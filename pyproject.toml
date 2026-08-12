@@ -73,12 +73,6 @@ ignore = [
   "S106",
   "ISC004",
 ]
-# Interim port from embyx-web; replaced by the PostgreSQL repository.
-"src/embyx_manager/fill_actor/sqlite_repository.py" = [
-  "PLR0917",
-  "RUF036",
-  "ISC004",
-]
 
 [tool.ruff.format]
 quote-style = "single"

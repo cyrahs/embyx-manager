@@ -3,7 +3,14 @@ import fcntl
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import BinaryIO
+from typing import TYPE_CHECKING, BinaryIO
+
+if TYPE_CHECKING:
+    import asyncpg
+
+# Shared advisory-lock namespace; see fill_actor.postgres_repository.
+_ADVISORY_NAMESPACE = 0x454D4258  # 'EMBX'
+MUTATION_LOCK_KEY = 2
 
 
 class AsyncFileLock:
@@ -45,3 +52,37 @@ class AsyncFileLock:
     @staticmethod
     def _unlock(handle: BinaryIO) -> None:
         fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
+class PostgresAdvisoryLock:
+    """Cross-process mutation lock backed by a PostgreSQL session advisory lock.
+
+    Holds one pooled connection for the duration of the critical section; the
+    server queues waiters, so acquisition is fair and cancellation-responsive
+    (cancelling the awaiting task cancels the server-side wait).
+    """
+
+    def __init__(self, pool_provider, key: int = MUTATION_LOCK_KEY) -> None:  # noqa: ANN001
+        """``pool_provider`` is an async callable returning an asyncpg pool."""
+        self._pool_provider = pool_provider
+        self._key = key
+
+    @asynccontextmanager
+    async def acquire(self) -> AsyncIterator[None]:
+        pool: asyncpg.Pool = await self._pool_provider()
+        connection = await pool.acquire()
+        acquired = False
+        try:
+            await connection.execute('SELECT pg_advisory_lock($1, $2)', _ADVISORY_NAMESPACE, self._key)
+            acquired = True
+            yield
+        finally:
+            try:
+                if acquired:
+                    await connection.execute(
+                        'SELECT pg_advisory_unlock($1, $2)',
+                        _ADVISORY_NAMESPACE,
+                        self._key,
+                    )
+            finally:
+                await pool.release(connection)

@@ -13,7 +13,7 @@ from embyx_manager.fill_actor.persistence import (
     FileFingerprint,
     PlanRecord,
 )
-from embyx_manager.fill_actor.sqlite_repository import SQLiteFillActorRepository
+from tests.conftest import make_postgres_repository
 
 
 def plan_record(
@@ -104,8 +104,8 @@ def terminal_result(record: PlanRecord, state: MoveState, error_code: str | None
 
 
 @pytest.mark.asyncio
-async def test_sqlite_round_trips_cloud_candidate_and_operation_state(tmp_path: Path) -> None:
-    repository = SQLiteFillActorRepository(tmp_path / 'state.sqlite3')
+async def test_postgres_round_trips_cloud_candidate_and_operation_state() -> None:
+    repository = make_postgres_repository()
     record = plan_record('plan-1', 'candidate-1')
     await repository.save_plan(record)
 
@@ -133,8 +133,8 @@ async def test_sqlite_round_trips_cloud_candidate_and_operation_state(tmp_path: 
 
 
 @pytest.mark.asyncio
-async def test_sqlite_terminal_operation_and_result_finalize_atomically(tmp_path: Path) -> None:
-    repository = SQLiteFillActorRepository(tmp_path / 'state.sqlite3')
+async def test_postgres_terminal_operation_and_result_finalize_atomically() -> None:
+    repository = make_postgres_repository()
     record = plan_record('plan-1', 'candidate-1')
     await repository.save_plan(record)
     await repository.save_cloud_move_operation(operation(record, CloudMoveOperationState.PREPARED))
@@ -156,8 +156,8 @@ async def test_sqlite_terminal_operation_and_result_finalize_atomically(tmp_path
 
 
 @pytest.mark.asyncio
-async def test_sqlite_prevents_two_unresolved_operations_for_one_cloud_source(tmp_path: Path) -> None:
-    repository = SQLiteFillActorRepository(tmp_path / 'state.sqlite3')
+async def test_postgres_prevents_two_unresolved_operations_for_one_cloud_source() -> None:
+    repository = make_postgres_repository()
     first = plan_record('plan-1', 'candidate-1')
     second = plan_record('plan-2', 'candidate-2')
     await repository.save_plan(first)

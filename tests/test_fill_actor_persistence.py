@@ -1,9 +1,8 @@
 import asyncio
-import sqlite3
-import threading
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
+import asyncpg
 import pytest
 
 from embyx_manager.fill_actor.models import (
@@ -34,16 +33,15 @@ from embyx_manager.fill_actor.persistence import (
     JobRecord,
     JobStage,
     JobState,
-    MemoryFillActorRepository,
     MoveJournalRecord,
     MoveJournalState,
     PlanRecord,
 )
-from embyx_manager.fill_actor.sqlite_repository import (
+from embyx_manager.fill_actor.postgres_repository import (
     CURRENT_SCHEMA_VERSION,
-    SQLiteFillActorRepository,
     UnsupportedSchemaVersionError,
 )
+from tests.conftest import make_postgres_repository, make_repository, postgres_test_dsn
 
 
 def make_plan_record(tmp_path: Path, *, plan_id: str = 'plan-1') -> PlanRecord:
@@ -99,12 +97,6 @@ def make_plan_record(tmp_path: Path, *, plan_id: str = 'plan-1') -> PlanRecord:
     )
 
 
-def make_repository(kind: str, tmp_path: Path):
-    if kind == 'memory':
-        return MemoryFillActorRepository()
-    return SQLiteFillActorRepository(tmp_path / 'fill-actor.sqlite3')
-
-
 def test_plan_record_rejects_private_candidate_mismatch(tmp_path: Path) -> None:
     plan = make_plan_record(tmp_path)
     with pytest.raises(ValueError, match='private candidate records must match public plan candidates'):
@@ -112,7 +104,7 @@ def test_plan_record_rejects_private_candidate_mismatch(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('repository_kind', ['memory', 'sqlite'])
+@pytest.mark.parametrize('repository_kind', ['memory', 'postgres'])
 async def test_repository_contract_round_trips_persistent_records(
     tmp_path: Path,
     repository_kind: str,
@@ -178,7 +170,7 @@ async def test_repository_contract_round_trips_persistent_records(
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('repository_kind', ['memory', 'sqlite'])
+@pytest.mark.parametrize('repository_kind', ['memory', 'postgres'])
 async def test_apply_jobs_are_idempotent_atomic_and_protect_their_plan(
     tmp_path: Path,
     repository_kind: str,
@@ -286,7 +278,7 @@ async def test_apply_jobs_are_idempotent_atomic_and_protect_their_plan(
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('repository_kind', ['memory', 'sqlite'])
+@pytest.mark.parametrize('repository_kind', ['memory', 'postgres'])
 async def test_repository_contract_enforces_move_journal_transitions(
     tmp_path: Path,
     repository_kind: str,
@@ -326,7 +318,7 @@ async def test_repository_contract_enforces_move_journal_transitions(
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('repository_kind', ['memory', 'sqlite'])
+@pytest.mark.parametrize('repository_kind', ['memory', 'postgres'])
 async def test_repository_contract_purges_expired_plan_dependents(
     tmp_path: Path,
     repository_kind: str,
@@ -386,7 +378,7 @@ async def test_repository_contract_purges_expired_plan_dependents(
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('repository_kind', ['memory', 'sqlite'])
+@pytest.mark.parametrize('repository_kind', ['memory', 'postgres'])
 async def test_repository_refuses_to_delete_plan_with_unreconciled_move(
     tmp_path: Path,
     repository_kind: str,
@@ -409,11 +401,10 @@ async def test_repository_refuses_to_delete_plan_with_unreconciled_move(
 
 
 @pytest.mark.asyncio
-async def test_sqlite_repository_survives_reopen(tmp_path: Path) -> None:
-    database_path = tmp_path / 'fill-actor.sqlite3'
+async def test_postgres_repository_survives_reconnect(tmp_path: Path) -> None:
     plan = make_plan_record(tmp_path)
     now = plan.public.created_at
-    repository = SQLiteFillActorRepository(database_path)
+    repository = make_postgres_repository()
     result = MoveResult(
         candidate_id='candidate-1',
         video_id='ABC-001',
@@ -439,8 +430,9 @@ async def test_sqlite_repository_survives_reopen(tmp_path: Path) -> None:
     await repository.save_move_result(plan.public.plan_id, result)
     await repository.save_job(job)
     await repository.save_move_journal(journal)
+    await repository.aclose()
 
-    reopened = SQLiteFillActorRepository(database_path)
+    reopened = make_postgres_repository()
 
     assert await reopened.get_plan(plan.public.plan_id) == plan
     assert await reopened.get_move_result(plan.public.plan_id, 'candidate-1') == result
@@ -448,128 +440,36 @@ async def test_sqlite_repository_survives_reopen(tmp_path: Path) -> None:
     assert await reopened.list_unreconciled_moves() == (journal,)
 
 
-def test_sqlite_repository_applies_explicit_schema_migration(tmp_path: Path) -> None:
-    database_path = tmp_path / 'fill-actor.sqlite3'
+@pytest.mark.asyncio
+async def test_postgres_repository_applies_explicit_schema_migration() -> None:
+    repository = make_postgres_repository()
+    assert await repository.health_check() is True
 
-    SQLiteFillActorRepository(database_path)
-
-    with sqlite3.connect(database_path) as connection:
-        version = connection.execute('SELECT MAX(version) FROM schema_migrations').fetchone()[0]
-        tables = {
-            row[0]
-            for row in connection.execute(
-                "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'"
-            )
-        }
-        jobs_sql = connection.execute(
-            "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'jobs'"
-        ).fetchone()[0]
+    connection = await asyncpg.connect(postgres_test_dsn())
+    try:
+        version = await connection.fetchval('SELECT MAX(version) FROM schema_migrations')
+        rows = await connection.fetch(
+            "SELECT tablename FROM pg_tables WHERE schemaname = 'public'",
+        )
+    finally:
+        await connection.close()
     assert version == CURRENT_SCHEMA_VERSION
-    assert tables == {
+    assert {row['tablename'] for row in rows} == {
         'schema_migrations',
-        'apply_jobs',
-        'plans',
-        'candidates',
-        'cloud_move_operations',
-        'move_results',
-        'jobs',
-        'job_feeds',
-        'move_journal',
+        'fill_actor_apply_jobs',
+        'fill_actor_plans',
+        'fill_actor_candidates',
+        'fill_actor_cloud_move_operations',
+        'fill_actor_move_results',
+        'fill_actor_jobs',
+        'fill_actor_job_feeds',
+        'fill_actor_move_journal',
         'health_probe',
     }
-    assert "'pages'" in jobs_sql
-
-
-def test_sqlite_repository_migrates_v5_database_without_rewriting_jobs(tmp_path: Path) -> None:
-    database_path = tmp_path / 'fill-actor-v5.sqlite3'
-    repository = SQLiteFillActorRepository(database_path)
-    now = datetime(2026, 7, 13, 10, 0, tzinfo=UTC)
-    original = JobRecord(
-        job_id='existing-job',
-        operation=JobOperation.CREATE_PLAN,
-        state=JobState.COMPLETED,
-        created_at=now,
-        updated_at=now,
-    )
-    asyncio.run(repository.save_job(original))
-    with sqlite3.connect(database_path) as connection:
-        connection.execute('DROP TABLE apply_jobs')
-        connection.execute('DELETE FROM schema_migrations WHERE version = 6')
-
-    reopened = SQLiteFillActorRepository(database_path)
-
-    assert asyncio.run(reopened.get_job(original.job_id)) == original
-    with sqlite3.connect(database_path) as connection:
-        version = connection.execute('SELECT MAX(version) FROM schema_migrations').fetchone()[0]
-        columns = {row[1] for row in connection.execute("PRAGMA table_info('apply_jobs')")}
-    assert version == 6
-    assert columns == {'job_id', 'revision', 'candidate_ids_json', 'result_json'}
-
-
-def test_sqlite_repository_migrates_v2_jobs_with_compatible_progress(tmp_path: Path) -> None:
-    database_path = tmp_path / 'fill-actor-v2.sqlite3'
-    created_at = datetime(2026, 7, 13, 10, 0, tzinfo=UTC).isoformat()
-    with sqlite3.connect(database_path) as connection:
-        connection.execute('CREATE TABLE schema_migrations (version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL)')
-        connection.executemany(
-            'INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)',
-            ((1, created_at), (2, created_at)),
-        )
-        connection.execute(
-            """
-            CREATE TABLE jobs (
-                job_id TEXT PRIMARY KEY, operation TEXT NOT NULL, state TEXT NOT NULL,
-                created_at TEXT NOT NULL, updated_at TEXT NOT NULL, plan_id TEXT, error_code TEXT,
-                owner_id TEXT, lease_expires_at TEXT, actor_ids_json TEXT NOT NULL DEFAULT '[]'
-            )
-            """
-        )
-        connection.execute(
-            """
-            CREATE TABLE candidates (
-                plan_id TEXT NOT NULL, candidate_id TEXT NOT NULL, video_id TEXT NOT NULL,
-                source_path TEXT NOT NULL, source_root TEXT NOT NULL, destination_path TEXT NOT NULL,
-                fingerprint_device INTEGER NOT NULL, fingerprint_inode INTEGER NOT NULL,
-                fingerprint_size INTEGER NOT NULL, fingerprint_mtime_ns INTEGER NOT NULL,
-                fingerprint_ctime_ns INTEGER NOT NULL,
-                PRIMARY KEY (plan_id, candidate_id)
-            )
-            """
-        )
-        connection.executemany(
-            """
-            INSERT INTO jobs (
-                job_id, operation, state, created_at, updated_at, plan_id, error_code,
-                owner_id, lease_expires_at, actor_ids_json
-            ) VALUES (?, 'create_plan', ?, ?, ?, ?, NULL, ?, ?, ?)
-            """,
-            (
-                ('queued', 'queued', created_at, created_at, 'queued', None, None, '["a", "b"]'),
-                ('running', 'running', created_at, created_at, 'running', 'owner', created_at, '["a"]'),
-                ('completed', 'completed', created_at, created_at, 'completed', None, None, '["a"]'),
-            ),
-        )
-
-    repository = SQLiteFillActorRepository(database_path)
-    queued = asyncio.run(repository.get_job('queued'))
-    running = asyncio.run(repository.get_job('running'))
-    completed = asyncio.run(repository.get_job('completed'))
-
-    assert queued is not None
-    assert queued.progress is not None
-    assert queued.progress.stage is JobStage.QUEUED
-    assert queued.progress.total == 2
-    assert queued.progress.unit is JobProgressUnit.ACTORS
-    assert running is not None
-    assert running.progress is not None
-    assert running.progress.stage is JobStage.UNKNOWN
-    assert completed is not None
-    assert completed.progress is not None
-    assert completed.progress.stage is JobStage.DONE
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('repository_kind', ['memory', 'sqlite'])
+@pytest.mark.parametrize('repository_kind', ['memory', 'postgres'])
 async def test_lease_and_progress_updates_do_not_overwrite_each_other(
     tmp_path: Path,
     repository_kind: str,
@@ -665,7 +565,7 @@ async def test_lease_and_progress_updates_do_not_overwrite_each_other(
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('repository_kind', ['memory', 'sqlite'])
+@pytest.mark.parametrize('repository_kind', ['memory', 'postgres'])
 async def test_job_feed_updates_require_current_owner_and_unexpired_lease(
     tmp_path: Path,
     repository_kind: str,
@@ -734,7 +634,7 @@ async def test_job_feed_updates_require_current_owner_and_unexpired_lease(
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('repository_kind', ['memory', 'sqlite'])
+@pytest.mark.parametrize('repository_kind', ['memory', 'postgres'])
 async def test_cancel_job_atomically_terminalizes_running_job_and_pending_feeds(
     tmp_path: Path,
     repository_kind: str,
@@ -830,7 +730,7 @@ async def test_cancel_job_atomically_terminalizes_running_job_and_pending_feeds(
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('repository_kind', ['memory', 'sqlite'])
+@pytest.mark.parametrize('repository_kind', ['memory', 'postgres'])
 async def test_cancel_queued_job_prevents_claim_and_releases_capacity(tmp_path: Path, repository_kind: str) -> None:
     repository = make_repository(repository_kind, tmp_path)
     now = datetime(2026, 7, 13, 10, 0, tzinfo=UTC)
@@ -867,7 +767,7 @@ async def test_cancel_queued_job_prevents_claim_and_releases_capacity(tmp_path: 
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('repository_kind', ['memory', 'sqlite'])
+@pytest.mark.parametrize('repository_kind', ['memory', 'postgres'])
 async def test_apply_job_cancellation_is_rejected_atomically_before_and_after_enqueue(
     tmp_path: Path,
     repository_kind: str,
@@ -908,7 +808,7 @@ async def test_apply_job_cancellation_is_rejected_atomically_before_and_after_en
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('repository_kind', ['memory', 'sqlite'])
+@pytest.mark.parametrize('repository_kind', ['memory', 'postgres'])
 async def test_cancel_and_finish_have_one_atomic_winner(tmp_path: Path, repository_kind: str) -> None:
     repository = make_repository(repository_kind, tmp_path)
     now = datetime(2026, 7, 13, 10, 0, tzinfo=UTC)
@@ -952,17 +852,24 @@ async def test_cancel_and_finish_have_one_atomic_winner(tmp_path: Path, reposito
         assert current.state is JobState.COMPLETED
 
 
-def test_sqlite_repository_rejects_unknown_future_schema(tmp_path: Path) -> None:
-    database_path = tmp_path / 'fill-actor.sqlite3'
-    with sqlite3.connect(database_path) as connection:
-        connection.execute('CREATE TABLE schema_migrations (version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL)')
-        connection.execute(
-            'INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)',
-            (CURRENT_SCHEMA_VERSION + 1, datetime.now(tz=UTC).isoformat()),
+@pytest.mark.asyncio
+async def test_postgres_repository_rejects_unknown_future_schema() -> None:
+    connection = await asyncpg.connect(postgres_test_dsn())
+    try:
+        await connection.execute(
+            'CREATE TABLE schema_migrations (version INTEGER PRIMARY KEY, applied_at TIMESTAMPTZ NOT NULL)',
         )
+        await connection.execute(
+            'INSERT INTO schema_migrations (version, applied_at) VALUES ($1, $2)',
+            CURRENT_SCHEMA_VERSION + 1,
+            datetime.now(tz=UTC),
+        )
+    finally:
+        await connection.close()
 
+    repository = make_postgres_repository()
     with pytest.raises(UnsupportedSchemaVersionError):
-        SQLiteFillActorRepository(database_path)
+        await repository.get_job('any')
 
 
 def test_job_states_are_stable_public_values() -> None:
@@ -973,39 +880,3 @@ def test_job_states_are_stable_public_values() -> None:
         JobState.PARTIAL_FAILED,
         JobState.FAILED,
     )
-
-
-@pytest.mark.asyncio
-async def test_sqlite_write_finishes_before_cancellation_propagates(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    repository = SQLiteFillActorRepository(tmp_path / 'fill-actor.sqlite3')
-    now = datetime.now(UTC)
-    job = JobRecord(
-        job_id='job-1',
-        operation=JobOperation.CREATE_PLAN,
-        state=JobState.QUEUED,
-        created_at=now,
-        updated_at=now,
-    )
-    started = threading.Event()
-    release = threading.Event()
-    original_save = repository._save_job  # noqa: SLF001
-
-    def delayed_save(record: JobRecord) -> None:
-        started.set()
-        assert release.wait(timeout=2)
-        original_save(record)
-
-    monkeypatch.setattr(repository, '_save_job', delayed_save)
-    task = asyncio.create_task(repository.save_job(job))
-    assert await asyncio.to_thread(started.wait, 2)
-    task.cancel()
-    await asyncio.sleep(0.02)
-    assert not task.done()
-    release.set()
-
-    with pytest.raises(asyncio.CancelledError):
-        await task
-    assert await repository.get_job(job.job_id) == job

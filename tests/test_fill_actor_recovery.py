@@ -11,9 +11,10 @@ import pytest
 import embyx_manager.fill_actor.service as fill_actor_service_module
 from embyx_manager.fill_actor.models import MoveState
 from embyx_manager.fill_actor.persistence import MoveJournalRecord, MoveJournalState
+from embyx_manager.fill_actor.postgres_repository import PostgresFillActorRepository
 from embyx_manager.fill_actor.service import FillActorPaths, FillActorService
-from embyx_manager.fill_actor.sqlite_repository import SQLiteFillActorRepository
 from embyx_manager.locking import AsyncFileLock
+from tests.conftest import make_postgres_repository
 
 
 class ActorCatalog:
@@ -33,7 +34,7 @@ class BrandResolver:
 
 def make_service(
     tmp_path: Path,
-    repository: SQLiteFillActorRepository,
+    repository: PostgresFillActorRepository,
     *,
     root_sentinel: str | None = None,
     apply_enabled: bool = True,
@@ -75,7 +76,7 @@ async def test_startup_reconciles_each_move_journal_state(
     journal_state: MoveJournalState,
     filesystem_state: str,
 ) -> None:
-    repository = SQLiteFillActorRepository(tmp_path / 'state' / 'app.sqlite3')
+    repository = make_postgres_repository()
     service, paths = make_service(tmp_path, repository)
     brand_path = paths.additional_brand_paths[0] / 'ABC'
     brand_path.mkdir()
@@ -100,7 +101,7 @@ async def test_startup_reconciles_each_move_journal_state(
     if filesystem_state == 'destination_only':
         record.source.unlink()
 
-    restarted_repository = SQLiteFillActorRepository(tmp_path / 'state' / 'app.sqlite3')
+    restarted_repository = make_postgres_repository()
     restarted, _ = make_service(tmp_path, restarted_repository)
     results = await restarted.reconcile_moves()
 
@@ -116,8 +117,7 @@ async def test_startup_reconciles_each_move_journal_state(
 
 @pytest.mark.asyncio
 async def test_disabled_apply_leaves_unreconciled_move_untouched(tmp_path: Path) -> None:
-    database = tmp_path / 'state' / 'app.sqlite3'
-    repository = SQLiteFillActorRepository(database)
+    repository = make_postgres_repository()
     service, paths = make_service(tmp_path, repository)
     brand_path = paths.additional_brand_paths[0] / 'ABC'
     brand_path.mkdir()
@@ -134,7 +134,7 @@ async def test_disabled_apply_leaves_unreconciled_move_untouched(tmp_path: Path)
         )
     )
 
-    restarted_repository = SQLiteFillActorRepository(database)
+    restarted_repository = make_postgres_repository()
     restarted, _ = make_service(tmp_path, restarted_repository, apply_enabled=False)
 
     assert await restarted.reconcile_moves() == ()
@@ -146,9 +146,8 @@ async def test_disabled_apply_leaves_unreconciled_move_untouched(tmp_path: Path)
 
 
 @pytest.mark.asyncio
-async def test_sqlite_service_result_is_idempotent_after_restart(tmp_path: Path) -> None:
-    database = tmp_path / 'state' / 'app.sqlite3'
-    repository = SQLiteFillActorRepository(database)
+async def test_postgres_service_result_is_idempotent_after_restart(tmp_path: Path) -> None:
+    repository = make_postgres_repository()
     service, paths = make_service(tmp_path, repository)
     brand_path = paths.additional_brand_paths[0] / 'ABC'
     brand_path.mkdir()
@@ -162,7 +161,7 @@ async def test_sqlite_service_result_is_idempotent_after_restart(tmp_path: Path)
         candidate_ids=[candidate.candidate_id],
     )
 
-    restarted, _ = make_service(tmp_path, SQLiteFillActorRepository(database))
+    restarted, _ = make_service(tmp_path, make_postgres_repository())
     second = await restarted.apply(
         plan_id=plan.plan_id,
         revision=plan.revision,
@@ -183,8 +182,7 @@ async def test_cancelled_mutation_keeps_file_lock_until_native_move_finishes(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    database = tmp_path / 'state' / 'app.sqlite3'
-    repository = SQLiteFillActorRepository(database)
+    repository = make_postgres_repository()
     service, paths = make_service(tmp_path, repository)
     brand_path = paths.additional_brand_paths[0] / 'ABC'
     brand_path.mkdir()
@@ -209,7 +207,7 @@ async def test_cancelled_mutation_keeps_file_lock_until_native_move_finishes(
     assert await asyncio.to_thread(renamed.wait, 2)
     move_task.cancel()
 
-    restarted, _ = make_service(tmp_path, SQLiteFillActorRepository(database))
+    restarted, _ = make_service(tmp_path, make_postgres_repository())
     reconcile_task = asyncio.create_task(restarted.reconcile_moves())
     await asyncio.sleep(0.03)
     assert not reconcile_task.done()
@@ -225,8 +223,7 @@ async def test_cancelled_mutation_keeps_file_lock_until_native_move_finishes(
 
 @pytest.mark.asyncio
 async def test_offline_root_keeps_journal_until_mount_identity_returns(tmp_path: Path) -> None:
-    database = tmp_path / 'state' / 'app.sqlite3'
-    repository = SQLiteFillActorRepository(database)
+    repository = make_postgres_repository()
     service, paths = make_service(tmp_path, repository, root_sentinel='.root-ready')
     brand_path = paths.additional_brand_paths[0] / 'ABC'
     brand_path.mkdir()
@@ -266,7 +263,7 @@ async def test_offline_root_keeps_journal_until_mount_identity_returns(tmp_path:
     reason='relies on Linux inode-allocation semantics',
 )
 async def test_prepared_reconcile_rolls_destination_replacement_back_to_source(tmp_path: Path) -> None:
-    repository = SQLiteFillActorRepository(tmp_path / 'state' / 'app.sqlite3')
+    repository = make_postgres_repository()
     service, paths = make_service(tmp_path, repository)
     brand_path = paths.additional_brand_paths[0] / 'ABC'
     brand_path.mkdir()
@@ -307,7 +304,7 @@ async def test_prepared_reconcile_rolls_destination_replacement_back_to_source(t
     reason='relies on Linux inode-allocation semantics',
 )
 async def test_prepared_reconcile_preserves_journal_when_both_paths_were_replaced(tmp_path: Path) -> None:
-    repository = SQLiteFillActorRepository(tmp_path / 'state' / 'app.sqlite3')
+    repository = make_postgres_repository()
     service, paths = make_service(tmp_path, repository)
     brand_path = paths.additional_brand_paths[0] / 'ABC'
     brand_path.mkdir()
@@ -346,7 +343,7 @@ async def test_legacy_link_reconcile_retries_when_quarantine_move_fails(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    repository = SQLiteFillActorRepository(tmp_path / 'state' / 'app.sqlite3')
+    repository = make_postgres_repository()
     service, paths = make_service(tmp_path, repository)
     brand_path = paths.additional_brand_paths[0] / 'ABC'
     brand_path.mkdir()
@@ -383,7 +380,7 @@ async def test_legacy_link_reconcile_retries_when_quarantine_move_fails(
 
 @pytest.mark.asyncio
 async def test_reconcile_never_restores_foreign_quarantine_file(tmp_path: Path) -> None:
-    repository = SQLiteFillActorRepository(tmp_path / 'state' / 'app.sqlite3')
+    repository = make_postgres_repository()
     service, paths = make_service(tmp_path, repository)
     brand_path = paths.additional_brand_paths[0] / 'ABC'
     brand_path.mkdir()
@@ -419,7 +416,7 @@ async def test_nfs_fallback_reconciles_legacy_both_linked_move(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    repository = SQLiteFillActorRepository(tmp_path / 'state' / 'app.sqlite3')
+    repository = make_postgres_repository()
     service, paths = make_service(tmp_path, repository)
     brand_path = paths.additional_brand_paths[0] / 'ABC'
     brand_path.mkdir()
@@ -458,7 +455,7 @@ async def test_nfs_fallback_restores_replacement_from_private_quarantine(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    repository = SQLiteFillActorRepository(tmp_path / 'state' / 'app.sqlite3')
+    repository = make_postgres_repository()
     service, paths = make_service(tmp_path, repository)
     brand_path = paths.additional_brand_paths[0] / 'ABC'
     brand_path.mkdir()

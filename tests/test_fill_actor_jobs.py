@@ -21,7 +21,7 @@ from embyx_manager.fill_actor.persistence import (
     MemoryFillActorRepository,
     PlanRecord,
 )
-from embyx_manager.fill_actor.sqlite_repository import SQLiteFillActorRepository
+from tests.conftest import make_postgres_repository
 
 
 class ControlledService:
@@ -382,9 +382,10 @@ class ControlledApplyService(ControlledService):
 
 
 def make_repository(kind: str, tmp_path: Path):
+    del tmp_path
     if kind == 'memory':
         return MemoryFillActorRepository()
-    return SQLiteFillActorRepository(tmp_path / 'jobs.sqlite3')
+    return make_postgres_repository()
 
 
 async def wait_for_state(repository, job_id: str, states: set[JobState]) -> JobRecord:
@@ -924,8 +925,8 @@ async def test_heartbeat_stops_execution_after_external_cancellation() -> None:
 
 
 @pytest.mark.asyncio
-async def test_new_manager_executes_durable_queued_job(tmp_path: Path) -> None:
-    repository = SQLiteFillActorRepository(tmp_path / 'jobs.sqlite3')
+async def test_new_manager_executes_durable_queued_job() -> None:
+    repository = make_postgres_repository()
     now = datetime.now(UTC)
     queued = JobRecord(
         job_id='queued-plan',
