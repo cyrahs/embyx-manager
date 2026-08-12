@@ -5,6 +5,7 @@ from pathlib import Path
 import asyncpg
 import pytest
 
+from embyx_manager.db import CURRENT_SCHEMA_VERSION, UnsupportedSchemaVersionError
 from embyx_manager.fill_actor.models import (
     ActorPlan,
     ApplyResult,
@@ -36,10 +37,6 @@ from embyx_manager.fill_actor.persistence import (
     MoveJournalRecord,
     MoveJournalState,
     PlanRecord,
-)
-from embyx_manager.fill_actor.postgres_repository import (
-    CURRENT_SCHEMA_VERSION,
-    UnsupportedSchemaVersionError,
 )
 from tests.conftest import make_postgres_repository, make_repository, postgres_test_dsn
 
@@ -430,7 +427,6 @@ async def test_postgres_repository_survives_reconnect(tmp_path: Path) -> None:
     await repository.save_move_result(plan.public.plan_id, result)
     await repository.save_job(job)
     await repository.save_move_journal(journal)
-    await repository.aclose()
 
     reopened = make_postgres_repository()
 
@@ -456,6 +452,7 @@ async def test_postgres_repository_applies_explicit_schema_migration() -> None:
     assert version == CURRENT_SCHEMA_VERSION
     assert {row['tablename'] for row in rows} == {
         'schema_migrations',
+        'app_config',
         'fill_actor_apply_jobs',
         'fill_actor_plans',
         'fill_actor_candidates',

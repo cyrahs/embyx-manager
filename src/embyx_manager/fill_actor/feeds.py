@@ -66,14 +66,29 @@ def build_freshrss_add_url(
     return urlunsplit((parsed.scheme, parsed.netloc, path, query, ''))
 
 
+UrlValue = str | None | Callable[[], str | None]
+
+
+def _url_provider(value: UrlValue) -> Callable[[], str | None]:
+    if callable(value):
+
+        def resolve() -> str | None:
+            resolved = value()
+            return resolved.rstrip('/') if resolved else None
+
+        return resolve
+    normalized = value.rstrip('/') if value else None
+    return lambda: normalized
+
+
 class RSSHubFeedWarmer:
     def __init__(  # noqa: PLR0913
         self,
         *,
         repository: FillActorRepository,
-        rsshub_url: str,
-        freshrss_url: str | None = None,
-        freshrss_rsshub_url: str | None = None,
+        rsshub_url: UrlValue,
+        freshrss_url: UrlValue = None,
+        freshrss_rsshub_url: UrlValue = None,
         client: httpx.AsyncClient | None = None,
         request_timeout: float = 70.0,
         poll_interval: float = 1.0,
@@ -90,9 +105,9 @@ class RSSHubFeedWarmer:
             msg = 'RSSHub feed warm-up limits are invalid'
             raise ValueError(msg)
         self._repository = repository
-        self._rsshub_url = rsshub_url.rstrip('/')
-        self._freshrss_url = freshrss_url.rstrip('/') if freshrss_url else None
-        self._freshrss_rsshub_url = freshrss_rsshub_url.rstrip('/') if freshrss_rsshub_url else None
+        self._get_rsshub_url = _url_provider(rsshub_url)
+        self._get_freshrss_url = _url_provider(freshrss_url)
+        self._get_freshrss_rsshub_url = _url_provider(freshrss_rsshub_url)
         self._client = client or httpx.AsyncClient(
             timeout=request_timeout,
             follow_redirects=False,
@@ -117,6 +132,8 @@ class RSSHubFeedWarmer:
         actor_ids: Sequence[str],
         now: datetime,
     ) -> tuple[JobFeedRecord, ...]:
+        if self._get_rsshub_url() is None:
+            return ()
         return tuple(
             JobFeedRecord(
                 job_id=job_id,
@@ -373,13 +390,17 @@ class RSSHubFeedWarmer:
         )
 
     def _feed_url(self, actor_id: str) -> str:
-        return f'{self._rsshub_url}/javbus/star/{quote(actor_id, safe="")}'
+        rsshub_url = self._get_rsshub_url()
+        if rsshub_url is None:
+            msg = 'RSSHub is not configured'
+            raise RuntimeError(msg)
+        return f'{rsshub_url}/javbus/star/{quote(actor_id, safe="")}'
 
     def _freshrss_add_url(self, actor_id: str) -> str | None:
         return build_freshrss_add_url(
             actor_id,
-            freshrss_url=self._freshrss_url,
-            freshrss_rsshub_url=self._freshrss_rsshub_url,
+            freshrss_url=self._get_freshrss_url(),
+            freshrss_rsshub_url=self._get_freshrss_rsshub_url(),
         )
 
     def _now(self) -> datetime:

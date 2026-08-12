@@ -6,7 +6,7 @@ clients, so the ports are satisfied with thin adapters instead of loaded
 callables.
 """
 
-from collections.abc import Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 
 from embyx_manager.clients.clouddrive import AsyncCloudDrive
@@ -17,6 +17,11 @@ from embyx_manager.fill_actor.cloud_moves import CloudFileMetadata, CloudFileMov
 from embyx_manager.fill_actor.ports import PageProgressCallback
 
 NANOSECONDS_PER_SECOND = 1_000_000_000
+
+
+class CloudDriveUnconfiguredError(RuntimeError):
+    def __init__(self) -> None:
+        super().__init__('CloudDrive connection is not configured')
 
 
 @dataclass(frozen=True)
@@ -47,10 +52,24 @@ class AvidBrandResolver:
 
 @dataclass(frozen=True)
 class CloudDriveFileMover(CloudFileMover):
-    cloud: AsyncCloudDrive
+    """Cloud mover resolving the current client per call.
+
+    ``get_cloud`` returns the AsyncCloudDrive built from the live configuration,
+    or ``None`` while CloudDrive is unconfigured — operations then fail with
+    CloudDriveUnconfiguredError, which the service's readiness checks treat as
+    "cloud not ready".
+    """
+
+    get_cloud: Callable[[], AsyncCloudDrive | None]
+
+    def _cloud(self) -> AsyncCloudDrive:
+        cloud = self.get_cloud()
+        if cloud is None:
+            raise CloudDriveUnconfiguredError
+        return cloud
 
     async def list_directory(self, api_directory: str) -> tuple[CloudFileMetadata, ...]:
-        values = await self.cloud.list_directory(api_directory)
+        values = await self._cloud().list_directory(api_directory)
         files: list[CloudFileMetadata] = []
         for value in values:
             is_directory = value.get('is_directory')
@@ -90,7 +109,7 @@ class CloudDriveFileMover(CloudFileMover):
         return tuple(files)
 
     async def ensure_directory(self, parent_api_directory: str, folder_name: str) -> bool:
-        value = await self.cloud.ensure_directory(parent_api_directory, folder_name)
+        value = await self._cloud().ensure_directory(parent_api_directory, folder_name)
         success = value.get('success')
         if not isinstance(success, bool):
             msg = 'CloudDrive returned invalid directory result'
@@ -98,7 +117,7 @@ class CloudDriveFileMover(CloudFileMover):
         return success
 
     async def move_file(self, source_api_path: str, destination_api_directory: str) -> CloudMoveResponse:
-        value = await self.cloud.move_file(source_api_path, destination_api_directory)
+        value = await self._cloud().move_file(source_api_path, destination_api_directory)
         return CloudMoveResponse.from_mapping(
             {
                 'success': value.get('success'),

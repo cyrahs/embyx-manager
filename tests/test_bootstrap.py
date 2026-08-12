@@ -2,12 +2,10 @@ import asyncio
 from pathlib import Path
 
 import asyncpg
-import pytest
 from fastapi.testclient import TestClient
 
 from embyx_manager import bootstrap
 from embyx_manager.bootstrap import build_app
-from embyx_manager.fill_actor.cloud_moves import CloudMovePaths
 from embyx_manager.settings import Settings
 from tests.conftest import postgres_test_dsn
 
@@ -26,7 +24,6 @@ def test_bootstrap_wires_repository_api_and_shutdown(tmp_path: Path) -> None:
         additional_brand_paths=(additional,),
         move_in_path=move_in,
         move_in_by_brand=True,
-        rsshub_url=None,
     )
 
     app = build_app(settings)
@@ -80,35 +77,17 @@ def test_bootstrap_passes_feed_integration_urls_to_warmer_and_api(monkeypatch, t
         actor_brand_path=tmp_path / 'actor',
         additional_brand_paths=(tmp_path / 'additional',),
         move_in_path=tmp_path / 'move-in',
-        rsshub_url='http://rsshub.internal.test',
-        freshrss_url='https://freshrss.example.test',
-        freshrss_rsshub_url='https://rsshub.example.test',
         apply_enabled=True,
     )
 
     assert build_app(settings) is app
-    assert captured['warmer']['rsshub_url'] == settings.rsshub_url
-    assert captured['warmer']['freshrss_url'] == settings.freshrss_url
-    assert captured['warmer']['freshrss_rsshub_url'] == settings.freshrss_rsshub_url
+    # URLs now resolve from the live config store; with defaults they are None.
+    assert callable(captured['warmer']['rsshub_url'])
+    assert captured['warmer']['rsshub_url']() is None
+    assert callable(captured['warmer']['freshrss_url'])
     assert captured['jobs']['feed_warmer'] is warmer
     assert captured['jobs']['service'].apply_enabled is True
     assert captured['api']['jobs'] is jobs
-    assert captured['api']['freshrss_url'] == settings.freshrss_url
-    assert captured['api']['freshrss_rsshub_url'] == settings.freshrss_rsshub_url
-
-
-def test_bootstrap_requires_clouddrive_connection_for_cloud_paths(tmp_path: Path) -> None:
-    settings = Settings(
-        database_url='postgresql://unused.invalid/db',
-        actor_brand_path=tmp_path / 'actor',
-        additional_brand_paths=(tmp_path / 'additional',),
-        move_in_path=tmp_path / 'move-in',
-        cloud_move_paths=CloudMovePaths.from_values(
-            strm_mount_prefix='/mounted-cloud',
-            source_api_roots=('/cloud/library/additional',),
-            move_in_api_root='/cloud/library/destination',
-        ),
-    )
-
-    with pytest.raises(ValueError, match='CloudDrive connection settings'):
-        build_app(settings)
+    assert callable(captured['api']['freshrss_url'])
+    assert captured['api']['freshrss_url']() is None
+    assert callable(captured['api']['freshrss_rsshub_url'])

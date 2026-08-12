@@ -6,6 +6,7 @@ import pytest
 from embyx_manager.adapters import (
     AvidBrandResolver,
     CloudDriveFileMover,
+    CloudDriveUnconfiguredError,
     JavBusActorCatalog,
     SukebeiMagnetProvider,
 )
@@ -68,7 +69,7 @@ async def test_cloud_mover_converts_listing_and_skips_directories() -> None:
             ),
         ),
     )
-    mover = CloudDriveFileMover(cloud)  # type: ignore[arg-type]
+    mover = CloudDriveFileMover(lambda: cloud)  # type: ignore[arg-type, return-value]
 
     files = await mover.list_directory('/cloud/ABC')
 
@@ -93,7 +94,7 @@ async def test_cloud_mover_rejects_missing_write_time() -> None:
             ),
         ),
     )
-    mover = CloudDriveFileMover(cloud)  # type: ignore[arg-type]
+    mover = CloudDriveFileMover(lambda: cloud)  # type: ignore[arg-type, return-value]
 
     with pytest.raises(TypeError, match='invalid write time'):
         await mover.list_directory('/cloud/ABC')
@@ -103,7 +104,7 @@ async def test_cloud_mover_ensure_directory_returns_success_flag() -> None:
     cloud = SimpleNamespace(
         ensure_directory=AsyncMock(return_value={'success': True, 'created': False, 'path': '/cloud/ABC'}),
     )
-    mover = CloudDriveFileMover(cloud)  # type: ignore[arg-type]
+    mover = CloudDriveFileMover(lambda: cloud)  # type: ignore[arg-type, return-value]
 
     assert await mover.ensure_directory('/cloud', 'ABC') is True
     cloud.ensure_directory.assert_awaited_once_with('/cloud', 'ABC')
@@ -119,9 +120,16 @@ async def test_cloud_mover_move_file_maps_response() -> None:
             },
         ),
     )
-    mover = CloudDriveFileMover(cloud)  # type: ignore[arg-type]
+    mover = CloudDriveFileMover(lambda: cloud)  # type: ignore[arg-type, return-value]
 
     response = await mover.move_file('/cloud/src/ABC-001.mp4', '/cloud/dst')
 
     assert response.success is True
     assert response.result_paths == ('/cloud/dst/ABC-001.mp4',)
+
+
+async def test_cloud_mover_raises_when_unconfigured() -> None:
+    mover = CloudDriveFileMover(lambda: None)
+
+    with pytest.raises(CloudDriveUnconfiguredError):
+        await mover.list_directory('/cloud/ABC')

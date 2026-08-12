@@ -8,7 +8,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, Request
+from fastapi import APIRouter, Depends, FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, Response
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -16,6 +16,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
+from embyx_manager.config.api import ConfigApiError
 from embyx_manager.fill_actor.errors import (
     ApplyJobNotCancellableError,
     ApplyRequestConflictError,
@@ -195,6 +196,25 @@ class ApiError(Exception):
         super().__init__(code)
 
 
+def make_mutation_auth(api_token: str | None) -> Callable[..., Awaitable[None]]:
+    """Bearer-token dependency shared by every mutation endpoint."""
+    bearer = HTTPBearer(auto_error=False)
+
+    async def require_mutation_auth(
+        credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)],
+    ) -> None:
+        if api_token is None:
+            return
+        if (
+            credentials is None
+            or credentials.scheme.casefold() != 'bearer'
+            or not secrets.compare_digest(credentials.credentials, api_token)
+        ):
+            raise ApiError(401, 'unauthorized')
+
+    return require_mutation_auth
+
+
 class RequestSizeLimitMiddleware:
     def __init__(self, app: ASGIApp, *, max_bytes: int) -> None:
         self._app = app
@@ -241,11 +261,15 @@ def create_app(  # noqa: C901, PLR0913, PLR0915
     max_request_bytes: int = 65_536,
     runtime_close: Callable[[], Awaitable[None]] | None = None,
     frontend_dist: Path | None = None,
-    freshrss_url: str | None = None,
-    freshrss_rsshub_url: str | None = None,
+    freshrss_url: str | Callable[[], str | None] | None = None,
+    freshrss_rsshub_url: str | Callable[[], str | None] | None = None,
+    extra_routers: Sequence[APIRouter] = (),
+    on_startup: Callable[[], Awaitable[None]] | None = None,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+        if on_startup is not None:
+            await on_startup()
         if not await repository.health_check():
             msg = 'fill-actor repository is unavailable'
             raise RuntimeError(msg)
@@ -277,9 +301,8 @@ def create_app(  # noqa: C901, PLR0913, PLR0915
             if runtime_close is not None:
                 await runtime_close()
 
-    app = FastAPI(title='embyx-web', version='0.2.0', lifespan=lifespan)
+    app = FastAPI(title='embyx-manager', version='0.1.0', lifespan=lifespan)
     app.add_middleware(RequestSizeLimitMiddleware, max_bytes=max_request_bytes)
-    bearer = HTTPBearer(auto_error=False)
 
     @app.middleware('http')
     async def add_api_cache_control(
@@ -291,17 +314,7 @@ def create_app(  # noqa: C901, PLR0913, PLR0915
             response.headers['Cache-Control'] = 'no-store'
         return response
 
-    async def require_mutation_auth(
-        credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)],
-    ) -> None:
-        if api_token is None:
-            return
-        if (
-            credentials is None
-            or credentials.scheme.casefold() != 'bearer'
-            or not secrets.compare_digest(credentials.credentials, api_token)
-        ):
-            raise ApiError(401, 'unauthorized')
+    require_mutation_auth = make_mutation_auth(api_token)
 
     async def require_scan_ready() -> None:
         if not await repository.health_check() or not await service.scan_ready():
@@ -347,8 +360,8 @@ def create_app(  # noqa: C901, PLR0913, PLR0915
             feeds=tuple(
                 ActorFeedView.from_record(
                     feed,
-                    freshrss_url=freshrss_url,
-                    freshrss_rsshub_url=freshrss_rsshub_url,
+                    freshrss_url=_current_url(freshrss_url),
+                    freshrss_rsshub_url=_current_url(freshrss_rsshub_url),
                 )
                 for feed in feeds
             ),
@@ -371,8 +384,8 @@ def create_app(  # noqa: C901, PLR0913, PLR0915
             feeds=tuple(
                 ActorFeedView.from_record(
                     feed,
-                    freshrss_url=freshrss_url,
-                    freshrss_rsshub_url=freshrss_rsshub_url,
+                    freshrss_url=_current_url(freshrss_url),
+                    freshrss_rsshub_url=_current_url(freshrss_rsshub_url),
                 )
                 for feed in feeds
             ),
@@ -395,8 +408,8 @@ def create_app(  # noqa: C901, PLR0913, PLR0915
             feeds=tuple(
                 ActorFeedView.from_record(
                     feed,
-                    freshrss_url=freshrss_url,
-                    freshrss_rsshub_url=freshrss_rsshub_url,
+                    freshrss_url=_current_url(freshrss_url),
+                    freshrss_rsshub_url=_current_url(freshrss_rsshub_url),
                 )
                 for feed in feeds
             ),
@@ -489,9 +502,21 @@ def create_app(  # noqa: C901, PLR0913, PLR0915
             status_code=200 if ready else 503,
         )
 
+    @app.exception_handler(ConfigApiError)
+    async def handle_config_api_error(_request: Request, exc: ConfigApiError) -> JSONResponse:
+        return JSONResponse({'error': {'code': exc.code}}, status_code=exc.status_code)
+
+    for router in extra_routers:
+        app.include_router(router)
+
     if frontend_dist is not None and frontend_dist.is_dir():
         app.mount('/', StaticFiles(directory=frontend_dist, html=True), name='frontend')
     return app
+
+
+def _current_url(value: str | Callable[[], str | None] | None) -> str | None:
+    resolved = value() if callable(value) else value
+    return resolved or None
 
 
 def _service_error_status(exc: FillActorError) -> int:
