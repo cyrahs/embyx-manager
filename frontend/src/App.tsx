@@ -1,20 +1,28 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { BrowserRouter, NavLink, Outlet, Route, Routes } from 'react-router-dom'
 
 import { getHealth, type HealthStatus } from './api'
+import { ApiTokenButton, ApiTokenDialog } from './components/ApiTokenDialog'
 import DashboardPage from './pages/DashboardPage'
 import FillActorPage from './pages/FillActorPage'
 import SettingsPage from './pages/SettingsPage'
 
-export interface HealthContext {
+export interface AppContext {
   health: HealthStatus | null
   healthFailed: boolean
   setHealth: React.Dispatch<React.SetStateAction<HealthStatus | null>>
+  /** Opens the shared API token dialog; pages call it when a request comes back 401. */
+  requestApiToken: () => void
 }
+
+/** @deprecated Kept for existing imports; the context now carries more than health. */
+export type HealthContext = AppContext
 
 function Layout() {
   const [health, setHealth] = useState<HealthStatus | null>(null)
   const [healthFailed, setHealthFailed] = useState(false)
+  const [tokenDialogOpen, setTokenDialogOpen] = useState(false)
+  const requestApiToken = useCallback(() => setTokenDialogOpen(true), [])
 
   useEffect(() => {
     let mounted = true
@@ -60,11 +68,13 @@ function Layout() {
           </NavLink>
         </nav>
         <div className="topbar-meta">
+          <ApiTokenButton onClick={requestApiToken} />
           <span className={`health-dot ${healthReady ? 'online' : healthFailed || health ? 'offline' : ''}`} />
           {healthFailed ? '服务不可达' : health ? healthReady ? '服务正常' : '服务未就绪' : '正在连接'}
         </div>
       </header>
-      <Outlet context={{ health, healthFailed, setHealth } satisfies HealthContext} />
+      <Outlet context={{ health, healthFailed, setHealth, requestApiToken } satisfies AppContext} />
+      {tokenDialogOpen && <ApiTokenDialog onClose={() => setTokenDialogOpen(false)} />}
     </div>
   )
 }

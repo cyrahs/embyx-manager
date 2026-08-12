@@ -63,6 +63,13 @@ pipelines write to their media mounts — mount those paths read-write.
 The schema migrates automatically at startup (`schema_migrations`, advisory-lock
 serialized across replicas).
 
+When `EMBYX_MANAGER_API_TOKEN` is set, every mutation (scan, move, pipeline trigger,
+config save, connection test) needs `Authorization: Bearer <token>`. In the browser,
+enter it once via the **API Token** button in the top bar — it is kept in
+`sessionStorage` only, so it is gone when the tab closes. Reads (health, monitor
+status, run history, config) stay open, which is what keeps the dashboard useful
+before the token is entered.
+
 ### Importing a legacy config.toml
 
 ```bash

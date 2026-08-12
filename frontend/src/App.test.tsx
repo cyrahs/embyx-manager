@@ -1275,3 +1275,58 @@ describe('Fill Actor page', () => {
     expect(window.sessionStorage.getItem('embyx-web-api-token')).toBe('session-token')
   })
 })
+
+describe('API token entry', () => {
+  beforeEach(() => {
+    window.sessionStorage.clear()
+    vi.stubGlobal('fetch', vi.fn().mockImplementation(() => jsonResponse({ status: 'ok', database: 'ok', roots: 'ok' })))
+  })
+
+  afterEach(() => vi.restoreAllMocks())
+
+  it('saves a token from the top bar without waiting for a rejection', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole('button', { name: /API Token/ }))
+    const dialog = screen.getByRole('dialog')
+    await user.type(within(dialog).getByLabelText('API Token'), 'topbar-token')
+    await user.click(within(dialog).getByRole('button', { name: '保存 Token' }))
+
+    expect(window.sessionStorage.getItem('embyx-web-api-token')).toBe('topbar-token')
+    expect(within(screen.getByRole('dialog')).getByText('已保存，可以重试刚才的操作。')).toBeInTheDocument()
+  })
+
+  it('opens the token dialog when a dashboard action is rejected', async () => {
+    const user = userEvent.setup()
+    vi.mocked(fetch).mockImplementation((input) => {
+      const url = String(input)
+      if (url.startsWith('/api/monitor/status')) {
+        return jsonResponse([
+          {
+            pipeline: 'rss',
+            enabled: false,
+            configured: true,
+            reason: null,
+            running_run_id: null,
+            next_scheduled_at: null,
+            last_run: null,
+          },
+        ])
+      }
+      if (url.startsWith('/api/monitor/runs')) return jsonResponse([])
+      if (url.startsWith('/api/config')) {
+        return jsonResponse([{ section: 'rss', values: { enabled: false }, secrets: {}, version: 1 }])
+      }
+      if (url.includes('/trigger')) return jsonResponse({ error: { code: 'unauthorized' } }, 401)
+      return jsonResponse({ status: 'ok', database: 'ok', roots: 'ok' })
+    })
+
+    render(<App />)
+    await user.click(screen.getByRole('link', { name: '监控看板' }))
+    await user.click(await screen.findByRole('button', { name: '立即运行' }))
+
+    expect(await screen.findByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByText('需要 API Token')).toBeInTheDocument()
+  })
+})

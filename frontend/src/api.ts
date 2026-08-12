@@ -27,6 +27,8 @@ const APPLY_JOB_STATES = new Set<JobState>(['queued', 'running', 'completed', 'p
 const MOVE_STATES = new Set<MoveState>(['moved', 'stale', 'conflict', 'invalid_path', 'failed'])
 const MAX_APPLY_ITEMS = 5_000
 
+const apiTokenListeners = new Set<() => void>()
+
 export function hasApiToken(): boolean {
   return Boolean(window.sessionStorage.getItem(API_TOKEN_KEY))
 }
@@ -35,6 +37,15 @@ export function setApiToken(value: string): void {
   const token = value.trim()
   if (token) window.sessionStorage.setItem(API_TOKEN_KEY, token)
   else window.sessionStorage.removeItem(API_TOKEN_KEY)
+  for (const listener of apiTokenListeners) listener()
+}
+
+/** Lets every page observe the shared session token instead of caching its own copy. */
+export function subscribeApiToken(listener: () => void): () => void {
+  apiTokenListeners.add(listener)
+  return () => {
+    apiTokenListeners.delete(listener)
+  }
 }
 
 export function getActivePlanId(): string | null {
@@ -119,6 +130,15 @@ export class ApiError extends Error {
   }
 }
 
+export function isUnauthorized(error: unknown): boolean {
+  return error instanceof ApiError && (error.status === 401 || error.code === 'unauthorized')
+}
+
+const CODE_MESSAGES: Record<string, string> = {
+  unauthorized: '需要 API Token：请在右上角「API Token」中填写后重试。',
+  not_ready: '服务尚未就绪，请稍后重试。',
+}
+
 function requestHeaders(): HeadersInit {
   const apiToken = window.sessionStorage.getItem(API_TOKEN_KEY)
   return {
@@ -147,7 +167,7 @@ async function request(path: string, init?: RequestInit, acceptedStatuses: reado
         ? detail.message
         : typeof detail.detail === 'string'
           ? detail.detail
-          : '请求未能完成，请稍后重试。'
+          : (CODE_MESSAGES[code] ?? (response.status === 401 ? CODE_MESSAGES.unauthorized : '请求未能完成，请稍后重试。'))
     throw new ApiError(response.status, code, message)
   }
   return body
