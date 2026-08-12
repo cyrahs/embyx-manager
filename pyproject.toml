@@ -30,6 +30,7 @@ embyx-manager = "embyx_manager.__main__:main"
 
 [dependency-groups]
 dev = [
+  "httpx2>=2.10.0",
   "pytest>=9,<10",
   "pytest-asyncio>=1.3,<2",
   "ruff>=0.14,<1",
@@ -65,10 +66,18 @@ ignore = [
 "tests/**" = [
   "ANN",
   "PLR0913",
+  "PLR0917",
   "PLR2004",
   "S101",
   "S105",  # Fake tokens in fixtures.
   "S106",
+  "ISC004",
+]
+# Interim port from embyx-web; replaced by the PostgreSQL repository.
+"src/embyx_manager/fill_actor/sqlite_repository.py" = [
+  "PLR0917",
+  "RUF036",
+  "ISC004",
 ]
 
 [tool.ruff.format]

@@ -1,0 +1,127 @@
+from types import SimpleNamespace
+from unittest.mock import AsyncMock
+
+import pytest
+
+from embyx_manager.adapters import (
+    AvidBrandResolver,
+    CloudDriveFileMover,
+    JavBusActorCatalog,
+    SukebeiMagnetProvider,
+)
+
+
+async def test_actor_catalog_delegates_to_javbus() -> None:
+    client = SimpleNamespace(scrape=AsyncMock(return_value=['ABC-001', 'ABC-002']))
+    catalog = JavBusActorCatalog(client)  # type: ignore[arg-type]
+
+    assert await catalog.list_video_ids('actor-1') == ['ABC-001', 'ABC-002']
+    client.scrape.assert_awaited_once_with('actor-1', progress_callback=None)
+
+
+async def test_actor_catalog_forwards_progress_callback() -> None:
+    client = SimpleNamespace(scrape=AsyncMock(return_value=[]))
+    catalog = JavBusActorCatalog(client)  # type: ignore[arg-type]
+    progress = AsyncMock()
+
+    await catalog.list_video_ids('actor-1', progress_callback=progress)
+    client.scrape.assert_awaited_once_with('actor-1', progress_callback=progress)
+
+
+async def test_magnet_provider_delegates_to_sukebei() -> None:
+    client = SimpleNamespace(get_magnet=AsyncMock(return_value='magnet:?xt=urn:btih:abc'))
+    provider = SukebeiMagnetProvider(client)  # type: ignore[arg-type]
+
+    assert await provider.find_magnet('ABC-001') == 'magnet:?xt=urn:btih:abc'
+    client.get_magnet.assert_awaited_once_with('ABC-001')
+
+
+def test_brand_resolver_uses_avid_rules() -> None:
+    resolver = AvidBrandResolver()
+
+    assert resolver.resolve_brand('ABC-001') == 'ABC'
+    assert resolver.resolve_brand('NOBRAND') is None
+
+
+async def test_cloud_mover_converts_listing_and_skips_directories() -> None:
+    cloud = SimpleNamespace(
+        list_directory=AsyncMock(
+            return_value=(
+                {
+                    'id': 'dir-id',
+                    'name': 'ABC',
+                    'full_path': '/cloud/ABC',
+                    'size': 0,
+                    'is_directory': True,
+                    'write_time': {'seconds': 1, 'nanos': 0},
+                    'hashes': {},
+                },
+                {
+                    'id': 'file-id',
+                    'name': 'ABC-001.mp4',
+                    'full_path': '/cloud/ABC/ABC-001.mp4',
+                    'size': 123,
+                    'is_directory': False,
+                    'write_time': {'seconds': 456, 'nanos': 789},
+                    'hashes': {'2': 'sha1-value'},
+                },
+            ),
+        ),
+    )
+    mover = CloudDriveFileMover(cloud)  # type: ignore[arg-type]
+
+    files = await mover.list_directory('/cloud/ABC')
+
+    assert len(files) == 1
+    assert files[0].path == '/cloud/ABC/ABC-001.mp4'
+    assert files[0].write_time == 456 * 1_000_000_000 + 789
+
+
+async def test_cloud_mover_rejects_missing_write_time() -> None:
+    cloud = SimpleNamespace(
+        list_directory=AsyncMock(
+            return_value=(
+                {
+                    'id': 'file-id',
+                    'name': 'ABC-001.mp4',
+                    'full_path': '/cloud/ABC/ABC-001.mp4',
+                    'size': 123,
+                    'is_directory': False,
+                    'write_time': None,
+                    'hashes': {},
+                },
+            ),
+        ),
+    )
+    mover = CloudDriveFileMover(cloud)  # type: ignore[arg-type]
+
+    with pytest.raises(TypeError, match='invalid write time'):
+        await mover.list_directory('/cloud/ABC')
+
+
+async def test_cloud_mover_ensure_directory_returns_success_flag() -> None:
+    cloud = SimpleNamespace(
+        ensure_directory=AsyncMock(return_value={'success': True, 'created': False, 'path': '/cloud/ABC'}),
+    )
+    mover = CloudDriveFileMover(cloud)  # type: ignore[arg-type]
+
+    assert await mover.ensure_directory('/cloud', 'ABC') is True
+    cloud.ensure_directory.assert_awaited_once_with('/cloud', 'ABC')
+
+
+async def test_cloud_mover_move_file_maps_response() -> None:
+    cloud = SimpleNamespace(
+        move_file=AsyncMock(
+            return_value={
+                'success': True,
+                'error_message': '',
+                'result_file_paths': ('/cloud/dst/ABC-001.mp4',),
+            },
+        ),
+    )
+    mover = CloudDriveFileMover(cloud)  # type: ignore[arg-type]
+
+    response = await mover.move_file('/cloud/src/ABC-001.mp4', '/cloud/dst')
+
+    assert response.success is True
+    assert response.result_paths == ('/cloud/dst/ABC-001.mp4',)
