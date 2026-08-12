@@ -453,6 +453,8 @@ async def test_postgres_repository_applies_explicit_schema_migration() -> None:
     assert {row['tablename'] for row in rows} == {
         'schema_migrations',
         'app_config',
+        'pipeline_runs',
+        'rss_failed_avids',
         'fill_actor_apply_jobs',
         'fill_actor_plans',
         'fill_actor_candidates',

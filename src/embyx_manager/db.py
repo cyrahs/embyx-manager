@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 
 import asyncpg
 
-CURRENT_SCHEMA_VERSION = 2
+CURRENT_SCHEMA_VERSION = 3
 
 # Advisory-lock key space for embyx-manager; low word selects the resource.
 ADVISORY_NAMESPACE = 0x454D4258  # 'EMBX'
@@ -184,6 +184,29 @@ _MIGRATIONS[2] = (
         value_json TEXT NOT NULL,
         version INTEGER NOT NULL DEFAULT 1,
         updated_at TIMESTAMPTZ NOT NULL
+    )
+    """,
+)
+
+_MIGRATIONS[3] = (
+    """
+    CREATE TABLE pipeline_runs (
+        run_id TEXT PRIMARY KEY,
+        pipeline TEXT NOT NULL CHECK (pipeline IN ('rss', 'archive', 'mapping')),
+        trigger TEXT NOT NULL CHECK (trigger IN ('scheduled', 'manual', 'watchdog', 'startup')),
+        state TEXT NOT NULL CHECK (state IN ('running', 'completed', 'failed', 'cancelled')),
+        started_at TIMESTAMPTZ NOT NULL,
+        finished_at TIMESTAMPTZ,
+        stats_json TEXT NOT NULL DEFAULT '{}',
+        errors_json TEXT NOT NULL DEFAULT '[]',
+        log_json TEXT NOT NULL DEFAULT '[]'
+    )
+    """,
+    'CREATE INDEX pipeline_runs_pipeline_idx ON pipeline_runs (pipeline, started_at DESC)',
+    """
+    CREATE TABLE rss_failed_avids (
+        avid TEXT PRIMARY KEY,
+        failed_at TIMESTAMPTZ NOT NULL
     )
     """,
 )
