@@ -1,4 +1,6 @@
+import asyncio
 import threading
+from datetime import datetime
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -11,16 +13,33 @@ from embyx_manager.adapters import (
 )
 from embyx_manager.api import create_app, make_mutation_auth
 from embyx_manager.clients.clouddrive import AsyncCloudDrive, CloudDriveClient
+from embyx_manager.clients.freshrss import FreshRSSClient
 from embyx_manager.clients.javbus import JavBusClient
 from embyx_manager.clients.sukebei import SukebeiClient
-from embyx_manager.config import CloudDriveConfig, ConfigStore, FeedsConfig
+from embyx_manager.config import (
+    ArchiveConfig,
+    CloudDriveConfig,
+    ConfigStore,
+    FeedsConfig,
+    FreshRSSConfig,
+    MappingConfig,
+    RssConfig,
+)
 from embyx_manager.config.api import create_config_router
+from embyx_manager.core.avid import AvidConfig, AvidParser
 from embyx_manager.db import Database
 from embyx_manager.fill_actor.feeds import RSSHubFeedWarmer
 from embyx_manager.fill_actor.jobs import FillActorJobManager
 from embyx_manager.fill_actor.postgres_repository import PostgresFillActorRepository
 from embyx_manager.fill_actor.service import FillActorPaths, FillActorService
 from embyx_manager.locking import PostgresAdvisoryLock
+from embyx_manager.monitor.api import create_monitor_router
+from embyx_manager.monitor.archive import ArchivePipeline
+from embyx_manager.monitor.mapping import MappingPipeline
+from embyx_manager.monitor.reports import RunContext
+from embyx_manager.monitor.rss import RssPipeline
+from embyx_manager.monitor.runs import PipelineRunRepository
+from embyx_manager.monitor.scheduler import MonitorScheduler
 from embyx_manager.settings import Settings
 
 
@@ -65,7 +84,28 @@ class CloudDriveHandle:
             self._cloud = None
 
 
-def build_app(settings: Settings) -> FastAPI:
+class AvidParserHandle:
+    """Rebuilds the AvidParser when the avid rules configuration changes."""
+
+    def __init__(self, store: ConfigStore) -> None:
+        self._store = store
+        self._version: int | None = None
+        self._parser = AvidParser()
+
+    def current(self) -> AvidParser:
+        rules, version = self._store.get_with_version('avid')
+        if version != self._version:
+            self._parser = AvidParser(
+                AvidConfig(
+                    id_exceptions=tuple(rules.id_exceptions),
+                    ignored_id_patterns=tuple(rules.ignored_id_patterns),
+                ),
+            )
+            self._version = version
+        return self._parser
+
+
+def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly root
     settings.validate_exposure()
     actor_root, additional_roots, move_in_root = settings.require_fill_actor_paths()
 
@@ -108,9 +148,101 @@ def build_app(settings: Settings) -> FastAPI:
     )
     jobs = FillActorJobManager(service=service, repository=repository, feed_warmer=feed_warmer)
 
-    config_router = create_config_router(store, mutation_auth=make_mutation_auth(settings.api_token))
+    mutation_auth = make_mutation_auth(settings.api_token)
+    config_router = create_config_router(store, mutation_auth=mutation_auth)
+
+    avid_handle = AvidParserHandle(store)
+    pipeline_runs = PipelineRunRepository(database)
+
+    def rss_trigger_ready() -> str | None:
+        return _rss_configuration_gap(store)
+
+    async def rss_runner(ctx: RunContext, rank: bool) -> None:  # noqa: FBT001
+        cloud = cloud_handle.current()
+        if cloud is None:
+            msg = 'CloudDrive is not configured'
+            raise RuntimeError(msg)
+        freshrss_config = store.get(FreshRSSConfig)
+        rss_config = store.get(RssConfig)
+        clouddrive_config = store.get(CloudDriveConfig)
+        client = FreshRSSClient(
+            url=freshrss_config.url,
+            api_key=freshrss_config.api_key,
+            proxy=freshrss_config.proxy or None,
+        )
+
+        async def cooldown_lookup(now: datetime) -> frozenset[str]:
+            return await pipeline_runs.active_cooldowns(
+                now=now,
+                ttl_seconds=rss_config.failed_avid_cooldown_seconds,
+            )
+
+        async def cooldown_record(avids: set[str], now: datetime) -> None:
+            await pipeline_runs.record_failed_avids(avids, now=now)
+
+        try:
+            pipeline = RssPipeline(
+                config=rss_config,
+                avid_parser=avid_handle.current(),
+                freshrss=client,
+                cloud=cloud,
+                sukebei=sukebei,
+                javbus=javbus,
+                task_dir_path=clouddrive_config.task_dir_path,
+                cooldown_lookup=cooldown_lookup,
+                cooldown_record=cooldown_record,
+            )
+            await pipeline.run(ctx, rank=rank)
+        finally:
+            await client.aclose()
+
+    def archive_ready() -> str | None:
+        if not store.get(ArchiveConfig).configured:
+            return 'archive source, destination, and mapping must be configured'
+        return None
+
+    async def archive_runner(ctx: RunContext) -> None:
+        clouddrive_config = store.get(CloudDriveConfig)
+        cloud = cloud_handle.current()
+        if cloud is not None and clouddrive_config.task_dir_path:
+            try:
+                await cloud.list_directory(clouddrive_config.task_dir_path)
+            except Exception:  # noqa: BLE001
+                ctx.exception('failed to refresh the CloudDrive task directory')
+        pipeline = ArchivePipeline(config=store.get(ArchiveConfig), avid_parser=avid_handle.current())
+        await asyncio.to_thread(pipeline.run, ctx)
+
+    def mapping_ready() -> str | None:
+        if not store.get(MappingConfig).configured:
+            return 'mapping source and destination directories must be configured'
+        return None
+
+    def mapping_factory() -> MappingPipeline:
+        return MappingPipeline(config=store.get(MappingConfig), avid_parser=avid_handle.current())
+
+    scheduler = MonitorScheduler(
+        store=store,
+        runs=pipeline_runs,
+        rss_runner=rss_runner,
+        archive_runner=archive_runner,
+        mapping_factory=mapping_factory,
+        rss_ready=rss_trigger_ready,
+        archive_ready=archive_ready,
+        mapping_ready=mapping_ready,
+    )
+    monitor_router = create_monitor_router(scheduler, pipeline_runs, mutation_auth=mutation_auth)
+
+    async def on_startup() -> None:
+        await store.load()
+        await scheduler.start()
 
     async def close_runtime() -> None:
+        try:
+            await scheduler.aclose()
+        finally:
+            await _close_clients()
+
+    async def _close_clients() -> None:
         try:
             await javbus.aclose()
         finally:
@@ -133,6 +265,17 @@ def build_app(settings: Settings) -> FastAPI:
         frontend_dist=frontend_dist,
         freshrss_url=lambda: current_feeds().freshrss_url or None,
         freshrss_rsshub_url=lambda: current_feeds().freshrss_rsshub_url or None,
-        extra_routers=(config_router,),
-        on_startup=store.load,
+        extra_routers=(config_router, monitor_router),
+        on_startup=on_startup,
     )
+
+
+def _rss_configuration_gap(store: ConfigStore) -> str | None:
+    if not store.get(FreshRSSConfig).configured:
+        return 'FreshRSS is not configured'
+    clouddrive = store.get(CloudDriveConfig)
+    if not clouddrive.configured:
+        return 'CloudDrive is not configured'
+    if not clouddrive.task_dir_path:
+        return 'CloudDrive task directory is not configured'
+    return None
