@@ -14,6 +14,7 @@ from fastapi.responses import JSONResponse, Response
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from embyx_manager.config.api import ConfigApiError
@@ -49,6 +50,7 @@ from embyx_manager.fill_actor.persistence import (
 from embyx_manager.fill_actor.service import FillActorService
 
 HTTP_UNAUTHORIZED = 401
+HTTP_NOT_FOUND = 404
 LOGGER = logging.getLogger(__name__)
 
 
@@ -510,8 +512,24 @@ def create_app(  # noqa: C901, PLR0913, PLR0915
         app.include_router(router)
 
     if frontend_dist is not None and frontend_dist.is_dir():
-        app.mount('/', StaticFiles(directory=frontend_dist, html=True), name='frontend')
+        app.mount('/', SpaStaticFiles(directory=frontend_dist, html=True), name='frontend')
     return app
+
+
+class SpaStaticFiles(StaticFiles):
+    """Static files with history-API fallback: unknown page paths serve index.html."""
+
+    async def get_response(self, path: str, scope: Scope) -> Response:
+        is_page_path = not path.startswith('api/') and '.' not in path.rsplit('/', 1)[-1]
+        try:
+            response = await super().get_response(path, scope)
+        except StarletteHTTPException as exc:
+            if exc.status_code == HTTP_NOT_FOUND and is_page_path:
+                return await super().get_response('index.html', scope)
+            raise
+        if response.status_code == HTTP_NOT_FOUND and is_page_path:
+            return await super().get_response('index.html', scope)
+        return response
 
 
 def _current_url(value: str | Callable[[], str | None] | None) -> str | None:

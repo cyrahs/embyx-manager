@@ -117,3 +117,48 @@ export interface ActiveApplyRequest {
   jobId?: string
   retrySubmitIfMissing?: boolean
 }
+
+// ---------- monitor ----------
+
+export type PipelineId = 'rss' | 'archive' | 'mapping'
+export type RunState = 'running' | 'completed' | 'failed' | 'cancelled'
+
+export interface RunSummary {
+  run_id: string
+  pipeline: PipelineId
+  trigger: 'scheduled' | 'manual' | 'watchdog' | 'startup'
+  state: RunState
+  started_at: string
+  finished_at: string | null
+  stats: Record<string, number>
+  error_count: number
+}
+
+export interface RunDetail extends RunSummary {
+  errors: string[]
+  log_tail: string[]
+}
+
+export interface PipelineStatus {
+  pipeline: PipelineId
+  enabled: boolean
+  configured: boolean
+  reason: string | null
+  running_run_id: string | null
+  next_scheduled_at: string | null
+  last_run: RunSummary | null
+}
+
+// ---------- config ----------
+
+export interface ConfigSection {
+  section: string
+  values: Record<string, unknown>
+  secrets: Record<string, boolean>
+  version: number
+}
+
+export interface TestConnectionResult {
+  ok: boolean
+  detail: string
+}

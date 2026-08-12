@@ -1,5 +1,11 @@
 import type {
   ActiveApplyRequest,
+  ConfigSection,
+  PipelineId,
+  PipelineStatus,
+  RunDetail,
+  RunSummary,
+  TestConnectionResult,
   ActorFeedStatus,
   ApplyJobEnvelope,
   ApplyResult,
@@ -436,4 +442,89 @@ export async function getHealth(): Promise<HealthStatus> {
     throw new ApiError(0, 'invalid_health_response', '服务健康响应无效，请稍后重试。')
   }
   return value as unknown as HealthStatus
+}
+
+// ---------- monitor ----------
+
+export async function getMonitorStatus(signal?: AbortSignal): Promise<PipelineStatus[]> {
+  const body = await request('/api/monitor/status', { signal })
+  if (!Array.isArray(body)) throw new ApiError(0, 'invalid_response', '监控状态响应无效。')
+  return body as PipelineStatus[]
+}
+
+export async function triggerPipeline(pipeline: PipelineId, options?: { rank?: boolean }): Promise<string> {
+  const body = await request(`/api/monitor/${pipeline}/trigger`, {
+    method: 'POST',
+    body: JSON.stringify({ rank: Boolean(options?.rank) }),
+  })
+  if (!isRecord(body) || typeof body.run_id !== 'string') {
+    throw new ApiError(0, 'invalid_response', '触发响应无效。')
+  }
+  return body.run_id
+}
+
+export async function cancelPipeline(pipeline: PipelineId): Promise<void> {
+  await request(`/api/monitor/${pipeline}/cancel`, { method: 'POST' })
+}
+
+export async function listRuns(
+  pipeline: PipelineId | null,
+  limit = 20,
+  signal?: AbortSignal,
+): Promise<RunSummary[]> {
+  const params = new URLSearchParams()
+  if (pipeline) params.set('pipeline', pipeline)
+  params.set('limit', String(limit))
+  const body = await request(`/api/monitor/runs?${params.toString()}`, { signal })
+  if (!Array.isArray(body)) throw new ApiError(0, 'invalid_response', '运行历史响应无效。')
+  return body as RunSummary[]
+}
+
+export async function getRun(runId: string, signal?: AbortSignal): Promise<RunDetail> {
+  const body = await request(`/api/monitor/runs/${encodeURIComponent(runId)}`, { signal })
+  if (!isRecord(body) || typeof body.run_id !== 'string') {
+    throw new ApiError(0, 'invalid_response', '运行详情响应无效。')
+  }
+  return body as unknown as RunDetail
+}
+
+// ---------- config ----------
+
+function looksLikeConfigSection(value: unknown): value is ConfigSection {
+  return isRecord(value) && typeof value.section === 'string' && isRecord(value.values) && typeof value.version === 'number'
+}
+
+export async function getConfigSections(signal?: AbortSignal): Promise<ConfigSection[]> {
+  const body = await request('/api/config', { signal })
+  if (!Array.isArray(body) || !body.every(looksLikeConfigSection)) {
+    throw new ApiError(0, 'invalid_response', '配置响应无效。')
+  }
+  return body
+}
+
+export async function updateConfigSection(
+  section: string,
+  values: Record<string, unknown>,
+  version: number,
+): Promise<ConfigSection> {
+  const body = await request(`/api/config/${encodeURIComponent(section)}`, {
+    method: 'PUT',
+    body: JSON.stringify({ values, version }),
+  })
+  if (!looksLikeConfigSection(body)) throw new ApiError(0, 'invalid_response', '配置响应无效。')
+  return body
+}
+
+export async function testConnection(
+  target: 'clouddrive' | 'freshrss',
+  values: Record<string, unknown>,
+): Promise<TestConnectionResult> {
+  const body = await request(`/api/config/${target}/test`, {
+    method: 'POST',
+    body: JSON.stringify({ values }),
+  })
+  if (!isRecord(body) || typeof body.ok !== 'boolean') {
+    throw new ApiError(0, 'invalid_response', '测试连接响应无效。')
+  }
+  return { ok: body.ok, detail: typeof body.detail === 'string' ? body.detail : '' }
 }
