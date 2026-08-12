@@ -77,20 +77,15 @@ the dashboard.
 
 ```bash
 uv sync --locked
-uv run pytest                       # Postgres-backed tests skip without the env below
-EMBYX_MANAGER_TEST_DATABASE_URL=postgresql://postgres:test@localhost:54329/embyx_test \
-  uv run pytest                     # full suite against a disposable database
+uv run pytest
 uv run ruff check .
 uv run ruff format --check .
 ```
 
-The Postgres-backed tests drop and recreate the target database's `public` schema between
-tests — point them only at a disposable database, e.g.:
-
-```bash
-docker run -d --name embyx-manager-test-pg -e POSTGRES_PASSWORD=test \
-  -e POSTGRES_DB=embyx_test -p 54329:5432 postgres:17-alpine
-```
+PostgreSQL-backed tests are gated in GitHub Actions CI, which provides a disposable
+Postgres service container via `EMBYX_MANAGER_TEST_DATABASE_URL`. Locally they skip
+automatically when that variable is unset — do not point it at a real database: the
+fixtures drop and recreate the target database's `public` schema between tests.
 
 Frontend:
 
