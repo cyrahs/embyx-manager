@@ -1,0 +1,15 @@
+.git
+.venv
+.pytest_cache
+.ruff_cache
+__pycache__
+dist
+build
+state
+log
+.env
+config.toml
+frontend/node_modules
+frontend/dist
+tests
+docs

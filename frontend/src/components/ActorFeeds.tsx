@@ -1,0 +1,72 @@
+import { formatFeedUpdatedAt, safeFreshRssUrl } from '../lib/format'
+import { FEED_STATE_LABELS } from '../lib/labels'
+import type { ActorFeedStatus } from '../types'
+import { ExternalIcon, FeedIcon, FeedStateIcon } from './Icons'
+
+export function ActorFeeds({ feeds }: { feeds: ActorFeedStatus[] }) {
+  return (
+    <section className="feed-panel" aria-labelledby="feed-title">
+      <div className="feed-panel-heading">
+        <span className="feed-panel-icon">
+          <FeedIcon />
+        </span>
+        <div>
+          <h2 id="feed-title">RSSHub 缓存</h2>
+          <p>演员订阅源准备状态</p>
+        </div>
+        <span className="feed-panel-count">{feeds.length} 位演员</span>
+      </div>
+      <ul className="feed-list">
+        {feeds.map((feed) => {
+          const freshrssAddUrl = feed.state === 'ready' ? safeFreshRssUrl(feed.freshrss_add_url) : null
+          const freshrssUrl = feed.state === 'ready' ? safeFreshRssUrl(feed.freshrss_url) : null
+          const detail =
+            feed.state === 'warming'
+              ? 'RSSHub 正在预热缓存，页面会自动更新。'
+              : feed.state === 'failed'
+                ? feed.error_code
+                  ? `错误：${feed.error_code}`
+                  : '缓存预热未能完成。'
+                : null
+          return (
+            <li className={`feed-row feed-${feed.state}`} key={feed.actor_id}>
+              <span className="feed-actor">
+                <strong>{feed.actor_id}</strong>
+                <small>{`已尝试 ${feed.attempts} 次 · ${formatFeedUpdatedAt(feed.updated_at)}`}</small>
+              </span>
+              <span className="feed-state" role="status" aria-live="polite">
+                <FeedStateIcon state={feed.state} />
+                {FEED_STATE_LABELS[feed.state]}
+              </span>
+              <span className="feed-detail">{detail}</span>
+              <span className="feed-actions">
+                {freshrssAddUrl && (
+                  <a
+                    className="button secondary freshrss-button"
+                    href={freshrssAddUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <ExternalIcon />
+                    一键添加到 FreshRSS
+                  </a>
+                )}
+                {freshrssUrl && (
+                  <a
+                    className="button secondary freshrss-button"
+                    href={freshrssUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <ExternalIcon />
+                    打开 FreshRSS
+                  </a>
+                )}
+              </span>
+            </li>
+          )
+        })}
+      </ul>
+    </section>
+  )
+}

@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+dist/
+build/
+*.egg-info/
+state/
+log/
+.env
+config.toml
+
+# frontend
+frontend/node_modules/
+frontend/dist/
+src/embyx_manager/static/
