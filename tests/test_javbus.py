@@ -1,0 +1,237 @@
+import asyncio
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import httpx
+import pytest
+
+from embyx_manager.clients.javbus import JavBusClient, JavBusPaginationError
+
+MAIN_PAGE_HTML = """
+<html>
+<script>
+    var gid = 12345;
+    var uc = 0;
+    var img = '/pics/cover/sample.jpg';
+</script>
+</html>
+"""
+
+AJAX_RESPONSE_HTML = """
+<html>
+    <tr>
+        <td width="70%">
+            <a href="magnet:?xt=urn:btih:de439fca97a0365b47d9b087010115a94cad6853&dn=release1">release1</a>
+        </td>
+        <td style="text-align:center">
+            <a href="magnet:?xt=urn:btih:de439fca97a0365b47d9b087010115a94cad6853&dn=release1">2.02GB</a>
+        </td>
+        <td style="text-align:center">
+            <a href="magnet:?xt=urn:btih:de439fca97a0365b47d9b087010115a94cad6853&dn=release1">2025-01-01</a>
+        </td>
+    </tr>
+    <tr>
+        <td width="70%">
+            <a href="magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2">release2</a>
+        </td>
+        <td style="text-align:center">
+            <a href="magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2">1.5GB</a>
+        </td>
+        <td style="text-align:center">
+            <a href="magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2">2025-01-02</a>
+        </td>
+    </tr>
+    <a href="http://other-link.com">Other Link</a>
+</html>
+"""
+
+
+@pytest.fixture
+async def client():
+    javbus = JavBusClient()
+    yield javbus
+    await javbus.aclose()
+
+
+def set_get(client: JavBusClient, mock_get: AsyncMock) -> None:
+    client._client.get = mock_get  # noqa: SLF001
+
+
+async def test_get_magnets_success(client: JavBusClient) -> None:
+    mock_response_main = MagicMock(text=MAIN_PAGE_HTML, status_code=200)
+    mock_response_ajax = MagicMock(text=AJAX_RESPONSE_HTML, status_code=200)
+    mock_get = AsyncMock(side_effect=[mock_response_main, mock_response_ajax])
+    set_get(client, mock_get)
+
+    video_id = 'TEST-001'
+    magnets = await client.get_magnets(video_id)
+
+    assert len(magnets) == 2
+    magnet1 = next(m for m in magnets if 'de439fca97a0365b47d9b087010115a94cad6853' in m['magnet'])
+    assert magnet1['magnet'] == f'magnet:?xt=urn:btih:de439fca97a0365b47d9b087010115a94cad6853&dn={video_id}'
+    assert magnet1['size'] == '2.02GB'
+    assert magnet1['size_int'] > 0
+
+    magnet2 = next(m for m in magnets if 'a1b2c3d4e5f67890abcdef1234567890abcdef12' in m['magnet'])
+    assert magnet2['magnet'] == f'magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn={video_id}'
+    assert magnet2['size'] == '1.5GB'
+
+    assert mock_get.call_count == 2
+    args, _ = mock_get.call_args_list[0]
+    assert str(args[0]).endswith(f'/{video_id}')
+    args, kwargs = mock_get.call_args_list[1]
+    assert 'uncledatoolsbyajax.php' in str(args[0])
+    assert 'gid=12345' in str(args[0])
+    assert kwargs['headers']['Referer'].endswith(f'/{video_id}')
+
+
+async def test_get_magnets_no_variables(client: JavBusClient) -> None:
+    mock_response_main = MagicMock(text='<html>No variables here</html>', status_code=200)
+    mock_get = AsyncMock(return_value=mock_response_main)
+    set_get(client, mock_get)
+
+    assert await client.get_magnets('TEST-002') == []
+    assert mock_get.call_count == 1
+
+
+async def test_scrape_one_page(client: JavBusClient) -> None:
+    html = """
+    <html>
+        <a class="movie-box featured" href="https://www.javbus.com/VID-001/"></a>
+        <a class="movie-box" href="https://www.javbus.com/VID-002"></a>
+        <a class="movie-box" href="https://www.javbus.com/VID-001"></a> <!-- Duplicate -->
+    </html>
+    """
+    mock_response = MagicMock(text=html, status_code=200)
+    mock_get = AsyncMock(return_value=mock_response)
+    set_get(client, mock_get)
+
+    ids = await client.scrape_one_page('ACTOR-1', 1)
+    assert sorted(ids) == ['VID-001', 'VID-002']
+    mock_get.assert_called_once_with(url=f'{client.host}/star/ACTOR-1')
+
+    mock_get.reset_mock()
+    await client.scrape_one_page('ACTOR-1', 2)
+    mock_get.assert_called_once_with(url=f'{client.host}/star/ACTOR-1/2')
+
+
+async def test_get_total_page(client: JavBusClient) -> None:
+    html = """
+    <html>
+        <a href="/star/ACTOR-1/1">1</a>
+        <a href="/star/ACTOR-1/2">2</a>
+        <a href="/star/ACTOR-1/3">3</a>
+    </html>
+    """
+    mock_response = MagicMock(text=html, status_code=200)
+    mock_get = AsyncMock(return_value=mock_response)
+    set_get(client, mock_get)
+
+    assert await client.get_total_page('ACTOR-1') == 3
+    mock_get.assert_any_call(url=f'{client.host}/star/ACTOR-1')
+    mock_get.assert_any_call(url=f'{client.host}/star/ACTOR-1/4')
+
+    mock_response.text = '<html></html>'
+    assert await client.get_total_page('ACTOR-1') == 1
+
+
+async def test_scrape(client: JavBusClient) -> None:
+    with (
+        patch.object(client, 'get_total_page', new_callable=AsyncMock) as mock_get_total_page,
+        patch.object(client, 'scrape_one_page', new_callable=AsyncMock) as mock_scrape_one_page,
+    ):
+        mock_get_total_page.return_value = 2
+        mock_scrape_one_page.side_effect = [['A', 'B'], ['C']]
+
+        ids = await client.scrape('ACTOR-1')
+
+        assert set(ids) == {'A', 'B', 'C'}
+        mock_get_total_page.assert_called_once_with('ACTOR-1')
+        assert mock_scrape_one_page.call_count == 2
+
+
+async def test_get_total_page_follows_sliding_windows_through_page_26(client: JavBusClient) -> None:
+    windows = {
+        1: range(1, 11),
+        10: range(6, 16),
+        15: range(11, 21),
+        20: range(16, 26),
+        25: range(17, 27),
+        26: (),
+    }
+    requested: list[int] = []
+
+    async def get(*, url: str) -> httpx.Response:
+        page = 1 if url.endswith('/ACTOR-1') else int(url.rsplit('/', 1)[-1])
+        requested.append(page)
+        request = httpx.Request('GET', url)
+        if page == 27:
+            return httpx.Response(404, request=request)
+        links = ''.join(f'<a href="/star/ACTOR-1/{number}">{number}</a>' for number in windows[page])
+        return httpx.Response(
+            200,
+            text=f'<a class="movie-box" href="/{page:03d}"></a>{links}',
+            request=request,
+        )
+
+    set_get(client, AsyncMock(side_effect=get))
+
+    assert await client.get_total_page('ACTOR-1') == 26
+    assert requested == [1, 10, 15, 20, 25, 26, 27]
+
+
+async def test_scrape_reports_page_progress_and_globally_deduplicates(client: JavBusClient) -> None:
+    events: list[tuple[int, int | None, int | None]] = []
+
+    async def progress(completed: int, total: int | None, current: int | None) -> None:
+        events.append((completed, total, current))
+
+    async def scrape_page(_actor_id: str, page: int) -> list[str]:
+        await asyncio.sleep((4 - page) * 0.001)
+        return {1: ['A', 'B'], 2: ['B', 'C'], 3: ['D']}[page]
+
+    with (
+        patch.object(client, 'get_total_page', new_callable=AsyncMock, return_value=3) as total,
+        patch.object(client, 'scrape_one_page', new_callable=AsyncMock, side_effect=scrape_page),
+    ):
+        ids = await client.scrape('ACTOR-1', progress_callback=progress)
+
+    assert ids == ['A', 'B', 'C', 'D']
+    total.assert_awaited_once_with('ACTOR-1', progress_callback=progress)
+    assert events[:2] == [(0, None, None), (0, 3, None)]
+    assert [event[0] for event in events[2:]] == [1, 2, 3]
+    assert {event[2] for event in events[2:]} == {1, 2, 3}
+
+
+async def test_terminal_404_is_not_retried(client: JavBusClient) -> None:
+    url = f'{client.host}/star/ACTOR-1/2'
+    response = httpx.Response(404, request=httpx.Request('GET', url))
+    mock_get = AsyncMock(return_value=response)
+    set_get(client, mock_get)
+
+    assert await client.scrape_one_page('ACTOR-1', 2) == []
+    mock_get.assert_awaited_once_with(url=url)
+
+
+async def test_pagination_limit_fails_instead_of_returning_partial_results(client: JavBusClient) -> None:
+    html = """
+    <a class="movie-box" href="/VID-001"></a>
+    <a href="/star/ACTOR-1/3">3</a>
+    """
+    response = MagicMock(text=html, status_code=200)
+    set_get(client, AsyncMock(return_value=response))
+    client.max_actor_pages = 3
+
+    with pytest.raises(JavBusPaginationError, match='safety limit'):
+        await client.get_total_page('ACTOR-1')
+
+
+async def test_scrape_rejects_an_empty_page_inside_discovered_range(client: JavBusClient) -> None:
+    async def scrape_page(_actor_id: str, page: int) -> list[str]:
+        return {1: ['A'], 2: [], 3: ['C']}[page]
+
+    with (
+        patch.object(client, 'get_total_page', new_callable=AsyncMock, return_value=3),
+        patch.object(client, 'scrape_one_page', new_callable=AsyncMock, side_effect=scrape_page),
+        pytest.raises(JavBusPaginationError, match='empty page at 2'),
+    ):
+        await client.scrape('ACTOR-1')
