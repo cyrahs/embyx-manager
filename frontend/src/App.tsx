@@ -1,11 +1,20 @@
 import { useCallback, useEffect, useState } from 'react'
-import { BrowserRouter, NavLink, Outlet, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, NavLink, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 
 import { getHealth, type HealthStatus } from './api'
 import { ApiTokenButton, ApiTokenDialog } from './components/ApiTokenDialog'
 import DashboardPage from './pages/DashboardPage'
 import FillActorPage from './pages/FillActorPage'
 import SettingsPage from './pages/SettingsPage'
+
+const APP_NAME = 'Embyx Manager'
+
+/** Route paths, nav labels and tab titles share one source so they cannot drift apart. */
+const NAV_ITEMS = [
+  { to: '/', end: true, label: '补全演员' },
+  { to: '/dashboard', end: false, label: '监控看板' },
+  { to: '/settings', end: false, label: '设置' },
+] as const
 
 export interface AppContext {
   health: HealthStatus | null
@@ -18,11 +27,21 @@ export interface AppContext {
 /** @deprecated Kept for existing imports; the context now carries more than health. */
 export type HealthContext = AppContext
 
+/** Keeps the tab title on the app name, suffixed with the page so open tabs stay tellable apart. */
+function useDocumentTitle() {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    const item = NAV_ITEMS.find((nav) => (nav.end ? pathname === nav.to : pathname.startsWith(nav.to)))
+    document.title = item && !item.end ? `${item.label} · ${APP_NAME}` : APP_NAME
+  }, [pathname])
+}
+
 function Layout() {
   const [health, setHealth] = useState<HealthStatus | null>(null)
   const [healthFailed, setHealthFailed] = useState(false)
   const [tokenDialogOpen, setTokenDialogOpen] = useState(false)
   const requestApiToken = useCallback(() => setTokenDialogOpen(true), [])
+  useDocumentTitle()
 
   useEffect(() => {
     let mounted = true
@@ -52,20 +71,16 @@ function Layout() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <NavLink className="brand" to="/" aria-label="Embyx 首页">
+        <NavLink className="brand" to="/" aria-label={`${APP_NAME} 首页`}>
           <span className="brand-mark" aria-hidden="true">E</span>
-          <span>embyx</span>
+          <span>embyx<span className="brand-suffix"> manager</span></span>
         </NavLink>
         <nav className="topbar-nav" aria-label="页面导航">
-          <NavLink to="/" end className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
-            补全演员
-          </NavLink>
-          <NavLink to="/dashboard" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
-            监控看板
-          </NavLink>
-          <NavLink to="/settings" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
-            设置
-          </NavLink>
+          {NAV_ITEMS.map(({ to, end, label }) => (
+            <NavLink key={to} to={to} end={end} className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+              {label}
+            </NavLink>
+          ))}
         </nav>
         <div className="topbar-meta">
           <ApiTokenButton onClick={requestApiToken} />

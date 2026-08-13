@@ -114,7 +114,7 @@ class RSSHubFeedWarmer:
             trust_env=False,
             headers={
                 'Accept': 'application/rss+xml, application/atom+xml, application/xml, text/xml',
-                'User-Agent': 'embyx-web-feed-warmer/1.0',
+                'User-Agent': 'embyx-manager-feed-warmer/1.0',
             },
         )
         self._owns_client = client is None
