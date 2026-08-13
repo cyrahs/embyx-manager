@@ -82,11 +82,28 @@ svg { width: 18px; height: 18px; flex: 0 0 auto; fill: none; stroke: currentColo
 .token-button:hover { color: var(--text); background: var(--surface-3); }
 .token-button svg { width: 15px; height: 15px; }
 .token-button.configured { color: var(--text); border-color: rgba(134, 220, 170, .34); }
-.token-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--yellow, #e8c468); }
-.token-dot.on { background: var(--green); }
-.token-dialog .token-field { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; }
-.token-dialog .token-field label { color: var(--text-2); font-size: 12px; font-weight: 600; }
-.token-dialog .token-field input {
+
+/* ---------- login ---------- */
+.login-screen { min-height: 100vh; padding: 24px; display: grid; place-items: center; background: var(--bg); }
+.login-card {
+  width: min(420px, 100%);
+  padding: 28px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--surface-2);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .45);
+}
+.login-card .brand-mark { width: 34px; height: 34px; font-size: 17px; border-radius: 8px; }
+.login-card h1 { margin: 16px 0 8px; color: var(--text); font-size: 20px; font-weight: 600; letter-spacing: -.02em; }
+.login-intro { margin: 0; color: var(--text-2); font-size: 13px; line-height: 1.65; }
+.login-card code, .token-dialog code { padding: 1px 5px; border-radius: 5px; background: var(--surface-3); font-size: 12px; }
+.login-notice { margin: 14px 0 0; padding: 9px 11px; border: 1px solid rgba(245, 194, 116, .34); border-radius: 8px; background: rgba(245, 194, 116, .06); color: var(--amber); font-size: 12px; }
+.login-error { margin: 10px 0 0; color: var(--red); font-size: 12px; }
+.login-actions { margin-top: 18px; display: flex; justify-content: flex-end; gap: 9px; }
+.login-card .login-actions .button { flex: 1; justify-content: center; }
+.token-field { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; }
+.token-field label { color: var(--text-2); font-size: 12px; font-weight: 600; }
+.token-field input {
   min-height: 38px;
   padding: 0 12px;
   border: 1px solid var(--line-strong);
@@ -95,8 +112,7 @@ svg { width: 18px; height: 18px; flex: 0 0 auto; fill: none; stroke: currentColo
   background: var(--bg);
   font-size: 13px;
 }
-.token-dialog .token-field input:focus { outline: none; border-color: var(--accent); }
-.token-dialog code { padding: 1px 5px; border-radius: 5px; background: var(--surface-3); font-size: 12px; }
+.token-field input:focus { outline: none; border-color: var(--accent); }
 .token-dialog .token-status { margin-top: 10px; color: var(--text-2); font-size: 12px; }
 .token-dialog .token-status.on { color: var(--green); }
 .health-dot { width: 7px; height: 7px; border-radius: 50%; background: #6b7178; box-shadow: 0 0 0 3px rgba(107, 113, 120, .16); }
@@ -173,12 +189,10 @@ main {
 .validation { margin: 10px 2px 0; color: var(--red); font-size: 12px; }
 .scan-actions { margin-top: 14px; display: flex; align-items: center; gap: 14px; }
 .scan-button { min-width: 132px; }
-.auth-configured { color: var(--text-3); font-size: 12px; }
-.auth-prompt { margin-top: 12px; padding: 12px; border: 1px solid rgba(245, 194, 116, .34); border-radius: 8px; background: rgba(245, 194, 116, .06); display: grid; grid-template-columns: 1fr minmax(180px, 240px) auto; align-items: center; gap: 12px; }
+.auth-prompt { margin-top: 12px; padding: 12px; border: 1px solid rgba(245, 194, 116, .34); border-radius: 8px; background: rgba(245, 194, 116, .06); display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; }
 .auth-prompt > div { display: flex; flex-direction: column; gap: 3px; }
 .auth-prompt strong { color: var(--text); font-size: 13px; }
 .auth-prompt span { color: var(--text-2); font-size: 12px; }
-.auth-prompt input { width: 100%; min-height: 36px; padding: 0 11px; border: 1px solid var(--line-strong); border-radius: 7px; color: var(--text); background: var(--bg); }
 
 /* ---------- progress ---------- */
 .progress-panel { padding: 14px 16px; border: 1px solid #3a4230; border-radius: var(--radius); background: rgba(214, 255, 75, .04); display: flex; flex-direction: column; gap: 11px; }

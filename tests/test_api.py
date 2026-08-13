@@ -397,6 +397,32 @@ def test_mutations_require_configured_bearer_token(tmp_path: Path) -> None:
     assert allowed_apply_poll.json() == {'error': {'code': 'unknown_apply_job'}}
 
 
+def test_auth_session_gates_the_login_screen(tmp_path: Path) -> None:
+    token = 'login-screen-token'
+    client, _, _ = make_client(tmp_path, api_token=token)
+    with client:
+        denied = client.get('/api/auth/session')
+        wrong = client.get('/api/auth/session', headers={'Authorization': 'Bearer nope'})
+        allowed = client.get('/api/auth/session', headers={'Authorization': f'Bearer {token}'})
+        health = client.get('/api/health')
+
+    assert denied.status_code == 401
+    assert denied.json() == {'error': {'code': 'unauthorized'}}
+    assert wrong.status_code == 401
+    assert allowed.status_code == 200
+    assert allowed.json() == {'auth_required': True}
+    assert health.json()['auth_required'] is True
+
+
+def test_auth_session_accepts_anyone_when_no_token_is_configured(tmp_path: Path) -> None:
+    client, _, _ = make_client(tmp_path)
+    with client:
+        response = client.get('/api/auth/session')
+
+    assert response.status_code == 200
+    assert response.json() == {'auth_required': False}
+
+
 def test_cancel_running_plan_is_authenticated_idempotent_and_does_not_require_roots(tmp_path: Path) -> None:
     token = 'cancel-token'
     actor_catalog = BlockingActorCatalog()
@@ -481,6 +507,7 @@ def test_request_size_limit_and_health(tmp_path: Path) -> None:
         'legacy_journal': True,
         'apply_enabled': True,
         'apply_ready': True,
+        'auth_required': False,
     }
 
 

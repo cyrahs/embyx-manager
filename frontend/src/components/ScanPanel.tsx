@@ -11,10 +11,7 @@ export function ScanPanel({
   applyPending,
   onScan,
   authRequired,
-  authConfigured,
-  apiTokenInput,
-  onApiTokenChange,
-  onSaveApiToken,
+  onRequestLogin,
 }: {
   input: string
   onInputChange: (value: string) => void
@@ -25,10 +22,7 @@ export function ScanPanel({
   applyPending: boolean
   onScan: () => void
   authRequired: boolean
-  authConfigured: boolean
-  apiTokenInput: string
-  onApiTokenChange: (value: string) => void
-  onSaveApiToken: () => void
+  onRequestLogin: () => void
 }) {
   const tooMany = parsed.actorIds.length > MAX_ACTORS
   const blocked = !parsed.actorIds.length || Boolean(parsed.invalid.length) || tooMany
@@ -71,23 +65,11 @@ export function ScanPanel({
       {authRequired && (
         <div className="auth-prompt" role="group" aria-label="API 认证">
           <div>
-            <strong>需要 API Token</strong>
-            <span>Token 仅保存在当前浏览器会话中，不会写入构建产物。</span>
+            <strong>需要重新登录</strong>
+            <span>服务端拒绝了刚才的操作，重新登录后可以继续。</span>
           </div>
-          <input
-            aria-label="API Token"
-            type="password"
-            autoComplete="off"
-            value={apiTokenInput}
-            onChange={(event) => onApiTokenChange(event.target.value)}
-          />
-          <button
-            className="button secondary"
-            type="button"
-            disabled={!apiTokenInput.trim()}
-            onClick={onSaveApiToken}
-          >
-            保存 Token
+          <button className="button secondary" type="button" onClick={onRequestLogin}>
+            重新登录
           </button>
         </div>
       )}
@@ -102,7 +84,6 @@ export function ScanPanel({
           {submitting || jobPending || applyPending ? <Spinner /> : <ScanIcon />}
           {submitting ? '正在提交' : jobPending ? '正在扫描' : applyPending ? '移动处理中' : '开始扫描'}
         </button>
-        {authConfigured && !authRequired && <span className="auth-configured">当前会话已配置 API Token。</span>}
       </div>
     </section>
   )

@@ -483,6 +483,11 @@ def create_app(  # noqa: C901, PLR0913, PLR0915
             candidate_ids=request.candidate_ids,
         )
 
+    @app.get('/api/auth/session', dependencies=[Depends(require_mutation_auth)])
+    async def auth_session() -> dict[str, bool]:
+        """Login probe: 200 means the presented token — or no token at all — is accepted."""
+        return {'auth_required': api_token is not None}
+
     @app.get('/api/health')
     async def health() -> JSONResponse:
         database_ready = await repository.health_check()
@@ -500,6 +505,8 @@ def create_app(  # noqa: C901, PLR0913, PLR0915
                 'legacy_journal': legacy_journal_ready,
                 'apply_enabled': service.apply_enabled,
                 'apply_ready': apply_ready,
+                # Public so the browser can show its login screen before any authorized call.
+                'auth_required': api_token is not None,
             },
             status_code=200 if ready else 503,
         )

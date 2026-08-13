@@ -19,6 +19,7 @@ import type {
 } from './types'
 
 const API_TOKEN_KEY = 'embyx-manager-api-token'
+const AUTH_REQUIRED_KEY = 'embyx-manager-auth-required'
 const ACTIVE_PLAN_KEY = 'embyx-manager-active-plan-id'
 const ACTIVE_APPLY_KEY = 'embyx-manager-active-apply'
 const PLAN_ID = /^[A-Za-z0-9_-]{1,256}$/
@@ -28,24 +29,88 @@ const MOVE_STATES = new Set<MoveState>(['moved', 'stale', 'conflict', 'invalid_p
 const MAX_APPLY_ITEMS = 5_000
 
 const apiTokenListeners = new Set<() => void>()
+/** Mirrors the stored token so a browser that blocks persistence still works for this tab. */
+let memoryToken: string | null = null
+/** Set once a write is refused (private mode, quota), which is when the mirror matters. */
+let persistenceFailed = false
+
+/** Null when the browser blocks persistence (private mode, disabled site data). */
+function localStorageOrNull(): Storage | null {
+  try {
+    return window.localStorage as Storage | undefined ?? null
+  } catch {
+    return null
+  }
+}
+
+function readLocalStorage(key: string): string | null {
+  try {
+    return localStorageOrNull()?.getItem(key) ?? null
+  } catch {
+    return null
+  }
+}
+
+function writeLocalStorage(key: string, value: string | null): void {
+  const storage = localStorageOrNull()
+  if (storage === null) {
+    persistenceFailed = true
+    return
+  }
+  try {
+    if (value === null) storage.removeItem(key)
+    else storage.setItem(key, value)
+  } catch {
+    // Private-mode browsers reject persistence; the in-memory copy still serves this tab.
+    persistenceFailed = true
+  }
+}
+
+/** The signed-in token, persisted across tabs and restarts until the user signs out. */
+export function readApiToken(): string | null {
+  // Storage stays authoritative where it works, so a token cleared elsewhere stays cleared;
+  // the mirror only answers once a write has proven that persistence is unavailable.
+  return readLocalStorage(API_TOKEN_KEY) ?? (persistenceFailed ? memoryToken : null)
+}
 
 export function hasApiToken(): boolean {
-  return Boolean(window.sessionStorage.getItem(API_TOKEN_KEY))
+  return Boolean(readApiToken())
 }
 
 export function setApiToken(value: string): void {
   const token = value.trim()
-  if (token) window.sessionStorage.setItem(API_TOKEN_KEY, token)
-  else window.sessionStorage.removeItem(API_TOKEN_KEY)
+  memoryToken = token || null
+  writeLocalStorage(API_TOKEN_KEY, memoryToken)
   for (const listener of apiTokenListeners) listener()
 }
 
-/** Lets every page observe the shared session token instead of caching its own copy. */
+/** Signing out in one tab must sign out the others, so mirror cross-tab storage writes. */
+function handleTokenStorageEvent(event: StorageEvent): void {
+  if (event.key !== null && event.key !== API_TOKEN_KEY) return
+  memoryToken = readLocalStorage(API_TOKEN_KEY)
+  for (const listener of apiTokenListeners) listener()
+}
+
+/** Lets every page observe the shared token instead of caching its own copy. */
 export function subscribeApiToken(listener: () => void): () => void {
   apiTokenListeners.add(listener)
+  if (apiTokenListeners.size === 1) window.addEventListener('storage', handleTokenStorageEvent)
   return () => {
     apiTokenListeners.delete(listener)
+    if (apiTokenListeners.size === 0) window.removeEventListener('storage', handleTokenStorageEvent)
   }
+}
+
+/**
+ * Last known answer to "does this deployment demand a token?", so a returning visitor
+ * lands on the login screen without a flash of the app while /api/health is in flight.
+ */
+export function readAuthRequired(): boolean {
+  return readLocalStorage(AUTH_REQUIRED_KEY) === 'true'
+}
+
+export function rememberAuthRequired(value: boolean): void {
+  writeLocalStorage(AUTH_REQUIRED_KEY, value ? 'true' : null)
 }
 
 export function getActivePlanId(): string | null {
@@ -135,12 +200,13 @@ export function isUnauthorized(error: unknown): boolean {
 }
 
 const CODE_MESSAGES: Record<string, string> = {
-  unauthorized: '需要 API Token：请在右上角「API Token」中填写后重试。',
+  unauthorized: '登录状态已失效，请重新登录后重试。',
   not_ready: '服务尚未就绪，请稍后重试。',
 }
 
-function requestHeaders(): HeadersInit {
-  const apiToken = window.sessionStorage.getItem(API_TOKEN_KEY)
+/** `undefined` uses the signed-in token; `null` deliberately sends none. */
+function requestHeaders(tokenOverride?: string | null): HeadersInit {
+  const apiToken = tokenOverride === undefined ? readApiToken() : tokenOverride
   return {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -148,10 +214,15 @@ function requestHeaders(): HeadersInit {
   }
 }
 
-async function request(path: string, init?: RequestInit, acceptedStatuses: readonly number[] = []): Promise<unknown> {
+async function request(
+  path: string,
+  init?: RequestInit,
+  acceptedStatuses: readonly number[] = [],
+  tokenOverride?: string | null,
+): Promise<unknown> {
   let response: Response
   try {
-    response = await fetch(path, { ...init, headers: { ...requestHeaders(), ...init?.headers } })
+    response = await fetch(path, { ...init, headers: { ...requestHeaders(tokenOverride), ...init?.headers } })
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') throw error
     throw new ApiError(0, 'network_error', '无法连接到服务，请检查网络后重试。')
@@ -454,6 +525,7 @@ export interface HealthStatus {
   legacy_journal?: boolean
   apply_enabled?: boolean
   apply_ready?: boolean
+  auth_required?: boolean
 }
 
 export async function getHealth(): Promise<HealthStatus> {
@@ -461,7 +533,24 @@ export async function getHealth(): Promise<HealthStatus> {
   if (!isRecord(value) || typeof value.status !== 'string') {
     throw new ApiError(0, 'invalid_health_response', '服务健康响应无效，请稍后重试。')
   }
-  return value as unknown as HealthStatus
+  const health = value as unknown as HealthStatus
+  if (typeof health.auth_required === 'boolean') rememberAuthRequired(health.auth_required)
+  return health
+}
+
+/**
+ * Checks a token against the server before it is trusted, so the login screen can
+ * reject a wrong token instead of failing on the user's first real action.
+ * Resolves for an accepted token (or for a deployment that requires none) and
+ * throws `unauthorized` otherwise.
+ */
+export async function verifyApiToken(token: string | null): Promise<{ authRequired: boolean }> {
+  const value = await request('/api/auth/session', { cache: 'no-store' }, [], token)
+  if (!isRecord(value) || typeof value.auth_required !== 'boolean') {
+    throw new ApiError(0, 'invalid_auth_response', '登录响应无效，请确认服务端版本。')
+  }
+  rememberAuthRequired(value.auth_required)
+  return { authRequired: value.auth_required }
 }
 
 // ---------- monitor ----------

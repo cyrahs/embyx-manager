@@ -108,9 +108,15 @@ function jsonResponse(body: unknown, status = 200) {
   return Promise.resolve(new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } }))
 }
 
+function authorizationOf(init?: RequestInit): string | null {
+  const headers = (init?.headers ?? {}) as Record<string, string>
+  return headers.Authorization ?? null
+}
+
 describe('Fill Actor page', () => {
   beforeEach(() => {
     window.sessionStorage.clear()
+    window.localStorage.clear()
     vi.spyOn(crypto, 'randomUUID').mockReturnValue(APPLY_REQUEST_ID)
     vi.stubGlobal('fetch', vi.fn().mockImplementation(() => jsonResponse({ status: 'ok', database: 'ok', roots: 'ok' })))
   })
@@ -1121,7 +1127,7 @@ describe('Fill Actor page', () => {
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
     await user.click(await screen.findByRole('button', { name: '取消扫描' }))
 
-    expect(await screen.findByText('需要 API Token')).toBeInTheDocument()
+    expect(await screen.findByText('需要登录')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '取消扫描' })).toBeEnabled()
     expect(screen.queryByText('扫描已取消')).not.toBeInTheDocument()
 
@@ -1133,7 +1139,7 @@ describe('Fill Actor page', () => {
         signal: expect.any(AbortSignal),
       }),
     )
-    expect(window.sessionStorage.getItem('embyx-manager-api-token')).toBeNull()
+    expect(window.localStorage.getItem('embyx-manager-api-token')).toBeNull()
   })
 
   it('refreshes the current plan after a plan_not_cancellable race', async () => {
@@ -1248,56 +1254,161 @@ describe('Fill Actor page', () => {
     expect(screen.getByRole('button', { name: '确认并移入' })).toBeDisabled()
   })
 
-  it('stores a required API token only for the browser session', async () => {
+  it('verifies a token typed after a rejection and keeps it in local storage', async () => {
     const user = userEvent.setup()
     const fetchMock = vi.mocked(fetch)
-    fetchMock
-      .mockImplementationOnce(() => jsonResponse({ status: 'ok' }))
-      .mockImplementationOnce(() => jsonResponse({ error: { code: 'unauthorized' } }, 401))
-      .mockImplementationOnce(() => jsonResponse(plan))
+    let planRejected = false
+    fetchMock.mockImplementation((path, init) => {
+      if (path === '/api/health') return jsonResponse({ status: 'ok' })
+      if (path === '/api/auth/session') {
+        return authorizationOf(init) === 'Bearer rejected-then-saved'
+          ? jsonResponse({ auth_required: true })
+          : jsonResponse({ error: { code: 'unauthorized' } }, 401)
+      }
+      if (path === '/api/fill-actor/plans' && init?.method === 'POST') {
+        if (planRejected) return jsonResponse(plan)
+        planRejected = true
+        return jsonResponse({ error: { code: 'unauthorized' } }, 401)
+      }
+      return jsonResponse({ error: { code: 'unexpected_request' } }, 500)
+    })
 
     render(<App />)
     await user.type(screen.getByLabelText('演员 ID'), 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
-    await screen.findByText('需要 API Token')
-    await user.type(screen.getByLabelText('API Token'), 'session-token')
-    await user.click(screen.getByRole('button', { name: '保存 Token' }))
+    await screen.findByRole('dialog')
+    await user.type(screen.getByLabelText('API Token'), 'rejected-then-saved')
+    await user.click(screen.getByRole('button', { name: '登录' }))
+    await screen.findByText('已登录，可以重试刚才的操作。')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
 
     await screen.findByText('扫描结果')
-    expect(fetchMock).toHaveBeenNthCalledWith(
-      3,
+    expect(fetchMock).toHaveBeenLastCalledWith(
       '/api/fill-actor/plans',
       expect.objectContaining({
-        headers: expect.objectContaining({ Authorization: 'Bearer session-token' }),
+        headers: expect.objectContaining({ Authorization: 'Bearer rejected-then-saved' }),
       }),
     )
-    expect(window.sessionStorage.getItem('embyx-manager-api-token')).toBe('session-token')
+    expect(window.localStorage.getItem('embyx-manager-api-token')).toBe('rejected-then-saved')
   })
 })
 
-describe('API token entry', () => {
+describe('login gate', () => {
+  const TOKEN_KEY = 'embyx-manager-api-token'
+  const AUTH_REQUIRED_KEY = 'embyx-manager-auth-required'
+
   beforeEach(() => {
     window.sessionStorage.clear()
-    vi.stubGlobal('fetch', vi.fn().mockImplementation(() => jsonResponse({ status: 'ok', database: 'ok', roots: 'ok' })))
+    window.localStorage.clear()
+    vi.stubGlobal('fetch', vi.fn().mockImplementation(() => jsonResponse({ status: 'ok', auth_required: true })))
   })
 
   afterEach(() => vi.restoreAllMocks())
 
-  it('saves a token from the top bar without waiting for a rejection', async () => {
+  /** Serves a deployment that demands `token`; anything else is rejected like the real API. */
+  function stubTokenServer(token: string) {
+    vi.mocked(fetch).mockImplementation((path, init) => {
+      const authorized = authorizationOf(init) === `Bearer ${token}`
+      if (path === '/api/health') return jsonResponse({ status: 'ok', auth_required: true })
+      if (path === '/api/auth/session') {
+        return authorized ? jsonResponse({ auth_required: true }) : jsonResponse({ error: { code: 'unauthorized' } }, 401)
+      }
+      if (!authorized) return jsonResponse({ error: { code: 'unauthorized' } }, 401)
+      return jsonResponse({ status: 'ok' })
+    })
+  }
+
+  it('hides the app until the server accepts the token, then persists it for the next visit', async () => {
     const user = userEvent.setup()
+    stubTokenServer('gate-token')
+
     render(<App />)
 
-    await user.click(screen.getByRole('button', { name: /API Token/ }))
-    const dialog = screen.getByRole('dialog')
-    await user.type(within(dialog).getByLabelText('API Token'), 'topbar-token')
-    await user.click(within(dialog).getByRole('button', { name: '保存 Token' }))
+    expect(await screen.findByRole('heading', { name: '登录 Embyx Manager' })).toBeInTheDocument()
+    expect(screen.queryByLabelText('演员 ID')).not.toBeInTheDocument()
 
-    expect(window.sessionStorage.getItem('embyx-manager-api-token')).toBe('topbar-token')
-    expect(within(screen.getByRole('dialog')).getByText('已保存，可以重试刚才的操作。')).toBeInTheDocument()
+    await user.type(screen.getByLabelText('API Token'), 'wrong-token')
+    await user.click(screen.getByRole('button', { name: '登录' }))
+    expect(await screen.findByText('API Token 不正确，请检查后重试。')).toBeInTheDocument()
+    expect(window.localStorage.getItem(TOKEN_KEY)).toBeNull()
+
+    await user.clear(screen.getByLabelText('API Token'))
+    await user.type(screen.getByLabelText('API Token'), 'gate-token')
+    await user.click(screen.getByRole('button', { name: '登录' }))
+
+    expect(await screen.findByLabelText('演员 ID')).toBeInTheDocument()
+    expect(window.localStorage.getItem(TOKEN_KEY)).toBe('gate-token')
+    expect(window.localStorage.getItem(AUTH_REQUIRED_KEY)).toBe('true')
   })
 
-  it('opens the token dialog when a dashboard action is rejected', async () => {
+  it('shows the login screen before health answers when the last visit needed a token', () => {
+    window.localStorage.setItem(AUTH_REQUIRED_KEY, 'true')
+
+    render(<App />)
+
+    expect(screen.getByRole('heading', { name: '登录 Embyx Manager' })).toBeInTheDocument()
+    expect(screen.queryByLabelText('演员 ID')).not.toBeInTheDocument()
+  })
+
+  it('reuses a stored token across reloads and signs out on request', async () => {
+    const user = userEvent.setup()
+    window.localStorage.setItem(TOKEN_KEY, 'stored-token')
+    window.localStorage.setItem(AUTH_REQUIRED_KEY, 'true')
+    stubTokenServer('stored-token')
+
+    render(<App />)
+
+    expect(await screen.findByLabelText('演员 ID')).toBeInTheDocument()
+    await waitFor(() => expect(fetch).toHaveBeenCalledWith(
+      '/api/auth/session',
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: 'Bearer stored-token' }) }),
+    ))
+
+    await user.click(await screen.findByRole('button', { name: '退出登录' }))
+
+    expect(await screen.findByRole('heading', { name: '登录 Embyx Manager' })).toBeInTheDocument()
+    expect(window.localStorage.getItem(TOKEN_KEY)).toBeNull()
+  })
+
+  it('drops a stored token the server no longer accepts and explains why', async () => {
+    window.localStorage.setItem(TOKEN_KEY, 'rotated-away')
+    window.localStorage.setItem(AUTH_REQUIRED_KEY, 'true')
+    stubTokenServer('current-token')
+
+    render(<App />)
+
+    expect(await screen.findByText('登录状态已失效，请重新登录。')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '登录 Embyx Manager' })).toBeInTheDocument()
+    expect(window.localStorage.getItem(TOKEN_KEY)).toBeNull()
+  })
+
+  it('signs out every open tab when one of them clears the token', async () => {
+    window.localStorage.setItem(TOKEN_KEY, 'shared-token')
+    window.localStorage.setItem(AUTH_REQUIRED_KEY, 'true')
+    stubTokenServer('shared-token')
+
+    render(<App />)
+    expect(await screen.findByLabelText('演员 ID')).toBeInTheDocument()
+
+    act(() => {
+      window.localStorage.removeItem(TOKEN_KEY)
+      window.dispatchEvent(new StorageEvent('storage', { key: TOKEN_KEY, newValue: null }))
+    })
+
+    expect(await screen.findByRole('heading', { name: '登录 Embyx Manager' })).toBeInTheDocument()
+  })
+
+  it('keeps the app open when a deployment requires no token at all', async () => {
+    vi.mocked(fetch).mockImplementation(() => jsonResponse({ status: 'ok', auth_required: false }))
+
+    render(<App />)
+
+    expect(await screen.findByLabelText('演员 ID')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '退出登录' })).not.toBeInTheDocument()
+    expect(window.localStorage.getItem(AUTH_REQUIRED_KEY)).toBeNull()
+  })
+
+  it('opens the login dialog when a dashboard action is rejected', async () => {
     const user = userEvent.setup()
     vi.mocked(fetch).mockImplementation((input) => {
       const url = String(input)
@@ -1327,6 +1438,6 @@ describe('API token entry', () => {
     await user.click(await screen.findByRole('button', { name: '立即运行' }))
 
     expect(await screen.findByRole('dialog')).toBeInTheDocument()
-    expect(screen.getByText('需要 API Token')).toBeInTheDocument()
+    expect(screen.getByText('需要登录')).toBeInTheDocument()
   })
 })
