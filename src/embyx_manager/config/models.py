@@ -49,6 +49,25 @@ def normalize_absolute_path(name: str, value: str) -> str:
     return normalized
 
 
+def normalize_relative_subpath(name: str, value: str) -> str:
+    """Validate a subdirectory path relative to a configured root."""
+    trimmed = value.strip().rstrip('/')
+    if not trimmed:
+        msg = f'{name} must not be empty'
+        raise ValueError(msg)
+    if trimmed.startswith('/'):
+        msg = f'{name} must be relative to the configured root'
+        raise ValueError(msg)
+    if '\x00' in trimmed:
+        msg = f'{name} must not contain a null byte'
+        raise ValueError(msg)
+    normalized = str(PurePosixPath(trimmed))
+    if '..' in PurePosixPath(normalized).parts:
+        msg = f'{name} must not contain ".."'
+        raise ValueError(msg)
+    return normalized
+
+
 def normalize_absolute_paths(name: str, values: tuple[str, ...]) -> tuple[str, ...]:
     """Normalizes a list of absolute paths, dropping blanks and rejecting duplicates."""
     normalized = tuple(normalize_absolute_path(name, value) for value in values if value.strip())
@@ -159,6 +178,36 @@ class ArchiveConfig(ConfigSection):
             msg = 'must not be negative'
             raise ValueError(msg)
         return value
+
+    @field_validator('mapping')
+    @classmethod
+    def _validate_mapping(cls, value: dict[str, str]) -> dict[str, str]:
+        mapping: dict[str, str] = {}
+        for src, dst in value.items():
+            source = normalize_relative_subpath('archive.mapping source', src)
+            if source in mapping:
+                msg = f'archive.mapping must not repeat the source subdirectory {source!r}'
+                raise ValueError(msg)
+            mapping[source] = normalize_relative_subpath('archive.mapping destination', dst)
+        return mapping
+
+    @field_validator('brand_mapping')
+    @classmethod
+    def _validate_brand_mapping(cls, value: dict[str, tuple[str, ...]]) -> dict[str, tuple[str, ...]]:
+        mapping: dict[str, tuple[str, ...]] = {}
+        for dst, brands in value.items():
+            destination = normalize_relative_subpath('archive.brand_mapping destination', dst)
+            if destination in mapping:
+                msg = f'archive.brand_mapping must not repeat the destination subdirectory {destination!r}'
+                raise ValueError(msg)
+            # Brands are matched against upper-cased video IDs, so a lower-cased
+            # entry here would silently never route anything.
+            normalized = tuple(dict.fromkeys(brand.strip().upper() for brand in brands if brand.strip()))
+            if not normalized:
+                msg = f'archive.brand_mapping[{destination!r}] must list at least one brand'
+                raise ValueError(msg)
+            mapping[destination] = normalized
+        return mapping
 
     @property
     def configured(self) -> bool:

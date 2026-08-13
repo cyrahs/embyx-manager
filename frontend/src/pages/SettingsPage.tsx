@@ -5,10 +5,15 @@ import { ApiError, getConfigSections, isUnauthorized, testConnection, updateConf
 import type { AppContext } from '../App'
 import { Notice } from '../components/Feedback'
 import { Spinner } from '../components/Icons'
+import { BrandRoutesField, DirRoutesField } from '../components/settings/RouteEditors'
 import { useApiTokenConfigured } from '../lib/apiToken'
+import type { BrandRoute, DirRoute } from '../lib/settings/routes'
+import { fromBrandRoutes, fromDirRoutes, toBrandRoutes, toDirRoutes } from '../lib/settings/routes'
 import type { ConfigSection } from '../types'
 
-type FieldKind = 'text' | 'secret' | 'boolean' | 'number' | 'lines' | 'json'
+type FieldKind = 'text' | 'secret' | 'boolean' | 'number' | 'lines' | 'dir-routes' | 'brand-routes'
+
+type FormValue = string | boolean | DirRoute[] | BrandRoute[]
 
 interface FieldSpec {
   key: string
@@ -16,6 +21,8 @@ interface FieldSpec {
   kind: FieldKind
   hint?: string
   placeholder?: string
+  /** Route editors preview absolute paths built from these sibling fields. */
+  rootKeys?: { src?: string; dst?: string }
 }
 
 interface SectionSpec {
@@ -131,20 +138,22 @@ const SECTION_SPECS: SectionSpec[] = [
     description: '把下载目录中的视频规范化命名并按厂牌移动到媒体库。',
     fields: [
       { key: 'enabled', label: '启用定时调度', kind: 'boolean' },
-      { key: 'src_dir', label: '来源根目录', kind: 'text' },
-      { key: 'dst_dir', label: '目标根目录', kind: 'text' },
+      { key: 'src_dir', label: '来源根目录', kind: 'text', placeholder: '/downloads' },
+      { key: 'dst_dir', label: '目标根目录', kind: 'text', placeholder: '/media/library' },
       { key: 'min_size_mb', label: '最小视频大小（MB）', kind: 'number' },
       {
         key: 'mapping',
-        label: '子目录路由（JSON）',
-        kind: 'json',
-        hint: '例如 {"intake": "sorted"}：处理 来源/intake → 目标/sorted',
+        label: '子目录路由',
+        kind: 'dir-routes',
+        hint: '每条规则整理一个来源子目录，并把视频按厂牌分目录放进对应的目标子目录；没有任何一条时归档不会运行。',
+        rootKeys: { src: 'src_dir', dst: 'dst_dir' },
       },
       {
         key: 'brand_mapping',
-        label: '厂牌路由（JSON）',
-        kind: 'json',
-        hint: '例如 {"special": ["ABC"]}：厂牌 ABC 归入 目标/special/ABC',
+        label: '厂牌路由（可选）',
+        kind: 'brand-routes',
+        hint: '这里列出的厂牌不再走上面的目标子目录，改为归入目标根目录下的指定子目录。同一个厂牌只能出现一次。',
+        rootKeys: { dst: 'dst_dir' },
       },
     ],
   },
@@ -171,7 +180,7 @@ const SECTION_SPECS: SectionSpec[] = [
   },
 ]
 
-function toFormValue(kind: FieldKind, value: unknown): string | boolean {
+function toFormValue(kind: FieldKind, value: unknown): FormValue {
   switch (kind) {
     case 'boolean':
       return Boolean(value)
@@ -179,8 +188,10 @@ function toFormValue(kind: FieldKind, value: unknown): string | boolean {
       return ''
     case 'lines':
       return Array.isArray(value) ? value.join('\n') : ''
-    case 'json':
-      return value && typeof value === 'object' ? JSON.stringify(value, null, 2) : '{}'
+    case 'dir-routes':
+      return toDirRoutes(value)
+    case 'brand-routes':
+      return toBrandRoutes(value)
     case 'number':
       return value === null || value === undefined ? '' : String(value)
     default:
@@ -188,7 +199,7 @@ function toFormValue(kind: FieldKind, value: unknown): string | boolean {
   }
 }
 
-function fromFormValue(kind: FieldKind, raw: string | boolean): unknown {
+function fromFormValue(kind: FieldKind, raw: FormValue): unknown {
   switch (kind) {
     case 'boolean':
       return Boolean(raw)
@@ -202,11 +213,10 @@ function fromFormValue(kind: FieldKind, raw: string | boolean): unknown {
         .split('\n')
         .map((line) => line.trim())
         .filter(Boolean)
-    case 'json': {
-      const text = String(raw).trim()
-      if (!text) return {}
-      return JSON.parse(text) as unknown
-    }
+    case 'dir-routes':
+      return fromDirRoutes(raw as DirRoute[])
+    case 'brand-routes':
+      return fromBrandRoutes(raw as BrandRoute[])
     default:
       return String(raw)
   }
@@ -220,7 +230,7 @@ interface SectionFormProps {
 }
 
 function SectionForm({ spec, data, onSaved, onUnauthorized }: SectionFormProps) {
-  const [form, setForm] = useState<Record<string, string | boolean>>(() =>
+  const [form, setForm] = useState<Record<string, FormValue>>(() =>
     Object.fromEntries(spec.fields.map((field) => [field.key, toFormValue(field.kind, data.values[field.key])])),
   )
   const [saving, setSaving] = useState(false)
@@ -238,8 +248,8 @@ function SectionForm({ spec, data, onSaved, onUnauthorized }: SectionFormProps) 
       if (field.kind === 'secret' && (!raw || raw === '')) continue
       try {
         values[field.key] = fromFormValue(field.kind, raw)
-      } catch {
-        throw new Error(`${field.label} 格式无效`)
+      } catch (error) {
+        throw new Error(error instanceof Error ? `${field.label}：${error.message}` : `${field.label} 格式无效`)
       }
     }
     return values
@@ -304,6 +314,31 @@ function SectionForm({ spec, data, onSaved, onUnauthorized }: SectionFormProps) 
               </label>
             )
           }
+          if (field.kind === 'dir-routes' || field.kind === 'brand-routes') {
+            const root = (key: string | undefined) => (key ? String(form[key] ?? '') : '')
+            return (
+              <div key={field.key} className="settings-field wide" role="group" aria-labelledby={`${id}-label`}>
+                <span className="settings-label" id={`${id}-label`}>
+                  {field.label}
+                </span>
+                {field.kind === 'dir-routes' ? (
+                  <DirRoutesField
+                    rows={form[field.key] as DirRoute[]}
+                    srcRoot={root(field.rootKeys?.src)}
+                    dstRoot={root(field.rootKeys?.dst)}
+                    onChange={(rows) => setForm((current) => ({ ...current, [field.key]: rows }))}
+                  />
+                ) : (
+                  <BrandRoutesField
+                    rows={form[field.key] as BrandRoute[]}
+                    dstRoot={root(field.rootKeys?.dst)}
+                    onChange={(rows) => setForm((current) => ({ ...current, [field.key]: rows }))}
+                  />
+                )}
+                {field.hint && <p className="settings-hint">{field.hint}</p>}
+              </div>
+            )
+          }
           const secretConfigured = field.kind === 'secret' && data.secrets[field.key]
           const commonProps = {
             id,
@@ -314,8 +349,8 @@ function SectionForm({ spec, data, onSaved, onUnauthorized }: SectionFormProps) 
           return (
             <div key={field.key} className="settings-field">
               <label htmlFor={id}>{field.label}</label>
-              {field.kind === 'lines' || field.kind === 'json' ? (
-                <textarea rows={field.kind === 'json' ? 4 : 3} spellCheck={false} {...commonProps} />
+              {field.kind === 'lines' ? (
+                <textarea rows={3} spellCheck={false} {...commonProps} />
               ) : (
                 <input
                   type={field.kind === 'secret' ? 'password' : field.kind === 'number' ? 'number' : 'text'}
