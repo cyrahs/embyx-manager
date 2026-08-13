@@ -99,6 +99,15 @@ export function MagnetIcon() {
   )
 }
 
+export function KeyIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="8" cy="12" r="4" />
+      <path d="M12 12h9m-3 0v3m-3-3v2" />
+    </svg>
+  )
+}
+
 export function SearchIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">

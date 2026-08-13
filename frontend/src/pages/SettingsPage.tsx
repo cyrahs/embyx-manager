@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
+import { useOutletContext } from 'react-router-dom'
 
-import { ApiError, getConfigSections, testConnection, updateConfigSection } from '../api'
+import { ApiError, getConfigSections, isUnauthorized, testConnection, updateConfigSection } from '../api'
+import type { AppContext } from '../App'
 import { Notice } from '../components/Feedback'
 import { Spinner } from '../components/Icons'
+import { useApiTokenConfigured } from '../lib/apiToken'
 import type { ConfigSection } from '../types'
 
 type FieldKind = 'text' | 'secret' | 'boolean' | 'number' | 'lines' | 'json'
@@ -162,9 +165,10 @@ interface SectionFormProps {
   spec: SectionSpec
   data: ConfigSection
   onSaved: (updated: ConfigSection) => void
+  onUnauthorized: () => void
 }
 
-function SectionForm({ spec, data, onSaved }: SectionFormProps) {
+function SectionForm({ spec, data, onSaved, onUnauthorized }: SectionFormProps) {
   const [form, setForm] = useState<Record<string, string | boolean>>(() =>
     Object.fromEntries(spec.fields.map((field) => [field.key, toFormValue(field.kind, data.values[field.key])])),
   )
@@ -198,7 +202,10 @@ function SectionForm({ spec, data, onSaved }: SectionFormProps) {
       onSaved(updated)
       setMessage({ tone: 'ok', text: '已保存并生效。' })
     } catch (saveError) {
-      if (saveError instanceof ApiError && saveError.code === 'config_version_conflict') {
+      if (isUnauthorized(saveError)) {
+        setMessage({ tone: 'error', text: '需要 API Token 才能保存，请在弹窗中填写后重试。' })
+        onUnauthorized()
+      } else if (saveError instanceof ApiError && saveError.code === 'config_version_conflict') {
         setMessage({ tone: 'error', text: '配置已被其他会话修改，请刷新页面后重试。' })
       } else {
         setMessage({ tone: 'error', text: saveError instanceof Error ? saveError.message : '保存失败。' })
@@ -216,6 +223,7 @@ function SectionForm({ spec, data, onSaved }: SectionFormProps) {
       const result = await testConnection(spec.testTarget, collectValues())
       setMessage({ tone: result.ok ? 'ok' : 'error', text: result.ok ? `连接成功：${result.detail}` : `连接失败：${result.detail}` })
     } catch (testError) {
+      if (isUnauthorized(testError)) onUnauthorized()
       setMessage({ tone: 'error', text: testError instanceof Error ? testError.message : '测试请求失败。' })
     } finally {
       setTesting(false)
@@ -288,6 +296,8 @@ function SectionForm({ spec, data, onSaved }: SectionFormProps) {
 }
 
 export default function SettingsPage() {
+  const { requestApiToken } = useOutletContext<AppContext>()
+  const tokenConfigured = useApiTokenConfigured()
   const [sections, setSections] = useState<Record<string, ConfigSection> | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -307,6 +317,18 @@ export default function SettingsPage() {
 
   return (
     <main>
+      {!tokenConfigured && (
+        <Notice
+          tone="warning"
+          title="保存与测试连接需要 API Token"
+          body="读取配置无需认证；保存或测试连接前，请先填写部署时设置的 API Token（也可从右上角进入）。"
+          action={
+            <button className="text-button" type="button" onClick={requestApiToken}>
+              填写 Token
+            </button>
+          }
+        />
+      )}
       {error && <Notice tone="error" title="配置加载失败" body={error} />}
       {!sections && !error && (
         <p className="dashboard-loading">
@@ -323,6 +345,7 @@ export default function SettingsPage() {
               spec={spec}
               data={data}
               onSaved={(updated) => setSections((current) => ({ ...(current ?? {}), [updated.section]: updated }))}
+              onUnauthorized={requestApiToken}
             />
           )
         })}

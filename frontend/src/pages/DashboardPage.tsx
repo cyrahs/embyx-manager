@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useOutletContext } from 'react-router-dom'
 
 import {
   ApiError,
@@ -6,10 +7,12 @@ import {
   getConfigSections,
   getMonitorStatus,
   getRun,
+  isUnauthorized,
   listRuns,
   triggerPipeline,
   updateConfigSection,
 } from '../api'
+import type { AppContext } from '../App'
 import { Notice } from '../components/Feedback'
 import { Spinner } from '../components/Icons'
 import type { PipelineId, PipelineStatus, RunDetail, RunSummary } from '../types'
@@ -87,11 +90,13 @@ function statChips(stats: Record<string, number>): Array<[string, number]> {
 }
 
 export default function DashboardPage() {
+  const { requestApiToken } = useOutletContext<AppContext>()
   const [statuses, setStatuses] = useState<PipelineStatus[] | null>(null)
   const [runs, setRuns] = useState<RunSummary[]>([])
   const [runFilter, setRunFilter] = useState<PipelineId | 'all'>('all')
   const [selectedRun, setSelectedRun] = useState<RunDetail | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [authRequired, setAuthRequired] = useState(false)
   const [busyAction, setBusyAction] = useState<string | null>(null)
   const [sectionVersions, setSectionVersions] = useState<Record<string, { enabled: boolean; version: number }>>({})
   const [refreshTick, setRefreshTick] = useState(0)
@@ -149,9 +154,16 @@ export default function DashboardPage() {
     setError(null)
     try {
       await action()
+      setAuthRequired(false)
       setRefreshTick((value) => value + 1)
     } catch (actionError) {
-      setError(actionError instanceof ApiError ? actionError.message : '操作未能完成。')
+      if (isUnauthorized(actionError)) {
+        // Reads stay open, so a 401 here means the write path needs the token: ask for it right away.
+        setAuthRequired(true)
+        requestApiToken()
+      } else {
+        setError(actionError instanceof ApiError ? actionError.message : '操作未能完成。')
+      }
     } finally {
       setBusyAction(null)
     }
@@ -178,6 +190,18 @@ export default function DashboardPage() {
         <div className="panel-heading">
           <h2 id="dashboard-title">流水线</h2>
         </div>
+        {authRequired && (
+          <Notice
+            tone="warning"
+            title="需要 API Token"
+            body="触发运行和启停调度属于写操作，需要部署时设置的 API Token。填写后再重试即可。"
+            action={
+              <button className="text-button" type="button" onClick={requestApiToken}>
+                填写 Token
+              </button>
+            }
+          />
+        )}
         {error && <Notice tone="error" title="监控请求失败" body={error} />}
         {!statuses && !error && <p className="dashboard-loading"><Spinner /> 正在加载…</p>}
         <div className="pipeline-grid">

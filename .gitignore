@@ -15,3 +15,6 @@ config.toml
 frontend/node_modules/
 frontend/dist/
 src/embyx_manager/static/
+
+# agent scratch
+.claude/

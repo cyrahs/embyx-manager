@@ -9,19 +9,19 @@ import {
   getActivePlanId,
   getApplyJob,
   getPlan,
-  hasApiToken,
   setActiveApplyRequest,
   setActivePlanId,
   setApiToken as storeApiToken,
   startApplyJob,
 } from '../api'
-import type { HealthContext } from '../App'
+import type { AppContext } from '../App'
 import { ActorFeeds } from '../components/ActorFeeds'
 import { ApplySummary, ConfirmDialog, Notice } from '../components/Feedback'
 import { ArrowIcon, CheckIcon, CopyIcon, MoveIcon, SearchIcon, Spinner } from '../components/Icons'
 import { ProgressPanel } from '../components/ProgressPanel'
 import { ActorFailures, PlanSummary, VideoGroup } from '../components/Results'
 import { ScanPanel } from '../components/ScanPanel'
+import { useApiTokenConfigured } from '../lib/apiToken'
 import {
   applyPlaceholder,
   assertActiveApplyEnvelope,
@@ -66,8 +66,8 @@ export default function FillActorPage() {
   const [input, setInput] = useState('')
   const [apiTokenInput, setApiTokenInput] = useState('')
   const [authRequired, setAuthRequired] = useState(false)
-  const [authConfigured, setAuthConfigured] = useState(hasApiToken)
-  const { health, setHealth } = useOutletContext<HealthContext>()
+  const authConfigured = useApiTokenConfigured()
+  const { health, setHealth } = useOutletContext<AppContext>()
   const [plan, setPlan] = useState<FillActorPlan | null>(null)
   const [feeds, setFeeds] = useState<ActorFeedStatus[]>([])
   const [planId, setPlanId] = useState<string | null>(recoveredPlanId)
@@ -556,13 +556,17 @@ export default function FillActorPage() {
 
   function saveApiToken() {
     storeApiToken(apiTokenInput)
-    setAuthConfigured(Boolean(apiTokenInput.trim()))
+    setApiTokenInput('')
+  }
+
+  // The token can arrive from this panel or from the top-bar dialog; resume paused work either way.
+  useEffect(() => {
+    if (!authConfigured) return
     setAuthRequired(false)
     setApplyPausedForAuth(false)
     setApplyRetryTick((value) => value + 1)
-    setApiTokenInput('')
     setError(null)
-  }
+  }, [authConfigured])
 
   const scanLocked = submitting || jobPending || applyPending
 
