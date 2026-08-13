@@ -53,6 +53,57 @@ const SECTION_SPECS: SectionSpec[] = [
     ],
   },
   {
+    section: 'fill_actor',
+    title: '补全演员',
+    description: '媒体库根目录与文件移入设置。留空则补全演员保持未配置，其余功能不受影响。',
+    fields: [
+      {
+        key: 'actor_root',
+        label: '主片库根目录',
+        kind: 'text',
+        placeholder: '/media/actor',
+        hint: '判断作品是否已入库的参考库，按 <根目录>/<厂牌>/<番号>.ext 查找；只读，可与其他根目录不同盘',
+      },
+      {
+        key: 'additional_roots',
+        label: '附加片库根目录（每行一个）',
+        kind: 'lines',
+        hint: '主库没有时在这里找可移入的文件。必须与移入目录在同一文件系统，移动才能靠 rename 完成',
+      },
+      {
+        key: 'move_in_root',
+        label: '移入目标目录',
+        kind: 'text',
+        placeholder: '/media/move-in',
+      },
+      { key: 'move_in_by_brand', label: '按厂牌分目录移入（<移入目录>/<厂牌>/）', kind: 'boolean' },
+      {
+        key: 'root_sentinel',
+        label: '根目录哨兵文件',
+        kind: 'text',
+        hint: '每个根目录下都必须存在该文件，用于防止挂载失败时把空目录当成真实片库',
+      },
+      {
+        key: 'apply_enabled',
+        label: '允许移动文件',
+        kind: 'boolean',
+        hint: '关闭时仅可扫描、查磁力和订阅。开启需要下面三项 CloudDrive 路径全部填写',
+      },
+      {
+        key: 'cloud_strm_mount_prefix',
+        label: 'CloudDrive 挂载前缀（.strm 内部路径）',
+        kind: 'text',
+      },
+      {
+        key: 'cloud_source_roots',
+        label: 'CloudDrive 来源根目录（每行一个）',
+        kind: 'lines',
+        hint: '必须与上面的附加片库根目录一一对应、顺序一致',
+      },
+      { key: 'cloud_move_in_root', label: 'CloudDrive 移入根目录', kind: 'text' },
+    ],
+  },
+  {
     section: 'feeds',
     title: 'RSSHub / FreshRSS 集成',
     description: '补全演员页面的订阅预热与 FreshRSS 跳转所用的地址。',

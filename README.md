@@ -6,12 +6,10 @@ automation) into one FastAPI + React application backed by PostgreSQL.
 
 ## What it does
 
-- **Fill Actor** (`/`): scan a JavBus actor's catalog against the local library, find
-  missing titles, look up magnets, prewarm RSSHub feeds, hand off FreshRSS subscriptions,
-  and safely move matching files through CloudDrive — carried over from embyx-web with the
-  same durable job queue and move-safety guarantees, now on PostgreSQL.
-- **Monitor dashboard** (`/dashboard`): the embyx-monitor pipelines rebuilt as scheduled
-  services with persisted run history —
+Three peer features; `/` redirects to the dashboard and no feature owns the app root.
+
+- **Monitor dashboard** (`/dashboard`, the landing page): the embyx-monitor pipelines
+  rebuilt as scheduled services with persisted run history —
   - **rss**: unread FreshRSS items → magnet resolution (sukebei → RSS table → javbus) →
     115 offline tasks, with a database-backed failed-AVID cooldown;
   - **archive**: intake normalization (flatten/rename) and per-brand archiving;
@@ -19,9 +17,14 @@ automation) into one FastAPI + React application backed by PostgreSQL.
     watchdog for incremental syncs plus a periodic full sync.
   Each pipeline has enable/disable, manual trigger (rss supports the Rank label), live
   status, and per-run stats/errors/log tail.
-- **Settings** (`/settings`): CloudDrive, FreshRSS, RSSHub URLs, pipeline behavior, and
-  avid parsing rules are stored in the database, editable from the browser, versioned
-  against concurrent edits, and hot-applied without restarts. CloudDrive and FreshRSS
+- **Fill Actor** (`/fill-actor`): scan a JavBus actor's catalog against the local library,
+  find missing titles, look up magnets, prewarm RSSHub feeds, hand off FreshRSS
+  subscriptions, and safely move matching files through CloudDrive — carried over from
+  embyx-web with the same durable job queue and move-safety guarantees, now on PostgreSQL.
+- **Settings** (`/settings`): CloudDrive, FreshRSS, RSSHub URLs, Fill Actor library
+  roots, pipeline behavior, and avid parsing rules are stored in the database, editable
+  from the browser, versioned against concurrent edits, and hot-applied without
+  restarts. CloudDrive and FreshRSS
   panels have connection-test buttons that use the unsaved form values (secrets fall back
   to stored ones). Secrets are never echoed back.
 
@@ -36,32 +39,65 @@ automation) into one FastAPI + React application backed by PostgreSQL.
 Deployment-level settings come from the environment; everything else lives in the
 database and is edited on the Settings page.
 
-| Variable | Purpose | Default |
-| --- | --- | --- |
-| `EMBYX_MANAGER_DATABASE_URL` | PostgreSQL DSN | `postgresql://localhost/embyx_manager` |
-| `EMBYX_MANAGER_ACTOR_ROOT` | Primary actor library root | required |
-| `EMBYX_MANAGER_ADDITIONAL_ROOTS` | Additional roots (OS path separator) | required |
-| `EMBYX_MANAGER_MOVE_IN_ROOT` | Move-in destination root | required |
-| `EMBYX_MANAGER_MOVE_IN_BY_BRAND` | Put moved files under `<move-in>/<brand>/` | `false` |
-| `EMBYX_MANAGER_APPLY_ENABLED` | Allow CloudDrive move application | `false` |
-| `EMBYX_MANAGER_CLOUD_STRM_MOUNT_PREFIX` | Mount prefix inside `.strm` targets | disabled |
-| `EMBYX_MANAGER_CLOUD_SOURCE_ROOTS` | API-native source roots (one per additional root) | disabled |
-| `EMBYX_MANAGER_CLOUD_MOVE_IN_ROOT` | API-native destination root | disabled |
-| `EMBYX_MANAGER_ROOT_SENTINEL` | Required marker file in each root | `.embyx-root` |
-| `EMBYX_MANAGER_API_TOKEN` | Bearer token for mutation endpoints | optional on loopback |
-| `EMBYX_MANAGER_TLS_TERMINATED` | Assert TLS-terminating proxy for non-loopback bind | `false` |
-| `EMBYX_MANAGER_HOST` / `EMBYX_MANAGER_PORT` | Bind address / port | `127.0.0.1:8000` |
-| `EMBYX_MANAGER_MAX_ACTORS` / `EMBYX_MANAGER_MAX_VIDEOS` | Per-plan limits | `20` / `2000` |
-| `EMBYX_MANAGER_MAGNET_CONCURRENCY` | Magnet lookup concurrency | `8` |
-| `EMBYX_MANAGER_MAX_REQUEST_BYTES` | Maximum mutation body | `65536` |
+| Variable | Scope | Purpose | Default |
+| --- | --- | --- | --- |
+| `EMBYX_MANAGER_DATABASE_URL` | app | PostgreSQL DSN | `postgresql://localhost/embyx_manager` |
+| `EMBYX_MANAGER_API_TOKEN` | app | Bearer token for mutation endpoints | optional on loopback |
+| `EMBYX_MANAGER_TLS_TERMINATED` | app | Assert TLS-terminating proxy for non-loopback bind | `false` |
+| `EMBYX_MANAGER_HOST` / `EMBYX_MANAGER_PORT` | app | Bind address / port | `127.0.0.1:8000` |
+| `EMBYX_MANAGER_MAX_REQUEST_BYTES` | app | Maximum mutation body | `65536` |
+| `EMBYX_MANAGER_MAX_ACTORS` / `EMBYX_MANAGER_MAX_VIDEOS` | fill actor | Per-plan limits | `20` / `2000` |
+| `EMBYX_MANAGER_MAGNET_CONCURRENCY` | fill actor | Magnet lookup concurrency | `8` |
 
-Filesystem roots stay in the environment deliberately: they must match the container's
-volume mounts. Create the sentinel file in every configured root so an empty mount is
-never mistaken for the real library. Note that unlike embyx-web, the mapping/archive
-pipelines write to their media mounts — mount those paths read-write.
+The `EMBYX_MANAGER_` prefix is historical: the last two configure Fill Actor
+specifically, not the app. They stay in the environment because raising them raises the
+request pressure on JavBus and Sukebei — an operator decision, not a UI toggle.
+
+### Fill Actor library roots (Settings page)
+
+The library roots live in the database and are edited on the **补全演员** card of the
+Settings page — `actor_root`, `additional_roots`, `move_in_root`, `move_in_by_brand`,
+`root_sentinel`, `apply_enabled`, and the three CloudDrive move paths. Saving them takes
+effect without a restart.
+
+Create the sentinel file in every configured root so an empty mount is never mistaken
+for the real library. `additional_roots` must be on the same filesystem as
+`move_in_root` (moves are renames); `actor_root` is read-only and may live elsewhere.
+Note that unlike embyx-web, the mapping/archive pipelines write to their media mounts —
+mount those paths read-write.
+
+Saving the card invalidates any scan produced under the previous settings: applying it
+would move files against roots that have since changed, so the browser is asked to
+re-scan instead.
+
+**Migrating from the environment.** The former `EMBYX_MANAGER_ACTOR_ROOT`,
+`ADDITIONAL_ROOTS`, `MOVE_IN_ROOT`, `MOVE_IN_BY_BRAND`, `ROOT_SENTINEL`,
+`APPLY_ENABLED`, `CLOUD_STRM_MOUNT_PREFIX`, `CLOUD_SOURCE_ROOTS` and
+`CLOUD_MOVE_IN_ROOT` are deprecated but still read once: on the first startup where the
+`fill_actor` section has never been saved, their values are written into the database
+and a warning is logged. After that the database is the only source of truth and the
+variables can be deleted from the deployment. They are never used to overwrite a section
+that already exists, so nothing you save on the Settings page can be undone by a stale
+environment variable.
+
+Until the section is configured, Fill Actor reports itself as not configured and its
+page links to Settings; the dashboard, the pipelines and the health probe are unaffected.
 
 The schema migrates automatically at startup (`schema_migrations`, advisory-lock
 serialized across replicas).
+
+### Health
+
+`GET /api/health` reports **app-level** readiness only: `status` and the HTTP code
+(200/503) reflect the database, the one dependency every feature shares. Point container
+probes here.
+
+A feature's own dependencies live under its own key and never change `status` — today
+that is `fill_actor` (`configured`, `roots`, `cloud`, `legacy_journal`, `apply_enabled`,
+`scan_ready`, `apply_ready`). An unmounted library root or an expired CloudDrive authorization degrades
+Fill Actor, which says so on its own page, while the monitor pipelines, the settings page
+and the probes stay green. The top-bar status chip shows app-level health, so it does not
+go red for one feature.
 
 When `EMBYX_MANAGER_API_TOKEN` is set, every mutation (scan, move, pipeline trigger,
 config save, connection test) needs `Authorization: Bearer <token>`. The browser then
@@ -84,6 +120,21 @@ uv run embyx-manager import-config /path/to/config.toml --database-url postgresq
 Maps the embyx-monitor `[clouddrive]`, `[freshrss]`, `[avid]`, `[archive]`, and
 `[mapping]` sections into the config store. Pipelines stay disabled until enabled from
 the dashboard.
+
+## Layout
+
+Every feature owns its own slice on both sides, and the app root owns none of them:
+
+| | Backend | Frontend |
+| --- | --- | --- |
+| app root | `api.py` (shell, auth, health, SPA hosting), `errors.py` | `App.tsx`, `components/{Login,Feedback,Icons}`, `lib/{apiToken,errors}` |
+| fill actor | `fill_actor/api.py` | `pages/FillActorPage.tsx`, `components/fill-actor/`, `lib/fill-actor/` |
+| monitor | `monitor/api.py` | `pages/DashboardPage.tsx` |
+| settings | `config/api.py` | `pages/SettingsPage.tsx` |
+
+`create_app` takes routers, health probes, lifespans and exception handlers — never a
+feature's service — so adding or removing a feature touches only `bootstrap.py`. Fill
+Actor used to be wired into the app root itself, a leftover from embyx-web.
 
 ## Development
 

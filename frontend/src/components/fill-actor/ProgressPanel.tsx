@@ -8,14 +8,14 @@ import {
   remainingEta,
   secondsSince,
   stageElapsed,
-} from '../lib/format'
+} from '../../lib/fill-actor/format'
 import {
   BUSINESS_PROGRESS_WARNING_SECONDS,
   HEARTBEAT_WARNING_SECONDS,
   STAGE_LABELS,
-} from '../lib/labels'
-import type { PlanJob } from '../types'
-import { CheckIcon, Spinner } from './Icons'
+} from '../../lib/fill-actor/labels'
+import type { PlanJob } from '../../types'
+import { CheckIcon, Spinner } from '../Icons'
 
 function panelTitle(kind: 'scan' | 'apply', job: PlanJob | null, submitting: boolean) {
   const state = jobState(job)

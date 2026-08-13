@@ -12,6 +12,7 @@ from embyx_manager.config import api as config_api
 from embyx_manager.config.api import create_config_router
 from embyx_manager.config.store import masked_values, secret_flags
 from embyx_manager.db import Database
+from embyx_manager.errors import ApiError
 from tests.conftest import make_database, postgres_test_dsn, reset_public_schema
 
 
@@ -109,7 +110,7 @@ def make_config_client() -> TestClient:
     app = FastAPI(lifespan=lifespan)
     app.include_router(create_config_router(store, mutation_auth=_noop_auth))
 
-    @app.exception_handler(config_api.ConfigApiError)
+    @app.exception_handler(ApiError)
     async def handle(_request, exc):
 
         return JSONResponse({'error': {'code': exc.code}}, status_code=exc.status_code)

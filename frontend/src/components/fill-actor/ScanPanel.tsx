@@ -1,5 +1,5 @@
-import { MAX_ACTORS } from '../lib/labels'
-import { ScanIcon, Spinner } from './Icons'
+import { MAX_ACTORS } from '../../lib/fill-actor/labels'
+import { ScanIcon, Spinner } from '../Icons'
 
 export function ScanPanel({
   input,

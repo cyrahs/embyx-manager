@@ -12,7 +12,7 @@ import embyx_manager.fill_actor.service as fill_actor_service_module
 from embyx_manager.fill_actor.models import MoveState
 from embyx_manager.fill_actor.persistence import MoveJournalRecord, MoveJournalState
 from embyx_manager.fill_actor.postgres_repository import PostgresFillActorRepository
-from embyx_manager.fill_actor.service import FillActorPaths, FillActorService
+from embyx_manager.fill_actor.service import FillActorPaths, FillActorService, static_runtime
 from embyx_manager.locking import AsyncFileLock
 from tests.conftest import make_postgres_repository
 
@@ -49,14 +49,16 @@ def make_service(
         if root_sentinel is not None:
             (path / root_sentinel).write_text('ready', encoding='utf-8')
     service = FillActorService(
-        paths=paths,
+        runtime=static_runtime(
+            paths=paths,
+            root_sentinel=root_sentinel,
+            apply_enabled=apply_enabled,
+        ),
         actor_catalog=ActorCatalog(),
         magnet_provider=MagnetProvider(),
         brand_resolver=BrandResolver(),
         repository=repository,
         mutation_lock=AsyncFileLock(tmp_path / 'move.lock'),
-        root_sentinel=root_sentinel,
-        apply_enabled=apply_enabled,
     )
     return service, paths
 

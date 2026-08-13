@@ -14,7 +14,7 @@ from embyx_manager.fill_actor.persistence import (
     MoveJournalRecord,
     MoveJournalState,
 )
-from embyx_manager.fill_actor.service import FillActorPaths, FillActorService
+from embyx_manager.fill_actor.service import FillActorPaths, FillActorService, static_runtime
 
 SOURCE_API_PATH = '/cloud/library/source-b/ABC/ABC-001.mp4'
 DESTINATION_API_DIR = '/cloud/library/destination/ABC'
@@ -136,19 +136,21 @@ def make_service(
     repo = repository or MemoryFillActorRepository()
     mover = FakeCloudMover(cloud_file)
     service = FillActorService(
-        paths=paths,
+        runtime=static_runtime(
+            paths=paths,
+            move_in_by_brand=True,
+            apply_enabled=apply_enabled,
+            cloud_move_paths=CloudMovePaths.from_values(
+                strm_mount_prefix='/mounted-cloud',
+                source_api_roots=('/cloud/library/source-b',),
+                move_in_api_root='/cloud/library/destination',
+            ),
+        ),
         actor_catalog=ActorCatalog(),
         magnet_provider=MagnetProvider(),
         brand_resolver=BrandResolver(brand),
         repository=repo,
-        move_in_by_brand=True,
-        apply_enabled=apply_enabled,
         cloud_file_mover=mover,
-        cloud_move_paths=CloudMovePaths.from_values(
-            strm_mount_prefix='/mounted-cloud',
-            source_api_roots=('/cloud/library/source-b',),
-            move_in_api_root='/cloud/library/destination',
-        ),
     )
     return service, repo, mover, mapping
 

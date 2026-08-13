@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { BrowserRouter, NavLink, Outlet, Route, Routes, useLocation } from 'react-router-dom'
+import { BrowserRouter, Navigate, NavLink, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 
 import { getHealth, type HealthStatus } from './api'
 import { LoginDialog, LoginScreen, SignOutButton } from './components/Login'
@@ -10,11 +10,14 @@ import SettingsPage from './pages/SettingsPage'
 
 const APP_NAME = 'Embyx Manager'
 
+/** The landing page; `/` only redirects here so no feature owns the app root. */
+const HOME_PATH = '/dashboard'
+
 /** Route paths, nav labels and tab titles share one source so they cannot drift apart. */
 const NAV_ITEMS = [
-  { to: '/dashboard', end: false, label: '监控看板' },
-  { to: '/', end: true, label: '补全演员' },
-  { to: '/settings', end: false, label: '设置' },
+  { to: HOME_PATH, label: '监控看板' },
+  { to: '/fill-actor', label: '补全演员' },
+  { to: '/settings', label: '设置' },
 ] as const
 
 export interface AppContext {
@@ -32,12 +35,12 @@ interface LayoutProps extends AppContext {
   authRequired: boolean
 }
 
-/** Keeps the tab title on the app name, suffixed with the page so open tabs stay tellable apart. */
+/** Names every page in the tab title: no feature is the unlabelled default one. */
 function useDocumentTitle() {
   const { pathname } = useLocation()
   useEffect(() => {
-    const item = NAV_ITEMS.find((nav) => (nav.end ? pathname === nav.to : pathname.startsWith(nav.to)))
-    document.title = item && !item.end ? `${item.label} · ${APP_NAME}` : APP_NAME
+    const item = NAV_ITEMS.find((nav) => pathname === nav.to || pathname.startsWith(`${nav.to}/`))
+    document.title = item ? `${item.label} · ${APP_NAME}` : APP_NAME
   }, [pathname])
 }
 
@@ -80,13 +83,13 @@ function Layout({ health, healthFailed, setHealth, requestApiToken, authRequired
   return (
     <div className="app-shell">
       <header className="topbar">
-        <NavLink className="brand" to="/" aria-label={`${APP_NAME} 首页`}>
+        <NavLink className="brand" to={HOME_PATH} aria-label={`${APP_NAME} 首页`}>
           <span className="brand-mark" aria-hidden="true">E</span>
           <span>embyx<span className="brand-suffix"> manager</span></span>
         </NavLink>
         <nav className="topbar-nav" aria-label="页面导航">
-          {NAV_ITEMS.map(({ to, end, label }) => (
-            <NavLink key={to} to={to} end={end} className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+          {NAV_ITEMS.map(({ to, label }) => (
+            <NavLink key={to} to={to} className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
               {label}
             </NavLink>
           ))}
@@ -129,9 +132,11 @@ export default function App() {
             />
           }
         >
-          <Route index element={<FillActorPage />} />
+          <Route index element={<Navigate to={HOME_PATH} replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="fill-actor" element={<FillActorPage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="*" element={<Navigate to={HOME_PATH} replace />} />
         </Route>
       </Routes>
       {loginDialogOpen && <LoginDialog onClose={() => setLoginDialogOpen(false)} />}

@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.testclient import TestClient
 
-from embyx_manager.config import api as config_api
+from embyx_manager.errors import ApiError
 from embyx_manager.monitor.api import create_monitor_router
 from embyx_manager.monitor.reports import PipelineName, RunState, RunTrigger
 from embyx_manager.monitor.runs import PipelineRunRecord
@@ -93,7 +93,7 @@ def make_client(scheduler: FakeScheduler, runs: FakeRuns) -> TestClient:
     app = FastAPI()
     app.include_router(create_monitor_router(scheduler, runs, mutation_auth=_noop_auth))  # type: ignore[arg-type]
 
-    @app.exception_handler(config_api.ConfigApiError)
+    @app.exception_handler(ApiError)
     async def handle(_request, exc):
         return JSONResponse({'error': {'code': exc.code}}, status_code=exc.status_code)
 

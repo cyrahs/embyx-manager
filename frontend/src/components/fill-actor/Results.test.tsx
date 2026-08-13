@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { ActorFailures, PlanSummary } from './Results'
-import type { ActorPlan, FillActorPlan } from '../types'
+import type { ActorPlan, FillActorPlan } from '../../types'
 
 function makePlan(actors: ActorPlan[]): FillActorPlan {
   return {

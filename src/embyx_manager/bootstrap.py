@@ -1,5 +1,8 @@
 import asyncio
+import logging
 import threading
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
 
@@ -20,7 +23,9 @@ from embyx_manager.config import (
     ArchiveConfig,
     CloudDriveConfig,
     ConfigStore,
+    ConfigVersionConflictError,
     FeedsConfig,
+    FillActorConfig,
     FreshRSSConfig,
     MappingConfig,
     RssConfig,
@@ -28,10 +33,18 @@ from embyx_manager.config import (
 from embyx_manager.config.api import create_config_router
 from embyx_manager.core.avid import AvidConfig, AvidParser
 from embyx_manager.db import Database
+from embyx_manager.fill_actor.api import (
+    create_fill_actor_router,
+    fill_actor_health,
+    fill_actor_lifespan,
+    handle_fill_actor_error,
+)
+from embyx_manager.fill_actor.cloud_moves import CloudMovePaths
+from embyx_manager.fill_actor.errors import FillActorError
 from embyx_manager.fill_actor.feeds import RSSHubFeedWarmer
 from embyx_manager.fill_actor.jobs import FillActorJobManager
 from embyx_manager.fill_actor.postgres_repository import PostgresFillActorRepository
-from embyx_manager.fill_actor.service import FillActorPaths, FillActorService
+from embyx_manager.fill_actor.service import FillActorPaths, FillActorRuntime, FillActorService
 from embyx_manager.locking import PostgresAdvisoryLock
 from embyx_manager.monitor.api import create_monitor_router
 from embyx_manager.monitor.archive import ArchivePipeline
@@ -41,6 +54,8 @@ from embyx_manager.monitor.rss import RssPipeline
 from embyx_manager.monitor.runs import PipelineRunRepository
 from embyx_manager.monitor.scheduler import MonitorScheduler
 from embyx_manager.settings import Settings
+
+LOGGER = logging.getLogger(__name__)
 
 
 class CloudDriveHandle:
@@ -84,6 +99,62 @@ class CloudDriveHandle:
             self._cloud = None
 
 
+class FillActorRuntimeHandle:
+    """Turns the stored Fill Actor section into the snapshot the service reads.
+
+    Rebuilt only when the section's version changes, so the hot scan path does no
+    parsing. An invalid stored value leaves the feature unconfigured rather than
+    taking the process down — the Settings page is how it gets fixed.
+    """
+
+    def __init__(self, store: ConfigStore) -> None:
+        self._store = store
+        self._lock = threading.Lock()
+        self._version: int | None = None
+        self._runtime = FillActorRuntime()
+
+    def current(self) -> FillActorRuntime:
+        config, version = self._store.get_with_version('fill_actor')
+        if not isinstance(config, FillActorConfig):  # pragma: no cover - registry keeps types aligned
+            msg = 'fill_actor config has unexpected type'
+            raise TypeError(msg)
+        with self._lock:
+            if version != self._version:
+                self._version = version
+                self._runtime = _build_fill_actor_runtime(config, version)
+            return self._runtime
+
+
+def _build_fill_actor_runtime(config: FillActorConfig, version: int) -> FillActorRuntime:
+    if not config.configured:
+        return FillActorRuntime(version=version)
+    try:
+        cloud_move_paths = (
+            CloudMovePaths.from_values(
+                strm_mount_prefix=config.cloud_strm_mount_prefix,
+                source_api_roots=config.cloud_source_roots,
+                move_in_api_root=config.cloud_move_in_root,
+            )
+            if config.cloud_configured
+            else None
+        )
+    except ValueError:
+        LOGGER.exception('stored fill_actor CloudDrive paths are invalid; moves stay disabled')
+        return FillActorRuntime(version=version)
+    return FillActorRuntime(
+        version=version,
+        paths=FillActorPaths.from_iterable(
+            actor_brand_path=Path(config.actor_root),
+            additional_brand_paths=tuple(Path(root) for root in config.additional_roots),
+            move_in_path=Path(config.move_in_root),
+        ),
+        root_sentinel=config.root_sentinel,
+        move_in_by_brand=config.move_in_by_brand,
+        apply_enabled=config.apply_enabled,
+        cloud_move_paths=cloud_move_paths,
+    )
+
+
 class AvidParserHandle:
     """Rebuilds the AvidParser when the avid rules configuration changes."""
 
@@ -107,7 +178,6 @@ class AvidParserHandle:
 
 def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly root
     settings.validate_exposure()
-    actor_root, additional_roots, move_in_root = settings.require_fill_actor_paths()
 
     database = Database(settings.database_url)
     store = ConfigStore(database)
@@ -116,23 +186,18 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
     cloud_handle = CloudDriveHandle(store)
 
     repository = PostgresFillActorRepository(database)
+    fill_actor_runtime = FillActorRuntimeHandle(store)
     service = FillActorService(
-        paths=FillActorPaths.from_iterable(
-            actor_brand_path=actor_root,
-            additional_brand_paths=additional_roots,
-            move_in_path=move_in_root,
-        ),
+        runtime=fill_actor_runtime.current,
         actor_catalog=JavBusActorCatalog(javbus),
         magnet_provider=SukebeiMagnetProvider(sukebei),
         brand_resolver=AvidBrandResolver(),
         max_actors=settings.max_actors,
         max_videos=settings.max_videos,
         magnet_concurrency=settings.magnet_concurrency,
-        root_sentinel=settings.root_sentinel,
-        move_in_by_brand=settings.move_in_by_brand,
-        apply_enabled=settings.apply_enabled,
-        cloud_file_mover=(CloudDriveFileMover(cloud_handle.current) if settings.cloud_move_paths is not None else None),
-        cloud_move_paths=settings.cloud_move_paths,
+        # The mover is always available; whether moves may run is the runtime's call,
+        # since the CloudDrive paths it needs now live in the database.
+        cloud_file_mover=CloudDriveFileMover(cloud_handle.current),
         repository=repository,
         mutation_lock=PostgresAdvisoryLock(database.get_pool),
     )
@@ -150,6 +215,14 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
 
     mutation_auth = make_mutation_auth(settings.api_token)
     config_router = create_config_router(store, mutation_auth=mutation_auth)
+    fill_actor_router = create_fill_actor_router(
+        service=service,
+        repository=repository,
+        jobs=jobs,
+        mutation_auth=mutation_auth,
+        freshrss_url=lambda: current_feeds().freshrss_url or None,
+        freshrss_rsshub_url=lambda: current_feeds().freshrss_rsshub_url or None,
+    )
 
     avid_handle = AvidParserHandle(store)
     pipeline_runs = PipelineRunRepository(database)
@@ -232,15 +305,19 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
     )
     monitor_router = create_monitor_router(scheduler, pipeline_runs, mutation_auth=mutation_auth)
 
-    async def on_startup() -> None:
+    @asynccontextmanager
+    async def runtime_lifespan() -> AsyncIterator[None]:
+        """Config store, scheduler and shared clients: everything the features sit on."""
         await store.load()
+        await _seed_fill_actor_config(store, settings)
         await scheduler.start()
-
-    async def close_runtime() -> None:
         try:
-            await scheduler.aclose()
+            yield
         finally:
-            await _close_clients()
+            try:
+                await scheduler.aclose()
+            finally:
+                await _close_clients()
 
     async def _close_clients() -> None:
         try:
@@ -256,17 +333,54 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
 
     frontend_dist = Path(__file__).resolve().parent / 'static'
     return create_app(
-        service=service,
-        repository=repository,
-        jobs=jobs,
+        app_ready=repository.health_check,
+        routers=(fill_actor_router, config_router, monitor_router),
+        feature_health={'fill_actor': fill_actor_health(service=service, repository=repository)},
+        exception_handlers={FillActorError: handle_fill_actor_error},
+        # The runtime comes up first and goes down last; features stack on top of it.
+        lifespans=(
+            runtime_lifespan,
+            fill_actor_lifespan(service=service, repository=repository, jobs=jobs),
+        ),
         api_token=settings.api_token,
         max_request_bytes=settings.max_request_bytes,
-        runtime_close=close_runtime,
         frontend_dist=frontend_dist,
-        freshrss_url=lambda: current_feeds().freshrss_url or None,
-        freshrss_rsshub_url=lambda: current_feeds().freshrss_rsshub_url or None,
-        extra_routers=(config_router, monitor_router),
-        on_startup=on_startup,
+    )
+
+
+async def _seed_fill_actor_config(store: ConfigStore, settings: Settings) -> None:
+    """Carries the deprecated `EMBYX_MANAGER_*` paths into the config store, once.
+
+    Writing against version 0 means this only ever lands on a section no one has saved
+    yet — including across replicas, since the store's optimistic check is atomic. Once
+    the section exists the database is the only source of truth and the environment
+    variables are ignored, so they can be dropped from the deployment.
+    """
+    if settings.actor_brand_path is None and not settings.additional_brand_paths and settings.move_in_path is None:
+        return
+    cloud = settings.cloud_move_paths
+    values: dict[str, object] = {
+        'actor_root': str(settings.actor_brand_path) if settings.actor_brand_path else '',
+        'additional_roots': tuple(str(root) for root in settings.additional_brand_paths),
+        'move_in_root': str(settings.move_in_path) if settings.move_in_path else '',
+        'move_in_by_brand': settings.move_in_by_brand,
+        'root_sentinel': settings.root_sentinel,
+        'apply_enabled': settings.apply_enabled,
+        'cloud_strm_mount_prefix': str(cloud.strm_mount_prefix) if cloud is not None else '',
+        'cloud_source_roots': tuple(str(root) for root in cloud.source_api_roots) if cloud is not None else (),
+        'cloud_move_in_root': str(cloud.move_in_api_root) if cloud is not None else '',
+    }
+    try:
+        await store.update('fill_actor', values, expected_version=0)
+    except ConfigVersionConflictError:
+        LOGGER.info('fill_actor config is already stored; ignoring the EMBYX_MANAGER_* path variables')
+        return
+    except ValueError:
+        LOGGER.exception('EMBYX_MANAGER_* path variables are not a valid fill_actor config; configure it in Settings')
+        return
+    LOGGER.warning(
+        'seeded the fill_actor config from EMBYX_MANAGER_* path variables; '
+        'they are now stored in the database and can be removed from the deployment',
     )
 
 

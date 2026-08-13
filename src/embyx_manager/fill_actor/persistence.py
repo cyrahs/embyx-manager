@@ -157,6 +157,8 @@ class CandidateRecord:
 class PlanRecord:
     public: FillActorPlan
     candidates: tuple[CandidateRecord, ...]
+    #: fill-actor config version the plan was scanned under; 0 for pre-migration rows.
+    config_version: int = 0
 
     def __post_init__(self) -> None:
         candidate_ids = [candidate.candidate_id for candidate in self.candidates]

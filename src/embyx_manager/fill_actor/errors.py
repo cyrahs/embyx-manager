@@ -36,6 +36,12 @@ class MoveDisabledError(FillActorError):
     code = 'move_disabled'
 
 
+class NotConfiguredError(FillActorError):
+    """Raised when library roots are needed but the feature has none configured."""
+
+    code = 'fill_actor_not_configured'
+
+
 class LegacyPlanError(FillActorError):
     code = 'legacy_plan_requires_rescan'
 

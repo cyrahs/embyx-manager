@@ -4,10 +4,11 @@ Secret fields are declared per section; the API layer masks them on read and
 treats empty submitted values as "keep the stored secret".
 """
 
+from pathlib import PurePosixPath
 from typing import ClassVar
 from urllib.parse import urlsplit, urlunsplit
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 
 def normalize_http_base_url(name: str, value: str) -> str:
@@ -28,6 +29,33 @@ def normalize_http_base_url(name: str, value: str) -> str:
         raise ValueError(msg)
     path = parsed.path.rstrip('/')
     return urlunsplit((parsed.scheme, parsed.netloc, path, '', ''))
+
+
+def normalize_absolute_path(name: str, value: str) -> str:
+    """Validate an absolute filesystem path with no trailing slash; '' stays ''."""
+    trimmed = value.strip()
+    if not trimmed:
+        return ''
+    if not trimmed.startswith('/'):
+        msg = f'{name} must be an absolute path'
+        raise ValueError(msg)
+    if '\x00' in trimmed:
+        msg = f'{name} must not contain a null byte'
+        raise ValueError(msg)
+    normalized = str(PurePosixPath(trimmed))
+    if '..' in PurePosixPath(normalized).parts:
+        msg = f'{name} must not contain ".."'
+        raise ValueError(msg)
+    return normalized
+
+
+def normalize_absolute_paths(name: str, values: tuple[str, ...]) -> tuple[str, ...]:
+    """Normalizes a list of absolute paths, dropping blanks and rejecting duplicates."""
+    normalized = tuple(normalize_absolute_path(name, value) for value in values if value.strip())
+    if len(set(normalized)) != len(normalized):
+        msg = f'{name} must not repeat a path'
+        raise ValueError(msg)
+    return normalized
 
 
 class ConfigSection(BaseModel):
@@ -157,6 +185,96 @@ class MappingConfig(ConfigSection):
         return bool(self.src_dir and self.dst_dir)
 
 
+class FillActorConfig(ConfigSection):
+    """Library roots and move settings for the Fill Actor feature.
+
+    Every field defaults to empty: a deployment's real paths belong in the database,
+    never in this file. An unconfigured section simply leaves the feature not ready.
+    """
+
+    actor_root: str = ''
+    additional_roots: tuple[str, ...] = ()
+    move_in_root: str = ''
+    move_in_by_brand: bool = False
+    root_sentinel: str = '.embyx-root'
+    apply_enabled: bool = False
+    cloud_strm_mount_prefix: str = ''
+    cloud_source_roots: tuple[str, ...] = ()
+    cloud_move_in_root: str = ''
+
+    @field_validator('actor_root')
+    @classmethod
+    def _validate_actor_root(cls, value: str) -> str:
+        return normalize_absolute_path('fill_actor.actor_root', value)
+
+    @field_validator('move_in_root')
+    @classmethod
+    def _validate_move_in_root(cls, value: str) -> str:
+        return normalize_absolute_path('fill_actor.move_in_root', value)
+
+    @field_validator('additional_roots')
+    @classmethod
+    def _validate_additional_roots(cls, value: tuple[str, ...]) -> tuple[str, ...]:
+        return normalize_absolute_paths('fill_actor.additional_roots', value)
+
+    @field_validator('cloud_strm_mount_prefix')
+    @classmethod
+    def _validate_mount_prefix(cls, value: str) -> str:
+        return normalize_absolute_path('fill_actor.cloud_strm_mount_prefix', value)
+
+    @field_validator('cloud_move_in_root')
+    @classmethod
+    def _validate_cloud_move_in_root(cls, value: str) -> str:
+        return normalize_absolute_path('fill_actor.cloud_move_in_root', value)
+
+    @field_validator('cloud_source_roots')
+    @classmethod
+    def _validate_cloud_source_roots(cls, value: tuple[str, ...]) -> tuple[str, ...]:
+        return normalize_absolute_paths('fill_actor.cloud_source_roots', value)
+
+    @field_validator('root_sentinel')
+    @classmethod
+    def _validate_sentinel(cls, value: str) -> str:
+        trimmed = value.strip()
+        if trimmed in {'', '.', '..'} or '/' in trimmed or '\x00' in trimmed:
+            msg = 'fill_actor.root_sentinel must be a single path segment'
+            raise ValueError(msg)
+        return trimmed
+
+    @model_validator(mode='after')
+    def _validate_combination(self) -> 'FillActorConfig':
+        if self.actor_root and self.actor_root in self.additional_roots:
+            msg = 'fill_actor.actor_root must not also be an additional root'
+            raise ValueError(msg)
+        cloud_values = (
+            bool(self.cloud_strm_mount_prefix),
+            bool(self.cloud_source_roots),
+            bool(self.cloud_move_in_root),
+        )
+        if any(cloud_values) and not all(cloud_values):
+            msg = (
+                'fill_actor.cloud_strm_mount_prefix, fill_actor.cloud_source_roots, and '
+                'fill_actor.cloud_move_in_root must be configured together'
+            )
+            raise ValueError(msg)
+        if self.cloud_source_roots and len(self.cloud_source_roots) != len(self.additional_roots):
+            msg = 'fill_actor.cloud_source_roots must match fill_actor.additional_roots one-for-one'
+            raise ValueError(msg)
+        if self.apply_enabled and not all(cloud_values):
+            msg = 'fill_actor.apply_enabled requires the CloudDrive move path configuration'
+            raise ValueError(msg)
+        return self
+
+    @property
+    def cloud_configured(self) -> bool:
+        return bool(self.cloud_strm_mount_prefix and self.cloud_source_roots and self.cloud_move_in_root)
+
+    @property
+    def configured(self) -> bool:
+        """True once scanning has somewhere to look and somewhere to move into."""
+        return bool(self.actor_root and self.additional_roots and self.move_in_root)
+
+
 SECTION_MODELS: dict[str, type[ConfigSection]] = {
     'clouddrive': CloudDriveConfig,
     'freshrss': FreshRSSConfig,
@@ -165,4 +283,5 @@ SECTION_MODELS: dict[str, type[ConfigSection]] = {
     'rss': RssConfig,
     'archive': ArchiveConfig,
     'mapping': MappingConfig,
+    'fill_actor': FillActorConfig,
 }

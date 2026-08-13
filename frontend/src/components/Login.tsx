@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { isUnauthorized } from '../api'
 import { signIn, signOut, useApiTokenConfigured } from '../lib/apiToken'
-import { errorMessage } from '../lib/format'
+import { errorMessage } from '../lib/errors'
 import { KeyIcon, Spinner } from './Icons'
 
 /**

@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 
 import asyncpg
 
-CURRENT_SCHEMA_VERSION = 3
+CURRENT_SCHEMA_VERSION = 4
 
 # Advisory-lock key space for embyx-manager; low word selects the resource.
 ADVISORY_NAMESPACE = 0x454D4258  # 'EMBX'
@@ -210,6 +210,10 @@ _MIGRATIONS[3] = (
     )
     """,
 )
+
+# Plans are bound to the fill-actor config version that produced their paths, so a
+# path change can never be applied against a plan scanned under the previous one.
+_MIGRATIONS[4] = ('ALTER TABLE fill_actor_plans ADD COLUMN config_version INTEGER NOT NULL DEFAULT 0',)
 
 
 class Database:
