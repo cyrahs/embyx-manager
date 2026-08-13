@@ -123,6 +123,17 @@ describe('Fill Actor page', () => {
 
   afterEach(() => vi.restoreAllMocks())
 
+  it('orders the primary navigation as dashboard, fill actor, then settings', async () => {
+    render(<App />)
+
+    const navigation = await screen.findByRole('navigation', { name: '页面导航' })
+    expect(within(navigation).getAllByRole('link').map((link) => link.textContent)).toEqual([
+      '监控看板',
+      '补全演员',
+      '设置',
+    ])
+  })
+
   it('validates and deduplicates actor IDs before rendering grouped scan results', async () => {
     const user = userEvent.setup()
     const fetchMock = vi.mocked(fetch)

@@ -12,8 +12,8 @@ const APP_NAME = 'Embyx Manager'
 
 /** Route paths, nav labels and tab titles share one source so they cannot drift apart. */
 const NAV_ITEMS = [
-  { to: '/', end: true, label: '补全演员' },
   { to: '/dashboard', end: false, label: '监控看板' },
+  { to: '/', end: true, label: '补全演员' },
   { to: '/settings', end: false, label: '设置' },
 ] as const
 
