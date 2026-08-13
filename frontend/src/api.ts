@@ -18,9 +18,9 @@ import type {
   PlanJob,
 } from './types'
 
-const API_TOKEN_KEY = 'embyx-web-api-token'
-const ACTIVE_PLAN_KEY = 'embyx-web-active-plan-id'
-const ACTIVE_APPLY_KEY = 'embyx-web-active-apply'
+const API_TOKEN_KEY = 'embyx-manager-api-token'
+const ACTIVE_PLAN_KEY = 'embyx-manager-active-plan-id'
+const ACTIVE_APPLY_KEY = 'embyx-manager-active-apply'
 const PLAN_ID = /^[A-Za-z0-9_-]{1,256}$/
 const REQUEST_ID = /^[A-Za-z0-9_-]{16,128}$/
 const APPLY_JOB_STATES = new Set<JobState>(['queued', 'running', 'completed', 'partial_failed', 'failed'])

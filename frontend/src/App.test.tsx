@@ -245,7 +245,7 @@ describe('Fill Actor page', () => {
   })
 
   it('recovers an active scan from session storage and clears it after completion', async () => {
-    window.sessionStorage.setItem('embyx-web-active-plan-id', 'resume-1')
+    window.sessionStorage.setItem('embyx-manager-active-plan-id', 'resume-1')
     const resumedPlan = { ...plan, plan_id: 'resume-1' }
     const fetchMock = vi.mocked(fetch)
     fetchMock
@@ -261,7 +261,7 @@ describe('Fill Actor page', () => {
       '/api/fill-actor/plans/resume-1',
       expect.objectContaining({ cache: 'no-store', signal: expect.any(AbortSignal) }),
     )
-    await waitFor(() => expect(window.sessionStorage.getItem('embyx-web-active-plan-id')).toBeNull())
+    await waitFor(() => expect(window.sessionStorage.getItem('embyx-manager-active-plan-id')).toBeNull())
   })
 
   it('requires confirmation and displays per-file apply results', async () => {
@@ -511,7 +511,7 @@ describe('Fill Actor page', () => {
 
   it('reuses the same request ID only after recovery lookup confirms the job is missing', async () => {
     const requestId = '1234567890abcdef'
-    window.sessionStorage.setItem('embyx-web-active-apply', JSON.stringify({
+    window.sessionStorage.setItem('embyx-manager-active-apply', JSON.stringify({
       planId: 'plan-1',
       revision: 'revision-1',
       candidateIds: ['safe-1'],
@@ -556,7 +556,7 @@ describe('Fill Actor page', () => {
   })
 
   it('restores an accepted move and its parent plan from session storage after refresh', async () => {
-    window.sessionStorage.setItem('embyx-web-active-apply', JSON.stringify({
+    window.sessionStorage.setItem('embyx-manager-active-apply', JSON.stringify({
       planId: 'plan-1',
       revision: 'revision-1',
       candidateIds: ['safe-1'],
@@ -612,13 +612,13 @@ describe('Fill Actor page', () => {
     expect(screen.getByLabelText('演员 ID')).toBeDisabled()
     expect(screen.getByText('文件移动已暂停')).toBeInTheDocument()
     expect(await screen.findByText('所选文件已全部移入', {}, { timeout: 4_000 })).toBeInTheDocument()
-    await waitFor(() => expect(window.sessionStorage.getItem('embyx-web-active-apply')).toBeNull())
+    await waitFor(() => expect(window.sessionStorage.getItem('embyx-manager-active-apply')).toBeNull())
     expect(fetchMock.mock.calls.some(([path, init]) => String(path).endsWith('/apply-jobs') && init?.method === 'POST')).toBe(false)
   })
 
   it('restores only the confirmed candidate subset and clears the lost-response retry flag', async () => {
     const requestId = '1234567890abcdef'
-    window.sessionStorage.setItem('embyx-web-active-apply', JSON.stringify({
+    window.sessionStorage.setItem('embyx-manager-active-apply', JSON.stringify({
       planId: 'plan-1',
       revision: 'revision-1',
       candidateIds: ['safe-1'],
@@ -653,7 +653,7 @@ describe('Fill Actor page', () => {
     await waitFor(() => expect(screen.getByRole('checkbox', { name: /ABC-001\.mp4/ })).toBeChecked())
     expect(screen.getByRole('checkbox', { name: /ABC-002\.mkv/ })).not.toBeChecked()
     await waitFor(() => {
-      const stored = JSON.parse(String(window.sessionStorage.getItem('embyx-web-active-apply'))) as Record<string, unknown>
+      const stored = JSON.parse(String(window.sessionStorage.getItem('embyx-manager-active-apply'))) as Record<string, unknown>
       expect(stored.retrySubmitIfMissing).toBeUndefined()
     }, { timeout: 2_000 })
   })
@@ -684,14 +684,14 @@ describe('Fill Actor page', () => {
   })
 
   it('rejects overlong persisted request IDs and retains the legacy synchronous API helper', async () => {
-    window.sessionStorage.setItem('embyx-web-active-apply', JSON.stringify({
+    window.sessionStorage.setItem('embyx-manager-active-apply', JSON.stringify({
       planId: 'plan-1',
       revision: 'revision-1',
       candidateIds: ['safe-1'],
       requestId: 'x'.repeat(129),
     }))
     expect(getActiveApplyRequest()).toBeNull()
-    expect(window.sessionStorage.getItem('embyx-web-active-apply')).toBeNull()
+    expect(window.sessionStorage.getItem('embyx-manager-active-apply')).toBeNull()
 
     const fetchMock = vi.mocked(fetch)
     fetchMock.mockImplementationOnce(() => jsonResponse({
@@ -1041,7 +1041,7 @@ describe('Fill Actor page', () => {
       '/api/fill-actor/plans/plan-1/cancel',
       expect.objectContaining({ method: 'POST', signal: expect.any(AbortSignal) }),
     )
-    await waitFor(() => expect(window.sessionStorage.getItem('embyx-web-active-plan-id')).toBeNull())
+    await waitFor(() => expect(window.sessionStorage.getItem('embyx-manager-active-plan-id')).toBeNull())
   })
 
   it('keeps polling and restores cancel after a network failure', async () => {
@@ -1133,7 +1133,7 @@ describe('Fill Actor page', () => {
         signal: expect.any(AbortSignal),
       }),
     )
-    expect(window.sessionStorage.getItem('embyx-web-api-token')).toBeNull()
+    expect(window.sessionStorage.getItem('embyx-manager-api-token')).toBeNull()
   })
 
   it('refreshes the current plan after a plan_not_cancellable race', async () => {
@@ -1272,7 +1272,7 @@ describe('Fill Actor page', () => {
         headers: expect.objectContaining({ Authorization: 'Bearer session-token' }),
       }),
     )
-    expect(window.sessionStorage.getItem('embyx-web-api-token')).toBe('session-token')
+    expect(window.sessionStorage.getItem('embyx-manager-api-token')).toBe('session-token')
   })
 })
 
@@ -1293,7 +1293,7 @@ describe('API token entry', () => {
     await user.type(within(dialog).getByLabelText('API Token'), 'topbar-token')
     await user.click(within(dialog).getByRole('button', { name: '保存 Token' }))
 
-    expect(window.sessionStorage.getItem('embyx-web-api-token')).toBe('topbar-token')
+    expect(window.sessionStorage.getItem('embyx-manager-api-token')).toBe('topbar-token')
     expect(within(screen.getByRole('dialog')).getByText('已保存，可以重试刚才的操作。')).toBeInTheDocument()
   })
 
