@@ -60,6 +60,8 @@ const STAT_LABELS: Record<string, string> = {
   duplicate_copies_deleted: '删除重复副本',
   videos_renamed: '重命名',
   videos_archived: '归档入库',
+  duplicates_promoted: '提级归档',
+  skipped_priority: '优先库已有',
   files_updated: '更新',
   files_skipped: '跳过',
   files_deleted: '删除',

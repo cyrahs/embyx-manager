@@ -62,15 +62,17 @@ class ArchivePipeline:
         self.dst_dir = Path(config.dst_dir)
 
     def run(self, ctx: RunContext) -> None:
-        for src, dst in self._config.mapping.items():
+        routes = [(src, dst, True) for src, dst in self._config.priority_mapping.items()]
+        routes += [(src, dst, False) for src, dst in self._config.mapping.items()]
+        for src, dst, priority in routes:
             ctx.check_cancelled()
             src_path = self.src_dir / src
             dst_path = self.dst_dir / dst
-            ctx.info('processing %s -> %s', src_path, dst_path)
+            ctx.info('processing %s -> %s%s', src_path, dst_path, ' (priority)' if priority else '')
             self.clear_dirname(src_path, ctx)
             self.flatten(src_path, dst_path, ctx)
             self.rename(src_path, ctx)
-            self.archive(src_path, dst_path, ctx)
+            self.archive(src_path, dst_path, ctx, priority=priority)
 
     # -- stages -------------------------------------------------------------
 
@@ -205,7 +207,7 @@ class ArchivePipeline:
         if renamed_any:
             self._settle(ctx, 'renaming')
 
-    def archive(self, src_dir: Path, dst_dir: Path, ctx: RunContext) -> None:
+    def archive(self, src_dir: Path, dst_dir: Path, ctx: RunContext, *, priority: bool = False) -> None:
         """Move renamed videos into their per-brand destination directories."""
         if not src_dir.is_dir():
             msg = f'{src_dir} is not a directory'
@@ -217,6 +219,15 @@ class ArchivePipeline:
             ctx.check_cancelled()
             if not (dst := self.find_video_dst(video, dst_dir, ctx)):
                 continue
+            avid = self._avid.get_avid(video.name)
+            brand = get_brand(avid)
+            # Brands routed by brand_mapping land in the same directory whatever the
+            # route category, so there is nothing to move between and nothing to guard.
+            if brand and not self._brand_routed(brand):
+                if priority:
+                    self._promote_from_normal(avid, brand, dst.parent, ctx)
+                elif self._held_by_priority(avid, brand, dst.parent, ctx):
+                    continue
             if not dst.parent.exists():
                 dst.parent.mkdir(parents=True)
             if dst.exists():
@@ -248,6 +259,53 @@ class ArchivePipeline:
         if video_dst_dir is None:
             return None
         return video_dst_dir / video.name
+
+    def _brand_routed(self, brand: str) -> bool:
+        return any(brand in brand_avids for brand_avids in self._config.brand_mapping.values())
+
+    @staticmethod
+    def _matching_archived(avid: str, brand_dir: Path) -> list[Path]:
+        """Archived videos belonging to avid, i.e. AVID.ext or AVID-cdN.ext."""
+        if not brand_dir.is_dir():
+            return []
+        # The '-' keeps ABC-12 from claiming ABC-123.mp4 while still matching -cdN parts.
+        return sorted(
+            f for f in brand_dir.iterdir() if is_video(f) and (f.stem == avid or f.stem.startswith(avid + '-'))
+        )
+
+    def _promote_from_normal(self, avid: str, brand: str, target_dir: Path, ctx: RunContext) -> None:
+        """Move avid out of every normal route's destination into the priority one."""
+        for normal_dst in dict.fromkeys(self._config.mapping.values()):
+            source_dir = self.dst_dir / normal_dst / brand
+            if source_dir == target_dir:
+                continue
+            for archived in self._matching_archived(avid, source_dir):
+                target = target_dir / archived.name
+                if target.exists():
+                    ctx.warning(
+                        'cannot promote %s, %s exists',
+                        _display(archived, self.dst_dir),
+                        _display(target, self.dst_dir),
+                    )
+                    continue
+                if not target_dir.exists():
+                    target_dir.mkdir(parents=True)
+                ctx.info('promoting %s to %s', _display(archived, self.dst_dir), _display(target, self.dst_dir))
+                # The emptied brand directory is left behind; the pipeline never
+                # removes brand directories and an empty one routes nothing.
+                archived.rename(target)
+                ctx.add('duplicates_promoted')
+
+    def _held_by_priority(self, avid: str, brand: str, own_dir: Path, ctx: RunContext) -> bool:
+        for priority_dst in dict.fromkeys(self._config.priority_mapping.values()):
+            holder_dir = self.dst_dir / priority_dst / brand
+            if holder_dir == own_dir:
+                continue
+            if self._matching_archived(avid, holder_dir):
+                ctx.warning('%s already archived in priority %s, skipping', avid, _display(holder_dir, self.dst_dir))
+                ctx.add('skipped_priority')
+                return True
+        return False
 
     def _drop_duplicate_copies(self, folder: Path, videos: list[Path], ctx: RunContext) -> list[Path]:
         base_by_key: dict[tuple[str, str, int], Path] = {}
