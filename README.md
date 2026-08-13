@@ -64,11 +64,16 @@ The schema migrates automatically at startup (`schema_migrations`, advisory-lock
 serialized across replicas).
 
 When `EMBYX_MANAGER_API_TOKEN` is set, every mutation (scan, move, pipeline trigger,
-config save, connection test) needs `Authorization: Bearer <token>`. In the browser,
-enter it once via the **API Token** button in the top bar — it is kept in
-`sessionStorage` only, so it is gone when the tab closes. Reads (health, monitor
-status, run history, config) stay open, which is what keeps the dashboard useful
-before the token is entered.
+config save, connection test) needs `Authorization: Bearer <token>`. The browser then
+opens on a login screen: the token is checked against `GET /api/auth/session` before it
+is accepted, and stored in `localStorage`, so a reload or a new tab stays signed in
+until **退出登录** in the top bar. A token the server no longer accepts is dropped on
+the next visit and the login screen explains why. `GET /api/health` reports
+`auth_required`, which is what tells the browser whether to ask for a login at all.
+
+The login screen is a convenience gate, not the security boundary — the API enforces the
+token on every mutation regardless of what the browser does. Reads (health, monitor
+status, run history, config) stay open by design.
 
 ### Importing a legacy config.toml
 

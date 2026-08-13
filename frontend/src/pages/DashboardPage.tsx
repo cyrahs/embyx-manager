@@ -193,11 +193,11 @@ export default function DashboardPage() {
         {authRequired && (
           <Notice
             tone="warning"
-            title="需要 API Token"
-            body="触发运行和启停调度属于写操作，需要部署时设置的 API Token。填写后再重试即可。"
+            title="需要重新登录"
+            body="触发运行和启停调度属于写操作，服务端拒绝了当前的登录状态。重新登录后再重试即可。"
             action={
               <button className="text-button" type="button" onClick={requestApiToken}>
-                填写 Token
+                重新登录
               </button>
             }
           />

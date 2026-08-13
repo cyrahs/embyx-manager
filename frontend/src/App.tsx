@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { BrowserRouter, NavLink, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 
 import { getHealth, type HealthStatus } from './api'
-import { ApiTokenButton, ApiTokenDialog } from './components/ApiTokenDialog'
+import { LoginDialog, LoginScreen, SignOutButton } from './components/Login'
+import { useAuthGate } from './lib/apiToken'
 import DashboardPage from './pages/DashboardPage'
 import FillActorPage from './pages/FillActorPage'
 import SettingsPage from './pages/SettingsPage'
@@ -20,12 +21,16 @@ export interface AppContext {
   health: HealthStatus | null
   healthFailed: boolean
   setHealth: React.Dispatch<React.SetStateAction<HealthStatus | null>>
-  /** Opens the shared API token dialog; pages call it when a request comes back 401. */
+  /** Opens the shared re-login dialog; pages call it when a request comes back 401. */
   requestApiToken: () => void
 }
 
 /** @deprecated Kept for existing imports; the context now carries more than health. */
 export type HealthContext = AppContext
+
+interface LayoutProps extends AppContext {
+  authRequired: boolean
+}
 
 /** Keeps the tab title on the app name, suffixed with the page so open tabs stay tellable apart. */
 function useDocumentTitle() {
@@ -36,12 +41,10 @@ function useDocumentTitle() {
   }, [pathname])
 }
 
-function Layout() {
+/** Health drives the login gate as well as the status chip, so it is polled above the router. */
+function useHealthPolling() {
   const [health, setHealth] = useState<HealthStatus | null>(null)
   const [healthFailed, setHealthFailed] = useState(false)
-  const [tokenDialogOpen, setTokenDialogOpen] = useState(false)
-  const requestApiToken = useCallback(() => setTokenDialogOpen(true), [])
-  useDocumentTitle()
 
   useEffect(() => {
     let mounted = true
@@ -66,6 +69,12 @@ function Layout() {
     }
   }, [])
 
+  return { health, healthFailed, setHealth }
+}
+
+function Layout({ health, healthFailed, setHealth, requestApiToken, authRequired }: LayoutProps) {
+  useDocumentTitle()
+
   const healthReady = Boolean(health && ['ok', 'healthy', 'ready'].includes(health.status.toLowerCase()))
 
   return (
@@ -83,27 +92,49 @@ function Layout() {
           ))}
         </nav>
         <div className="topbar-meta">
-          <ApiTokenButton onClick={requestApiToken} />
+          {authRequired && <SignOutButton />}
           <span className={`health-dot ${healthReady ? 'online' : healthFailed || health ? 'offline' : ''}`} />
           {healthFailed ? '服务不可达' : health ? healthReady ? '服务正常' : '服务未就绪' : '正在连接'}
         </div>
       </header>
       <Outlet context={{ health, healthFailed, setHealth, requestApiToken } satisfies AppContext} />
-      {tokenDialogOpen && <ApiTokenDialog onClose={() => setTokenDialogOpen(false)} />}
     </div>
   )
 }
 
 export default function App() {
+  const { health, healthFailed, setHealth } = useHealthPolling()
+  const gate = useAuthGate(health)
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false)
+  const requestApiToken = useCallback(() => setLoginDialogOpen(true), [])
+
+  // Signing out (or an expired token) must not leave the dialog waiting behind the gate.
+  useEffect(() => {
+    if (gate.screen === 'login') setLoginDialogOpen(false)
+  }, [gate.screen])
+
+  if (gate.screen === 'login') return <LoginScreen notice={gate.notice} />
+
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<Layout />}>
+        <Route
+          element={
+            <Layout
+              health={health}
+              healthFailed={healthFailed}
+              setHealth={setHealth}
+              requestApiToken={requestApiToken}
+              authRequired={gate.authRequired}
+            />
+          }
+        >
           <Route index element={<FillActorPage />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
       </Routes>
+      {loginDialogOpen && <LoginDialog onClose={() => setLoginDialogOpen(false)} />}
     </BrowserRouter>
   )
 }

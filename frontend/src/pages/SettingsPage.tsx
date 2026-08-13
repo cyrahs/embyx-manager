@@ -320,11 +320,11 @@ export default function SettingsPage() {
       {!tokenConfigured && (
         <Notice
           tone="warning"
-          title="保存与测试连接需要 API Token"
-          body="读取配置无需认证；保存或测试连接前，请先填写部署时设置的 API Token（也可从右上角进入）。"
+          title="保存与测试连接需要登录"
+          body="读取配置无需认证；保存或测试连接前，请先用部署时设置的 API Token 登录。"
           action={
             <button className="text-button" type="button" onClick={requestApiToken}>
-              填写 Token
+              登录
             </button>
           }
         />

@@ -11,7 +11,6 @@ import {
   getPlan,
   setActiveApplyRequest,
   setActivePlanId,
-  setApiToken as storeApiToken,
   startApplyJob,
 } from '../api'
 import type { AppContext } from '../App'
@@ -21,7 +20,7 @@ import { ArrowIcon, CheckIcon, CopyIcon, MoveIcon, SearchIcon, Spinner } from '.
 import { ProgressPanel } from '../components/ProgressPanel'
 import { ActorFailures, PlanSummary, VideoGroup } from '../components/Results'
 import { ScanPanel } from '../components/ScanPanel'
-import { useApiTokenConfigured } from '../lib/apiToken'
+import { useApiTokenValue } from '../lib/apiToken'
 import {
   applyPlaceholder,
   assertActiveApplyEnvelope,
@@ -64,10 +63,9 @@ export default function FillActorPage() {
   const [recoveredApply] = useState(getActiveApplyRequest)
   const recoveredPlanId = recoveredScanPlanId ?? recoveredApply?.planId ?? null
   const [input, setInput] = useState('')
-  const [apiTokenInput, setApiTokenInput] = useState('')
   const [authRequired, setAuthRequired] = useState(false)
-  const authConfigured = useApiTokenConfigured()
-  const { health, setHealth } = useOutletContext<AppContext>()
+  const apiToken = useApiTokenValue()
+  const { health, setHealth, requestApiToken } = useOutletContext<AppContext>()
   const [plan, setPlan] = useState<FillActorPlan | null>(null)
   const [feeds, setFeeds] = useState<ActorFeedStatus[]>([])
   const [planId, setPlanId] = useState<string | null>(recoveredPlanId)
@@ -307,7 +305,7 @@ export default function FillActorPage() {
           if (pollError instanceof ApiError && pollError.code === 'unauthorized') {
             setAuthRequired(true)
             setApplyPausedForAuth(true)
-            setApplyPollWarning('移动任务仍在保留中；配置 API Token 后会继续恢复。')
+            setApplyPollWarning('移动任务仍在保留中；重新登录后会继续恢复。')
             return
           }
           if (
@@ -451,7 +449,10 @@ export default function FillActorPage() {
     try {
       consumeEnvelope(await createPlan(parsed.actorIds), setPlan, setPlanId, setJob, setFeeds, setError)
     } catch (scanError) {
-      if (scanError instanceof ApiError && scanError.code === 'unauthorized') setAuthRequired(true)
+      if (scanError instanceof ApiError && scanError.code === 'unauthorized') {
+        setAuthRequired(true)
+        requestApiToken()
+      }
       setError(errorMessage(scanError))
     } finally {
       setSubmitting(false)
@@ -492,7 +493,10 @@ export default function FillActorPage() {
     } catch (cancelError) {
       if (generation !== requestGeneration.current) return
       if (cancelError instanceof DOMException && cancelError.name === 'AbortError') return
-      if (cancelError instanceof ApiError && cancelError.code === 'unauthorized') setAuthRequired(true)
+      if (cancelError instanceof ApiError && cancelError.code === 'unauthorized') {
+        setAuthRequired(true)
+        requestApiToken()
+      }
       if (cancelError instanceof ApiError && STALE_CODES.has(cancelError.code)) {
         setNeedsFreshPlan(true)
         setJob((current) => current ? { ...current, state: 'failed', error_code: cancelError.code } : current)
@@ -554,19 +558,14 @@ export default function FillActorPage() {
     }
   }
 
-  function saveApiToken() {
-    storeApiToken(apiTokenInput)
-    setApiTokenInput('')
-  }
-
-  // The token can arrive from this panel or from the top-bar dialog; resume paused work either way.
+  // A fresh token — first one or a replacement after a rotation — resumes work paused by a 401.
   useEffect(() => {
-    if (!authConfigured) return
+    if (!apiToken) return
     setAuthRequired(false)
     setApplyPausedForAuth(false)
     setApplyRetryTick((value) => value + 1)
     setError(null)
-  }, [authConfigured])
+  }, [apiToken])
 
   const scanLocked = submitting || jobPending || applyPending
 
@@ -583,10 +582,7 @@ export default function FillActorPage() {
           applyPending={applyPending}
           onScan={() => void startScan()}
           authRequired={authRequired}
-          authConfigured={authConfigured}
-          apiTokenInput={apiTokenInput}
-          onApiTokenChange={setApiTokenInput}
-          onSaveApiToken={saveApiToken}
+          onRequestLogin={requestApiToken}
         />
 
         {(submitting || jobPending) && (
