@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { BrandRoute, DirRoute } from './routes'
-import { fromBrandRoutes, fromDirRoutes, toBrandRoutes, toDirRoutes } from './routes'
+import { assertDisjointSources, fromBrandRoutes, fromDirRoutes, toBrandRoutes, toDirRoutes } from './routes'
 
 function dirRows(...pairs: [string, string][]): DirRoute[] {
   return pairs.map(([src, dst], index) => ({ id: `row-${index}`, src, dst }))
@@ -36,6 +36,15 @@ describe('dir routes', () => {
 
   it('rejects a repeated source subdirectory', () => {
     expect(() => fromDirRoutes(dirRows(['intake', 'sorted'], ['intake', 'other']))).toThrow('出现了多次')
+  })
+
+  it('rejects a source claimed by both the priority and the normal table', () => {
+    expect(() => assertDisjointSources({ intake: 'starred' }, { intake: 'sorted' })).toThrow('intake')
+  })
+
+  it('accepts disjoint tables, including a shared destination', () => {
+    expect(() => assertDisjointSources({ vip: 'sorted' }, { intake: 'sorted' })).not.toThrow()
+    expect(() => assertDisjointSources({}, {})).not.toThrow()
   })
 })
 

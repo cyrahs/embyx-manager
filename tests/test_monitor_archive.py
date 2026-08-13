@@ -35,6 +35,15 @@ def make_pipeline(tmp_path: Path, **overrides) -> ArchivePipeline:
     return ArchivePipeline(config=config, avid_parser=AvidParser())
 
 
+def make_priority_pipeline(tmp_path: Path, **overrides) -> ArchivePipeline:
+    """Pipeline with a priority route vip -> starred alongside the normal intake -> sorted."""
+    overrides.setdefault('priority_mapping', {'vip': 'starred'})
+    pipeline = make_pipeline(tmp_path, **overrides)
+    (tmp_path / 'task' / 'vip').mkdir(parents=True, exist_ok=True)
+    (tmp_path / 'library' / 'starred').mkdir(parents=True, exist_ok=True)
+    return pipeline
+
+
 @pytest.mark.parametrize(
     ('avid', 'expected'),
     [
@@ -253,3 +262,146 @@ def test_full_run_processes_each_mapping(tmp_path: Path, monkeypatch: pytest.Mon
     assert ctx.stats['folders_flattened'] == 1
     assert ctx.stats['videos_renamed'] == 1
     assert ctx.stats['videos_archived'] == 1
+
+
+def test_priority_archive_promotes_copy_from_normal_destination(tmp_path: Path) -> None:
+    pipeline = make_priority_pipeline(tmp_path)
+    vip = pipeline.src_dir / 'vip'
+    starred = pipeline.dst_dir / 'starred'
+    write_video(vip / 'ABC-123.mp4')
+    write_video(pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4')
+
+    ctx = make_ctx()
+    pipeline.archive(vip, starred, ctx, priority=True)
+
+    assert (starred / 'ABC' / 'ABC-123.mp4').exists()
+    assert not (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
+    # The freshly arrived copy stays put for a human to deal with.
+    assert (vip / 'ABC-123.mp4').exists()
+    assert ctx.stats['duplicates_promoted'] == 1
+    assert 'videos_archived' not in ctx.stats
+
+
+def test_priority_archive_promotes_every_part_of_a_set(tmp_path: Path) -> None:
+    pipeline = make_priority_pipeline(tmp_path)
+    vip = pipeline.src_dir / 'vip'
+    starred = pipeline.dst_dir / 'starred'
+    write_video(vip / 'ABC-123-cd1.mp4')
+    write_video(vip / 'ABC-123-cd2.mp4')
+    write_video(pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123-cd1.mp4')
+    write_video(pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123-cd2.mp4')
+
+    ctx = make_ctx()
+    pipeline.archive(vip, starred, ctx, priority=True)
+
+    assert (starred / 'ABC' / 'ABC-123-cd1.mp4').exists()
+    assert (starred / 'ABC' / 'ABC-123-cd2.mp4').exists()
+    assert ctx.stats['duplicates_promoted'] == 2
+
+
+def test_priority_archive_does_not_promote_a_longer_avid(tmp_path: Path) -> None:
+    pipeline = make_priority_pipeline(tmp_path)
+    vip = pipeline.src_dir / 'vip'
+    starred = pipeline.dst_dir / 'starred'
+    write_video(vip / 'ABC-12.mp4')
+    write_video(pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4')
+
+    ctx = make_ctx()
+    pipeline.archive(vip, starred, ctx, priority=True)
+
+    assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
+    assert (starred / 'ABC' / 'ABC-12.mp4').exists()
+    assert 'duplicates_promoted' not in ctx.stats
+
+
+def test_priority_promotion_keeps_both_when_target_exists(tmp_path: Path) -> None:
+    pipeline = make_priority_pipeline(tmp_path)
+    vip = pipeline.src_dir / 'vip'
+    starred = pipeline.dst_dir / 'starred'
+    write_video(vip / 'ABC-123.mp4')
+    write_video(pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4')
+    write_video(starred / 'ABC' / 'ABC-123.mp4')
+
+    ctx = make_ctx()
+    pipeline.archive(vip, starred, ctx, priority=True)
+
+    assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
+    assert (starred / 'ABC' / 'ABC-123.mp4').exists()
+    assert (vip / 'ABC-123.mp4').exists()
+    assert 'duplicates_promoted' not in ctx.stats
+
+
+def test_priority_archive_skips_promotion_for_brand_mapped_brand(tmp_path: Path) -> None:
+    """brand_mapping sends both categories to the same directory, so there is nothing to move."""
+    pipeline = make_priority_pipeline(tmp_path, brand_mapping={'special': ('ABC',)})
+    vip = pipeline.src_dir / 'vip'
+    write_video(vip / 'ABC-123.mp4')
+    write_video(pipeline.dst_dir / 'special' / 'ABC' / 'ABC-123.mp4')
+
+    ctx = make_ctx()
+    pipeline.archive(vip, pipeline.dst_dir / 'starred', ctx, priority=True)
+
+    assert not (pipeline.dst_dir / 'starred' / 'ABC').exists()
+    assert (vip / 'ABC-123.mp4').exists()
+    assert 'duplicates_promoted' not in ctx.stats
+
+
+def test_normal_archive_skips_avid_held_by_priority(tmp_path: Path) -> None:
+    pipeline = make_priority_pipeline(tmp_path)
+    intake = pipeline.src_dir / 'intake'
+    sorted_dir = pipeline.dst_dir / 'sorted'
+    write_video(intake / 'ABC-123.mp4')
+    write_video(pipeline.dst_dir / 'starred' / 'ABC' / 'ABC-123.mp4')
+
+    ctx = make_ctx()
+    pipeline.archive(intake, sorted_dir, ctx)
+
+    assert (intake / 'ABC-123.mp4').exists()
+    assert not (sorted_dir / 'ABC').exists()
+    assert ctx.stats['skipped_priority'] == 1
+
+
+def test_normal_archive_guard_ignores_brand_mapped_brand(tmp_path: Path) -> None:
+    pipeline = make_priority_pipeline(tmp_path, brand_mapping={'special': ('ABC',)})
+    intake = pipeline.src_dir / 'intake'
+    write_video(intake / 'ABC-123.mp4')
+
+    ctx = make_ctx()
+    pipeline.archive(intake, pipeline.dst_dir / 'sorted', ctx)
+
+    assert (pipeline.dst_dir / 'special' / 'ABC' / 'ABC-123.mp4').exists()
+    assert 'skipped_priority' not in ctx.stats
+
+
+def test_full_run_processes_priority_routes_first(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Had the normal route run first, its copy would have landed in sorted instead."""
+    monkeypatch.setattr('embyx_manager.monitor.archive.POST_MUTATION_SLEEP_SECONDS', 0)
+    pipeline = make_priority_pipeline(tmp_path)
+    intake = pipeline.src_dir / 'intake'
+    vip = pipeline.src_dir / 'vip'
+    write_video(intake / 'ABC-123.mp4')
+    write_video(vip / 'ABC-123.mp4')
+
+    ctx = make_ctx()
+    pipeline.run(ctx)
+
+    assert (pipeline.dst_dir / 'starred' / 'ABC' / 'ABC-123.mp4').exists()
+    assert not (pipeline.dst_dir / 'sorted' / 'ABC').exists()
+    assert (intake / 'ABC-123.mp4').exists()
+    assert ctx.stats['skipped_priority'] == 1
+
+
+def test_full_run_promotes_then_keeps_the_new_copy(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr('embyx_manager.monitor.archive.POST_MUTATION_SLEEP_SECONDS', 0)
+    pipeline = make_priority_pipeline(tmp_path)
+    vip = pipeline.src_dir / 'vip'
+    write_video(vip / 'ABC-123 release' / 'abc-123 hd.mp4')
+    write_video(pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4')
+
+    ctx = make_ctx()
+    pipeline.run(ctx)
+
+    assert (pipeline.dst_dir / 'starred' / 'ABC' / 'ABC-123.mp4').exists()
+    assert not (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
+    assert (vip / 'ABC-123.mp4').exists()
+    assert ctx.stats['duplicates_promoted'] == 1

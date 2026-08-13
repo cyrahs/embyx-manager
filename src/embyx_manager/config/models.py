@@ -8,7 +8,7 @@ from pathlib import PurePosixPath
 from typing import ClassVar
 from urllib.parse import urlsplit, urlunsplit
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, ValidationInfo, field_validator, model_validator
 
 
 def normalize_http_base_url(name: str, value: str) -> str:
@@ -167,6 +167,9 @@ class ArchiveConfig(ConfigSection):
     dst_dir: str = ''
     # Per-subdirectory routing below src_dir/dst_dir, e.g. {'intake': 'library'}.
     mapping: dict[str, str] = {}
+    # Same shape as mapping; these routes run first and claim duplicates already
+    # archived under a mapping destination.
+    priority_mapping: dict[str, str] = {}
     min_size_mb: int = 0
     # Destination subdirectory -> list of brands routed into it.
     brand_mapping: dict[str, tuple[str, ...]] = {}
@@ -179,16 +182,17 @@ class ArchiveConfig(ConfigSection):
             raise ValueError(msg)
         return value
 
-    @field_validator('mapping')
+    @field_validator('mapping', 'priority_mapping')
     @classmethod
-    def _validate_mapping(cls, value: dict[str, str]) -> dict[str, str]:
+    def _validate_mapping(cls, value: dict[str, str], info: ValidationInfo) -> dict[str, str]:
+        label = f'archive.{info.field_name}'
         mapping: dict[str, str] = {}
         for src, dst in value.items():
-            source = normalize_relative_subpath('archive.mapping source', src)
+            source = normalize_relative_subpath(f'{label} source', src)
             if source in mapping:
-                msg = f'archive.mapping must not repeat the source subdirectory {source!r}'
+                msg = f'{label} must not repeat the source subdirectory {source!r}'
                 raise ValueError(msg)
-            mapping[source] = normalize_relative_subpath('archive.mapping destination', dst)
+            mapping[source] = normalize_relative_subpath(f'{label} destination', dst)
         return mapping
 
     @field_validator('brand_mapping')
@@ -209,9 +213,22 @@ class ArchiveConfig(ConfigSection):
             mapping[destination] = normalized
         return mapping
 
+    @model_validator(mode='after')
+    def _validate_route_sources(self) -> 'ArchiveConfig':
+        # A destination may be shared by both tables, but a source subdirectory
+        # belongs to exactly one category or the routing would be ambiguous.
+        overlap = sorted(set(self.mapping) & set(self.priority_mapping))
+        if overlap:
+            msg = (
+                'archive.mapping and archive.priority_mapping must not share the source '
+                f'subdirectory {", ".join(repr(source) for source in overlap)}'
+            )
+            raise ValueError(msg)
+        return self
+
     @property
     def configured(self) -> bool:
-        return bool(self.src_dir and self.dst_dir and self.mapping)
+        return bool(self.src_dir and self.dst_dir and (self.mapping or self.priority_mapping))
 
 
 class MappingConfig(ConfigSection):

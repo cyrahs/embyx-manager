@@ -68,6 +68,13 @@ export function fromDirRoutes(rows: DirRoute[]): Record<string, string> {
   return mapping
 }
 
+/** 两张路由表共用同一个来源根目录，同一个来源子目录只能归属其中一类。 */
+export function assertDisjointSources(priority: Record<string, string>, normal: Record<string, string>): void {
+  for (const src of Object.keys(priority)) {
+    if (src in normal) throw new Error(`来源子目录「${src}」不能同时出现在优先路由和普通路由中`)
+  }
+}
+
 export function toBrandRoutes(value: unknown): BrandRoute[] {
   if (!value || typeof value !== 'object') return []
   return Object.entries(value as Record<string, unknown>).map(([dst, brands]) => ({

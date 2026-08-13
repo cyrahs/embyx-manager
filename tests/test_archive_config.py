@@ -9,6 +9,7 @@ def test_defaults_leave_the_pipeline_unconfigured() -> None:
     config = ArchiveConfig()
 
     assert config.mapping == {}
+    assert config.priority_mapping == {}
     assert config.brand_mapping == {}
     assert config.configured is False
 
@@ -18,6 +19,25 @@ def test_mapping_normalizes_subdirectories() -> None:
 
     assert config.mapping == {'intake': 'sorted'}
     assert config.configured is True
+
+
+def test_priority_mapping_normalizes_subdirectories() -> None:
+    config = ArchiveConfig(src_dir='/downloads', dst_dir='/library', priority_mapping={' vip/ ': './starred'})
+
+    assert config.priority_mapping == {'vip': 'starred'}
+    assert config.configured is True
+
+
+def test_both_tables_may_share_a_destination() -> None:
+    config = ArchiveConfig(
+        src_dir='/downloads',
+        dst_dir='/library',
+        mapping={'intake': 'sorted'},
+        priority_mapping={'vip': 'sorted'},
+    )
+
+    assert config.mapping == {'intake': 'sorted'}
+    assert config.priority_mapping == {'vip': 'sorted'}
 
 
 def test_brand_mapping_upper_cases_and_deduplicates_brands() -> None:
@@ -37,6 +57,16 @@ def test_brand_mapping_upper_cases_and_deduplicates_brands() -> None:
         ({'brand_mapping': {'special': ()}}, 'must list at least one brand'),
         ({'brand_mapping': {'special': ('  ',)}}, 'must list at least one brand'),
         ({'brand_mapping': {'/special': ('ABC',)}}, 'destination must be relative'),
+        ({'priority_mapping': {'/vip': 'starred'}}, r'archive\.priority_mapping source must be relative'),
+        ({'priority_mapping': {'vip': '../escape'}}, r'archive\.priority_mapping destination must not contain'),
+        (
+            {'priority_mapping': {'vip': 'starred', ' vip/ ': 'other'}},
+            r"archive\.priority_mapping must not repeat the source subdirectory 'vip'",
+        ),
+        (
+            {'mapping': {'intake': 'sorted'}, 'priority_mapping': {'./intake': 'starred'}},
+            "must not share the source subdirectory 'intake'",
+        ),
     ],
 )
 def test_rejects_unusable_routes(values: dict, message: str) -> None:

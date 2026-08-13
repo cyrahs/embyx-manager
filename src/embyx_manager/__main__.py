@@ -58,6 +58,7 @@ def _import_config(config_path: Path, database_url: str) -> None:
             'src_dir': str(archive.get('src_dir', '')),
             'dst_dir': str(archive.get('dst_dir', '')),
             'mapping': {str(key): str(value) for key, value in archive.get('mapping', {}).items()},
+            'priority_mapping': {str(key): str(value) for key, value in archive.get('priority_mapping', {}).items()},
             'min_size_mb': int(archive.get('min_size', 0)),
             'brand_mapping': {
                 str(key): [str(brand) for brand in values] for key, values in archive.get('brand_mapping', {}).items()

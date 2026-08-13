@@ -8,7 +8,7 @@ import { Spinner } from '../components/Icons'
 import { BrandRoutesField, DirRoutesField } from '../components/settings/RouteEditors'
 import { useApiTokenConfigured } from '../lib/apiToken'
 import type { BrandRoute, DirRoute } from '../lib/settings/routes'
-import { fromBrandRoutes, fromDirRoutes, toBrandRoutes, toDirRoutes } from '../lib/settings/routes'
+import { assertDisjointSources, fromBrandRoutes, fromDirRoutes, toBrandRoutes, toDirRoutes } from '../lib/settings/routes'
 import type { ConfigSection } from '../types'
 
 type FieldKind = 'text' | 'secret' | 'boolean' | 'number' | 'lines' | 'dir-routes' | 'brand-routes'
@@ -31,6 +31,8 @@ interface SectionSpec {
   description: string
   fields: FieldSpec[]
   testTarget?: 'clouddrive' | 'freshrss'
+  /** Cross-field check run after every field is collected; throws a message to show. */
+  validate?: (values: Record<string, unknown>) => void
 }
 
 const SECTION_SPECS: SectionSpec[] = [
@@ -142,10 +144,17 @@ const SECTION_SPECS: SectionSpec[] = [
       { key: 'dst_dir', label: '目标根目录', kind: 'text', placeholder: '/media/library' },
       { key: 'min_size_mb', label: '最小视频大小（MB）', kind: 'number' },
       {
-        key: 'mapping',
-        label: '子目录路由',
+        key: 'priority_mapping',
+        label: '优先子目录路由',
         kind: 'dir-routes',
-        hint: '每条规则整理一个来源子目录，并把视频按厂牌分目录放进对应的目标子目录；没有任何一条时归档不会运行。',
+        hint: '先于普通路由处理；若同一番号已归档在某个普通目标子目录，会先把已归档文件移动到这里的目标子目录，来源目录里新到的那份保留待人工处理。来源子目录不能与下面的普通路由重复。',
+        rootKeys: { src: 'src_dir', dst: 'dst_dir' },
+      },
+      {
+        key: 'mapping',
+        label: '普通子目录路由',
+        kind: 'dir-routes',
+        hint: '每条规则整理一个来源子目录，并把视频按厂牌分目录放进对应的目标子目录；番号已归档在优先目标子目录时会跳过并保留来源文件。两张表都为空时归档不会运行。',
         rootKeys: { src: 'src_dir', dst: 'dst_dir' },
       },
       {
@@ -156,6 +165,11 @@ const SECTION_SPECS: SectionSpec[] = [
         rootKeys: { dst: 'dst_dir' },
       },
     ],
+    validate: (values) =>
+      assertDisjointSources(
+        (values.priority_mapping ?? {}) as Record<string, string>,
+        (values.mapping ?? {}) as Record<string, string>,
+      ),
   },
   {
     section: 'mapping',
@@ -252,6 +266,7 @@ function SectionForm({ spec, data, onSaved, onUnauthorized }: SectionFormProps) 
         throw new Error(error instanceof Error ? `${field.label}：${error.message}` : `${field.label} 格式无效`)
       }
     }
+    spec.validate?.(values)
     return values
   }
 
