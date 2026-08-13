@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { clockText, safeMagnet } from '../lib/format'
-import { ACTOR_ERROR_LABELS, MOVE_ERROR_LABELS, MOVE_LABELS, VIDEO_GROUPS, type VideoGroupDef } from '../lib/labels'
-import type { ApplyResult, FillActorPlan, MoveCandidate, VideoPlan } from '../types'
-import { AlertIcon, CheckIcon, ChevronIcon, FileIcon, StatusIcon } from './Icons'
+import { clockText, safeMagnet } from '../../lib/fill-actor/format'
+import { ACTOR_ERROR_LABELS, MOVE_ERROR_LABELS, MOVE_LABELS, VIDEO_GROUPS, type VideoGroupDef } from '../../lib/fill-actor/labels'
+import type { ApplyResult, FillActorPlan, MoveCandidate, VideoPlan } from '../../types'
+import { AlertIcon, CheckIcon, ChevronIcon, FileIcon, StatusIcon } from '../Icons'
 
 export function PlanSummary({ plan }: { plan: FillActorPlan }) {
   const actorFailures = plan.actors.filter((actor) => actor.error_code).length

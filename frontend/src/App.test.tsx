@@ -113,15 +113,22 @@ function authorizationOf(init?: RequestInit): string | null {
   return headers.Authorization ?? null
 }
 
-describe('Fill Actor page', () => {
+describe('app shell', () => {
   beforeEach(() => {
     window.sessionStorage.clear()
     window.localStorage.clear()
-    vi.spyOn(crypto, 'randomUUID').mockReturnValue(APPLY_REQUEST_ID)
-    vi.stubGlobal('fetch', vi.fn().mockImplementation(() => jsonResponse({ status: 'ok', database: 'ok', roots: 'ok' })))
+    vi.stubGlobal('fetch', vi.fn().mockImplementation((input) => {
+      const url = String(input)
+      if (url.startsWith('/api/monitor/status') || url.startsWith('/api/monitor/runs')) return jsonResponse([])
+      if (url.startsWith('/api/config')) return jsonResponse([])
+      return jsonResponse({ status: 'ok', database: true })
+    }))
   })
 
-  afterEach(() => vi.restoreAllMocks())
+  afterEach(() => {
+    vi.restoreAllMocks()
+    window.history.pushState({}, '', '/')
+  })
 
   it('orders the primary navigation as dashboard, fill actor, then settings', async () => {
     render(<App />)
@@ -132,6 +139,42 @@ describe('Fill Actor page', () => {
       '补全演员',
       '设置',
     ])
+  })
+
+  it('lands on the dashboard rather than a feature page when the app root is opened', async () => {
+    window.history.pushState({}, '', '/')
+
+    render(<App />)
+
+    expect(await screen.findByRole('heading', { name: '流水线' })).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/dashboard')
+  })
+
+  it.each([
+    ['/dashboard', '监控看板 · Embyx Manager'],
+    ['/fill-actor', '补全演员 · Embyx Manager'],
+    ['/settings', '设置 · Embyx Manager'],
+  ])('names %s in the tab title', async (path, title) => {
+    window.history.pushState({}, '', path)
+
+    render(<App />)
+
+    await waitFor(() => expect(document.title).toBe(title))
+  })
+})
+
+describe('Fill Actor page', () => {
+  beforeEach(() => {
+    window.sessionStorage.clear()
+    window.localStorage.clear()
+    window.history.pushState({}, '', '/fill-actor')
+    vi.spyOn(crypto, 'randomUUID').mockReturnValue(APPLY_REQUEST_ID)
+    vi.stubGlobal('fetch', vi.fn().mockImplementation(() => jsonResponse({ status: 'ok', database: true })))
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+    window.history.pushState({}, '', '/')
   })
 
   it('validates and deduplicates actor IDs before rendering grouped scan results', async () => {
@@ -262,7 +305,7 @@ describe('Fill Actor page', () => {
   })
 
   it('recovers an active scan from session storage and clears it after completion', async () => {
-    window.sessionStorage.setItem('embyx-manager-active-plan-id', 'resume-1')
+    window.sessionStorage.setItem('embyx-manager-fill-actor-plan-id', 'resume-1')
     const resumedPlan = { ...plan, plan_id: 'resume-1' }
     const fetchMock = vi.mocked(fetch)
     fetchMock
@@ -278,14 +321,27 @@ describe('Fill Actor page', () => {
       '/api/fill-actor/plans/resume-1',
       expect.objectContaining({ cache: 'no-store', signal: expect.any(AbortSignal) }),
     )
-    await waitFor(() => expect(window.sessionStorage.getItem('embyx-manager-active-plan-id')).toBeNull())
+    await waitFor(() => expect(window.sessionStorage.getItem('embyx-manager-fill-actor-plan-id')).toBeNull())
+  })
+
+  it('recovers a scan a previous version stored under the unprefixed session key', async () => {
+    window.sessionStorage.setItem('embyx-manager-active-plan-id', 'legacy-1')
+    const resumedPlan = { ...plan, plan_id: 'legacy-1' }
+    vi.mocked(fetch)
+      .mockImplementationOnce(() => jsonResponse({ status: 'ok' }))
+      .mockImplementationOnce(() => jsonResponse({ job: { job_id: 'legacy-1', plan_id: 'legacy-1', state: 'completed' }, plan: resumedPlan }))
+
+    render(<App />)
+
+    expect(await screen.findByText('扫描结果', {}, { timeout: 2_000 })).toBeInTheDocument()
+    expect(window.sessionStorage.getItem('embyx-manager-active-plan-id')).toBeNull()
   })
 
   it('requires confirmation and displays per-file apply results', async () => {
     const user = userEvent.setup()
     const fetchMock = vi.mocked(fetch)
     fetchMock
-      .mockImplementationOnce(() => jsonResponse({ status: 'ok', apply_enabled: true, apply_ready: true }))
+      .mockImplementationOnce(() => jsonResponse({ status: 'ok', fill_actor: { apply_enabled: true, apply_ready: true } }))
       .mockImplementationOnce(() => jsonResponse(plan))
       .mockImplementationOnce(() =>
         jsonResponse({
@@ -356,7 +412,7 @@ describe('Fill Actor page', () => {
       resolveTerminal = resolve
     })
     fetchMock
-      .mockImplementationOnce(() => jsonResponse({ status: 'ok', apply_enabled: true, apply_ready: true }))
+      .mockImplementationOnce(() => jsonResponse({ status: 'ok', fill_actor: { apply_enabled: true, apply_ready: true } }))
       .mockImplementationOnce(() => jsonResponse(twoCandidatePlan))
       .mockImplementationOnce(() => jsonResponse({
         job: {
@@ -439,7 +495,7 @@ describe('Fill Actor page', () => {
     const user = userEvent.setup()
     const fetchMock = vi.mocked(fetch)
     fetchMock
-      .mockImplementationOnce(() => jsonResponse({ status: 'ok', apply_enabled: true, apply_ready: true }))
+      .mockImplementationOnce(() => jsonResponse({ status: 'ok', fill_actor: { apply_enabled: true, apply_ready: true } }))
       .mockImplementationOnce(() => jsonResponse(twoCandidatePlan))
       .mockImplementationOnce(() => jsonResponse({
         job: {
@@ -488,7 +544,7 @@ describe('Fill Actor page', () => {
     const user = userEvent.setup()
     const fetchMock = vi.mocked(fetch)
     fetchMock
-      .mockImplementationOnce(() => jsonResponse({ status: 'ok', apply_enabled: true, apply_ready: true }))
+      .mockImplementationOnce(() => jsonResponse({ status: 'ok', fill_actor: { apply_enabled: true, apply_ready: true } }))
       .mockImplementationOnce(() => jsonResponse(plan))
       .mockImplementationOnce(() => Promise.reject(new TypeError('response lost')))
       .mockImplementationOnce(() => jsonResponse({
@@ -528,7 +584,7 @@ describe('Fill Actor page', () => {
 
   it('reuses the same request ID only after recovery lookup confirms the job is missing', async () => {
     const requestId = '1234567890abcdef'
-    window.sessionStorage.setItem('embyx-manager-active-apply', JSON.stringify({
+    window.sessionStorage.setItem('embyx-manager-fill-actor-apply', JSON.stringify({
       planId: 'plan-1',
       revision: 'revision-1',
       candidateIds: ['safe-1'],
@@ -538,7 +594,7 @@ describe('Fill Actor page', () => {
     }))
     const fetchMock = vi.mocked(fetch)
     fetchMock.mockImplementation((path, init) => {
-      if (path === '/api/health') return jsonResponse({ status: 'ok', apply_enabled: true, apply_ready: true })
+      if (path === '/api/health') return jsonResponse({ status: 'ok', fill_actor: { apply_enabled: true, apply_ready: true } })
       if (path === '/api/fill-actor/plans/plan-1') return jsonResponse(plan)
       if (path === `/api/fill-actor/apply-jobs/${requestId}`) {
         return jsonResponse({ error: { code: 'unknown_apply_job' } }, 404)
@@ -573,7 +629,7 @@ describe('Fill Actor page', () => {
   })
 
   it('restores an accepted move and its parent plan from session storage after refresh', async () => {
-    window.sessionStorage.setItem('embyx-manager-active-apply', JSON.stringify({
+    window.sessionStorage.setItem('embyx-manager-fill-actor-apply', JSON.stringify({
       planId: 'plan-1',
       revision: 'revision-1',
       candidateIds: ['safe-1'],
@@ -584,7 +640,7 @@ describe('Fill Actor page', () => {
     let applyPolls = 0
     fetchMock.mockImplementation((path) => {
       if (path === '/api/health') {
-        return jsonResponse({ status: 'ok', apply_enabled: false, apply_ready: false })
+        return jsonResponse({ status: 'ok', fill_actor: { apply_enabled: false, apply_ready: false } })
       }
       if (path === '/api/fill-actor/plans/plan-1') {
         return jsonResponse({ job: { job_id: 'scan-1', plan_id: 'plan-1', state: 'completed' }, plan, feeds: [] })
@@ -629,13 +685,13 @@ describe('Fill Actor page', () => {
     expect(screen.getByLabelText('演员 ID')).toBeDisabled()
     expect(screen.getByText('文件移动已暂停')).toBeInTheDocument()
     expect(await screen.findByText('所选文件已全部移入', {}, { timeout: 4_000 })).toBeInTheDocument()
-    await waitFor(() => expect(window.sessionStorage.getItem('embyx-manager-active-apply')).toBeNull())
+    await waitFor(() => expect(window.sessionStorage.getItem('embyx-manager-fill-actor-apply')).toBeNull())
     expect(fetchMock.mock.calls.some(([path, init]) => String(path).endsWith('/apply-jobs') && init?.method === 'POST')).toBe(false)
   })
 
   it('restores only the confirmed candidate subset and clears the lost-response retry flag', async () => {
     const requestId = '1234567890abcdef'
-    window.sessionStorage.setItem('embyx-manager-active-apply', JSON.stringify({
+    window.sessionStorage.setItem('embyx-manager-fill-actor-apply', JSON.stringify({
       planId: 'plan-1',
       revision: 'revision-1',
       candidateIds: ['safe-1'],
@@ -645,7 +701,7 @@ describe('Fill Actor page', () => {
     }))
     const fetchMock = vi.mocked(fetch)
     fetchMock.mockImplementation((path) => {
-      if (path === '/api/health') return jsonResponse({ status: 'ok', apply_enabled: true, apply_ready: true })
+      if (path === '/api/health') return jsonResponse({ status: 'ok', fill_actor: { apply_enabled: true, apply_ready: true } })
       if (path === '/api/fill-actor/plans/plan-1') {
         return jsonResponse({ job: { job_id: 'scan-1', plan_id: 'plan-1', state: 'completed' }, plan: twoCandidatePlan, feeds: [] })
       }
@@ -670,7 +726,7 @@ describe('Fill Actor page', () => {
     await waitFor(() => expect(screen.getByRole('checkbox', { name: /ABC-001\.mp4/ })).toBeChecked())
     expect(screen.getByRole('checkbox', { name: /ABC-002\.mkv/ })).not.toBeChecked()
     await waitFor(() => {
-      const stored = JSON.parse(String(window.sessionStorage.getItem('embyx-manager-active-apply'))) as Record<string, unknown>
+      const stored = JSON.parse(String(window.sessionStorage.getItem('embyx-manager-fill-actor-apply'))) as Record<string, unknown>
       expect(stored.retrySubmitIfMissing).toBeUndefined()
     }, { timeout: 2_000 })
   })
@@ -701,14 +757,14 @@ describe('Fill Actor page', () => {
   })
 
   it('rejects overlong persisted request IDs and retains the legacy synchronous API helper', async () => {
-    window.sessionStorage.setItem('embyx-manager-active-apply', JSON.stringify({
+    window.sessionStorage.setItem('embyx-manager-fill-actor-apply', JSON.stringify({
       planId: 'plan-1',
       revision: 'revision-1',
       candidateIds: ['safe-1'],
       requestId: 'x'.repeat(129),
     }))
     expect(getActiveApplyRequest()).toBeNull()
-    expect(window.sessionStorage.getItem('embyx-manager-active-apply')).toBeNull()
+    expect(window.sessionStorage.getItem('embyx-manager-fill-actor-apply')).toBeNull()
 
     const fetchMock = vi.mocked(fetch)
     fetchMock.mockImplementationOnce(() => jsonResponse({
@@ -731,7 +787,7 @@ describe('Fill Actor page', () => {
     const user = userEvent.setup()
     const fetchMock = vi.mocked(fetch)
     fetchMock
-      .mockImplementationOnce(() => jsonResponse({ status: 'ok', apply_enabled: true, apply_ready: true }))
+      .mockImplementationOnce(() => jsonResponse({ status: 'ok', fill_actor: { apply_enabled: true, apply_ready: true } }))
       .mockImplementationOnce(() => jsonResponse(plan))
       .mockImplementationOnce(() =>
         jsonResponse({
@@ -787,7 +843,7 @@ describe('Fill Actor page', () => {
     const user = userEvent.setup()
     const fetchMock = vi.mocked(fetch)
     fetchMock
-      .mockImplementationOnce(() => jsonResponse({ status: 'ok', apply_enabled: false, apply_ready: false }))
+      .mockImplementationOnce(() => jsonResponse({ status: 'ok', fill_actor: { apply_enabled: false, apply_ready: false } }))
       .mockImplementationOnce(() => jsonResponse(plan))
 
     render(<App />)
@@ -809,10 +865,7 @@ describe('Fill Actor page', () => {
     fetchMock
       .mockImplementationOnce(() => jsonResponse({
         status: 'ok',
-        cloud: true,
-        legacy_journal: false,
-        apply_enabled: true,
-        apply_ready: false,
+        fill_actor: { cloud: true, legacy_journal: false, apply_enabled: true, apply_ready: false },
       }))
       .mockImplementationOnce(() => jsonResponse(plan))
 
@@ -833,21 +886,13 @@ describe('Fill Actor page', () => {
     fetchMock
       .mockImplementationOnce(() => jsonResponse({
         status: 'not_ready',
-        database: true,
-        roots: true,
-        cloud: false,
-        legacy_journal: true,
-        apply_enabled: true,
-        apply_ready: false,
+        database: false,
+        fill_actor: { roots: true, cloud: true, legacy_journal: true, apply_enabled: true, apply_ready: false },
       }, 503))
       .mockImplementationOnce(() => jsonResponse({
         status: 'ok',
         database: true,
-        roots: true,
-        cloud: true,
-        legacy_journal: true,
-        apply_enabled: true,
-        apply_ready: true,
+        fill_actor: { roots: true, cloud: true, legacy_journal: true, apply_enabled: true, apply_ready: true },
       }))
 
     const view = render(<App />)
@@ -871,6 +916,35 @@ describe('Fill Actor page', () => {
       view.unmount()
       vi.useRealTimers()
     }
+  })
+
+  it('points an unconfigured deployment at the settings page instead of blaming the mounts', async () => {
+    vi.mocked(fetch).mockImplementation(() => jsonResponse({
+      status: 'ok',
+      database: true,
+      fill_actor: { configured: false, roots: false, cloud: true, scan_ready: false, apply_ready: false },
+    }))
+
+    render(<App />)
+
+    expect(await screen.findByText('补全演员尚未配置')).toBeInTheDocument()
+    expect(screen.queryByText('媒体库根目录不可用')).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '前往设置' })).toHaveAttribute('href', '/settings')
+    expect(screen.getByText('服务正常')).toBeInTheDocument()
+  })
+
+  it('keeps the app healthy and warns only this page when fill actor dependencies are down', async () => {
+    vi.mocked(fetch).mockImplementation(() => jsonResponse({
+      status: 'ok',
+      database: true,
+      fill_actor: { configured: true, roots: false, cloud: true, scan_ready: false, apply_enabled: true, apply_ready: false },
+    }))
+
+    render(<App />)
+
+    expect(await screen.findByText('媒体库根目录不可用')).toBeInTheDocument()
+    expect(screen.getByText('服务正常')).toBeInTheDocument()
+    expect(screen.queryByText('服务未就绪')).not.toBeInTheDocument()
   })
 
   it('copies every valid unique magnet in plan order and has no per-row magnet actions', async () => {
@@ -1058,7 +1132,7 @@ describe('Fill Actor page', () => {
       '/api/fill-actor/plans/plan-1/cancel',
       expect.objectContaining({ method: 'POST', signal: expect.any(AbortSignal) }),
     )
-    await waitFor(() => expect(window.sessionStorage.getItem('embyx-manager-active-plan-id')).toBeNull())
+    await waitFor(() => expect(window.sessionStorage.getItem('embyx-manager-fill-actor-plan-id')).toBeNull())
   })
 
   it('keeps polling and restores cancel after a network failure', async () => {
@@ -1228,7 +1302,7 @@ describe('Fill Actor page', () => {
     const user = userEvent.setup()
     const fetchMock = vi.mocked(fetch)
     fetchMock
-      .mockImplementationOnce(() => jsonResponse({ status: 'ok', apply_enabled: true, apply_ready: true }))
+      .mockImplementationOnce(() => jsonResponse({ status: 'ok', fill_actor: { apply_enabled: true, apply_ready: true } }))
       .mockImplementationOnce(() => jsonResponse(plan))
       .mockImplementationOnce(() => jsonResponse({ error: { code: 'expired_plan' } }, 410))
 
@@ -1248,7 +1322,7 @@ describe('Fill Actor page', () => {
     const user = userEvent.setup()
     const fetchMock = vi.mocked(fetch)
     fetchMock
-      .mockImplementationOnce(() => jsonResponse({ status: 'ok', apply_enabled: true, apply_ready: true }))
+      .mockImplementationOnce(() => jsonResponse({ status: 'ok', fill_actor: { apply_enabled: true, apply_ready: true } }))
       .mockImplementationOnce(() => jsonResponse(plan))
       .mockImplementationOnce(() => jsonResponse({ error: { code: 'legacy_plan_requires_rescan' } }, 409))
 
@@ -1311,10 +1385,15 @@ describe('login gate', () => {
   beforeEach(() => {
     window.sessionStorage.clear()
     window.localStorage.clear()
+    // The gate is page-agnostic; fill-actor is just the page these cases assert against.
+    window.history.pushState({}, '', '/fill-actor')
     vi.stubGlobal('fetch', vi.fn().mockImplementation(() => jsonResponse({ status: 'ok', auth_required: true })))
   })
 
-  afterEach(() => vi.restoreAllMocks())
+  afterEach(() => {
+    vi.restoreAllMocks()
+    window.history.pushState({}, '', '/')
+  })
 
   /** Serves a deployment that demands `token`; anything else is rejected like the real API. */
   function stubTokenServer(token: string) {
@@ -1441,7 +1520,7 @@ describe('login gate', () => {
         return jsonResponse([{ section: 'rss', values: { enabled: false }, secrets: {}, version: 1 }])
       }
       if (url.includes('/trigger')) return jsonResponse({ error: { code: 'unauthorized' } }, 401)
-      return jsonResponse({ status: 'ok', database: 'ok', roots: 'ok' })
+      return jsonResponse({ status: 'ok', database: true })
     })
 
     render(<App />)

@@ -7,6 +7,7 @@ from embyx_manager.fill_actor.errors import (
     JobQueueFullError,
     LegacyPlanError,
     MoveDisabledError,
+    NotConfiguredError,
     RevisionMismatchError,
     TooManyActorsError,
     TooManyVideosError,
@@ -25,7 +26,12 @@ from embyx_manager.fill_actor.models import (
     VideoState,
 )
 from embyx_manager.fill_actor.ports import ActorCatalog, BrandResolver, MagnetProvider
-from embyx_manager.fill_actor.service import FillActorPaths, FillActorService
+from embyx_manager.fill_actor.service import (
+    FillActorPaths,
+    FillActorRuntime,
+    FillActorService,
+    static_runtime,
+)
 
 __all__ = [
     'ActorCatalog',
@@ -37,6 +43,7 @@ __all__ = [
     'FillActorError',
     'FillActorPaths',
     'FillActorPlan',
+    'FillActorRuntime',
     'FillActorService',
     'InvalidActorIdError',
     'JobQueueFullError',
@@ -46,6 +53,7 @@ __all__ = [
     'MoveDisabledError',
     'MoveResult',
     'MoveState',
+    'NotConfiguredError',
     'RevisionMismatchError',
     'TooManyActorsError',
     'TooManyVideosError',
@@ -53,4 +61,5 @@ __all__ = [
     'UnknownPlanError',
     'VideoPlan',
     'VideoState',
+    'static_runtime',
 ]

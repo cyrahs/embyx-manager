@@ -8,7 +8,16 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from embyx_manager.api import ActorFeedView, JobProgressView, create_app
+from embyx_manager.api import create_app, make_mutation_auth
+from embyx_manager.fill_actor.api import (
+    ActorFeedView,
+    JobProgressView,
+    create_fill_actor_router,
+    fill_actor_health,
+    fill_actor_lifespan,
+    handle_fill_actor_error,
+)
+from embyx_manager.fill_actor.errors import FillActorError
 from embyx_manager.fill_actor.feeds import RSSHubFeedWarmer
 from embyx_manager.fill_actor.jobs import FillActorJobManager
 from embyx_manager.fill_actor.persistence import (
@@ -23,7 +32,12 @@ from embyx_manager.fill_actor.persistence import (
     JobState,
     MemoryFillActorRepository,
 )
-from embyx_manager.fill_actor.service import FillActorPaths, FillActorService
+from embyx_manager.fill_actor.service import (
+    FillActorPaths,
+    FillActorRuntime,
+    FillActorService,
+    static_runtime,
+)
 
 
 class ActorCatalog:
@@ -73,23 +87,34 @@ def make_client(
         path.mkdir()
     repository = MemoryFillActorRepository()
     service = FillActorService(
-        paths=paths,
+        runtime=static_runtime(
+            paths=paths,
+            apply_enabled=apply_enabled,
+        ),
         actor_catalog=actor_catalog or ActorCatalog(),
         magnet_provider=MagnetProvider(),
         brand_resolver=BrandResolver(),
         repository=repository,
-        apply_enabled=apply_enabled,
     )
     feed_warmer = feed_warmer_factory(repository) if feed_warmer_factory is not None else None
     jobs = FillActorJobManager(service=service, repository=repository, feed_warmer=feed_warmer)
     app = create_app(
-        service=service,
-        repository=repository,
-        jobs=jobs,
+        app_ready=repository.health_check,
+        routers=(
+            create_fill_actor_router(
+                service=service,
+                repository=repository,
+                jobs=jobs,
+                mutation_auth=make_mutation_auth(api_token),
+                freshrss_url=freshrss_url,
+                freshrss_rsshub_url=freshrss_rsshub_url,
+            ),
+        ),
+        feature_health={'fill_actor': fill_actor_health(service=service, repository=repository)},
+        exception_handlers={FillActorError: handle_fill_actor_error},
+        lifespans=(fill_actor_lifespan(service=service, repository=repository, jobs=jobs),),
         api_token=api_token,
         max_request_bytes=max_request_bytes,
-        freshrss_url=freshrss_url,
-        freshrss_rsshub_url=freshrss_rsshub_url,
     )
     return TestClient(app), paths, repository
 
@@ -502,13 +527,79 @@ def test_request_size_limit_and_health(tmp_path: Path) -> None:
     assert health.json() == {
         'status': 'ok',
         'database': True,
-        'roots': True,
+        'auth_required': False,
+        'fill_actor': {
+            'configured': True,
+            'roots': True,
+            'cloud': True,
+            'legacy_journal': True,
+            'apply_enabled': True,
+            'scan_ready': True,
+            'apply_ready': True,
+        },
+    }
+
+
+def test_unavailable_fill_actor_roots_do_not_mark_the_whole_app_unhealthy(tmp_path: Path) -> None:
+    client, paths, _ = make_client(tmp_path)
+    # An unmounted library root is fill-actor's problem; the monitor pipelines and the
+    # settings page keep working, so probes and the top bar must not see a dead app.
+    paths.move_in_path.rmdir()
+
+    with client:
+        health = client.get('/api/health')
+        scan = client.post('/api/fill-actor/plans', json={'actor_ids': ['actor']})
+
+    assert health.status_code == 200
+    assert health.json()['status'] == 'ok'
+    assert health.json()['fill_actor'] == {
+        'configured': True,
+        'roots': False,
         'cloud': True,
         'legacy_journal': True,
         'apply_enabled': True,
-        'apply_ready': True,
-        'auth_required': False,
+        'scan_ready': False,
+        'apply_ready': False,
     }
+    assert scan.status_code == 503
+    assert scan.json() == {'error': {'code': 'not_ready'}}
+
+
+def test_unconfigured_fill_actor_reports_itself_without_failing_the_app() -> None:
+    repository = MemoryFillActorRepository()
+    service = FillActorService(
+        runtime=FillActorRuntime,
+        actor_catalog=ActorCatalog(),
+        magnet_provider=MagnetProvider(),
+        brand_resolver=BrandResolver(),
+        repository=repository,
+    )
+    jobs = FillActorJobManager(service=service, repository=repository)
+    app = create_app(
+        app_ready=repository.health_check,
+        routers=(
+            create_fill_actor_router(
+                service=service,
+                repository=repository,
+                jobs=jobs,
+                mutation_auth=make_mutation_auth(None),
+            ),
+        ),
+        feature_health={'fill_actor': fill_actor_health(service=service, repository=repository)},
+        exception_handlers={FillActorError: handle_fill_actor_error},
+        lifespans=(fill_actor_lifespan(service=service, repository=repository, jobs=jobs),),
+    )
+
+    with TestClient(app) as client:
+        health = client.get('/api/health')
+        scan = client.post('/api/fill-actor/plans', json={'actor_ids': ['actor']})
+
+    assert health.status_code == 200
+    assert health.json()['status'] == 'ok'
+    assert health.json()['fill_actor']['configured'] is False
+    assert health.json()['fill_actor']['scan_ready'] is False
+    assert scan.status_code == 503
+    assert scan.json() == {'error': {'code': 'not_ready'}}
 
 
 def test_disabled_apply_is_exposed_without_affecting_scan_or_readiness(tmp_path: Path) -> None:
@@ -534,7 +625,7 @@ def test_disabled_apply_is_exposed_without_affecting_scan_or_readiness(tmp_path:
 
     assert health.status_code == 200
     assert health.json()['status'] == 'ok'
-    assert health.json()['apply_enabled'] is False
+    assert health.json()['fill_actor']['apply_enabled'] is False
     assert created.status_code == 202
     assert payload['job']['state'] == 'completed'
     assert applied.status_code == 503

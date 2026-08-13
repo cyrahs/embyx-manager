@@ -1,4 +1,4 @@
-import { ApiError } from '../api'
+import { ApiError } from '../../api'
 import type {
   ActiveApplyRequest,
   ApplyJobEnvelope,
@@ -7,7 +7,8 @@ import type {
   JobState,
   MoveCandidate,
   PlanJob,
-} from '../types'
+} from '../../types'
+import { errorMessage as sharedErrorMessage } from '../errors'
 import { ACTOR_ID, UNIT_LABELS } from './labels'
 
 export function parseActorIds(value: string) {
@@ -74,6 +75,7 @@ export function planMagnets(plan: FillActorPlan | null): string[] {
   return magnets
 }
 
+/** Fill Actor's own error codes, layered over the app-wide fallback. */
 export function errorMessage(error: unknown): string {
   if (error instanceof ApiError) {
     const messages: Record<string, string> = {
@@ -81,9 +83,10 @@ export function errorMessage(error: unknown): string {
       legacy_plan_requires_rescan: '该计划来自旧版本，请重新扫描后再操作。',
       not_ready: '移动依赖尚未就绪，请稍后重试。',
     }
-    return messages[error.code] ?? error.message
+    const message = messages[error.code]
+    if (message) return message
   }
-  return '操作未能完成，请稍后重试。'
+  return sharedErrorMessage(error)
 }
 
 export function progressValue(progress?: JobProgress | null): number | null {

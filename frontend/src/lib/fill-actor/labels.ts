@@ -1,4 +1,4 @@
-import type { VideoState } from '../types'
+import type { VideoState } from '../../types'
 
 export const ACTOR_ID = /^[A-Za-z0-9_-]{1,32}$/
 export const MAX_ACTORS = 20

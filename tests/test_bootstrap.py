@@ -31,7 +31,7 @@ def test_bootstrap_wires_repository_api_and_shutdown(tmp_path: Path) -> None:
         with TestClient(app) as client:
             health = client.get('/api/health').json()
             assert health['status'] == 'ok'
-            assert health['apply_enabled'] is False
+            assert health['fill_actor']['apply_enabled'] is False
             response = client.post('/api/fill-actor/plans', json={'actor_ids': ['actor']})
             assert response.status_code == 202
     finally:
@@ -54,6 +54,7 @@ def test_bootstrap_passes_feed_integration_urls_to_warmer_and_api(monkeypatch, t
     captured: dict[str, dict] = {}
     warmer = object()
     jobs = object()
+    fill_actor_router = object()
     app = object()
 
     def make_warmer(**kwargs):
@@ -64,12 +65,17 @@ def test_bootstrap_passes_feed_integration_urls_to_warmer_and_api(monkeypatch, t
         captured['jobs'] = kwargs
         return jobs
 
+    def make_fill_actor_router(**kwargs):
+        captured['fill_actor'] = kwargs
+        return fill_actor_router
+
     def make_app(**kwargs):
         captured['api'] = kwargs
         return app
 
     monkeypatch.setattr(bootstrap, 'RSSHubFeedWarmer', make_warmer)
     monkeypatch.setattr(bootstrap, 'FillActorJobManager', make_jobs)
+    monkeypatch.setattr(bootstrap, 'create_fill_actor_router', make_fill_actor_router)
     monkeypatch.setattr(bootstrap, 'create_app', make_app)
 
     settings = Settings(
@@ -86,8 +92,16 @@ def test_bootstrap_passes_feed_integration_urls_to_warmer_and_api(monkeypatch, t
     assert captured['warmer']['rsshub_url']() is None
     assert callable(captured['warmer']['freshrss_url'])
     assert captured['jobs']['feed_warmer'] is warmer
-    assert captured['jobs']['service'].apply_enabled is True
-    assert captured['api']['jobs'] is jobs
-    assert callable(captured['api']['freshrss_url'])
-    assert captured['api']['freshrss_url']() is None
-    assert callable(captured['api']['freshrss_rsshub_url'])
+    # Paths and the move switch now come from the config store, so a freshly built
+    # service is unconfigured until the section is loaded or seeded.
+    assert captured['jobs']['service'].configured is False
+    assert captured['jobs']['service'].apply_enabled is False
+    assert captured['fill_actor']['jobs'] is jobs
+    assert callable(captured['fill_actor']['freshrss_url'])
+    assert captured['fill_actor']['freshrss_url']() is None
+    # Fill Actor is mounted like every other feature, not baked into the app root.
+    assert fill_actor_router in captured['api']['routers']
+    assert set(captured['api']['feature_health']) == {'fill_actor'}
+    assert 'service' not in captured['api']
+    assert 'jobs' not in captured['api']
+    assert callable(captured['fill_actor']['freshrss_rsshub_url'])

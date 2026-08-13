@@ -64,19 +64,23 @@ class PostgresFillActorRepository:
         async with pool.acquire() as connection, connection.transaction():
             await connection.execute(
                 """
-                INSERT INTO fill_actor_plans (plan_id, revision, public_json, created_at, expires_at)
-                VALUES ($1, $2, $3, $4, $5)
+                INSERT INTO fill_actor_plans (
+                    plan_id, revision, public_json, created_at, expires_at, config_version
+                )
+                VALUES ($1, $2, $3, $4, $5, $6)
                 ON CONFLICT (plan_id) DO UPDATE SET
                     revision = excluded.revision,
                     public_json = excluded.public_json,
                     created_at = excluded.created_at,
-                    expires_at = excluded.expires_at
+                    expires_at = excluded.expires_at,
+                    config_version = excluded.config_version
                 """,
                 public.plan_id,
                 public.revision,
                 public.model_dump_json(),
                 normalize_datetime(public.created_at),
                 normalize_datetime(public.expires_at),
+                record.config_version,
             )
             await connection.execute(
                 'DELETE FROM fill_actor_candidates WHERE plan_id = $1 AND candidate_id != ALL($2::text[])',
@@ -132,7 +136,7 @@ class PostgresFillActorRepository:
         pool = await self.get_pool()
         async with pool.acquire() as connection, connection.transaction():
             row = await connection.fetchrow(
-                'SELECT public_json FROM fill_actor_plans WHERE plan_id = $1',
+                'SELECT public_json, config_version FROM fill_actor_plans WHERE plan_id = $1',
                 plan_id,
             )
             if row is None:
@@ -144,6 +148,7 @@ class PostgresFillActorRepository:
         return PlanRecord(
             public=FillActorPlan.model_validate_json(row['public_json']),
             candidates=tuple(_candidate_from_row(candidate_row) for candidate_row in candidate_rows),
+            config_version=row['config_version'],
         )
 
     async def get_candidate(self, plan_id: str, candidate_id: str) -> CandidateRecord | None:

@@ -6,7 +6,7 @@ from typing import Any
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, ConfigDict
 
-from embyx_manager.config.api import ConfigApiError
+from embyx_manager.errors import ApiError
 from embyx_manager.monitor.reports import PipelineName
 from embyx_manager.monitor.runs import PipelineRunRecord, PipelineRunRepository
 from embyx_manager.monitor.scheduler import (
@@ -86,7 +86,7 @@ def _parse_pipeline(pipeline: str) -> PipelineName:
     try:
         return PipelineName(pipeline)
     except ValueError as exc:
-        raise ConfigApiError(404, 'unknown_pipeline') from exc
+        raise ApiError(404, 'unknown_pipeline') from exc
 
 
 def create_monitor_router(  # noqa: C901 - route registration
@@ -122,9 +122,9 @@ def create_monitor_router(  # noqa: C901 - route registration
         try:
             run_id = await scheduler.trigger(name, rank=rank)
         except PipelineBusyError as exc:
-            raise ConfigApiError(409, 'pipeline_busy') from exc
+            raise ApiError(409, 'pipeline_busy') from exc
         except PipelineNotConfiguredError as exc:
-            raise ConfigApiError(422, 'pipeline_not_configured') from exc
+            raise ApiError(422, 'pipeline_not_configured') from exc
         return TriggerResponse(run_id=run_id)
 
     @router.post('/{pipeline}/cancel', dependencies=[Depends(mutation_auth)])
@@ -132,7 +132,7 @@ def create_monitor_router(  # noqa: C901 - route registration
         name = _parse_pipeline(pipeline)
         cancelled = await scheduler.cancel_running(name)
         if not cancelled:
-            raise ConfigApiError(409, 'pipeline_not_running')
+            raise ApiError(409, 'pipeline_not_running')
         return {'cancelling': True}
 
     @router.get('/runs')
@@ -150,7 +150,7 @@ def create_monitor_router(  # noqa: C901 - route registration
     async def get_run(run_id: str) -> RunDetailView:
         record = await runs.get_run(run_id)
         if record is None:
-            raise ConfigApiError(404, 'unknown_run')
+            raise ApiError(404, 'unknown_run')
         return RunDetailView.from_record(record)
 
     return router

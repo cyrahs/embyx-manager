@@ -20,8 +20,12 @@ import type {
 
 const API_TOKEN_KEY = 'embyx-manager-api-token'
 const AUTH_REQUIRED_KEY = 'embyx-manager-auth-required'
-const ACTIVE_PLAN_KEY = 'embyx-manager-active-plan-id'
-const ACTIVE_APPLY_KEY = 'embyx-manager-active-apply'
+// Plans and applies belong to Fill Actor, so its keys say so rather than claiming the
+// app-level prefix. The unprefixed names are read once more to carry a mid-scan tab over.
+const ACTIVE_PLAN_KEY = 'embyx-manager-fill-actor-plan-id'
+const ACTIVE_APPLY_KEY = 'embyx-manager-fill-actor-apply'
+const LEGACY_ACTIVE_PLAN_KEY = 'embyx-manager-active-plan-id'
+const LEGACY_ACTIVE_APPLY_KEY = 'embyx-manager-active-apply'
 const PLAN_ID = /^[A-Za-z0-9_-]{1,256}$/
 const REQUEST_ID = /^[A-Za-z0-9_-]{16,128}$/
 const APPLY_JOB_STATES = new Set<JobState>(['queued', 'running', 'completed', 'partial_failed', 'failed'])
@@ -113,9 +117,20 @@ export function rememberAuthRequired(value: boolean): void {
   writeLocalStorage(AUTH_REQUIRED_KEY, value ? 'true' : null)
 }
 
+// ---------- fill actor: session recovery ----------
+
+/** Reads the current key, falling back to the pre-rename one left by an older tab. */
+function readSessionValue(key: string, legacyKey: string): string | null {
+  const value = window.sessionStorage.getItem(key)
+  if (value !== null) return value
+  const legacy = window.sessionStorage.getItem(legacyKey)
+  if (legacy !== null) window.sessionStorage.removeItem(legacyKey)
+  return legacy
+}
+
 export function getActivePlanId(): string | null {
   try {
-    const value = window.sessionStorage.getItem(ACTIVE_PLAN_KEY)
+    const value = readSessionValue(ACTIVE_PLAN_KEY, LEGACY_ACTIVE_PLAN_KEY)
     if (!value) return null
     if (PLAN_ID.test(value)) return value
     window.sessionStorage.removeItem(ACTIVE_PLAN_KEY)
@@ -157,7 +172,7 @@ function normalizeActiveApplyRequest(value: unknown): ActiveApplyRequest | null 
 
 export function getActiveApplyRequest(): ActiveApplyRequest | null {
   try {
-    const raw = window.sessionStorage.getItem(ACTIVE_APPLY_KEY)
+    const raw = readSessionValue(ACTIVE_APPLY_KEY, LEGACY_ACTIVE_APPLY_KEY)
     if (!raw) return null
     const request = normalizeActiveApplyRequest(JSON.parse(raw) as unknown)
     if (request) return request
@@ -182,6 +197,8 @@ export function setActiveApplyRequest(value: ActiveApplyRequest | null): void {
     // Storage restrictions must not block an already-authorized move.
   }
 }
+
+// ---------- shared request plumbing ----------
 
 export class ApiError extends Error {
   readonly status: number
@@ -284,6 +301,8 @@ function normalizeActorFeedStatus(value: unknown): ActorFeedStatus | null {
     freshrss_url: value.freshrss_url ?? null,
   }
 }
+
+// ---------- fill actor ----------
 
 export function normalizePlanEnvelope(value: unknown): PlanEnvelope {
   if (looksLikePlan(value)) return { plan: value, job: null, planId: value.plan_id, feeds: [] }
@@ -517,15 +536,26 @@ export async function getApplyJob(jobId: string, signal?: AbortSignal): Promise<
   )
 }
 
-export interface HealthStatus {
-  status: string
-  database?: boolean | string
-  roots?: boolean | string | Record<string, string | boolean>
+// ---------- health and auth ----------
+
+/** Fill Actor's own dependencies; they say nothing about the rest of the app. */
+export interface FillActorHealth {
+  /** False until library roots are saved in Settings — unconfigured, not broken. */
+  configured?: boolean
+  roots?: boolean
   cloud?: boolean
   legacy_journal?: boolean
   apply_enabled?: boolean
+  scan_ready?: boolean
   apply_ready?: boolean
+}
+
+/** App-level readiness: `status` covers only what every feature shares. */
+export interface HealthStatus {
+  status: string
+  database?: boolean | string
   auth_required?: boolean
+  fill_actor?: FillActorHealth
 }
 
 export async function getHealth(): Promise<HealthStatus> {

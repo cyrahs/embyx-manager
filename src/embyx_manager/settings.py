@@ -127,12 +127,3 @@ class Settings:
             if not self.tls_terminated:
                 msg = 'EMBYX_MANAGER_TLS_TERMINATED must be true when binding to a non-loopback host'
                 raise ValueError(msg)
-
-    def require_fill_actor_paths(self) -> tuple[Path, tuple[Path, ...], Path]:
-        if self.actor_brand_path is None or self.move_in_path is None or not self.additional_brand_paths:
-            msg = (
-                'EMBYX_MANAGER_ACTOR_ROOT, EMBYX_MANAGER_ADDITIONAL_ROOTS, '
-                'and EMBYX_MANAGER_MOVE_IN_ROOT must be configured'
-            )
-            raise ValueError(msg)
-        return self.actor_brand_path, self.additional_brand_paths, self.move_in_path

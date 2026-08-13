@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useOutletContext } from 'react-router-dom'
+import { Link, useOutletContext } from 'react-router-dom'
 
 import {
   ApiError,
@@ -14,12 +14,13 @@ import {
   startApplyJob,
 } from '../api'
 import type { AppContext } from '../App'
-import { ActorFeeds } from '../components/ActorFeeds'
-import { ApplySummary, ConfirmDialog, Notice } from '../components/Feedback'
+import { Notice } from '../components/Feedback'
+import { ActorFeeds } from '../components/fill-actor/ActorFeeds'
+import { ApplySummary, ConfirmDialog } from '../components/fill-actor/ApplyFeedback'
+import { ProgressPanel } from '../components/fill-actor/ProgressPanel'
+import { ActorFailures, PlanSummary, VideoGroup } from '../components/fill-actor/Results'
+import { ScanPanel } from '../components/fill-actor/ScanPanel'
 import { ArrowIcon, CheckIcon, CopyIcon, MoveIcon, SearchIcon, Spinner } from '../components/Icons'
-import { ProgressPanel } from '../components/ProgressPanel'
-import { ActorFailures, PlanSummary, VideoGroup } from '../components/Results'
-import { ScanPanel } from '../components/ScanPanel'
 import { useApiTokenValue } from '../lib/apiToken'
 import {
   applyPlaceholder,
@@ -33,8 +34,8 @@ import {
   parseActorIds,
   planMagnets,
   terminalApplyJob,
-} from '../lib/format'
-import { MAX_ACTORS, STALE_CODES, VIDEO_GROUPS } from '../lib/labels'
+} from '../lib/fill-actor/format'
+import { MAX_ACTORS, STALE_CODES, VIDEO_GROUPS } from '../lib/fill-actor/labels'
 import type {
   ActiveApplyRequest,
   ActorFeedStatus,
@@ -125,27 +126,48 @@ export default function FillActorPage() {
   const jobCancelled = isJobCancelled(job)
   const feedsPending = feeds.some((feed) => feed.state === 'queued' || feed.state === 'warming')
   const envelopePending = jobPending || feedsPending
-  const applyEnabled = health?.apply_ready === true
+  // This page owns its readiness display: the top bar reports the app, not this feature.
+  const fillActorHealth = health?.fill_actor
+  const applyEnabled = fillActorHealth?.apply_ready === true
   const trimmedQuery = query.trim()
   const visibleVideos = useMemo(
     () => (plan?.videos ?? []).filter((video) => matchesQuery(video, trimmedQuery)),
     [plan, trimmedQuery],
   )
-  const applyNotice = !health || applyEnabled
+  const notConfigured = fillActorHealth?.configured === false
+  const scanNotice = !fillActorHealth || fillActorHealth.scan_ready !== false
     ? null
-    : health.apply_enabled === false
+    : notConfigured
+      ? {
+          title: '补全演员尚未配置',
+          body: '请先在设置页填写主片库、附加片库和移入目录，扫描才能开始。其余功能不受影响。',
+        }
+      : fillActorHealth.roots === false
+        ? {
+            title: '媒体库根目录不可用',
+            body: '已配置的根目录未挂载或缺少哨兵文件，扫描会被服务端拒绝。请检查容器挂载后重试。',
+          }
+        : {
+            title: '扫描依赖尚未就绪',
+            body: fillActorHealth.cloud === false
+              ? 'CloudDrive 连接或授权尚未就绪，扫描会被服务端拒绝。'
+              : '补全演员的依赖尚未就绪，请稍后重试。',
+          }
+  const applyNotice = !fillActorHealth || applyEnabled || scanNotice
+    ? null
+    : fillActorHealth.apply_enabled === false
       ? {
           title: '文件移动已暂停',
           body: '当前仅支持扫描、磁力查询和订阅操作；确认移入功能已由管理员关闭。',
         }
-      : health.legacy_journal === false
+      : fillActorHealth.legacy_journal === false
         ? {
             title: '文件移动等待管理员处理',
             body: '检测到旧版本未完成的移动记录。为避免误动派生映射文件，新的移入已被阻止。',
           }
         : {
             title: '文件移动尚未就绪',
-            body: health.cloud === false
+            body: fillActorHealth.cloud === false
               ? 'CloudDrive 连接或授权尚未就绪，当前不会提交移动。'
               : '文件移动依赖尚未就绪，请稍后重试。',
           }
@@ -279,7 +301,9 @@ export default function FillActorPage() {
           if (!isJobPending(envelope.job)) {
             if (envelope.job.error_code && STALE_CODES.has(envelope.job.error_code)) setNeedsFreshPlan(true)
             if (envelope.job.error_code === 'move_disabled') {
-              setHealth((current) => current ? { ...current, apply_enabled: false, apply_ready: false } : current)
+              setHealth((current) => current
+                ? { ...current, fill_actor: { ...current.fill_actor, apply_enabled: false, apply_ready: false } }
+                : current)
             }
             setError(envelope.job.error_code
               ? `移动任务失败：${envelope.job.error_code}`
@@ -323,7 +347,9 @@ export default function FillActorPage() {
           }
           if (pollError instanceof ApiError && STALE_CODES.has(pollError.code)) setNeedsFreshPlan(true)
           if (pollError instanceof ApiError && pollError.code === 'move_disabled') {
-            setHealth((current) => current ? { ...current, apply_enabled: false, apply_ready: false } : current)
+            setHealth((current) => current
+                ? { ...current, fill_actor: { ...current.fill_actor, apply_enabled: false, apply_ready: false } }
+                : current)
           }
           const retryable = !(pollError instanceof ApiError) || pollError.status === 0 || pollError.status >= 500
           if (retryable) {
@@ -584,6 +610,15 @@ export default function FillActorPage() {
           authRequired={authRequired}
           onRequestLogin={requestApiToken}
         />
+
+        {scanNotice && (
+          <Notice
+            tone="warning"
+            title={scanNotice.title}
+            body={scanNotice.body}
+            action={notConfigured ? <Link className="text-button" to="/settings">前往设置</Link> : undefined}
+          />
+        )}
 
         {(submitting || jobPending) && (
           <ProgressPanel

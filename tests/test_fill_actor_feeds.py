@@ -18,7 +18,7 @@ from embyx_manager.fill_actor.persistence import (
     JobState,
     MemoryFillActorRepository,
 )
-from embyx_manager.fill_actor.service import FillActorPaths, FillActorService
+from embyx_manager.fill_actor.service import FillActorPaths, FillActorService, static_runtime
 
 RSS_BODY = b'<?xml version="1.0"?><rss version="2.0"><channel><title>actor</title></channel></rss>'
 
@@ -56,7 +56,9 @@ def make_service(
     for path in (paths.actor_brand_path, *paths.additional_brand_paths, paths.move_in_path):
         path.mkdir()
     return FillActorService(
-        paths=paths,
+        runtime=static_runtime(
+            paths=paths,
+        ),
         actor_catalog=actor_catalog,
         magnet_provider=MagnetProvider(),
         brand_resolver=BrandResolver(),

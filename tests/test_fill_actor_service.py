@@ -14,8 +14,10 @@ from embyx_manager.fill_actor import (
     ApplyState,
     ExpiredPlanError,
     FillActorPaths,
+    FillActorRuntime,
     FillActorService,
     InvalidActorIdError,
+    LegacyPlanError,
     MoveDisabledError,
     MoveState,
     RevisionMismatchError,
@@ -23,6 +25,7 @@ from embyx_manager.fill_actor import (
     UnknownCandidateError,
     UnknownPlanError,
     VideoState,
+    static_runtime,
 )
 from embyx_manager.fill_actor.jobs import FillActorJobManager
 from embyx_manager.fill_actor.persistence import (
@@ -122,15 +125,17 @@ def make_service(
     magnet_provider = FakeMagnetProvider(magnets)
     return (
         FillActorService(
-            paths=paths,
+            runtime=static_runtime(
+                paths=paths,
+                move_in_by_brand=move_in_by_brand,
+                apply_enabled=apply_enabled,
+            ),
             actor_catalog=FakeActorCatalog(catalog),
             magnet_provider=magnet_provider,
             brand_resolver=MappingBrandResolver(brands),
             clock=clock,
             token_factory=TokenFactory(),
             max_actors=max_actors,
-            move_in_by_brand=move_in_by_brand,
-            apply_enabled=apply_enabled,
         ),
         magnet_provider,
     )
@@ -182,7 +187,9 @@ async def test_job_cancel_does_not_return_before_managed_scan_worker_exits(
 ) -> None:
     repository = MemoryFillActorRepository()
     service = FillActorService(
-        paths=paths,
+        runtime=static_runtime(
+            paths=paths,
+        ),
         actor_catalog=FakeActorCatalog({'actor': ['ABC-001']}),
         magnet_provider=FakeMagnetProvider(),
         brand_resolver=MappingBrandResolver({'ABC-001': 'ABC'}),
@@ -240,7 +247,9 @@ async def test_job_cancel_does_not_return_before_managed_scan_worker_exits(
 async def test_create_plan_reports_durable_stage_and_page_progress(paths: FillActorPaths) -> None:
     events: list[JobProgressEvent] = []
     service = FillActorService(
-        paths=paths,
+        runtime=static_runtime(
+            paths=paths,
+        ),
         actor_catalog=PageProgressActorCatalog(),
         magnet_provider=FakeMagnetProvider({'ABC-001': None, 'ABC-002': None}),
         brand_resolver=MappingBrandResolver({'ABC-001': 'ABC', 'ABC-002': 'ABC'}),
@@ -1081,3 +1090,46 @@ async def test_apply_rejects_expired_plan(paths: FillActorPaths) -> None:
 
     with pytest.raises(ExpiredPlanError):
         await service.apply(plan_id=plan.plan_id, revision=plan.revision, candidate_ids=[])
+
+
+@pytest.mark.asyncio
+async def test_apply_refuses_a_plan_scanned_under_different_library_roots(paths: FillActorPaths) -> None:
+    """A settings change must invalidate plans, not silently redirect their moves."""
+    runtime = FillActorRuntime(version=1, paths=paths, apply_enabled=True)
+    source = create_move_candidate(paths)
+    service = FillActorService(
+        runtime=lambda: runtime,
+        actor_catalog=FakeActorCatalog({'actor': ['ABC-001']}),
+        magnet_provider=FakeMagnetProvider(),
+        brand_resolver=MappingBrandResolver({'ABC-001': 'ABC'}),
+        token_factory=TokenFactory(),
+    )
+    plan = await service.create_plan(['actor'])
+    candidate = plan.videos[0].move_candidates[0]
+
+    runtime = FillActorRuntime(version=2, paths=paths, apply_enabled=True)
+
+    with pytest.raises(LegacyPlanError):
+        await service.apply(
+            plan_id=plan.plan_id,
+            revision=plan.revision,
+            candidate_ids=[candidate.candidate_id],
+        )
+    assert source.exists()
+
+
+@pytest.mark.asyncio
+async def test_unconfigured_service_is_not_ready_instead_of_raising() -> None:
+    service = FillActorService(
+        runtime=FillActorRuntime,
+        actor_catalog=FakeActorCatalog({'actor': []}),
+        magnet_provider=FakeMagnetProvider(),
+        brand_resolver=MappingBrandResolver({}),
+    )
+
+    assert service.configured is False
+    assert await service.roots_ready() is False
+    assert await service.scan_ready() is False
+    assert await service.apply_ready() is False
+    # Cloud health is a separate question and must not be dragged down by empty paths.
+    assert await service.cloud_ready() is True

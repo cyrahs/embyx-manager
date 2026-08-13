@@ -1,7 +1,7 @@
-import { formatFeedUpdatedAt, safeFreshRssUrl } from '../lib/format'
-import { FEED_STATE_LABELS } from '../lib/labels'
-import type { ActorFeedStatus } from '../types'
-import { ExternalIcon, FeedIcon, FeedStateIcon } from './Icons'
+import { formatFeedUpdatedAt, safeFreshRssUrl } from '../../lib/fill-actor/format'
+import { FEED_STATE_LABELS } from '../../lib/fill-actor/labels'
+import type { ActorFeedStatus } from '../../types'
+import { ExternalIcon, FeedIcon, FeedStateIcon } from '../Icons'
 
 export function ActorFeeds({ feeds }: { feeds: ActorFeedStatus[] }) {
   return (

@@ -24,6 +24,7 @@ from embyx_manager.config.store import (
     masked_values,
     secret_flags,
 )
+from embyx_manager.errors import ApiError
 
 LOGGER = logging.getLogger(__name__)
 
@@ -55,18 +56,11 @@ class TestConnectionResult(BaseModel):
     detail: str = ''
 
 
-class ConfigApiError(Exception):
-    def __init__(self, status_code: int, code: str) -> None:
-        self.status_code = status_code
-        self.code = code
-        super().__init__(code)
-
-
 def _section_view(store: ConfigStore, section: str) -> SectionView:
     try:
         value, version = store.get_with_version(section)
     except UnknownConfigSectionError as exc:
-        raise ConfigApiError(404, 'unknown_config_section') from exc
+        raise ApiError(404, 'unknown_config_section') from exc
     return SectionView(
         section=section,
         values=masked_values(value),
@@ -91,12 +85,12 @@ def create_config_router(store: ConfigStore, *, mutation_auth: Any) -> APIRouter
         try:
             await store.update(section, request.values, expected_version=request.version)
         except UnknownConfigSectionError as exc:
-            raise ConfigApiError(404, 'unknown_config_section') from exc
+            raise ApiError(404, 'unknown_config_section') from exc
         except ConfigVersionConflictError as exc:
-            raise ConfigApiError(409, 'config_version_conflict') from exc
+            raise ApiError(409, 'config_version_conflict') from exc
         except ValueError as exc:
             LOGGER.info('rejected config update for %s: %s', section, exc)
-            raise ConfigApiError(422, 'invalid_config_values') from exc
+            raise ApiError(422, 'invalid_config_values') from exc
         return _section_view(store, section)
 
     @router.post('/clouddrive/test', dependencies=[Depends(mutation_auth)])
@@ -121,14 +115,14 @@ def _merge_for_test[SectionT](store: ConfigStore, section_type: type[SectionT], 
     merged = dict(stored.model_dump())
     for key, value in values.items():
         if key not in merged:
-            raise ConfigApiError(422, 'invalid_config_values')
+            raise ApiError(422, 'invalid_config_values')
         if key in section_type.SECRET_FIELDS and (value is None or value == ''):  # type: ignore[attr-defined]
             continue
         merged[key] = value
     try:
         return section_type.model_validate(merged)  # type: ignore[attr-defined]
     except ValueError as exc:
-        raise ConfigApiError(422, 'invalid_config_values') from exc
+        raise ApiError(422, 'invalid_config_values') from exc
 
 
 async def _run_clouddrive_test(config: CloudDriveConfig) -> TestConnectionResult:

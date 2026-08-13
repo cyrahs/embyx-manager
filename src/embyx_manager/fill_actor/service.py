@@ -29,6 +29,7 @@ from embyx_manager.fill_actor.errors import (
     InvalidActorIdError,
     LegacyPlanError,
     MoveDisabledError,
+    NotConfiguredError,
     RevisionMismatchError,
     TooManyActorsError,
     TooManyVideosError,
@@ -118,6 +119,46 @@ class FillActorPaths:
             additional_brand_paths=tuple(additional_brand_paths),
             move_in_path=move_in_path,
         )
+
+
+@dataclass(frozen=True)
+class FillActorRuntime:
+    """A coherent view of the settings a scan or move must agree on.
+
+    Taken as one snapshot so a configuration saved mid-operation can never mix old
+    and new roots. `version` stamps the plans a snapshot produced: plans from an
+    older version are refused rather than applied against paths that have moved.
+    """
+
+    version: int = 0
+    paths: FillActorPaths | None = None
+    root_sentinel: str | None = None
+    move_in_by_brand: bool = False
+    apply_enabled: bool = False
+    cloud_move_paths: CloudMovePaths | None = None
+
+    @property
+    def configured(self) -> bool:
+        return self.paths is not None
+
+
+def static_runtime(
+    *,
+    paths: FillActorPaths,
+    root_sentinel: str | None = None,
+    move_in_by_brand: bool = False,
+    apply_enabled: bool = False,
+    cloud_move_paths: CloudMovePaths | None = None,
+) -> Callable[[], FillActorRuntime]:
+    """A provider for a deployment whose settings never change while it runs."""
+    runtime = FillActorRuntime(
+        paths=paths,
+        root_sentinel=root_sentinel,
+        move_in_by_brand=move_in_by_brand,
+        apply_enabled=apply_enabled,
+        cloud_move_paths=cloud_move_paths,
+    )
+    return lambda: runtime
 
 
 _Fingerprint = FileFingerprint
@@ -219,7 +260,7 @@ class FillActorService:
     def __init__(  # noqa: PLR0913
         self,
         *,
-        paths: FillActorPaths,
+        runtime: Callable[[], FillActorRuntime],
         actor_catalog: ActorCatalog,
         magnet_provider: MagnetProvider,
         brand_resolver: BrandResolver,
@@ -231,11 +272,7 @@ class FillActorService:
         token_factory: Callable[[], str] | None = None,
         repository: FillActorRepository | None = None,
         mutation_lock: AsyncFileLock | None = None,
-        root_sentinel: str | None = None,
-        move_in_by_brand: bool = False,
-        apply_enabled: bool = False,
         cloud_file_mover: CloudFileMover | None = None,
-        cloud_move_paths: CloudMovePaths | None = None,
     ) -> None:
         if max_actors < 1:
             msg = 'max_actors must be positive'
@@ -249,14 +286,8 @@ class FillActorService:
         if plan_ttl <= timedelta(0):
             msg = 'plan_ttl must be positive'
             raise ValueError(msg)
-        if (cloud_file_mover is None) is not (cloud_move_paths is None):
-            msg = 'CloudDrive mover and path mapping must be configured together'
-            raise ValueError(msg)
-        if cloud_move_paths is not None and len(cloud_move_paths.source_api_roots) != len(paths.additional_brand_paths):
-            msg = 'CloudDrive source roots must match additional roots one-for-one'
-            raise ValueError(msg)
 
-        self._paths = paths
+        self._runtime = runtime
         self._actor_catalog = actor_catalog
         self._magnet_provider = magnet_provider
         self._brand_resolver = brand_resolver
@@ -269,14 +300,7 @@ class FillActorService:
         self._token_factory = token_factory or (lambda: secrets.token_urlsafe(18))
         self._repository = repository or MemoryFillActorRepository()
         self._mutation_lock = mutation_lock
-        if root_sentinel is not None and not self._is_safe_segment(root_sentinel):
-            msg = 'root_sentinel must be a safe path segment'
-            raise ValueError(msg)
-        self._root_sentinel = root_sentinel
-        self._move_in_by_brand = move_in_by_brand
-        self._apply_enabled = apply_enabled
         self._cloud_file_mover = cloud_file_mover
-        self._cloud_move_paths = cloud_move_paths
         self._in_flight: dict[tuple[str, str], asyncio.Task[MoveResult]] = {}
         self._mutation_futures: set[Future[MoveResult]] = set()
         self._scan_futures: dict[Future[object], threading.Event] = {}
@@ -284,7 +308,42 @@ class FillActorService:
         self._cloud_health_lock = asyncio.Lock()
         self._cloud_health_cache: tuple[float, bool] | None = None
 
-    async def create_plan(  # noqa: C901, PLR0915
+    # Settings are read through these rather than frozen at construction, so saving
+    # the Fill Actor section takes effect without a restart. Readiness gates every
+    # entry point, so code past those gates can rely on `_paths` being present.
+    @property
+    def _paths(self) -> FillActorPaths:
+        paths = self._runtime().paths
+        if paths is None:
+            raise NotConfiguredError
+        return paths
+
+    @property
+    def _root_sentinel(self) -> str | None:
+        return self._runtime().root_sentinel
+
+    @property
+    def _move_in_by_brand(self) -> bool:
+        return self._runtime().move_in_by_brand
+
+    @property
+    def _apply_enabled(self) -> bool:
+        return self._runtime().apply_enabled
+
+    @property
+    def _cloud_move_paths(self) -> CloudMovePaths | None:
+        return self._runtime().cloud_move_paths
+
+    @property
+    def _cloud_mode(self) -> bool:
+        """Cloud moves run only when a mover exists *and* the runtime maps API paths.
+
+        The mover is a capability the deployment supplies once; whether to use it is a
+        configuration question, so it can be answered differently after a settings save.
+        """
+        return self._cloud_file_mover is not None and self._runtime().cloud_move_paths is not None
+
+    async def create_plan(  # noqa: C901, PLR0912, PLR0915
         self,
         actor_ids: Sequence[str],
         *,
@@ -292,6 +351,9 @@ class FillActorService:
         revision: str | None = None,
         progress: ProgressCallback | None = None,
     ) -> FillActorPlan:
+        # Stamped now and re-checked before saving, so a plan is always the product of
+        # exactly one configuration.
+        config_version = self._runtime().version
         normalized_actor_ids = self._validate_actor_ids(actor_ids)
         actor_plans: list[ActorPlan] = []
         video_actors: dict[str, set[str]] = {}
@@ -474,7 +536,12 @@ class FillActorService:
                 current='保存扫描结果',
             ),
         )
-        await self._repository.save_plan(PlanRecord(public=plan, candidates=tuple(records.values())))
+        if self._runtime().version != config_version:
+            # Settings were saved while this scan ran; its results mix two configurations.
+            raise LegacyPlanError
+        await self._repository.save_plan(
+            PlanRecord(public=plan, candidates=tuple(records.values()), config_version=config_version),
+        )
         await self._report_progress(
             progress,
             JobProgressEvent(
@@ -536,7 +603,7 @@ class FillActorService:
                 True,
             )
 
-        if self._cloud_file_mover is not None and self._cloud_move_paths is not None:
+        if self._cloud_mode:
             return await self._create_cloud_video_plan(
                 video_id=video_id,
                 actor_membership=actor_membership,
@@ -742,7 +809,7 @@ class FillActorService:
             unknown = [candidate_id for candidate_id in selected if candidate_id not in candidates]
             if unknown:
                 raise UnknownCandidateError(unknown[0])
-            if self._cloud_file_mover is not None and any(
+            if self._cloud_mode and any(
                 candidates[candidate_id].kind is not CandidateKind.CLOUD_STRM for candidate_id in selected
             ):
                 raise LegacyPlanError
@@ -974,6 +1041,10 @@ class FillActorService:
             raise UnknownPlanError(plan_id)
         if revision is not None and stored.public.revision != revision:
             raise RevisionMismatchError(revision)
+        if stored.config_version != self._runtime().version:
+            # The library roots moved under this plan; its destinations no longer mean
+            # what they meant when it was scanned, so it must not be applied.
+            raise LegacyPlanError
         now = self._now()
         if now >= stored.public.expires_at:
             raise ExpiredPlanError(plan_id)
@@ -1172,7 +1243,7 @@ class FillActorService:
             return ()
         if not await self.roots_ready():
             return ()
-        if self._cloud_file_mover is not None:
+        if self._cloud_mode:
             results: list[MoveResult] = []
             for operation in await self._repository.list_unresolved_cloud_moves():
                 record = await self._repository.get_candidate(operation.plan_id, operation.candidate_id)
@@ -1206,6 +1277,11 @@ class FillActorService:
     def apply_enabled(self) -> bool:
         return self._apply_enabled
 
+    @property
+    def configured(self) -> bool:
+        """False until library roots are saved; the feature is idle rather than broken."""
+        return self._runtime().configured
+
     async def ready(self) -> bool:
         return await self.scan_ready()
 
@@ -1216,10 +1292,12 @@ class FillActorService:
         return await self.scan_ready() and await self.legacy_journal_ready()
 
     async def cloud_ready(self) -> bool:
+        cloud_move_paths = self._cloud_move_paths
         if self._cloud_file_mover is None:
-            return self._cloud_move_paths is None
-        if self._cloud_move_paths is None:
-            return False
+            # A deployment without a mover must not claim to be ready for cloud moves.
+            return cloud_move_paths is None
+        if cloud_move_paths is None:
+            return True
         now = asyncio.get_running_loop().time()
         cached = self._cloud_health_cache
         if cached is not None and now < cached[0]:
@@ -1243,28 +1321,34 @@ class FillActorService:
             return result
 
     async def legacy_journal_ready(self) -> bool:
-        if self._cloud_file_mover is None:
+        if not self._cloud_mode:
             return True
         return not await self._repository.list_unreconciled_moves()
 
     async def roots_ready(self) -> bool:
+        runtime = self._runtime()
+        if runtime.paths is None:
+            # Nothing configured yet is "not ready", not an error: the rest of the app
+            # keeps working and the Settings page is where this gets fixed.
+            return False
+        paths = runtime.paths
+        sentinel = runtime.root_sentinel
         roots = (
-            self._paths.actor_brand_path,
-            *self._paths.additional_brand_paths,
-            self._paths.move_in_path,
+            paths.actor_brand_path,
+            *paths.additional_brand_paths,
+            paths.move_in_path,
         )
 
         def check() -> bool:
             if not all(root.is_dir() and not root.is_symlink() for root in roots):
                 return False
-            if self._root_sentinel is not None and not all(
-                (root / self._root_sentinel).is_file() and not (root / self._root_sentinel).is_symlink()
-                for root in roots
+            if sentinel is not None and not all(
+                (root / sentinel).is_file() and not (root / sentinel).is_symlink() for root in roots
             ):
                 return False
             try:
-                destination_device = self._paths.move_in_path.stat().st_dev
-                return all(root.stat().st_dev == destination_device for root in self._paths.additional_brand_paths)
+                destination_device = paths.move_in_path.stat().st_dev
+                return all(root.stat().st_dev == destination_device for root in paths.additional_brand_paths)
             except OSError:
                 return False
 
