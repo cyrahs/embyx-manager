@@ -23,7 +23,6 @@ from embyx_manager.config import (
     ArchiveConfig,
     CloudDriveConfig,
     ConfigStore,
-    ConfigVersionConflictError,
     FeedsConfig,
     FillActorConfig,
     FreshRSSConfig,
@@ -309,7 +308,6 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
     async def runtime_lifespan() -> AsyncIterator[None]:
         """Config store, scheduler and shared clients: everything the features sit on."""
         await store.load()
-        await _seed_fill_actor_config(store, settings)
         await scheduler.start()
         try:
             yield
@@ -345,42 +343,6 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         api_token=settings.api_token,
         max_request_bytes=settings.max_request_bytes,
         frontend_dist=frontend_dist,
-    )
-
-
-async def _seed_fill_actor_config(store: ConfigStore, settings: Settings) -> None:
-    """Carries the deprecated `EMBYX_MANAGER_*` paths into the config store, once.
-
-    Writing against version 0 means this only ever lands on a section no one has saved
-    yet — including across replicas, since the store's optimistic check is atomic. Once
-    the section exists the database is the only source of truth and the environment
-    variables are ignored, so they can be dropped from the deployment.
-    """
-    if settings.actor_brand_path is None and not settings.additional_brand_paths and settings.move_in_path is None:
-        return
-    cloud = settings.cloud_move_paths
-    values: dict[str, object] = {
-        'actor_root': str(settings.actor_brand_path) if settings.actor_brand_path else '',
-        'additional_roots': tuple(str(root) for root in settings.additional_brand_paths),
-        'move_in_root': str(settings.move_in_path) if settings.move_in_path else '',
-        'move_in_by_brand': settings.move_in_by_brand,
-        'root_sentinel': settings.root_sentinel,
-        'apply_enabled': settings.apply_enabled,
-        'cloud_strm_mount_prefix': str(cloud.strm_mount_prefix) if cloud is not None else '',
-        'cloud_source_roots': tuple(str(root) for root in cloud.source_api_roots) if cloud is not None else (),
-        'cloud_move_in_root': str(cloud.move_in_api_root) if cloud is not None else '',
-    }
-    try:
-        await store.update('fill_actor', values, expected_version=0)
-    except ConfigVersionConflictError:
-        LOGGER.info('fill_actor config is already stored; ignoring the EMBYX_MANAGER_* path variables')
-        return
-    except ValueError:
-        LOGGER.exception('EMBYX_MANAGER_* path variables are not a valid fill_actor config; configure it in Settings')
-        return
-    LOGGER.warning(
-        'seeded the fill_actor config from EMBYX_MANAGER_* path variables; '
-        'they are now stored in the database and can be removed from the deployment',
     )
 
 

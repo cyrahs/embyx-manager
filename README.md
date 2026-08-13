@@ -70,18 +70,14 @@ Saving the card invalidates any scan produced under the previous settings: apply
 would move files against roots that have since changed, so the browser is asked to
 re-scan instead.
 
-**Migrating from the environment.** The former `EMBYX_MANAGER_ACTOR_ROOT`,
-`ADDITIONAL_ROOTS`, `MOVE_IN_ROOT`, `MOVE_IN_BY_BRAND`, `ROOT_SENTINEL`,
-`APPLY_ENABLED`, `CLOUD_STRM_MOUNT_PREFIX`, `CLOUD_SOURCE_ROOTS` and
-`CLOUD_MOVE_IN_ROOT` are deprecated but still read once: on the first startup where the
-`fill_actor` section has never been saved, their values are written into the database
-and a warning is logged. After that the database is the only source of truth and the
-variables can be deleted from the deployment. They are never used to overwrite a section
-that already exists, so nothing you save on the Settings page can be undone by a stale
-environment variable.
-
 Until the section is configured, Fill Actor reports itself as not configured and its
 page links to Settings; the dashboard, the pipelines and the health probe are unaffected.
+A fresh deployment is therefore configured entirely from the browser.
+
+`EMBYX_MANAGER_ACTOR_ROOT`, `ADDITIONAL_ROOTS`, `MOVE_IN_ROOT`, `MOVE_IN_BY_BRAND`,
+`ROOT_SENTINEL`, `APPLY_ENABLED`, `CLOUD_STRM_MOUNT_PREFIX`, `CLOUD_SOURCE_ROOTS` and
+`CLOUD_MOVE_IN_ROOT` no longer exist. They are ignored if still present, so a stale
+deployment variable cannot override what the Settings page stored.
 
 The schema migrates automatically at startup (`schema_migrations`, advisory-lock
 serialized across replicas).
@@ -182,8 +178,8 @@ Pushes to `main` publish `ghcr.io/<owner>/embyx-manager:latest` and an immutable
 Deployment notes:
 
 - provide `EMBYX_MANAGER_DATABASE_URL` from a Secret;
-- mount the media volumes at the paths referenced by the root variables (read-write for
-  the mapping/archive targets) and create the sentinel files;
+- mount the media volumes (read-write for the mapping/archive targets) and create the
+  sentinel file in each, then point the Settings page's Fill Actor card at those paths;
 - bind non-loopback only with `EMBYX_MANAGER_API_TOKEN` and
   `EMBYX_MANAGER_TLS_TERMINATED=true` behind a TLS-terminating proxy;
 - CloudDrive/FreshRSS/RSSHub endpoints and credentials are entered on the Settings page

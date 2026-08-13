@@ -18,19 +18,34 @@ def test_bootstrap_wires_repository_api_and_shutdown(tmp_path: Path) -> None:
     for path in (actor, additional, move_in):
         path.mkdir()
         (path / '.embyx-root').write_text('ready', encoding='utf-8')
-    settings = Settings(
-        database_url=dsn,
-        actor_brand_path=actor,
-        additional_brand_paths=(additional,),
-        move_in_path=move_in,
-        move_in_by_brand=True,
-    )
-
-    app = build_app(settings)
+    app = build_app(Settings(database_url=dsn))
     try:
         with TestClient(app) as client:
+            # A fresh database has no library roots, which is "not configured" rather
+            # than an error: the app is healthy and every other feature keeps working.
+            unconfigured = client.get('/api/health').json()
+            assert unconfigured['status'] == 'ok'
+            assert unconfigured['fill_actor']['configured'] is False
+            refused = client.post('/api/fill-actor/plans', json={'actor_ids': ['actor']})
+            assert refused.status_code == 503
+
+            saved = client.put(
+                '/api/config/fill_actor',
+                json={
+                    'values': {
+                        'actor_root': str(actor),
+                        'additional_roots': [str(additional)],
+                        'move_in_root': str(move_in),
+                        'move_in_by_brand': True,
+                    },
+                },
+            )
+            assert saved.status_code == 200
+
+            # Saving takes effect without a restart.
             health = client.get('/api/health').json()
             assert health['status'] == 'ok'
+            assert health['fill_actor']['configured'] is True
             assert health['fill_actor']['apply_enabled'] is False
             response = client.post('/api/fill-actor/plans', json={'actor_ids': ['actor']})
             assert response.status_code == 202
@@ -50,7 +65,7 @@ def _reset_public_schema(dsn: str) -> None:
     asyncio.run(reset())
 
 
-def test_bootstrap_passes_feed_integration_urls_to_warmer_and_api(monkeypatch, tmp_path: Path) -> None:
+def test_bootstrap_passes_feed_integration_urls_to_warmer_and_api(monkeypatch) -> None:
     captured: dict[str, dict] = {}
     warmer = object()
     jobs = object()
@@ -78,13 +93,7 @@ def test_bootstrap_passes_feed_integration_urls_to_warmer_and_api(monkeypatch, t
     monkeypatch.setattr(bootstrap, 'create_fill_actor_router', make_fill_actor_router)
     monkeypatch.setattr(bootstrap, 'create_app', make_app)
 
-    settings = Settings(
-        database_url='postgresql://unused.invalid/db',
-        actor_brand_path=tmp_path / 'actor',
-        additional_brand_paths=(tmp_path / 'additional',),
-        move_in_path=tmp_path / 'move-in',
-        apply_enabled=True,
-    )
+    settings = Settings(database_url='postgresql://unused.invalid/db')
 
     assert build_app(settings) is app
     # URLs now resolve from the live config store; with defaults they are None.
@@ -92,8 +101,8 @@ def test_bootstrap_passes_feed_integration_urls_to_warmer_and_api(monkeypatch, t
     assert captured['warmer']['rsshub_url']() is None
     assert callable(captured['warmer']['freshrss_url'])
     assert captured['jobs']['feed_warmer'] is warmer
-    # Paths and the move switch now come from the config store, so a freshly built
-    # service is unconfigured until the section is loaded or seeded.
+    # Paths and the move switch come from the config store, so a freshly built service
+    # is unconfigured until that section is loaded.
     assert captured['jobs']['service'].configured is False
     assert captured['jobs']['service'].apply_enabled is False
     assert captured['fill_actor']['jobs'] is jobs

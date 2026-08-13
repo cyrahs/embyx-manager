@@ -1,60 +1,38 @@
-import os
-from pathlib import Path
-
 import pytest
 
 from embyx_manager.settings import Settings
 
 
-def test_settings_use_explicit_non_secret_runtime_paths(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_settings_read_the_deployment_level_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv('EMBYX_MANAGER_DATABASE_URL', 'postgresql://db.internal/embyx')
-    monkeypatch.setenv('EMBYX_MANAGER_ACTOR_ROOT', str(tmp_path / 'actor'))
-    monkeypatch.setenv(
-        'EMBYX_MANAGER_ADDITIONAL_ROOTS',
-        os.pathsep.join((str(tmp_path / 'additional-1'), str(tmp_path / 'additional-2'))),
-    )
-    monkeypatch.setenv('EMBYX_MANAGER_MOVE_IN_ROOT', str(tmp_path / 'move-in'))
-    monkeypatch.setenv('EMBYX_MANAGER_MOVE_IN_BY_BRAND', 'true')
-    monkeypatch.setenv('EMBYX_MANAGER_APPLY_ENABLED', 'true')
-    monkeypatch.setenv('EMBYX_MANAGER_CLOUD_STRM_MOUNT_PREFIX', '/mounted-cloud')
-    monkeypatch.setenv('EMBYX_MANAGER_CLOUD_SOURCE_ROOTS', '/cloud/library/additional-1:/cloud/library/additional-2')
-    monkeypatch.setenv('EMBYX_MANAGER_CLOUD_MOVE_IN_ROOT', '/cloud/library/destination')
+    monkeypatch.setenv('EMBYX_MANAGER_MAX_ACTORS', '5')
+    monkeypatch.setenv('EMBYX_MANAGER_MAX_VIDEOS', '50')
+    monkeypatch.setenv('EMBYX_MANAGER_MAGNET_CONCURRENCY', '2')
 
     settings = Settings.from_env()
 
     assert settings.database_url == 'postgresql://db.internal/embyx'
-    assert settings.actor_brand_path == tmp_path / 'actor'
-    assert settings.additional_brand_paths == (tmp_path / 'additional-1', tmp_path / 'additional-2')
-    assert settings.move_in_path == tmp_path / 'move-in'
-    assert settings.move_in_by_brand is True
-    assert settings.apply_enabled is True
-    assert settings.cloud_move_paths is not None
-    assert tuple(map(str, settings.cloud_move_paths.source_api_roots)) == (
-        '/cloud/library/additional-1',
-        '/cloud/library/additional-2',
-    )
+    assert settings.max_actors == 5
+    assert settings.max_videos == 50
+    assert settings.magnet_concurrency == 2
 
 
-def test_apply_defaults_to_disabled(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv('EMBYX_MANAGER_APPLY_ENABLED', raising=False)
-
-    assert Settings.from_env().apply_enabled is False
-
-
-def test_apply_cannot_enable_legacy_local_file_moves(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_library_paths_are_not_read_from_the_environment(monkeypatch: pytest.MonkeyPatch) -> None:
+    """They live in the config store; a leftover variable must not affect startup."""
+    monkeypatch.setenv('EMBYX_MANAGER_ACTOR_ROOT', '/media/actor')
     monkeypatch.setenv('EMBYX_MANAGER_APPLY_ENABLED', 'true')
+    monkeypatch.setenv('EMBYX_MANAGER_CLOUD_SOURCE_ROOTS', '/cloud/a')
 
-    with pytest.raises(ValueError, match='requires the CloudDrive'):
-        Settings.from_env()
+    settings = Settings.from_env()
+
+    assert not hasattr(settings, 'actor_brand_path')
+    assert not hasattr(settings, 'apply_enabled')
 
 
-def test_cloud_roots_must_be_complete_and_match_additional_roots(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv('EMBYX_MANAGER_ADDITIONAL_ROOTS', '/mapping/a:/mapping/b')
-    monkeypatch.setenv('EMBYX_MANAGER_CLOUD_STRM_MOUNT_PREFIX', '/mounted-cloud')
-    monkeypatch.setenv('EMBYX_MANAGER_CLOUD_SOURCE_ROOTS', '/cloud/library/a')
-    monkeypatch.setenv('EMBYX_MANAGER_CLOUD_MOVE_IN_ROOT', '/cloud/library/destination')
+def test_positive_limits_are_rejected_when_zero(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv('EMBYX_MANAGER_MAX_ACTORS', '0')
 
-    with pytest.raises(ValueError, match='one-for-one'):
+    with pytest.raises(ValueError, match='MAX_ACTORS must be positive'):
         Settings.from_env()
 
 
