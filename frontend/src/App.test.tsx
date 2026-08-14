@@ -24,16 +24,14 @@ const plan: FillActorPlan = {
         { candidate_id: 'safe-1', video_id: 'ABC-001', file_name: 'ABC-001.mp4', source_label: 'additional-1', destination_conflict: false },
         { candidate_id: 'conflict-1', video_id: 'ABC-001', file_name: 'ABC-001-CD2.mp4', source_label: 'additional-2', destination_conflict: true },
       ],
-      magnet: null,
       warnings: [],
     },
     {
       video_id: 'XYZ-002',
       actor_ids: ['B456'],
-      state: 'magnet_found',
+      state: 'submitted',
       existing_files: [],
       move_candidates: [],
-      magnet: 'magnet:?xt=urn:btih:123456',
       warnings: [],
     },
     {
@@ -42,7 +40,6 @@ const plan: FillActorPlan = {
       state: 'exists',
       existing_files: ['DONE-003.mkv'],
       move_candidates: [],
-      magnet: null,
       warnings: [],
     },
   ],
@@ -50,36 +47,25 @@ const plan: FillActorPlan = {
 
 const APPLY_REQUEST_ID = '00000000-0000-4000-8000-000000000001'
 
-const magnetPlan: FillActorPlan = {
+const submittedPlan: FillActorPlan = {
   ...plan,
   videos: [
     ...plan.videos,
     {
       video_id: 'XYZ-003',
       actor_ids: ['B456'],
-      state: 'magnet_found',
+      state: 'submitted',
       existing_files: [],
       move_candidates: [],
-      magnet: 'magnet:?xt=urn:btih:ABCDEF',
       warnings: [],
     },
     {
       video_id: 'XYZ-004',
       actor_ids: ['B456'],
-      state: 'magnet_found',
+      state: 'submit_failed',
       existing_files: [],
       move_candidates: [],
-      magnet: 'magnet:?xt=urn:btih:123456',
-      warnings: [],
-    },
-    {
-      video_id: 'XYZ-005',
-      actor_ids: ['B456'],
-      state: 'magnet_found',
-      existing_files: [],
-      move_candidates: [],
-      magnet: 'https://example.com/not-a-magnet',
-      warnings: [],
+      warnings: ['submit_failed'],
     },
   ],
 }
@@ -196,8 +182,8 @@ describe('Fill Actor page', () => {
       '/api/fill-actor/plans',
       expect.objectContaining({ body: JSON.stringify({ actor_ids: ['A123', 'B456'] }), method: 'POST' }),
     )
-    expect(screen.getByText('可移入')).toBeInTheDocument()
-    expect(screen.getByText('可下载')).toBeInTheDocument()
+    expect(screen.getAllByText('可移入')).toHaveLength(2)
+    expect(screen.getAllByText('已提交下载')).toHaveLength(2)
     expect(screen.getAllByText('已入库')).toHaveLength(2)
     expect(screen.getByText('目标位置已有同名文件')).toBeInTheDocument()
     expect(screen.getByRole('checkbox', { name: /ABC-001\.mp4/ })).toBeChecked()
@@ -852,9 +838,9 @@ describe('Fill Actor page', () => {
     await screen.findByText('扫描结果')
 
     expect(screen.getByText('文件移动已暂停')).toBeInTheDocument()
-    expect(screen.getByText(/当前仅支持扫描、磁力查询和订阅操作/)).toBeInTheDocument()
+    expect(screen.getByText(/当前仅支持扫描、提交下载和订阅操作/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '确认并移入' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: '复制全部磁力（1）' })).toBeEnabled()
+    expect(screen.getByText(/缺失作品已自动提交到下载追踪/)).toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(fetchMock).toHaveBeenCalledTimes(2)
   })
@@ -947,29 +933,25 @@ describe('Fill Actor page', () => {
     expect(screen.queryByText('服务未就绪')).not.toBeInTheDocument()
   })
 
-  it('copies every valid unique magnet in plan order and has no per-row magnet actions', async () => {
+  it('shows submission outcomes with a dashboard hint instead of magnets', async () => {
     const user = userEvent.setup()
-    const clipboardSpy = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue()
     const fetchMock = vi.mocked(fetch)
     fetchMock
       .mockImplementationOnce(() => jsonResponse({ status: 'ok' }))
-      .mockImplementationOnce(() => jsonResponse(magnetPlan))
+      .mockImplementationOnce(() => jsonResponse(submittedPlan))
 
     render(<App />)
     await user.type(screen.getByLabelText('演员 ID'), 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
     await screen.findByText('扫描结果')
 
-    expect(screen.queryByRole('button', { name: /复制 .*磁力链接/ })).not.toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: /打开 .*磁力链接/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /磁力/ })).not.toBeInTheDocument()
     expect(document.querySelector('a[href^="magnet:"]')).toBeNull()
+    expect(document.querySelector('.magnet-text')).toBeNull()
 
-    await user.click(screen.getByRole('button', { name: '复制全部磁力（2）' }))
-    expect(clipboardSpy).toHaveBeenCalledTimes(1)
-    expect(clipboardSpy).toHaveBeenCalledWith(
-      'magnet:?xt=urn:btih:123456\nmagnet:?xt=urn:btih:ABCDEF',
-    )
-    expect(screen.getByRole('button', { name: '已复制 2 个磁力' })).toBeInTheDocument()
+    expect(screen.getAllByText('已提交下载')).toHaveLength(2)
+    expect(screen.getByText('提交失败')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '监控面板' })).toHaveAttribute('href', '/dashboard')
   })
 
   it('keeps polling completed plans while RSSHub warms and retains terminal feed states', async () => {

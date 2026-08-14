@@ -20,7 +20,7 @@ import { ApplySummary, ConfirmDialog } from '../components/fill-actor/ApplyFeedb
 import { ProgressPanel } from '../components/fill-actor/ProgressPanel'
 import { ActorFailures, PlanSummary, VideoGroup } from '../components/fill-actor/Results'
 import { ScanPanel } from '../components/fill-actor/ScanPanel'
-import { ArrowIcon, CheckIcon, CopyIcon, MoveIcon, SearchIcon, Spinner } from '../components/Icons'
+import { ArrowIcon, MoveIcon, SearchIcon, Spinner } from '../components/Icons'
 import { useApiTokenValue } from '../lib/apiToken'
 import {
   applyPlaceholder,
@@ -32,7 +32,6 @@ import {
   isJobPending,
   jobState,
   parseActorIds,
-  planMagnets,
   terminalApplyJob,
 } from '../lib/fill-actor/format'
 import { MAX_ACTORS, STALE_CODES, VIDEO_GROUPS } from '../lib/fill-actor/labels'
@@ -87,9 +86,6 @@ export default function FillActorPage() {
   const [applyRetryTick, setApplyRetryTick] = useState(0)
   const [applyPlanRetryTick, setApplyPlanRetryTick] = useState(0)
   const [needsFreshPlan, setNeedsFreshPlan] = useState(false)
-  const [copyingMagnets, setCopyingMagnets] = useState(false)
-  const [copiedRevision, setCopiedRevision] = useState<string | null>(null)
-  const [magnetCopyError, setMagnetCopyError] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [now, setNow] = useState(Date.now())
   const lastAutoSelectedPlanKey = useRef<string | null>(null)
@@ -106,7 +102,10 @@ export default function FillActorPage() {
   const activeApplyPlanController = useRef<AbortController | null>(null)
   const parsed = useMemo(() => parseActorIds(input), [input])
   const candidates = useMemo(() => candidateMap(plan), [plan])
-  const magnets = useMemo(() => planMagnets(plan), [plan])
+  const submittedCount = useMemo(
+    () => (plan?.videos ?? []).filter((video) => video.state === 'submitted' || video.state === 'submit_failed').length,
+    [plan],
+  )
   const selectedCandidates = [...selected].map((id) => candidates.get(id)).filter(Boolean) as MoveCandidate[]
   const selectableIds = useMemo(
     () =>
@@ -158,7 +157,7 @@ export default function FillActorPage() {
     : fillActorHealth.apply_enabled === false
       ? {
           title: '文件移动已暂停',
-          body: '当前仅支持扫描、磁力查询和订阅操作；确认移入功能已由管理员关闭。',
+          body: '当前仅支持扫描、提交下载和订阅操作；确认移入功能已由管理员关闭。',
         }
       : fillActorHealth.legacy_journal === false
         ? {
@@ -458,8 +457,6 @@ export default function FillActorPage() {
     setApplyPausedForAuth(false)
     setSelected(new Set())
     setNeedsFreshPlan(false)
-    setCopiedRevision(null)
-    setMagnetCopyError(null)
     setQuery('')
     lastAutoSelectedPlanKey.current = null
     lastScrolledPlanKey.current = null
@@ -568,22 +565,6 @@ export default function FillActorPage() {
     setError(null)
   }
 
-  async function copyAllMagnets() {
-    if (!magnets.length || copyingMagnets) return
-    setCopyingMagnets(true)
-    setMagnetCopyError(null)
-    try {
-      await navigator.clipboard.writeText(magnets.join('\n'))
-      const revision = plan?.revision ?? null
-      setCopiedRevision(revision)
-      window.setTimeout(() => setCopiedRevision((current) => (current === revision ? null : current)), 1600)
-    } catch {
-      setMagnetCopyError('浏览器不允许访问剪贴板，请手动复制磁力链接。')
-    } finally {
-      setCopyingMagnets(false)
-    }
-  }
-
   // A fresh token — first one or a replacement after a rotation — resumes work paused by a 401.
   useEffect(() => {
     if (!apiToken) return
@@ -683,23 +664,12 @@ export default function FillActorPage() {
                     onChange={(event) => setQuery(event.target.value)}
                   />
                 </div>
-                {magnets.length > 0 && (
-                  <button
-                    className="button secondary magnet-copy-button"
-                    type="button"
-                    disabled={copyingMagnets}
-                    onClick={() => void copyAllMagnets()}
-                  >
-                    {copyingMagnets ? <Spinner /> : copiedRevision === plan.revision ? <CheckIcon /> : <CopyIcon />}
-                    {copyingMagnets
-                      ? '正在复制'
-                      : copiedRevision === plan.revision
-                        ? `已复制 ${magnets.length} 个磁力`
-                        : `复制全部磁力（${magnets.length}）`}
-                  </button>
-                )}
               </div>
-              {magnetCopyError && <p className="magnet-copy-error" role="alert">{magnetCopyError}</p>}
+              {submittedCount > 0 && (
+                <p className="submitted-hint">
+                  缺失作品已自动提交到下载追踪，进度见<Link to="/dashboard">监控面板</Link>。
+                </p>
+              )}
 
               <div className="group-stack">
                 {VIDEO_GROUPS.map((group) => {

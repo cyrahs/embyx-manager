@@ -3,7 +3,9 @@
 export type VideoState =
   | 'exists'
   | 'additional_found'
-  | 'magnet_found'
+  | 'submitted'
+  | 'already_tracked'
+  | 'submit_failed'
   | 'missing'
   | 'invalid_video_id'
   | 'scan_failed'
@@ -35,7 +37,6 @@ export interface VideoPlan {
   state: VideoState
   existing_files: string[]
   move_candidates: MoveCandidate[]
-  magnet: string | null
   warnings: string[]
 }
 
@@ -177,7 +178,7 @@ export type AttemptState =
 export interface Acquisition {
   avid: string
   state: AcquisitionState
-  source: 'rss_actor' | 'rss_rank' | 'manual' | 'reconcile'
+  source: 'rss_actor' | 'rss_rank' | 'manual' | 'reconcile' | 'fill_actor'
   note: string | null
   archived_paths: string[]
   next_action_at: string | null

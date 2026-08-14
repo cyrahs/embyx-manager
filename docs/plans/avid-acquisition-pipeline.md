@@ -39,6 +39,12 @@
 - 兜底扫描不再搭 RSS 间隔的车:新增 `archive.scan_cron`(cronsim 校验,服务器本地
   时间),调度器为归档单独开 cron 循环;设置页在 cron 输入下实时显示中文自然语言描述
   (cronstrue zh_CN)。
+- **Fill actor 成为账本输入源**:磁力解析与首次提交从 `RssPipeline` 抽为共享的
+  `monitor/intake.py`(`AcquisitionIntake`),fill actor 扫描出的缺失番号不再返回磁力
+  给前端复制,而是经 `AcquisitionGateway` 端口自动 discover→解析→提交离线
+  (`source='fill_actor'`,迁移 v8 扩展 source CHECK 并新增 `submitting` job 阶段),
+  后续生命周期全部由 tracker 接管;`rss.failed_avid_cooldown_seconds` 现在约束所有
+  intake 来源的解析失败冷却。
 
 ## 原计划(v3)
 

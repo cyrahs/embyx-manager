@@ -42,16 +42,6 @@ export function candidateMap(plan: FillActorPlan | null) {
   return map
 }
 
-export function safeMagnet(magnet: string | null): string | null {
-  if (!magnet || !magnet.toLowerCase().startsWith('magnet:?')) return null
-  return [...magnet].every((character) => {
-    const code = character.charCodeAt(0)
-    return code > 31 && code !== 127
-  })
-    ? magnet
-    : null
-}
-
 export function safeFreshRssUrl(value: string | null): string | null {
   if (!value) return null
   try {
@@ -60,19 +50,6 @@ export function safeFreshRssUrl(value: string | null): string | null {
   } catch {
     return null
   }
-}
-
-export function planMagnets(plan: FillActorPlan | null): string[] {
-  const seen = new Set<string>()
-  const magnets: string[] = []
-  plan?.videos.forEach((video) => {
-    const magnet = safeMagnet(video.magnet)
-    if (magnet && !seen.has(magnet)) {
-      seen.add(magnet)
-      magnets.push(magnet)
-    }
-  })
-  return magnets
 }
 
 /** Fill Actor's own error codes, layered over the app-wide fallback. */
