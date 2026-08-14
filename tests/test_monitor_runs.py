@@ -1,4 +1,3 @@
-
 from embyx_manager.monitor.reports import PipelineName, RunState, RunTrigger
 from embyx_manager.monitor.runs import PipelineRunRepository
 from tests.conftest import make_database, postgres_test_dsn
