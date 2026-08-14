@@ -620,3 +620,36 @@ def test_padded_content_id_archives_under_the_same_avid_rss_would_record(tmp_pat
     assert parser.get_avid('[sukebei] abc00123 1080p') == 'ABC-123'
     assert result.avid == 'ABC-123'
     assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
+
+
+def test_a_nested_route_is_not_archived_by_the_route_that_contains_it(tmp_path: Path) -> None:
+    """A category downloading into a subdirectory of the shared inbox.
+
+    Without the guard the outer scan treats the inner route as one download:
+    it would file a single video out of everything below it and then delete the
+    directory, taking the other downloads with it.
+    """
+    pipeline = make_pipeline(tmp_path, mapping={'intake': 'sorted', 'intake/rank': 'sorted/rank'})
+    nested = tmp_path / 'task' / 'intake' / 'rank'
+    write_video(nested / 'DEF-456 release' / 'DEF-456.mp4')
+    write_video(tmp_path / 'task' / 'intake' / 'ABC-123 release' / 'ABC-123.mp4')
+
+    ctx = make_ctx()
+    pipeline.run(ctx)
+
+    assert (tmp_path / 'library' / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
+    # The nested route files its own downloads, into its own destination.
+    assert (tmp_path / 'library' / 'sorted' / 'rank' / 'DEF' / 'DEF-456.mp4').exists()
+    assert nested.is_dir()
+
+
+def test_a_nested_route_is_skipped_even_when_it_is_deeper(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path, mapping={'intake': 'sorted', 'intake/rank/new': 'sorted/rank'})
+    (tmp_path / 'task' / 'intake' / 'rank' / 'new').mkdir(parents=True)
+    write_video(tmp_path / 'task' / 'intake' / 'rank' / 'new' / 'DEF-456 release' / 'DEF-456.mp4')
+
+    pipeline.run(make_ctx())
+
+    # 'rank' holds a route without being one, so it is left alone too.
+    assert (tmp_path / 'task' / 'intake' / 'rank' / 'new').is_dir()
+    assert (tmp_path / 'library' / 'sorted' / 'rank' / 'DEF' / 'DEF-456.mp4').exists()

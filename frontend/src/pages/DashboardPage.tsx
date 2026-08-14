@@ -48,6 +48,7 @@ const TRIGGER_LABELS: Record<string, string> = {
 const STAT_LABELS: Record<string, string> = {
   items: 'RSS 条目',
   unique_avids: '番号',
+  categories_failed: '分类拉取失败',
   skipped_known: '已跟踪跳过',
   skipped_cooldown: '冷却跳过',
   magnets_found: '磁力命中',
@@ -75,6 +76,7 @@ const STAT_LABELS: Record<string, string> = {
   files_deleted: '删除',
   dirs_deleted: '清理目录',
   offline_tasks: '离线任务',
+  duplicate_offline_tasks: '重复离线任务',
   archived: '已入库',
   retried: '换磁力重试',
   exhausted: '磁力用尽',
@@ -282,28 +284,15 @@ export default function DashboardPage() {
                       取消运行
                     </button>
                   ) : (
-                    <>
-                      <button
-                        className="button primary"
-                        type="button"
-                        disabled={!status.configured || busyAction === `run-${pipeline}`}
-                        onClick={() => void runAction(`run-${pipeline}`, () => triggerPipeline(pipeline))}
-                      >
-                        {busyAction === `run-${pipeline}` ? <Spinner /> : null}
-                        立即运行
-                      </button>
-                      {pipeline === 'rss' && (
-                        <button
-                          className="button secondary"
-                          type="button"
-                          disabled={!status.configured || busyAction === `run-rank`}
-                          onClick={() => void runAction('run-rank', () => triggerPipeline('rss', { rank: true }))}
-                        >
-                          {busyAction === 'run-rank' ? <Spinner /> : null}
-                          运行 Rank
-                        </button>
-                      )}
-                    </>
+                    <button
+                      className="button primary"
+                      type="button"
+                      disabled={!status.configured || busyAction === `run-${pipeline}`}
+                      onClick={() => void runAction(`run-${pipeline}`, () => triggerPipeline(pipeline))}
+                    >
+                      {busyAction === `run-${pipeline}` ? <Spinner /> : null}
+                      立即运行
+                    </button>
                   )}
                   {toggle && (
                     <button

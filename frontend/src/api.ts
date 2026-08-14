@@ -613,11 +613,8 @@ export async function getMonitorStatus(signal?: AbortSignal): Promise<PipelineSt
   return body as PipelineStatus[]
 }
 
-export async function triggerPipeline(pipeline: PipelineId, options?: { rank?: boolean }): Promise<string> {
-  const body = await request(`/api/monitor/${pipeline}/trigger`, {
-    method: 'POST',
-    body: JSON.stringify({ rank: Boolean(options?.rank) }),
-  })
+export async function triggerPipeline(pipeline: PipelineId): Promise<string> {
+  const body = await request(`/api/monitor/${pipeline}/trigger`, { method: 'POST' })
   if (!isRecord(body) || typeof body.run_id !== 'string') {
     throw new ApiError(0, 'invalid_response', '触发响应无效。')
   }

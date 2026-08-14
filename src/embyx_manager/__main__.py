@@ -35,8 +35,19 @@ def _import_config(config_path: Path, database_url: str) -> None:
         sections['clouddrive'] = {
             'address': str(clouddrive.get('address', '')),
             'api_token': str(clouddrive.get('api_token', '')),
-            'task_dir_path': str(clouddrive.get('task_dir_path', '')),
         }
+        # The legacy config has one offline directory and no notion of categories,
+        # while RSS now ingests categories that each name a directory. Recreate
+        # the two the pipeline used to have, both pointing at that directory, so
+        # an imported deployment behaves as it did before.
+        task_dir_path = str(clouddrive.get('task_dir_path', '')).strip()
+        if task_dir_path:
+            sections['rss'] = {
+                'categories': [
+                    {'label': 'Actor', 'task_dir_path': task_dir_path},
+                    {'label': 'Rank', 'task_dir_path': task_dir_path},
+                ],
+            }
     freshrss = raw.get('freshrss', {})
     if freshrss:
         sections['freshrss'] = {

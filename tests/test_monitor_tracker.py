@@ -1,6 +1,7 @@
 import logging
 from datetime import timedelta
 from pathlib import Path
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -8,7 +9,6 @@ from embyx_manager.clients.clouddrive.aio import OfflineStatus
 from embyx_manager.config.models import ArchiveConfig
 from embyx_manager.core.avid import AvidParser
 from embyx_manager.monitor.acquisitions import (
-    AcquisitionSource,
     AcquisitionState,
     AttemptState,
     MagnetCandidate,
@@ -45,13 +45,14 @@ def offline_task(
 
 
 class FakeCloud:
-    def __init__(self, tasks: list[dict]) -> None:
-        self.tasks = tasks
+    def __init__(self, tasks: list[dict] | dict[str, list[dict]]) -> None:
+        self.tasks_by_dir: dict[str, list[dict]] = {TASK_DIR: tasks} if isinstance(tasks, list) else tasks
+        self.listed: list[str] = []
         self.refreshed: list[str] = []
 
     async def list_offline_files(self, path: str) -> tuple[dict, ...]:
-        assert path == TASK_DIR
-        return tuple(self.tasks)
+        self.listed.append(path)
+        return tuple(self.tasks_by_dir.get(path, ()))
 
     async def list_directory(self, path: str) -> tuple[()]:
         self.refreshed.append(path)
@@ -95,14 +96,14 @@ def build(
         ledger=ledger,
         cloud=cloud,  # type: ignore[arg-type]
         archiver=archiver,
-        settings=TrackerSettings.from_config(config, task_dir_path=TASK_DIR),
+        settings=TrackerSettings.from_config(config, task_dir_paths=(TASK_DIR,)),
         submit_magnet=submit,
     )
     return tracker, ledger, cloud, submitted
 
 
 async def seed(ledger: FakeLedger, avid: str, hashes: list[str]) -> None:
-    await ledger.discover(avid, source=AcquisitionSource.RSS_ACTOR, now=now_stub())
+    await ledger.discover(avid, source='rss:Actor', now=now_stub())
     await ledger.add_attempts(
         avid,
         [MagnetCandidate(magnet=f'magnet:?xt=urn:btih:{h}', info_hash=h, source='sukebei') for h in hashes],
@@ -149,7 +150,7 @@ async def test_a_finished_download_is_filed_by_the_route_that_holds_it(tmp_path:
         ledger=ledger,
         cloud=cloud,  # type: ignore[arg-type]
         archiver=ArchivePipeline(config=config, avid_parser=AvidParser()),
-        settings=TrackerSettings.from_config(config, task_dir_path=TASK_DIR),
+        settings=TrackerSettings.from_config(config, task_dir_paths=(TASK_DIR,)),
         submit_magnet=submit,
     )
     await seed(ledger, 'ABC-123', [HASH_A])
@@ -330,3 +331,110 @@ async def test_an_avid_an_operator_parked_is_not_touched(tmp_path: Path) -> None
 
     assert not (tmp_path / 'library' / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
     assert ledger.states['ABC-123'] is AcquisitionState.NEEDS_ATTENTION
+
+
+RANK_DIR = f'{TASK_DIR}/rank'
+
+
+def build_nested(tmp_path: Path, tasks: dict[str, list[dict]]) -> tuple[AcquisitionTracker, FakeLedger, FakeCloud]:
+    """A category directory nested inside the shared inbox, each its own route."""
+    local = tmp_path / 'task'
+    (local / 'downloads' / 'rank').mkdir(parents=True)
+    config = ArchiveConfig(
+        enabled=True,
+        src_dir=str(local),
+        dst_dir=str(tmp_path / 'library'),
+        mapping={'downloads': 'sorted', 'downloads/rank': 'sorted/rank'},
+    )
+    ledger = FakeLedger()
+    cloud = FakeCloud(tasks)
+
+    async def submit(avid: str, magnet: str) -> bool:  # noqa: ARG001 - nothing should retry here
+        pytest.fail('no magnet should be submitted')
+
+    tracker = AcquisitionTracker(
+        ledger=ledger,
+        cloud=cloud,  # type: ignore[arg-type]
+        archiver=ArchivePipeline(config=config, avid_parser=AvidParser()),
+        settings=TrackerSettings.from_config(config, task_dir_paths=(TASK_DIR, RANK_DIR)),
+        submit_magnet=submit,
+    )
+    return tracker, ledger, cloud
+
+
+async def test_every_configured_directory_is_polled(tmp_path: Path) -> None:
+    tracker, ledger, cloud = build_nested(
+        tmp_path,
+        {
+            TASK_DIR: [offline_task('ABC-123 release', HASH_A, OfflineStatus.FINISHED)],
+            RANK_DIR: [offline_task('DEF-456 release', HASH_B, OfflineStatus.FINISHED)],
+        },
+    )
+    await seed(ledger, 'ABC-123', [HASH_A])
+    await seed(ledger, 'DEF-456', [HASH_B])
+    write_video(tmp_path / 'task' / 'downloads' / 'ABC-123 release' / 'ABC-123.mp4')
+    write_video(tmp_path / 'task' / 'downloads' / 'rank' / 'DEF-456 release' / 'DEF-456.mp4')
+
+    ctx = make_ctx()
+    await tracker.poll(ctx)
+
+    assert cloud.listed == [TASK_DIR, RANK_DIR]
+    assert ctx.stats['offline_tasks'] == 2
+    # Each download is filed by the route that holds it, which is what puts the
+    # rank category in a library subdirectory of its own.
+    assert (tmp_path / 'library' / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
+    assert (tmp_path / 'library' / 'sorted' / 'rank' / 'DEF' / 'DEF-456.mp4').exists()
+
+
+async def test_the_mount_refresh_uses_the_directory_the_task_was_listed_under(tmp_path: Path) -> None:
+    tracker, ledger, cloud = build_nested(
+        tmp_path,
+        {RANK_DIR: [offline_task('DEF-456 release', HASH_B, OfflineStatus.FINISHED)]},
+    )
+    await seed(ledger, 'DEF-456', [HASH_B])
+    write_video(tmp_path / 'task' / 'downloads' / 'rank' / 'DEF-456 release' / 'DEF-456.mp4')
+
+    await tracker.poll(make_ctx())
+
+    assert cloud.refreshed == [f'{RANK_DIR}/DEF-456 release']
+
+
+async def test_a_hash_listed_in_two_directories_is_advanced_once(tmp_path: Path) -> None:
+    task = offline_task('ABC-123 release', HASH_A, OfflineStatus.FINISHED)
+    tracker, ledger, cloud = build_nested(tmp_path, {TASK_DIR: [task], RANK_DIR: [dict(task)]})
+    await seed(ledger, 'ABC-123', [HASH_A])
+    write_video(tmp_path / 'task' / 'downloads' / 'ABC-123 release' / 'ABC-123.mp4')
+
+    ctx = make_ctx()
+    await tracker.poll(ctx)
+
+    assert ctx.stats['duplicate_offline_tasks'] == 1
+    assert ledger.states['ABC-123'] is AcquisitionState.ARCHIVED
+    assert cloud.refreshed == [f'{TASK_DIR}/ABC-123 release']
+
+
+async def test_no_configured_directory_does_not_conclude_the_downloads_in_flight(tmp_path: Path) -> None:
+    """An empty directory list is no evidence, not evidence of everything vanishing."""
+    config = ArchiveConfig(
+        enabled=True,
+        src_dir=str(tmp_path / 'task'),
+        dst_dir=str(tmp_path / 'library'),
+        mapping={'downloads': 'sorted'},
+    )
+    ledger = FakeLedger()
+    cloud = FakeCloud([])
+    tracker = AcquisitionTracker(
+        ledger=ledger,
+        cloud=cloud,  # type: ignore[arg-type]
+        archiver=ArchivePipeline(config=config, avid_parser=AvidParser()),
+        settings=TrackerSettings.from_config(config, task_dir_paths=()),
+        submit_magnet=AsyncMock(return_value=True),
+    )
+    await seed(ledger, 'ABC-123', [HASH_A])
+
+    ctx = make_ctx()
+    await tracker.poll(ctx)
+
+    assert cloud.listed == []
+    assert ledger.attempt_states('ABC-123') == [AttemptState.SUBMITTED]
+    assert any('no offline directory' in line for line in ctx.log_tail)

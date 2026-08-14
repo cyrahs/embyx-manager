@@ -14,7 +14,10 @@ const EXACT_TEXT: Record<string, string> = {
   'mapping source and destination directories must be configured': '需要先配置映射的源目录和目标目录',
   'FreshRSS is not configured': '尚未配置 FreshRSS',
   'CloudDrive is not configured': '尚未配置 CloudDrive',
+  'CloudDrive must be configured': '需要先配置 CloudDrive',
   'CloudDrive task directory is not configured': '尚未配置 CloudDrive 任务目录',
+  'at least one RSS category must be configured': '需要至少配置一个 RSS 分类',
+  'at least one RSS category with an offline directory must be configured': '需要至少配置一个带离线目录的 RSS 分类',
   'the tracker is not wired up': '下载追踪尚未接入',
   // Acquisition ledger notes (tracker.py, reconcile.py, monitor/api.py).
   'every magnet was tried': '所有磁力都已尝试',
@@ -36,6 +39,7 @@ const EXACT_TEXT: Record<string, string> = {
 }
 
 const TEXT_PATTERNS: Array<[RegExp, (match: RegExpMatchArray) => string]> = [
+  [/^additional-(\d+)$/, (m) => `附加库 ${m[1]}`],
   [/^no progress for (\d+)d at (\d+)%$/, (m) => `已 ${m[1]} 天无进度（停在 ${m[2]}%）`],
   [/^expected (\S+) but found (\S+)$/, (m) => `预期番号 ${m[1]}，实际识别为 ${m[2]}`],
   [/^multiple avids in one folder: (.+)$/, (m) => `同一文件夹中有多个番号：${m[1]}`],

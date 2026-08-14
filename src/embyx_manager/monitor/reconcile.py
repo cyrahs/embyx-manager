@@ -86,6 +86,11 @@ class ReconcileScanner:
         folders = await asyncio.to_thread(lambda: sorted(entry for entry in root.iterdir() if entry.is_dir()))
         for folder in folders:
             ctx.check_cancelled()
+            if self._archiver.covers_other_route(folder, route_root=root):
+                # Another route's source: it is scanned as a route of its own, and
+                # measuring it here would walk a live download directory.
+                ctx.info('skipping %s, it is another route of its own', folder.name)
+                continue
             avid = self._archiver.avid_of(folder.name)
             if avid and avid in active:
                 # The tracker owns this download; the ledger is the lock.

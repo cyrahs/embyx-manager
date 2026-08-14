@@ -137,12 +137,8 @@ async def _run_clouddrive_test(config: CloudDriveConfig) -> TestConnectionResult
     try:
         async with asyncio.timeout(TEST_TIMEOUT_SECONDS):
             await cloud.check()
-            if config.task_dir_path:
-                await cloud.list_directory(config.task_dir_path)
     except TimeoutError:
         return TestConnectionResult(ok=False, detail='connection timed out')
-    except FileNotFoundError:
-        return TestConnectionResult(ok=False, detail=f'task directory not found: {config.task_dir_path}')
     except grpc.RpcError as exc:
         detail = exc.details() if hasattr(exc, 'details') else ''
         code = exc.code().name if hasattr(exc, 'code') else 'RPC_ERROR'
@@ -152,9 +148,7 @@ async def _run_clouddrive_test(config: CloudDriveConfig) -> TestConnectionResult
     except OSError as exc:
         return TestConnectionResult(ok=False, detail=f'connection failed: {exc}')
     else:
-        task_note = f'; task directory {config.task_dir_path} is accessible' if config.task_dir_path else ''
-        detail = f'connected{task_note}'
-        return TestConnectionResult(ok=True, detail=detail)
+        return TestConnectionResult(ok=True, detail='connected')
     finally:
         await cloud.aclose()
 
