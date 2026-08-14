@@ -107,6 +107,10 @@ class ArchivePipeline:
         self.src_dir = Path(config.src_dir)
         self.dst_dir = Path(config.dst_dir)
 
+    def avid_of(self, name: str) -> str:
+        """The AVID a file or folder name reads as; '' when none can be read."""
+        return self._avid.get_avid(name)
+
     # -- the full scan -------------------------------------------------------
 
     def run(self, ctx: RunContext) -> None:

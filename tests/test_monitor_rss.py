@@ -143,6 +143,47 @@ class FakeLedger:
                 return True
         return False
 
+    async def attempts_by_info_hash(self, info_hashes) -> dict[str, MagnetAttemptRecord]:
+        wanted = {h for h in info_hashes if h}
+        live = {AttemptState.SUBMITTED, AttemptState.DOWNLOADING, AttemptState.FINISHED, AttemptState.ARCHIVING}
+        return {
+            attempt.info_hash: attempt
+            for attempts in self.attempts.values()
+            for attempt in attempts
+            if attempt.info_hash in wanted and attempt.state in live
+        }
+
+    async def in_flight_attempts(self) -> tuple[MagnetAttemptRecord, ...]:
+        return tuple(
+            attempt
+            for attempts in self.attempts.values()
+            for attempt in attempts
+            if attempt.state in {AttemptState.SUBMITTED, AttemptState.DOWNLOADING}
+        )
+
+    async def attempts_for(self, avid: str) -> tuple[MagnetAttemptRecord, ...]:
+        return tuple(self.attempts.get(avid, []))
+
+    async def record_progress(
+        self,
+        avid: str,
+        attempt_no: int,
+        *,
+        state: AttemptState,
+        progress: float | None,
+        now: datetime,
+    ) -> bool:
+        for index, attempt in enumerate(self.attempts.get(avid, [])):
+            if attempt.attempt_no != attempt_no:
+                continue
+            if attempt.state not in {AttemptState.SUBMITTED, AttemptState.DOWNLOADING}:
+                return False
+            if attempt.state is state and attempt.progress == progress:
+                return False
+            self.attempts[avid][index] = _replace(attempt, state=state, progress=progress, updated_at=now)
+            return True
+        return False
+
     # -- assertions helpers -------------------------------------------------
 
     def attempt_states(self, avid: str) -> list[AttemptState]:

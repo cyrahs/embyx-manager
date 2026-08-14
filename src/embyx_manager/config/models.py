@@ -171,6 +171,33 @@ class ArchiveConfig(ConfigSection):
     min_size_mb: int = 0
     # Destination subdirectory -> list of brands routed into it.
     brand_mapping: dict[str, tuple[str, ...]] = {}
+    # Where the tracker files finished offline downloads. Independent of the route
+    # tables above: the tracker knows the AVID it is expecting, so it has no need
+    # to infer intent from which directory a folder happens to sit in.
+    task_dir_local: str = ''
+    task_dst: str = ''
+    task_priority: bool = False
+    tracker_interval_seconds: int = 300
+    stall_timeout_hours: int = 24
+    max_attempts: int = 5
+
+    @field_validator('task_dir_local')
+    @classmethod
+    def _validate_task_dir_local(cls, value: str) -> str:
+        return normalize_absolute_path('archive.task_dir_local', value)
+
+    @field_validator('tracker_interval_seconds', 'stall_timeout_hours', 'max_attempts')
+    @classmethod
+    def _tracker_positive(cls, value: int) -> int:
+        if value < 1:
+            msg = 'must be positive'
+            raise ValueError(msg)
+        return value
+
+    @property
+    def tracker_configured(self) -> bool:
+        """The tracker needs its own paths only; the route tables are for the scan."""
+        return bool(self.src_dir and self.dst_dir and self.task_dir_local and self.task_dst)
 
     @field_validator('min_size_mb')
     @classmethod
