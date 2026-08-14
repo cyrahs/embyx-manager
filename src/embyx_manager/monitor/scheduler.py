@@ -46,6 +46,15 @@ STARTUP_RETRY_SECONDS = 60.0
 CONFIG_REFRESH_SECONDS = 15.0
 CRON_POLL_SECONDS = 20.0
 
+#: Seconds after a magnet submission at which the tracker takes an extra look.
+#: Popular magnets often finish within moments on the provider's cache, so the
+#: first checks come quickly; whatever is still downloading after the last one
+#: is a real wait and falls back to ``tracker_interval_seconds``.
+TRACKER_FAST_CHECKS_SECONDS: tuple[float, ...] = (15.0, 30.0, 60.0, 120.0)
+#: Submissions closer together than this share one burst of fast checks, so an
+#: RSS run queueing a batch of magnets does not multiply the polls.
+TRACKER_SUBMISSION_MERGE_SECONDS = 5.0
+
 
 class PipelineBusyError(Exception):
     def __init__(self, pipeline: PipelineName) -> None:
@@ -141,6 +150,10 @@ class MonitorScheduler:
         self._tracker_poll = tracker_poll
         self._tracker_ready = tracker_ready
         self._tracker_state = TrackerState()
+        # Monotonic times of recent magnet submissions, each owed the burst of
+        # fast checks in TRACKER_FAST_CHECKS_SECONDS.
+        self._tracker_submitted_at: list[float] = []
+        self._tracker_submission = asyncio.Event()
         self._ready = {
             PipelineName.RSS: rss_ready,
             PipelineName.ARCHIVE: archive_ready,
@@ -351,9 +364,12 @@ class MonitorScheduler:
     async def _tracker_loop(self) -> None:
         """Poll CloudDrive for the acquisitions in flight.
 
-        A service loop rather than a pipeline run: it wakes every few minutes and
-        would swamp the run history. Its state lives in the ledger, with the last
-        poll and last error surfaced through :meth:`tracker_state`.
+        A service loop rather than a pipeline run: it wakes on the configured
+        interval and would swamp the run history. A fresh submission (reported
+        via :meth:`notify_submission`) pulls extra polls at the fast-check
+        offsets, so an instantly cached download is archived within moments
+        instead of waiting out the interval. State lives in the ledger, with
+        the last poll and last error surfaced through :meth:`tracker_state`.
         """
         assert self._tracker_poll is not None  # noqa: S101 - loop only starts when set
         while not self._stop.is_set():
@@ -369,8 +385,59 @@ class MonitorScheduler:
                     self._tracker_state.record(error=str(exc), stats={})
                 else:
                     self._tracker_state.record(error=None, stats=dict(ctx.stats))
-            if await self._wait_stop(interval):
+            if await self._wait_next_tracker_poll(time.monotonic() + interval):
                 return
+
+    def notify_submission(self) -> None:
+        """A magnet was just queued: owe it the burst of fast checks."""
+        now = time.monotonic()
+        merged = self._tracker_submitted_at and now - self._tracker_submitted_at[-1] < TRACKER_SUBMISSION_MERGE_SECONDS
+        if not merged:
+            self._tracker_submitted_at.append(now)
+        self._tracker_submission.set()
+
+    async def _wait_next_tracker_poll(self, regular_at: float) -> bool:
+        """Sleep until the next tracker poll is due; True when stopping instead.
+
+        The regular deadline stands however often the sleep is interrupted; a
+        submission arriving mid-sleep only pulls the wake-up forward to its
+        first fast check, it never pushes a poll back.
+        """
+        while not self._stop.is_set():
+            self._tracker_submission.clear()
+            due = min([regular_at, *self._pending_fast_checks()])
+            if await self._wait_stop_or_submission(due - time.monotonic()):
+                return True
+            if not self._tracker_submission.is_set():
+                return False
+        return True
+
+    def _pending_fast_checks(self) -> list[float]:
+        """Monotonic deadlines of the fast checks still owed to recent submissions."""
+        now = time.monotonic()
+        horizon = TRACKER_FAST_CHECKS_SECONDS[-1]
+        self._tracker_submitted_at = [t for t in self._tracker_submitted_at if now - t < horizon]
+        return [
+            submitted + offset
+            for submitted in self._tracker_submitted_at
+            for offset in TRACKER_FAST_CHECKS_SECONDS
+            if now < submitted + offset
+        ]
+
+    async def _wait_stop_or_submission(self, seconds: float) -> bool:
+        """Wait out ``seconds`` unless a submission or shutdown cuts it short; True when stopping."""
+        if seconds <= 0:
+            return self._stop.is_set()
+        waiters = (
+            asyncio.ensure_future(self._stop.wait()),
+            asyncio.ensure_future(self._tracker_submission.wait()),
+        )
+        try:
+            await asyncio.wait(waiters, timeout=seconds, return_when=asyncio.FIRST_COMPLETED)
+        finally:
+            for waiter in waiters:
+                waiter.cancel()
+        return self._stop.is_set()
 
     def tracker_state(self) -> 'TrackerState':
         return self._tracker_state

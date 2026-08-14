@@ -104,6 +104,8 @@ def make_scheduler(
     rss_ready=ready,
     archive_ready=ready,
     mapping_ready=ready,
+    tracker_poll=None,
+    tracker_ready=None,
 ) -> MonitorScheduler:
     async def default_rss(ctx: RunContext) -> None:
         ctx.add('rss_runs')
@@ -120,6 +122,8 @@ def make_scheduler(
         rss_ready=rss_ready,
         archive_ready=archive_ready,
         mapping_ready=mapping_ready,
+        tracker_poll=tracker_poll,
+        tracker_ready=tracker_ready,
     )
 
 
@@ -254,6 +258,62 @@ async def test_archive_scan_fires_when_its_cron_time_arrives(monkeypatch: pytest
     assert archive_runs[0].trigger is RunTrigger.SCHEDULED
     assert next_after_fire is not None
     assert next_after_fire > datetime.now(UTC)
+
+
+async def test_tracker_fast_checks_follow_a_submission(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(scheduler_module, 'TRACKER_FAST_CHECKS_SECONDS', (0.05, 0.1, 0.15))
+    store = FakeStore(archive=ArchiveConfig(tracker_interval_seconds=3600))
+    runs = FakeRuns()
+    polls: list[int] = []
+
+    async def tracker_poll(ctx: RunContext) -> None:
+        del ctx
+        polls.append(len(polls))
+
+    scheduler = make_scheduler(store, runs, tracker_poll=tracker_poll)
+    await scheduler.start()
+    for _ in range(100):
+        if polls:
+            break
+        await asyncio.sleep(0.01)
+    assert len(polls) == 1  # the startup poll; the next regular one is an hour out
+
+    scheduler.notify_submission()
+    for _ in range(200):
+        if len(polls) >= 4:
+            break
+        await asyncio.sleep(0.01)
+    await scheduler.aclose()
+
+    # One extra poll per fast-check offset, pulled in ahead of the hour-long interval.
+    assert len(polls) == 4
+
+
+async def test_tracker_merges_a_burst_of_submissions(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(scheduler_module, 'TRACKER_FAST_CHECKS_SECONDS', (0.05, 0.1, 0.15))
+    store = FakeStore(archive=ArchiveConfig(tracker_interval_seconds=3600))
+    runs = FakeRuns()
+    polls: list[int] = []
+
+    async def tracker_poll(ctx: RunContext) -> None:
+        del ctx
+        polls.append(len(polls))
+
+    scheduler = make_scheduler(store, runs, tracker_poll=tracker_poll)
+    await scheduler.start()
+    for _ in range(100):
+        if polls:
+            break
+        await asyncio.sleep(0.01)
+
+    # A batch of submissions within the merge window shares one burst of checks.
+    scheduler.notify_submission()
+    scheduler.notify_submission()
+    scheduler.notify_submission()
+    await asyncio.sleep(0.5)
+    await scheduler.aclose()
+
+    assert len(polls) == 4
 
 
 def test_next_cron_fire_returns_the_next_local_occurrence_in_utc() -> None:

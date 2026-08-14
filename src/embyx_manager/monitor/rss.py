@@ -17,6 +17,7 @@ independent, so one failing does not cost the others their pass.
 """
 
 import asyncio
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 
 import grpc
@@ -68,7 +69,9 @@ class RssPipeline:
         javbus: JavBusClient,
         ledger: AcquisitionRepository,
         archiver: ArchivePipeline,
+        on_submitted: Callable[[], None] | None = None,
     ) -> None:
+        """``on_submitted()`` is called whenever a magnet lands at CloudDrive."""
         self._config = config
         self._avid = avid_parser
         self._freshrss = freshrss
@@ -77,6 +80,7 @@ class RssPipeline:
         self._javbus = javbus
         self._ledger = ledger
         self._archiver = archiver
+        self._on_submitted = on_submitted
 
     async def run(self, ctx: RunContext) -> None:
         """Ingest every configured category."""
@@ -286,6 +290,8 @@ class RssPipeline:
                 error='failed to add the offline task',
             )
             return await self._submit_next(avid, task_dir, ctx)
+        if self._on_submitted is not None:
+            self._on_submitted()
         record = await self._ledger.get(avid)
         if record is not None and record.state is not AcquisitionState.DOWNLOADING:
             await self._ledger.transition(

@@ -1,15 +1,17 @@
-"""Migration 8: the two fixed RSS labels become categories that own their directory.
+"""Migrations that rewrite stored configuration, tested statement by statement.
 
-A stored section that fails validation reverts to defaults rather than raising
-(see config/store.py), which for RSS now means no categories at all. These tests
-run the migration's own statements against rows shaped the way deployments could
-have left them and check the result still validates.
+Migration 8 turns the two fixed RSS labels into categories that own their
+directory; migration 9 moves the tracker interval's old default along to the new
+one. A stored section that fails validation reverts to defaults rather than
+raising (see config/store.py), which for RSS now means no categories at all.
+These tests run the migrations' own statements against rows shaped the way
+deployments could have left them and check the result still validates.
 """
 
 import json
 from datetime import UTC, datetime
 
-from embyx_manager.config.models import CloudDriveConfig, RssConfig
+from embyx_manager.config.models import ArchiveConfig, CloudDriveConfig, RssConfig
 from embyx_manager.db import _MIGRATIONS
 from tests.conftest import make_database, postgres_test_dsn
 
@@ -17,6 +19,7 @@ from tests.conftest import make_database, postgres_test_dsn
 BACKFILL_ACQUISITIONS = _MIGRATIONS[8][1]
 RESHAPE_RSS_SECTION = _MIGRATIONS[8][2]
 STRIP_CLOUDDRIVE_DIR = _MIGRATIONS[8][3]
+RAISE_TRACKER_INTERVAL = _MIGRATIONS[9][0]
 NOW = datetime(2026, 8, 14, tzinfo=UTC)
 INBOX = '/115/embyx_in'
 
@@ -150,3 +153,25 @@ async def test_acquisitions_keep_the_directory_they_were_submitted_to() -> None:
     await pool.execute(BACKFILL_ACQUISITIONS)
 
     assert await pool.fetchval("SELECT task_dir_path FROM archive_acquisitions WHERE avid = 'ABC-123'") == INBOX
+
+
+async def _migrate_archive(archive: dict) -> ArchiveConfig:
+    postgres_test_dsn()
+    pool = await make_database().get_pool()
+    await _store_section(pool, 'archive', archive)
+    await pool.execute(RAISE_TRACKER_INTERVAL)
+    stored = await pool.fetchval("SELECT value_json FROM app_config WHERE section = 'archive'")
+    return ArchiveConfig.model_validate_json(stored)
+
+
+async def test_the_old_default_tracker_interval_follows_the_new_default() -> None:
+    archive = await _migrate_archive({'enabled': True, 'tracker_interval_seconds': 300})
+
+    assert archive.tracker_interval_seconds == 1800
+    assert archive.enabled is True
+
+
+async def test_a_deliberately_chosen_tracker_interval_stays() -> None:
+    archive = await _migrate_archive({'enabled': True, 'tracker_interval_seconds': 600})
+
+    assert archive.tracker_interval_seconds == 600
