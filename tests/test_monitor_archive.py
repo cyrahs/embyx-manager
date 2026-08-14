@@ -7,6 +7,7 @@ from embyx_manager.config.models import ArchiveConfig
 from embyx_manager.core.avid import AvidParser
 from embyx_manager.monitor.archive import (
     ArchivePipeline,
+    Outcome,
     _isolate,
     is_4k_video,
     multi_part_video_check,
@@ -44,6 +45,19 @@ def make_priority_pipeline(tmp_path: Path, **overrides) -> ArchivePipeline:
     return pipeline
 
 
+def write_video(path: Path, size: int = 10) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(b'x' * size)
+    return path
+
+
+def archive(pipeline: ArchivePipeline, folder: Path, dst: str = 'sorted', **kwargs):
+    return pipeline.archive_folder(folder, dst, make_ctx(), **kwargs)
+
+
+# -- helpers ------------------------------------------------------------------
+
+
 def test_multi_part_video_check() -> None:
     assert multi_part_video_check([Path('a-1.mp4'), Path('a-2.mp4')]) is True
     assert multi_part_video_check([Path('a-A.mp4'), Path('a-B.mp4')]) is True
@@ -66,397 +80,376 @@ def test_normalize_copy_suffix() -> None:
     assert normalize_copy_suffix('ABC-123') == 'ABC-123'
 
 
-def write_video(path: Path, size: int = 10) -> Path:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(b'0' * size)
-    return path
-
-
-def test_flatten_moves_single_video_and_removes_folder(tmp_path: Path) -> None:
-    pipeline = make_pipeline(tmp_path)
-    intake = pipeline.src_dir / 'intake'
-    write_video(intake / 'ABC-123 release' / 'ABC-123.mp4')
-
-    pipeline.flatten(intake, pipeline.dst_dir / 'sorted', make_ctx())
-
-    assert (intake / 'ABC-123.mp4').exists()
-    assert not (intake / 'ABC-123 release').exists()
-
-
-def test_flatten_skips_folder_with_multiple_avids(tmp_path: Path) -> None:
-    pipeline = make_pipeline(tmp_path)
-    intake = pipeline.src_dir / 'intake'
-    write_video(intake / 'mixed' / 'ABC-123.mp4')
-    write_video(intake / 'mixed' / 'DEF-456.mp4')
-
-    pipeline.flatten(intake, pipeline.dst_dir / 'sorted', make_ctx())
-
-    assert (intake / 'mixed' / 'ABC-123.mp4').exists()
-    assert (intake / 'mixed' / 'DEF-456.mp4').exists()
-
-
-def test_flatten_moves_multi_part_videos(tmp_path: Path) -> None:
-    pipeline = make_pipeline(tmp_path)
-    intake = pipeline.src_dir / 'intake'
-    write_video(intake / 'set' / 'ABC-123-1.mp4')
-    write_video(intake / 'set' / 'ABC-123-2.mp4')
-
-    pipeline.flatten(intake, pipeline.dst_dir / 'sorted', make_ctx())
-
-    assert (intake / 'ABC-123-1.mp4').exists()
-    assert (intake / 'ABC-123-2.mp4').exists()
-
-
-def test_flatten_prefers_4k_variant(tmp_path: Path) -> None:
-    pipeline = make_pipeline(tmp_path)
-    intake = pipeline.src_dir / 'intake'
-    write_video(intake / 'dual' / 'ABC-123.mp4')
-    write_video(intake / 'dual' / 'ABC-123 4k.mp4')
-
-    pipeline.flatten(intake, pipeline.dst_dir / 'sorted', make_ctx())
-
-    assert (intake / 'ABC-123 4k.mp4').exists()
-    assert not (intake / 'ABC-123.mp4').exists()
-    assert not (intake / 'dual').exists()
-
-
-def test_flatten_honors_min_size(tmp_path: Path) -> None:
-    pipeline = make_pipeline(tmp_path, min_size_mb=1)
-    intake = pipeline.src_dir / 'intake'
-    write_video(intake / 'small' / 'ABC-123.mp4', size=100)
-
-    pipeline.flatten(intake, pipeline.dst_dir / 'sorted', make_ctx())
-
-    assert (intake / 'small' / 'ABC-123.mp4').exists()
-
-
-def test_flatten_deletes_junk_folder_when_video_already_archived(tmp_path: Path) -> None:
-    pipeline = make_pipeline(tmp_path, min_size_mb=1)
-    intake = pipeline.src_dir / 'intake'
-    write_video(intake / 'ABC-123 junk' / 'ad.mp4', size=10)
-    write_video(pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4', size=10)
-
-    pipeline.flatten(intake, pipeline.dst_dir / 'sorted', make_ctx())
-
-    assert not (intake / 'ABC-123 junk').exists()
-
-
-def test_flatten_drops_duplicate_copies(tmp_path: Path) -> None:
-    pipeline = make_pipeline(tmp_path)
-    intake = pipeline.src_dir / 'intake'
-    write_video(intake / 'dup' / 'ABC-123.mp4', size=50)
-    write_video(intake / 'dup' / 'ABC-123 (1).mp4', size=50)
-
-    pipeline.flatten(intake, pipeline.dst_dir / 'sorted', make_ctx())
-
-    assert (intake / 'ABC-123.mp4').exists()
-    assert not (intake / 'ABC-123 (1).mp4').exists()
-
-
-def test_rename_to_avid_and_multi_part(tmp_path: Path) -> None:
-    pipeline = make_pipeline(tmp_path)
-    intake = pipeline.src_dir / 'intake'
-    write_video(intake / '[site] abc-123 special.mp4')
-    write_video(intake / 'def-456 part1.mp4')
-    write_video(intake / 'def-456 part2.mp4')
-
-    pipeline.rename(intake, make_ctx())
-
-    assert (intake / 'ABC-123.mp4').exists()
-    assert (intake / 'DEF-456-cd1.mp4').exists()
-    assert (intake / 'DEF-456-cd2.mp4').exists()
-
-
-def test_rename_conflict_is_reported_without_renaming(tmp_path: Path) -> None:
-    pipeline = make_pipeline(tmp_path)
-    intake = pipeline.src_dir / 'intake'
-    write_video(intake / 'abc-123 raw.mp4')
-    # A directory occupying the target name is not collected as a video,
-    # so the planned rename target already exists and must fail atomically.
-    (intake / 'ABC-123.mp4').mkdir()
-    ctx = make_ctx()
-
-    pipeline.rename(intake, ctx)
-
-    assert (intake / 'abc-123 raw.mp4').exists()
-    assert ctx.stats.get('videos_renamed') is None
-    assert ctx.stats['items_failed'] == 1
-    assert any('failed to rename ABC-123' in error for error in ctx.errors)
-
-
-def test_two_files_with_same_avid_become_multi_part(tmp_path: Path) -> None:
-    pipeline = make_pipeline(tmp_path)
-    intake = pipeline.src_dir / 'intake'
-    write_video(intake / 'abc-123 raw.mp4')
-    write_video(intake / 'ABC-123.mp4')
-
-    pipeline.rename(intake, make_ctx())
-
-    assert (intake / 'ABC-123-cd1.mp4').exists()
-    assert (intake / 'ABC-123-cd2.mp4').exists()
-
-
-def test_clear_dirname_rewrites_video_suffix_folders(tmp_path: Path) -> None:
-    pipeline = make_pipeline(tmp_path)
-    intake = pipeline.src_dir / 'intake'
-    (intake / 'ABC-123.mp4').mkdir(parents=True)
-
-    pipeline.clear_dirname(intake, make_ctx())
-
-    assert (intake / 'ABC-123-mp4').is_dir()
-    assert not (intake / 'ABC-123.mp4').exists()
-
-
-def test_archive_moves_video_to_brand_directory(tmp_path: Path) -> None:
-    pipeline = make_pipeline(tmp_path)
-    intake = pipeline.src_dir / 'intake'
-    sorted_dir = pipeline.dst_dir / 'sorted'
-    write_video(intake / 'ABC-123.mp4')
-
-    pipeline.archive(intake, sorted_dir, make_ctx())
-
-    assert (sorted_dir / 'ABC' / 'ABC-123.mp4').exists()
-
-
-def test_archive_respects_brand_mapping(tmp_path: Path) -> None:
-    pipeline = make_pipeline(tmp_path, brand_mapping={'special': ('ABC',)})
-    intake = pipeline.src_dir / 'intake'
-    sorted_dir = pipeline.dst_dir / 'sorted'
-    write_video(intake / 'ABC-123.mp4')
-
-    pipeline.archive(intake, sorted_dir, make_ctx())
-
-    assert (pipeline.dst_dir / 'special' / 'ABC' / 'ABC-123.mp4').exists()
-
-
-def test_archive_skips_existing_destination(tmp_path: Path) -> None:
-    pipeline = make_pipeline(tmp_path)
-    intake = pipeline.src_dir / 'intake'
-    sorted_dir = pipeline.dst_dir / 'sorted'
-    write_video(intake / 'ABC-123.mp4')
-    write_video(sorted_dir / 'ABC' / 'ABC-123.mp4')
-
-    pipeline.archive(intake, sorted_dir, make_ctx())
-
-    assert (intake / 'ABC-123.mp4').exists()
-
-
-def test_full_run_processes_each_mapping(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr('embyx_manager.monitor.archive.POST_MUTATION_SLEEP_SECONDS', 0)
-    pipeline = make_pipeline(tmp_path)
-    intake = pipeline.src_dir / 'intake'
-    write_video(intake / 'ABC-123 release' / 'abc-123 hd.mp4')
-
-    ctx = make_ctx()
-    pipeline.run(ctx)
-
-    assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
-    assert ctx.stats['folders_flattened'] == 1
-    assert ctx.stats['videos_renamed'] == 1
-    assert ctx.stats['videos_archived'] == 1
-
-
-def test_priority_archive_promotes_copy_from_normal_destination(tmp_path: Path) -> None:
-    pipeline = make_priority_pipeline(tmp_path)
-    vip = pipeline.src_dir / 'vip'
-    starred = pipeline.dst_dir / 'starred'
-    write_video(vip / 'ABC-123.mp4')
-    write_video(pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4')
-
-    ctx = make_ctx()
-    pipeline.archive(vip, starred, ctx, priority=True)
-
-    assert (starred / 'ABC' / 'ABC-123.mp4').exists()
-    assert not (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
-    # The freshly arrived copy stays put for a human to deal with.
-    assert (vip / 'ABC-123.mp4').exists()
-    assert ctx.stats['duplicates_promoted'] == 1
-    assert 'videos_archived' not in ctx.stats
-
-
-def test_priority_archive_promotes_every_part_of_a_set(tmp_path: Path) -> None:
-    pipeline = make_priority_pipeline(tmp_path)
-    vip = pipeline.src_dir / 'vip'
-    starred = pipeline.dst_dir / 'starred'
-    write_video(vip / 'ABC-123-cd1.mp4')
-    write_video(vip / 'ABC-123-cd2.mp4')
-    write_video(pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123-cd1.mp4')
-    write_video(pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123-cd2.mp4')
-
-    ctx = make_ctx()
-    pipeline.archive(vip, starred, ctx, priority=True)
-
-    assert (starred / 'ABC' / 'ABC-123-cd1.mp4').exists()
-    assert (starred / 'ABC' / 'ABC-123-cd2.mp4').exists()
-    assert ctx.stats['duplicates_promoted'] == 2
-
-
-def test_priority_archive_does_not_promote_a_longer_avid(tmp_path: Path) -> None:
-    pipeline = make_priority_pipeline(tmp_path)
-    vip = pipeline.src_dir / 'vip'
-    starred = pipeline.dst_dir / 'starred'
-    write_video(vip / 'ABC-12.mp4')
-    write_video(pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4')
-
-    ctx = make_ctx()
-    pipeline.archive(vip, starred, ctx, priority=True)
-
-    assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
-    assert (starred / 'ABC' / 'ABC-12.mp4').exists()
-    assert 'duplicates_promoted' not in ctx.stats
-
-
-def test_priority_promotion_keeps_both_when_target_exists(tmp_path: Path) -> None:
-    pipeline = make_priority_pipeline(tmp_path)
-    vip = pipeline.src_dir / 'vip'
-    starred = pipeline.dst_dir / 'starred'
-    write_video(vip / 'ABC-123.mp4')
-    write_video(pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4')
-    write_video(starred / 'ABC' / 'ABC-123.mp4')
-
-    ctx = make_ctx()
-    pipeline.archive(vip, starred, ctx, priority=True)
-
-    assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
-    assert (starred / 'ABC' / 'ABC-123.mp4').exists()
-    assert (vip / 'ABC-123.mp4').exists()
-    assert 'duplicates_promoted' not in ctx.stats
-
-
-def test_priority_archive_skips_promotion_for_brand_mapped_brand(tmp_path: Path) -> None:
-    """brand_mapping sends both categories to the same directory, so there is nothing to move."""
-    pipeline = make_priority_pipeline(tmp_path, brand_mapping={'special': ('ABC',)})
-    vip = pipeline.src_dir / 'vip'
-    write_video(vip / 'ABC-123.mp4')
-    write_video(pipeline.dst_dir / 'special' / 'ABC' / 'ABC-123.mp4')
-
-    ctx = make_ctx()
-    pipeline.archive(vip, pipeline.dst_dir / 'starred', ctx, priority=True)
-
-    assert not (pipeline.dst_dir / 'starred' / 'ABC').exists()
-    assert (vip / 'ABC-123.mp4').exists()
-    assert 'duplicates_promoted' not in ctx.stats
-
-
-def test_normal_archive_skips_avid_held_by_priority(tmp_path: Path) -> None:
-    pipeline = make_priority_pipeline(tmp_path)
-    intake = pipeline.src_dir / 'intake'
-    sorted_dir = pipeline.dst_dir / 'sorted'
-    write_video(intake / 'ABC-123.mp4')
-    write_video(pipeline.dst_dir / 'starred' / 'ABC' / 'ABC-123.mp4')
-
-    ctx = make_ctx()
-    pipeline.archive(intake, sorted_dir, ctx)
-
-    assert (intake / 'ABC-123.mp4').exists()
-    assert not (sorted_dir / 'ABC').exists()
-    assert ctx.stats['skipped_priority'] == 1
-
-
-def test_normal_archive_guard_ignores_brand_mapped_brand(tmp_path: Path) -> None:
-    pipeline = make_priority_pipeline(tmp_path, brand_mapping={'special': ('ABC',)})
-    intake = pipeline.src_dir / 'intake'
-    write_video(intake / 'ABC-123.mp4')
-
-    ctx = make_ctx()
-    pipeline.archive(intake, pipeline.dst_dir / 'sorted', ctx)
-
-    assert (pipeline.dst_dir / 'special' / 'ABC' / 'ABC-123.mp4').exists()
-    assert 'skipped_priority' not in ctx.stats
-
-
-def test_full_run_processes_priority_routes_first(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    """Had the normal route run first, its copy would have landed in sorted instead."""
-    monkeypatch.setattr('embyx_manager.monitor.archive.POST_MUTATION_SLEEP_SECONDS', 0)
-    pipeline = make_priority_pipeline(tmp_path)
-    intake = pipeline.src_dir / 'intake'
-    vip = pipeline.src_dir / 'vip'
-    write_video(intake / 'ABC-123.mp4')
-    write_video(vip / 'ABC-123.mp4')
-
-    ctx = make_ctx()
-    pipeline.run(ctx)
-
-    assert (pipeline.dst_dir / 'starred' / 'ABC' / 'ABC-123.mp4').exists()
-    assert not (pipeline.dst_dir / 'sorted' / 'ABC').exists()
-    assert (intake / 'ABC-123.mp4').exists()
-    assert ctx.stats['skipped_priority'] == 1
-
-
-def test_full_run_promotes_then_keeps_the_new_copy(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr('embyx_manager.monitor.archive.POST_MUTATION_SLEEP_SECONDS', 0)
-    pipeline = make_priority_pipeline(tmp_path)
-    vip = pipeline.src_dir / 'vip'
-    write_video(vip / 'ABC-123 release' / 'abc-123 hd.mp4')
-    write_video(pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4')
-
-    ctx = make_ctx()
-    pipeline.run(ctx)
-
-    assert (pipeline.dst_dir / 'starred' / 'ABC' / 'ABC-123.mp4').exists()
-    assert not (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
-    assert (vip / 'ABC-123.mp4').exists()
-    assert ctx.stats['duplicates_promoted'] == 1
-
-
 def test_isolate_contains_a_failure_and_records_it() -> None:
     ctx = make_ctx()
-
-    with _isolate(ctx, 'contained %s', 'boom'):
-        raise PermissionError(13, 'Permission denied')
-
+    error = RuntimeError('nope')
+    with _isolate(ctx, 'boom for %s', 'thing'):
+        raise error
     assert ctx.stats['items_failed'] == 1
-    assert any('contained boom' in error for error in ctx.errors)
 
 
 def test_isolate_lets_cancellation_through() -> None:
     ctx = make_ctx()
-
-    with pytest.raises(RunCancelledError), _isolate(ctx, 'must not swallow'):
+    with pytest.raises(RunCancelledError), _isolate(ctx, 'boom'):
         raise RunCancelledError
 
-    assert ctx.stats == {}
-    assert ctx.errors == ()
+
+# -- archiving one folder -----------------------------------------------------
 
 
-def test_flatten_continues_after_one_folder_fails(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    """A refused rename is what the CloudDrive mount actually throws at us."""
-    monkeypatch.setattr('embyx_manager.monitor.archive.POST_MUTATION_SLEEP_SECONDS', 0)
+def test_folder_is_archived_under_its_brand_and_then_deleted(tmp_path: Path) -> None:
     pipeline = make_pipeline(tmp_path)
-    intake = pipeline.src_dir / 'intake'
-    write_video(intake / 'ABC-123' / 'abc-123.mp4')
-    write_video(intake / 'DEF-456' / 'def-456.mp4')
-    real_rename = Path.rename
+    folder = pipeline.src_dir / 'intake' / 'ABC-123 release'
+    write_video(folder / 'ABC-123.mp4')
 
-    def refuse_one(self: Path, target: Path) -> Path:
-        if self.name == 'abc-123.mp4':
-            raise PermissionError(13, 'Permission denied')
-        return real_rename(self, target)
+    result = archive(pipeline, folder)
 
-    monkeypatch.setattr(Path, 'rename', refuse_one)
+    assert result.outcome is Outcome.ARCHIVED
+    assert result.avid == 'ABC-123'
+    assert result.archived_paths == ('sorted/ABC/ABC-123.mp4',)
+    assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
+    assert not folder.exists()
+
+
+def test_video_is_renamed_after_its_avid(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / 'release'
+    write_video(folder / '[somesite] abc-123 1080p.mp4')
+
+    result = archive(pipeline, folder)
+
+    assert result.outcome is Outcome.ARCHIVED
+    assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
+
+
+def test_nested_video_is_found_rather_than_deleted_with_the_folder(tmp_path: Path) -> None:
+    # Only direct children used to count, while the folder was removed
+    # recursively, so a video one level down was deleted as junk.
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / 'ABC-123 release'
+    write_video(folder / 'inner' / 'ABC-123.mp4')
+
+    result = archive(pipeline, folder)
+
+    assert result.outcome is Outcome.ARCHIVED
+    assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
+    assert not folder.exists()
+
+
+def test_multi_part_set_becomes_cd_parts(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / 'set'
+    write_video(folder / 'ABC-123-1.mp4')
+    write_video(folder / 'ABC-123-2.mp4')
+
+    result = archive(pipeline, folder)
+
+    assert result.outcome is Outcome.ARCHIVED
+    assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123-cd1.mp4').exists()
+    assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123-cd2.mp4').exists()
+    assert result.archived_paths == ('sorted/ABC/ABC-123-cd1.mp4', 'sorted/ABC/ABC-123-cd2.mp4')
+
+
+def test_high_resolution_cut_wins_over_the_smaller_one(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / 'dual'
+    write_video(folder / 'ABC-123.mp4')
+    write_video(folder / 'ABC-123 4k.mp4')
+
+    result = archive(pipeline, folder)
+
+    assert result.outcome is Outcome.ARCHIVED
+    assert result.archived_paths == ('sorted/ABC/ABC-123.mp4',)
+    assert not folder.exists()
+
+
+def test_duplicate_copies_are_dropped(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / 'dupes'
+    write_video(folder / 'ABC-123.mp4')
+    write_video(folder / 'ABC-123 (1).mp4')
+
+    result = archive(pipeline, folder)
+
+    assert result.outcome is Outcome.ARCHIVED
+    assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
+
+
+def test_folder_without_a_qualifying_video_is_junk(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path, min_size_mb=1)
+    folder = pipeline.src_dir / 'intake' / 'ads'
+    write_video(folder / 'ABC-123.mp4', size=100)
+
+    result = archive(pipeline, folder)
+
+    assert result.outcome is Outcome.JUNK
+    # Junk is reported, not deleted here: the caller decides, because for a
+    # tracked download it also means "try the next magnet".
+    assert folder.exists()
+
+
+def test_several_unrelated_videos_need_attention(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / 'mixed'
+    write_video(folder / 'ABC-123.mp4')
+    write_video(folder / 'DEF-456.mp4')
+
+    result = archive(pipeline, folder)
+
+    assert result.outcome is Outcome.NEEDS_ATTENTION
+    assert 'multiple avids' in result.reason
+    # Nothing is moved or deleted while the identity is in doubt.
+    assert (folder / 'ABC-123.mp4').exists()
+    assert (folder / 'DEF-456.mp4').exists()
+
+
+def test_unreadable_avid_needs_attention(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / 'whatever'
+    write_video(folder / 'movie.mp4')
+
+    result = archive(pipeline, folder)
+
+    assert result.outcome is Outcome.NEEDS_ATTENTION
+    assert folder.exists()
+
+
+def test_folder_name_supplies_the_avid_when_the_file_name_does_not(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / 'ABC-123'
+    write_video(folder / 'movie.mp4')
+
+    result = archive(pipeline, folder)
+
+    assert result.outcome is Outcome.ARCHIVED
+    assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
+
+
+def test_expected_avid_mismatch_is_reported_and_nothing_moves(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / 'surprise'
+    write_video(folder / 'DEF-456.mp4')
+
+    result = archive(pipeline, folder, expected_avid='ABC-123')
+
+    assert result.outcome is Outcome.NEEDS_ATTENTION
+    assert result.reason == 'expected ABC-123 but found DEF-456'
+    assert (folder / 'DEF-456.mp4').exists()
+
+
+def test_expected_avid_match_archives_normally(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / 'download'
+    write_video(folder / 'ABC-123.mp4')
+
+    result = archive(pipeline, folder, expected_avid='ABC-123')
+
+    assert result.outcome is Outcome.ARCHIVED
+    assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
+
+
+def test_existing_destination_is_left_alone(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    write_video(pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4', size=999)
+    folder = pipeline.src_dir / 'intake' / 'again'
+    write_video(folder / 'ABC-123.mp4')
+
+    result = archive(pipeline, folder)
+
+    assert result.outcome is Outcome.NEEDS_ATTENTION
+    assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').stat().st_size == 999
+    assert folder.exists()
+
+
+def test_brand_mapping_overrides_the_route_destination(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path, brand_mapping={'special': ('ABC',)})
+    folder = pipeline.src_dir / 'intake' / 'release'
+    write_video(folder / 'ABC-123.mp4')
+
+    result = archive(pipeline, folder)
+
+    assert result.outcome is Outcome.ARCHIVED
+    assert (pipeline.dst_dir / 'special' / 'ABC' / 'ABC-123.mp4').exists()
+
+
+def test_failure_while_archiving_is_reported_not_raised(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / 'release'
+    write_video(folder / 'ABC-123.mp4')
+
+    def explode(*_args: object, **_kwargs: object) -> None:
+        msg = 'mount went away'
+        raise OSError(msg)
+
+    monkeypatch.setattr(Path, 'rename', explode)
+    result = archive(pipeline, folder)
+
+    assert result.outcome is Outcome.FAILED
+    assert folder.exists()
+
+
+# -- priority routes ----------------------------------------------------------
+
+
+def test_priority_route_promotes_a_copy_out_of_the_normal_destination(tmp_path: Path) -> None:
+    pipeline = make_priority_pipeline(tmp_path)
+    write_video(pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4')
+    folder = pipeline.src_dir / 'vip' / 'release'
+    write_video(folder / 'ABC-123-4k.mp4')
+
     ctx = make_ctx()
+    result = pipeline.archive_folder(folder, 'starred', ctx, priority=True)
 
-    pipeline.flatten(intake, pipeline.dst_dir / 'sorted', ctx)
+    assert (pipeline.dst_dir / 'starred' / 'ABC' / 'ABC-123.mp4').exists()
+    assert not (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
+    assert ctx.stats['duplicates_promoted'] == 1
+    # The promoted copy now occupies the destination, so the newly arrived one is
+    # left for a human rather than overwriting what was just rescued.
+    assert result.outcome is Outcome.NEEDS_ATTENTION
+    assert folder.exists()
 
-    assert (intake / 'ABC-123' / 'abc-123.mp4').exists()
-    assert (intake / 'def-456.mp4').exists()
-    assert ctx.stats['folders_flattened'] == 1
-    assert ctx.stats['items_failed'] == 1
+
+def test_priority_promotion_moves_every_part_of_a_set(tmp_path: Path) -> None:
+    pipeline = make_priority_pipeline(tmp_path)
+    write_video(pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123-cd1.mp4')
+    write_video(pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123-cd2.mp4')
+    folder = pipeline.src_dir / 'vip' / 'release'
+    write_video(folder / 'DEF-456.mp4')
+
+    pipeline.archive_folder(folder, 'starred', make_ctx(), priority=True)
+    # Promotion is keyed on the avid being archived, so a different avid moves nothing.
+    assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123-cd1.mp4').exists()
+
+    other = pipeline.src_dir / 'vip' / 'abc'
+    write_video(other / 'ABC-123.mp4')
+    pipeline.archive_folder(other, 'starred', make_ctx(), priority=True)
+
+    assert (pipeline.dst_dir / 'starred' / 'ABC' / 'ABC-123-cd1.mp4').exists()
+    assert (pipeline.dst_dir / 'starred' / 'ABC' / 'ABC-123-cd2.mp4').exists()
 
 
-def test_run_continues_after_a_route_fails(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr('embyx_manager.monitor.archive.POST_MUTATION_SLEEP_SECONDS', 0)
-    # The 'gone' route has no directory on disk, so all four of its stages blow up.
-    pipeline = make_pipeline(tmp_path, mapping={'gone': 'sorted', 'intake': 'sorted'})
-    intake = pipeline.src_dir / 'intake'
-    write_video(intake / 'ABC-123 release' / 'abc-123 hd.mp4')
+def test_promotion_does_not_claim_a_longer_avid(tmp_path: Path) -> None:
+    pipeline = make_priority_pipeline(tmp_path)
+    write_video(pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-1234.mp4')
+    folder = pipeline.src_dir / 'vip' / 'release'
+    write_video(folder / 'ABC-123.mp4')
+
+    pipeline.archive_folder(folder, 'starred', make_ctx(), priority=True)
+
+    assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-1234.mp4').exists()
+
+
+def test_promotion_keeps_both_when_the_target_exists(tmp_path: Path) -> None:
+    pipeline = make_priority_pipeline(tmp_path)
+    write_video(pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4', size=11)
+    write_video(pipeline.dst_dir / 'starred' / 'ABC' / 'ABC-123.mp4', size=22)
+    folder = pipeline.src_dir / 'vip' / 'release'
+    write_video(folder / 'ABC-123.mp4')
+
+    result = pipeline.archive_folder(folder, 'starred', make_ctx(), priority=True)
+
+    assert result.outcome is Outcome.NEEDS_ATTENTION
+    assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').stat().st_size == 11
+    assert (pipeline.dst_dir / 'starred' / 'ABC' / 'ABC-123.mp4').stat().st_size == 22
+
+
+def test_normal_route_skips_an_avid_the_priority_route_holds(tmp_path: Path) -> None:
+    pipeline = make_priority_pipeline(tmp_path)
+    write_video(pipeline.dst_dir / 'starred' / 'ABC' / 'ABC-123.mp4')
+    folder = pipeline.src_dir / 'intake' / 'release'
+    write_video(folder / 'ABC-123.mp4')
+
+    result = pipeline.archive_folder(folder, 'sorted', make_ctx())
+
+    assert result.outcome is Outcome.NEEDS_ATTENTION
+    assert not (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
+    assert folder.exists()
+
+
+def test_brand_mapped_brands_ignore_the_priority_guards(tmp_path: Path) -> None:
+    pipeline = make_priority_pipeline(tmp_path, brand_mapping={'special': ('ABC',)})
+    write_video(pipeline.dst_dir / 'starred' / 'ABC' / 'ABC-123.mp4')
+    folder = pipeline.src_dir / 'intake' / 'release'
+    write_video(folder / 'ABC-123.mp4')
+
+    result = pipeline.archive_folder(folder, 'sorted', make_ctx())
+
+    assert result.outcome is Outcome.ARCHIVED
+    assert (pipeline.dst_dir / 'special' / 'ABC' / 'ABC-123.mp4').exists()
+
+
+# -- the full scan ------------------------------------------------------------
+
+
+def test_run_archives_every_route(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path, mapping={'intake': 'sorted', 'extra': 'other'})
+    write_video(pipeline.src_dir / 'intake' / 'one' / 'ABC-123.mp4')
+    write_video(pipeline.src_dir / 'extra' / 'two' / 'DEF-456.mp4')
+
+    pipeline.run(make_ctx())
+
+    assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
+    assert (pipeline.dst_dir / 'other' / 'DEF' / 'DEF-456.mp4').exists()
+
+
+def test_run_takes_priority_routes_first(tmp_path: Path) -> None:
+    pipeline = make_priority_pipeline(tmp_path)
+    write_video(pipeline.src_dir / 'intake' / 'normal' / 'ABC-123.mp4')
+    write_video(pipeline.src_dir / 'vip' / 'better' / 'ABC-123.mp4')
+
+    pipeline.run(make_ctx())
+
+    # The priority copy lands first, so the normal one finds the avid taken.
+    assert (pipeline.dst_dir / 'starred' / 'ABC' / 'ABC-123.mp4').exists()
+    assert not (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
+
+
+def test_run_files_loose_videos_left_in_a_route(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    write_video(pipeline.src_dir / 'intake' / 'ABC-123.mp4')
+
+    pipeline.run(make_ctx())
+
+    assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
+
+
+def test_run_treats_a_missing_route_source_as_nothing_to_do(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path, mapping={'intake': 'sorted', 'gone': 'elsewhere'})
 
     ctx = make_ctx()
     pipeline.run(ctx)
 
-    assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
-    assert ctx.stats['videos_archived'] == 1
-    assert ctx.stats['items_failed'] == 4
+    assert ctx.stats.get('items_failed') is None
+
+
+def test_run_continues_after_one_folder_fails(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    pipeline = make_pipeline(tmp_path)
+    write_video(pipeline.src_dir / 'intake' / 'aaa-bad' / 'ABC-123.mp4')
+    write_video(pipeline.src_dir / 'intake' / 'zzz-good' / 'DEF-456.mp4')
+    original = Path.rglob
+
+    def explode(self: Path, pattern: str):
+        if self.name == 'aaa-bad':
+            msg = 'mount went away'
+            raise OSError(msg)
+        return original(self, pattern)
+
+    monkeypatch.setattr(Path, 'rglob', explode)
+    ctx = make_ctx()
+    pipeline.run(ctx)
+
+    assert ctx.stats['items_failed'] == 1
+    assert (pipeline.dst_dir / 'sorted' / 'DEF' / 'DEF-456.mp4').exists()
+
+
+def test_run_stops_when_cancelled(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    write_video(pipeline.src_dir / 'intake' / 'one' / 'ABC-123.mp4')
+    ctx = make_ctx()
+    ctx.request_stop()
+
+    with pytest.raises(RunCancelledError):
+        pipeline.run(ctx)
 
 
 def test_padded_content_id_archives_under_the_same_avid_rss_would_record(tmp_path: Path) -> None:
@@ -465,11 +458,11 @@ def test_padded_content_id_archives_under_the_same_avid_rss_would_record(tmp_pat
     # now read it through one parser.
     pipeline = make_pipeline(tmp_path)
     parser = AvidParser()
-    intake = pipeline.src_dir / 'intake'
-    write_video(intake / 'abc00123.mp4')
+    folder = pipeline.src_dir / 'intake' / 'release'
+    write_video(folder / 'abc00123.mp4')
 
-    pipeline.rename(intake, make_ctx())
-    pipeline.archive(intake, pipeline.dst_dir / 'sorted', make_ctx())
+    result = archive(pipeline, folder)
 
     assert parser.get_avid('[sukebei] abc00123 1080p') == 'ABC-123'
+    assert result.avid == 'ABC-123'
     assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
