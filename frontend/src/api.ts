@@ -223,6 +223,24 @@ export function isUnauthorized(error: unknown): boolean {
 const CODE_MESSAGES: Record<string, string> = {
   unauthorized: '登录状态已失效，请重新登录后重试。',
   not_ready: '服务尚未就绪，请稍后重试。',
+  unknown_pipeline: '未知的流水线。',
+  pipeline_busy: '流水线正在运行，请等它结束后再试。',
+  pipeline_not_configured: '流水线尚未配置完成，无法运行。',
+  pipeline_not_running: '流水线当前没有在运行。',
+  unknown_run: '找不到这条运行记录。',
+  unknown_state: '筛选状态无效。',
+  unknown_acquisition: '找不到该番号的记录。',
+  acquisition_changed: '该番号状态已发生变化，请刷新后重试。',
+  clouddrive_not_configured: '尚未配置 CloudDrive，无法提交离线任务。',
+  no_magnet_left: '没有可用的候选磁力了。',
+  offline_task_rejected: 'CloudDrive 拒绝了这个离线任务。',
+  already_archived: '该番号已入库，无需再操作。',
+  unusable_magnet: '磁力链接无效，请检查后重试。',
+  magnet_already_tried: '这条磁力已经尝试过了。',
+  not_parked: '该番号当前不在待处理状态。',
+  unknown_config_section: '未知的配置分区。',
+  config_version_conflict: '配置已被其他会话修改，请刷新后重试。',
+  invalid_config_values: '配置项校验未通过，请检查填写内容。',
 }
 
 /** `undefined` uses the signed-in token; `null` deliberately sends none. */

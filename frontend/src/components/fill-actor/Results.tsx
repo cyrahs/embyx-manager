@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { localizeBackendText } from '../../lib/backendText'
 import { clockText } from '../../lib/fill-actor/format'
 import { ACTOR_ERROR_LABELS, MOVE_ERROR_LABELS, MOVE_LABELS, VIDEO_GROUPS, type VideoGroupDef } from '../../lib/fill-actor/labels'
 import type { ApplyResult, FillActorPlan, MoveCandidate, VideoPlan } from '../../types'
@@ -176,7 +177,7 @@ function VideoRow({
               <span className="candidate-name" title={candidate.file_name}>
                 {candidate.file_name}
               </span>
-              <span className="candidate-source">{candidate.source_label}</span>
+              <span className="candidate-source">{localizeBackendText(candidate.source_label)}</span>
               {candidate.destination_conflict && (
                 <span className="warning-pill">
                   <AlertIcon />

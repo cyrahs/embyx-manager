@@ -16,6 +16,7 @@ import type { AppContext } from '../App'
 import { AcquisitionPanel } from '../components/AcquisitionPanel'
 import { Notice } from '../components/Feedback'
 import { Spinner } from '../components/Icons'
+import { localizeBackendText } from '../lib/backendText'
 import type { PipelineId, PipelineStatus, RunDetail, RunSummary } from '../types'
 
 const PIPELINE_LABELS: Record<PipelineId, string> = {
@@ -47,10 +48,13 @@ const TRIGGER_LABELS: Record<string, string> = {
 const STAT_LABELS: Record<string, string> = {
   items: 'RSS 条目',
   unique_avids: '番号',
+  categories_failed: '分类拉取失败',
+  skipped_known: '已跟踪跳过',
   skipped_cooldown: '冷却跳过',
   magnets_found: '磁力命中',
   magnets_failed: '磁力失败',
   magnets_added: '已提交离线',
+  candidates_recorded: '记录候选磁力',
   duplicates: '重复任务',
   add_failed: '提交失败',
   items_marked_read: '标记已读',
@@ -64,10 +68,22 @@ const STAT_LABELS: Record<string, string> = {
   duplicates_promoted: '提级归档',
   skipped_priority: '优先库已有',
   items_failed: '处理失败',
+  reconciled: '核对入库',
+  folders_discarded: '清理源文件夹',
+  needs_attention: '待处理',
   files_updated: '更新',
   files_skipped: '跳过',
   files_deleted: '删除',
   dirs_deleted: '清理目录',
+  offline_tasks: '离线任务',
+  duplicate_offline_tasks: '重复离线任务',
+  archived: '已入库',
+  retried: '换磁力重试',
+  exhausted: '磁力用尽',
+  junk: '无有效视频',
+  error: '离线出错',
+  stalled: '长期无进度',
+  lost: '任务丢失',
 }
 
 function formatTime(value: string | null): string {
@@ -230,7 +246,9 @@ export default function DashboardPage() {
                   </span>
                 </div>
                 <p className="pipeline-desc">{PIPELINE_DESCRIPTIONS[pipeline]}</p>
-                {!status.configured && status.reason && <p className="pipeline-reason">{status.reason}</p>}
+                {!status.configured && status.reason && (
+                  <p className="pipeline-reason">{localizeBackendText(status.reason)}</p>
+                )}
                 <dl className="pipeline-meta">
                   <div>
                     <dt>上次运行</dt>

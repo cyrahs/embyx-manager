@@ -9,6 +9,7 @@ import {
   isUnauthorized,
   listAcquisitions,
 } from '../api'
+import { localizeBackendText } from '../lib/backendText'
 import { Notice } from './Feedback'
 import { Spinner } from './Icons'
 import type {
@@ -38,7 +39,7 @@ const STATE_TONES: Partial<Record<AcquisitionState, string>> = {
   resolve_failed: 'failed',
 }
 
-const SOURCE_LABELS: Record<string, string> = {
+const ACQUISITION_SOURCE_LABELS: Record<string, string> = {
   rss_actor: '演员订阅',
   rss_rank: '排行订阅',
   manual: '手动',
@@ -49,7 +50,7 @@ const SOURCE_LABELS: Record<string, string> = {
 /** 'rss:<category>' renders as the category; fixed sources get their label. */
 function sourceLabel(source: string): string {
   if (source.startsWith('rss:')) return `订阅 ${source.slice(4)}`
-  return SOURCE_LABELS[source] ?? source
+  return ACQUISITION_SOURCE_LABELS[source] ?? source
 }
 
 const ATTEMPT_LABELS: Record<string, string> = {
@@ -63,6 +64,13 @@ const ATTEMPT_LABELS: Record<string, string> = {
   error: '离线出错',
   stalled: '长期无进度',
   lost: '任务丢失',
+}
+
+const MAGNET_SOURCE_LABELS: Record<string, string> = {
+  sukebei: 'Sukebei',
+  rss_item: 'RSS 条目',
+  javbus: 'JavBus',
+  manual: '手动添加',
 }
 
 const ATTEMPT_TONES: Record<string, string> = {
@@ -132,7 +140,7 @@ function AcquisitionRow({
         </span>
       </td>
       <td className="acq-muted">{sourceLabel(item.source)}</td>
-      <td className="acq-muted">{item.note ?? '—'}</td>
+      <td className="acq-muted">{item.note ? localizeBackendText(item.note) : '—'}</td>
       <td className="acq-muted">{formatTime(item.updated_at)}</td>
       <td onClick={(event) => event.stopPropagation()}>
         <div className="acq-actions">
@@ -161,7 +169,7 @@ function AttemptRow({ attempt }: { attempt: MagnetAttempt }) {
   return (
     <tr>
       <td>#{attempt.attempt_no}</td>
-      <td>{attempt.magnet_source}</td>
+      <td>{MAGNET_SOURCE_LABELS[attempt.magnet_source] ?? attempt.magnet_source}</td>
       <td>
         <span className={`run-state ${ATTEMPT_TONES[attempt.state] ?? ''}`}>
           {ATTEMPT_LABELS[attempt.state] ?? attempt.state}
@@ -170,7 +178,7 @@ function AttemptRow({ attempt }: { attempt: MagnetAttempt }) {
       <td>
         <ProgressBar value={attempt.progress} />
       </td>
-      <td className="acq-muted">{attempt.error ?? '—'}</td>
+      <td className="acq-muted">{attempt.error ? localizeBackendText(attempt.error) : '—'}</td>
       <td className="acq-muted">{formatTime(attempt.updated_at)}</td>
     </tr>
   )
@@ -382,11 +390,11 @@ export function AcquisitionPanel({ onUnauthorized }: { onUnauthorized: () => voi
         <Notice
           tone="warning"
           title="下载追踪未运行"
-          body={tracker.reason ?? 'CloudDrive 或归档路由尚未配置。'}
+          body={tracker.reason ? localizeBackendText(tracker.reason) : 'CloudDrive 或归档路由尚未配置。'}
         />
       )}
       {tracker?.last_error && (
-        <Notice tone="error" title="上次轮询出错" body={tracker.last_error} />
+        <Notice tone="error" title="上次轮询出错" body={localizeBackendText(tracker.last_error)} />
       )}
       {error && <Notice tone="error" title="下载追踪请求失败" body={error} />}
 
