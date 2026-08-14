@@ -48,8 +48,9 @@ class Settings:
     host: str = '127.0.0.1'
     port: int = 8000
     max_request_bytes: int = 65_536
-    # Per-plan limits and lookup concurrency stay here: raising them raises the request
-    # pressure on JavBus and Sukebei, which is an operator call rather than a UI toggle.
+    # Per-plan limits and submission concurrency stay here: raising them raises the
+    # request pressure on JavBus, Sukebei, and CloudDrive during a fill-actor scan,
+    # which is an operator call rather than a UI toggle.
     max_actors: int = 20
     max_videos: int = 2_000
     magnet_concurrency: int = 8

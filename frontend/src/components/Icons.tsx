@@ -141,7 +141,8 @@ export function FeedStateIcon({ state }: { state: ActorFeedStatus['state'] }) {
 export function StatusIcon({ state }: { state: VideoState }) {
   if (state === 'exists') return <CheckIcon />
   if (state === 'additional_found') return <MoveIcon />
-  if (state === 'magnet_found') return <MagnetIcon />
+  if (state === 'submitted') return <MagnetIcon />
+  if (state === 'already_tracked') return <MagnetIcon />
   if (state === 'missing') return <SearchIcon />
   return <AlertIcon />
 }

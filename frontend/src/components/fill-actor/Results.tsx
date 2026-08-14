@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { localizeBackendText } from '../../lib/backendText'
-import { clockText, safeMagnet } from '../../lib/fill-actor/format'
+import { clockText } from '../../lib/fill-actor/format'
 import { ACTOR_ERROR_LABELS, MOVE_ERROR_LABELS, MOVE_LABELS, VIDEO_GROUPS, type VideoGroupDef } from '../../lib/fill-actor/labels'
 import type { ApplyResult, FillActorPlan, MoveCandidate, VideoPlan } from '../../types'
 import { AlertIcon, CheckIcon, ChevronIcon, FileIcon, StatusIcon } from '../Icons'
@@ -26,8 +26,12 @@ export function PlanSummary({ plan }: { plan: FillActorPlan }) {
         <strong>{counts.exists}</strong>
       </div>
       <div>
-        <span>可处理</span>
-        <strong>{counts.additional_found + counts.magnet_found}</strong>
+        <span>可移入</span>
+        <strong>{counts.additional_found}</strong>
+      </div>
+      <div>
+        <span>已提交下载</span>
+        <strong>{counts.submitted}</strong>
       </div>
       <div>
         <span>计划有效至</span>
@@ -141,7 +145,6 @@ function VideoRow({
   applyResult: ApplyResult | null
   selectionLocked: boolean
 }) {
-  const magnet = safeMagnet(video.magnet)
   const warnings = video.warnings.length ? video.warnings.join(' · ') : null
   return (
     <article className="video-row">
@@ -189,11 +192,6 @@ function VideoRow({
             </label>
           )
         })}
-        {magnet && (
-          <span className="magnet-text" title={magnet}>
-            {magnet}
-          </span>
-        )}
         {warnings && <span className="row-warning">{warnings}</span>}
       </div>
       <span className="video-actors" title={video.actor_ids.join(' · ')}>

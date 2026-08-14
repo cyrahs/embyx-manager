@@ -11,7 +11,7 @@ from embyx_manager.adapters import (
     AvidBrandResolver,
     CloudDriveFileMover,
     JavBusActorCatalog,
-    SukebeiMagnetProvider,
+    LedgerAcquisitionGateway,
 )
 from embyx_manager.api import create_app, make_mutation_auth
 from embyx_manager.clients.clouddrive import AsyncCloudDrive, CloudDriveClient
@@ -47,6 +47,7 @@ from embyx_manager.locking import PostgresAdvisoryLock
 from embyx_manager.monitor.acquisitions import AcquisitionRepository
 from embyx_manager.monitor.api import AcquisitionApi, create_monitor_router
 from embyx_manager.monitor.archive import ArchivePipeline
+from embyx_manager.monitor.intake import AcquisitionIntake
 from embyx_manager.monitor.mapping import MappingPipeline
 from embyx_manager.monitor.reconcile import ReconcileScanner
 from embyx_manager.monitor.reports import RunContext
@@ -186,10 +187,30 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
 
     repository = PostgresFillActorRepository(database)
     fill_actor_runtime = FillActorRuntimeHandle(store)
+    ledger = AcquisitionRepository(database)
+
+    def intake_factory() -> AcquisitionIntake | None:
+        cloud = cloud_handle.current()
+        if cloud is None:
+            return None
+        return AcquisitionIntake(
+            ledger=ledger,
+            sukebei=sukebei,
+            javbus=javbus,
+            cloud=cloud,
+            failed_cooldown_seconds=store.get(RssConfig).failed_avid_cooldown_seconds,
+            # Resolved lazily: the scheduler is built later in this function
+            # and the factory only runs once the app is serving.
+            on_submitted=scheduler.notify_submission,
+        )
+
     service = FillActorService(
         runtime=fill_actor_runtime.current,
         actor_catalog=JavBusActorCatalog(javbus),
-        magnet_provider=SukebeiMagnetProvider(sukebei),
+        acquisition_gateway=LedgerAcquisitionGateway(
+            intake_factory,
+            task_dir=lambda: store.get(FillActorConfig).task_dir_path,
+        ),
         brand_resolver=AvidBrandResolver(),
         max_actors=settings.max_actors,
         max_videos=settings.max_videos,
@@ -225,7 +246,6 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
 
     avid_handle = AvidParserHandle(store)
     pipeline_runs = PipelineRunRepository(database)
-    ledger = AcquisitionRepository(database)
 
     def rss_trigger_ready() -> str | None:
         return _rss_configuration_gap(store)
@@ -295,7 +315,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         if cloud_handle.current() is None:
             return 'CloudDrive must be configured'
         if not _offline_task_dirs(store):
-            return 'at least one RSS category with an offline directory must be configured'
+            return 'at least one offline directory (an RSS category or fill actor) must be configured'
         return None
 
     async def submit_magnet(avid: str, magnet: str) -> bool:
@@ -353,6 +373,15 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
             submit_magnet=submit_magnet,
         )
         await tracker.poll(ctx)
+        # The resolver leg of the tracker pass (plan §Step 6 item 7): parked
+        # acquisitions whose cooldown expired get a fresh resolve-and-submit,
+        # without waiting for an input source to sight the AVID again. Records
+        # without a pinned directory fall back to the first polled one, the
+        # same choice submit_magnet makes for them.
+        intake = intake_factory()
+        if intake is not None:
+            dirs = _offline_task_dirs(store)
+            await intake.retry_due(ctx=ctx, fallback_task_dir=dirs[0] if dirs else None)
 
     def mapping_ready() -> str | None:
         if not store.get(MappingConfig).configured:
@@ -441,7 +470,12 @@ def _rss_configuration_gap(store: ConfigStore) -> str | None:
 def _offline_task_dirs(store: ConfigStore) -> tuple[str, ...]:
     """Every directory offline tasks are queued under, in category order.
 
-    Categories may share one, so the list is deduplicated; the tracker polls each
-    of these exactly once.
+    Fill actor's own directory joins the RSS categories'. Sources may share
+    one, so the list is deduplicated; the tracker polls each of these exactly
+    once.
     """
-    return tuple(dict.fromkeys(category.task_dir_path for category in store.get(RssConfig).categories))
+    dirs = [category.task_dir_path for category in store.get(RssConfig).categories]
+    fill_actor_dir = store.get(FillActorConfig).task_dir_path
+    if fill_actor_dir:
+        dirs.append(fill_actor_dir)
+    return tuple(dict.fromkeys(dirs))

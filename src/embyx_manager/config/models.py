@@ -185,6 +185,8 @@ class RssConfig(ConfigSection):
     #: trigger may scope itself to one of them by label. Empty until an operator
     #: adds one, because a category cannot be guessed: it needs a directory.
     categories: tuple[RssCategory, ...] = ()
+    #: Resolve-failure cooldown for every acquisition intake source (RSS and fill
+    #: actor alike), not just RSS — the shared intake reads it from this section.
     failed_avid_cooldown_seconds: int = 86_400
 
     @field_validator('interval_seconds', 'failed_avid_cooldown_seconds')
@@ -345,11 +347,20 @@ class FillActorConfig(ConfigSection):
     cloud_strm_mount_prefix: str = ''
     cloud_source_roots: tuple[str, ...] = ()
     cloud_move_in_root: str = ''
+    #: The CloudDrive API path fill-actor submissions are queued under. Like an
+    #: RSS category's directory it decides which archive route files the
+    #: download, so it is named explicitly; empty means scans cannot submit.
+    task_dir_path: str = ''
 
     @field_validator('actor_root')
     @classmethod
     def _validate_actor_root(cls, value: str) -> str:
         return normalize_absolute_path('fill_actor.actor_root', value)
+
+    @field_validator('task_dir_path')
+    @classmethod
+    def _validate_task_dir(cls, value: str) -> str:
+        return normalize_absolute_path('fill_actor.task_dir_path', value)
 
     @field_validator('move_in_root')
     @classmethod

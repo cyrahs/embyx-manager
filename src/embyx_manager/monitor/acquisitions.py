@@ -39,6 +39,7 @@ class AcquisitionState(StrEnum):
 class AcquisitionSource(StrEnum):
     MANUAL = 'manual'
     RECONCILE = 'reconcile'
+    FILL_ACTOR = 'fill_actor'
 
 
 #: RSS sources carry the category they came from, so the set is open-ended and

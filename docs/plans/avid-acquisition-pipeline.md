@@ -38,6 +38,20 @@
 - 兜底扫描不再搭 RSS 间隔的车:新增 `archive.scan_cron`(cronsim 校验,服务器本地
   时间),调度器为归档单独开 cron 循环;设置页在 cron 输入下实时显示中文自然语言描述
   (cronstrue zh_CN)。
+- **Fill actor 成为账本输入源**:磁力解析与首次提交从 `RssPipeline` 抽为共享的
+  `monitor/intake.py`(`AcquisitionIntake`),fill actor 扫描出的缺失番号不再返回磁力
+  给前端复制,而是经 `AcquisitionGateway` 端口自动 discover→解析→提交离线
+  (`source='fill_actor'`;source 列自迁移 v8 起为自由文本,无需扩展约束;迁移 v9
+  给 job 阶段 CHECK 加 `submitting`)。与 RSS 分类同理,fill actor 在
+  `fill_actor.task_dir_path` 显式声明自己的离线目录并入 tracker 轮询集合,
+  后续生命周期全部由 tracker 接管;`rss.failed_avid_cooldown_seconds` 现在约束所有
+  intake 来源的解析失败冷却。
+- **§Step 6 第 7 项的 resolver 补上接线**:tracker 每轮 poll 末尾跑
+  `AcquisitionIntake.retry_due`,捞 `next_action_at` 到期的 `resolve_failed`/
+  `exhausted` 行重新解析并提交。与 `enqueue` 不同,重试不经 `discover`(记录不在
+  `discovered` 态),一轮没提交上任何磁力时必须从记录当前状态续期冷却
+  (`resolve_failed→resolve_failed` / `exhausted→resolve_failed`),否则过期的
+  `next_action_at` 会让每一轮都重复捞起同一行。
 
 RSS 分类与离线目录(2026-08-14,迁移 v8):
 

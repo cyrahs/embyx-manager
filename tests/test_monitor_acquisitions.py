@@ -67,6 +67,20 @@ async def test_discover_inserts_then_reports_the_avid_as_taken() -> None:
     assert await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW) is False
 
 
+async def test_discover_accepts_the_fill_actor_source() -> None:
+    ledger = make_ledger()
+
+    assert (
+        await ledger.discover('ABC-123', source=AcquisitionSource.FILL_ACTOR, now=NOW, task_dir_path='/115/fill')
+        is True
+    )
+
+    record = await ledger.get('ABC-123')
+    assert record is not None
+    assert record.source == AcquisitionSource.FILL_ACTOR
+    assert record.task_dir_path == '/115/fill'
+
+
 @pytest.mark.parametrize('state', [AcquisitionState.ARCHIVED, AcquisitionState.IGNORED])
 async def test_discover_skips_terminal_avids(state: AcquisitionState) -> None:
     ledger = make_ledger()

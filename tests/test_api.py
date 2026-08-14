@@ -32,6 +32,7 @@ from embyx_manager.fill_actor.persistence import (
     JobState,
     MemoryFillActorRepository,
 )
+from embyx_manager.fill_actor.ports import AcquisitionOutcome
 from embyx_manager.fill_actor.service import (
     FillActorPaths,
     FillActorRuntime,
@@ -57,9 +58,9 @@ class BlockingActorCatalog:
         return ['ABC-001']
 
 
-class MagnetProvider:
-    async def find_magnet(self, _video_id: str) -> None:
-        return None
+class AcquisitionGateway:
+    async def submit_missing(self, _video_id: str) -> AcquisitionOutcome:
+        return AcquisitionOutcome.NO_MAGNET
 
 
 class BrandResolver:
@@ -92,7 +93,7 @@ def make_client(
             apply_enabled=apply_enabled,
         ),
         actor_catalog=actor_catalog or ActorCatalog(),
-        magnet_provider=MagnetProvider(),
+        acquisition_gateway=AcquisitionGateway(),
         brand_resolver=BrandResolver(),
         repository=repository,
     )
@@ -570,7 +571,7 @@ def test_unconfigured_fill_actor_reports_itself_without_failing_the_app() -> Non
     service = FillActorService(
         runtime=FillActorRuntime,
         actor_catalog=ActorCatalog(),
-        magnet_provider=MagnetProvider(),
+        acquisition_gateway=AcquisitionGateway(),
         brand_resolver=BrandResolver(),
         repository=repository,
     )

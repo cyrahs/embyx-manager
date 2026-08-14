@@ -11,7 +11,12 @@ class FrozenModel(BaseModel):
 class VideoState(StrEnum):
     EXISTS = 'exists'
     ADDITIONAL_FOUND = 'additional_found'
+    #: Legacy: plans persisted before scans submitted to the download tracker.
     MAGNET_FOUND = 'magnet_found'
+    SUBMITTED = 'submitted'
+    ALREADY_TRACKED = 'already_tracked'
+    SUBMIT_FAILED = 'submit_failed'
+    #: No magnet found anywhere; the ledger parks the AVID with a cooldown.
     MISSING = 'missing'
     INVALID_VIDEO_ID = 'invalid_video_id'
     SCAN_FAILED = 'scan_failed'
@@ -54,7 +59,6 @@ class VideoPlan(FrozenModel):
     state: VideoState
     existing_files: tuple[str, ...] = ()
     move_candidates: tuple[MoveCandidate, ...] = ()
-    magnet: str | None = None
     warnings: tuple[str, ...] = ()
 
 

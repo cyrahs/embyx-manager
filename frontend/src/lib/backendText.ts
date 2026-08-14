@@ -18,8 +18,13 @@ const EXACT_TEXT: Record<string, string> = {
   'CloudDrive task directory is not configured': '尚未配置 CloudDrive 任务目录',
   'at least one RSS category must be configured': '需要至少配置一个 RSS 分类',
   'at least one RSS category with an offline directory must be configured': '需要至少配置一个带离线目录的 RSS 分类',
+  'at least one offline directory (an RSS category or fill actor) must be configured':
+    '需要至少配置一个离线目录（RSS 分类或补全演员）',
   'the tracker is not wired up': '下载追踪尚未接入',
-  // Acquisition ledger notes (tracker.py, reconcile.py, monitor/api.py).
+  // Acquisition ledger notes (tracker.py, reconcile.py, intake.py, monitor/api.py).
+  'no magnet found': '未找到磁力',
+  'no magnet accepted': '没有磁力提交成功',
+  'no offline directory configured': '未配置离线目录',
   'every magnet was tried': '所有磁力都已尝试',
   'ignored by an operator': '已被手动忽略',
   'destination already holds this avid': '目标库中已有该番号',

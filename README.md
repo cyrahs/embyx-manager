@@ -18,9 +18,10 @@ Three peer features; `/` redirects to the dashboard and no feature owns the app 
   Each pipeline has enable/disable, manual trigger (rss supports the Rank label), live
   status, and per-run stats/errors/log tail.
 - **Fill Actor** (`/fill-actor`): scan a JavBus actor's catalog against the local library,
-  find missing titles, look up magnets, prewarm RSSHub feeds, hand off FreshRSS
-  subscriptions, and safely move matching files through CloudDrive — carried over from
-  embyx-web with the same durable job queue and move-safety guarantees, now on PostgreSQL.
+  submit missing titles to the acquisition tracker (same intake as the rss pipeline),
+  prewarm RSSHub feeds, hand off FreshRSS subscriptions, and safely move matching files
+  through CloudDrive — carried over from embyx-web with the same durable job queue and
+  move-safety guarantees, now on PostgreSQL.
 - **Settings** (`/settings`): CloudDrive, FreshRSS, RSSHub URLs, Fill Actor library
   roots, pipeline behavior, and avid parsing rules are stored in the database, editable
   from the browser, versioned against concurrent edits, and hot-applied without

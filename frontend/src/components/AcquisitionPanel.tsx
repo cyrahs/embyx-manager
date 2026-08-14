@@ -39,6 +39,20 @@ const STATE_TONES: Partial<Record<AcquisitionState, string>> = {
   resolve_failed: 'failed',
 }
 
+const ACQUISITION_SOURCE_LABELS: Record<string, string> = {
+  rss_actor: '演员订阅',
+  rss_rank: '排行订阅',
+  manual: '手动',
+  reconcile: '目录扫描',
+  fill_actor: '补全演员',
+}
+
+/** 'rss:<category>' renders as the category; fixed sources get their label. */
+function sourceLabel(source: string): string {
+  if (source.startsWith('rss:')) return `订阅 ${source.slice(4)}`
+  return ACQUISITION_SOURCE_LABELS[source] ?? source
+}
+
 const ATTEMPT_LABELS: Record<string, string> = {
   pending: '待用',
   submitted: '已提交',
@@ -52,7 +66,7 @@ const ATTEMPT_LABELS: Record<string, string> = {
   lost: '任务丢失',
 }
 
-const SOURCE_LABELS: Record<string, string> = {
+const MAGNET_SOURCE_LABELS: Record<string, string> = {
   sukebei: 'Sukebei',
   rss_item: 'RSS 条目',
   javbus: 'JavBus',
@@ -125,6 +139,7 @@ function AcquisitionRow({
           {STATE_LABELS[item.state]}
         </span>
       </td>
+      <td className="acq-muted">{sourceLabel(item.source)}</td>
       <td className="acq-muted">{item.note ? localizeBackendText(item.note) : '—'}</td>
       <td className="acq-muted">{formatTime(item.updated_at)}</td>
       <td onClick={(event) => event.stopPropagation()}>
@@ -154,7 +169,7 @@ function AttemptRow({ attempt }: { attempt: MagnetAttempt }) {
   return (
     <tr>
       <td>#{attempt.attempt_no}</td>
-      <td>{SOURCE_LABELS[attempt.magnet_source] ?? attempt.magnet_source}</td>
+      <td>{MAGNET_SOURCE_LABELS[attempt.magnet_source] ?? attempt.magnet_source}</td>
       <td>
         <span className={`run-state ${ATTEMPT_TONES[attempt.state] ?? ''}`}>
           {ATTEMPT_LABELS[attempt.state] ?? attempt.state}
@@ -184,7 +199,7 @@ function DetailRow({
 }) {
   return (
     <tr className="acq-detail-row">
-      <td colSpan={5}>
+      <td colSpan={6}>
         <div className="acq-detail">
           <div className="run-table-wrap">
             <table className="run-table">
@@ -401,6 +416,7 @@ export function AcquisitionPanel({ onUnauthorized }: { onUnauthorized: () => voi
               <tr>
                 <th>番号</th>
                 <th>状态</th>
+                <th>来源</th>
                 <th>说明</th>
                 <th>更新时间</th>
                 <th>操作</th>

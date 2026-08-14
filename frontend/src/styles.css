@@ -273,8 +273,8 @@ main {
 .results-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--text); font-size: 13px; }
 .results-search input::placeholder { color: var(--text-3); }
 .results-search input::-webkit-search-cancel-button { filter: invert(.6); }
-.magnet-copy-button { margin-left: auto; }
-.magnet-copy-error { margin: 0; color: var(--red); font-size: 12px; }
+.submitted-hint { margin: 0; color: var(--text-2); font-size: 12px; }
+.submitted-hint a { color: var(--text); }
 .results-empty { margin: 8px 2px; color: var(--text-2); font-size: 13px; }
 
 .group-stack { display: flex; flex-direction: column; gap: 8px; }
@@ -347,7 +347,6 @@ main {
 .result-moved { color: var(--green); background: rgba(134, 220, 170, .12); }
 .result-stale, .result-conflict, .result-invalid_path, .result-failed { color: var(--red); background: rgba(245, 144, 137, .12); }
 
-.magnet-text { min-width: 0; padding: 3px 9px; color: var(--text-3); border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2); font: 400 11px/1.5 var(--font-mono); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .row-warning { color: var(--amber); font-size: 12px; }
 
 /* ---------- apply summary + dock ---------- */
@@ -446,7 +445,6 @@ main {
   .scan-button { width: 100%; }
   .input-footer { align-items: flex-start; flex-direction: column; justify-content: center; padding: 8px 12px; }
   .results-bar { position: static; }
-  .magnet-copy-button { margin-left: 0; width: 100%; }
   .results-search { max-width: none; }
   /* Keep the box and the filename on one line; push source + pills onto a second. */
   .candidate { flex-wrap: wrap; row-gap: 3px; }

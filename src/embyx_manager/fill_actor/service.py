@@ -62,14 +62,13 @@ from embyx_manager.fill_actor.persistence import (
     MoveJournalState,
     PlanRecord,
 )
-from embyx_manager.fill_actor.ports import ActorCatalog, BrandResolver, MagnetProvider
+from embyx_manager.fill_actor.ports import AcquisitionGateway, AcquisitionOutcome, ActorCatalog, BrandResolver
 from embyx_manager.locking import AsyncFileLock
 
 LOGGER = logging.getLogger(__name__)
 
 ACTOR_ID_RE = re.compile(r'^[A-Za-z0-9_-]{1,32}$')
 DATED_VIDEO_ID_RE = re.compile(r'^(.+)_\d{4}-\d{2}-\d{2}$')
-MAX_MAGNET_LENGTH = 8192
 MAX_ERROR_MESSAGE_LENGTH = 200
 # Query strings carry signed URLs and access tokens; keep the endpoint, drop the parameters.
 QUERY_STRING_RE = re.compile(r'(?i)(\bhttps?://[^\s?#]+)\?\S*')
@@ -98,6 +97,13 @@ CLOUD_HEALTH_SUCCESS_TTL_SECONDS = 30.0
 CLOUD_HEALTH_FAILURE_TTL_SECONDS = 5.0
 ProgressCallback = Callable[[JobProgressEvent], Awaitable[None]]
 StopCallback = Callable[[], bool]
+
+_OUTCOME_STATES: dict[AcquisitionOutcome, VideoState] = {
+    AcquisitionOutcome.SUBMITTED: VideoState.SUBMITTED,
+    AcquisitionOutcome.ALREADY_TRACKED: VideoState.ALREADY_TRACKED,
+    AcquisitionOutcome.NO_MAGNET: VideoState.MISSING,
+    AcquisitionOutcome.SUBMIT_FAILED: VideoState.SUBMIT_FAILED,
+}
 
 
 @dataclass(frozen=True)
@@ -262,7 +268,7 @@ class FillActorService:
         *,
         runtime: Callable[[], FillActorRuntime],
         actor_catalog: ActorCatalog,
-        magnet_provider: MagnetProvider,
+        acquisition_gateway: AcquisitionGateway,
         brand_resolver: BrandResolver,
         max_actors: int = 20,
         max_videos: int = 2_000,
@@ -289,7 +295,7 @@ class FillActorService:
 
         self._runtime = runtime
         self._actor_catalog = actor_catalog
-        self._magnet_provider = magnet_provider
+        self._acquisition_gateway = acquisition_gateway
         self._brand_resolver = brand_resolver
         self._max_actors = max_actors
         self._max_videos = max_videos
@@ -449,7 +455,7 @@ class FillActorService:
         public_videos: dict[str, VideoPlan] = {}
         records: dict[str, _MoveRecord] = {}
         cloud_directory_cache: dict[str, tuple[CloudFileMetadata, ...] | None] = {}
-        magnet_video_ids: list[str] = []
+        missing_video_ids: list[str] = []
         video_total = len(video_actors)
 
         await self._report_progress(
@@ -465,7 +471,7 @@ class FillActorService:
         for video_index, video_id in enumerate(sorted(video_actors), start=1):
             actor_membership = tuple(sorted(video_actors[video_id]))
             try:
-                video_plan, video_records, needs_magnet = await self._create_video_plan(
+                video_plan, video_records, needs_acquisition = await self._create_video_plan(
                     video_id,
                     actor_membership,
                     cloud_directory_cache=cloud_directory_cache,
@@ -480,8 +486,8 @@ class FillActorService:
             else:
                 public_videos[video_id] = video_plan
                 records.update({record.candidate_id: record for record in video_records})
-                if needs_magnet:
-                    magnet_video_ids.append(video_id)
+                if needs_acquisition:
+                    missing_video_ids.append(video_id)
             await self._report_progress(
                 progress,
                 JobProgressEvent(
@@ -494,23 +500,22 @@ class FillActorService:
             )
 
         self._mark_duplicate_destination_conflicts(public_videos, records)
-        magnet_total = len(magnet_video_ids)
+        missing_total = len(missing_video_ids)
         await self._report_progress(
             progress,
             JobProgressEvent(
-                stage=JobStage.MAGNET_LOOKUP,
+                stage=JobStage.SUBMITTING,
                 completed=0,
-                total=magnet_total,
-                unit=JobProgressUnit.MAGNETS,
+                total=missing_total,
+                unit=JobProgressUnit.VIDEOS,
             ),
         )
-        magnet_results = await self._find_magnets(magnet_video_ids, progress=progress)
-        for video_id, magnet, warning in magnet_results:
+        submit_results = await self._submit_missing(missing_video_ids, progress=progress)
+        for video_id, outcome, warning in submit_results:
             current = public_videos[video_id]
             public_videos[video_id] = current.model_copy(
                 update={
-                    'state': VideoState.MAGNET_FOUND if magnet else VideoState.MISSING,
-                    'magnet': magnet,
+                    'state': _OUTCOME_STATES[outcome],
                     'warnings': (warning,) if warning else (),
                 },
             )
@@ -966,26 +971,25 @@ class FillActorService:
             return str(PurePosixPath(record.cloud_destination_dir) / record.cloud_file.name)
         return str(record.destination)
 
-    async def _find_magnets(
+    async def _submit_missing(
         self,
         video_ids: Sequence[str],
         *,
         progress: ProgressCallback | None = None,
-    ) -> list[tuple[str, str | None, str | None]]:
-        async def find(video_id: str) -> tuple[str, str | None, str | None]:
+    ) -> list[tuple[str, AcquisitionOutcome, str | None]]:
+        async def submit(video_id: str) -> tuple[str, AcquisitionOutcome, str | None]:
             async with self._magnet_semaphore:
                 try:
-                    raw_magnet = await self._magnet_provider.find_magnet(video_id)
-                    magnet = self._sanitize_magnet(raw_magnet)
+                    outcome = await self._acquisition_gateway.submit_missing(video_id)
                 except Exception:  # noqa: BLE001
-                    return video_id, None, 'magnet_lookup_failed'
-                warning = 'invalid_magnet' if raw_magnet is not None and magnet is None else None
-                return video_id, magnet, warning
+                    return video_id, AcquisitionOutcome.SUBMIT_FAILED, 'acquisition_failed'
+                warning = 'submit_failed' if outcome is AcquisitionOutcome.SUBMIT_FAILED else None
+                return video_id, outcome, warning
 
         queue = asyncio.Queue[str]()
         for video_id in video_ids:
             queue.put_nowait(video_id)
-        results: dict[str, tuple[str, str | None, str | None]] = {}
+        results: dict[str, tuple[str, AcquisitionOutcome, str | None]] = {}
         progress_lock = asyncio.Lock()
         completed = 0
 
@@ -996,16 +1000,16 @@ class FillActorService:
                     video_id = queue.get_nowait()
                 except asyncio.QueueEmpty:
                     return
-                results[video_id] = await find(video_id)
+                results[video_id] = await submit(video_id)
                 async with progress_lock:
                     completed += 1
                     await self._report_progress(
                         progress,
                         JobProgressEvent(
-                            stage=JobStage.MAGNET_LOOKUP,
+                            stage=JobStage.SUBMITTING,
                             completed=completed,
                             total=len(video_ids),
-                            unit=JobProgressUnit.MAGNETS,
+                            unit=JobProgressUnit.VIDEOS,
                             current=video_id,
                         ),
                     )
@@ -1193,12 +1197,6 @@ class FillActorService:
             and stat.st_size == fingerprint.size
             and stat.st_mtime_ns == fingerprint.mtime_ns
         )
-
-    @staticmethod
-    def _sanitize_magnet(value: str | None) -> str | None:
-        if not isinstance(value, str) or len(value) > MAX_MAGNET_LENGTH or not value.lower().startswith('magnet:'):
-            return None
-        return value
 
     @staticmethod
     def _is_safe_segment(value: str) -> bool:

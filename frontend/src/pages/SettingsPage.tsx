@@ -105,6 +105,13 @@ const SECTION_SPECS: SectionSpec[] = [
         hint: '每个根目录下都必须存在该文件，用于防止挂载失败时把空目录当成真实片库',
       },
       {
+        key: 'task_dir_path',
+        label: '缺失作品离线目录',
+        kind: 'text',
+        placeholder: '/115/embyx_in',
+        hint: '扫描出的缺失作品自动提交 115 离线到这里（CloudDrive 云端路径），语义同 RSS 分类的离线目录：目录决定归档路由，需要在归档整理里配对应的来源子目录路由；可与某个 RSS 分类共用。留空则扫描不提交下载。',
+      },
+      {
         key: 'apply_enabled',
         label: '允许移动文件',
         kind: 'boolean',

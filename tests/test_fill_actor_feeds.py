@@ -18,6 +18,7 @@ from embyx_manager.fill_actor.persistence import (
     JobState,
     MemoryFillActorRepository,
 )
+from embyx_manager.fill_actor.ports import AcquisitionOutcome
 from embyx_manager.fill_actor.service import FillActorPaths, FillActorService, static_runtime
 
 RSS_BODY = b'<?xml version="1.0"?><rss version="2.0"><channel><title>actor</title></channel></rss>'
@@ -33,9 +34,9 @@ class ActorCatalog:
         return ['ABC-001']
 
 
-class MagnetProvider:
-    async def find_magnet(self, _video_id: str) -> None:
-        return None
+class AcquisitionGateway:
+    async def submit_missing(self, _video_id: str) -> AcquisitionOutcome:
+        return AcquisitionOutcome.NO_MAGNET
 
 
 class BrandResolver:
@@ -60,7 +61,7 @@ def make_service(
             paths=paths,
         ),
         actor_catalog=actor_catalog,
-        magnet_provider=MagnetProvider(),
+        acquisition_gateway=AcquisitionGateway(),
         brand_resolver=BrandResolver(),
         repository=repository,
     )
