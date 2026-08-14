@@ -7,6 +7,7 @@ dashboard can show what happened without shipping whole log files.
 
 import asyncio
 import logging
+import sys
 from collections import deque
 from enum import StrEnum
 
@@ -82,12 +83,16 @@ class RunContext:
 
     def exception(self, message: str, *args: object) -> None:
         self._logger.exception(message, *args)  # noqa: LOG004 - called from callers' except blocks
-        rendered = self._record('ERROR: ' + message, args)
+        # The full traceback only reaches the process log; the persisted tail
+        # must still say what went wrong or a failed run is undiagnosable from
+        # the dashboard.
+        exc = sys.exc_info()[1]
+        rendered = self._record('ERROR: ' + message, args, detail=f': {exc!r}' if exc is not None else '')
         if len(self._errors) < MAX_ERRORS:
             self._errors.append(rendered)
 
-    def _record(self, message: str, args: tuple[object, ...]) -> str:
-        rendered = message % args if args else message
+    def _record(self, message: str, args: tuple[object, ...], detail: str = '') -> str:
+        rendered = (message % args if args else message) + detail
         self._lines.append(rendered)
         return rendered
 

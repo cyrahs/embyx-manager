@@ -118,6 +118,17 @@ def test_incremental_reports_failed_paths(tmp_path: Path, monkeypatch) -> None:
     assert failed_deleted == set()
 
 
+def test_tokyo_hot_separated_id_maps_to_canonical_directory(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    write_strm(pipeline.src_dir / 'rest' / 'N' / 'N-0893.strm')
+
+    ctx = make_ctx()
+    pipeline.run_full(ctx)
+
+    assert (pipeline.dst_dir / 'rest' / 'N' / 'N0893' / 'N-0893.strm').exists()
+    assert not any('failed to get avid' in line for line in ctx.log_tail)
+
+
 def test_non_avid_strm_is_skipped_with_warning(tmp_path: Path) -> None:
     pipeline = make_pipeline(tmp_path)
     write_strm(pipeline.src_dir / '!!!.strm')

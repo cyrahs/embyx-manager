@@ -121,9 +121,9 @@ def _match_odd_numbering(norm: str) -> str:
     # 尝试匹配TMA制作的影片(如'T28-557', 他家的番号很乱)
     if match := re.search(r'(T[23]8[-_]\d{3})', norm):
         return match.group(1)
-    # 尝试匹配东热n, k系列
-    if match := re.search(r'(N\d{4}|K\d{4})', norm, re.IGNORECASE):
-        return match.group(1)
+    # 尝试匹配东热n, k系列; 部分存档把n0893写成N-0893, 规范形式不带分隔符
+    if match := re.search(r'([NK])[-_]?(\d{4})', norm, re.IGNORECASE):
+        return match.group(1) + match.group(2)
     # 尝试匹配纯数字番号, 无码影片
     if match := re.search(r'(\d{6}[-_]\d{2,3})', norm):
         return match.group(1)
