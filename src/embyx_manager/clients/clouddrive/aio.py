@@ -215,3 +215,17 @@ class AsyncCloudDrive:
         directory = validate_api_path(path, allow_root=True)
         files = await _run_sync_complete(self._client.list_offline_files_by_path, directory)
         return tuple(_offline_file_to_dict(file) for file in files)
+
+    async def remove_offline_files(self, info_hashes: list[str], path: str, *, delete_files: bool) -> Any:
+        """Drop offline tasks by info hash, optionally with the data they downloaded.
+
+        The path names the cloud the tasks live in, the same way the listing
+        addresses it; any directory of that cloud works.
+        """
+        directory = validate_api_path(path, allow_root=True)
+        return await _run_sync_complete(
+            self._client.remove_offline_files,
+            info_hashes,
+            directory,
+            delete_files=delete_files,
+        )
