@@ -184,6 +184,13 @@ class FakeLedger:
             return True
         return False
 
+    async def active_avids(self) -> frozenset[str]:
+        return frozenset(
+            avid
+            for avid, state in self.states.items()
+            if state in {AcquisitionState.DISCOVERED, AcquisitionState.DOWNLOADING}
+        )
+
     # -- assertions helpers -------------------------------------------------
 
     def attempt_states(self, avid: str) -> list[AttemptState]:

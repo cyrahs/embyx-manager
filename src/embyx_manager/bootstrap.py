@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import threading
 from collections.abc import AsyncIterator
@@ -49,6 +48,7 @@ from embyx_manager.monitor.acquisitions import AcquisitionRepository
 from embyx_manager.monitor.api import create_monitor_router
 from embyx_manager.monitor.archive import ArchivePipeline
 from embyx_manager.monitor.mapping import MappingPipeline
+from embyx_manager.monitor.reconcile import ReconcileScanner
 from embyx_manager.monitor.reports import RunContext
 from embyx_manager.monitor.rss import RssPipeline
 from embyx_manager.monitor.runs import PipelineRunRepository
@@ -264,6 +264,9 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
             return 'archive source, destination, and mapping must be configured'
         return None
 
+    # Held across runs: settling a folder takes two passes to observe.
+    reconcile_scanner: list[ReconcileScanner] = []
+
     async def archive_runner(ctx: RunContext) -> None:
         clouddrive_config = store.get(CloudDriveConfig)
         cloud = cloud_handle.current()
@@ -272,8 +275,15 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
                 await cloud.list_directory(clouddrive_config.task_dir_path)
             except Exception:  # noqa: BLE001
                 ctx.exception('failed to refresh the CloudDrive task directory')
-        pipeline = ArchivePipeline(config=store.get(ArchiveConfig), avid_parser=avid_handle.current())
-        await asyncio.to_thread(pipeline.run, ctx)
+        archive_config = store.get(ArchiveConfig)
+        archiver = ArchivePipeline(config=archive_config, avid_parser=avid_handle.current())
+        if reconcile_scanner:
+            reconcile_scanner[0].rebind(archiver=archiver, config=archive_config)
+        else:
+            reconcile_scanner.append(
+                ReconcileScanner(ledger=ledger, archiver=archiver, config=archive_config),
+            )
+        await reconcile_scanner[0].run(ctx)
 
     def tracker_ready() -> str | None:
         archive_config = store.get(ArchiveConfig)
