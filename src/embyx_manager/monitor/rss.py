@@ -1,8 +1,8 @@
 """RSS discovery: unread FreshRSS items -> AVIDs -> magnet candidates -> offline tasks.
 
 This pipeline only discovers. It reads unread items, records each AVID in the
-acquisition ledger, collects every magnet worth trying, and submits the first
-one; what happens to that download afterwards belongs to the tracker.
+acquisition ledger, and hands resolution and submission to the shared intake;
+what happens to that download afterwards belongs to the tracker.
 
 Two consequences of the ledger owning the outcome. Items are marked read as soon
 as their AVID is recorded, because retries are driven by the ledger's cooldown
@@ -12,11 +12,7 @@ stalls, or turns out to be an ad reel has a successor waiting.
 """
 
 import asyncio
-from datetime import UTC, datetime, timedelta
-
-import grpc
-import httpx
-from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
+from datetime import UTC, datetime
 
 from embyx_manager.clients.clouddrive import AsyncCloudDrive
 from embyx_manager.clients.freshrss import FreshRSSClient
@@ -25,24 +21,13 @@ from embyx_manager.clients.rss_magnet import get_magnet_from_item
 from embyx_manager.clients.sukebei import SukebeiClient
 from embyx_manager.config.models import RssConfig
 from embyx_manager.core.avid import AvidParser
-from embyx_manager.core.magnet import extract_info_hash
 from embyx_manager.monitor.acquisitions import (
     AcquisitionRepository,
     AcquisitionSource,
-    AcquisitionState,
-    AttemptState,
     MagnetCandidate,
 )
+from embyx_manager.monitor.intake import AcquisitionIntake
 from embyx_manager.monitor.reports import RunContext
-
-MAX_CANDIDATES = 5
-
-CLOUD_RETRY = retry(
-    stop=stop_after_attempt(3),
-    wait=wait_exponential(multiplier=1, min=1, max=10),
-    retry=retry_if_exception_type((grpc.RpcError, httpx.HTTPError, httpx.TimeoutException, OSError)),
-    reraise=True,
-)
 
 
 class RssPipeline:
@@ -61,11 +46,15 @@ class RssPipeline:
         self._config = config
         self._avid = avid_parser
         self._freshrss = freshrss
-        self._cloud = cloud
-        self._sukebei = sukebei
-        self._javbus = javbus
-        self._task_dir_path = task_dir_path
         self._ledger = ledger
+        self._intake = AcquisitionIntake(
+            ledger=ledger,
+            sukebei=sukebei,
+            javbus=javbus,
+            cloud=cloud,
+            task_dir_path=task_dir_path,
+            failed_cooldown_seconds=config.failed_avid_cooldown_seconds,
+        )
 
     async def run(self, ctx: RunContext, *, rank: bool = False) -> None:
         label = self._config.rank_label if rank else self._config.actor_label
@@ -119,21 +108,12 @@ class RssPipeline:
         ctx.set('magnets_found', sum(len(candidates) for candidates in resolved.values()))
         ctx.info('Found magnets for %d of %d avids', len(resolved), len(avid_item))
 
-        now = datetime.now(UTC)
-        cooldown = timedelta(seconds=self._config.failed_avid_cooldown_seconds)
         for avid in avid_item:
             if avid in resolved:
                 continue
             ctx.add('magnets_failed')
             ctx.warning('Failed to get any magnet for %s', avid)
-            await self._ledger.transition(
-                avid,
-                expected=AcquisitionState.DISCOVERED,
-                target=AcquisitionState.RESOLVE_FAILED,
-                now=now,
-                note='no magnet found',
-                next_action_at=now + cooldown,
-            )
+            await self._intake.park_unresolved(avid)
         return resolved
 
     async def _resolve_safely(
@@ -144,112 +124,19 @@ class RssPipeline:
         ctx: RunContext,
     ) -> None:
         try:
-            candidates = await self._candidates_for(avid, items, ctx)
+            candidates = await self._intake.resolve(avid, ctx=ctx, item_magnet=get_magnet_from_item(items[0], avid))
         except Exception:  # noqa: BLE001
             ctx.exception('Failed to get magnets for %s', avid)
             return
         if candidates:
             resolved[avid] = candidates
 
-    async def _candidates_for(self, avid: str, items: list[dict], ctx: RunContext) -> list[MagnetCandidate]:
-        """Every magnet worth trying for one AVID, best first.
-
-        Sukebei leads because most items are recent releases it indexes well; the
-        item's own magnet table and javbus fill in behind it. Only tracked hashes
-        are kept: a magnet CloudDrive cannot report back on is one the tracker
-        could never conclude.
-        """
-        candidates: list[MagnetCandidate] = []
-        seen: set[str] = set()
-
-        def collect(magnet: str | None, source: str, size_hint: int | None = None) -> None:
-            if not magnet or not magnet.lower().startswith('magnet:'):
-                return
-            info_hash = extract_info_hash(magnet)
-            if info_hash is None:
-                ctx.warning('Skipping magnet without a usable info hash for %s', avid)
-                return
-            if info_hash in seen:
-                return
-            seen.add(info_hash)
-            candidates.append(MagnetCandidate(magnet=magnet, info_hash=info_hash, source=source, size_hint=size_hint))
-
-        collect(await self._sukebei.get_magnet(avid), 'sukebei')
-        collect(get_magnet_from_item(items[0], avid), 'rss_item')
-        try:
-            magnets = await self._javbus.get_magnets(avid)
-        except Exception:  # noqa: BLE001
-            ctx.exception('Failed to get magnets from javbus for %s', avid)
-        else:
-            for magnet in sorted(magnets, key=lambda entry: entry['size_int'], reverse=True):
-                collect(magnet['magnet'], 'javbus', magnet['size_int'])
-        return candidates[:MAX_CANDIDATES]
-
     # -- CloudDrive offline tasks ---------------------------------------------
 
     async def _submit_all(self, resolved: dict[str, list[MagnetCandidate]], ctx: RunContext) -> None:
-        now = datetime.now(UTC)
         for avid, candidates in resolved.items():
             ctx.check_cancelled()
-            added = await self._ledger.add_attempts(avid, candidates, now=now)
-            ctx.add('candidates_recorded', added)
-            await self._submit_next(avid, ctx)
-
-    async def _submit_next(self, avid: str, ctx: RunContext) -> bool:
-        """Submit this AVID's next untried magnet; False when none is left."""
-        now = datetime.now(UTC)
-        attempt = await self._ledger.claim_next_pending(avid, now=now)
-        if attempt is None:
-            return False
-        outcome = await self._add_magnet(avid, attempt.magnet, ctx)
-        if outcome == 'failed':
-            await self._ledger.transition_attempt(
-                avid,
-                attempt.attempt_no,
-                expected=AttemptState.SUBMITTED,
-                target=AttemptState.ERROR,
-                now=now,
-                error='failed to add the offline task',
-            )
-            return await self._submit_next(avid, ctx)
-        record = await self._ledger.get(avid)
-        if record is not None and record.state is not AcquisitionState.DOWNLOADING:
-            await self._ledger.transition(
-                avid,
-                expected=record.state,
-                target=AcquisitionState.DOWNLOADING,
-                now=now,
-            )
-        return True
-
-    async def _add_magnet(self, avid: str, link: str, ctx: RunContext) -> str:
-        try:
-            result = await self._add_offline_with_retry(link)
-        except grpc.RpcError as exc:
-            if '任务已存在' in (exc.details() or ''):
-                # Already queued at CloudDrive: the hash is what we track, so this
-                # attempt is live either way.
-                ctx.warning('Duplicate magnet for %s', avid)
-                ctx.add('duplicates')
-                return 'duplicate'
-            ctx.exception('Failed to add magnet for %s: %s', avid, exc.details())
-            ctx.add('add_failed')
-            return 'failed'
-        except Exception:  # noqa: BLE001
-            ctx.exception('Failed to add magnet for %s', avid)
-            ctx.add('add_failed')
-            return 'failed'
-        if getattr(result, 'success', False):
-            ctx.info('Added magnet for %s', avid)
-            ctx.add('magnets_added')
-            return 'success'
-        ctx.error('Failed to add magnet for %s: %s', avid, result)
-        ctx.add('add_failed')
-        return 'failed'
-
-    @CLOUD_RETRY
-    async def _add_offline_with_retry(self, link: str) -> object:
-        return await self._cloud.add_offline_files([link], self._task_dir_path)
+            await self._intake.record_and_submit(avid, candidates, ctx=ctx)
 
     async def _mark_read(self, ctx: RunContext, item_ids: list[str]) -> None:
         if not item_ids:
