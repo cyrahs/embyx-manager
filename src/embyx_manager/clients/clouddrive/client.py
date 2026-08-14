@@ -9,6 +9,12 @@ from embyx_manager.clients.clouddrive import clouddrive_pb2, clouddrive_pb2_grpc
 
 GRPC_TIMEOUT_SECONDS = 30.0
 
+#: How soon CloudDrive re-checks the destination folder after an offline task is
+#: added. Zero disables the check, and with a persistent directory cache (115)
+#: nothing else ever expires the folder listing, so the finished download would
+#: stay invisible to both the API and the mount.
+CHECK_FOLDER_AFTER_SECONDS = 10
+
 
 class CloudDriveClient:
     def __init__(self, *, address: str, api_token: str, secure: bool = True) -> None:
@@ -69,13 +75,19 @@ class CloudDriveClient:
         )
         return self.stub.MoveFile(request, metadata=self._metadata(), timeout=GRPC_TIMEOUT_SECONDS)
 
-    def add_offline_file(self, urls: str | list[str], dst_dir: str) -> clouddrive_pb2.FileOperationResult:
+    def add_offline_file(
+        self,
+        urls: str | list[str],
+        dst_dir: str,
+        *,
+        check_folder_after_secs: int = CHECK_FOLDER_AFTER_SECONDS,
+    ) -> clouddrive_pb2.FileOperationResult:
         if isinstance(urls, str):
             urls = [urls]
         request = clouddrive_pb2.AddOfflineFileRequest(
             urls='\n'.join(urls),
             toFolder=dst_dir,
-            checkFolderAfterSecs=0,
+            checkFolderAfterSecs=check_folder_after_secs,
         )
         return self.stub.AddOfflineFiles(request, metadata=self._metadata(), timeout=GRPC_TIMEOUT_SECONDS)
 

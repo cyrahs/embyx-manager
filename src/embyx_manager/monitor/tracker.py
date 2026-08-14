@@ -491,10 +491,14 @@ class AcquisitionTracker:
         The mount caches listings, so a just-finished download can look empty.
         Asking the API for it is the targeted version of what used to be a
         five-second sleep after every stage. ``task_dir`` is the directory the
-        task was listed under, which is where its folder actually is.
+        task was listed under, which is where its folder actually is. The parent
+        goes first: under a persistent directory cache (115) its listing never
+        expires on its own, so until it is re-read the finished folder does not
+        resolve at all.
         """
         path = f'{task_dir}/{task["name"]}'
         try:
+            await self._cloud.list_directory(task_dir)
             await self._cloud.list_directory(path)
         except FileNotFoundError:
             ctx.warning('finished task %s is not on the mount yet', task['name'])
