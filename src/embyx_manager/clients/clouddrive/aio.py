@@ -10,11 +10,25 @@ import asyncio
 import posixpath
 from collections.abc import Callable
 from contextlib import suppress
+from enum import StrEnum
 from typing import Any
 
+from embyx_manager.clients.clouddrive import clouddrive_pb2
 from embyx_manager.clients.clouddrive.client import CloudDriveClient
 
 CloudFile = dict[str, object]
+OfflineTask = dict[str, object]
+
+
+class OfflineStatus(StrEnum):
+    """CloudDrive's offline-task status, by proto enum name."""
+
+    INIT = 'OFFLINE_INIT'
+    DOWNLOADING = 'OFFLINE_DOWNLOADING'
+    FINISHED = 'OFFLINE_FINISHED'
+    ERROR = 'OFFLINE_ERROR'
+    UNKNOWN = 'OFFLINE_UNKNOWN'
+
 
 _ASCII_CONTROL_LIMIT = 32
 _ASCII_DELETE = 127
@@ -65,6 +79,25 @@ def _cloud_file_to_dict(file: Any) -> CloudFile:
         'is_directory': bool(file.isDirectory),
         'write_time': write_time,
         'hashes': dict(sorted((str(key), str(value)) for key, value in file.fileHashes.items())),
+    }
+
+
+def _offline_file_to_dict(file: Any) -> OfflineTask:
+    try:
+        status = OfflineStatus(clouddrive_pb2.OfflineFileStatus.Name(file.status))
+    except ValueError:
+        status = OfflineStatus.UNKNOWN
+    return {
+        'name': str(file.name),
+        'size': int(file.size),
+        'url': str(file.url),
+        'status': status,
+        # Normalized to match the hashes extracted from our own magnets.
+        'info_hash': str(file.infoHash).upper(),
+        'file_id': str(file.fileId),
+        'add_time': int(file.add_time),
+        'progress': float(file.percendDone),
+        'peers': int(file.peers),
     }
 
 
@@ -171,6 +204,17 @@ class AsyncCloudDrive:
     async def add_offline_files(self, urls: list[str], dst_dir: str) -> Any:
         directory = validate_api_path(dst_dir, allow_root=True)
         return await _run_sync_complete(self._client.add_offline_file, urls, directory)
+
+    async def list_offline_files(self, path: str) -> tuple[OfflineTask, ...]:
+        """Every offline task under path, whatever its status.
+
+        This is the tracker's view of what CloudDrive is doing: each task carries
+        the infoHash that identifies which attempt it belongs to, along with the
+        progress needed to tell a slow download from a stalled one.
+        """
+        directory = validate_api_path(path, allow_root=True)
+        files = await _run_sync_complete(self._client.list_offline_files_by_path, directory)
+        return tuple(_offline_file_to_dict(file) for file in files)
 
     async def list_finished_offline_files(self, path: str) -> Any:
         directory = validate_api_path(path, allow_root=True)

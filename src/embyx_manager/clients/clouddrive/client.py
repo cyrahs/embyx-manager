@@ -93,6 +93,12 @@ class CloudDriveClient:
         )
         return self.stub.AddOfflineFiles(request, metadata=self._metadata(), timeout=GRPC_TIMEOUT_SECONDS)
 
+    def list_offline_files_by_path(self, path: str) -> list[clouddrive_pb2.OfflineFile]:
+        """Every offline task under path, whatever its status."""
+        request = clouddrive_pb2.FileRequest(path=path)
+        result = self.stub.ListOfflineFilesByPath(request, metadata=self._metadata(), timeout=GRPC_TIMEOUT_SECONDS)
+        return list(result.offlineFiles)
+
     def list_finished_offline_files_by_path(self, path: str) -> clouddrive_pb2.OfflineFileListResult:
         request = clouddrive_pb2.FileRequest(path=path)
         result = self.stub.ListOfflineFilesByPath(request, metadata=self._metadata(), timeout=GRPC_TIMEOUT_SECONDS)
