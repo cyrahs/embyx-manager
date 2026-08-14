@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useState } from 'react'
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
 import {
   ApiError,
@@ -73,6 +73,10 @@ const GROUPS: AcquisitionState[] = [
   'ignored',
 ]
 
+const REFRESH_INTERVAL_MS = 10_000
+
+type AcquisitionAction = 'retry' | 'ignore' | 'resume'
+
 function formatTime(value: string | null): string {
   if (!value) return '—'
   const date = new Date(value)
@@ -90,6 +94,51 @@ function ProgressBar({ value }: { value: number | null }) {
       />
       <span className="acq-progress-text">{value.toFixed(0)}%</span>
     </span>
+  )
+}
+
+function AcquisitionRow({
+  item,
+  busy,
+  onOpen,
+  onAct,
+}: {
+  item: Acquisition
+  busy: boolean
+  onOpen: (avid: string) => void
+  onAct: (avid: string, action: AcquisitionAction) => void
+}) {
+  const closed = item.state === 'archived' || item.state === 'ignored'
+  return (
+    <tr onClick={() => onOpen(item.avid)}>
+      <td>{item.avid}</td>
+      <td>
+        <span className={`run-state ${STATE_TONES[item.state] ?? ''}`}>
+          {STATE_LABELS[item.state]}
+        </span>
+      </td>
+      <td className="acq-muted">{item.note ?? '—'}</td>
+      <td className="acq-muted">{formatTime(item.updated_at)}</td>
+      <td onClick={(event) => event.stopPropagation()}>
+        <div className="acq-actions">
+          {item.state === 'needs_attention' && (
+            <button type="button" className="text-button" disabled={busy} onClick={() => onAct(item.avid, 'resume')}>
+              已处理，继续
+            </button>
+          )}
+          {!closed && (
+            <>
+              <button type="button" className="text-button" disabled={busy} onClick={() => onAct(item.avid, 'retry')}>
+                换下一个磁力
+              </button>
+              <button type="button" className="text-button" disabled={busy} onClick={() => onAct(item.avid, 'ignore')}>
+                忽略
+              </button>
+            </>
+          )}
+        </div>
+      </td>
+    </tr>
   )
 }
 
@@ -112,6 +161,69 @@ function AttemptRow({ attempt }: { attempt: MagnetAttempt }) {
   )
 }
 
+function DetailRow({
+  detail,
+  busy,
+  magnet,
+  onMagnetChange,
+  onSubmitMagnet,
+}: {
+  detail: AcquisitionDetail
+  busy: boolean
+  magnet: string
+  onMagnetChange: (value: string) => void
+  onSubmitMagnet: () => void
+}) {
+  return (
+    <tr className="acq-detail-row">
+      <td colSpan={5}>
+        <div className="acq-detail">
+          <div className="run-table-wrap">
+            <table className="run-table">
+              <thead>
+                <tr>
+                  <th>尝试</th>
+                  <th>来源</th>
+                  <th>状态</th>
+                  <th>进度</th>
+                  <th>错误</th>
+                  <th>更新</th>
+                </tr>
+              </thead>
+              <tbody>
+                {detail.attempts.map((attempt) => (
+                  <AttemptRow key={attempt.attempt_no} attempt={attempt} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {detail.archived_paths.length > 0 && (
+            <p className="acq-muted">已入库：{detail.archived_paths.join('、')}</p>
+          )}
+          {detail.state !== 'archived' && detail.state !== 'ignored' && (
+            <div className="acq-magnet">
+              <input
+                type="text"
+                value={magnet}
+                placeholder="magnet:?xt=urn:btih:..."
+                onChange={(event) => onMagnetChange(event.target.value)}
+              />
+              <button
+                type="button"
+                className="button primary"
+                disabled={busy || !magnet.trim()}
+                onClick={onSubmitMagnet}
+              >
+                手动提交磁力
+              </button>
+            </div>
+          )}
+        </div>
+      </td>
+    </tr>
+  )
+}
+
 export function AcquisitionPanel({ onUnauthorized }: { onUnauthorized: () => void }) {
   const [page, setPage] = useState<{
     items: Acquisition[]
@@ -123,57 +235,63 @@ export function AcquisitionPanel({ onUnauthorized }: { onUnauthorized: () => voi
   const [tracker, setTracker] = useState<TrackerStatus | null>(null)
   const [filter, setFilter] = useState<AcquisitionState | null>('needs_attention')
   const [detail, setDetail] = useState<AcquisitionDetail | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loaded, setLoaded] = useState(false)
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [magnet, setMagnet] = useState('')
+  const [tick, setTick] = useState(0)
 
-  const refresh = useCallback(
-    async (signal?: AbortSignal) => {
+  // Kept in a ref so the polling effect never restarts because a parent
+  // re-render handed down a new callback identity: restarting it resets the
+  // panel to its loading state, which reads as flicker.
+  const onUnauthorizedRef = useRef(onUnauthorized)
+  useEffect(() => {
+    onUnauthorizedRef.current = onUnauthorized
+  })
+
+  const reload = useCallback(() => setTick((value) => value + 1), [])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    const load = async () => {
       try {
         const [nextPage, nextTracker] = await Promise.all([
-          listAcquisitions(filter, 50, signal),
-          getTrackerStatus(signal),
+          listAcquisitions(filter, 50, controller.signal),
+          getTrackerStatus(controller.signal),
         ])
         setPage(nextPage)
         setTracker(nextTracker)
         setError(null)
       } catch (err) {
-        if (signal?.aborted) return
+        if (controller.signal.aborted) return
         if (isUnauthorized(err)) {
-          onUnauthorized()
+          onUnauthorizedRef.current()
           return
         }
         setError(err instanceof ApiError ? err.message : '加载下载追踪失败。')
       } finally {
-        setLoading(false)
+        if (!controller.signal.aborted) setLoaded(true)
       }
-    },
-    [filter, onUnauthorized],
-  )
-
-  useEffect(() => {
-    const controller = new AbortController()
-    setLoading(true)
-    void refresh(controller.signal)
-    const timer = window.setInterval(() => void refresh(controller.signal), 10_000)
+    }
+    void load()
+    const timer = window.setInterval(() => void load(), REFRESH_INTERVAL_MS)
     return () => {
       controller.abort()
       window.clearInterval(timer)
     }
-  }, [refresh])
+  }, [filter, tick])
 
   const act = useCallback(
-    async (avid: string, action: 'retry' | 'ignore' | 'resume') => {
+    async (avid: string, action: AcquisitionAction) => {
       setBusy(avid)
       setError(null)
       try {
         await actOnAcquisition(avid, action)
-        await refresh()
         if (detail?.avid === avid) setDetail(await getAcquisition(avid))
+        reload()
       } catch (err) {
         if (isUnauthorized(err)) {
-          onUnauthorized()
+          onUnauthorizedRef.current()
           return
         }
         setError(err instanceof ApiError ? err.message : '操作失败。')
@@ -181,7 +299,7 @@ export function AcquisitionPanel({ onUnauthorized }: { onUnauthorized: () => voi
         setBusy(null)
       }
     },
-    [detail, onUnauthorized, refresh],
+    [detail, reload],
   )
 
   const submitMagnet = useCallback(async () => {
@@ -191,18 +309,18 @@ export function AcquisitionPanel({ onUnauthorized }: { onUnauthorized: () => voi
     try {
       await addAcquisitionMagnet(detail.avid, magnet.trim())
       setMagnet('')
-      await refresh()
       setDetail(await getAcquisition(detail.avid))
+      reload()
     } catch (err) {
       if (isUnauthorized(err)) {
-        onUnauthorized()
+        onUnauthorizedRef.current()
         return
       }
       setError(err instanceof ApiError ? err.message : '提交磁力失败。')
     } finally {
       setBusy(null)
     }
-  }, [detail, magnet, onUnauthorized, refresh])
+  }, [detail, magnet, reload])
 
   const openDetail = useCallback(
     async (avid: string) => {
@@ -213,10 +331,10 @@ export function AcquisitionPanel({ onUnauthorized }: { onUnauthorized: () => voi
       try {
         setDetail(await getAcquisition(avid))
       } catch (err) {
-        if (isUnauthorized(err)) onUnauthorized()
+        if (isUnauthorized(err)) onUnauthorizedRef.current()
       }
     },
-    [detail, onUnauthorized],
+    [detail],
   )
 
   return (
@@ -262,7 +380,7 @@ export function AcquisitionPanel({ onUnauthorized }: { onUnauthorized: () => voi
         {tracker?.last_polled_at ? ` 上次轮询：${formatTime(tracker.last_polled_at)}` : ''}
       </p>
 
-      {loading ? (
+      {!loaded ? (
         <p className="dashboard-loading">
           <Spinner /> 正在加载…
         </p>
@@ -283,97 +401,20 @@ export function AcquisitionPanel({ onUnauthorized }: { onUnauthorized: () => voi
             <tbody>
               {page.items.map((item) => (
                 <Fragment key={item.avid}>
-                  <tr onClick={() => void openDetail(item.avid)}>
-                    <td>{item.avid}</td>
-                    <td>
-                      <span className={`run-state ${STATE_TONES[item.state] ?? ''}`}>
-                        {STATE_LABELS[item.state]}
-                      </span>
-                    </td>
-                    <td className="acq-muted">{item.note ?? '—'}</td>
-                    <td className="acq-muted">{formatTime(item.updated_at)}</td>
-                    <td className="acq-actions" onClick={(event) => event.stopPropagation()}>
-                      {item.state === 'needs_attention' && (
-                        <button
-                          type="button"
-                          className="text-button"
-                          disabled={busy === item.avid}
-                          onClick={() => void act(item.avid, 'resume')}
-                        >
-                          已处理，继续
-                        </button>
-                      )}
-                      {item.state !== 'archived' && item.state !== 'ignored' && (
-                        <>
-                          <button
-                            type="button"
-                            className="text-button"
-                            disabled={busy === item.avid}
-                            onClick={() => void act(item.avid, 'retry')}
-                          >
-                            换下一个磁力
-                          </button>
-                          <button
-                            type="button"
-                            className="text-button"
-                            disabled={busy === item.avid}
-                            onClick={() => void act(item.avid, 'ignore')}
-                          >
-                            忽略
-                          </button>
-                        </>
-                      )}
-                    </td>
-                  </tr>
+                  <AcquisitionRow
+                    item={item}
+                    busy={busy === item.avid}
+                    onOpen={(avid) => void openDetail(avid)}
+                    onAct={(avid, action) => void act(avid, action)}
+                  />
                   {detail?.avid === item.avid && (
-                    <tr className="acq-detail-row">
-                      <td colSpan={5}>
-                        <div className="acq-detail">
-                          <div className="run-table-wrap">
-                            <table className="run-table">
-                              <thead>
-                                <tr>
-                                  <th>尝试</th>
-                                  <th>来源</th>
-                                  <th>状态</th>
-                                  <th>进度</th>
-                                  <th>错误</th>
-                                  <th>更新</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {detail.attempts.map((attempt) => (
-                                  <AttemptRow key={attempt.attempt_no} attempt={attempt} />
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                          {detail.archived_paths.length > 0 && (
-                            <p className="acq-muted">
-                              已入库：{detail.archived_paths.join('、')}
-                            </p>
-                          )}
-                          {detail.state !== 'archived' && detail.state !== 'ignored' && (
-                            <div className="acq-magnet">
-                              <input
-                                type="text"
-                                value={magnet}
-                                placeholder="magnet:?xt=urn:btih:..."
-                                onChange={(event) => setMagnet(event.target.value)}
-                              />
-                              <button
-                                type="button"
-                                className="button primary"
-                                disabled={busy === detail.avid || !magnet.trim()}
-                                onClick={() => void submitMagnet()}
-                              >
-                                手动提交磁力
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
+                    <DetailRow
+                      detail={detail}
+                      busy={busy === detail.avid}
+                      magnet={magnet}
+                      onMagnetChange={setMagnet}
+                      onSubmitMagnet={() => void submitMagnet()}
+                    />
                   )}
                 </Fragment>
               ))}

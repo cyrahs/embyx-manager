@@ -655,7 +655,11 @@ main {
 }
 .acq-progress-fill { position: absolute; inset: 0 auto 0 0; background: rgba(214, 255, 75, .25); }
 .acq-progress-text { position: relative; display: block; text-align: center; font-size: 11px; line-height: 16px; color: var(--text); }
-.acq-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+/* Inner wrapper: flex directly on the td would take it out of table-cell
+   layout and misalign the column. Compact buttons and a fixed minimum height
+   keep every row the same height whether or not it offers actions. */
+.acq-actions { display: flex; align-items: center; gap: 4px; min-height: 23px; }
+.acq-actions .text-button { padding: 2px 8px; }
 .run-table tbody tr.acq-detail-row { cursor: default; }
 .run-table tbody tr.acq-detail-row:hover { background: transparent; }
 .acq-detail { padding: 4px 0 8px; }
