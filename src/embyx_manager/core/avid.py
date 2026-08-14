@@ -36,7 +36,7 @@ _DOMAIN_RE = re.compile(r'\w{3,10}\.(COM|NET|APP|XYZ)', re.IGNORECASE)
 #: SDMF-016 and leave MF-016 behind.
 _TAG_ALTERNATIVES = (
     r'dvd|iso|mkv|mp4|c?avi|\d*fps|whole|(?:f|hhb)?hd\d*|sd\d*|lt'
-    r'|(?:144|240|360|480|720|1080|2160)[pi]|x1080x|uhd|uncensored|leak|[2468]ks?|[xh]26[45]'
+    r'|(?:144|240|360|480|720|1080|2160)[pi]|x1080x|uhd|hq|uncensored|leak|[2468]ks?|[xh]26[45]'
 )
 _TAG_RE = re.compile(rf'(?:^|(?<=[^a-z\d]))(?:{_TAG_ALTERNATIVES})+(?=$|[^a-z\d])', re.IGNORECASE)
 _SINGLE_TAG_RE = re.compile(rf'({_TAG_ALTERNATIVES})', re.IGNORECASE)
@@ -72,6 +72,15 @@ def strip_extension(name: str) -> str:
     if 0 < len(suffix) < MAX_EXTENSION_LENGTH:
         return name[: -len(suffix)]
     return name
+
+
+def strip_variant_tags(name: str) -> str:
+    """The name without its extension or quality tags; separators are left behind.
+
+    What remains of two file names being equal is how the archiver knows they
+    are cuts of the same video rather than parts of one.
+    """
+    return _TAG_RE.sub('', strip_extension(name))
 
 
 def variant_tags(name: str) -> frozenset[str]:
