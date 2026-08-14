@@ -4,10 +4,12 @@ Secret fields are declared per section; the API layer masks them on read and
 treats empty submitted values as "keep the stored secret".
 """
 
+from datetime import datetime
 from pathlib import PurePosixPath
 from typing import ClassVar
 from urllib.parse import urlsplit, urlunsplit
 
+from cronsim import CronSim, CronSimError
 from pydantic import BaseModel, ConfigDict, ValidationInfo, field_validator, model_validator
 
 
@@ -161,9 +163,15 @@ class RssConfig(ConfigSection):
 
 class ArchiveConfig(ConfigSection):
     enabled: bool = False
+    # When the fallback scan runs, as a five-field cron expression in the
+    # server's local time. The tracker polls on its own interval below.
+    scan_cron: str = '0 4 * * *'
     src_dir: str = ''
     dst_dir: str = ''
     # Per-subdirectory routing below src_dir/dst_dir, e.g. {'intake': 'library'}.
+    # The CloudDrive offline task directory is expected to be one of these
+    # sources: the tracker locates finished downloads in the route tables and
+    # files them by that route, so it needs no directory config of its own.
     mapping: dict[str, str] = {}
     # Same shape as mapping; these routes run first and claim duplicates already
     # archived under a mapping destination.
@@ -171,20 +179,20 @@ class ArchiveConfig(ConfigSection):
     min_size_mb: int = 0
     # Destination subdirectory -> list of brands routed into it.
     brand_mapping: dict[str, tuple[str, ...]] = {}
-    # Where the tracker files finished offline downloads. Independent of the route
-    # tables above: the tracker knows the AVID it is expecting, so it has no need
-    # to infer intent from which directory a folder happens to sit in.
-    task_dir_local: str = ''
-    task_dst: str = ''
-    task_priority: bool = False
     tracker_interval_seconds: int = 300
     stall_timeout_hours: int = 24
     max_attempts: int = 5
 
-    @field_validator('task_dir_local')
+    @field_validator('scan_cron')
     @classmethod
-    def _validate_task_dir_local(cls, value: str) -> str:
-        return normalize_absolute_path('archive.task_dir_local', value)
+    def _validate_scan_cron(cls, value: str) -> str:
+        expr = ' '.join(value.split())
+        try:
+            CronSim(expr, datetime(2000, 1, 1))  # noqa: DTZ001 - probe parse only, never iterated
+        except CronSimError as exc:
+            msg = f'archive.scan_cron is not a valid cron expression: {exc}'
+            raise ValueError(msg) from exc
+        return expr
 
     @field_validator('tracker_interval_seconds', 'stall_timeout_hours', 'max_attempts')
     @classmethod
@@ -193,11 +201,6 @@ class ArchiveConfig(ConfigSection):
             msg = 'must be positive'
             raise ValueError(msg)
         return value
-
-    @property
-    def tracker_configured(self) -> bool:
-        """The tracker needs its own paths only; the route tables are for the scan."""
-        return bool(self.src_dir and self.dst_dir and self.task_dir_local and self.task_dst)
 
     @field_validator('min_size_mb')
     @classmethod

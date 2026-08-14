@@ -29,6 +29,17 @@
   没有可用的主键可停放。
 - 仓储层补 `claim_attempt`:手动提交的磁力要提交它本身,而不是"下一条待用的"。
 
+部署后修订(2026-08-14):
+
+- **撤销"tracker 目的地独立配置"**:`task_dir_local`/`task_dst`/`task_priority` 与
+  `clouddrive.task_dir_path` 及路由表重复配置同一目录。现阶段离线目录只配置一处
+  (`clouddrive.task_dir_path`,RSS 全部离线到此),tracker 在归档路由表中定位完成的
+  下载,落在哪条路由就按该路由的目标与优先级归档(迁移 v7 剥离旧键)。计划正文
+  §Step 6 的相关描述以此为准。
+- 兜底扫描不再搭 RSS 间隔的车:新增 `archive.scan_cron`(cronsim 校验,服务器本地
+  时间),调度器为归档单独开 cron 循环;设置页在 cron 输入下实时显示中文自然语言描述
+  (cronstrue zh_CN)。
+
 ## 原计划(v3)
 
 ## 背景与目标
