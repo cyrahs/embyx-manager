@@ -26,7 +26,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from enum import StrEnum
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from embyx_manager.config.models import ArchiveConfig
 from embyx_manager.core.avid import HIGH_RESOLUTION_TAGS, AvidParser, get_brand, strip_variant_tags, variant_tags
@@ -517,6 +517,56 @@ class ArchivePipeline:
             ctx.exception('archived %s but failed to remove it', folder.name)
 
     # -- destinations ---------------------------------------------------------
+
+    def route_for_task_dir(self, task_dir_path: str) -> tuple[str, bool] | None:
+        """The (dst_subdir, priority) of the route rooted at this offline directory.
+
+        Offline directories are configured as CloudDrive API paths while routes
+        are rooted on the local mount of the same tree, so the two are matched
+        by path suffix: the mount exposes the cloud tree unchanged, which makes
+        the API path a suffix of exactly the route root it feeds. None when no
+        route root matches, e.g. before the operator has added the route.
+        """
+        wanted = PurePosixPath(task_dir_path).parts
+        if wanted and wanted[0] == '/':
+            wanted = wanted[1:]
+        if not wanted:
+            return None
+        for table, priority in ((self._config.priority_mapping, True), (self._config.mapping, False)):
+            for source, dst in table.items():
+                parts = (self.src_dir / source).parts
+                if len(parts) >= len(wanted) and parts[len(parts) - len(wanted) :] == wanted:
+                    return dst, priority
+        return None
+
+    def library_holdings(self, avid: str, ctx: RunContext, *, task_dir_path: str | None = None) -> tuple[str, ...]:
+        """Library paths already holding this AVID, () when the library has none.
+
+        The library keeps one copy of an AVID across every route destination,
+        so a caller about to queue a download asks here first. When the caller's
+        directory feeds a priority route, copies sitting under normal
+        destinations are moved into it — the promotion archiving itself would
+        perform — so the returned paths are where the library keeps this AVID
+        from now on.
+        """
+        brand = get_brand(avid)
+        if not brand:
+            return ()
+        route = self.route_for_task_dir(task_dir_path) if task_dir_path is not None else None
+        if route is not None and route[1] and not self._brand_routed(brand):
+            target_dir = self.find_dst_dir(avid, self.dst_dir / route[0], ctx)
+            if target_dir is not None:
+                self._promote_from_normal(avid, brand, target_dir, ctx)
+        found: list[str] = []
+        for dst in dict.fromkeys((*self._config.priority_mapping.values(), *self._config.mapping.values())):
+            brand_dir = self.find_dst_dir(avid, self.dst_dir / dst, ctx)
+            if brand_dir is None:
+                continue
+            for archived in self._matching_archived(avid, brand_dir):
+                path = str(_display(archived, self.dst_dir))
+                if path not in found:
+                    found.append(path)
+        return tuple(found)
 
     def find_dst_dir(self, avid: str, dst_dir: Path, ctx: RunContext) -> Path | None:
         brand = get_brand(avid)

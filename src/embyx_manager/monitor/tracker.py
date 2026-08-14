@@ -13,10 +13,12 @@ instead. Concurrency is handled the same way, by claiming a finished attempt wit
 a compare-and-set, so two replicas can poll the same task list and only one will
 archive the folder.
 
-Deliberately absent: clearing finished tasks from CloudDrive. That existed to
-stop the old scanner reprocessing folders, and the ledger answers that now.
-Leaving the records in place also keeps CloudDrive's own duplicate detection
-working when the same magnet comes round again.
+Abandoning an attempt also removes its offline task at CloudDrive, downloaded
+data included: left in place, a stalled task can finish long after a sibling
+magnet was archived and hand the fallback scan a duplicate folder. Tasks that
+archived successfully are left alone; their records keep CloudDrive's own
+duplicate detection working when the same magnet comes round again, and their
+folders are already gone.
 """
 
 import asyncio
@@ -157,11 +159,18 @@ class AcquisitionTracker:
         if status is OfflineStatus.FINISHED:
             await self._archive_finished(attempt, task, task_dir, ctx)
         elif status is OfflineStatus.ERROR:
-            await self._give_up(attempt, AttemptState.ERROR, 'CloudDrive reported the download failed', ctx)
+            if await self._give_up(attempt, AttemptState.ERROR, 'CloudDrive reported the download failed', ctx):
+                await self._remove_task(str(task['info_hash']), task_dir, ctx)
         elif attempt.state in {AttemptState.SUBMITTED, AttemptState.DOWNLOADING}:
-            await self._refresh_progress(attempt, task, ctx)
+            await self._refresh_progress(attempt, task, task_dir, ctx)
 
-    async def _refresh_progress(self, attempt: MagnetAttemptRecord, task: OfflineTask, ctx: RunContext) -> None:
+    async def _refresh_progress(
+        self,
+        attempt: MagnetAttemptRecord,
+        task: OfflineTask,
+        task_dir: str,
+        ctx: RunContext,
+    ) -> None:
         now = datetime.now(UTC)
         moved = await self._ledger.record_progress(
             attempt.avid,
@@ -175,12 +184,14 @@ class AcquisitionTracker:
         # Nothing was written, so updated_at still marks the last real progress.
         stalled_for = now - attempt.updated_at
         if stalled_for >= timedelta(hours=self._settings.stall_timeout_hours):
-            await self._give_up(
+            gave_up = await self._give_up(
                 attempt,
                 AttemptState.STALLED,
                 f'no progress for {stalled_for.days}d at {attempt.progress or 0:.0f}%',
                 ctx,
             )
+            if gave_up:
+                await self._remove_task(str(task['info_hash']), task_dir, ctx)
 
     async def _archive_finished(
         self,
@@ -235,6 +246,10 @@ class AcquisitionTracker:
             expected_avid=attempt.avid,
         )
         await self._settle(attempt, result, ctx)
+        if result.outcome is Outcome.JUNK:
+            # The archiver only reported the folder; the task and its files are
+            # still at CloudDrive and nothing will come back for them.
+            await self._remove_task(str(task['info_hash']), task_dir, ctx)
 
     async def _settle(self, attempt: MagnetAttemptRecord, result: ArchiveResult, ctx: RunContext) -> None:
         now = datetime.now(UTC)
@@ -293,7 +308,12 @@ class AcquisitionTracker:
         state: AttemptState,
         reason: str,
         ctx: RunContext,
-    ) -> None:
+    ) -> bool:
+        """Conclude the attempt and move to the next magnet; True when this call did it.
+
+        The transition is the claim: a False return means someone else concluded
+        the attempt first and any follow-up cleanup is theirs.
+        """
         now = datetime.now(UTC)
         if not await self._ledger.transition_attempt(
             attempt.avid,
@@ -303,13 +323,37 @@ class AcquisitionTracker:
             now=now,
             error=reason,
         ):
-            return
+            return False
         ctx.warning('%s: %s', attempt.avid, reason)
         ctx.add(state.value)
         await self._try_next(attempt.avid, ctx)
+        return True
+
+    async def _remove_task(self, info_hash: str, task_dir: str, ctx: RunContext) -> None:
+        """Drop an abandoned offline task at CloudDrive, downloaded data included.
+
+        Left in place, a stalled or errored task can keep downloading and land
+        its folder long after a sibling magnet was archived, handing the
+        fallback scan a duplicate. Best-effort: a failure costs only that
+        cleanup, so it never blocks the switch to the next magnet.
+        """
+        try:
+            await self._cloud.remove_offline_files([info_hash], task_dir, delete_files=True)
+        except Exception:  # noqa: BLE001
+            ctx.exception('failed to remove the abandoned offline task %s under %s', info_hash, task_dir)
+        else:
+            ctx.add('tasks_removed')
 
     async def _try_next(self, avid: str, ctx: RunContext) -> None:
         """Submit this AVID's next magnet, or mark it out of options."""
+        record = await self._ledger.get(avid)
+        if record is None or record.state is not AcquisitionState.DOWNLOADING:
+            # The AVID is nobody's to retry: an operator ignored or parked it,
+            # or it is already archived. An operator cancelling a duplicate's
+            # offline task must not have the sweep resurrect it with the next
+            # candidate; the remaining magnets stay put until a deliberate
+            # retry hands the AVID back to the tracker.
+            return
         attempts = await self._ledger.attempts_for(avid)
         # The cap counts magnets actually submitted, not candidates collected, so
         # a long candidate list still stops after max_attempts real downloads.

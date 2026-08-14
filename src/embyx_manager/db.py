@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 
 import asyncpg
 
-CURRENT_SCHEMA_VERSION = 8
+CURRENT_SCHEMA_VERSION = 9
 
 # Advisory-lock key space for embyx-manager; low word selects the resource.
 ADVISORY_NAMESPACE = 0x454D4258  # 'EMBX'
@@ -427,4 +427,19 @@ _MIGRATIONS[8] = (
     # Sources are now free text: RSS records the category it came from as
     # 'rss:<label>'. Rows written before this keep their legacy values.
     'ALTER TABLE archive_acquisitions DROP CONSTRAINT archive_acquisitions_source_check',
+)
+
+# The tracker now bursts fast checks right after a magnet is submitted, so the
+# polling interval only paces downloads that are genuinely waiting and its
+# default grew from 5 to 30 minutes. The store persists whole sections, so a
+# deployment that ever saved settings holds the old default explicitly; exactly
+# that value follows the default, while any other stored value was a choice and
+# stays.
+_MIGRATIONS[9] = (
+    """
+    UPDATE app_config
+    SET value_json = (value_json::jsonb || jsonb_build_object('tracker_interval_seconds', 1800))::text
+    WHERE section = 'archive'
+      AND value_json::jsonb ->> 'tracker_interval_seconds' = '300'
+    """,
 )

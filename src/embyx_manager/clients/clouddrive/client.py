@@ -96,3 +96,18 @@ class CloudDriveClient:
         request = clouddrive_pb2.FileRequest(path=path)
         result = self.stub.ListOfflineFilesByPath(request, metadata=self._metadata(), timeout=GRPC_TIMEOUT_SECONDS)
         return list(result.offlineFiles)
+
+    def remove_offline_files(
+        self,
+        info_hashes: list[str],
+        path: str,
+        *,
+        delete_files: bool,
+    ) -> clouddrive_pb2.FileOperationResult:
+        """Drop offline tasks by info hash; the path names the cloud they live in."""
+        request = clouddrive_pb2.RemoveOfflineFilesRequest(
+            infoHashes=info_hashes,
+            path=path,
+            deleteFiles=delete_files,
+        )
+        return self.stub.RemoveOfflineFiles(request, metadata=self._metadata(), timeout=GRPC_TIMEOUT_SECONDS)
