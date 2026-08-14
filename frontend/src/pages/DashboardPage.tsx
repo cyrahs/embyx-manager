@@ -62,6 +62,7 @@ const STAT_LABELS: Record<string, string> = {
   videos_archived: '归档入库',
   duplicates_promoted: '提级归档',
   skipped_priority: '优先库已有',
+  items_failed: '处理失败',
   files_updated: '更新',
   files_skipped: '跳过',
   files_deleted: '删除',

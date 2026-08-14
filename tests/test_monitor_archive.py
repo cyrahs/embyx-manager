@@ -7,12 +7,13 @@ from embyx_manager.config.models import ArchiveConfig
 from embyx_manager.core.avid import AvidParser
 from embyx_manager.monitor.archive import (
     ArchivePipeline,
+    _isolate,
     is_4k_video,
     multi_part_video_check,
     normalize_copy_suffix,
     remove_00,
 )
-from embyx_manager.monitor.reports import RunContext
+from embyx_manager.monitor.reports import RunCancelledError, RunContext
 
 
 def make_ctx() -> RunContext:
@@ -178,18 +179,21 @@ def test_rename_to_avid_and_multi_part(tmp_path: Path) -> None:
     assert (intake / 'DEF-456-cd2.mp4').exists()
 
 
-def test_rename_conflict_raises_before_any_rename(tmp_path: Path) -> None:
+def test_rename_conflict_is_reported_without_renaming(tmp_path: Path) -> None:
     pipeline = make_pipeline(tmp_path)
     intake = pipeline.src_dir / 'intake'
     write_video(intake / 'abc-123 raw.mp4')
     # A directory occupying the target name is not collected as a video,
     # so the planned rename target already exists and must fail atomically.
     (intake / 'ABC-123.mp4').mkdir()
+    ctx = make_ctx()
 
-    with pytest.raises(FileExistsError):
-        pipeline.rename(intake, make_ctx())
+    pipeline.rename(intake, ctx)
 
     assert (intake / 'abc-123 raw.mp4').exists()
+    assert ctx.stats.get('videos_renamed') is None
+    assert ctx.stats['items_failed'] == 1
+    assert any('failed to rename ABC-123' in error for error in ctx.errors)
 
 
 def test_two_files_with_same_avid_become_multi_part(tmp_path: Path) -> None:
@@ -405,3 +409,63 @@ def test_full_run_promotes_then_keeps_the_new_copy(tmp_path: Path, monkeypatch: 
     assert not (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
     assert (vip / 'ABC-123.mp4').exists()
     assert ctx.stats['duplicates_promoted'] == 1
+
+
+def test_isolate_contains_a_failure_and_records_it() -> None:
+    ctx = make_ctx()
+
+    with _isolate(ctx, 'contained %s', 'boom'):
+        raise PermissionError(13, 'Permission denied')
+
+    assert ctx.stats['items_failed'] == 1
+    assert any('contained boom' in error for error in ctx.errors)
+
+
+def test_isolate_lets_cancellation_through() -> None:
+    ctx = make_ctx()
+
+    with pytest.raises(RunCancelledError), _isolate(ctx, 'must not swallow'):
+        raise RunCancelledError
+
+    assert ctx.stats == {}
+    assert ctx.errors == ()
+
+
+def test_flatten_continues_after_one_folder_fails(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A refused rename is what the CloudDrive mount actually throws at us."""
+    monkeypatch.setattr('embyx_manager.monitor.archive.POST_MUTATION_SLEEP_SECONDS', 0)
+    pipeline = make_pipeline(tmp_path)
+    intake = pipeline.src_dir / 'intake'
+    write_video(intake / 'ABC-123' / 'abc-123.mp4')
+    write_video(intake / 'DEF-456' / 'def-456.mp4')
+    real_rename = Path.rename
+
+    def refuse_one(self: Path, target: Path) -> Path:
+        if self.name == 'abc-123.mp4':
+            raise PermissionError(13, 'Permission denied')
+        return real_rename(self, target)
+
+    monkeypatch.setattr(Path, 'rename', refuse_one)
+    ctx = make_ctx()
+
+    pipeline.flatten(intake, pipeline.dst_dir / 'sorted', ctx)
+
+    assert (intake / 'ABC-123' / 'abc-123.mp4').exists()
+    assert (intake / 'def-456.mp4').exists()
+    assert ctx.stats['folders_flattened'] == 1
+    assert ctx.stats['items_failed'] == 1
+
+
+def test_run_continues_after_a_route_fails(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr('embyx_manager.monitor.archive.POST_MUTATION_SLEEP_SECONDS', 0)
+    # The 'gone' route has no directory on disk, so all four of its stages blow up.
+    pipeline = make_pipeline(tmp_path, mapping={'gone': 'sorted', 'intake': 'sorted'})
+    intake = pipeline.src_dir / 'intake'
+    write_video(intake / 'ABC-123 release' / 'abc-123 hd.mp4')
+
+    ctx = make_ctx()
+    pipeline.run(ctx)
+
+    assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
+    assert ctx.stats['videos_archived'] == 1
+    assert ctx.stats['items_failed'] == 4

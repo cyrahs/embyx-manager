@@ -4,17 +4,24 @@ Ported from embyx-monitor's archive.py: for each configured mapping the run
 does clear_dirname -> flatten -> rename -> archive. Filesystem work is
 synchronous by nature; the scheduler executes ``run`` in a worker thread and
 cancellation is checked between directory entries.
+
+Every stage walks a shared mount that can refuse an individual operation at
+any time, so failures are contained per folder, per rename group and per
+route: one unreadable file or one refused rename is reported and counted, and
+the rest of the run still gets its turn.
 """
 
 import re
 import shutil
 import time
+from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
 
 from embyx_manager.config.models import ArchiveConfig
 from embyx_manager.core.avid import AvidParser, get_brand
 from embyx_manager.core.media import has_video_suffix, is_video
-from embyx_manager.monitor.reports import RunContext
+from embyx_manager.monitor.reports import RunCancelledError, RunContext
 
 MAX_RENAME_ATTEMPTS = 5
 COPY_SUFFIX_RE = re.compile(r'\s*\(\d+\)$')
@@ -54,6 +61,22 @@ def normalize_copy_suffix(stem: str) -> str:
     return COPY_SUFFIX_RE.sub('', stem)
 
 
+@contextmanager
+def _isolate(ctx: RunContext, message: str, *args: object) -> Iterator[None]:
+    """Report a failure and carry on, so one bad entry cannot end the run.
+
+    Cancellation is deliberately let through: it is the operator asking to
+    stop, not a failure to contain.
+    """
+    try:
+        yield
+    except RunCancelledError:
+        raise
+    except Exception:  # noqa: BLE001
+        ctx.exception(message, *args)
+        ctx.add('items_failed')
+
+
 class ArchivePipeline:
     def __init__(self, *, config: ArchiveConfig, avid_parser: AvidParser) -> None:
         self._config = config
@@ -69,10 +92,17 @@ class ArchivePipeline:
             src_path = self.src_dir / src
             dst_path = self.dst_dir / dst
             ctx.info('processing %s -> %s%s', src_path, dst_path, ' (priority)' if priority else '')
-            self.clear_dirname(src_path, ctx)
-            self.flatten(src_path, dst_path, ctx)
-            self.rename(src_path, ctx)
-            self.archive(src_path, dst_path, ctx, priority=priority)
+            # Each stage is isolated on its own: a stage that fails outright
+            # (an unreachable mount, say) must not cost the route its
+            # remaining stages, nor the run its remaining routes.
+            with _isolate(ctx, 'clear_dirname failed for %s', src_path):
+                self.clear_dirname(src_path, ctx)
+            with _isolate(ctx, 'flatten failed for %s', src_path):
+                self.flatten(src_path, dst_path, ctx)
+            with _isolate(ctx, 'rename failed for %s', src_path):
+                self.rename(src_path, ctx)
+            with _isolate(ctx, 'archive failed for %s', src_path):
+                self.archive(src_path, dst_path, ctx, priority=priority)
 
     # -- stages -------------------------------------------------------------
 
@@ -82,7 +112,9 @@ class ArchivePipeline:
             ctx.check_cancelled()
             if not folder.is_dir():
                 continue
-            if has_video_suffix(folder):
+            if not has_video_suffix(folder):
+                continue
+            with _isolate(ctx, 'failed to clear dirname for %s', folder.name):
                 new_name = folder.stem + folder.suffix.replace('.', '-')
                 ctx.info('clearing dirname for %s -> %s', folder.name, new_name)
                 new_path = root / new_name
@@ -99,88 +131,102 @@ class ArchivePipeline:
                 folder.rename(new_path)
                 ctx.add('dirnames_cleared')
 
-    def flatten(self, root: Path, dst_dir: Path, ctx: RunContext) -> None:  # noqa: C901, PLR0912, PLR0915
+    def flatten(self, root: Path, dst_dir: Path, ctx: RunContext) -> None:
         """Move qualifying videos from intake subfolders into the intake root."""
         flattened_any = False
         if not root.is_dir():
             msg = f'{root} is not a directory'
             raise ValueError(msg)
         exist_avids = {self._avid.get_avid(f.name) for f in root.iterdir() if is_video(f)}
-        min_size_bytes = self._config.min_size_mb * 1024 * 1024
         for folder in root.iterdir():
             ctx.check_cancelled()
             if not folder.is_dir():
                 continue
-            videos = [f for f in folder.iterdir() if is_video(f) and f.stat().st_size > min_size_bytes]
-            if len(videos) == 0:
-                folder_avid = self._avid.get_avid(folder.name)
-                ctx.info('%s has no video files larger than %dMB', folder.name, self._config.min_size_mb)
-                if not folder_avid:
-                    continue
-                folder_avid = remove_00(folder_avid)
-                folder_avid_dst_dir = self.find_dst_dir(folder_avid, dst_dir, ctx)
-                if folder_avid_dst_dir is None or not folder_avid_dst_dir.exists():
-                    continue
-                for f in folder_avid_dst_dir.iterdir():
-                    if not is_video(f) or not f.name.startswith(folder_avid):
-                        continue
-                    # Intentional cleanup: folders without a qualifying video are
-                    # treated as disposable leftovers, usually ads or junk files.
-                    ctx.warning('%s has no video and %s exists (%s), deleting', folder.name, folder_avid, f)
-                    shutil.rmtree(folder)
-                    ctx.add('junk_folders_deleted')
-                    break
-                continue
-            videos = self._drop_duplicate_copies(folder, videos, ctx)
-            avids = [self._avid.get_avid(t.name) for t in videos]
-            if len(set(avids)) != 1:
-                ctx.warning(
-                    'multiple avid result: %s found in %s in %s, skipping',
-                    ', '.join(avids),
-                    folder.name,
-                    ', '.join([t.name for t in videos]),
-                )
-                continue
-            avid = avids[0]
-            if len(videos) > 1 and not multi_part_video_check(videos):
-                four_k = [v for v in videos if is_4k_video(v)]
-                if len(four_k) == 1:
-                    kept = four_k[0]
-                    kept_avid = self._avid.get_avid(kept.name)
-                    if kept_avid != avid:
-                        ctx.warning('4k video avid mismatch in %s, skipping', folder.name)
-                        continue
-                    dropped = [v.name for v in videos if v != kept]
-                    ctx.info(
-                        '4k variant found in %s, keeping %s and dropping %s',
-                        folder.name,
-                        kept.name,
-                        ', '.join(dropped),
-                    )
-                    videos = [kept]
-                else:
-                    ctx.warning('multiple videos found, but seems not multi-part video, skipping %s', folder.name)
-                    continue
-            if not avid:
-                ctx.warning('failed to get avid for %s, skipping folder', ', '.join([t.name for t in videos]))
-                continue
-            avid = remove_00(avid)
-            if avid in exist_avids:
-                ctx.warning('%s exists in %s, skipping', avid, root)
-                continue
-            ctx.info('flattening %s', folder.name)
-            exist_avids.add(avid)
-            for v in videos:
-                dst = root / v.name
-                if dst.exists():
-                    msg = f'{dst} exists'
-                    raise FileExistsError(msg)
-                v.rename(dst)
-            shutil.rmtree(folder)
-            ctx.add('folders_flattened')
-            flattened_any = True
+            with _isolate(ctx, 'failed to flatten %s', folder.name):
+                flattened_any |= self._flatten_folder(folder, root, dst_dir, exist_avids, ctx)
         if flattened_any:
             self._settle(ctx, 'flattening')
+
+    def _flatten_folder(  # noqa: PLR0911
+        self,
+        folder: Path,
+        root: Path,
+        dst_dir: Path,
+        exist_avids: set[str],
+        ctx: RunContext,
+    ) -> bool:
+        """Flatten one intake subfolder; returns whether its videos were moved."""
+        min_size_bytes = self._config.min_size_mb * 1024 * 1024
+        videos = [f for f in folder.iterdir() if is_video(f) and f.stat().st_size > min_size_bytes]
+        if len(videos) == 0:
+            self._discard_if_archived(folder, dst_dir, ctx)
+            return False
+        videos = self._drop_duplicate_copies(folder, videos, ctx)
+        avids = [self._avid.get_avid(t.name) for t in videos]
+        if len(set(avids)) != 1:
+            ctx.warning(
+                'multiple avid result: %s found in %s in %s, skipping',
+                ', '.join(avids),
+                folder.name,
+                ', '.join([t.name for t in videos]),
+            )
+            return False
+        avid = avids[0]
+        if len(videos) > 1 and not multi_part_video_check(videos):
+            four_k = [v for v in videos if is_4k_video(v)]
+            if len(four_k) != 1:
+                ctx.warning('multiple videos found, but seems not multi-part video, skipping %s', folder.name)
+                return False
+            kept = four_k[0]
+            if self._avid.get_avid(kept.name) != avid:
+                ctx.warning('4k video avid mismatch in %s, skipping', folder.name)
+                return False
+            dropped = [v.name for v in videos if v != kept]
+            ctx.info(
+                '4k variant found in %s, keeping %s and dropping %s',
+                folder.name,
+                kept.name,
+                ', '.join(dropped),
+            )
+            videos = [kept]
+        if not avid:
+            ctx.warning('failed to get avid for %s, skipping folder', ', '.join([t.name for t in videos]))
+            return False
+        avid = remove_00(avid)
+        if avid in exist_avids:
+            ctx.warning('%s exists in %s, skipping', avid, root)
+            return False
+        ctx.info('flattening %s', folder.name)
+        exist_avids.add(avid)
+        for v in videos:
+            dst = root / v.name
+            if dst.exists():
+                msg = f'{dst} exists'
+                raise FileExistsError(msg)
+            v.rename(dst)
+        shutil.rmtree(folder)
+        ctx.add('folders_flattened')
+        return True
+
+    def _discard_if_archived(self, folder: Path, dst_dir: Path, ctx: RunContext) -> None:
+        """Delete a video-less intake folder once its avid is known to be archived."""
+        folder_avid = self._avid.get_avid(folder.name)
+        ctx.info('%s has no video files larger than %dMB', folder.name, self._config.min_size_mb)
+        if not folder_avid:
+            return
+        folder_avid = remove_00(folder_avid)
+        folder_avid_dst_dir = self.find_dst_dir(folder_avid, dst_dir, ctx)
+        if folder_avid_dst_dir is None or not folder_avid_dst_dir.exists():
+            return
+        for f in folder_avid_dst_dir.iterdir():
+            if not is_video(f) or not f.name.startswith(folder_avid):
+                continue
+            # Intentional cleanup: folders without a qualifying video are
+            # treated as disposable leftovers, usually ads or junk files.
+            ctx.warning('%s has no video and %s exists (%s), deleting', folder.name, folder_avid, f)
+            shutil.rmtree(folder)
+            ctx.add('junk_folders_deleted')
+            break
 
     def rename(self, root: Path, ctx: RunContext) -> None:
         """Rename videos to AVID.ext (or AVID-cdN.ext for multi-part sets)."""
@@ -196,14 +242,15 @@ class ArchivePipeline:
             avids.setdefault(avid, set()).add(video)
         for avid, videos_set in avids.items():
             ctx.check_cancelled()
-            videos = sorted(videos_set, key=lambda x: x.name)
-            planned_renames = self._build_rename_plan(root, avid, videos, ctx)
-            _check_rename_targets(planned_renames)
-            for video, target, new_name in planned_renames:
-                ctx.info('%s -> %s', video.relative_to(root), new_name)
-                video.rename(target)
-                ctx.add('videos_renamed')
-                renamed_any = True
+            with _isolate(ctx, 'failed to rename %s in %s', avid, root):
+                videos = sorted(videos_set, key=lambda x: x.name)
+                planned_renames = self._build_rename_plan(root, avid, videos, ctx)
+                _check_rename_targets(planned_renames)
+                for video, target, new_name in planned_renames:
+                    ctx.info('%s -> %s', video.relative_to(root), new_name)
+                    video.rename(target)
+                    ctx.add('videos_renamed')
+                    renamed_any = True
         if renamed_any:
             self._settle(ctx, 'renaming')
 
@@ -217,25 +264,26 @@ class ArchivePipeline:
             raise ValueError(msg)
         for video in src_dir.iterdir():
             ctx.check_cancelled()
-            if not (dst := self.find_video_dst(video, dst_dir, ctx)):
-                continue
-            avid = self._avid.get_avid(video.name)
-            brand = get_brand(avid)
-            # Brands routed by brand_mapping land in the same directory whatever the
-            # route category, so there is nothing to move between and nothing to guard.
-            if brand and not self._brand_routed(brand):
-                if priority:
-                    self._promote_from_normal(avid, brand, dst.parent, ctx)
-                elif self._held_by_priority(avid, brand, dst.parent, ctx):
+            with _isolate(ctx, 'failed to archive %s', _display(video, self.src_dir)):
+                if not (dst := self.find_video_dst(video, dst_dir, ctx)):
                     continue
-            if not dst.parent.exists():
-                dst.parent.mkdir(parents=True)
-            if dst.exists():
-                ctx.warning('%s exists, skipping', _display(dst, self.dst_dir))
-                continue
-            ctx.info('moving %s to %s', video.relative_to(src_dir), _display(dst, self.dst_dir))
-            video.rename(dst)
-            ctx.add('videos_archived')
+                avid = self._avid.get_avid(video.name)
+                brand = get_brand(avid)
+                # Brands routed by brand_mapping land in the same directory whatever the
+                # route category, so there is nothing to move between and nothing to guard.
+                if brand and not self._brand_routed(brand):
+                    if priority:
+                        self._promote_from_normal(avid, brand, dst.parent, ctx)
+                    elif self._held_by_priority(avid, brand, dst.parent, ctx):
+                        continue
+                if not dst.parent.exists():
+                    dst.parent.mkdir(parents=True)
+                if dst.exists():
+                    ctx.warning('%s exists, skipping', _display(dst, self.dst_dir))
+                    continue
+                ctx.info('moving %s to %s', video.relative_to(src_dir), _display(dst, self.dst_dir))
+                video.rename(dst)
+                ctx.add('videos_archived')
 
     # -- helpers --------------------------------------------------------------
 
