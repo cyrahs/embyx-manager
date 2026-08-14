@@ -68,6 +68,7 @@ async def test_a_category_stays_in_its_own_directory_from_feed_to_library(tmp_pa
     )
     ledger = FakeLedger()
     cloud = RecordingCloud()
+    archiver = ArchivePipeline(config=archive_config, avid_parser=AvidParser())
 
     rss = RssPipeline(
         config=RssConfig(
@@ -92,6 +93,7 @@ async def test_a_category_stays_in_its_own_directory_from_feed_to_library(tmp_pa
         sukebei=SimpleNamespace(get_magnet=AsyncMock(side_effect=MAGNETS.get)),
         javbus=SimpleNamespace(get_magnets=AsyncMock(return_value=[])),
         ledger=ledger,
+        archiver=archiver,
     )
 
     await rss.run(make_ctx())
@@ -107,7 +109,6 @@ async def test_a_category_stays_in_its_own_directory_from_feed_to_library(tmp_pa
     write_video(mount / 'embyx_in' / 'ABC-123 release' / 'ABC-123.mp4')
     write_video(mount / 'embyx_in' / 'rank' / 'DEF-456 release' / 'DEF-456.mp4')
 
-    archiver = ArchivePipeline(config=archive_config, avid_parser=AvidParser())
     tracker = AcquisitionTracker(
         ledger=ledger,
         cloud=cloud,  # type: ignore[arg-type]
