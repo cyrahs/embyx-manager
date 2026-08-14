@@ -1,5 +1,5 @@
 import { formatFeedUpdatedAt, safeFreshRssUrl } from '../../lib/fill-actor/format'
-import { FEED_STATE_LABELS } from '../../lib/fill-actor/labels'
+import { FEED_ERROR_LABELS, FEED_STATE_LABELS } from '../../lib/fill-actor/labels'
 import type { ActorFeedStatus } from '../../types'
 import { ExternalIcon, FeedIcon, FeedStateIcon } from '../Icons'
 
@@ -25,7 +25,7 @@ export function ActorFeeds({ feeds }: { feeds: ActorFeedStatus[] }) {
               ? 'RSSHub 正在预热缓存，页面会自动更新。'
               : feed.state === 'failed'
                 ? feed.error_code
-                  ? `错误：${feed.error_code}`
+                  ? `错误：${FEED_ERROR_LABELS[feed.error_code] ?? feed.error_code}`
                   : '缓存预热未能完成。'
                 : null
           return (

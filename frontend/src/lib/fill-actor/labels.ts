@@ -119,6 +119,36 @@ export const ACTOR_ERROR_LABELS: Record<string, string> = {
   actor_catalog_error: '演员作品目录抓取失败',
 }
 
+/** Job-level failure codes shown in the "扫描/移动任务失败" banner. */
+export const JOB_ERROR_LABELS: Record<string, string> = {
+  job_cancelled: '任务已取消',
+  job_interrupted: '任务被中断',
+  plan_creation_failed: '扫描计划创建失败',
+  apply_failed: '移动执行失败',
+  apply_job_payload_missing: '任务结果缺失',
+  move_disabled: '文件移动当前由管理员暂停',
+  not_ready: '移动依赖尚未就绪',
+  expired_plan: '计划已过期',
+  revision_mismatch: '计划已更新，需要重新扫描',
+  unknown_plan: '计划不存在或已被清理',
+  legacy_plan_requires_rescan: '计划来自旧版本，需要重新扫描',
+  network_error: '网络连接失败',
+}
+
+export function jobErrorLabel(code: string): string {
+  // Unknown codes surface verbatim so a newly added backend error is never swallowed.
+  return JOB_ERROR_LABELS[code] ?? code
+}
+
+export const FEED_ERROR_LABELS: Record<string, string> = {
+  rsshub_timeout: 'RSSHub 请求超时',
+  rsshub_network_error: 'RSSHub 网络错误',
+  rsshub_http_error: 'RSSHub 响应出错',
+  rsshub_invalid_feed: '订阅源内容无效',
+  rsshub_not_ready: '缓存尚未就绪',
+  rsshub_cancelled: '预热已取消',
+}
+
 export const MOVE_ERROR_LABELS: Record<string, string> = {
   cloud_move_status_unknown: '远端状态待确认，请勿重复操作',
   cloud_move_in_progress: '已有移动正在核验',

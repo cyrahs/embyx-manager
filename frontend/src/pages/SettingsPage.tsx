@@ -9,6 +9,7 @@ import { Notice } from '../components/Feedback'
 import { Spinner } from '../components/Icons'
 import { BrandRoutesField, DirRoutesField } from '../components/settings/RouteEditors'
 import { useApiTokenConfigured } from '../lib/apiToken'
+import { localizeBackendText } from '../lib/backendText'
 import type { BrandRoute, DirRoute } from '../lib/settings/routes'
 import { assertDisjointSources, fromBrandRoutes, fromDirRoutes, toBrandRoutes, toDirRoutes } from '../lib/settings/routes'
 import type { ConfigSection } from '../types'
@@ -339,7 +340,11 @@ function SectionForm({ spec, data, onSaved, onUnauthorized }: SectionFormProps) 
     setMessage(null)
     try {
       const result = await testConnection(spec.testTarget, collectValues())
-      setMessage({ tone: result.ok ? 'ok' : 'error', text: result.ok ? `连接成功：${result.detail}` : `连接失败：${result.detail}` })
+      const detail = result.detail ? localizeBackendText(result.detail) : ''
+      setMessage({
+        tone: result.ok ? 'ok' : 'error',
+        text: result.ok ? (detail ? `连接成功：${detail}` : '连接成功') : (detail ? `连接失败：${detail}` : '连接失败'),
+      })
     } catch (testError) {
       if (isUnauthorized(testError)) onUnauthorized()
       setMessage({ tone: 'error', text: testError instanceof Error ? testError.message : '测试请求失败。' })
