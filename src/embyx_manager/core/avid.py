@@ -1,7 +1,10 @@
 """Extract and normalize video IDs (DVD ID / AVID) from titles and file names.
 
-The pattern branches follow JavSP's avid recognition (https://github.com/Yuukiy/JavSP);
-site-specific quirks are documented inline in Chinese where they originate from JavSP.
+The pattern branches are derived from JavSP's ``javsp/avid.py``
+(https://github.com/Yuukiy/JavSP), Copyright (C) JavSP contributors, licensed
+under GPL-3.0; site-specific quirks are documented inline in Chinese where they
+originate from JavSP. This project is likewise distributed under GPL-3.0 (see
+LICENSE at the repository root).
 """
 
 import re
