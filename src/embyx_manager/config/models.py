@@ -150,6 +150,8 @@ class RssConfig(ConfigSection):
     interval_seconds: int = 1800
     actor_label: str = 'Actor'
     rank_label: str = 'Rank'
+    #: Resolve-failure cooldown for every acquisition intake source (RSS and fill
+    #: actor alike), not just RSS — the shared intake reads it from this section.
     failed_avid_cooldown_seconds: int = 86_400
 
     @field_validator('interval_seconds', 'failed_avid_cooldown_seconds')

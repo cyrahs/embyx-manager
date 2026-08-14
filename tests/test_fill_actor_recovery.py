@@ -11,6 +11,7 @@ import pytest
 import embyx_manager.fill_actor.service as fill_actor_service_module
 from embyx_manager.fill_actor.models import MoveState
 from embyx_manager.fill_actor.persistence import MoveJournalRecord, MoveJournalState
+from embyx_manager.fill_actor.ports import AcquisitionOutcome
 from embyx_manager.fill_actor.postgres_repository import PostgresFillActorRepository
 from embyx_manager.fill_actor.service import FillActorPaths, FillActorService, static_runtime
 from embyx_manager.locking import AsyncFileLock
@@ -22,9 +23,9 @@ class ActorCatalog:
         return ['ABC-001']
 
 
-class MagnetProvider:
-    async def find_magnet(self, _video_id: str) -> None:
-        return None
+class AcquisitionGateway:
+    async def submit_missing(self, _video_id: str) -> AcquisitionOutcome:
+        return AcquisitionOutcome.NO_MAGNET
 
 
 class BrandResolver:
@@ -55,7 +56,7 @@ def make_service(
             apply_enabled=apply_enabled,
         ),
         actor_catalog=ActorCatalog(),
-        magnet_provider=MagnetProvider(),
+        acquisition_gateway=AcquisitionGateway(),
         brand_resolver=BrandResolver(),
         repository=repository,
         mutation_lock=AsyncFileLock(tmp_path / 'move.lock'),

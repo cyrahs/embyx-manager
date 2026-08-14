@@ -11,7 +11,7 @@ from embyx_manager.adapters import (
     AvidBrandResolver,
     CloudDriveFileMover,
     JavBusActorCatalog,
-    SukebeiMagnetProvider,
+    LedgerAcquisitionGateway,
 )
 from embyx_manager.api import create_app, make_mutation_auth
 from embyx_manager.clients.clouddrive import AsyncCloudDrive, CloudDriveClient
@@ -47,6 +47,7 @@ from embyx_manager.locking import PostgresAdvisoryLock
 from embyx_manager.monitor.acquisitions import AcquisitionRepository
 from embyx_manager.monitor.api import AcquisitionApi, create_monitor_router
 from embyx_manager.monitor.archive import ArchivePipeline
+from embyx_manager.monitor.intake import AcquisitionIntake
 from embyx_manager.monitor.mapping import MappingPipeline
 from embyx_manager.monitor.reconcile import ReconcileScanner
 from embyx_manager.monitor.reports import RunContext
@@ -186,10 +187,26 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
 
     repository = PostgresFillActorRepository(database)
     fill_actor_runtime = FillActorRuntimeHandle(store)
+    ledger = AcquisitionRepository(database)
+
+    def intake_factory() -> AcquisitionIntake | None:
+        cloud = cloud_handle.current()
+        task_dir_path = store.get(CloudDriveConfig).task_dir_path
+        if cloud is None or not task_dir_path:
+            return None
+        return AcquisitionIntake(
+            ledger=ledger,
+            sukebei=sukebei,
+            javbus=javbus,
+            cloud=cloud,
+            task_dir_path=task_dir_path,
+            failed_cooldown_seconds=store.get(RssConfig).failed_avid_cooldown_seconds,
+        )
+
     service = FillActorService(
         runtime=fill_actor_runtime.current,
         actor_catalog=JavBusActorCatalog(javbus),
-        magnet_provider=SukebeiMagnetProvider(sukebei),
+        acquisition_gateway=LedgerAcquisitionGateway(intake_factory),
         brand_resolver=AvidBrandResolver(),
         max_actors=settings.max_actors,
         max_videos=settings.max_videos,
@@ -225,7 +242,6 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
 
     avid_handle = AvidParserHandle(store)
     pipeline_runs = PipelineRunRepository(database)
-    ledger = AcquisitionRepository(database)
 
     def rss_trigger_ready() -> str | None:
         return _rss_configuration_gap(store)

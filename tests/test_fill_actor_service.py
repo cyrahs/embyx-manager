@@ -35,6 +35,7 @@ from embyx_manager.fill_actor.persistence import (
     JobStage,
     MemoryFillActorRepository,
 )
+from embyx_manager.fill_actor.ports import AcquisitionOutcome
 
 
 class FakeActorCatalog:
@@ -58,14 +59,14 @@ class PageProgressActorCatalog:
         return ['ABC-001', 'ABC-002']
 
 
-class FakeMagnetProvider:
-    def __init__(self, values: dict[str, str | Exception | None] | None = None) -> None:
+class FakeAcquisitionGateway:
+    def __init__(self, values: dict[str, AcquisitionOutcome | Exception] | None = None) -> None:
         self.values = values or {}
         self.calls: list[str] = []
 
-    async def find_magnet(self, video_id: str) -> str | None:
+    async def submit_missing(self, video_id: str) -> AcquisitionOutcome:
         self.calls.append(video_id)
-        value = self.values.get(video_id)
+        value = self.values.get(video_id, AcquisitionOutcome.NO_MAGNET)
         if isinstance(value, Exception):
             raise value
         return value
@@ -116,13 +117,13 @@ def make_service(
     *,
     catalog: dict[str, list[str] | Exception],
     brands: dict[str, str | None],
-    magnets: dict[str, str | Exception | None] | None = None,
+    outcomes: dict[str, AcquisitionOutcome | Exception] | None = None,
     clock: MutableClock | None = None,
     max_actors: int = 20,
     move_in_by_brand: bool = False,
     apply_enabled: bool = True,
-) -> tuple[FillActorService, FakeMagnetProvider]:
-    magnet_provider = FakeMagnetProvider(magnets)
+) -> tuple[FillActorService, FakeAcquisitionGateway]:
+    gateway = FakeAcquisitionGateway(outcomes)
     return (
         FillActorService(
             runtime=static_runtime(
@@ -131,13 +132,13 @@ def make_service(
                 apply_enabled=apply_enabled,
             ),
             actor_catalog=FakeActorCatalog(catalog),
-            magnet_provider=magnet_provider,
+            acquisition_gateway=gateway,
             brand_resolver=MappingBrandResolver(brands),
             clock=clock,
             token_factory=TokenFactory(),
             max_actors=max_actors,
         ),
-        magnet_provider,
+        gateway,
     )
 
 
@@ -191,7 +192,7 @@ async def test_job_cancel_does_not_return_before_managed_scan_worker_exits(
             paths=paths,
         ),
         actor_catalog=FakeActorCatalog({'actor': ['ABC-001']}),
-        magnet_provider=FakeMagnetProvider(),
+        acquisition_gateway=FakeAcquisitionGateway(),
         brand_resolver=MappingBrandResolver({'ABC-001': 'ABC'}),
         repository=repository,
     )
@@ -251,7 +252,7 @@ async def test_create_plan_reports_durable_stage_and_page_progress(paths: FillAc
             paths=paths,
         ),
         actor_catalog=PageProgressActorCatalog(),
-        magnet_provider=FakeMagnetProvider({'ABC-001': None, 'ABC-002': None}),
+        acquisition_gateway=FakeAcquisitionGateway(),
         brand_resolver=MappingBrandResolver({'ABC-001': 'ABC', 'ABC-002': 'ABC'}),
         token_factory=TokenFactory(),
     )
@@ -268,7 +269,7 @@ async def test_create_plan_reports_durable_stage_and_page_progress(paths: FillAc
     assert transitions == [
         JobStage.ACTOR_CATALOG,
         JobStage.LIBRARY_SCAN,
-        JobStage.MAGNET_LOOKUP,
+        JobStage.SUBMITTING,
         JobStage.PERSISTING,
     ]
     assert events[0].stage is JobStage.ACTOR_CATALOG
@@ -294,12 +295,10 @@ async def test_create_plan_reports_durable_stage_and_page_progress(paths: FillAc
         (JobStage.LIBRARY_SCAN, 1, 2),
         (JobStage.LIBRARY_SCAN, 2, 2),
     ]
-    assert [
-        (event.stage, event.completed, event.total) for event in events if event.stage is JobStage.MAGNET_LOOKUP
-    ] == [
-        (JobStage.MAGNET_LOOKUP, 0, 2),
-        (JobStage.MAGNET_LOOKUP, 1, 2),
-        (JobStage.MAGNET_LOOKUP, 2, 2),
+    assert [(event.stage, event.completed, event.total) for event in events if event.stage is JobStage.SUBMITTING] == [
+        (JobStage.SUBMITTING, 0, 2),
+        (JobStage.SUBMITTING, 1, 2),
+        (JobStage.SUBMITTING, 2, 2),
     ]
     assert [(event.stage, event.completed, event.total) for event in events[-2:]] == [
         (JobStage.PERSISTING, 0, 1),
@@ -318,14 +317,14 @@ async def test_create_plan_classifies_and_sorts_results(paths: FillActorPaths) -
         brand_path.mkdir()
         (brand_path / f'ABC-002-cd{index}.mp4').write_bytes(f'part-{index}'.encode())
 
-    service, magnet_provider = make_service(
+    service, gateway = make_service(
         paths,
         catalog={
             'actor-a': ['abc-003', 'abc-001_2026-07-01', 'abc-002', 'bad'],
             'actor-b': ['abc-002'],
         },
         brands={'ABC-001': brand, 'ABC-002': brand, 'ABC-003': brand, 'BAD': None},
-        magnets={'ABC-003': 'magnet:?xt=urn:btih:test'},
+        outcomes={'ABC-003': AcquisitionOutcome.SUBMITTED},
     )
 
     plan = await service.create_plan(['actor-a', 'actor-b', 'actor-a'])
@@ -343,10 +342,9 @@ async def test_create_plan_classifies_and_sorts_results(paths: FillActorPaths) -
     ]
     assert not any(candidate.destination_conflict for candidate in videos['ABC-002'].move_candidates)
     assert videos['ABC-002'].actor_ids == ('actor-a', 'actor-b')
-    assert videos['ABC-003'].state is VideoState.MAGNET_FOUND
-    assert videos['ABC-003'].magnet == 'magnet:?xt=urn:btih:test'
+    assert videos['ABC-003'].state is VideoState.SUBMITTED
     assert videos['BAD'].state is VideoState.INVALID_VIDEO_ID
-    assert magnet_provider.calls == ['ABC-003']
+    assert gateway.calls == ['ABC-003']
     assert str(paths.actor_brand_path) not in plan.model_dump_json()
     assert str(paths.additional_brand_paths[0]) not in plan.model_dump_json()
 
@@ -360,7 +358,7 @@ async def test_create_plan_preserves_partial_external_failures(paths: FillActorP
             'working': ['abc-001', 'abc-002'],
         },
         brands={'ABC-001': 'ABC', 'ABC-002': 'ABC'},
-        magnets={'ABC-001': None, 'ABC-002': RuntimeError('search failed')},
+        outcomes={'ABC-002': RuntimeError('search failed')},
     )
 
     plan = await service.create_plan(['broken', 'working'])
@@ -372,8 +370,8 @@ async def test_create_plan_preserves_partial_external_failures(paths: FillActorP
     videos = {video.video_id: video for video in plan.videos}
     assert videos['ABC-001'].state is VideoState.MISSING
     assert videos['ABC-001'].warnings == ()
-    assert videos['ABC-002'].state is VideoState.MISSING
-    assert videos['ABC-002'].warnings == ('magnet_lookup_failed',)
+    assert videos['ABC-002'].state is VideoState.SUBMIT_FAILED
+    assert videos['ABC-002'].warnings == ('acquisition_failed',)
 
 
 @pytest.mark.asyncio
@@ -417,24 +415,38 @@ async def test_actor_catalog_failure_message_is_redacted_and_truncated(paths: Fi
 
 
 @pytest.mark.asyncio
-async def test_create_plan_rejects_invalid_magnet(paths: FillActorPaths) -> None:
+async def test_create_plan_reports_submit_failures(paths: FillActorPaths) -> None:
     service, _ = make_service(
         paths,
         catalog={'actor': ['ABC-001']},
         brands={'ABC-001': 'ABC'},
-        magnets={'ABC-001': 'https://example.invalid/not-a-magnet'},
+        outcomes={'ABC-001': AcquisitionOutcome.SUBMIT_FAILED},
     )
 
     plan = await service.create_plan(['actor'])
 
-    assert plan.videos[0].state is VideoState.MISSING
-    assert plan.videos[0].magnet is None
-    assert plan.videos[0].warnings == ('invalid_magnet',)
+    assert plan.videos[0].state is VideoState.SUBMIT_FAILED
+    assert plan.videos[0].warnings == ('submit_failed',)
+
+
+@pytest.mark.asyncio
+async def test_create_plan_reports_already_tracked_videos(paths: FillActorPaths) -> None:
+    service, _ = make_service(
+        paths,
+        catalog={'actor': ['ABC-001']},
+        brands={'ABC-001': 'ABC'},
+        outcomes={'ABC-001': AcquisitionOutcome.ALREADY_TRACKED},
+    )
+
+    plan = await service.create_plan(['actor'])
+
+    assert plan.videos[0].state is VideoState.ALREADY_TRACKED
+    assert plan.videos[0].warnings == ()
 
 
 @pytest.mark.asyncio
 async def test_create_plan_rejects_brand_path_escape(paths: FillActorPaths) -> None:
-    service, magnet_provider = make_service(
+    service, gateway = make_service(
         paths,
         catalog={'actor': ['ABC-001']},
         brands={'ABC-001': '../../outside'},
@@ -443,7 +455,7 @@ async def test_create_plan_rejects_brand_path_escape(paths: FillActorPaths) -> N
     plan = await service.create_plan(['actor'])
 
     assert plan.videos[0].state is VideoState.INVALID_VIDEO_ID
-    assert magnet_provider.calls == []
+    assert gateway.calls == []
 
 
 @pytest.mark.asyncio
@@ -480,7 +492,7 @@ async def test_create_plan_reports_unavailable_scan_root(
 ) -> None:
     root = paths.actor_brand_path if root_kind == 'actor' else paths.additional_brand_paths[0]
     root.rmdir()
-    service, magnet_provider = make_service(
+    service, gateway = make_service(
         paths,
         catalog={'actor': ['ABC-001']},
         brands={'ABC-001': 'ABC'},
@@ -490,7 +502,7 @@ async def test_create_plan_reports_unavailable_scan_root(
 
     assert plan.videos[0].state is VideoState.SCAN_FAILED
     assert plan.videos[0].warnings == ('scan_failed',)
-    assert magnet_provider.calls == []
+    assert gateway.calls == []
 
 
 @pytest.mark.asyncio
@@ -556,21 +568,20 @@ async def test_disabled_apply_does_not_change_scan_results(paths: FillActorPaths
 
 
 @pytest.mark.asyncio
-async def test_disabled_apply_does_not_affect_magnet_lookup(paths: FillActorPaths) -> None:
-    service, magnet_provider = make_service(
+async def test_disabled_apply_does_not_affect_submission(paths: FillActorPaths) -> None:
+    service, gateway = make_service(
         paths,
         catalog={'actor': ['ABC-001']},
         brands={'ABC-001': 'ABC'},
-        magnets={'ABC-001': 'magnet:?xt=urn:btih:abc'},
+        outcomes={'ABC-001': AcquisitionOutcome.SUBMITTED},
         apply_enabled=False,
     )
 
     plan = await service.create_plan(['actor'])
 
     assert service.apply_enabled is False
-    assert magnet_provider.calls == ['ABC-001']
-    assert plan.videos[0].state is VideoState.MAGNET_FOUND
-    assert plan.videos[0].magnet == 'magnet:?xt=urn:btih:abc'
+    assert gateway.calls == ['ABC-001']
+    assert plan.videos[0].state is VideoState.SUBMITTED
 
 
 @pytest.mark.asyncio
@@ -1100,7 +1111,7 @@ async def test_apply_refuses_a_plan_scanned_under_different_library_roots(paths:
     service = FillActorService(
         runtime=lambda: runtime,
         actor_catalog=FakeActorCatalog({'actor': ['ABC-001']}),
-        magnet_provider=FakeMagnetProvider(),
+        acquisition_gateway=FakeAcquisitionGateway(),
         brand_resolver=MappingBrandResolver({'ABC-001': 'ABC'}),
         token_factory=TokenFactory(),
     )
@@ -1123,7 +1134,7 @@ async def test_unconfigured_service_is_not_ready_instead_of_raising() -> None:
     service = FillActorService(
         runtime=FillActorRuntime,
         actor_catalog=FakeActorCatalog({'actor': []}),
-        magnet_provider=FakeMagnetProvider(),
+        acquisition_gateway=FakeAcquisitionGateway(),
         brand_resolver=MappingBrandResolver({}),
     )
 

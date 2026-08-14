@@ -6,15 +6,20 @@ clients, so the ports are satisfied with thin adapters instead of loaded
 callables.
 """
 
+import logging
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 
 from embyx_manager.clients.clouddrive import AsyncCloudDrive
 from embyx_manager.clients.javbus import JavBusClient
-from embyx_manager.clients.sukebei import SukebeiClient
 from embyx_manager.core import avid
 from embyx_manager.fill_actor.cloud_moves import CloudFileMetadata, CloudFileMover, CloudMoveResponse
-from embyx_manager.fill_actor.ports import PageProgressCallback
+from embyx_manager.fill_actor.ports import AcquisitionOutcome, PageProgressCallback
+from embyx_manager.monitor.acquisitions import AcquisitionSource
+from embyx_manager.monitor.intake import AcquisitionIntake
+from embyx_manager.monitor.reports import RunContext
+
+LOGGER = logging.getLogger(__name__)
 
 NANOSECONDS_PER_SECOND = 1_000_000_000
 
@@ -38,11 +43,23 @@ class JavBusActorCatalog:
 
 
 @dataclass(frozen=True)
-class SukebeiMagnetProvider:
-    client: SukebeiClient
+class LedgerAcquisitionGateway:
+    """Fill-actor port implementation backed by the monitor acquisition intake.
 
-    async def find_magnet(self, video_id: str) -> str | None:
-        return await self.client.get_magnet(video_id)
+    ``intake_factory`` resolves the intake from the live configuration per call,
+    or ``None`` while CloudDrive is unconfigured — submissions then fail without
+    creating ledger rows nothing would ever advance.
+    """
+
+    intake_factory: Callable[[], AcquisitionIntake | None]
+
+    async def submit_missing(self, video_id: str) -> AcquisitionOutcome:
+        intake = self.intake_factory()
+        if intake is None:
+            return AcquisitionOutcome.SUBMIT_FAILED
+        ctx = RunContext(logger=LOGGER)
+        outcome = await intake.enqueue(video_id, source=AcquisitionSource.FILL_ACTOR, ctx=ctx)
+        return AcquisitionOutcome(outcome.value)
 
 
 class AvidBrandResolver:

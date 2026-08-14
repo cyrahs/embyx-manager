@@ -47,7 +47,9 @@ class JobStage(StrEnum):
     QUEUED = 'queued'
     ACTOR_CATALOG = 'actor_catalog'
     LIBRARY_SCAN = 'library_scan'
+    #: Legacy: job rows persisted before scans submitted to the download tracker.
     MAGNET_LOOKUP = 'magnet_lookup'
+    SUBMITTING = 'submitting'
     PERSISTING = 'persisting'
     DONE = 'done'
     UNKNOWN = 'unknown'
@@ -57,6 +59,7 @@ class JobProgressUnit(StrEnum):
     ACTORS = 'actors'
     PAGES = 'pages'
     VIDEOS = 'videos'
+    #: Legacy: job rows persisted before scans submitted to the download tracker.
     MAGNETS = 'magnets'
     STEPS = 'steps'
     ITEMS = 'items'

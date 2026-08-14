@@ -25,7 +25,7 @@ from embyx_manager.fill_actor.models import (
     VideoPlan,
     VideoState,
 )
-from embyx_manager.fill_actor.ports import ActorCatalog, BrandResolver, MagnetProvider
+from embyx_manager.fill_actor.ports import AcquisitionGateway, AcquisitionOutcome, ActorCatalog, BrandResolver
 from embyx_manager.fill_actor.service import (
     FillActorPaths,
     FillActorRuntime,
@@ -34,6 +34,8 @@ from embyx_manager.fill_actor.service import (
 )
 
 __all__ = [
+    'AcquisitionGateway',
+    'AcquisitionOutcome',
     'ActorCatalog',
     'ActorPlan',
     'ApplyResult',
@@ -48,7 +50,6 @@ __all__ = [
     'InvalidActorIdError',
     'JobQueueFullError',
     'LegacyPlanError',
-    'MagnetProvider',
     'MoveCandidate',
     'MoveDisabledError',
     'MoveResult',

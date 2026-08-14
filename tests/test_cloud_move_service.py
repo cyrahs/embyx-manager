@@ -14,6 +14,7 @@ from embyx_manager.fill_actor.persistence import (
     MoveJournalRecord,
     MoveJournalState,
 )
+from embyx_manager.fill_actor.ports import AcquisitionOutcome
 from embyx_manager.fill_actor.service import FillActorPaths, FillActorService, static_runtime
 
 SOURCE_API_PATH = '/cloud/library/source-b/ABC/ABC-001.mp4'
@@ -27,9 +28,9 @@ class ActorCatalog:
         return ('ABC-001',)
 
 
-class MagnetProvider:
-    async def find_magnet(self, _video_id: str) -> None:
-        return None
+class AcquisitionGateway:
+    async def submit_missing(self, _video_id: str) -> AcquisitionOutcome:
+        return AcquisitionOutcome.NO_MAGNET
 
 
 class BrandResolver:
@@ -147,7 +148,7 @@ def make_service(
             ),
         ),
         actor_catalog=ActorCatalog(),
-        magnet_provider=MagnetProvider(),
+        acquisition_gateway=AcquisitionGateway(),
         brand_resolver=BrandResolver(brand),
         repository=repo,
         cloud_file_mover=mover,

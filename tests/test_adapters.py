@@ -8,8 +8,11 @@ from embyx_manager.adapters import (
     CloudDriveFileMover,
     CloudDriveUnconfiguredError,
     JavBusActorCatalog,
-    SukebeiMagnetProvider,
+    LedgerAcquisitionGateway,
 )
+from embyx_manager.fill_actor.ports import AcquisitionOutcome
+from embyx_manager.monitor.acquisitions import AcquisitionSource
+from embyx_manager.monitor.intake import IntakeOutcome
 
 
 async def test_actor_catalog_delegates_to_javbus() -> None:
@@ -29,12 +32,19 @@ async def test_actor_catalog_forwards_progress_callback() -> None:
     client.scrape.assert_awaited_once_with('actor-1', progress_callback=progress)
 
 
-async def test_magnet_provider_delegates_to_sukebei() -> None:
-    client = SimpleNamespace(get_magnet=AsyncMock(return_value='magnet:?xt=urn:btih:abc'))
-    provider = SukebeiMagnetProvider(client)  # type: ignore[arg-type]
+async def test_acquisition_gateway_maps_the_intake_outcome() -> None:
+    intake = SimpleNamespace(enqueue=AsyncMock(return_value=IntakeOutcome.SUBMITTED))
+    gateway = LedgerAcquisitionGateway(lambda: intake)  # type: ignore[arg-type, return-value]
 
-    assert await provider.find_magnet('ABC-001') == 'magnet:?xt=urn:btih:abc'
-    client.get_magnet.assert_awaited_once_with('ABC-001')
+    assert await gateway.submit_missing('ABC-001') is AcquisitionOutcome.SUBMITTED
+    assert intake.enqueue.await_args.args == ('ABC-001',)
+    assert intake.enqueue.await_args.kwargs['source'] is AcquisitionSource.FILL_ACTOR
+
+
+async def test_acquisition_gateway_fails_while_clouddrive_is_unconfigured() -> None:
+    gateway = LedgerAcquisitionGateway(lambda: None)
+
+    assert await gateway.submit_missing('ABC-001') is AcquisitionOutcome.SUBMIT_FAILED
 
 
 def test_brand_resolver_uses_avid_rules() -> None:
