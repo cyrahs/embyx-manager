@@ -20,6 +20,7 @@ from embyx_manager.clients.javbus import JavBusClient
 from embyx_manager.clients.sukebei import SukebeiClient
 from embyx_manager.core.magnet import extract_info_hash
 from embyx_manager.monitor.acquisitions import (
+    AcquisitionRecord,
     AcquisitionRepository,
     AcquisitionSource,
     AcquisitionState,
@@ -88,6 +89,50 @@ class AcquisitionIntake:
         if await self.record_and_submit(avid, candidates, ctx=ctx):
             return IntakeOutcome.SUBMITTED
         return IntakeOutcome.SUBMIT_FAILED
+
+    # -- cooldown retries -----------------------------------------------------
+
+    async def retry_due(self, *, ctx: RunContext, limit: int = 50) -> int:
+        """Re-resolve the acquisitions whose cooldown has expired; count processed."""
+        records = await self._ledger.due_for_retry(now=datetime.now(UTC), limit=limit)
+        for record in records:
+            outcome = await self.retry(record, ctx=ctx)
+            ctx.add(f'retry_{outcome.value}')
+        if records:
+            ctx.set('retry_due', len(records))
+            ctx.info('Retried %d cooled-down avids', len(records))
+        return len(records)
+
+    async def retry(self, record: AcquisitionRecord, *, ctx: RunContext) -> IntakeOutcome:
+        """One retry pass for a parked acquisition.
+
+        Unlike :meth:`enqueue`, the record is not in ``discovered``: the caller
+        picked it off the retry timer, so a pass that submits nothing must re-arm
+        the cooldown from the record's current state — leaving the expired
+        ``next_action_at`` in place would make every subsequent pass pick the
+        same row up again.
+        """
+        try:
+            candidates = await self.resolve(record.avid, ctx=ctx)
+        except Exception:  # noqa: BLE001
+            ctx.exception('Failed to get magnets for %s', record.avid)
+            candidates = []
+        outcome = IntakeOutcome.NO_MAGNET
+        if candidates:
+            if await self.record_and_submit(record.avid, candidates, ctx=ctx):
+                return IntakeOutcome.SUBMITTED
+            outcome = IntakeOutcome.SUBMIT_FAILED
+        ctx.warning('Retry submitted nothing for %s', record.avid)
+        now = datetime.now(UTC)
+        await self._ledger.transition(
+            record.avid,
+            expected=record.state,
+            target=AcquisitionState.RESOLVE_FAILED,
+            now=now,
+            note='no magnet found' if outcome is IntakeOutcome.NO_MAGNET else 'no magnet accepted',
+            next_action_at=now + self._failed_cooldown,
+        )
+        return outcome
 
     # -- magnet resolution ---------------------------------------------------
 

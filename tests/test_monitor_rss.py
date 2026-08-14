@@ -191,6 +191,17 @@ class FakeLedger:
             if state in {AcquisitionState.DISCOVERED, AcquisitionState.DOWNLOADING}
         )
 
+    async def due_for_retry(self, *, now: datetime, limit: int = 50) -> tuple[AcquisitionRecord, ...]:
+        due = sorted(
+            avid
+            for avid, state in self.states.items()
+            if state in {AcquisitionState.RESOLVE_FAILED, AcquisitionState.EXHAUSTED}
+            and self.next_action_at.get(avid) is not None
+            and self.next_action_at[avid] <= now  # type: ignore[operator]
+        )
+        records = [await self.get(avid) for avid in due[:limit]]
+        return tuple(record for record in records if record is not None)
+
     async def claim_attempt(self, avid: str, attempt_no: int, *, now: datetime) -> MagnetAttemptRecord | None:
         for index, attempt in enumerate(self.attempts.get(avid, [])):
             if attempt.attempt_no == attempt_no and attempt.state is AttemptState.PENDING:

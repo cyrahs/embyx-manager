@@ -1,8 +1,14 @@
 import logging
+from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
-from embyx_manager.monitor.acquisitions import AcquisitionSource, AcquisitionState, AttemptState
+from embyx_manager.monitor.acquisitions import (
+    AcquisitionSource,
+    AcquisitionState,
+    AttemptState,
+    MagnetCandidate,
+)
 from embyx_manager.monitor.intake import AcquisitionIntake, IntakeOutcome
 from embyx_manager.monitor.reports import RunContext
 from tests.test_monitor_rss import FakeLedger
@@ -118,6 +124,80 @@ async def test_enqueue_falls_through_to_the_next_candidate() -> None:
     assert outcome is IntakeOutcome.SUBMITTED
     assert deps.ledger.attempt_states('ABC-123') == [AttemptState.ERROR, AttemptState.SUBMITTED]
     assert deps.ledger.states['ABC-123'] is AcquisitionState.DOWNLOADING
+
+
+def parked_ledger(state: AcquisitionState, *, due: bool = True) -> FakeLedger:
+    ledger = FakeLedger(known={'ABC-123': state})
+    delta = timedelta(hours=-1 if due else 1)
+    ledger.next_action_at['ABC-123'] = datetime.now(UTC) + delta
+    return ledger
+
+
+async def test_retry_submits_and_reactivates_a_parked_avid() -> None:
+    intake, deps = make_intake(
+        ledger=parked_ledger(AcquisitionState.RESOLVE_FAILED),
+        sukebei_magnet=MAGNET_A,
+    )
+
+    processed = await intake.retry_due(ctx=make_ctx())
+
+    assert processed == 1
+    deps.cloud.add_offline_files.assert_awaited_once_with([MAGNET_A], '/115/task')
+    assert deps.ledger.states['ABC-123'] is AcquisitionState.DOWNLOADING
+    assert deps.ledger.attempt_states('ABC-123') == [AttemptState.SUBMITTED]
+
+
+async def test_retry_rearms_the_cooldown_when_nothing_resolves() -> None:
+    # An exhausted record parks back as resolve_failed with a fresh deadline;
+    # leaving the expired one in place would re-select the row every pass.
+    intake, deps = make_intake(ledger=parked_ledger(AcquisitionState.EXHAUSTED))
+
+    await intake.retry_due(ctx=make_ctx())
+
+    assert deps.ledger.states['ABC-123'] is AcquisitionState.RESOLVE_FAILED
+    assert deps.ledger.next_action_at['ABC-123'] > datetime.now(UTC)
+    deps.cloud.add_offline_files.assert_not_awaited()
+
+
+async def test_retry_rearms_the_cooldown_when_every_candidate_was_already_tried() -> None:
+    ledger = parked_ledger(AcquisitionState.RESOLVE_FAILED)
+    now = datetime.now(UTC)
+    await ledger.add_attempts(
+        'ABC-123',
+        [MagnetCandidate(magnet=MAGNET_A, info_hash=HASH_A, source='sukebei', size_hint=None)],
+        now=now,
+    )
+    await ledger.claim_next_pending('ABC-123', now=now)
+    await ledger.transition_attempt(
+        'ABC-123',
+        1,
+        expected=AttemptState.SUBMITTED,
+        target=AttemptState.ERROR,
+        now=now,
+    )
+    intake, deps = make_intake(ledger=ledger, sukebei_magnet=MAGNET_A)
+    record = await ledger.get('ABC-123')
+    assert record is not None
+
+    outcome = await intake.retry(record, ctx=make_ctx())
+
+    assert outcome is IntakeOutcome.SUBMIT_FAILED
+    assert deps.ledger.states['ABC-123'] is AcquisitionState.RESOLVE_FAILED
+    assert deps.ledger.next_action_at['ABC-123'] > datetime.now(UTC)
+    deps.cloud.add_offline_files.assert_not_awaited()
+
+
+async def test_retry_due_skips_records_still_cooling_down() -> None:
+    intake, deps = make_intake(
+        ledger=parked_ledger(AcquisitionState.RESOLVE_FAILED, due=False),
+        sukebei_magnet=MAGNET_A,
+    )
+
+    processed = await intake.retry_due(ctx=make_ctx())
+
+    assert processed == 0
+    deps.sukebei.get_magnet.assert_not_awaited()
+    assert deps.ledger.states['ABC-123'] is AcquisitionState.RESOLVE_FAILED
 
 
 async def test_resolve_slots_the_item_magnet_between_sukebei_and_javbus() -> None:

@@ -345,6 +345,12 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
             submit_magnet=submit_magnet,
         )
         await tracker.poll(ctx)
+        # The resolver leg of the tracker pass (plan §Step 6 item 7): parked
+        # acquisitions whose cooldown expired get a fresh resolve-and-submit,
+        # without waiting for an input source to sight the AVID again.
+        intake = intake_factory()
+        if intake is not None:
+            await intake.retry_due(ctx=ctx)
 
     def mapping_ready() -> str | None:
         if not store.get(MappingConfig).configured:

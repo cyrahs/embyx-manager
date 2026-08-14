@@ -45,6 +45,12 @@
   (`source='fill_actor'`,迁移 v8 扩展 source CHECK 并新增 `submitting` job 阶段),
   后续生命周期全部由 tracker 接管;`rss.failed_avid_cooldown_seconds` 现在约束所有
   intake 来源的解析失败冷却。
+- **§Step 6 第 7 项的 resolver 补上接线**:tracker 每轮 poll 末尾跑
+  `AcquisitionIntake.retry_due`,捞 `next_action_at` 到期的 `resolve_failed`/
+  `exhausted` 行重新解析并提交。与 `enqueue` 不同,重试不经 `discover`(记录不在
+  `discovered` 态),一轮没提交上任何磁力时必须从记录当前状态续期冷却
+  (`resolve_failed→resolve_failed` / `exhausted→resolve_failed`),否则过期的
+  `next_action_at` 会让每一轮都重复捞起同一行。
 
 ## 原计划(v3)
 
