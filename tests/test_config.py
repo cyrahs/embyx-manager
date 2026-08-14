@@ -181,7 +181,7 @@ def test_clouddrive_test_endpoint_uses_form_values_and_stored_secret(monkeypatch
             )
             response = client.post(
                 '/api/config/clouddrive/test',
-                json={'values': {'address': 'override.internal:19798', 'task_dir_path': '/downloads'}},
+                json={'values': {'address': 'override.internal:19798'}},
             )
     finally:
         reset_public_schema()
@@ -191,7 +191,6 @@ def test_clouddrive_test_endpoint_uses_form_values_and_stored_secret(monkeypatch
     assert body['ok'] is True
     assert captured['address'] == 'override.internal:19798'
     assert captured['api_token'] == 'stored-secret'
-    assert '/downloads' in captured['listed']
     assert captured['closed'] is True
 
 

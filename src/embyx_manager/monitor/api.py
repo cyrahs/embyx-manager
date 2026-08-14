@@ -123,7 +123,7 @@ class AcquisitionView(BaseModel):
         return cls(
             avid=record.avid,
             state=record.state.value,
-            source=record.source.value,
+            source=record.source,
             note=record.note,
             archived_paths=record.archived_paths,
             next_action_at=record.next_action_at,
@@ -155,12 +155,6 @@ class MagnetRequest(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
     magnet: str
-
-
-class TriggerRequest(BaseModel):
-    model_config = ConfigDict(extra='forbid')
-
-    rank: bool = False
 
 
 class TriggerResponse(BaseModel):
@@ -215,11 +209,10 @@ def create_monitor_router(  # noqa: C901, PLR0915 - route registration
         return views
 
     @router.post('/{pipeline}/trigger', dependencies=[Depends(mutation_auth)], status_code=202)
-    async def trigger(pipeline: str, request: TriggerRequest | None = None) -> TriggerResponse:
+    async def trigger(pipeline: str) -> TriggerResponse:
         name = _parse_pipeline(pipeline)
-        rank = bool(request.rank) if request is not None else False
         try:
-            run_id = await scheduler.trigger(name, rank=rank)
+            run_id = await scheduler.trigger(name)
         except PipelineBusyError as exc:
             raise ApiError(409, 'pipeline_busy') from exc
         except PipelineNotConfiguredError as exc:

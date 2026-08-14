@@ -91,7 +91,6 @@ class CloudDriveConfig(ConfigSection):
     address: str = ''
     api_token: str = ''
     secure: bool = True
-    task_dir_path: str = ''
 
     @property
     def configured(self) -> bool:
@@ -145,11 +144,47 @@ class AvidRulesConfig(ConfigSection):
     ignored_id_patterns: tuple[str, ...] = ()
 
 
+class RssCategory(BaseModel):
+    """One FreshRSS category and the offline directory its items download to.
+
+    Every category names its own directory. There is deliberately no shared
+    default to fall back on: the directory decides which archive route files the
+    download, so leaving it implicit would hide where a category's videos land.
+    """
+
+    model_config = ConfigDict(extra='forbid')
+
+    #: The FreshRSS category (label) whose unread items this entry ingests.
+    label: str
+    #: The CloudDrive API path this category's offline tasks are queued under.
+    task_dir_path: str
+
+    @field_validator('label')
+    @classmethod
+    def _validate_label(cls, value: str) -> str:
+        trimmed = value.strip()
+        if not trimmed:
+            msg = 'rss.categories label must not be empty'
+            raise ValueError(msg)
+        return trimmed
+
+    @field_validator('task_dir_path')
+    @classmethod
+    def _validate_task_dir(cls, value: str) -> str:
+        normalized = normalize_absolute_path('rss.categories task_dir_path', value)
+        if not normalized:
+            msg = 'rss.categories task_dir_path must not be empty'
+            raise ValueError(msg)
+        return normalized
+
+
 class RssConfig(ConfigSection):
     enabled: bool = False
     interval_seconds: int = 1800
-    actor_label: str = 'Actor'
-    rank_label: str = 'Rank'
+    #: Every configured category is ingested on each scheduled run; a manual
+    #: trigger may scope itself to one of them by label. Empty until an operator
+    #: adds one, because a category cannot be guessed: it needs a directory.
+    categories: tuple[RssCategory, ...] = ()
     failed_avid_cooldown_seconds: int = 86_400
 
     @field_validator('interval_seconds', 'failed_avid_cooldown_seconds')
@@ -157,6 +192,18 @@ class RssConfig(ConfigSection):
     def _positive(cls, value: int) -> int:
         if value < 1:
             msg = 'must be positive'
+            raise ValueError(msg)
+        return value
+
+    @field_validator('categories')
+    @classmethod
+    def _unique_labels(cls, value: tuple[RssCategory, ...]) -> tuple[RssCategory, ...]:
+        # A repeated label would ingest the same items twice in one run, and the
+        # second entry's directory would silently lose to the first.
+        labels = [category.label for category in value]
+        duplicates = sorted({label for label in labels if labels.count(label) > 1})
+        if duplicates:
+            msg = f'rss.categories must not repeat the label {", ".join(repr(label) for label in duplicates)}'
             raise ValueError(msg)
         return value
 

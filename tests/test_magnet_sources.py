@@ -50,6 +50,27 @@ def test_rss_magnet_handles_missing_summary() -> None:
     assert get_magnet_from_item({'title': 'ABC-123'}, 'ABC-123') is None
 
 
+def test_rss_magnet_is_absent_from_a_javlibrary_item() -> None:
+    """javlibrary items carry a cover and an info table, never a magnet.
+
+    They lose this candidate and fall back on sukebei and javbus, which is why
+    a javlibrary feed needs no parser of its own.
+    """
+    item = {
+        'title': 'ABC-123中出し',
+        'summary': {
+            'content': (
+                '<img src="cover.jpg"/><div id="video_info"><table><tbody>'
+                '<tr><td>ID:</td><td>ABC-123</td></tr>'
+                '<tr><td>Release Date:</td><td>2026-01-01</td></tr>'
+                '</tbody></table></div>'
+            ),
+        },
+    }
+
+    assert get_magnet_from_item(item, 'ABC-123') is None
+
+
 @pytest.fixture
 async def sukebei():
     client = SukebeiClient()

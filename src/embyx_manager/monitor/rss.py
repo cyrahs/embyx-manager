@@ -9,6 +9,11 @@ as their AVID is recorded, because retries are driven by the ledger's cooldown
 rather than by an item staying unread until the next run. And magnets are
 resolved as a ranked list rather than a single pick, so a magnet that errors,
 stalls, or turns out to be an ad reel has a successor waiting.
+
+One run covers every configured category in turn. A category names a FreshRSS
+label and the offline directory its downloads belong in, which is how one feed
+category ends up in a library subdirectory of its own; categories are otherwise
+independent, so one failing does not cost the others their pass.
 """
 
 import asyncio
@@ -23,17 +28,17 @@ from embyx_manager.clients.freshrss import FreshRSSClient
 from embyx_manager.clients.javbus import JavBusClient
 from embyx_manager.clients.rss_magnet import get_magnet_from_item
 from embyx_manager.clients.sukebei import SukebeiClient
-from embyx_manager.config.models import RssConfig
+from embyx_manager.config.models import RssCategory, RssConfig
 from embyx_manager.core.avid import AvidParser
 from embyx_manager.core.magnet import extract_info_hash
 from embyx_manager.monitor.acquisitions import (
     AcquisitionRepository,
-    AcquisitionSource,
     AcquisitionState,
     AttemptState,
     MagnetCandidate,
+    rss_source,
 )
-from embyx_manager.monitor.reports import RunContext
+from embyx_manager.monitor.reports import RunCancelledError, RunContext
 
 MAX_CANDIDATES = 5
 
@@ -55,7 +60,6 @@ class RssPipeline:
         cloud: AsyncCloudDrive,
         sukebei: SukebeiClient,
         javbus: JavBusClient,
-        task_dir_path: str,
         ledger: AcquisitionRepository,
     ) -> None:
         self._config = config
@@ -64,14 +68,28 @@ class RssPipeline:
         self._cloud = cloud
         self._sukebei = sukebei
         self._javbus = javbus
-        self._task_dir_path = task_dir_path
         self._ledger = ledger
 
-    async def run(self, ctx: RunContext, *, rank: bool = False) -> None:
-        label = self._config.rank_label if rank else self._config.actor_label
-        source = AcquisitionSource.RSS_RANK if rank else AcquisitionSource.RSS_ACTOR
+    async def run(self, ctx: RunContext) -> None:
+        """Ingest every configured category."""
+        for category in self._config.categories:
+            ctx.check_cancelled()
+            try:
+                await self._run_category(ctx, category)
+            except RunCancelledError:
+                raise
+            except Exception:  # noqa: BLE001 - one category's failure is not the run's
+                ctx.exception('Failed to ingest the %s category', category.label)
+                ctx.add('categories_failed')
+
+    async def _run_category(self, ctx: RunContext, category: RssCategory) -> None:
+        label = category.label
+        source = rss_source(label)
+        # Pinned onto each acquisition so its retries keep landing here even if
+        # the category is later repointed or removed.
+        task_dir = category.task_dir_path
         items = await self._freshrss.get_items(label)
-        ctx.set('items', len(items))
+        ctx.add('items', len(items))
         ctx.info('Find %d items in %s', len(items), label)
         if not items:
             return
@@ -83,13 +101,13 @@ class RssPipeline:
                 ctx.warning('Failed to get avid for %s', item['title'])
                 continue
             avid_item.setdefault(avid, []).append(item)
-        ctx.set('unique_avids', len(avid_item))
+        ctx.add('unique_avids', len(avid_item))
         ctx.info('Find %d unique avids in %s', len(avid_item), label)
 
         now = datetime.now(UTC)
         wanted: dict[str, list[dict]] = {}
         for avid, avid_items in avid_item.items():
-            if await self._ledger.discover(avid, source=source, now=now):
+            if await self._ledger.discover(avid, source=source, now=now, task_dir_path=task_dir):
                 wanted[avid] = avid_items
             else:
                 ctx.add('skipped_known')
@@ -105,7 +123,7 @@ class RssPipeline:
         ctx.check_cancelled()
         resolved = await self._resolve_all(wanted, ctx)
         ctx.check_cancelled()
-        await self._submit_all(resolved, ctx)
+        await self._submit_all(resolved, task_dir, ctx)
 
     # -- magnet resolution ---------------------------------------------------
 
@@ -116,7 +134,7 @@ class RssPipeline:
     ) -> dict[str, list[MagnetCandidate]]:
         resolved: dict[str, list[MagnetCandidate]] = {}
         await asyncio.gather(*(self._resolve_safely(avid, items, resolved, ctx) for avid, items in avid_item.items()))
-        ctx.set('magnets_found', sum(len(candidates) for candidates in resolved.values()))
+        ctx.add('magnets_found', sum(len(candidates) for candidates in resolved.values()))
         ctx.info('Found magnets for %d of %d avids', len(resolved), len(avid_item))
 
         now = datetime.now(UTC)
@@ -187,21 +205,21 @@ class RssPipeline:
 
     # -- CloudDrive offline tasks ---------------------------------------------
 
-    async def _submit_all(self, resolved: dict[str, list[MagnetCandidate]], ctx: RunContext) -> None:
+    async def _submit_all(self, resolved: dict[str, list[MagnetCandidate]], task_dir: str, ctx: RunContext) -> None:
         now = datetime.now(UTC)
         for avid, candidates in resolved.items():
             ctx.check_cancelled()
             added = await self._ledger.add_attempts(avid, candidates, now=now)
             ctx.add('candidates_recorded', added)
-            await self._submit_next(avid, ctx)
+            await self._submit_next(avid, task_dir, ctx)
 
-    async def _submit_next(self, avid: str, ctx: RunContext) -> bool:
+    async def _submit_next(self, avid: str, task_dir: str, ctx: RunContext) -> bool:
         """Submit this AVID's next untried magnet; False when none is left."""
         now = datetime.now(UTC)
         attempt = await self._ledger.claim_next_pending(avid, now=now)
         if attempt is None:
             return False
-        outcome = await self._add_magnet(avid, attempt.magnet, ctx)
+        outcome = await self._add_magnet(avid, attempt.magnet, task_dir, ctx)
         if outcome == 'failed':
             await self._ledger.transition_attempt(
                 avid,
@@ -211,7 +229,7 @@ class RssPipeline:
                 now=now,
                 error='failed to add the offline task',
             )
-            return await self._submit_next(avid, ctx)
+            return await self._submit_next(avid, task_dir, ctx)
         record = await self._ledger.get(avid)
         if record is not None and record.state is not AcquisitionState.DOWNLOADING:
             await self._ledger.transition(
@@ -222,9 +240,9 @@ class RssPipeline:
             )
         return True
 
-    async def _add_magnet(self, avid: str, link: str, ctx: RunContext) -> str:
+    async def _add_magnet(self, avid: str, link: str, task_dir: str, ctx: RunContext) -> str:
         try:
-            result = await self._add_offline_with_retry(link)
+            result = await self._add_offline_with_retry(link, task_dir)
         except grpc.RpcError as exc:
             if '任务已存在' in (exc.details() or ''):
                 # Already queued at CloudDrive: the hash is what we track, so this
@@ -248,8 +266,8 @@ class RssPipeline:
         return 'failed'
 
     @CLOUD_RETRY
-    async def _add_offline_with_retry(self, link: str) -> object:
-        return await self._cloud.add_offline_files([link], self._task_dir_path)
+    async def _add_offline_with_retry(self, link: str, task_dir: str) -> object:
+        return await self._cloud.add_offline_files([link], task_dir)
 
     async def _mark_read(self, ctx: RunContext, item_ids: list[str]) -> None:
         if not item_ids:
