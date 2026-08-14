@@ -252,6 +252,8 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
                 sukebei=sukebei,
                 javbus=javbus,
                 ledger=ledger,
+                # Resolved when the run executes, well after the scheduler exists.
+                on_submitted=scheduler.notify_submission,
             )
             await pipeline.run(ctx)
         finally:
@@ -302,6 +304,12 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         the attempts that preceded it even if its category has since been
         repointed or removed.
         """
+        accepted = await _submit_magnet_at_cloud(avid, magnet)
+        if accepted:
+            scheduler.notify_submission()
+        return accepted
+
+    async def _submit_magnet_at_cloud(avid: str, magnet: str) -> bool:
         cloud = cloud_handle.current()
         if cloud is None:
             return False
