@@ -337,6 +337,20 @@ async def test_a_task_that_vanished_without_landing_moves_on(tmp_path: Path) -> 
     assert cloud.removed == []
 
 
+async def test_a_cancelled_task_of_an_ignored_avid_is_not_resubmitted(tmp_path: Path) -> None:
+    # An operator ignored the duplicate and cancelled its offline task. The
+    # sweep still books the attempt as lost, but must not resurrect the AVID
+    # with its next candidate magnet.
+    tracker, ledger, _, submitted = build(tmp_path, [])
+    await seed(ledger, 'ABC-123', [HASH_A, HASH_B])
+    ledger.states['ABC-123'] = AcquisitionState.IGNORED
+
+    await tracker.poll(make_ctx())
+
+    assert ledger.attempt_states('ABC-123') == [AttemptState.LOST, AttemptState.PENDING]
+    assert submitted == []
+
+
 async def test_an_avid_an_operator_parked_is_not_touched(tmp_path: Path) -> None:
     tracker, ledger, _, _ = build(tmp_path, [offline_task('ABC-123 release', HASH_A, OfflineStatus.FINISHED)])
     await seed(ledger, 'ABC-123', [HASH_A])

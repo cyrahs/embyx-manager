@@ -346,6 +346,14 @@ class AcquisitionTracker:
 
     async def _try_next(self, avid: str, ctx: RunContext) -> None:
         """Submit this AVID's next magnet, or mark it out of options."""
+        record = await self._ledger.get(avid)
+        if record is None or record.state is not AcquisitionState.DOWNLOADING:
+            # The AVID is nobody's to retry: an operator ignored or parked it,
+            # or it is already archived. An operator cancelling a duplicate's
+            # offline task must not have the sweep resurrect it with the next
+            # candidate; the remaining magnets stay put until a deliberate
+            # retry hands the AVID back to the tracker.
+            return
         attempts = await self._ledger.attempts_for(avid)
         # The cap counts magnets actually submitted, not candidates collected, so
         # a long candidate list still stops after max_attempts real downloads.

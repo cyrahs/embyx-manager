@@ -1032,7 +1032,7 @@ describe('Fill Actor page', () => {
     expect(freshrssLink).toHaveAttribute('rel', 'noopener noreferrer')
     expect(screen.getByText('缓存已就绪')).toBeInTheDocument()
     expect(screen.getByText('缓存失败')).toBeInTheDocument()
-    expect(screen.getByText('错误：rsshub_timeout')).toBeInTheDocument()
+    expect(screen.getByText('错误：RSSHub 请求超时')).toBeInTheDocument()
     expect(screen.getByText('已尝试 2 次', { exact: false })).toBeInTheDocument()
     expect(fetchMock).toHaveBeenNthCalledWith(
       3,

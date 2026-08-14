@@ -35,7 +35,7 @@ import {
   planMagnets,
   terminalApplyJob,
 } from '../lib/fill-actor/format'
-import { MAX_ACTORS, STALE_CODES, VIDEO_GROUPS } from '../lib/fill-actor/labels'
+import { MAX_ACTORS, STALE_CODES, VIDEO_GROUPS, jobErrorLabel } from '../lib/fill-actor/labels'
 import type {
   ActiveApplyRequest,
   ActorFeedStatus,
@@ -306,7 +306,7 @@ export default function FillActorPage() {
                 : current)
             }
             setError(envelope.job.error_code
-              ? `移动任务失败：${envelope.job.error_code}`
+              ? `移动任务失败：${jobErrorLabel(envelope.job.error_code)}`
               : state === 'completed'
                 ? '移动任务已完成，但结果响应无效。'
                 : '移动任务未能完成。')
@@ -801,6 +801,6 @@ function consumeEnvelope(
     return
   }
   if ((state === 'failed' || state === 'partial_failed') && !envelope.plan) {
-    setError(envelope.job?.error_code ? `扫描任务失败：${envelope.job.error_code}` : '扫描任务未能完成。')
+    setError(envelope.job?.error_code ? `扫描任务失败：${jobErrorLabel(envelope.job.error_code)}` : '扫描任务未能完成。')
   }
 }

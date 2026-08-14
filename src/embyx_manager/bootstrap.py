@@ -252,6 +252,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
                 sukebei=sukebei,
                 javbus=javbus,
                 ledger=ledger,
+                archiver=ArchivePipeline(config=store.get(ArchiveConfig), avid_parser=avid_handle.current()),
                 # Resolved when the run executes, well after the scheduler exists.
                 on_submitted=scheduler.notify_submission,
             )
