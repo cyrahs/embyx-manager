@@ -40,6 +40,23 @@ def test_get_avid_recognizes_common_forms(parser: AvidParser, title: str, expect
     assert parser.get_avid(title) == expected
 
 
+@pytest.mark.parametrize(
+    ('title', 'expected'),
+    [
+        # javlibrary's listing puts the id and the title in sibling divs, so the
+        # RSS item title concatenates them with no separator at all.
+        ('ABP-123中出し温泉旅行', 'ABP-123'),
+        ('START-123あの子と', 'START-123'),
+        ('SSIS-001 新人NO.1STYLE', 'SSIS-001'),
+        ('259LUXU-1234 ラグジュTV', '259LUXU-1234'),
+        ('FC2-PPV-1234567 個人撮影', 'FC2-1234567'),
+    ],
+)
+def test_get_avid_reads_javlibrary_item_titles(parser: AvidParser, title: str, expected: str) -> None:
+    """Titles shaped the way the RSSHub javlibrary routes emit them."""
+    assert parser.get_avid(title) == expected
+
+
 def test_get_avid_strips_suspicious_domain_prefix(parser: AvidParser) -> None:
     assert parser.get_avid('hjd2048.com-0601meyd524-h264.mp4') == 'MEYD-524'
 

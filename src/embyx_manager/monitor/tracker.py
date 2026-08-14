@@ -57,14 +57,15 @@ class TrackerRoute:
 class TrackerSettings:
     """Where finished downloads live and how patient the tracker is.
 
-    The offline task directory is configured once, as the CloudDrive API path;
-    its local view is one of the archive routes. A finished download is located
-    in the route tables and filed by whichever route holds it, so the tracker
-    shares the scan's directory configuration instead of duplicating it.
+    Offline tasks are queued under CloudDrive API paths: the default directory
+    and any RSS category that downloads somewhere of its own. Each has a local
+    view among the archive routes, so a finished download is located in the route
+    tables and filed by whichever route holds it, and the tracker shares the
+    scan's directory configuration instead of duplicating it.
     """
 
-    #: The CloudDrive API path the offline tasks are queued under.
-    task_dir_path: str
+    #: The CloudDrive API paths the offline tasks are queued under, default first.
+    task_dir_paths: tuple[str, ...]
     #: The archive routes, priority routes first, resolved against src_dir.
     routes: tuple[TrackerRoute, ...]
     stall_timeout_hours: int = 24
@@ -75,7 +76,7 @@ class TrackerSettings:
     submit_grace_seconds: int = 300
 
     @classmethod
-    def from_config(cls, config: ArchiveConfig, *, task_dir_path: str) -> 'TrackerSettings':
+    def from_config(cls, config: ArchiveConfig, *, task_dir_paths: tuple[str, ...]) -> 'TrackerSettings':
         src_dir = Path(config.src_dir)
         routes = tuple(
             TrackerRoute(root=src_dir / source, dst=dst, priority=priority)
@@ -83,7 +84,7 @@ class TrackerSettings:
             for source, dst in table.items()
         )
         return cls(
-            task_dir_path=task_dir_path,
+            task_dir_paths=task_dir_paths,
             routes=routes,
             stall_timeout_hours=config.stall_timeout_hours,
             max_attempts=config.max_attempts,
@@ -108,24 +109,53 @@ class AcquisitionTracker:
         self._submit = submit_magnet
 
     async def poll(self, ctx: RunContext) -> None:
-        """One pass over the offline task list."""
-        tasks = await self._cloud.list_offline_files(self._settings.task_dir_path)
-        ctx.set('offline_tasks', len(tasks))
-        by_hash = {str(task['info_hash']): task for task in tasks if task['info_hash']}
+        """One pass over the offline task lists of every configured directory."""
+        if not self._settings.task_dir_paths:
+            # No directory to read means no evidence either way, which is not the
+            # same as every task having vanished; sweeping here would conclude the
+            # opposite and give up on everything in flight.
+            ctx.warning('no offline directory is configured, skipping the poll')
+            return
+        # Each task is kept with the directory it was listed under, which is the
+        # only way back to its path once the listings are merged.
+        by_hash: dict[str, tuple[OfflineTask, str]] = {}
+        total = 0
+        for task_dir in self._settings.task_dir_paths:
+            ctx.check_cancelled()
+            tasks = await self._cloud.list_offline_files(task_dir)
+            total += len(tasks)
+            for task in tasks:
+                info_hash = str(task['info_hash']) if task['info_hash'] else ''
+                if not info_hash:
+                    continue
+                if info_hash in by_hash:
+                    # CloudDrive rejects a magnet already queued elsewhere, so this
+                    # is rare; the first directory listing it wins either way.
+                    ctx.add('duplicate_offline_tasks')
+                    continue
+                by_hash[info_hash] = (task, task_dir)
+        ctx.set('offline_tasks', total)
         attempts = await self._ledger.attempts_by_info_hash(by_hash)
 
         for info_hash, attempt in attempts.items():
             ctx.check_cancelled()
-            await self._advance(attempt, by_hash[info_hash], ctx)
+            task, task_dir = by_hash[info_hash]
+            await self._advance(attempt, task, task_dir, ctx)
 
         await self._sweep_lost(set(by_hash), ctx)
 
     # -- one attempt ---------------------------------------------------------
 
-    async def _advance(self, attempt: MagnetAttemptRecord, task: OfflineTask, ctx: RunContext) -> None:
+    async def _advance(
+        self,
+        attempt: MagnetAttemptRecord,
+        task: OfflineTask,
+        task_dir: str,
+        ctx: RunContext,
+    ) -> None:
         status = task['status']
         if status is OfflineStatus.FINISHED:
-            await self._archive_finished(attempt, task, ctx)
+            await self._archive_finished(attempt, task, task_dir, ctx)
         elif status is OfflineStatus.ERROR:
             await self._give_up(attempt, AttemptState.ERROR, 'CloudDrive reported the download failed', ctx)
         elif attempt.state in {AttemptState.SUBMITTED, AttemptState.DOWNLOADING}:
@@ -152,7 +182,13 @@ class AcquisitionTracker:
                 ctx,
             )
 
-    async def _archive_finished(self, attempt: MagnetAttemptRecord, task: OfflineTask, ctx: RunContext) -> None:
+    async def _archive_finished(
+        self,
+        attempt: MagnetAttemptRecord,
+        task: OfflineTask,
+        task_dir: str,
+        ctx: RunContext,
+    ) -> None:
         now = datetime.now(UTC)
         record = await self._ledger.get(attempt.avid)
         if record is None or record.state is not AcquisitionState.DOWNLOADING:
@@ -176,7 +212,7 @@ class AcquisitionTracker:
             # Another replica claimed it first.
             return
 
-        await self._refresh_mount(task, ctx)
+        await self._refresh_mount(task, task_dir, ctx)
         located = await asyncio.to_thread(self._locate, str(task['name']), attempt.avid)
         if located is None:
             # Release the claim: the mount may simply not show the folder yet.
@@ -341,9 +377,11 @@ class AcquisitionTracker:
     def _locate(self, name: str, avid: str) -> tuple[Path, TrackerRoute] | None:
         """The downloaded folder and the archive route holding it.
 
-        Every offline task lands in the one task directory, which the operator
-        lists among the archive routes; the exact task name is tried first, the
-        AVID second so a renamed folder is still found.
+        Every offline task lands in one of the task directories, each of which the
+        operator lists among the archive routes; the exact task name is tried
+        first, the AVID second so a renamed folder is still found. Searching all
+        routes is unambiguous even when one route's source nests inside another's,
+        because the folder exists under exactly one of them.
         """
         for route in self._settings.routes:
             candidate = route.root / name
@@ -403,14 +441,15 @@ class AcquisitionTracker:
         )
         await self._settle(attempt, result, ctx)
 
-    async def _refresh_mount(self, task: OfflineTask, ctx: RunContext) -> None:
+    async def _refresh_mount(self, task: OfflineTask, task_dir: str, ctx: RunContext) -> None:
         """Make CloudDrive re-read the finished task's directory before we walk it.
 
         The mount caches listings, so a just-finished download can look empty.
         Asking the API for it is the targeted version of what used to be a
-        five-second sleep after every stage.
+        five-second sleep after every stage. ``task_dir`` is the directory the
+        task was listed under, which is where its folder actually is.
         """
-        path = f'{self._settings.task_dir_path}/{task["name"]}'
+        path = f'{task_dir}/{task["name"]}'
         try:
             await self._cloud.list_directory(path)
         except FileNotFoundError:

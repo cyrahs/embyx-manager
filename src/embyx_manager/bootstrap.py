@@ -230,14 +230,13 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
     def rss_trigger_ready() -> str | None:
         return _rss_configuration_gap(store)
 
-    async def rss_runner(ctx: RunContext, rank: bool) -> None:  # noqa: FBT001
+    async def rss_runner(ctx: RunContext) -> None:
         cloud = cloud_handle.current()
         if cloud is None:
             msg = 'CloudDrive is not configured'
             raise RuntimeError(msg)
         freshrss_config = store.get(FreshRSSConfig)
         rss_config = store.get(RssConfig)
-        clouddrive_config = store.get(CloudDriveConfig)
         client = FreshRSSClient(
             url=freshrss_config.url,
             api_key=freshrss_config.api_key,
@@ -252,10 +251,9 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
                 cloud=cloud,
                 sukebei=sukebei,
                 javbus=javbus,
-                task_dir_path=clouddrive_config.task_dir_path,
                 ledger=ledger,
             )
-            await pipeline.run(ctx, rank=rank)
+            await pipeline.run(ctx)
         finally:
             await client.aclose()
 
@@ -268,13 +266,13 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
     reconcile_scanner: list[ReconcileScanner] = []
 
     async def archive_runner(ctx: RunContext) -> None:
-        clouddrive_config = store.get(CloudDriveConfig)
         cloud = cloud_handle.current()
-        if cloud is not None and clouddrive_config.task_dir_path:
-            try:
-                await cloud.list_directory(clouddrive_config.task_dir_path)
-            except Exception:  # noqa: BLE001
-                ctx.exception('failed to refresh the CloudDrive task directory')
+        if cloud is not None:
+            for task_dir in _offline_task_dirs(store):
+                try:
+                    await cloud.list_directory(task_dir)
+                except Exception:  # noqa: BLE001
+                    ctx.exception('failed to refresh the CloudDrive task directory %s', task_dir)
         archive_config = store.get(ArchiveConfig)
         archiver = ArchivePipeline(config=archive_config, avid_parser=avid_handle.current())
         if reconcile_scanner:
@@ -291,17 +289,35 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
             return 'archive is disabled'
         if not archive_config.configured:
             return 'archive source, destination, and routes must be configured'
-        if cloud_handle.current() is None or not store.get(CloudDriveConfig).task_dir_path:
-            return 'CloudDrive and its task directory must be configured'
+        if cloud_handle.current() is None:
+            return 'CloudDrive must be configured'
+        if not _offline_task_dirs(store):
+            return 'at least one RSS category with an offline directory must be configured'
         return None
 
     async def submit_magnet(avid: str, magnet: str) -> bool:
-        """Queue one magnet at CloudDrive; shared by the tracker and the dashboard."""
+        """Queue one magnet at CloudDrive; shared by the tracker and the dashboard.
+
+        The directory comes from the acquisition itself, so a retry lands beside
+        the attempts that preceded it even if its category has since been
+        repointed or removed.
+        """
         cloud = cloud_handle.current()
         if cloud is None:
             return False
+        record = await ledger.get(avid)
+        task_dir = record.task_dir_path if record is not None else None
+        if task_dir is None:
+            # An acquisition the reconcile scan created has no directory of its
+            # own. Any polled one will do: the tracker finds a finished download
+            # by searching every archive route, not by where it was queued.
+            dirs = _offline_task_dirs(store)
+            if not dirs:
+                LOGGER.error('no offline directory is configured to submit %s to', avid)
+                return False
+            task_dir = dirs[0]
         try:
-            result = await cloud.add_offline_files([magnet], store.get(CloudDriveConfig).task_dir_path)
+            result = await cloud.add_offline_files([magnet], task_dir)
         except grpc.RpcError as exc:
             # Already queued at CloudDrive: the hash is what we track, so this
             # counts as submitted either way.
@@ -319,13 +335,12 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         if cloud is None:
             return
         archive_config = store.get(ArchiveConfig)
-        clouddrive_config = store.get(CloudDriveConfig)
         archiver = ArchivePipeline(config=archive_config, avid_parser=avid_handle.current())
         tracker = AcquisitionTracker(
             ledger=ledger,
             cloud=cloud,
             archiver=archiver,
-            settings=TrackerSettings.from_config(archive_config, task_dir_path=clouddrive_config.task_dir_path),
+            settings=TrackerSettings.from_config(archive_config, task_dir_paths=_offline_task_dirs(store)),
             submit_magnet=submit_magnet,
         )
         await tracker.poll(ctx)
@@ -409,6 +424,15 @@ def _rss_configuration_gap(store: ConfigStore) -> str | None:
     clouddrive = store.get(CloudDriveConfig)
     if not clouddrive.configured:
         return 'CloudDrive is not configured'
-    if not clouddrive.task_dir_path:
-        return 'CloudDrive task directory is not configured'
+    if not store.get(RssConfig).categories:
+        return 'at least one RSS category must be configured'
     return None
+
+
+def _offline_task_dirs(store: ConfigStore) -> tuple[str, ...]:
+    """Every directory offline tasks are queued under, in category order.
+
+    Categories may share one, so the list is deduplicated; the tracker polls each
+    of these exactly once.
+    """
+    return tuple(dict.fromkeys(category.task_dir_path for category in store.get(RssConfig).categories))

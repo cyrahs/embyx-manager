@@ -7,15 +7,27 @@ import { ApiError, getConfigSections, isUnauthorized, testConnection, updateConf
 import type { AppContext } from '../App'
 import { Notice } from '../components/Feedback'
 import { Spinner } from '../components/Icons'
+import { RssCategoriesField } from '../components/settings/RssCategoriesField'
 import { BrandRoutesField, DirRoutesField } from '../components/settings/RouteEditors'
 import { useApiTokenConfigured } from '../lib/apiToken'
+import type { RssCategoryRow } from '../lib/settings/rssCategories'
+import { fromRssCategories, toRssCategories } from '../lib/settings/rssCategories'
 import type { BrandRoute, DirRoute } from '../lib/settings/routes'
 import { assertDisjointSources, fromBrandRoutes, fromDirRoutes, toBrandRoutes, toDirRoutes } from '../lib/settings/routes'
 import type { ConfigSection } from '../types'
 
-type FieldKind = 'text' | 'secret' | 'boolean' | 'number' | 'lines' | 'cron' | 'dir-routes' | 'brand-routes'
+type FieldKind =
+  | 'text'
+  | 'secret'
+  | 'boolean'
+  | 'number'
+  | 'lines'
+  | 'cron'
+  | 'dir-routes'
+  | 'brand-routes'
+  | 'rss-categories'
 
-type FormValue = string | boolean | DirRoute[] | BrandRoute[]
+type FormValue = string | boolean | DirRoute[] | BrandRoute[] | RssCategoryRow[]
 
 interface FieldSpec {
   key: string
@@ -47,13 +59,6 @@ const SECTION_SPECS: SectionSpec[] = [
       { key: 'address', label: '服务地址', kind: 'text', placeholder: 'clouddrive.internal:19798' },
       { key: 'api_token', label: 'API Token', kind: 'secret' },
       { key: 'secure', label: '使用 TLS 连接', kind: 'boolean' },
-      {
-        key: 'task_dir_path',
-        label: '离线任务目录',
-        kind: 'text',
-        placeholder: '/115/task',
-        hint: '唯一的离线目录配置：RSS 摄取把全部磁力离线到这个云端目录。它的本机挂载路径应配置为归档整理的某个来源子目录路由，下载追踪会在路由表中定位完成的下载并按该路由归档。',
-      },
     ],
   },
   {
@@ -135,8 +140,12 @@ const SECTION_SPECS: SectionSpec[] = [
     fields: [
       { key: 'enabled', label: '启用定时调度', kind: 'boolean' },
       { key: 'interval_seconds', label: '运行间隔（秒）', kind: 'number' },
-      { key: 'actor_label', label: 'Actor 标签名', kind: 'text' },
-      { key: 'rank_label', label: 'Rank 标签名', kind: 'text' },
+      {
+        key: 'categories',
+        label: '分类与离线目录',
+        kind: 'rss-categories',
+        hint: '每行一个 FreshRSS 分类，以及该分类的 115 离线目录（CloudDrive 云端路径，必填）。每次定时运行会依次拉取所有分类。每个离线目录都要在归档整理里配一条对应的来源子目录路由，完成的下载才会被归档；多个分类可以共用一个目录。删除分类前请确认它没有正在下载的任务——下载追踪只轮询这里列出的目录。',
+      },
       { key: 'failed_avid_cooldown_seconds', label: '失败番号冷却（秒）', kind: 'number' },
     ],
   },
@@ -167,7 +176,7 @@ const SECTION_SPECS: SectionSpec[] = [
         key: 'mapping',
         label: '普通子目录路由',
         kind: 'dir-routes',
-        hint: '每条规则整理一个来源子目录，并把视频按厂牌分目录放进对应的目标子目录；番号已归档在优先目标子目录时会跳过并保留来源文件。两张表都为空时归档不会运行。CloudDrive 离线任务目录的挂载位置也应是其中一条路由的来源子目录，下载追踪按该路由归档完成的下载。',
+        hint: '每条规则整理一个来源子目录，并把视频按厂牌分目录放进对应的目标子目录；番号已归档在优先目标子目录时会跳过并保留来源文件。两张表都为空时归档不会运行。每个离线目录（默认的和各 RSS 分类的）的挂载位置都应是其中一条路由的来源子目录，下载追踪按该路由归档完成的下载。来源子目录可以嵌套（如 embyx_in 与 embyx_in/rank 各一条），外层路由会跳过内层路由的目录。',
         rootKeys: { src: 'src_dir', dst: 'dst_dir' },
       },
       {
@@ -248,6 +257,8 @@ function toFormValue(kind: FieldKind, value: unknown): FormValue {
       return toDirRoutes(value)
     case 'brand-routes':
       return toBrandRoutes(value)
+    case 'rss-categories':
+      return toRssCategories(value)
     case 'number':
       return value === null || value === undefined ? '' : String(value)
     default:
@@ -273,6 +284,8 @@ function fromFormValue(kind: FieldKind, raw: FormValue): unknown {
       return fromDirRoutes(raw as DirRoute[])
     case 'brand-routes':
       return fromBrandRoutes(raw as BrandRoute[])
+    case 'rss-categories':
+      return fromRssCategories(raw as RssCategoryRow[])
     default:
       return String(raw)
   }
@@ -369,6 +382,20 @@ function SectionForm({ spec, data, onSaved, onUnauthorized }: SectionFormProps) 
                 />
                 <span>{field.label}</span>
               </label>
+            )
+          }
+          if (field.kind === 'rss-categories') {
+            return (
+              <div key={field.key} className="settings-field wide" role="group" aria-labelledby={`${id}-label`}>
+                <span className="settings-label" id={`${id}-label`}>
+                  {field.label}
+                </span>
+                <RssCategoriesField
+                  rows={form[field.key] as RssCategoryRow[]}
+                  onChange={(rows) => setForm((current) => ({ ...current, [field.key]: rows }))}
+                />
+                {field.hint && <p className="settings-hint">{field.hint}</p>}
+              </div>
             )
           }
           if (field.kind === 'dir-routes' || field.kind === 'brand-routes') {

@@ -190,10 +190,23 @@ class ArchivePipeline:
         self._avid = avid_parser
         self.src_dir = Path(config.src_dir)
         self.dst_dir = Path(config.dst_dir)
+        self._route_roots = frozenset(
+            self.src_dir / source for table in (config.priority_mapping, config.mapping) for source in table
+        )
 
     def avid_of(self, name: str) -> str:
         """The AVID a file or folder name reads as; '' when none can be read."""
         return self._avid.get_avid(name)
+
+    def covers_other_route(self, folder: Path, *, route_root: Path) -> bool:
+        """Whether a folder in one route is, or contains, another route's source.
+
+        Routes nest when a category downloads into a subdirectory of the shared
+        inbox. The outer route must leave that subdirectory alone: archiving it
+        as if it were a download would file one video out of everything inside
+        and then delete the whole directory.
+        """
+        return any(other != route_root and (other == folder or folder in other.parents) for other in self._route_roots)
 
     # -- the full scan -------------------------------------------------------
 
@@ -219,8 +232,12 @@ class ArchivePipeline:
         entries = sorted(root.iterdir())
         for folder in entries:
             ctx.check_cancelled()
-            if folder.is_dir():
-                self.archive_folder(folder, dst_subdir, ctx, priority=priority)
+            if not folder.is_dir():
+                continue
+            if self.covers_other_route(folder, route_root=root):
+                ctx.info('skipping %s, it is another route of its own', _display(folder, self.src_dir))
+                continue
+            self.archive_folder(folder, dst_subdir, ctx, priority=priority)
         loose = [entry for entry in entries if is_video(entry)]
         if loose:
             self._archive_loose_videos(root, loose, dst_subdir, ctx, priority=priority)

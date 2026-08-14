@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 
 import asyncpg
 
-CURRENT_SCHEMA_VERSION = 7
+CURRENT_SCHEMA_VERSION = 8
 
 # Advisory-lock key space for embyx-manager; low word selects the resource.
 ADVISORY_NAMESPACE = 0x454D4258  # 'EMBX'
@@ -360,4 +360,71 @@ _MIGRATIONS[7] = (
     SET value_json = (value_json::jsonb - 'task_dir_local' - 'task_dst' - 'task_priority')::text
     WHERE section = 'archive'
     """,
+)
+
+# RSS categories become a list, each naming its own offline directory, so a feed
+# category can download somewhere other than the shared inbox and be filed by an
+# archive route of its own. The single clouddrive.task_dir_path goes away with
+# it: every category says where its downloads go, so there is nothing left for a
+# shared default to mean.
+#
+# Everything below inherits that one directory, which is where these deployments
+# were already downloading, so the upgrade changes no behaviour: the two fixed
+# labels become the first two categories pointing at it, and the acquisitions in
+# flight keep the directory they were submitted to.
+_MIGRATIONS[8] = (
+    # The directory an AVID's magnets were submitted to, pinned at discovery so a
+    # retry still goes where its siblings went after its category is edited.
+    'ALTER TABLE archive_acquisitions ADD COLUMN task_dir_path TEXT',
+    """
+    UPDATE archive_acquisitions
+    SET task_dir_path = (
+        SELECT NULLIF(trim(value_json::jsonb ->> 'task_dir_path'), '')
+        FROM app_config WHERE section = 'clouddrive'
+    )
+    """,
+    # The labels are rewritten defensively because the old fields had no
+    # validators. A stored blank becomes the shipped default rather than an empty
+    # label, and a deployment that pointed both fields at one category collapses
+    # to a single entry; either would fail the new validators, and a section that
+    # fails validation reverts to defaults (see config/store.py), which here would
+    # silently leave RSS with no categories at all.
+    """
+    UPDATE app_config
+    SET value_json = (
+        (value_json::jsonb - 'actor_label' - 'rank_label')
+        || jsonb_build_object('categories', COALESCE((
+            SELECT jsonb_agg(jsonb_build_object('label', label, 'task_dir_path', inbox.path) ORDER BY ord)
+            FROM (
+                SELECT DISTINCT ON (label) label, ord
+                FROM unnest(ARRAY[
+                    COALESCE(NULLIF(trim(value_json::jsonb ->> 'actor_label'), ''), 'Actor'),
+                    COALESCE(NULLIF(trim(value_json::jsonb ->> 'rank_label'), ''), 'Rank')
+                ]) WITH ORDINALITY AS entries(label, ord)
+                ORDER BY label, ord
+            ) unique_labels
+            -- Both categories inherit the one directory. A deployment that never
+            -- configured it has nowhere to point them: the join drops every row
+            -- and it gets no categories, which the settings page asks for, rather
+            -- than categories that would fail validation.
+            CROSS JOIN (
+                SELECT NULLIF(trim(value_json::jsonb ->> 'task_dir_path'), '') AS path
+                FROM app_config WHERE section = 'clouddrive'
+            ) inbox
+            WHERE inbox.path IS NOT NULL
+        ), '[]'::jsonb))
+    )::text
+    WHERE section = 'rss'
+    """,
+    # Now that the categories carry it, the single shared directory has no reader
+    # left. Same forbid-and-default story as migrations 6 and 7: the key has to go
+    # or the whole CloudDrive section would read as unconfigured.
+    """
+    UPDATE app_config
+    SET value_json = (value_json::jsonb - 'task_dir_path')::text
+    WHERE section = 'clouddrive'
+    """,
+    # Sources are now free text: RSS records the category it came from as
+    # 'rss:<label>'. Rows written before this keep their legacy values.
+    'ALTER TABLE archive_acquisitions DROP CONSTRAINT archive_acquisitions_source_check',
 )

@@ -6,7 +6,6 @@ from fastapi.testclient import TestClient
 
 from embyx_manager.errors import ApiError
 from embyx_manager.monitor.acquisitions import (
-    AcquisitionSource,
     AcquisitionState,
     AttemptState,
     MagnetCandidate,
@@ -39,7 +38,7 @@ def make_record(run_id: str, pipeline: PipelineName, state: RunState = RunState.
 
 class FakeScheduler:
     def __init__(self) -> None:
-        self.triggered: list[tuple[PipelineName, bool]] = []
+        self.triggered: list[PipelineName] = []
         self.busy = False
         self.unconfigured_reason: str | None = None
         self.running: set[PipelineName] = set()
@@ -67,12 +66,12 @@ class FakeScheduler:
             ),
         )
 
-    async def trigger(self, pipeline: PipelineName, *, rank: bool = False) -> str:
+    async def trigger(self, pipeline: PipelineName) -> str:
         if self.unconfigured_reason is not None:
             raise PipelineNotConfiguredError(pipeline, self.unconfigured_reason)
         if self.busy:
             raise PipelineBusyError(pipeline)
-        self.triggered.append((pipeline, rank))
+        self.triggered.append(pipeline)
         return 'run-1'
 
     async def cancel_running(self, pipeline: PipelineName) -> bool:
@@ -127,16 +126,28 @@ def test_status_includes_latest_run() -> None:
     assert archive['last_run'] is None
 
 
-def test_trigger_passes_rank_flag() -> None:
+def test_trigger_starts_the_pipeline() -> None:
     scheduler = FakeScheduler()
     runs = FakeRuns([])
 
     with make_client(scheduler, runs) as client:
-        response = client.post('/api/monitor/rss/trigger', json={'rank': True})
+        response = client.post('/api/monitor/rss/trigger')
 
     assert response.status_code == 202
     assert response.json() == {'run_id': 'run-1'}
-    assert scheduler.triggered == [(PipelineName.RSS, True)]
+    assert scheduler.triggered == [PipelineName.RSS]
+
+
+def test_every_pipeline_can_be_triggered_by_hand() -> None:
+    """The archive scan in particular: its cron is a fallback, not the only way in."""
+    scheduler = FakeScheduler()
+    runs = FakeRuns([])
+
+    with make_client(scheduler, runs) as client:
+        codes = [client.post(f'/api/monitor/{name}/trigger').status_code for name in ('rss', 'archive', 'mapping')]
+
+    assert codes == [202, 202, 202]
+    assert scheduler.triggered == [PipelineName.RSS, PipelineName.ARCHIVE, PipelineName.MAPPING]
 
 
 def test_trigger_busy_and_unconfigured_and_unknown() -> None:
@@ -232,7 +243,7 @@ async def seed_ledger(**states: AcquisitionState) -> FakeLedger:
     ledger = FakeLedger()
     for avid, state in states.items():
         real_avid = avid.replace('_', '-')
-        await ledger.discover(real_avid, source=AcquisitionSource.RSS_ACTOR, now=NOW)
+        await ledger.discover(real_avid, source='rss:Actor', now=NOW)
         await ledger.add_attempts(
             real_avid,
             [MagnetCandidate(magnet=f'magnet:?xt=urn:btih:{HASH_A}', info_hash=HASH_A, source='sukebei')],
