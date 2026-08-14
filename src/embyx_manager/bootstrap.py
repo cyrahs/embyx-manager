@@ -289,8 +289,8 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         archive_config = store.get(ArchiveConfig)
         if not archive_config.enabled:
             return 'archive is disabled'
-        if not archive_config.tracker_configured:
-            return 'the archive task directory and destination must be configured'
+        if not archive_config.configured:
+            return 'archive source, destination, and routes must be configured'
         if cloud_handle.current() is None or not store.get(CloudDriveConfig).task_dir_path:
             return 'CloudDrive and its task directory must be configured'
         return None
@@ -325,14 +325,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
             ledger=ledger,
             cloud=cloud,
             archiver=archiver,
-            settings=TrackerSettings(
-                task_dir_path=clouddrive_config.task_dir_path,
-                task_dir_local=Path(archive_config.task_dir_local),
-                task_dst=archive_config.task_dst,
-                task_priority=archive_config.task_priority,
-                stall_timeout_hours=archive_config.stall_timeout_hours,
-                max_attempts=archive_config.max_attempts,
-            ),
+            settings=TrackerSettings.from_config(archive_config, task_dir_path=clouddrive_config.task_dir_path),
             submit_magnet=submit_magnet,
         )
         await tracker.poll(ctx)

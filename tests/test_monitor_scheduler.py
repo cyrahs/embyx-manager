@@ -1,12 +1,13 @@
 import asyncio
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
 
 from embyx_manager.config.models import SECTION_MODELS, ArchiveConfig, MappingConfig, RssConfig
 from embyx_manager.core.avid import AvidParser
+from embyx_manager.monitor import scheduler as scheduler_module
 from embyx_manager.monitor.mapping import MappingPipeline
 from embyx_manager.monitor.reports import PipelineName, RunContext, RunState, RunTrigger
 from embyx_manager.monitor.runs import PipelineRunRecord
@@ -14,6 +15,7 @@ from embyx_manager.monitor.scheduler import (
     MonitorScheduler,
     PipelineBusyError,
     PipelineNotConfiguredError,
+    _next_cron_fire,
 )
 
 
@@ -205,7 +207,7 @@ async def test_cancel_running_marks_run_cancelled() -> None:
     await scheduler.aclose()
 
 
-async def test_update_loop_runs_rss_then_archive_when_enabled() -> None:
+async def test_rss_loop_runs_on_its_interval_and_archive_waits_for_its_cron() -> None:
     store = FakeStore(
         rss=RssConfig(enabled=True, interval_seconds=3600),
         archive=ArchiveConfig(enabled=True, src_dir='/x', dst_dir='/y', mapping={'a': 'b'}),
@@ -215,16 +217,58 @@ async def test_update_loop_runs_rss_then_archive_when_enabled() -> None:
 
     await scheduler.start()
     for _ in range(100):
-        if runs.finished(PipelineName.RSS) and runs.finished(PipelineName.ARCHIVE):
+        if runs.finished(PipelineName.RSS):
             break
         await asyncio.sleep(0.02)
     await scheduler.aclose()
 
     rss_runs = runs.finished(PipelineName.RSS)
-    archive_runs = runs.finished(PipelineName.ARCHIVE)
     assert len(rss_runs) == 1
     assert rss_runs[0].trigger is RunTrigger.SCHEDULED
+    # The archive scan no longer piggybacks on the rss interval.
+    assert runs.finished(PipelineName.ARCHIVE) == []
+
+
+async def test_archive_scan_fires_when_its_cron_time_arrives(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(scheduler_module, 'CRON_POLL_SECONDS', 0.01)
+    store = FakeStore(archive=ArchiveConfig(enabled=True, src_dir='/x', dst_dir='/y', mapping={'a': 'b'}))
+    runs = FakeRuns()
+    scheduler = make_scheduler(store, runs)
+
+    await scheduler.start()
+    for _ in range(100):
+        if scheduler._next_archive_at is not None:  # noqa: SLF001
+            break
+        await asyncio.sleep(0.01)
+    # Pull the next fire into the past instead of waiting out a real minute.
+    scheduler._next_archive_at = datetime.now(UTC) - timedelta(seconds=1)  # noqa: SLF001
+    for _ in range(200):
+        if runs.finished(PipelineName.ARCHIVE):
+            break
+        await asyncio.sleep(0.02)
+    next_after_fire = scheduler._next_archive_at  # noqa: SLF001
+    await scheduler.aclose()
+
+    archive_runs = runs.finished(PipelineName.ARCHIVE)
     assert len(archive_runs) == 1
+    assert archive_runs[0].trigger is RunTrigger.SCHEDULED
+    assert next_after_fire is not None
+    assert next_after_fire > datetime.now(UTC)
+
+
+def test_next_cron_fire_returns_the_next_local_occurrence_in_utc() -> None:
+    base = datetime(2026, 8, 14, 3, 59, 30, tzinfo=UTC)
+    fire = _next_cron_fire('0 4 * * *', now=base)
+
+    assert fire is not None
+    assert fire.tzinfo is UTC
+    assert fire > base
+    local = fire.astimezone()
+    assert (local.hour, local.minute) == (4, 0)
+
+
+def test_next_cron_fire_schedules_nothing_for_an_unparsable_expression() -> None:
+    assert _next_cron_fire('every day at four') is None
 
 
 async def test_update_loop_skips_disabled_pipelines() -> None:

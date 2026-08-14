@@ -28,6 +28,7 @@ from pathlib import Path
 
 from embyx_manager.clients.clouddrive import AsyncCloudDrive
 from embyx_manager.clients.clouddrive.aio import OfflineStatus, OfflineTask
+from embyx_manager.config.models import ArchiveConfig
 from embyx_manager.monitor.acquisitions import (
     AcquisitionRepository,
     AcquisitionState,
@@ -44,23 +45,49 @@ SubmitMagnet = Callable[[str, str], Awaitable[bool]]
 
 
 @dataclass(frozen=True)
+class TrackerRoute:
+    """One archive route, resolved to the local directory it covers."""
+
+    root: Path
+    dst: str
+    priority: bool
+
+
+@dataclass(frozen=True)
 class TrackerSettings:
-    """Where finished downloads live and how patient the tracker is."""
+    """Where finished downloads live and how patient the tracker is.
+
+    The offline task directory is configured once, as the CloudDrive API path;
+    its local view is one of the archive routes. A finished download is located
+    in the route tables and filed by whichever route holds it, so the tracker
+    shares the scan's directory configuration instead of duplicating it.
+    """
 
     #: The CloudDrive API path the offline tasks are queued under.
     task_dir_path: str
-    #: The same directory as seen through the local mount.
-    task_dir_local: Path
-    #: Library subdirectory finished downloads are filed into.
-    task_dst: str
-    #: Whether those downloads claim AVIDs already held by a normal route.
-    task_priority: bool = False
+    #: The archive routes, priority routes first, resolved against src_dir.
+    routes: tuple[TrackerRoute, ...]
     stall_timeout_hours: int = 24
     max_attempts: int = 5
     #: How long CloudDrive is given to register a freshly submitted magnet. Until
     #: then its absence from the task list means nothing: a magnet submitted during
     #: this very poll cannot appear in the listing this poll already read.
     submit_grace_seconds: int = 300
+
+    @classmethod
+    def from_config(cls, config: ArchiveConfig, *, task_dir_path: str) -> 'TrackerSettings':
+        src_dir = Path(config.src_dir)
+        routes = tuple(
+            TrackerRoute(root=src_dir / source, dst=dst, priority=priority)
+            for table, priority in ((config.priority_mapping, True), (config.mapping, False))
+            for source, dst in table.items()
+        )
+        return cls(
+            task_dir_path=task_dir_path,
+            routes=routes,
+            stall_timeout_hours=config.stall_timeout_hours,
+            max_attempts=config.max_attempts,
+        )
 
 
 class AcquisitionTracker:
@@ -149,14 +176,26 @@ class AcquisitionTracker:
             # Another replica claimed it first.
             return
 
-        folder = self._settings.task_dir_local / str(task['name'])
         await self._refresh_mount(task, ctx)
+        located = await asyncio.to_thread(self._locate, str(task['name']), attempt.avid)
+        if located is None:
+            # Release the claim: the mount may simply not show the folder yet.
+            await self._ledger.transition_attempt(
+                attempt.avid,
+                attempt.attempt_no,
+                expected=AttemptState.ARCHIVING,
+                target=AttemptState.FINISHED,
+                now=datetime.now(UTC),
+            )
+            ctx.warning('finished task %s is not under any archive route yet', task['name'])
+            return
+        folder, route = located
         result = await asyncio.to_thread(
             self._archiver.archive_folder,
             folder,
-            self._settings.task_dst,
+            route.dst,
             ctx,
-            priority=self._settings.task_priority,
+            priority=route.priority,
             expected_avid=attempt.avid,
         )
         await self._settle(attempt, result, ctx)
@@ -290,31 +329,53 @@ class AcquisitionTracker:
                 continue
             if attempt.submitted_at is not None and now - attempt.submitted_at < grace:
                 continue
-            folder = await asyncio.to_thread(self._find_folder_for, attempt.avid)
-            if folder is not None:
+            located = await asyncio.to_thread(self._find_folder_for, attempt.avid)
+            if located is not None:
                 # The download did land; only its bookkeeping went away.
-                await self._archive_orphaned(attempt, folder, ctx)
+                await self._archive_orphaned(attempt, *located, ctx=ctx)
                 continue
             await self._give_up(attempt, AttemptState.LOST, 'CloudDrive no longer lists this task', ctx)
 
-    def _find_folder_for(self, avid: str) -> Path | None:
-        """The task folder holding this AVID, if the download is on the mount.
+    # -- locating a download in the routes ------------------------------------
+
+    def _locate(self, name: str, avid: str) -> tuple[Path, TrackerRoute] | None:
+        """The downloaded folder and the archive route holding it.
+
+        Every offline task lands in the one task directory, which the operator
+        lists among the archive routes; the exact task name is tried first, the
+        AVID second so a renamed folder is still found.
+        """
+        for route in self._settings.routes:
+            candidate = route.root / name
+            if candidate.is_dir():
+                return candidate, route
+        return self._find_folder_for(avid)
+
+    def _find_folder_for(self, avid: str) -> tuple[Path, TrackerRoute] | None:
+        """The route folder holding this AVID, if the download is on the mount.
 
         A vanished task takes its folder name with it, so the directory is
         matched by the AVID its name parses to rather than by name.
         """
-        root = self._settings.task_dir_local
-        if not root.is_dir():
-            return None
-        return next(
-            (folder for folder in sorted(root.iterdir()) if folder.is_dir() and self._avid_of(folder) == avid),
-            None,
-        )
+        for route in self._settings.routes:
+            if not route.root.is_dir():
+                continue
+            for folder in sorted(route.root.iterdir()):
+                if folder.is_dir() and self._avid_of(folder) == avid:
+                    return folder, route
+        return None
 
     def _avid_of(self, folder: Path) -> str:
         return self._archiver.avid_of(folder.name)
 
-    async def _archive_orphaned(self, attempt: MagnetAttemptRecord, folder: Path, ctx: RunContext) -> None:
+    async def _archive_orphaned(
+        self,
+        attempt: MagnetAttemptRecord,
+        folder: Path,
+        route: TrackerRoute,
+        *,
+        ctx: RunContext,
+    ) -> None:
         now = datetime.now(UTC)
         if not await self._ledger.transition_attempt(
             attempt.avid,
@@ -335,9 +396,9 @@ class AcquisitionTracker:
         result = await asyncio.to_thread(
             self._archiver.archive_folder,
             folder,
-            self._settings.task_dst,
+            route.dst,
             ctx,
-            priority=self._settings.task_priority,
+            priority=route.priority,
             expected_avid=attempt.avid,
         )
         await self._settle(attempt, result, ctx)
