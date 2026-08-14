@@ -191,6 +191,25 @@ class FakeLedger:
             if state in {AcquisitionState.DISCOVERED, AcquisitionState.DOWNLOADING}
         )
 
+    async def claim_attempt(self, avid: str, attempt_no: int, *, now: datetime) -> MagnetAttemptRecord | None:
+        for index, attempt in enumerate(self.attempts.get(avid, [])):
+            if attempt.attempt_no == attempt_no and attempt.state is AttemptState.PENDING:
+                claimed = _replace(attempt, state=AttemptState.SUBMITTED, submitted_at=now)
+                self.attempts[avid][index] = claimed
+                return claimed
+        return None
+
+    async def list_acquisitions(self, *, states=None, limit: int = 50, offset: int = 0):
+        wanted = set(states) if states is not None else None
+        rows = [avid for avid, state in self.states.items() if wanted is None or state in wanted]
+        return tuple([await self.get(avid) for avid in sorted(rows)][offset : offset + limit])
+
+    async def count_by_state(self) -> dict[AcquisitionState, int]:
+        counts: dict[AcquisitionState, int] = {}
+        for state in self.states.values():
+            counts[state] = counts.get(state, 0) + 1
+        return counts
+
     # -- assertions helpers -------------------------------------------------
 
     def attempt_states(self, avid: str) -> list[AttemptState]:

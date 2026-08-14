@@ -373,6 +373,21 @@ class AcquisitionRepository:
         )
         return _attempt_from_row(row) if row is not None else None
 
+    async def claim_attempt(self, avid: str, attempt_no: int, *, now: datetime) -> MagnetAttemptRecord | None:
+        """Take one specific pending attempt, for a magnet an operator chose."""
+        pool = await self._database.get_pool()
+        row = await pool.fetchrow(
+            """
+            UPDATE archive_magnet_attempts SET state = 'submitted', submitted_at = $3, updated_at = $3
+            WHERE avid = $1 AND attempt_no = $2 AND state = 'pending'
+            RETURNING *
+            """,
+            avid,
+            attempt_no,
+            now,
+        )
+        return _attempt_from_row(row) if row is not None else None
+
     async def transition_attempt(  # noqa: PLR0913 - mirrors the acquisition CAS
         self,
         avid: str,

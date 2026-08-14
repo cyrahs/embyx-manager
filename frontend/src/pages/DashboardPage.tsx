@@ -13,6 +13,7 @@ import {
   updateConfigSection,
 } from '../api'
 import type { AppContext } from '../App'
+import { AcquisitionPanel } from '../components/AcquisitionPanel'
 import { Notice } from '../components/Feedback'
 import { Spinner } from '../components/Icons'
 import type { PipelineId, PipelineStatus, RunDetail, RunSummary } from '../types'
@@ -297,6 +298,13 @@ export default function DashboardPage() {
           })}
         </div>
       </section>
+
+      <AcquisitionPanel
+        onUnauthorized={() => {
+          setAuthRequired(true)
+          requestApiToken()
+        }}
+      />
 
       <section className="panel dashboard-panel" aria-labelledby="runs-title">
         <div className="panel-heading">

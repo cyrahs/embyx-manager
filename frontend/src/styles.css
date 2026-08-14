@@ -638,3 +638,68 @@ main {
   .token-button { padding: 5px 8px; }
   .token-button .token-label { display: none; }
 }
+
+/* download tracking panel */
+.acq-muted {
+  color: var(--muted, #8b8b8b);
+  font-size: 0.9em;
+}
+
+.acq-filters {
+  margin: 0.75rem 0;
+}
+
+.stat-chip-on {
+  outline: 2px solid currentColor;
+}
+
+.stat-chip-count {
+  margin-left: 0.35rem;
+  opacity: 0.75;
+}
+
+.acq-progress {
+  position: relative;
+  display: inline-block;
+  min-width: 4.5rem;
+  height: 1.1rem;
+  border-radius: 0.55rem;
+  background: rgba(127, 127, 127, 0.2);
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.acq-progress-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: rgba(90, 160, 250, 0.45);
+}
+
+.acq-progress-text {
+  position: relative;
+  display: block;
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1.1rem;
+}
+
+.acq-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.acq-detail {
+  padding: 0.5rem 0 0.75rem;
+}
+
+.acq-magnet {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.acq-magnet input {
+  flex: 1;
+  min-width: 0;
+}

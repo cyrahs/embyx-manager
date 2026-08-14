@@ -45,7 +45,7 @@ from embyx_manager.fill_actor.postgres_repository import PostgresFillActorReposi
 from embyx_manager.fill_actor.service import FillActorPaths, FillActorRuntime, FillActorService
 from embyx_manager.locking import PostgresAdvisoryLock
 from embyx_manager.monitor.acquisitions import AcquisitionRepository
-from embyx_manager.monitor.api import create_monitor_router
+from embyx_manager.monitor.api import AcquisitionApi, create_monitor_router
 from embyx_manager.monitor.archive import ArchivePipeline
 from embyx_manager.monitor.mapping import MappingPipeline
 from embyx_manager.monitor.reconcile import ReconcileScanner
@@ -295,6 +295,25 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
             return 'CloudDrive and its task directory must be configured'
         return None
 
+    async def submit_magnet(avid: str, magnet: str) -> bool:
+        """Queue one magnet at CloudDrive; shared by the tracker and the dashboard."""
+        cloud = cloud_handle.current()
+        if cloud is None:
+            return False
+        try:
+            result = await cloud.add_offline_files([magnet], store.get(CloudDriveConfig).task_dir_path)
+        except grpc.RpcError as exc:
+            # Already queued at CloudDrive: the hash is what we track, so this
+            # counts as submitted either way.
+            if '任务已存在' in (exc.details() or ''):
+                return True
+            LOGGER.exception('failed to add a magnet for %s', avid)
+            return False
+        except Exception:
+            LOGGER.exception('failed to add a magnet for %s', avid)
+            return False
+        return bool(getattr(result, 'success', False))
+
     async def tracker_poll(ctx: RunContext) -> None:
         cloud = cloud_handle.current()
         if cloud is None:
@@ -302,22 +321,6 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         archive_config = store.get(ArchiveConfig)
         clouddrive_config = store.get(CloudDriveConfig)
         archiver = ArchivePipeline(config=archive_config, avid_parser=avid_handle.current())
-
-        async def submit_magnet(avid: str, magnet: str) -> bool:
-            try:
-                result = await cloud.add_offline_files([magnet], clouddrive_config.task_dir_path)
-            except grpc.RpcError as exc:
-                # Already queued at CloudDrive: the hash is what we track, so this
-                # counts as submitted either way.
-                if '任务已存在' in (exc.details() or ''):
-                    return True
-                ctx.exception('failed to add a magnet for %s', avid)
-                return False
-            except Exception:  # noqa: BLE001
-                ctx.exception('failed to add a magnet for %s', avid)
-                return False
-            return bool(getattr(result, 'success', False))
-
         tracker = AcquisitionTracker(
             ledger=ledger,
             cloud=cloud,
@@ -354,7 +357,16 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         tracker_poll=tracker_poll,
         tracker_ready=tracker_ready,
     )
-    monitor_router = create_monitor_router(scheduler, pipeline_runs, mutation_auth=mutation_auth)
+    monitor_router = create_monitor_router(
+        scheduler,
+        pipeline_runs,
+        mutation_auth=mutation_auth,
+        acquisitions=AcquisitionApi(
+            ledger=ledger,
+            submit_magnet=submit_magnet,
+            tracker_ready=tracker_ready,
+        ),
+    )
 
     @asynccontextmanager
     async def runtime_lifespan() -> AsyncIterator[None]:
