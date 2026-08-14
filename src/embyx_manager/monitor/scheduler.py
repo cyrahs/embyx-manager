@@ -117,7 +117,7 @@ class MonitorScheduler:
         *,
         store: ConfigStore,
         runs: PipelineRunRepository,
-        rss_runner: Callable[[RunContext, bool], object],
+        rss_runner: Callable[[RunContext], object],
         archive_runner: Callable[[RunContext], object],
         mapping_factory: Callable[[], object],
         rss_ready: Callable[[], str | None],
@@ -128,7 +128,7 @@ class MonitorScheduler:
     ) -> None:
         """Runner callables execute one pipeline pass.
 
-        ``rss_runner(ctx, rank)`` and ``archive_runner(ctx)`` return awaitables;
+        ``rss_runner(ctx)`` and ``archive_runner(ctx)`` return awaitables;
         ``mapping_factory()`` builds a MappingPipeline-compatible object from the
         current configuration. ``*_ready()`` return None when runnable or a
         human-readable reason string when not.
@@ -188,7 +188,7 @@ class MonitorScheduler:
 
     # -- public API ----------------------------------------------------------
 
-    async def trigger(self, pipeline: PipelineName, *, rank: bool = False) -> str:
+    async def trigger(self, pipeline: PipelineName) -> str:
         reason = self._ready[pipeline]()
         if reason is not None:
             raise PipelineNotConfiguredError(pipeline, reason)
@@ -196,7 +196,7 @@ class MonitorScheduler:
             raise PipelineBusyError(pipeline)
         started: asyncio.Future[str] = asyncio.get_running_loop().create_future()
         task = asyncio.create_task(
-            self._execute(pipeline, RunTrigger.MANUAL, rank=rank, started=started),
+            self._execute(pipeline, RunTrigger.MANUAL, started=started),
             name=f'manual-{pipeline.value}',
         )
         self._tasks.append(task)
@@ -241,7 +241,6 @@ class MonitorScheduler:
         pipeline: PipelineName,
         trigger: RunTrigger,
         *,
-        rank: bool = False,
         started: asyncio.Future[str] | None = None,
         incremental_batch: tuple[set[Path], set[Path]] | None = None,
     ) -> RunState | None:
@@ -265,7 +264,7 @@ class MonitorScheduler:
             state = RunState.COMPLETED
             try:
                 if pipeline is PipelineName.RSS:
-                    await self._rss_runner(ctx, rank)
+                    await self._rss_runner(ctx)
                 elif pipeline is PipelineName.ARCHIVE:
                     await self._archive_runner(ctx)
                 elif incremental_batch is not None:

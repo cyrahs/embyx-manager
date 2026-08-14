@@ -37,11 +37,20 @@ class AcquisitionState(StrEnum):
 
 
 class AcquisitionSource(StrEnum):
-    RSS_ACTOR = 'rss_actor'
-    RSS_RANK = 'rss_rank'
     MANUAL = 'manual'
     RECONCILE = 'reconcile'
     FILL_ACTOR = 'fill_actor'
+
+
+#: RSS sources carry the category they came from, so the set is open-ended and
+#: cannot be an enum. Rows written before categories existed hold the two fixed
+#: values 'rss_actor' and 'rss_rank', which stay readable as plain strings.
+RSS_SOURCE_PREFIX = 'rss:'
+
+
+def rss_source(label: str) -> str:
+    """The ledger source for items ingested from one FreshRSS category."""
+    return f'{RSS_SOURCE_PREFIX}{label}'
 
 
 class AttemptState(StrEnum):
@@ -172,12 +181,14 @@ class MagnetCandidate:
 class AcquisitionRecord:
     avid: str
     state: AcquisitionState
-    source: AcquisitionSource
+    source: str
     note: str | None
     archived_paths: tuple[str, ...]
     next_action_at: datetime | None
     created_at: datetime
     updated_at: datetime
+    #: The offline directory this AVID's magnets go to; None means the default.
+    task_dir_path: str | None = None
 
 
 @dataclass(frozen=True)
@@ -201,22 +212,33 @@ class AcquisitionRepository:
 
     # -- discovery ---------------------------------------------------------
 
-    async def discover(self, avid: str, *, source: AcquisitionSource, now: datetime) -> bool:
+    async def discover(
+        self,
+        avid: str,
+        *,
+        source: str,
+        now: datetime,
+        task_dir_path: str | None = None,
+    ) -> bool:
         """Record an AVID sighting; return whether it still needs magnets resolved.
 
         False means someone already owns this AVID: it is downloading, archived,
         ignored, waiting on an operator, or cooling down after a failed resolve.
+
+        ``task_dir_path`` pins the offline directory this AVID's magnets go to;
+        None leaves it on the default directory of the moment.
         """
         pool = await self._database.get_pool()
         inserted = await pool.fetchval(
             """
-            INSERT INTO archive_acquisitions (avid, state, source, created_at, updated_at)
-            VALUES ($1, 'discovered', $2, $3, $3)
+            INSERT INTO archive_acquisitions (avid, state, source, task_dir_path, created_at, updated_at)
+            VALUES ($1, 'discovered', $2, $3, $4, $4)
             ON CONFLICT (avid) DO NOTHING
             RETURNING avid
             """,
             avid,
-            source.value,
+            str(source),
+            task_dir_path,
             now,
         )
         if inserted is not None:
@@ -225,10 +247,20 @@ class AcquisitionRepository:
         if existing is None:  # deleted between the insert and the read
             return True
         if existing.state is AcquisitionState.DISCOVERED:
-            return True
-        if existing.state in RETRYABLE_STATES:
-            return existing.next_action_at is None or existing.next_action_at <= now
-        return False
+            accepted = True
+        elif existing.state in RETRYABLE_STATES:
+            accepted = existing.next_action_at is None or existing.next_action_at <= now
+        else:
+            return False
+        if accepted and task_dir_path is not None and existing.task_dir_path != task_dir_path:
+            # The retry follows whichever category just re-discovered it, so
+            # repointing a category takes effect from its next pass.
+            await pool.execute(
+                'UPDATE archive_acquisitions SET task_dir_path = $2 WHERE avid = $1',
+                avid,
+                task_dir_path,
+            )
+        return accepted
 
     async def get(self, avid: str) -> AcquisitionRecord | None:
         pool = await self._database.get_pool()
@@ -535,12 +567,13 @@ def _acquisition_from_row(row: asyncpg.Record) -> AcquisitionRecord:
     return AcquisitionRecord(
         avid=row['avid'],
         state=AcquisitionState(row['state']),
-        source=AcquisitionSource(row['source']),
+        source=row['source'],
         note=row['note'],
         archived_paths=tuple(json.loads(row['archived_paths_json'])),
         next_action_at=row['next_action_at'],
         created_at=row['created_at'],
         updated_at=row['updated_at'],
+        task_dir_path=row['task_dir_path'],
     )
 
 

@@ -71,7 +71,7 @@ async def test_a_growing_folder_is_left_for_the_next_pass(tmp_path: Path) -> Non
 
 async def test_folders_the_tracker_owns_are_left_alone(tmp_path: Path) -> None:
     scanner, ledger, _ = build(tmp_path)
-    await ledger.discover('ABC-123', source=AcquisitionSource.RSS_ACTOR, now=now_stub())
+    await ledger.discover('ABC-123', source='rss:Actor', now=now_stub())
     ledger.states['ABC-123'] = AcquisitionState.DOWNLOADING
     folder = tmp_path / 'task' / 'intake' / 'ABC-123 release'
     write_video(folder / 'ABC-123.mp4')
@@ -124,7 +124,7 @@ async def test_a_missing_route_source_is_not_a_failure(tmp_path: Path) -> None:
 
 async def test_an_archived_avid_is_not_downgraded_by_a_later_scan(tmp_path: Path) -> None:
     scanner, ledger, _ = build(tmp_path)
-    await ledger.discover('ABC-123', source=AcquisitionSource.RSS_ACTOR, now=now_stub())
+    await ledger.discover('ABC-123', source='rss:Actor', now=now_stub())
     ledger.states['ABC-123'] = AcquisitionState.ARCHIVED
     folder = tmp_path / 'task' / 'intake' / 'ABC-123 leftover'
     write_video(folder / 'ABC-123.mp4')
@@ -133,3 +133,17 @@ async def test_an_archived_avid_is_not_downgraded_by_a_later_scan(tmp_path: Path
     await scanner.run(make_ctx())
 
     assert ledger.states['ABC-123'] is AcquisitionState.ARCHIVED
+
+
+async def test_a_nested_route_is_left_to_its_own_scan(tmp_path: Path) -> None:
+    """The scan must not measure or archive another route's source directory."""
+    scanner, ledger, _ = build(tmp_path, mapping={'intake': 'sorted', 'intake/rank': 'sorted/rank'})
+    nested = tmp_path / 'task' / 'intake' / 'rank'
+    write_video(nested / 'DEF-456 release' / 'DEF-456.mp4')
+
+    await scanner.run(make_ctx())
+    await scanner.run(make_ctx())
+
+    assert nested.is_dir()
+    assert (tmp_path / 'library' / 'sorted' / 'rank' / 'DEF' / 'DEF-456.mp4').exists()
+    assert ledger.states['DEF-456'] is AcquisitionState.ARCHIVED

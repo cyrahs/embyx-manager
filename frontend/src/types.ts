@@ -178,7 +178,8 @@ export type AttemptState =
 export interface Acquisition {
   avid: string
   state: AcquisitionState
-  source: 'rss_actor' | 'rss_rank' | 'manual' | 'reconcile' | 'fill_actor'
+  /** 'manual', 'reconcile', 'fill_actor', or 'rss:<category>'; older rows hold 'rss_actor'/'rss_rank'. */
+  source: string
   note: string | null
   archived_paths: string[]
   next_action_at: string | null

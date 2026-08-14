@@ -7,11 +7,10 @@ from unittest.mock import AsyncMock
 import grpc
 import pytest
 
-from embyx_manager.config.models import RssConfig
+from embyx_manager.config.models import RssCategory, RssConfig
 from embyx_manager.core.avid import AvidParser
 from embyx_manager.monitor.acquisitions import (
     AcquisitionRecord,
-    AcquisitionSource,
     AcquisitionState,
     AttemptState,
     MagnetAttemptRecord,
@@ -25,6 +24,7 @@ HASH_B = 'D23FE1C06BBA254A9DC9F519B335AA7C1367A88B'
 HASH_C = 'E34FE1C06BBA254A9DC9F519B335AA7C1367A88C'
 MAGNET_A = f'magnet:?xt=urn:btih:{HASH_A}&dn=ABC-123'
 MAGNET_B = f'magnet:?xt=urn:btih:{HASH_B}&dn=ABC-123'
+TASK_DIR = '/115/task'
 
 
 def make_ctx() -> RunContext:
@@ -40,23 +40,36 @@ class FakeLedger:
 
     def __init__(self, *, known: dict[str, AcquisitionState] | None = None) -> None:
         self.states: dict[str, AcquisitionState] = dict(known or {})
-        self.sources: dict[str, AcquisitionSource] = {}
+        self.sources: dict[str, str] = {}
         self.notes: dict[str, str | None] = {}
         self.next_action_at: dict[str, datetime | None] = {}
         self.attempts: dict[str, list[MagnetAttemptRecord]] = {}
+        self.task_dirs: dict[str, str | None] = {}
 
-    async def discover(self, avid: str, *, source: AcquisitionSource, now: datetime) -> bool:
+    async def discover(
+        self,
+        avid: str,
+        *,
+        source: str,
+        now: datetime,
+        task_dir_path: str | None = None,
+    ) -> bool:
         if avid not in self.states:
             self.states[avid] = AcquisitionState.DISCOVERED
             self.sources[avid] = source
+            self.task_dirs[avid] = task_dir_path
             return True
         state = self.states[avid]
         if state is AcquisitionState.DISCOVERED:
-            return True
-        if state in {AcquisitionState.RESOLVE_FAILED, AcquisitionState.EXHAUSTED}:
+            accepted = True
+        elif state in {AcquisitionState.RESOLVE_FAILED, AcquisitionState.EXHAUSTED}:
             due = self.next_action_at.get(avid)
-            return due is None or due <= now
-        return False
+            accepted = due is None or due <= now
+        else:
+            return False
+        if accepted and task_dir_path is not None:
+            self.task_dirs[avid] = task_dir_path
+        return accepted
 
     async def get(self, avid: str) -> AcquisitionRecord | None:
         if avid not in self.states:
@@ -64,12 +77,13 @@ class FakeLedger:
         return AcquisitionRecord(
             avid=avid,
             state=self.states[avid],
-            source=self.sources.get(avid, AcquisitionSource.RSS_ACTOR),
+            source=self.sources.get(avid, 'rss:Actor'),
             note=self.notes.get(avid),
             archived_paths=(),
             next_action_at=self.next_action_at.get(avid),
             created_at=now_stub(),
             updated_at=now_stub(),
+            task_dir_path=self.task_dirs.get(avid),
         )
 
     async def transition(
@@ -244,16 +258,29 @@ def make_item(item_id: str, title: str, magnet_html: str = '') -> dict:
 
 def make_pipeline(
     *,
-    items: list[dict],
+    items: list[dict] | None = None,
+    items_by_label: dict[str, list[dict]] | None = None,
+    categories: tuple[RssCategory, ...] = (RssCategory(label='Actor', task_dir_path=TASK_DIR),),
     sukebei_magnets: dict[str, str] | None = None,
     javbus_magnets: dict[str, list[dict]] | None = None,
     ledger: FakeLedger | None = None,
     add_result: object | None = None,
     add_side_effect: Exception | list[object] | None = None,
+    freshrss_side_effect: object | None = None,
 ) -> tuple[RssPipeline, SimpleNamespace]:
     deps = SimpleNamespace()
     deps.ledger = ledger or FakeLedger()
-    deps.freshrss = SimpleNamespace(get_items=AsyncMock(return_value=items), read_items=AsyncMock())
+    if freshrss_side_effect is not None:
+        get_items = AsyncMock(side_effect=freshrss_side_effect)
+    elif items_by_label is not None:
+
+        async def by_label(label: str) -> list[dict]:
+            return items_by_label.get(label, [])
+
+        get_items = AsyncMock(side_effect=by_label)
+    else:
+        get_items = AsyncMock(return_value=items or [])
+    deps.freshrss = SimpleNamespace(get_items=get_items, read_items=AsyncMock())
 
     async def sukebei_get(avid: str) -> str | None:
         return (sukebei_magnets or {}).get(avid)
@@ -271,13 +298,12 @@ def make_pipeline(
             add_offline_files=AsyncMock(return_value=add_result or SimpleNamespace(success=True)),
         )
     pipeline = RssPipeline(
-        config=RssConfig(enabled=True),
+        config=RssConfig(enabled=True, categories=categories),
         avid_parser=AvidParser(),
         freshrss=deps.freshrss,
         cloud=deps.cloud,
         sukebei=deps.sukebei,
         javbus=deps.javbus,
-        task_dir_path='/115/task',
         ledger=deps.ledger,
     )
     return pipeline, deps
@@ -462,13 +488,85 @@ async def test_unparseable_titles_are_reported_and_left_unread() -> None:
     assert any('Failed to get avid' in line for line in ctx.log_tail)
 
 
-async def test_rank_runs_are_recorded_under_their_own_source() -> None:
+async def test_each_category_is_recorded_under_its_own_source() -> None:
     pipeline, deps = make_pipeline(
-        items=[make_item('item-1', 'ABC-123')],
-        sukebei_magnets={'ABC-123': MAGNET_A},
+        items_by_label={'Actor': [make_item('item-1', 'ABC-123')], 'Rank': [make_item('item-2', 'DEF-456')]},
+        categories=(
+            RssCategory(label='Actor', task_dir_path=TASK_DIR),
+            RssCategory(label='Rank', task_dir_path=TASK_DIR),
+        ),
+        sukebei_magnets={'ABC-123': MAGNET_A, 'DEF-456': MAGNET_B},
     )
 
-    await pipeline.run(make_ctx(), rank=True)
+    await pipeline.run(make_ctx())
 
-    assert deps.ledger.sources['ABC-123'] is AcquisitionSource.RSS_RANK
-    deps.freshrss.get_items.assert_awaited_once_with('Rank')
+    assert deps.ledger.sources == {'ABC-123': 'rss:Actor', 'DEF-456': 'rss:Rank'}
+    assert [call.args[0] for call in deps.freshrss.get_items.await_args_list] == ['Actor', 'Rank']
+
+
+async def test_a_category_downloads_into_its_own_directory() -> None:
+    pipeline, deps = make_pipeline(
+        items_by_label={'Actor': [make_item('item-1', 'ABC-123')], 'Rank': [make_item('item-2', 'DEF-456')]},
+        categories=(
+            RssCategory(label='Actor', task_dir_path=TASK_DIR),
+            RssCategory(label='Rank', task_dir_path='/115/embyx_in/rank'),
+        ),
+        sukebei_magnets={'ABC-123': MAGNET_A, 'DEF-456': MAGNET_B},
+    )
+
+    await pipeline.run(make_ctx())
+
+    submitted = {call.args[0][0]: call.args[1] for call in deps.cloud.add_offline_files.await_args_list}
+    assert submitted == {MAGNET_A: TASK_DIR, MAGNET_B: '/115/embyx_in/rank'}
+    # Each AVID carries its category's directory, so a later retry follows it.
+    assert deps.ledger.task_dirs == {'ABC-123': TASK_DIR, 'DEF-456': '/115/embyx_in/rank'}
+
+
+async def test_no_categories_ingests_nothing() -> None:
+    pipeline, deps = make_pipeline(items=[make_item('item-1', 'ABC-123')], categories=())
+
+    await pipeline.run(make_ctx())
+
+    deps.freshrss.get_items.assert_not_awaited()
+    assert deps.ledger.states == {}
+
+
+async def test_one_failing_category_does_not_cost_the_others_their_pass() -> None:
+    pipeline, deps = make_pipeline(
+        freshrss_side_effect=[RuntimeError('freshrss is down'), [make_item('item-2', 'DEF-456')]],
+        categories=(
+            RssCategory(label='Actor', task_dir_path=TASK_DIR),
+            RssCategory(label='Rank', task_dir_path=TASK_DIR),
+        ),
+        sukebei_magnets={'DEF-456': MAGNET_B},
+    )
+
+    ctx = make_ctx()
+    await pipeline.run(ctx)
+
+    assert deps.ledger.states['DEF-456'] is AcquisitionState.DOWNLOADING
+    assert ctx.stats['categories_failed'] == 1
+
+
+async def test_stats_cover_every_category_in_the_run() -> None:
+    # Counters accumulate across categories; a later one must not overwrite the
+    # tally of the one before it.
+    pipeline, _ = make_pipeline(
+        items_by_label={
+            'Actor': [make_item('item-1', 'ABC-123')],
+            'Rank': [make_item('item-2', 'DEF-456'), make_item('item-3', 'GHI-789')],
+        },
+        categories=(
+            RssCategory(label='Actor', task_dir_path=TASK_DIR),
+            RssCategory(label='Rank', task_dir_path=TASK_DIR),
+        ),
+        sukebei_magnets={'ABC-123': MAGNET_A, 'DEF-456': MAGNET_B},
+    )
+
+    ctx = make_ctx()
+    await pipeline.run(ctx)
+
+    assert ctx.stats['items'] == 3
+    assert ctx.stats['unique_avids'] == 3
+    assert ctx.stats['magnets_found'] == 2
+    assert ctx.stats['magnets_added'] == 2

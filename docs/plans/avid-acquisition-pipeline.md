@@ -31,18 +31,19 @@
 
 部署后修订(2026-08-14):
 
-- **撤销"tracker 目的地独立配置"**:`task_dir_local`/`task_dst`/`task_priority` 与
-  `clouddrive.task_dir_path` 及路由表重复配置同一目录。现阶段离线目录只配置一处
-  (`clouddrive.task_dir_path`,RSS 全部离线到此),tracker 在归档路由表中定位完成的
+- **撤销"tracker 目的地独立配置"**:`task_dir_local`/`task_dst`/`task_priority` 与当时的
+  `clouddrive.task_dir_path` 及路由表重复配置同一目录。tracker 在归档路由表中定位完成的
   下载,落在哪条路由就按该路由的目标与优先级归档(迁移 v7 剥离旧键)。计划正文
-  §Step 6 的相关描述以此为准。
+  §Step 6 的相关描述以此为准。(离线目录本身在 v8 移到了 RSS 分类上,见下。)
 - 兜底扫描不再搭 RSS 间隔的车:新增 `archive.scan_cron`(cronsim 校验,服务器本地
   时间),调度器为归档单独开 cron 循环;设置页在 cron 输入下实时显示中文自然语言描述
   (cronstrue zh_CN)。
 - **Fill actor 成为账本输入源**:磁力解析与首次提交从 `RssPipeline` 抽为共享的
   `monitor/intake.py`(`AcquisitionIntake`),fill actor 扫描出的缺失番号不再返回磁力
   给前端复制,而是经 `AcquisitionGateway` 端口自动 discover→解析→提交离线
-  (`source='fill_actor'`,迁移 v8 扩展 source CHECK 并新增 `submitting` job 阶段),
+  (`source='fill_actor'`;source 列自迁移 v8 起为自由文本,无需扩展约束;迁移 v9
+  给 job 阶段 CHECK 加 `submitting`)。与 RSS 分类同理,fill actor 在
+  `fill_actor.task_dir_path` 显式声明自己的离线目录并入 tracker 轮询集合,
   后续生命周期全部由 tracker 接管;`rss.failed_avid_cooldown_seconds` 现在约束所有
   intake 来源的解析失败冷却。
 - **§Step 6 第 7 项的 resolver 补上接线**:tracker 每轮 poll 末尾跑
@@ -51,6 +52,30 @@
   `discovered` 态),一轮没提交上任何磁力时必须从记录当前状态续期冷却
   (`resolve_failed→resolve_failed` / `exhausted→resolve_failed`),否则过期的
   `next_action_at` 会让每一轮都重复捞起同一行。
+
+RSS 分类与离线目录(2026-08-14,迁移 v8):
+
+- **离线目录跟着分类走,`clouddrive.task_dir_path` 删除**。`rss.actor_label`/`rank_label`
+  两个固定字段改为 `rss.categories` 列表,每项 = {FreshRSS 分类名, 离线目录(必填)}。
+  这样一个 feed 分类可以离线到自己的目录,再经一条对应的归档路由进入独立的媒体库子目录。
+  没有共享默认值:目录决定了下载最终被哪条归档路由收走,留空会把"视频落在哪"变成隐式的。
+  多个分类可以共用同一个目录。迁移把旧的单一目录填进两个分类,行为不变。
+- **贯穿六层的 `rank: bool` 全部移除**,且没有替代的按分类限定参数:一次运行就是依次摄取
+  所有已配置分类(Rank 因此进入定时调度,不再只能手动触发),看板上也只有一个"立即运行"。
+  分类之间互相隔离,一个失败只计 `categories_failed` 并继续下一个。
+- **账本 source 改为自由文本**,新行写 `rss:<分类名>`;迁移 v8 移除 CHECK 约束,历史行的
+  `rss_actor`/`rss_rank` 保持可读。§下面 DDL 的 source 注释以此为准。
+- **`archive_acquisitions.task_dir_path`(可空)**:发现时写入该分类的目录。后续所有提交
+  (tracker 兜底重试、面板手动提交)以行内记录为准,配置改动或分类删除都不会把在途重试
+  甩到别的目录。仍为 NULL 的只有 reconcile 扫描建的行,它们手动补磁力时落在第一个分类的
+  目录——tracker 是按全部归档路由找完成的下载,所以落哪个已轮询的目录都不影响结果。
+- **tracker 轮询各分类目录**(去重),任务按所属目录打标签以便刷新挂载路径;同一 info_hash
+  在多个目录出现时只处理一次。**一个目录都没配时直接跳过本轮**:读不到列表是"没有证据",
+  而不是"所有任务都消失了",照常清扫会把在途任务全部判为 lost。
+- **嵌套路由防护**:离线目录嵌在共享收件目录里时(如 `embyx_in` 与 `embyx_in/rank` 各一条
+  路由),归档全量扫描与 reconcile 都会跳过"本身是其他路由根、或包含其他路由根"的子目录。
+  没有这层防护,外层路由会把内层目录当成一个下载文件夹:挑一个视频入库,然后把整个目录
+  连同其余下载一并删除。
 
 ## 原计划(v3)
 
@@ -154,10 +179,11 @@ CREATE TABLE archive_acquisitions (
         'discovered', 'downloading', 'archived',
         'resolve_failed', 'exhausted', 'needs_attention', 'ignored'
     )),
-    source TEXT NOT NULL,              -- rss_actor / rss_rank / manual / reconcile
+    source TEXT NOT NULL,              -- rss:<分类> / manual / reconcile;v8 前的行为 rss_actor / rss_rank
     note TEXT,                          -- needs_attention 的原因等
     archived_paths_json TEXT NOT NULL DEFAULT '[]',
     next_action_at TIMESTAMPTZ,        -- 冷却到期 / 停滞判定时间
+    task_dir_path TEXT,                -- v8 新增:发现时钉住的离线目录(reconcile 建的行为 NULL)
     created_at TIMESTAMPTZ NOT NULL,
     updated_at TIMESTAMPTZ NOT NULL
 );

@@ -38,12 +38,18 @@ const STATE_TONES: Partial<Record<AcquisitionState, string>> = {
   resolve_failed: 'failed',
 }
 
-const SOURCE_LABELS: Record<Acquisition['source'], string> = {
+const SOURCE_LABELS: Record<string, string> = {
   rss_actor: '演员订阅',
   rss_rank: '排行订阅',
   manual: '手动',
   reconcile: '目录扫描',
   fill_actor: '补全演员',
+}
+
+/** 'rss:<category>' renders as the category; fixed sources get their label. */
+function sourceLabel(source: string): string {
+  if (source.startsWith('rss:')) return `订阅 ${source.slice(4)}`
+  return SOURCE_LABELS[source] ?? source
 }
 
 const ATTEMPT_LABELS: Record<string, string> = {
@@ -125,7 +131,7 @@ function AcquisitionRow({
           {STATE_LABELS[item.state]}
         </span>
       </td>
-      <td className="acq-muted">{SOURCE_LABELS[item.source] ?? item.source}</td>
+      <td className="acq-muted">{sourceLabel(item.source)}</td>
       <td className="acq-muted">{item.note ?? '—'}</td>
       <td className="acq-muted">{formatTime(item.updated_at)}</td>
       <td onClick={(event) => event.stopPropagation()}>

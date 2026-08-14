@@ -105,7 +105,7 @@ def make_scheduler(
     archive_ready=ready,
     mapping_ready=ready,
 ) -> MonitorScheduler:
-    async def default_rss(ctx: RunContext, rank: bool) -> None:  # noqa: ARG001, FBT001
+    async def default_rss(ctx: RunContext) -> None:
         ctx.add('rss_runs')
 
     async def default_archive(ctx: RunContext) -> None:
@@ -143,7 +143,7 @@ async def test_trigger_rejects_concurrent_run() -> None:
     runs = FakeRuns()
     release = asyncio.Event()
 
-    async def blocking_rss(ctx: RunContext, rank: bool) -> None:  # noqa: ARG001, FBT001
+    async def blocking_rss(ctx: RunContext) -> None:  # noqa: ARG001
         await release.wait()
 
     scheduler = make_scheduler(store, runs, rss_runner=blocking_rss)
@@ -170,7 +170,7 @@ async def test_failed_run_is_recorded_with_errors() -> None:
     store = FakeStore()
     runs = FakeRuns()
 
-    async def broken_rss(ctx: RunContext, rank: bool) -> None:  # noqa: ARG001, FBT001
+    async def broken_rss(ctx: RunContext) -> None:  # noqa: ARG001
         msg = 'feed exploded'
         raise RuntimeError(msg)
 
@@ -189,7 +189,7 @@ async def test_cancel_running_marks_run_cancelled() -> None:
     runs = FakeRuns()
     started = asyncio.Event()
 
-    async def cancellable_rss(ctx: RunContext, rank: bool) -> None:  # noqa: ARG001, FBT001
+    async def cancellable_rss(ctx: RunContext) -> None:
         started.set()
         while True:
             ctx.check_cancelled()

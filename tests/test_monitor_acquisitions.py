@@ -11,6 +11,7 @@ from embyx_manager.monitor.acquisitions import (
     AttemptState,
     IllegalTransitionError,
     MagnetCandidate,
+    rss_source,
 )
 from tests.conftest import make_database, postgres_test_dsn
 
@@ -33,7 +34,7 @@ def candidate(name: str, *, source: str = 'sukebei', size: int | None = None) ->
 
 async def start_downloading(ledger: AcquisitionRepository, avid: str, *, count: int = 2) -> None:
     """Discover an AVID, give it candidates, and submit the first one."""
-    await ledger.discover(avid, source=AcquisitionSource.RSS_ACTOR, now=NOW)
+    await ledger.discover(avid, source=rss_source('Actor'), now=NOW)
     candidates = [candidate(f'{avid.replace("-", "")}hash{index}') for index in range(count)]
     await ledger.add_attempts(avid, candidates, now=NOW)
     await ledger.claim_next_pending(avid, now=NOW)
@@ -48,14 +49,14 @@ async def start_downloading(ledger: AcquisitionRepository, avid: str, *, count: 
 async def test_discover_inserts_then_reports_the_avid_as_taken() -> None:
     ledger = make_ledger()
 
-    assert await ledger.discover('ABC-123', source=AcquisitionSource.RSS_ACTOR, now=NOW) is True
+    assert await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW) is True
     # Still only discovered, so a second sighting should still ask for magnets.
-    assert await ledger.discover('ABC-123', source=AcquisitionSource.RSS_RANK, now=NOW) is True
+    assert await ledger.discover('ABC-123', source=rss_source('Rank'), now=NOW) is True
 
     record = await ledger.get('ABC-123')
     assert record is not None
     assert record.state is AcquisitionState.DISCOVERED
-    assert record.source is AcquisitionSource.RSS_ACTOR  # first sighting wins
+    assert record.source == 'rss:Actor'  # first sighting wins
 
     await ledger.transition(
         'ABC-123',
@@ -63,32 +64,35 @@ async def test_discover_inserts_then_reports_the_avid_as_taken() -> None:
         target=AcquisitionState.DOWNLOADING,
         now=NOW,
     )
-    assert await ledger.discover('ABC-123', source=AcquisitionSource.RSS_ACTOR, now=NOW) is False
+    assert await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW) is False
 
 
 async def test_discover_accepts_the_fill_actor_source() -> None:
-    # Exercises the migration-v8 source CHECK constraint.
     ledger = make_ledger()
 
-    assert await ledger.discover('ABC-123', source=AcquisitionSource.FILL_ACTOR, now=NOW) is True
+    assert (
+        await ledger.discover('ABC-123', source=AcquisitionSource.FILL_ACTOR, now=NOW, task_dir_path='/115/fill')
+        is True
+    )
 
     record = await ledger.get('ABC-123')
     assert record is not None
-    assert record.source is AcquisitionSource.FILL_ACTOR
+    assert record.source == AcquisitionSource.FILL_ACTOR
+    assert record.task_dir_path == '/115/fill'
 
 
 @pytest.mark.parametrize('state', [AcquisitionState.ARCHIVED, AcquisitionState.IGNORED])
 async def test_discover_skips_terminal_avids(state: AcquisitionState) -> None:
     ledger = make_ledger()
-    await ledger.discover('ABC-123', source=AcquisitionSource.RSS_ACTOR, now=NOW)
+    await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW)
     await ledger.transition('ABC-123', expected=AcquisitionState.DISCOVERED, target=state, now=NOW)
 
-    assert await ledger.discover('ABC-123', source=AcquisitionSource.RSS_ACTOR, now=NOW) is False
+    assert await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW) is False
 
 
 async def test_discover_respects_the_resolve_cooldown() -> None:
     ledger = make_ledger()
-    await ledger.discover('ABC-123', source=AcquisitionSource.RSS_ACTOR, now=NOW)
+    await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW)
     await ledger.transition(
         'ABC-123',
         expected=AcquisitionState.DISCOVERED,
@@ -97,13 +101,13 @@ async def test_discover_respects_the_resolve_cooldown() -> None:
         next_action_at=NOW + timedelta(hours=24),
     )
 
-    assert await ledger.discover('ABC-123', source=AcquisitionSource.RSS_ACTOR, now=NOW) is False
-    assert await ledger.discover('ABC-123', source=AcquisitionSource.RSS_ACTOR, now=NOW + timedelta(hours=25)) is True
+    assert await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW) is False
+    assert await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW + timedelta(hours=25)) is True
 
 
 async def test_transition_is_compare_and_set() -> None:
     ledger = make_ledger()
-    await ledger.discover('ABC-123', source=AcquisitionSource.RSS_ACTOR, now=NOW)
+    await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW)
 
     assert (
         await ledger.transition(
@@ -128,7 +132,7 @@ async def test_transition_is_compare_and_set() -> None:
 
 async def test_transition_rejects_edges_outside_the_state_machine() -> None:
     ledger = make_ledger()
-    await ledger.discover('ABC-123', source=AcquisitionSource.RSS_ACTOR, now=NOW)
+    await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW)
 
     with pytest.raises(IllegalTransitionError):
         await ledger.transition(
@@ -159,7 +163,7 @@ async def test_archiving_records_paths_with_the_state() -> None:
 
 async def test_add_attempts_numbers_sequentially_and_skips_known_hashes() -> None:
     ledger = make_ledger()
-    await ledger.discover('ABC-123', source=AcquisitionSource.RSS_ACTOR, now=NOW)
+    await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW)
 
     assert await ledger.add_attempts('ABC-123', [candidate('aaa'), candidate('bbb')], now=NOW) == 2
     # 'aaa' was already tried; only the new hash is appended.
@@ -173,7 +177,7 @@ async def test_add_attempts_numbers_sequentially_and_skips_known_hashes() -> Non
 
 async def test_claim_next_pending_hands_each_attempt_out_once() -> None:
     ledger = make_ledger()
-    await ledger.discover('ABC-123', source=AcquisitionSource.RSS_ACTOR, now=NOW)
+    await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW)
     await ledger.add_attempts('ABC-123', [candidate('aaa'), candidate('bbb')], now=NOW)
 
     first = await ledger.claim_next_pending('ABC-123', now=NOW)
@@ -190,7 +194,7 @@ async def test_claim_next_pending_hands_each_attempt_out_once() -> None:
 
 async def test_concurrent_claims_never_hand_out_the_same_attempt() -> None:
     ledger = make_ledger()
-    await ledger.discover('ABC-123', source=AcquisitionSource.RSS_ACTOR, now=NOW)
+    await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW)
     await ledger.add_attempts('ABC-123', [candidate('aaa'), candidate('bbb')], now=NOW)
 
     claims = await asyncio.gather(*(ledger.claim_next_pending('ABC-123', now=NOW) for _ in range(4)))
@@ -303,8 +307,8 @@ async def test_concluded_attempts_drop_out_of_the_hash_lookup() -> None:
 
 async def test_a_hash_cannot_be_live_for_two_attempts_at_once() -> None:
     ledger = make_ledger()
-    await ledger.discover('ABC-123', source=AcquisitionSource.RSS_ACTOR, now=NOW)
-    await ledger.discover('DEF-456', source=AcquisitionSource.RSS_ACTOR, now=NOW)
+    await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW)
+    await ledger.discover('DEF-456', source=rss_source('Actor'), now=NOW)
     await ledger.add_attempts('ABC-123', [candidate('shared')], now=NOW)
     await ledger.add_attempts('DEF-456', [candidate('shared')], now=NOW)
 
@@ -334,7 +338,7 @@ async def test_in_flight_attempts_exclude_concluded_ones() -> None:
 async def test_due_for_retry_returns_expired_cooldowns_in_order() -> None:
     ledger = make_ledger()
     for avid, hours in (('ABC-123', 1), ('DEF-456', 3), ('GHI-789', 5)):
-        await ledger.discover(avid, source=AcquisitionSource.RSS_ACTOR, now=NOW)
+        await ledger.discover(avid, source=rss_source('Actor'), now=NOW)
         await ledger.transition(
             avid,
             expected=AcquisitionState.DISCOVERED,
@@ -367,7 +371,7 @@ async def test_active_avids_covers_only_the_states_the_tracker_owns() -> None:
 async def test_listing_filters_by_state_and_counts() -> None:
     ledger = make_ledger()
     await start_downloading(ledger, 'ABC-123')
-    await ledger.discover('DEF-456', source=AcquisitionSource.RSS_ACTOR, now=NOW)
+    await ledger.discover('DEF-456', source=rss_source('Actor'), now=NOW)
     await ledger.transition(
         'DEF-456',
         expected=AcquisitionState.DISCOVERED,
@@ -384,3 +388,54 @@ async def test_listing_filters_by_state_and_counts() -> None:
         AcquisitionState.DOWNLOADING: 1,
         AcquisitionState.NEEDS_ATTENTION: 1,
     }
+
+
+async def test_the_offline_directory_is_pinned_at_discovery() -> None:
+    ledger = make_ledger()
+
+    await ledger.discover('ABC-123', source=rss_source('Rank'), now=NOW, task_dir_path='/115/embyx_in/rank')
+
+    record = await ledger.get('ABC-123')
+    assert record is not None
+    assert record.task_dir_path == '/115/embyx_in/rank'
+    assert record.source == 'rss:Rank'
+
+
+async def test_an_acquisition_with_no_directory_of_its_own_follows_the_default() -> None:
+    ledger = make_ledger()
+
+    await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW)
+
+    record = await ledger.get('ABC-123')
+    assert record is not None
+    assert record.task_dir_path is None
+
+
+async def test_rediscovery_repoints_a_retryable_row_at_its_category_directory() -> None:
+    """A category that moved takes its cooling-down AVIDs with it on the next pass."""
+    ledger = make_ledger()
+    await ledger.discover('ABC-123', source=rss_source('Rank'), now=NOW, task_dir_path='/115/old')
+    await ledger.transition(
+        'ABC-123',
+        expected=AcquisitionState.DISCOVERED,
+        target=AcquisitionState.RESOLVE_FAILED,
+        now=NOW,
+        next_action_at=NOW,
+    )
+
+    assert await ledger.discover('ABC-123', source=rss_source('Rank'), now=NOW, task_dir_path='/115/new') is True
+
+    record = await ledger.get('ABC-123')
+    assert record is not None
+    assert record.task_dir_path == '/115/new'
+
+
+async def test_an_avid_someone_else_owns_keeps_its_directory() -> None:
+    ledger = make_ledger()
+    await start_downloading(ledger, 'ABC-123')
+
+    assert await ledger.discover('ABC-123', source=rss_source('Rank'), now=NOW, task_dir_path='/115/rank') is False
+
+    record = await ledger.get('ABC-123')
+    assert record is not None
+    assert record.task_dir_path is None

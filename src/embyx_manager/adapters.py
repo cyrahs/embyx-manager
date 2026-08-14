@@ -47,18 +47,27 @@ class LedgerAcquisitionGateway:
     """Fill-actor port implementation backed by the monitor acquisition intake.
 
     ``intake_factory`` resolves the intake from the live configuration per call,
-    or ``None`` while CloudDrive is unconfigured — submissions then fail without
-    creating ledger rows nothing would ever advance.
+    or ``None`` while CloudDrive is unconfigured; ``task_dir`` names the offline
+    directory fill-actor submissions are queued under, '' while unset. Either
+    gap fails the submission without creating ledger rows nothing would ever
+    advance.
     """
 
     intake_factory: Callable[[], AcquisitionIntake | None]
+    task_dir: Callable[[], str]
 
     async def submit_missing(self, video_id: str) -> AcquisitionOutcome:
         intake = self.intake_factory()
-        if intake is None:
+        task_dir_path = self.task_dir()
+        if intake is None or not task_dir_path:
             return AcquisitionOutcome.SUBMIT_FAILED
         ctx = RunContext(logger=LOGGER)
-        outcome = await intake.enqueue(video_id, source=AcquisitionSource.FILL_ACTOR, ctx=ctx)
+        outcome = await intake.enqueue(
+            video_id,
+            source=AcquisitionSource.FILL_ACTOR,
+            task_dir_path=task_dir_path,
+            ctx=ctx,
+        )
         return AcquisitionOutcome(outcome.value)
 
 
