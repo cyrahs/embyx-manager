@@ -3,7 +3,9 @@
 Replaces embyx-monitor's hand-written thread/loop orchestration with asyncio
 tasks:
 
-- an update cycle running rss then archive every ``rss.interval_seconds``;
+- an rss loop running every ``rss.interval_seconds``;
+- an archive loop running the fallback scan on ``archive.scan_cron``, in the
+  server's local time;
 - a mapping loop with one full sync at startup, a periodic full sync as a
   safety net, and debounced incremental syncs fed by a watchdog observer;
 - manual triggers from the dashboard, one in-flight run per pipeline.
@@ -21,6 +23,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
+from cronsim import CronSim, CronSimError
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
@@ -41,6 +44,7 @@ FULL_SYNC_RETRY_SECONDS = 300.0
 IDLE_POLL_SECONDS = 0.5
 STARTUP_RETRY_SECONDS = 60.0
 CONFIG_REFRESH_SECONDS = 15.0
+CRON_POLL_SECONDS = 20.0
 
 
 class PipelineBusyError(Exception):
@@ -146,7 +150,8 @@ class MonitorScheduler:
         self._locks = {name: asyncio.Lock() for name in PipelineName}
         self._tasks: list[asyncio.Task[None]] = []
         self._stop = asyncio.Event()
-        self._next_update_at: datetime | None = None
+        self._next_rss_at: datetime | None = None
+        self._next_archive_at: datetime | None = None
         self._next_full_sync_at: datetime | None = None
         # watchdog state (event-loop confined)
         self._observer: Observer | None = None
@@ -163,7 +168,8 @@ class MonitorScheduler:
         if recovered:
             LOGGER.warning('marked %d orphaned pipeline runs as failed', recovered)
         self._tasks = [
-            asyncio.create_task(self._update_loop(), name='monitor-update-loop'),
+            asyncio.create_task(self._rss_loop(), name='monitor-rss-loop'),
+            asyncio.create_task(self._archive_loop(), name='monitor-archive-loop'),
             asyncio.create_task(self._mapping_loop(), name='monitor-mapping-loop'),
             asyncio.create_task(self._config_refresh_loop(), name='config-refresh-loop'),
         ]
@@ -213,9 +219,9 @@ class MonitorScheduler:
             if name is PipelineName.MAPPING:
                 next_at = self._next_full_sync_at
             elif name is PipelineName.ARCHIVE:
-                next_at = self._next_update_at if enabled else None
+                next_at = self._next_archive_at
             else:
-                next_at = self._next_update_at
+                next_at = self._next_rss_at
             statuses.append(
                 PipelineStatus(
                     pipeline=name,
@@ -304,23 +310,41 @@ class MonitorScheduler:
             self._deleted_paths |= failed_deleted
             self._last_fs_event = time.monotonic()
 
-    # -- update loop (rss + archive) ---------------------------------------------
+    # -- rss loop -----------------------------------------------------------------
 
-    async def _update_loop(self) -> None:
+    async def _rss_loop(self) -> None:
         while not self._stop.is_set():
             interval = max(60, self._store.get(RssConfig).interval_seconds)
             started = time.monotonic()
-            self._next_update_at = None
+            self._next_rss_at = None
             if self._pipeline_enabled(PipelineName.RSS) and self._ready[PipelineName.RSS]() is None:
                 await self._execute(PipelineName.RSS, RunTrigger.SCHEDULED)
-            if self._stop.is_set():
-                break
-            if self._pipeline_enabled(PipelineName.ARCHIVE) and self._ready[PipelineName.ARCHIVE]() is None:
-                await self._execute(PipelineName.ARCHIVE, RunTrigger.SCHEDULED)
             elapsed = time.monotonic() - started
             delay = max(0.0, interval - elapsed)
-            self._next_update_at = datetime.now(UTC).replace(microsecond=0) + _seconds(delay)
+            self._next_rss_at = datetime.now(UTC).replace(microsecond=0) + _seconds(delay)
             if await self._wait_stop(delay):
+                break
+
+    # -- archive loop (cron) ------------------------------------------------------
+
+    async def _archive_loop(self) -> None:
+        """Run the fallback scan whenever ``archive.scan_cron`` next fires.
+
+        The expression is re-read every pass so edits move the next fire time
+        without a restart; an occurrence is computed strictly after now, so a
+        fire is never replayed after the run it triggered.
+        """
+        cron: str | None = None
+        while not self._stop.is_set():
+            configured = self._store.get(ArchiveConfig).scan_cron
+            if configured != cron:
+                cron = configured
+                self._next_archive_at = _next_cron_fire(cron)
+            if self._next_archive_at is not None and datetime.now(UTC) >= self._next_archive_at:
+                if self._pipeline_enabled(PipelineName.ARCHIVE) and self._ready[PipelineName.ARCHIVE]() is None:
+                    await self._execute(PipelineName.ARCHIVE, RunTrigger.SCHEDULED)
+                self._next_archive_at = _next_cron_fire(cron)
+            if await self._wait_stop(CRON_POLL_SECONDS):
                 break
 
     # -- acquisition tracker ------------------------------------------------
@@ -483,3 +507,17 @@ class MonitorScheduler:
 
 def _seconds(value: float) -> timedelta:
     return timedelta(seconds=value)
+
+
+def _next_cron_fire(expr: str, *, now: datetime | None = None) -> datetime | None:
+    """The next occurrence of a cron expression, in UTC.
+
+    Cron times mean the server's local wall clock, so the iterator runs on an
+    aware local datetime. A stored expression is validated by the config model;
+    an unparsable one here simply schedules nothing rather than killing the loop.
+    """
+    base = (now or datetime.now(UTC)).astimezone()
+    try:
+        return next(CronSim(expr, base)).astimezone(UTC).replace(microsecond=0)
+    except (CronSimError, StopIteration):
+        return None

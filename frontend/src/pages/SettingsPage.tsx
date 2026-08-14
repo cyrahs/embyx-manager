@@ -1,3 +1,5 @@
+import cronstrue from 'cronstrue'
+import 'cronstrue/locales/zh_CN'
 import { useEffect, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 
@@ -11,7 +13,7 @@ import type { BrandRoute, DirRoute } from '../lib/settings/routes'
 import { assertDisjointSources, fromBrandRoutes, fromDirRoutes, toBrandRoutes, toDirRoutes } from '../lib/settings/routes'
 import type { ConfigSection } from '../types'
 
-type FieldKind = 'text' | 'secret' | 'boolean' | 'number' | 'lines' | 'dir-routes' | 'brand-routes'
+type FieldKind = 'text' | 'secret' | 'boolean' | 'number' | 'lines' | 'cron' | 'dir-routes' | 'brand-routes'
 
 type FormValue = string | boolean | DirRoute[] | BrandRoute[]
 
@@ -45,7 +47,13 @@ const SECTION_SPECS: SectionSpec[] = [
       { key: 'address', label: '服务地址', kind: 'text', placeholder: 'clouddrive.internal:19798' },
       { key: 'api_token', label: 'API Token', kind: 'secret' },
       { key: 'secure', label: '使用 TLS 连接', kind: 'boolean' },
-      { key: 'task_dir_path', label: '离线任务目录', kind: 'text', placeholder: '/115/task' },
+      {
+        key: 'task_dir_path',
+        label: '离线任务目录',
+        kind: 'text',
+        placeholder: '/115/task',
+        hint: '唯一的离线目录配置：RSS 摄取把全部磁力离线到这个云端目录。它的本机挂载路径应配置为归档整理的某个来源子目录路由，下载追踪会在路由表中定位完成的下载并按该路由归档。',
+      },
     ],
   },
   {
@@ -135,9 +143,16 @@ const SECTION_SPECS: SectionSpec[] = [
   {
     section: 'archive',
     title: '归档整理',
-    description: '把下载目录中的视频规范化命名并按厂牌移动到媒体库。',
+    description: '把下载目录中的视频规范化命名并按厂牌移动到媒体库。下载追踪与兜底扫描共用这里的目录和路由。',
     fields: [
-      { key: 'enabled', label: '启用定时调度', kind: 'boolean' },
+      { key: 'enabled', label: '启用调度（含下载追踪）', kind: 'boolean' },
+      {
+        key: 'scan_cron',
+        label: '兜底扫描时间（Cron）',
+        kind: 'cron',
+        placeholder: '0 4 * * *',
+        hint: '五段 cron（分 时 日 月 周），按服务器本地时间执行。只影响兜底扫描；下载追踪按下面的轮询间隔独立运行。',
+      },
       { key: 'src_dir', label: '来源根目录', kind: 'text', placeholder: '/downloads' },
       { key: 'dst_dir', label: '目标根目录', kind: 'text', placeholder: '/media/library' },
       { key: 'min_size_mb', label: '最小视频大小（MB）', kind: 'number' },
@@ -152,7 +167,7 @@ const SECTION_SPECS: SectionSpec[] = [
         key: 'mapping',
         label: '普通子目录路由',
         kind: 'dir-routes',
-        hint: '每条规则整理一个来源子目录，并把视频按厂牌分目录放进对应的目标子目录；番号已归档在优先目标子目录时会跳过并保留来源文件。两张表都为空时归档不会运行。',
+        hint: '每条规则整理一个来源子目录，并把视频按厂牌分目录放进对应的目标子目录；番号已归档在优先目标子目录时会跳过并保留来源文件。两张表都为空时归档不会运行。CloudDrive 离线任务目录的挂载位置也应是其中一条路由的来源子目录，下载追踪按该路由归档完成的下载。',
         rootKeys: { src: 'src_dir', dst: 'dst_dir' },
       },
       {
@@ -161,26 +176,6 @@ const SECTION_SPECS: SectionSpec[] = [
         kind: 'brand-routes',
         hint: '这里列出的厂牌不再走上面的目标子目录，改为归入目标根目录下的指定子目录。同一个厂牌只能出现一次。',
         rootKeys: { dst: 'dst_dir' },
-      },
-      {
-        key: 'task_dir_local',
-        label: '离线任务目录（挂载路径）',
-        kind: 'text',
-        placeholder: '/downloads/task',
-        hint: 'CloudDrive 离线任务目录在本机挂载中的绝对路径。下载追踪按番号定向归档这里的文件夹，不依赖上面的路由表。',
-      },
-      {
-        key: 'task_dst',
-        label: '离线任务目标子目录',
-        kind: 'text',
-        placeholder: 'library',
-        hint: '目标根目录下的子目录，追踪到的完成下载归档到这里（厂牌路由仍然优先）。与上面两项都填写后下载追踪才会运行。',
-      },
-      {
-        key: 'task_priority',
-        label: '离线任务按优先级归档',
-        kind: 'boolean',
-        hint: '开启后，追踪到的下载会把已归档在普通目标子目录的同番号文件移动过来，语义与优先子目录路由一致。',
       },
       {
         key: 'tracker_interval_seconds',
@@ -229,6 +224,17 @@ const SECTION_SPECS: SectionSpec[] = [
     ],
   },
 ]
+
+/** Live Chinese reading of a cron expression, shown under the cron input. */
+function describeCron(expr: string): string {
+  const trimmed = expr.trim()
+  if (!trimmed) return '需要 5 段 cron 表达式，例如 0 4 * * * 表示每天 04:00。'
+  try {
+    return `${cronstrue.toString(trimmed, { locale: 'zh_CN', use24HourTimeFormat: true })}（服务器本地时间）`
+  } catch {
+    return '无法解析的 cron 表达式。'
+  }
+}
 
 function toFormValue(kind: FieldKind, value: unknown): FormValue {
   switch (kind) {
@@ -409,6 +415,9 @@ function SectionForm({ spec, data, onSaved, onUnauthorized }: SectionFormProps) 
                   placeholder={secretConfigured ? '已配置（留空保持不变）' : field.placeholder}
                   {...commonProps}
                 />
+              )}
+              {field.kind === 'cron' && (
+                <p className="settings-hint cron-readout">{describeCron(String(form[field.key] ?? ''))}</p>
               )}
               {field.hint && <p className="settings-hint">{field.hint}</p>}
             </div>

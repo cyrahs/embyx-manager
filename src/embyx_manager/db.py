@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 
 import asyncpg
 
-CURRENT_SCHEMA_VERSION = 6
+CURRENT_SCHEMA_VERSION = 7
 
 # Advisory-lock key space for embyx-manager; low word selects the resource.
 ADVISORY_NAMESPACE = 0x454D4258  # 'EMBX'
@@ -347,5 +347,17 @@ _MIGRATIONS[6] = (
     UPDATE app_config
     SET value_json = (value_json::jsonb - 'cloud_name' - 'cloud_account_id')::text
     WHERE section = 'clouddrive'
+    """,
+)
+
+# The tracker's own directory settings duplicated what was already configured:
+# the offline task directory is clouddrive.task_dir_path, and its local view is
+# one of the archive routes, which also names the destination. Same forbid-and-
+# default story as migration 6: the keys must go or the section reads as unset.
+_MIGRATIONS[7] = (
+    """
+    UPDATE app_config
+    SET value_json = (value_json::jsonb - 'task_dir_local' - 'task_dst' - 'task_priority')::text
+    WHERE section = 'archive'
     """,
 )

@@ -74,16 +74,15 @@ def build(
     local = tmp_path / 'task'
     (local / 'downloads').mkdir(parents=True)
     (tmp_path / 'library' / 'sorted').mkdir(parents=True)
-    archiver = ArchivePipeline(
-        config=ArchiveConfig(
-            enabled=True,
-            src_dir=str(local),
-            dst_dir=str(tmp_path / 'library'),
-            mapping={'downloads': 'sorted'},
-            min_size_mb=min_size_mb,
-        ),
-        avid_parser=AvidParser(),
+    config = ArchiveConfig(
+        enabled=True,
+        src_dir=str(local),
+        dst_dir=str(tmp_path / 'library'),
+        mapping={'downloads': 'sorted'},
+        min_size_mb=min_size_mb,
+        max_attempts=max_attempts,
     )
+    archiver = ArchivePipeline(config=config, avid_parser=AvidParser())
     ledger = FakeLedger()
     cloud = FakeCloud(tasks)
     submitted: list[tuple[str, str]] = []
@@ -96,12 +95,7 @@ def build(
         ledger=ledger,
         cloud=cloud,  # type: ignore[arg-type]
         archiver=archiver,
-        settings=TrackerSettings(
-            task_dir_path=TASK_DIR,
-            task_dir_local=local / 'downloads',
-            task_dst='sorted',
-            max_attempts=max_attempts,
-        ),
+        settings=TrackerSettings.from_config(config, task_dir_path=TASK_DIR),
         submit_magnet=submit,
     )
     return tracker, ledger, cloud, submitted
@@ -132,6 +126,51 @@ async def test_finished_download_is_archived_and_the_avid_closed(tmp_path: Path)
     assert ctx.stats['archived'] == 1
     # The mount is asked for the finished folder rather than slept on.
     assert cloud.refreshed == [f'{TASK_DIR}/ABC-123 release']
+
+
+async def test_a_finished_download_is_filed_by_the_route_that_holds_it(tmp_path: Path) -> None:
+    """The task directory is one of the archive routes; here a priority one."""
+    local = tmp_path / 'task'
+    (local / 'vip').mkdir(parents=True)
+    config = ArchiveConfig(
+        enabled=True,
+        src_dir=str(local),
+        dst_dir=str(tmp_path / 'library'),
+        mapping={'downloads': 'sorted'},
+        priority_mapping={'vip': 'starred'},
+    )
+    ledger = FakeLedger()
+    cloud = FakeCloud([offline_task('ABC-123 release', HASH_A, OfflineStatus.FINISHED)])
+
+    async def submit(avid: str, magnet: str) -> bool:  # noqa: ARG001 - nothing should retry here
+        pytest.fail('no magnet should be submitted')
+
+    tracker = AcquisitionTracker(
+        ledger=ledger,
+        cloud=cloud,  # type: ignore[arg-type]
+        archiver=ArchivePipeline(config=config, avid_parser=AvidParser()),
+        settings=TrackerSettings.from_config(config, task_dir_path=TASK_DIR),
+        submit_magnet=submit,
+    )
+    await seed(ledger, 'ABC-123', [HASH_A])
+    write_video(local / 'vip' / 'ABC-123 release' / 'ABC-123.mp4')
+
+    await tracker.poll(make_ctx())
+
+    assert (tmp_path / 'library' / 'starred' / 'ABC' / 'ABC-123.mp4').exists()
+    assert ledger.states['ABC-123'] is AcquisitionState.ARCHIVED
+
+
+async def test_a_finished_task_not_yet_on_the_mount_is_left_for_the_next_poll(tmp_path: Path) -> None:
+    tracker, ledger, _, submitted = build(tmp_path, [offline_task('ABC-123 release', HASH_A, OfflineStatus.FINISHED)])
+    await seed(ledger, 'ABC-123', [HASH_A])
+    # No folder written: the mount has not caught up with CloudDrive yet.
+
+    await tracker.poll(make_ctx())
+
+    assert ledger.states['ABC-123'] is AcquisitionState.DOWNLOADING
+    assert ledger.attempt_states('ABC-123') == [AttemptState.FINISHED]
+    assert submitted == []
 
 
 async def test_a_download_of_nothing_but_ads_moves_to_the_next_magnet(tmp_path: Path) -> None:

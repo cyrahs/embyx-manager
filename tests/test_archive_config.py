@@ -14,6 +14,17 @@ def test_defaults_leave_the_pipeline_unconfigured() -> None:
     assert config.configured is False
 
 
+def test_scan_cron_normalizes_whitespace() -> None:
+    assert ArchiveConfig().scan_cron == '0 4 * * *'
+    assert ArchiveConfig(scan_cron='  30  3 * * 1 ').scan_cron == '30 3 * * 1'
+
+
+@pytest.mark.parametrize('expr', ['', 'every day at four', '0 4 * *', '99 4 * * *'])
+def test_rejects_an_unusable_scan_cron(expr: str) -> None:
+    with pytest.raises(ValueError, match='scan_cron'):
+        ArchiveConfig(scan_cron=expr)
+
+
 def test_mapping_normalizes_subdirectories() -> None:
     config = ArchiveConfig(src_dir='/downloads', dst_dir='/library', mapping={' intake/ ': './sorted'})
 
