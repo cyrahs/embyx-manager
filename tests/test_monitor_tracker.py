@@ -125,8 +125,10 @@ async def test_finished_download_is_archived_and_the_avid_closed(tmp_path: Path)
     assert ledger.states['ABC-123'] is AcquisitionState.ARCHIVED
     assert ledger.attempt_states('ABC-123') == [AttemptState.ARCHIVED]
     assert ctx.stats['archived'] == 1
-    # The mount is asked for the finished folder rather than slept on.
-    assert cloud.refreshed == [f'{TASK_DIR}/ABC-123 release']
+    # The mount is asked for the finished folder rather than slept on, and the
+    # task directory goes first: a persistent cache (115) never re-reads it on
+    # its own, so the new folder does not resolve until its parent is refreshed.
+    assert cloud.refreshed == [TASK_DIR, f'{TASK_DIR}/ABC-123 release']
 
 
 async def test_a_finished_download_is_filed_by_the_route_that_holds_it(tmp_path: Path) -> None:
@@ -396,7 +398,7 @@ async def test_the_mount_refresh_uses_the_directory_the_task_was_listed_under(tm
 
     await tracker.poll(make_ctx())
 
-    assert cloud.refreshed == [f'{RANK_DIR}/DEF-456 release']
+    assert cloud.refreshed == [RANK_DIR, f'{RANK_DIR}/DEF-456 release']
 
 
 async def test_a_hash_listed_in_two_directories_is_advanced_once(tmp_path: Path) -> None:
@@ -410,7 +412,7 @@ async def test_a_hash_listed_in_two_directories_is_advanced_once(tmp_path: Path)
 
     assert ctx.stats['duplicate_offline_tasks'] == 1
     assert ledger.states['ABC-123'] is AcquisitionState.ARCHIVED
-    assert cloud.refreshed == [f'{TASK_DIR}/ABC-123 release']
+    assert cloud.refreshed == [TASK_DIR, f'{TASK_DIR}/ABC-123 release']
 
 
 async def test_no_configured_directory_does_not_conclude_the_downloads_in_flight(tmp_path: Path) -> None:

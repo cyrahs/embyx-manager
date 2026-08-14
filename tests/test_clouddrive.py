@@ -53,6 +53,18 @@ def test_clouddrive_calls_include_timeout(monkeypatch: pytest.MonkeyPatch) -> No
         assert grpc_call.call_args.kwargs['timeout'] == GRPC_TIMEOUT_SECONDS
 
 
+def test_add_offline_file_asks_clouddrive_to_check_the_folder(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A zero check interval leaves a persistently cached folder stale forever."""
+    stub = SimpleNamespace(AddOfflineFiles=Mock(return_value=object()))
+    client = _make_client(monkeypatch, stub)
+
+    client.add_offline_file('magnet:?xt=urn:btih:abc', '/media')
+
+    request = stub.AddOfflineFiles.call_args.args[0]
+    assert request.checkFolderAfterSecs == client_module.CHECK_FOLDER_AFTER_SECONDS
+    assert request.checkFolderAfterSecs > 0
+
+
 @pytest.mark.parametrize('secure', [True, False])
 def test_clouddrive_channel_selection_and_auth_metadata(monkeypatch: pytest.MonkeyPatch, *, secure: bool) -> None:
     channel = SimpleNamespace(close=Mock())
