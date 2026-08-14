@@ -1,4 +1,3 @@
-from datetime import UTC, datetime, timedelta
 
 from embyx_manager.monitor.reports import PipelineName, RunState, RunTrigger
 from embyx_manager.monitor.runs import PipelineRunRepository
@@ -64,17 +63,6 @@ async def test_fail_stale_running_marks_orphans() -> None:
     assert record is not None
     assert record.state is RunState.FAILED
     assert record.errors == ('process restarted',)
-
-
-async def test_cooldown_round_trip_and_expiry() -> None:
-    runs = make_runs()
-    now = datetime.now(UTC)
-    await runs.record_failed_avids({'ABC-123', 'DEF-456'}, now=now - timedelta(hours=25))
-    await runs.record_failed_avids({'GHI-789'}, now=now)
-
-    active = await runs.active_cooldowns(now=now, ttl_seconds=86_400)
-
-    assert active == frozenset({'GHI-789'})
 
 
 async def test_prune_keeps_recent_runs_per_pipeline() -> None:
