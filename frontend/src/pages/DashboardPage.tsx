@@ -153,6 +153,13 @@ export default function DashboardPage() {
     }
   }, [refresh, anyRunning, refreshTick])
 
+  // Stable identity: an inline closure would change on every poll re-render and
+  // make the acquisition panel treat each tick as a configuration change.
+  const onPanelUnauthorized = useCallback(() => {
+    setAuthRequired(true)
+    requestApiToken()
+  }, [requestApiToken])
+
   async function runAction(key: string, action: () => Promise<unknown>) {
     setBusyAction(key)
     setError(null)
@@ -299,12 +306,7 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <AcquisitionPanel
-        onUnauthorized={() => {
-          setAuthRequired(true)
-          requestApiToken()
-        }}
-      />
+      <AcquisitionPanel onUnauthorized={onPanelUnauthorized} />
 
       <section className="panel dashboard-panel" aria-labelledby="runs-title">
         <div className="panel-heading">
