@@ -3,7 +3,6 @@ import logging
 import threading
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from datetime import datetime
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -45,6 +44,7 @@ from embyx_manager.fill_actor.jobs import FillActorJobManager
 from embyx_manager.fill_actor.postgres_repository import PostgresFillActorRepository
 from embyx_manager.fill_actor.service import FillActorPaths, FillActorRuntime, FillActorService
 from embyx_manager.locking import PostgresAdvisoryLock
+from embyx_manager.monitor.acquisitions import AcquisitionRepository
 from embyx_manager.monitor.api import create_monitor_router
 from embyx_manager.monitor.archive import ArchivePipeline
 from embyx_manager.monitor.mapping import MappingPipeline
@@ -84,8 +84,6 @@ class CloudDriveHandle:
                         address=config.address,
                         api_token=config.api_token,
                         secure=config.secure,
-                        cloud_name=config.cloud_name,
-                        cloud_account_id=config.cloud_account_id,
                     )
                     self._cloud = AsyncCloudDrive(self._client)
             return self._cloud
@@ -225,6 +223,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
 
     avid_handle = AvidParserHandle(store)
     pipeline_runs = PipelineRunRepository(database)
+    ledger = AcquisitionRepository(database)
 
     def rss_trigger_ready() -> str | None:
         return _rss_configuration_gap(store)
@@ -243,15 +242,6 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
             proxy=freshrss_config.proxy or None,
         )
 
-        async def cooldown_lookup(now: datetime) -> frozenset[str]:
-            return await pipeline_runs.active_cooldowns(
-                now=now,
-                ttl_seconds=rss_config.failed_avid_cooldown_seconds,
-            )
-
-        async def cooldown_record(avids: set[str], now: datetime) -> None:
-            await pipeline_runs.record_failed_avids(avids, now=now)
-
         try:
             pipeline = RssPipeline(
                 config=rss_config,
@@ -261,8 +251,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
                 sukebei=sukebei,
                 javbus=javbus,
                 task_dir_path=clouddrive_config.task_dir_path,
-                cooldown_lookup=cooldown_lookup,
-                cooldown_record=cooldown_record,
+                ledger=ledger,
             )
             await pipeline.run(ctx, rank=rank)
         finally:

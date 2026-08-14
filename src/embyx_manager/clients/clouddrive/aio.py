@@ -215,12 +215,3 @@ class AsyncCloudDrive:
         directory = validate_api_path(path, allow_root=True)
         files = await _run_sync_complete(self._client.list_offline_files_by_path, directory)
         return tuple(_offline_file_to_dict(file) for file in files)
-
-    async def list_finished_offline_files(self, path: str) -> Any:
-        directory = validate_api_path(path, allow_root=True)
-        result = await _run_sync_complete(self._client.list_finished_offline_files_by_path, directory)
-        return result.offlineFiles
-
-    async def clear_finished_offline_files(self, path: str) -> None:
-        directory = validate_api_path(path, allow_root=True)
-        await _run_sync_complete(self._client.clear_finished_offline_files, directory)

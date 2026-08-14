@@ -46,8 +46,6 @@ const SECTION_SPECS: SectionSpec[] = [
       { key: 'api_token', label: 'API Token', kind: 'secret' },
       { key: 'secure', label: '使用 TLS 连接', kind: 'boolean' },
       { key: 'task_dir_path', label: '离线任务目录', kind: 'text', placeholder: '/115/task' },
-      { key: 'cloud_name', label: '云盘名称', kind: 'text', hint: '用于清理已完成离线任务记录' },
-      { key: 'cloud_account_id', label: '云盘账号 ID', kind: 'text' },
     ],
   },
   {

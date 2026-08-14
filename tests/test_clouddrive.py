@@ -30,7 +30,6 @@ def test_clouddrive_calls_include_timeout(monkeypatch: pytest.MonkeyPatch) -> No
         MoveFile=Mock(return_value=object()),
         AddOfflineFiles=Mock(return_value=object()),
         ListOfflineFilesByPath=Mock(return_value=finished_result),
-        ClearOfflineFiles=Mock(return_value=None),
     )
     client = _make_client(monkeypatch, stub)
 
@@ -40,8 +39,7 @@ def test_clouddrive_calls_include_timeout(monkeypatch: pytest.MonkeyPatch) -> No
     client.rename_file('/media/old', 'new')
     client.move_file(['/media/file'], '/media/dst')
     client.add_offline_file('magnet:?xt=urn:btih:abc', '/media')
-    client.list_finished_offline_files_by_path('/media')
-    client.clear_finished_offline_files('/media')
+    client.list_offline_files_by_path('/media')
 
     for grpc_call in [
         stub.GetSystemInfo,
@@ -51,7 +49,6 @@ def test_clouddrive_calls_include_timeout(monkeypatch: pytest.MonkeyPatch) -> No
         stub.MoveFile,
         stub.AddOfflineFiles,
         stub.ListOfflineFilesByPath,
-        stub.ClearOfflineFiles,
     ]:
         assert grpc_call.call_args.kwargs['timeout'] == GRPC_TIMEOUT_SECONDS
 
@@ -278,9 +275,12 @@ def test_list_offline_files_by_path_keeps_every_status(monkeypatch: pytest.Monke
 
     files = client.list_offline_files_by_path('/media/tasks')
 
-    assert len(files) == 3
-    # The finished-only view drops the other two, which is why the tracker needs this one.
-    assert len(client.list_finished_offline_files_by_path('/media/tasks').offlineFiles) == 1
+    statuses = [file.status for file in files]
+    assert statuses == [
+        clouddrive_pb2.OfflineFileStatus.OFFLINE_DOWNLOADING,
+        clouddrive_pb2.OfflineFileStatus.OFFLINE_FINISHED,
+        clouddrive_pb2.OfflineFileStatus.OFFLINE_ERROR,
+    ]
 
 
 async def test_offline_task_view_exposes_the_fields_the_tracker_joins_on() -> None:

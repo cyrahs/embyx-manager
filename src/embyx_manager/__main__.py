@@ -36,8 +36,6 @@ def _import_config(config_path: Path, database_url: str) -> None:
             'address': str(clouddrive.get('address', '')),
             'api_token': str(clouddrive.get('api_token', '')),
             'task_dir_path': str(clouddrive.get('task_dir_path', '')),
-            'cloud_name': str(clouddrive.get('cloud_name', '')),
-            'cloud_account_id': str(clouddrive.get('cloud_account_id', '')),
         }
     freshrss = raw.get('freshrss', {})
     if freshrss:

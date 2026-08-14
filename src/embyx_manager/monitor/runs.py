@@ -1,4 +1,4 @@
-"""Persistence for pipeline run history and the RSS failed-AVID cooldown."""
+"""Persistence for pipeline run history."""
 
 import json
 import uuid
@@ -131,30 +131,6 @@ class PipelineRunRepository:
             keep_per_pipeline,
         )
         return int(status.rsplit(' ', 1)[-1])
-
-    # -- RSS failed-AVID cooldown ---------------------------------------
-
-    async def active_cooldowns(self, *, now: datetime, ttl_seconds: int) -> frozenset[str]:
-        pool = await self._database.get_pool()
-        await pool.execute(
-            'DELETE FROM rss_failed_avids WHERE failed_at <= ($1::timestamptz - make_interval(secs => $2))',
-            now,
-            float(ttl_seconds),
-        )
-        rows = await pool.fetch('SELECT avid FROM rss_failed_avids')
-        return frozenset(row['avid'] for row in rows)
-
-    async def record_failed_avids(self, avids: frozenset[str] | set[str], *, now: datetime) -> None:
-        if not avids:
-            return
-        pool = await self._database.get_pool()
-        await pool.executemany(
-            """
-            INSERT INTO rss_failed_avids (avid, failed_at) VALUES ($1, $2)
-            ON CONFLICT (avid) DO UPDATE SET failed_at = excluded.failed_at
-            """,
-            [(avid, now) for avid in sorted(avids)],
-        )
 
 
 def _run_from_row(row: object) -> PipelineRunRecord:

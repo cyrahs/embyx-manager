@@ -90,8 +90,6 @@ class CloudDriveConfig(ConfigSection):
     api_token: str = ''
     secure: bool = True
     task_dir_path: str = ''
-    cloud_name: str = ''
-    cloud_account_id: str = ''
 
     @property
     def configured(self) -> bool:

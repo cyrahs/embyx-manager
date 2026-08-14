@@ -11,23 +11,9 @@ GRPC_TIMEOUT_SECONDS = 30.0
 
 
 class CloudDriveClient:
-    def __init__(
-        self,
-        *,
-        address: str,
-        api_token: str,
-        secure: bool = True,
-        cloud_name: str = '',
-        cloud_account_id: str = '',
-    ) -> None:
-        """gRPC client for one CloudDrive server.
-
-        ``cloud_name`` / ``cloud_account_id`` identify the storage account for
-        offline-task bookkeeping calls (``clear_finished_offline_files``).
-        """
+    def __init__(self, *, address: str, api_token: str, secure: bool = True) -> None:
+        """gRPC client for one CloudDrive server."""
         self._api_token = api_token
-        self._cloud_name = cloud_name
-        self._cloud_account_id = cloud_account_id
         self.channel = (
             grpc.secure_channel(address, grpc.ssl_channel_credentials()) if secure else grpc.insecure_channel(address)
         )
@@ -98,19 +84,3 @@ class CloudDriveClient:
         request = clouddrive_pb2.FileRequest(path=path)
         result = self.stub.ListOfflineFilesByPath(request, metadata=self._metadata(), timeout=GRPC_TIMEOUT_SECONDS)
         return list(result.offlineFiles)
-
-    def list_finished_offline_files_by_path(self, path: str) -> clouddrive_pb2.OfflineFileListResult:
-        request = clouddrive_pb2.FileRequest(path=path)
-        result = self.stub.ListOfflineFilesByPath(request, metadata=self._metadata(), timeout=GRPC_TIMEOUT_SECONDS)
-        finished = [f for f in result.offlineFiles if f.status == clouddrive_pb2.OfflineFileStatus.OFFLINE_FINISHED]
-        return clouddrive_pb2.OfflineFileListResult(offlineFiles=finished, status=result.status)
-
-    def clear_finished_offline_files(self, path: str) -> None:
-        request = clouddrive_pb2.ClearOfflineFileRequest(
-            filter=clouddrive_pb2.ClearOfflineFileRequest.Filter.Finished,
-            cloudName=self._cloud_name,
-            cloudAccountId=self._cloud_account_id,
-            deleteFiles=False,
-            path=path,
-        )
-        self.stub.ClearOfflineFiles(request, metadata=self._metadata(), timeout=GRPC_TIMEOUT_SECONDS)

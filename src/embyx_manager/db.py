@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 
 import asyncpg
 
-CURRENT_SCHEMA_VERSION = 5
+CURRENT_SCHEMA_VERSION = 6
 
 # Advisory-lock key space for embyx-manager; low word selects the resource.
 ADVISORY_NAMESPACE = 0x454D4258  # 'EMBX'
@@ -336,3 +336,16 @@ class Database:
                     pending,
                     datetime.now(UTC),
                 )
+
+
+# cloud_name / cloud_account_id only ever addressed the finished-offline-task
+# cleanup, which the ledger made unnecessary. The section model forbids unknown
+# keys and falls back to defaults when validation fails, so the stored rows have
+# to lose the keys or the whole CloudDrive section would read as unconfigured.
+_MIGRATIONS[6] = (
+    """
+    UPDATE app_config
+    SET value_json = (value_json::jsonb - 'cloud_name' - 'cloud_account_id')::text
+    WHERE section = 'clouddrive'
+    """,
+)
