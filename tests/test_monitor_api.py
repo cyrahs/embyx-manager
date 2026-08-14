@@ -5,14 +5,22 @@ from fastapi.responses import JSONResponse
 from fastapi.testclient import TestClient
 
 from embyx_manager.errors import ApiError
-from embyx_manager.monitor.api import create_monitor_router
+from embyx_manager.monitor.acquisitions import (
+    AcquisitionSource,
+    AcquisitionState,
+    AttemptState,
+    MagnetCandidate,
+)
+from embyx_manager.monitor.api import AcquisitionApi, create_monitor_router
 from embyx_manager.monitor.reports import PipelineName, RunState, RunTrigger
 from embyx_manager.monitor.runs import PipelineRunRecord
 from embyx_manager.monitor.scheduler import (
     PipelineBusyError,
     PipelineNotConfiguredError,
     PipelineStatus,
+    TrackerState,
 )
+from tests.test_monitor_rss import HASH_A, HASH_B, FakeLedger, now_stub
 
 
 def make_record(run_id: str, pipeline: PipelineName, state: RunState = RunState.COMPLETED) -> PipelineRunRecord:
@@ -35,6 +43,9 @@ class FakeScheduler:
         self.busy = False
         self.unconfigured_reason: str | None = None
         self.running: set[PipelineName] = set()
+
+    def tracker_state(self) -> TrackerState:
+        return TrackerState()
 
     def status(self) -> tuple[PipelineStatus, ...]:
         return (
@@ -179,3 +190,210 @@ def test_runs_listing_and_detail() -> None:
     assert detail['errors'] == ['boom']
     assert detail['log_tail'] == ['line-1']
     assert missing.status_code == 404
+
+
+# -- acquisition ledger -------------------------------------------------------
+
+
+def make_ledger_client(
+    ledger: FakeLedger,
+    *,
+    submit_ok: bool = True,
+    tracker_reason: str | None = None,
+) -> tuple[TestClient, list[tuple[str, str]]]:
+    submitted: list[tuple[str, str]] = []
+
+    async def submit(avid: str, magnet: str) -> bool:
+        submitted.append((avid, magnet))
+        return submit_ok
+
+    app = FastAPI()
+    app.include_router(
+        create_monitor_router(
+            FakeScheduler(),  # type: ignore[arg-type]
+            FakeRuns([]),  # type: ignore[arg-type]
+            mutation_auth=_noop_auth,
+            acquisitions=AcquisitionApi(
+                ledger=ledger,  # type: ignore[arg-type]
+                submit_magnet=submit,
+                tracker_ready=lambda: tracker_reason,
+            ),
+        ),
+    )
+
+    @app.exception_handler(ApiError)
+    async def handle(_request, exc):
+        return JSONResponse({'error': {'code': exc.code}}, status_code=exc.status_code)
+
+    return TestClient(app), submitted
+
+
+async def seed_ledger(**states: AcquisitionState) -> FakeLedger:
+    ledger = FakeLedger()
+    for avid, state in states.items():
+        real_avid = avid.replace('_', '-')
+        await ledger.discover(real_avid, source=AcquisitionSource.RSS_ACTOR, now=NOW)
+        await ledger.add_attempts(
+            real_avid,
+            [MagnetCandidate(magnet=f'magnet:?xt=urn:btih:{HASH_A}', info_hash=HASH_A, source='sukebei')],
+            now=NOW,
+        )
+        ledger.states[real_avid] = state
+    return ledger
+
+
+async def test_acquisitions_list_filters_by_state_and_reports_counts() -> None:
+    ledger = await seed_ledger(ABC_123=AcquisitionState.NEEDS_ATTENTION, DEF_456=AcquisitionState.DOWNLOADING)
+    client, _ = make_ledger_client(ledger)
+
+    everything = client.get('/api/monitor/acquisitions').json()
+    assert {item['avid'] for item in everything['items']} == {'ABC-123', 'DEF-456'}
+    assert everything['counts'] == {'needs_attention': 1, 'downloading': 1}
+
+    parked = client.get('/api/monitor/acquisitions', params={'state': 'needs_attention'}).json()
+    assert [item['avid'] for item in parked['items']] == ['ABC-123']
+
+
+async def test_unknown_state_filter_is_rejected() -> None:
+    client, _ = make_ledger_client(await seed_ledger())
+
+    response = client.get('/api/monitor/acquisitions', params={'state': 'nonsense'})
+
+    assert response.status_code == 400
+    assert response.json()['error']['code'] == 'unknown_state'
+
+
+async def test_acquisition_detail_lists_its_attempts() -> None:
+    ledger = await seed_ledger(ABC_123=AcquisitionState.DOWNLOADING)
+    client, _ = make_ledger_client(ledger)
+
+    body = client.get('/api/monitor/acquisitions/ABC-123').json()
+
+    assert body['avid'] == 'ABC-123'
+    assert [attempt['attempt_no'] for attempt in body['attempts']] == [1]
+    assert body['attempts'][0]['magnet_source'] == 'sukebei'
+    assert client.get('/api/monitor/acquisitions/ZZZ-999').status_code == 404
+
+
+async def test_retry_submits_the_next_magnet_and_resumes_downloading() -> None:
+    ledger = await seed_ledger(ABC_123=AcquisitionState.EXHAUSTED)
+    client, submitted = make_ledger_client(ledger)
+
+    body = client.post('/api/monitor/acquisitions/ABC-123/retry').json()
+
+    assert body['state'] == 'downloading'
+    assert [avid for avid, _ in submitted] == ['ABC-123']
+
+
+async def test_retry_without_a_magnet_left_is_a_conflict() -> None:
+    ledger = await seed_ledger(ABC_123=AcquisitionState.EXHAUSTED)
+    await ledger.claim_next_pending('ABC-123', now=NOW)
+    client, submitted = make_ledger_client(ledger)
+
+    response = client.post('/api/monitor/acquisitions/ABC-123/retry')
+
+    assert response.status_code == 409
+    assert response.json()['error']['code'] == 'no_magnet_left'
+    assert submitted == []
+
+
+async def test_a_rejected_offline_task_marks_the_attempt_and_reports_upstream() -> None:
+    ledger = await seed_ledger(ABC_123=AcquisitionState.EXHAUSTED)
+    client, _ = make_ledger_client(ledger, submit_ok=False)
+
+    response = client.post('/api/monitor/acquisitions/ABC-123/retry')
+
+    assert response.status_code == 502
+    assert ledger.attempt_states('ABC-123') == [AttemptState.ERROR]
+
+
+async def test_an_operator_magnet_is_recorded_and_submitted() -> None:
+    ledger = await seed_ledger(ABC_123=AcquisitionState.NEEDS_ATTENTION)
+    client, submitted = make_ledger_client(ledger)
+    magnet = f'magnet:?xt=urn:btih:{HASH_B}&dn=ABC-123'
+
+    body = client.post('/api/monitor/acquisitions/ABC-123/magnet', json={'magnet': magnet}).json()
+
+    assert body['state'] == 'downloading'
+    assert submitted == [('ABC-123', magnet)]
+    assert ledger.magnets('ABC-123')[-1] == magnet
+
+
+async def test_an_unusable_magnet_is_refused() -> None:
+    ledger = await seed_ledger(ABC_123=AcquisitionState.NEEDS_ATTENTION)
+    client, submitted = make_ledger_client(ledger)
+
+    response = client.post('/api/monitor/acquisitions/ABC-123/magnet', json={'magnet': 'https://example.com/x'})
+
+    assert response.status_code == 400
+    assert response.json()['error']['code'] == 'unusable_magnet'
+    assert submitted == []
+
+
+async def test_a_magnet_already_tried_is_not_queued_twice() -> None:
+    ledger = await seed_ledger(ABC_123=AcquisitionState.NEEDS_ATTENTION)
+    client, submitted = make_ledger_client(ledger)
+
+    response = client.post(
+        '/api/monitor/acquisitions/ABC-123/magnet',
+        json={'magnet': f'magnet:?xt=urn:btih:{HASH_A}'},
+    )
+
+    assert response.status_code == 409
+    assert response.json()['error']['code'] == 'magnet_already_tried'
+    assert submitted == []
+
+
+async def test_ignoring_an_avid_takes_it_out_of_the_pipeline() -> None:
+    ledger = await seed_ledger(ABC_123=AcquisitionState.EXHAUSTED)
+    client, _ = make_ledger_client(ledger)
+
+    body = client.post('/api/monitor/acquisitions/ABC-123/ignore').json()
+
+    assert body['state'] == 'ignored'
+
+
+async def test_an_archived_avid_cannot_be_retried_or_ignored() -> None:
+    ledger = await seed_ledger(ABC_123=AcquisitionState.ARCHIVED)
+    client, submitted = make_ledger_client(ledger)
+
+    assert client.post('/api/monitor/acquisitions/ABC-123/retry').status_code == 409
+    assert client.post('/api/monitor/acquisitions/ABC-123/ignore').status_code == 409
+    assert submitted == []
+
+
+async def test_resume_hands_a_parked_avid_back_to_the_tracker() -> None:
+    ledger = await seed_ledger(ABC_123=AcquisitionState.NEEDS_ATTENTION)
+    client, _ = make_ledger_client(ledger)
+
+    body = client.post('/api/monitor/acquisitions/ABC-123/resume').json()
+
+    assert body['state'] == 'downloading'
+
+
+async def test_resume_only_applies_to_parked_avids() -> None:
+    ledger = await seed_ledger(ABC_123=AcquisitionState.DOWNLOADING)
+    client, _ = make_ledger_client(ledger)
+
+    response = client.post('/api/monitor/acquisitions/ABC-123/resume')
+
+    assert response.status_code == 409
+    assert response.json()['error']['code'] == 'not_parked'
+
+
+async def test_tracker_status_reports_why_it_is_not_running() -> None:
+    client, _ = make_ledger_client(await seed_ledger(), tracker_reason='archive is disabled')
+
+    body = client.get('/api/monitor/tracker').json()
+
+    assert body['running'] is False
+    assert body['reason'] == 'archive is disabled'
+
+
+def test_ledger_routes_are_absent_without_a_ledger() -> None:
+    client = make_client(FakeScheduler(), FakeRuns([]))
+
+    assert client.get('/api/monitor/acquisitions').status_code == 404
+
+
+NOW = now_stub()

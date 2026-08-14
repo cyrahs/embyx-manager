@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 
 import asyncpg
 
-CURRENT_SCHEMA_VERSION = 4
+CURRENT_SCHEMA_VERSION = 6
 
 # Advisory-lock key space for embyx-manager; low word selects the resource.
 ADVISORY_NAMESPACE = 0x454D4258  # 'EMBX'
@@ -215,6 +215,69 @@ _MIGRATIONS[3] = (
 # path change can never be applied against a plan scanned under the previous one.
 _MIGRATIONS[4] = ('ALTER TABLE fill_actor_plans ADD COLUMN config_version INTEGER NOT NULL DEFAULT 0',)
 
+# The acquisition ledger: one row per AVID tracking discovery -> magnet -> offline
+# download -> archive, with the per-magnet attempts that carry the CloudDrive
+# infoHash the tracker joins on. It subsumes rss_failed_avids, whose cooldown is
+# just an acquisition waiting for its next_action_at.
+_MIGRATIONS[5] = (
+    """
+    CREATE TABLE archive_acquisitions (
+        avid TEXT PRIMARY KEY,
+        state TEXT NOT NULL CHECK (state IN (
+            'discovered', 'downloading', 'archived',
+            'resolve_failed', 'exhausted', 'needs_attention', 'ignored'
+        )),
+        source TEXT NOT NULL CHECK (source IN ('rss_actor', 'rss_rank', 'manual', 'reconcile')),
+        note TEXT,
+        archived_paths_json TEXT NOT NULL DEFAULT '[]',
+        next_action_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ NOT NULL,
+        updated_at TIMESTAMPTZ NOT NULL
+    )
+    """,
+    'CREATE INDEX archive_acquisitions_state_idx ON archive_acquisitions (state, next_action_at)',
+    """
+    CREATE TABLE archive_magnet_attempts (
+        avid TEXT NOT NULL REFERENCES archive_acquisitions (avid) ON DELETE CASCADE,
+        attempt_no INTEGER NOT NULL CHECK (attempt_no > 0),
+        magnet TEXT NOT NULL,
+        info_hash TEXT,
+        magnet_source TEXT NOT NULL,
+        size_hint BIGINT,
+        state TEXT NOT NULL CHECK (state IN (
+            'pending', 'submitted', 'downloading', 'finished',
+            'archiving', 'archived', 'junk', 'error', 'stalled', 'lost'
+        )),
+        -- Double, not real: CloudDrive's percendDone is a double, and a float4
+        -- column would round it so every poll looked like fresh progress and no
+        -- download would ever be seen as stalled.
+        progress DOUBLE PRECISION,
+        error TEXT,
+        submitted_at TIMESTAMPTZ,
+        updated_at TIMESTAMPTZ NOT NULL,
+        PRIMARY KEY (avid, attempt_no)
+    )
+    """,
+    'CREATE INDEX archive_magnet_attempts_hash_idx ON archive_magnet_attempts (info_hash)',
+    # The tracker joins the CloudDrive task list to attempts by infoHash, so at most
+    # one attempt may be live for a hash at a time. Concluded attempts keep their hash
+    # for history and are free to repeat.
+    """
+    CREATE UNIQUE INDEX archive_magnet_attempts_live_hash_idx
+    ON archive_magnet_attempts (info_hash)
+    WHERE info_hash IS NOT NULL AND state IN ('submitted', 'downloading', 'finished', 'archiving')
+    """,
+    # Carry the RSS cooldown over at the shipped default (rss.failed_avid_cooldown_seconds
+    # = 86400); a deployment that tuned it only shifts these rows' first retry.
+    """
+    INSERT INTO archive_acquisitions (avid, state, source, next_action_at, created_at, updated_at)
+    SELECT avid, 'resolve_failed', 'rss_actor', failed_at + make_interval(secs => 86400), failed_at, failed_at
+    FROM rss_failed_avids
+    ON CONFLICT (avid) DO NOTHING
+    """,
+    'DROP TABLE rss_failed_avids',
+)
+
 
 class Database:
     def __init__(self, dsn: str, *, min_pool_size: int = 1, max_pool_size: int = 10) -> None:
@@ -273,3 +336,16 @@ class Database:
                     pending,
                     datetime.now(UTC),
                 )
+
+
+# cloud_name / cloud_account_id only ever addressed the finished-offline-task
+# cleanup, which the ledger made unnecessary. The section model forbids unknown
+# keys and falls back to defaults when validation fails, so the stored rows have
+# to lose the keys or the whole CloudDrive section would read as unconfigured.
+_MIGRATIONS[6] = (
+    """
+    UPDATE app_config
+    SET value_json = (value_json::jsonb - 'cloud_name' - 'cloud_account_id')::text
+    WHERE section = 'clouddrive'
+    """,
+)

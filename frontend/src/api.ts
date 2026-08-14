@@ -1,4 +1,7 @@
 import type {
+  Acquisition,
+  AcquisitionDetail,
+  AcquisitionPage,
   ActiveApplyRequest,
   ConfigSection,
   PipelineId,
@@ -16,6 +19,7 @@ import type {
   MoveState,
   PlanEnvelope,
   PlanJob,
+  TrackerStatus,
 } from './types'
 
 const API_TOKEN_KEY = 'embyx-manager-api-token'
@@ -625,6 +629,57 @@ export async function getRun(runId: string, signal?: AbortSignal): Promise<RunDe
     throw new ApiError(0, 'invalid_response', '运行详情响应无效。')
   }
   return body as unknown as RunDetail
+}
+
+// ---------- acquisition ledger ----------
+
+export async function listAcquisitions(
+  state: string | null,
+  limit = 50,
+  signal?: AbortSignal,
+): Promise<AcquisitionPage> {
+  const params = new URLSearchParams()
+  if (state) params.set('state', state)
+  params.set('limit', String(limit))
+  const body = await request(`/api/monitor/acquisitions?${params.toString()}`, { signal })
+  if (!isRecord(body) || !Array.isArray(body.items)) {
+    throw new ApiError(0, 'invalid_response', '下载追踪响应无效。')
+  }
+  return body as unknown as AcquisitionPage
+}
+
+export async function getAcquisition(avid: string, signal?: AbortSignal): Promise<AcquisitionDetail> {
+  const body = await request(`/api/monitor/acquisitions/${encodeURIComponent(avid)}`, { signal })
+  if (!isRecord(body) || typeof body.avid !== 'string') {
+    throw new ApiError(0, 'invalid_response', '番号详情响应无效。')
+  }
+  return body as unknown as AcquisitionDetail
+}
+
+export async function actOnAcquisition(
+  avid: string,
+  action: 'retry' | 'ignore' | 'resume',
+): Promise<Acquisition> {
+  const body = await request(`/api/monitor/acquisitions/${encodeURIComponent(avid)}/${action}`, {
+    method: 'POST',
+  })
+  return body as unknown as Acquisition
+}
+
+export async function addAcquisitionMagnet(avid: string, magnet: string): Promise<Acquisition> {
+  const body = await request(`/api/monitor/acquisitions/${encodeURIComponent(avid)}/magnet`, {
+    method: 'POST',
+    body: JSON.stringify({ magnet }),
+  })
+  return body as unknown as Acquisition
+}
+
+export async function getTrackerStatus(signal?: AbortSignal): Promise<TrackerStatus> {
+  const body = await request('/api/monitor/tracker', { signal })
+  if (!isRecord(body) || typeof body.running !== 'boolean') {
+    throw new ApiError(0, 'invalid_response', '追踪状态响应无效。')
+  }
+  return body as unknown as TrackerStatus
 }
 
 // ---------- config ----------

@@ -184,3 +184,12 @@ Deployment notes:
   `EMBYX_MANAGER_TLS_TERMINATED=true` behind a TLS-terminating proxy;
 - CloudDrive/FreshRSS/RSSHub endpoints and credentials are entered on the Settings page
   (stored in PostgreSQL), not in the environment.
+
+## License
+
+GPL-3.0-or-later; see [LICENSE](LICENSE).
+
+The AVID parser in `src/embyx_manager/core/avid.py` is derived from
+[JavSP](https://github.com/Yuukiy/JavSP) (GPL-3.0). Parts of its tag-stripping rules and
+test corpus come from [metatube-sdk-go](https://github.com/metatube-community/metatube-sdk-go)
+(Apache-2.0); the affected files carry the corresponding notices.

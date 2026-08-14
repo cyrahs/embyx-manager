@@ -131,8 +131,6 @@ async def _run_clouddrive_test(config: CloudDriveConfig) -> TestConnectionResult
             address=config.address,
             api_token=config.api_token,
             secure=config.secure,
-            cloud_name=config.cloud_name,
-            cloud_account_id=config.cloud_account_id,
         )
 
     cloud = AsyncCloudDrive(build_client())

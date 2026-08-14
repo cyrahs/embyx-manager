@@ -17,7 +17,7 @@ import contextlib
 import logging
 import time
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -54,6 +54,20 @@ class PipelineNotConfiguredError(Exception):
         super().__init__(f'pipeline {pipeline.value} is not runnable: {reason}')
         self.pipeline = pipeline
         self.reason = reason
+
+
+@dataclass
+class TrackerState:
+    """What the tracker did on its last pass, for the dashboard."""
+
+    last_polled_at: datetime | None = None
+    last_error: str | None = None
+    last_stats: dict[str, int] = field(default_factory=dict)
+
+    def record(self, *, error: str | None, stats: dict[str, int]) -> None:
+        self.last_polled_at = datetime.now(UTC).replace(microsecond=0)
+        self.last_error = error
+        self.last_stats = stats
 
 
 @dataclass(frozen=True)
@@ -105,6 +119,8 @@ class MonitorScheduler:
         rss_ready: Callable[[], str | None],
         archive_ready: Callable[[], str | None],
         mapping_ready: Callable[[], str | None],
+        tracker_poll: Callable[[RunContext], object] | None = None,
+        tracker_ready: Callable[[], str | None] | None = None,
     ) -> None:
         """Runner callables execute one pipeline pass.
 
@@ -118,6 +134,9 @@ class MonitorScheduler:
         self._rss_runner = rss_runner
         self._archive_runner = archive_runner
         self._mapping_factory = mapping_factory
+        self._tracker_poll = tracker_poll
+        self._tracker_ready = tracker_ready
+        self._tracker_state = TrackerState()
         self._ready = {
             PipelineName.RSS: rss_ready,
             PipelineName.ARCHIVE: archive_ready,
@@ -148,6 +167,8 @@ class MonitorScheduler:
             asyncio.create_task(self._mapping_loop(), name='monitor-mapping-loop'),
             asyncio.create_task(self._config_refresh_loop(), name='config-refresh-loop'),
         ]
+        if self._tracker_poll is not None:
+            self._tasks.append(asyncio.create_task(self._tracker_loop(), name='acquisition-tracker-loop'))
 
     async def aclose(self) -> None:
         self._stop.set()
@@ -301,6 +322,35 @@ class MonitorScheduler:
             self._next_update_at = datetime.now(UTC).replace(microsecond=0) + _seconds(delay)
             if await self._wait_stop(delay):
                 break
+
+    # -- acquisition tracker ------------------------------------------------
+
+    async def _tracker_loop(self) -> None:
+        """Poll CloudDrive for the acquisitions in flight.
+
+        A service loop rather than a pipeline run: it wakes every few minutes and
+        would swamp the run history. Its state lives in the ledger, with the last
+        poll and last error surfaced through :meth:`tracker_state`.
+        """
+        assert self._tracker_poll is not None  # noqa: S101 - loop only starts when set
+        while not self._stop.is_set():
+            interval = float(self._store.get(ArchiveConfig).tracker_interval_seconds)
+            if self._tracker_ready is None or self._tracker_ready() is None:
+                ctx = RunContext(logger=logging.getLogger('embyx-manager.tracker'))
+                try:
+                    await self._tracker_poll(ctx)
+                except (RunCancelledError, asyncio.CancelledError):
+                    return
+                except Exception as exc:
+                    LOGGER.exception('acquisition tracker poll failed')
+                    self._tracker_state.record(error=str(exc), stats={})
+                else:
+                    self._tracker_state.record(error=None, stats=dict(ctx.stats))
+            if await self._wait_stop(interval):
+                return
+
+    def tracker_state(self) -> 'TrackerState':
+        return self._tracker_state
 
     async def _config_refresh_loop(self) -> None:
         """Converge on config changes written by other replicas."""

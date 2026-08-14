@@ -1,6 +1,13 @@
 import pytest
 
-from embyx_manager.core.avid import AvidConfig, AvidParser, get_brand, get_cd
+from embyx_manager.core.avid import (
+    HIGH_RESOLUTION_TAGS,
+    AvidConfig,
+    AvidParser,
+    get_brand,
+    get_cd,
+    variant_tags,
+)
 
 
 @pytest.fixture
@@ -71,3 +78,93 @@ def test_get_brand(avid: str, expected: str | None) -> None:
 def test_get_cd() -> None:
     assert get_cd('ABC-123 CD2.mp4') == '2'
     assert get_cd('ABC-123.mp4') is None
+
+
+# -- content-id zero padding (was archive.remove_00) --------------------------
+
+
+@pytest.mark.parametrize(
+    ('title', 'expected'),
+    [
+        ('ABC-00123', 'ABC-123'),
+        ('abc00123.mp4', 'ABC-123'),
+        ('ssis00123', 'SSIS-123'),
+        ('118abp00077.mp4', 'ABP-077'),
+        ('ABC-00012', 'ABC-012'),  # padded down to three digits, not to twelve
+        ('ABP-012', 'ABP-012'),  # a genuine leading zero is left alone
+        ('ABC-123', 'ABC-123'),
+    ],
+)
+def test_content_id_padding_is_removed(parser: AvidParser, title: str, expected: str) -> None:
+    assert parser.get_avid(title) == expected
+
+
+@pytest.mark.parametrize('title', ['FC2-00123', '259LUXU-00123'])
+def test_brands_without_content_ids_keep_their_digits(parser: AvidParser, title: str) -> None:
+    assert parser.get_avid(title) == title
+
+
+def test_padding_removal_needs_the_full_content_id_padding(parser: AvidParser) -> None:
+    # A single leading zero is part of the number, not DMM's five-digit padding.
+    assert parser.get_avid('ABC-0123') == 'ABC-0123'
+
+
+# -- release noise ------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ('title', 'expected'),
+    [
+        ('heyzo_hd_1380_full.mp4', 'HEYZO-1380'),  # 'hd' would otherwise win
+        ('heyzo_lt_1380_full.mp4', 'HEYZO-1380'),
+        ('@x@imouser.com_SDMF-016_1.2K.mp4', 'SDMF-016'),  # 'sd' must not eat SDMF
+        ('[Uncensored] SDDE-618', 'SDDE-618'),
+        ('062620-001-carib-1080p.mp4', '062620-001'),
+        ('1pondo-020317-001.mp4', '020317-001'),
+        ('[Bdxav.Club]Tokyo-Hot-n1340 (title)', 'N1340'),
+        ('[psk.la]Carib-080520-001-FHD', '080520-001'),
+        ('HD_GS-333', 'GS-333'),
+        ('ABP-030-C-c_c-C-Cd1-cd4.mp4', 'ABP-030'),
+    ],
+)
+def test_release_noise_does_not_reach_the_id(parser: AvidParser, title: str, expected: str) -> None:
+    assert parser.get_avid(title) == expected
+
+
+def test_long_dotted_titles_keep_their_id(parser: AvidParser) -> None:
+    # Treating everything after the first dot as an extension threw the id away.
+    assert parser.get_avid('test.xxx@133ARA-030 hello') == 'ARA-030'
+    assert parser.get_avid('hhd800.com@HUNTB-269') == 'HUNTB-269'
+
+
+# -- variant tags (was archive.is_4k_video) -----------------------------------
+
+
+@pytest.mark.parametrize(
+    ('name', 'expected'),
+    [
+        ('ABC-123-4K.mp4', {'4K'}),
+        ('vema-181-4k-C.mp4', {'4K'}),
+        ('GIGL-677_4K60FPS.mp4', {'4K', '60FPS'}),  # tags with no separator between them
+        ('ABC-123-2160p.mkv', {'2160P'}),
+        ('ABC-123-x264-leak.mp4', {'X264', 'LEAK'}),
+        ('ABC-123.mp4', set()),
+        ('ABC-1234k.mp4', set()),  # '4k' here is part of the number
+    ],
+)
+def test_variant_tags(name: str, expected: set[str]) -> None:
+    assert variant_tags(name) == expected
+
+
+@pytest.mark.parametrize(
+    ('name', 'high_resolution'),
+    [
+        ('ABC-123-4K.mp4', True),
+        ('ABC-123-2160P.mp4', True),
+        ('ABC-123-1080p.mp4', False),
+        ('ABC-123.mp4', False),
+        ('4k.mp4', True),
+    ],
+)
+def test_high_resolution_detection(name: str, *, high_resolution: bool) -> None:
+    assert bool(variant_tags(name) & HIGH_RESOLUTION_TAGS) is high_resolution

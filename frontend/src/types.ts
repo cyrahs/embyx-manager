@@ -151,6 +151,68 @@ export interface PipelineStatus {
   last_run: RunSummary | null
 }
 
+// ---------- acquisition ledger ----------
+
+export type AcquisitionState =
+  | 'discovered'
+  | 'downloading'
+  | 'archived'
+  | 'resolve_failed'
+  | 'exhausted'
+  | 'needs_attention'
+  | 'ignored'
+
+export type AttemptState =
+  | 'pending'
+  | 'submitted'
+  | 'downloading'
+  | 'finished'
+  | 'archiving'
+  | 'archived'
+  | 'junk'
+  | 'error'
+  | 'stalled'
+  | 'lost'
+
+export interface Acquisition {
+  avid: string
+  state: AcquisitionState
+  source: 'rss_actor' | 'rss_rank' | 'manual' | 'reconcile'
+  note: string | null
+  archived_paths: string[]
+  next_action_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface MagnetAttempt {
+  attempt_no: number
+  magnet_source: string
+  state: AttemptState
+  progress: number | null
+  error: string | null
+  submitted_at: string | null
+  updated_at: string
+  info_hash: string | null
+}
+
+export interface AcquisitionDetail extends Acquisition {
+  attempts: MagnetAttempt[]
+}
+
+export interface AcquisitionPage {
+  items: Acquisition[]
+  counts: Partial<Record<AcquisitionState, number>>
+}
+
+export interface TrackerStatus {
+  running: boolean
+  reason: string | null
+  last_polled_at: string | null
+  last_error: string | null
+  last_stats: Record<string, number>
+}
+
 // ---------- config ----------
 
 export interface ConfigSection {

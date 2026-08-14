@@ -7,7 +7,9 @@ import pytest
 
 from embyx_manager.clients.clouddrive import AsyncCloudDrive, clouddrive_pb2
 from embyx_manager.clients.clouddrive import client as client_module
+from embyx_manager.clients.clouddrive.aio import OfflineStatus
 from embyx_manager.clients.clouddrive.client import GRPC_TIMEOUT_SECONDS, CloudDriveClient
+from embyx_manager.core.magnet import extract_info_hash
 
 
 def _make_client(monkeypatch: pytest.MonkeyPatch, stub: SimpleNamespace, *, secure: bool = True) -> CloudDriveClient:
@@ -28,7 +30,6 @@ def test_clouddrive_calls_include_timeout(monkeypatch: pytest.MonkeyPatch) -> No
         MoveFile=Mock(return_value=object()),
         AddOfflineFiles=Mock(return_value=object()),
         ListOfflineFilesByPath=Mock(return_value=finished_result),
-        ClearOfflineFiles=Mock(return_value=None),
     )
     client = _make_client(monkeypatch, stub)
 
@@ -38,8 +39,7 @@ def test_clouddrive_calls_include_timeout(monkeypatch: pytest.MonkeyPatch) -> No
     client.rename_file('/media/old', 'new')
     client.move_file(['/media/file'], '/media/dst')
     client.add_offline_file('magnet:?xt=urn:btih:abc', '/media')
-    client.list_finished_offline_files_by_path('/media')
-    client.clear_finished_offline_files('/media')
+    client.list_offline_files_by_path('/media')
 
     for grpc_call in [
         stub.GetSystemInfo,
@@ -49,7 +49,6 @@ def test_clouddrive_calls_include_timeout(monkeypatch: pytest.MonkeyPatch) -> No
         stub.MoveFile,
         stub.AddOfflineFiles,
         stub.ListOfflineFilesByPath,
-        stub.ClearOfflineFiles,
     ]:
         assert grpc_call.call_args.kwargs['timeout'] == GRPC_TIMEOUT_SECONDS
 
@@ -245,3 +244,70 @@ async def test_cancelled_cloud_move_waits_for_sync_call_before_returning() -> No
     release.set()
     with pytest.raises(asyncio.CancelledError):
         await task
+
+
+def _offline_file(**overrides: object) -> clouddrive_pb2.OfflineFile:
+    fields: dict[str, object] = {
+        'name': 'ABC-123',
+        'size': 1024,
+        'url': 'magnet:?xt=urn:btih:c12fe1c06bba254a9dc9f519b335aa7c1367a88a',
+        'status': clouddrive_pb2.OfflineFileStatus.OFFLINE_DOWNLOADING,
+        'infoHash': 'c12fe1c06bba254a9dc9f519b335aa7c1367a88a',
+        'fileId': '42',
+        'add_time': 1_755_000_000,
+        'percendDone': 33.33,
+        'peers': 7,
+    }
+    fields.update(overrides)
+    return clouddrive_pb2.OfflineFile(**fields)  # type: ignore[arg-type]
+
+
+def test_list_offline_files_by_path_keeps_every_status(monkeypatch: pytest.MonkeyPatch) -> None:
+    result = clouddrive_pb2.OfflineFileListResult(
+        offlineFiles=[
+            _offline_file(status=clouddrive_pb2.OfflineFileStatus.OFFLINE_DOWNLOADING),
+            _offline_file(status=clouddrive_pb2.OfflineFileStatus.OFFLINE_FINISHED),
+            _offline_file(status=clouddrive_pb2.OfflineFileStatus.OFFLINE_ERROR),
+        ],
+    )
+    stub = SimpleNamespace(ListOfflineFilesByPath=Mock(return_value=result))
+    client = _make_client(monkeypatch, stub)
+
+    files = client.list_offline_files_by_path('/media/tasks')
+
+    statuses = [file.status for file in files]
+    assert statuses == [
+        clouddrive_pb2.OfflineFileStatus.OFFLINE_DOWNLOADING,
+        clouddrive_pb2.OfflineFileStatus.OFFLINE_FINISHED,
+        clouddrive_pb2.OfflineFileStatus.OFFLINE_ERROR,
+    ]
+
+
+async def test_offline_task_view_exposes_the_fields_the_tracker_joins_on() -> None:
+    result = clouddrive_pb2.OfflineFileListResult(offlineFiles=[_offline_file()])
+    cloud = _async_wrapper(SimpleNamespace(list_offline_files_by_path=Mock(return_value=list(result.offlineFiles))))
+
+    tasks = await cloud.list_offline_files('/media/tasks')
+
+    assert tasks == (
+        {
+            'name': 'ABC-123',
+            'size': 1024,
+            'url': 'magnet:?xt=urn:btih:c12fe1c06bba254a9dc9f519b335aa7c1367a88a',
+            'status': OfflineStatus.DOWNLOADING,
+            'info_hash': 'C12FE1C06BBA254A9DC9F519B335AA7C1367A88A',
+            'file_id': '42',
+            'add_time': 1_755_000_000,
+            'progress': pytest.approx(33.33),
+            'peers': 7,
+        },
+    )
+
+
+async def test_offline_task_hash_matches_the_hash_parsed_from_our_magnet() -> None:
+    task = _offline_file()
+    cloud = _async_wrapper(SimpleNamespace(list_offline_files_by_path=Mock(return_value=[task])))
+
+    tasks = await cloud.list_offline_files('/media/tasks')
+
+    assert tasks[0]['info_hash'] == extract_info_hash(task.url)

@@ -1,11 +1,10 @@
-import asyncio
 import logging
 import threading
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from datetime import datetime
 from pathlib import Path
 
+import grpc
 from fastapi import FastAPI
 
 from embyx_manager.adapters import (
@@ -45,13 +44,16 @@ from embyx_manager.fill_actor.jobs import FillActorJobManager
 from embyx_manager.fill_actor.postgres_repository import PostgresFillActorRepository
 from embyx_manager.fill_actor.service import FillActorPaths, FillActorRuntime, FillActorService
 from embyx_manager.locking import PostgresAdvisoryLock
-from embyx_manager.monitor.api import create_monitor_router
+from embyx_manager.monitor.acquisitions import AcquisitionRepository
+from embyx_manager.monitor.api import AcquisitionApi, create_monitor_router
 from embyx_manager.monitor.archive import ArchivePipeline
 from embyx_manager.monitor.mapping import MappingPipeline
+from embyx_manager.monitor.reconcile import ReconcileScanner
 from embyx_manager.monitor.reports import RunContext
 from embyx_manager.monitor.rss import RssPipeline
 from embyx_manager.monitor.runs import PipelineRunRepository
 from embyx_manager.monitor.scheduler import MonitorScheduler
+from embyx_manager.monitor.tracker import AcquisitionTracker, TrackerSettings
 from embyx_manager.settings import Settings
 
 LOGGER = logging.getLogger(__name__)
@@ -84,8 +86,6 @@ class CloudDriveHandle:
                         address=config.address,
                         api_token=config.api_token,
                         secure=config.secure,
-                        cloud_name=config.cloud_name,
-                        cloud_account_id=config.cloud_account_id,
                     )
                     self._cloud = AsyncCloudDrive(self._client)
             return self._cloud
@@ -225,6 +225,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
 
     avid_handle = AvidParserHandle(store)
     pipeline_runs = PipelineRunRepository(database)
+    ledger = AcquisitionRepository(database)
 
     def rss_trigger_ready() -> str | None:
         return _rss_configuration_gap(store)
@@ -243,15 +244,6 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
             proxy=freshrss_config.proxy or None,
         )
 
-        async def cooldown_lookup(now: datetime) -> frozenset[str]:
-            return await pipeline_runs.active_cooldowns(
-                now=now,
-                ttl_seconds=rss_config.failed_avid_cooldown_seconds,
-            )
-
-        async def cooldown_record(avids: set[str], now: datetime) -> None:
-            await pipeline_runs.record_failed_avids(avids, now=now)
-
         try:
             pipeline = RssPipeline(
                 config=rss_config,
@@ -261,8 +253,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
                 sukebei=sukebei,
                 javbus=javbus,
                 task_dir_path=clouddrive_config.task_dir_path,
-                cooldown_lookup=cooldown_lookup,
-                cooldown_record=cooldown_record,
+                ledger=ledger,
             )
             await pipeline.run(ctx, rank=rank)
         finally:
@@ -273,6 +264,9 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
             return 'archive source, destination, and mapping must be configured'
         return None
 
+    # Held across runs: settling a folder takes two passes to observe.
+    reconcile_scanner: list[ReconcileScanner] = []
+
     async def archive_runner(ctx: RunContext) -> None:
         clouddrive_config = store.get(CloudDriveConfig)
         cloud = cloud_handle.current()
@@ -281,8 +275,67 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
                 await cloud.list_directory(clouddrive_config.task_dir_path)
             except Exception:  # noqa: BLE001
                 ctx.exception('failed to refresh the CloudDrive task directory')
-        pipeline = ArchivePipeline(config=store.get(ArchiveConfig), avid_parser=avid_handle.current())
-        await asyncio.to_thread(pipeline.run, ctx)
+        archive_config = store.get(ArchiveConfig)
+        archiver = ArchivePipeline(config=archive_config, avid_parser=avid_handle.current())
+        if reconcile_scanner:
+            reconcile_scanner[0].rebind(archiver=archiver, config=archive_config)
+        else:
+            reconcile_scanner.append(
+                ReconcileScanner(ledger=ledger, archiver=archiver, config=archive_config),
+            )
+        await reconcile_scanner[0].run(ctx)
+
+    def tracker_ready() -> str | None:
+        archive_config = store.get(ArchiveConfig)
+        if not archive_config.enabled:
+            return 'archive is disabled'
+        if not archive_config.tracker_configured:
+            return 'the archive task directory and destination must be configured'
+        if cloud_handle.current() is None or not store.get(CloudDriveConfig).task_dir_path:
+            return 'CloudDrive and its task directory must be configured'
+        return None
+
+    async def submit_magnet(avid: str, magnet: str) -> bool:
+        """Queue one magnet at CloudDrive; shared by the tracker and the dashboard."""
+        cloud = cloud_handle.current()
+        if cloud is None:
+            return False
+        try:
+            result = await cloud.add_offline_files([magnet], store.get(CloudDriveConfig).task_dir_path)
+        except grpc.RpcError as exc:
+            # Already queued at CloudDrive: the hash is what we track, so this
+            # counts as submitted either way.
+            if '任务已存在' in (exc.details() or ''):
+                return True
+            LOGGER.exception('failed to add a magnet for %s', avid)
+            return False
+        except Exception:
+            LOGGER.exception('failed to add a magnet for %s', avid)
+            return False
+        return bool(getattr(result, 'success', False))
+
+    async def tracker_poll(ctx: RunContext) -> None:
+        cloud = cloud_handle.current()
+        if cloud is None:
+            return
+        archive_config = store.get(ArchiveConfig)
+        clouddrive_config = store.get(CloudDriveConfig)
+        archiver = ArchivePipeline(config=archive_config, avid_parser=avid_handle.current())
+        tracker = AcquisitionTracker(
+            ledger=ledger,
+            cloud=cloud,
+            archiver=archiver,
+            settings=TrackerSettings(
+                task_dir_path=clouddrive_config.task_dir_path,
+                task_dir_local=Path(archive_config.task_dir_local),
+                task_dst=archive_config.task_dst,
+                task_priority=archive_config.task_priority,
+                stall_timeout_hours=archive_config.stall_timeout_hours,
+                max_attempts=archive_config.max_attempts,
+            ),
+            submit_magnet=submit_magnet,
+        )
+        await tracker.poll(ctx)
 
     def mapping_ready() -> str | None:
         if not store.get(MappingConfig).configured:
@@ -301,8 +354,19 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         rss_ready=rss_trigger_ready,
         archive_ready=archive_ready,
         mapping_ready=mapping_ready,
+        tracker_poll=tracker_poll,
+        tracker_ready=tracker_ready,
     )
-    monitor_router = create_monitor_router(scheduler, pipeline_runs, mutation_auth=mutation_auth)
+    monitor_router = create_monitor_router(
+        scheduler,
+        pipeline_runs,
+        mutation_auth=mutation_auth,
+        acquisitions=AcquisitionApi(
+            ledger=ledger,
+            submit_magnet=submit_magnet,
+            tracker_ready=tracker_ready,
+        ),
+    )
 
     @asynccontextmanager
     async def runtime_lifespan() -> AsyncIterator[None]:
