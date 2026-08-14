@@ -29,6 +29,19 @@ def parser() -> AvidParser:
         ('GETCHU-1234567', 'GETCHU-1234567'),
         ('GYUTTO-123456', 'GYUTTO-123456'),
         ('259LUXU-1234', '259LUXU-1234'),
+        ('32ID-020', '32ID-020'),  # the ID series keeps its varying digit prefix
+        ('17id_021.mp4', '17ID-021'),
+        # 3D+2D Blu-rays keep their 3D2(D)BD token: CATWALK POISON's early
+        # volumes are CW3D2BD, its later volumes CW3D2DBD, MUGEN's MK3D2DBD.
+        ('CW3D2BD-04 3D キャットウォーク ポイズン 04 : 波多野結衣', 'CW3D2BD-04'),
+        ('[BD-ISO] 3D CATWALK POISON 05 : Megumi Shino (CW3D2BD-05)', 'CW3D2BD-05'),
+        ('CW3D2DBD-24 キャットウォーク ポイズン 24', 'CW3D2DBD-24'),
+        ('3D-CW3D2DBD-28.mp4', 'CW3D2DBD-28'),
+        ('MK3D2DBD-01', 'MK3D2DBD-01'),
+        # MUGEN's other Blu-ray forms, which the ordinary patterns would misread.
+        ('MKBD-S03', 'MKBD-S03'),
+        ('S2MBD-048', 'S2MBD-048'),
+        ('S2M-001', 'S2M-001'),
         ('IBW-123z', 'IBW-123Z'),
         ('T28-557', 'T28-557'),
         ('n1234', 'N1234'),

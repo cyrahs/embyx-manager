@@ -214,14 +214,30 @@ class AvidParser:
             match = re.search(r'(?:HEY)[-_]*(\d{4})[-_]0?(\d{3,5})', norm, re.IGNORECASE)
             if match:
                 return 'heydouga-' + '-'.join(match.groups())
-            # 匹配片商 MUGEN 的奇怪番号。由于MK3D2DBD的模式, 要放在普通番号模式之前进行匹配
-            match = re.search(r'(MKB?D)[-_]*(S\d{2,3})|(MK3D2DBD|S2M|S2MBD)[-_]*(\d{2,3})', norm, re.IGNORECASE)
+            # 匹配片商 MUGEN 的奇怪番号。普通番号模式会把 S2MBD-048 读成 MBD-048,
+            # 因此要放在其之前进行匹配
+            match = re.search(r'(MKB?D)[-_]*(S\d{2,3})|(S2M|S2MBD)[-_]*(\d{2,3})', norm, re.IGNORECASE)
             if match:
                 if match.group(1) is not None:
                     return match.group(1) + '-' + match.group(2)
                 return match.group(3) + '-' + match.group(4)
+            # 3D+2D Blu-ray lines carry the marketing token as part of the id:
+            # MUGEN's MK3D2DBD, CATWALK POISON's CW3D2BD (volumes 1-5) and
+            # CW3D2DBD (later volumes; javdb lists both spellings as canonical).
+            # The spelling that appears is returned as written. Must run before
+            # the ordinary patterns, which would read BD-04 out of CW3D2BD-04.
+            match = re.search(r'([A-Z]{2,4}3D2D?BD)[-_]*(\d{2,3})', norm, re.IGNORECASE)
+            if match:
+                return match.group(1) + '-' + match.group(2)
             # 匹配IBW这样带有后缀z的番号
             match = re.search(r'(IBW)[-_](\d{2,5}z)', norm, re.IGNORECASE)
+            if match:
+                return match.group(1) + '-' + match.group(2)
+            # The ID series is the one known brand whose digit prefix varies by
+            # batch (17ID-021, 32ID-020), so the prefix is part of the id and
+            # must survive; every other digit prefix (133ARA-030) is dropped by
+            # the ordinary patterns below.
+            match = re.search(r'(\d{2,3}ID)[-_](\d{2,5})', norm, re.IGNORECASE)
             if match:
                 return match.group(1) + '-' + match.group(2)
             # 普通番号, 优先尝试匹配带分隔符的, 如ABC-123
