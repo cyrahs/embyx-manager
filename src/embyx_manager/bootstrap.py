@@ -199,6 +199,9 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
             javbus=javbus,
             cloud=cloud,
             failed_cooldown_seconds=store.get(RssConfig).failed_avid_cooldown_seconds,
+            # Resolved lazily: the scheduler is built later in this function
+            # and the factory only runs once the app is serving.
+            on_submitted=scheduler.notify_submission,
         )
 
     service = FillActorService(
@@ -269,6 +272,9 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
                 sukebei=sukebei,
                 javbus=javbus,
                 ledger=ledger,
+                archiver=ArchivePipeline(config=store.get(ArchiveConfig), avid_parser=avid_handle.current()),
+                # Resolved when the run executes, well after the scheduler exists.
+                on_submitted=scheduler.notify_submission,
             )
             await pipeline.run(ctx)
         finally:
@@ -319,6 +325,12 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         the attempts that preceded it even if its category has since been
         repointed or removed.
         """
+        accepted = await _submit_magnet_at_cloud(avid, magnet)
+        if accepted:
+            scheduler.notify_submission()
+        return accepted
+
+    async def _submit_magnet_at_cloud(avid: str, magnet: str) -> bool:
         cloud = cloud_handle.current()
         if cloud is None:
             return False

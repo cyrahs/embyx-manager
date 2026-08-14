@@ -12,7 +12,7 @@ the acquisition at discovery — so one source's downloads can be filed by an
 archive route of its own.
 """
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 
@@ -53,7 +53,7 @@ class IntakeOutcome(StrEnum):
 
 
 class AcquisitionIntake:
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         *,
         ledger: AcquisitionRepository,
@@ -61,12 +61,15 @@ class AcquisitionIntake:
         javbus: JavBusClient,
         cloud: AsyncCloudDrive,
         failed_cooldown_seconds: int,
+        on_submitted: Callable[[], None] | None = None,
     ) -> None:
+        """``on_submitted()`` is called whenever a magnet lands at CloudDrive."""
         self._ledger = ledger
         self._sukebei = sukebei
         self._javbus = javbus
         self._cloud = cloud
         self._failed_cooldown = timedelta(seconds=failed_cooldown_seconds)
+        self._on_submitted = on_submitted
 
     async def enqueue(
         self,
@@ -244,6 +247,8 @@ class AcquisitionIntake:
                 error='failed to add the offline task',
             )
             return await self._submit_next(avid, task_dir, ctx)
+        if self._on_submitted is not None:
+            self._on_submitted()
         record = await self._ledger.get(avid)
         if record is not None and record.state is not AcquisitionState.DOWNLOADING:
             await self._ledger.transition(

@@ -653,3 +653,65 @@ def test_a_nested_route_is_skipped_even_when_it_is_deeper(tmp_path: Path) -> Non
     # 'rank' holds a route without being one, so it is left alone too.
     assert (tmp_path / 'task' / 'intake' / 'rank' / 'new').is_dir()
     assert (tmp_path / 'library' / 'sorted' / 'rank' / 'DEF' / 'DEF-456.mp4').exists()
+
+
+# -- the library check ---------------------------------------------------------
+
+
+def test_route_for_task_dir_matches_by_path_suffix(tmp_path: Path) -> None:
+    pipeline = make_priority_pipeline(tmp_path)
+
+    assert pipeline.route_for_task_dir('/task/intake') == ('sorted', False)
+    assert pipeline.route_for_task_dir('/task/vip') == ('starred', True)
+    assert pipeline.route_for_task_dir('/task/unknown') is None
+    # The suffix must match in order, not merely share segments.
+    assert pipeline.route_for_task_dir('/intake/task') is None
+
+
+def test_library_holdings_reports_every_copy(tmp_path: Path) -> None:
+    pipeline = make_priority_pipeline(tmp_path)
+    write_video(tmp_path / 'library' / 'sorted' / 'ABC' / 'ABC-123.mp4')
+    write_video(tmp_path / 'library' / 'sorted' / 'ABC' / 'ABC-123-cd2.mp4')
+
+    held = pipeline.library_holdings('ABC-123', make_ctx(), task_dir_path='/task/intake')
+
+    assert held == ('sorted/ABC/ABC-123-cd2.mp4', 'sorted/ABC/ABC-123.mp4')
+
+
+def test_library_holdings_is_empty_for_an_absent_avid(tmp_path: Path) -> None:
+    pipeline = make_priority_pipeline(tmp_path)
+    # A longer AVID sharing the prefix must not count as a copy.
+    write_video(tmp_path / 'library' / 'sorted' / 'ABC' / 'ABC-1234.mp4')
+
+    assert pipeline.library_holdings('ABC-123', make_ctx(), task_dir_path='/task/intake') == ()
+
+
+def test_a_priority_task_dir_promotes_the_normal_copy(tmp_path: Path) -> None:
+    pipeline = make_priority_pipeline(tmp_path)
+    copy = write_video(tmp_path / 'library' / 'sorted' / 'ABC' / 'ABC-123.mp4')
+
+    held = pipeline.library_holdings('ABC-123', make_ctx(), task_dir_path='/task/vip')
+
+    assert held == ('starred/ABC/ABC-123.mp4',)
+    assert not copy.exists()
+    assert (tmp_path / 'library' / 'starred' / 'ABC' / 'ABC-123.mp4').exists()
+
+
+def test_a_normal_task_dir_leaves_the_priority_copy_where_it_is(tmp_path: Path) -> None:
+    pipeline = make_priority_pipeline(tmp_path)
+    copy = write_video(tmp_path / 'library' / 'starred' / 'ABC' / 'ABC-123.mp4')
+
+    held = pipeline.library_holdings('ABC-123', make_ctx(), task_dir_path='/task/intake')
+
+    assert held == ('starred/ABC/ABC-123.mp4',)
+    assert copy.exists()
+
+
+def test_an_unmatched_task_dir_still_finds_the_copy(tmp_path: Path) -> None:
+    # No route to promote into, but the one-copy answer is route-independent.
+    pipeline = make_priority_pipeline(tmp_path)
+    write_video(tmp_path / 'library' / 'sorted' / 'ABC' / 'ABC-123.mp4')
+
+    held = pipeline.library_holdings('ABC-123', make_ctx(), task_dir_path='/elsewhere/entirely')
+
+    assert held == ('sorted/ABC/ABC-123.mp4',)

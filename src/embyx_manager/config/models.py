@@ -228,7 +228,10 @@ class ArchiveConfig(ConfigSection):
     min_size_mb: int = 0
     # Destination subdirectory -> list of brands routed into it.
     brand_mapping: dict[str, tuple[str, ...]] = {}
-    tracker_interval_seconds: int = 300
+    # The slow cadence for downloads that are genuinely waiting. A freshly
+    # submitted magnet gets its own burst of fast checks first (see the
+    # scheduler), which is why this can afford to be long.
+    tracker_interval_seconds: int = 1800
     stall_timeout_hours: int = 24
     max_attempts: int = 5
 

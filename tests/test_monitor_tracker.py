@@ -49,6 +49,7 @@ class FakeCloud:
         self.tasks_by_dir: dict[str, list[dict]] = {TASK_DIR: tasks} if isinstance(tasks, list) else tasks
         self.listed: list[str] = []
         self.refreshed: list[str] = []
+        self.removed: list[tuple[str, str, bool]] = []
 
     async def list_offline_files(self, path: str) -> tuple[dict, ...]:
         self.listed.append(path)
@@ -57,6 +58,9 @@ class FakeCloud:
     async def list_directory(self, path: str) -> tuple[()]:
         self.refreshed.append(path)
         return ()
+
+    async def remove_offline_files(self, info_hashes: list[str], path: str, *, delete_files: bool) -> None:
+        self.removed.extend((info_hash, path, delete_files) for info_hash in info_hashes)
 
 
 def write_video(path: Path, size: int = 10) -> None:
@@ -127,6 +131,9 @@ async def test_finished_download_is_archived_and_the_avid_closed(tmp_path: Path)
     assert ctx.stats['archived'] == 1
     # The mount is asked for the finished folder rather than slept on.
     assert cloud.refreshed == [f'{TASK_DIR}/ABC-123 release']
+    # The task record stays: it feeds CloudDrive's duplicate detection, and the
+    # downloaded folder is already archived away.
+    assert cloud.removed == []
 
 
 async def test_a_finished_download_is_filed_by_the_route_that_holds_it(tmp_path: Path) -> None:
@@ -175,7 +182,7 @@ async def test_a_finished_task_not_yet_on_the_mount_is_left_for_the_next_poll(tm
 
 
 async def test_a_download_of_nothing_but_ads_moves_to_the_next_magnet(tmp_path: Path) -> None:
-    tracker, ledger, _, submitted = build(
+    tracker, ledger, cloud, submitted = build(
         tmp_path,
         [offline_task('junk release', HASH_A, OfflineStatus.FINISHED)],
         min_size_mb=1,
@@ -190,10 +197,12 @@ async def test_a_download_of_nothing_but_ads_moves_to_the_next_magnet(tmp_path: 
     assert [avid for avid, _ in submitted] == ['ABC-123']
     assert ledger.states['ABC-123'] is AcquisitionState.DOWNLOADING
     assert ctx.stats['junk'] == 1
+    # The junk folder goes with the task: nothing will come back for it.
+    assert cloud.removed == [(HASH_A, TASK_DIR, True)]
 
 
 async def test_errored_task_moves_to_the_next_magnet(tmp_path: Path) -> None:
-    tracker, ledger, _, submitted = build(tmp_path, [offline_task('x', HASH_A, OfflineStatus.ERROR)])
+    tracker, ledger, cloud, submitted = build(tmp_path, [offline_task('x', HASH_A, OfflineStatus.ERROR)])
     await seed(ledger, 'ABC-123', [HASH_A, HASH_B])
 
     ctx = make_ctx()
@@ -202,6 +211,8 @@ async def test_errored_task_moves_to_the_next_magnet(tmp_path: Path) -> None:
     assert ledger.attempt_states('ABC-123') == [AttemptState.ERROR, AttemptState.SUBMITTED]
     assert len(submitted) == 1
     assert ctx.stats['retried'] == 1
+    # The failed task is dropped at CloudDrive along with whatever it downloaded.
+    assert cloud.removed == [(HASH_A, TASK_DIR, True)]
 
 
 async def test_progress_is_recorded_while_the_download_moves(tmp_path: Path) -> None:
@@ -216,7 +227,7 @@ async def test_progress_is_recorded_while_the_download_moves(tmp_path: Path) -> 
 
 
 async def test_a_download_stuck_past_the_timeout_moves_on(tmp_path: Path) -> None:
-    tracker, ledger, _, submitted = build(tmp_path, [offline_task('x', HASH_A, progress=10.0)])
+    tracker, ledger, cloud, submitted = build(tmp_path, [offline_task('x', HASH_A, progress=10.0)])
     await seed(ledger, 'ABC-123', [HASH_A, HASH_B])
     # Already downloading, stuck at the same percentage since well before the timeout.
     stale = ledger.attempts['ABC-123'][0]
@@ -234,6 +245,9 @@ async def test_a_download_stuck_past_the_timeout_moves_on(tmp_path: Path) -> Non
 
     assert ledger.attempt_states('ABC-123') == [AttemptState.STALLED, AttemptState.SUBMITTED]
     assert len(submitted) == 1
+    # A stalled task left at CloudDrive could finish later and drop a duplicate
+    # folder next to whatever the retry archives; it goes, files included.
+    assert cloud.removed == [(HASH_A, TASK_DIR, True)]
 
 
 async def test_running_out_of_magnets_marks_the_avid_exhausted(tmp_path: Path) -> None:
@@ -311,7 +325,7 @@ async def test_a_task_that_vanished_but_landed_is_still_archived(tmp_path: Path)
 
 
 async def test_a_task_that_vanished_without_landing_moves_on(tmp_path: Path) -> None:
-    tracker, ledger, _, submitted = build(tmp_path, [])
+    tracker, ledger, cloud, submitted = build(tmp_path, [])
     await seed(ledger, 'ABC-123', [HASH_A, HASH_B])
 
     ctx = make_ctx()
@@ -319,6 +333,22 @@ async def test_a_task_that_vanished_without_landing_moves_on(tmp_path: Path) -> 
 
     assert ledger.attempt_states('ABC-123') == [AttemptState.LOST, AttemptState.SUBMITTED]
     assert len(submitted) == 1
+    # CloudDrive no longer lists the task, so there is nothing to remove.
+    assert cloud.removed == []
+
+
+async def test_a_cancelled_task_of_an_ignored_avid_is_not_resubmitted(tmp_path: Path) -> None:
+    # An operator ignored the duplicate and cancelled its offline task. The
+    # sweep still books the attempt as lost, but must not resurrect the AVID
+    # with its next candidate magnet.
+    tracker, ledger, _, submitted = build(tmp_path, [])
+    await seed(ledger, 'ABC-123', [HASH_A, HASH_B])
+    ledger.states['ABC-123'] = AcquisitionState.IGNORED
+
+    await tracker.poll(make_ctx())
+
+    assert ledger.attempt_states('ABC-123') == [AttemptState.LOST, AttemptState.PENDING]
+    assert submitted == []
 
 
 async def test_an_avid_an_operator_parked_is_not_touched(tmp_path: Path) -> None:

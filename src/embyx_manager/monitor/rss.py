@@ -17,6 +17,7 @@ independent, so one failing does not cost the others their pass.
 """
 
 import asyncio
+from collections.abc import Callable
 from datetime import UTC, datetime
 
 from embyx_manager.clients.clouddrive import AsyncCloudDrive
@@ -28,11 +29,18 @@ from embyx_manager.config.models import RssCategory, RssConfig
 from embyx_manager.core.avid import AvidParser
 from embyx_manager.monitor.acquisitions import (
     AcquisitionRepository,
+    AcquisitionState,
     MagnetCandidate,
     rss_source,
 )
+from embyx_manager.monitor.archive import ArchivePipeline
 from embyx_manager.monitor.intake import AcquisitionIntake
 from embyx_manager.monitor.reports import RunCancelledError, RunContext
+
+#: States discovery hands back for a fresh look; a library hit settles them.
+RECHECKABLE_STATES = frozenset(
+    {AcquisitionState.DISCOVERED, AcquisitionState.RESOLVE_FAILED, AcquisitionState.EXHAUSTED},
+)
 
 
 class RssPipeline:
@@ -46,17 +54,22 @@ class RssPipeline:
         sukebei: SukebeiClient,
         javbus: JavBusClient,
         ledger: AcquisitionRepository,
+        archiver: ArchivePipeline,
+        on_submitted: Callable[[], None] | None = None,
     ) -> None:
+        """``on_submitted()`` is called whenever a magnet lands at CloudDrive."""
         self._config = config
         self._avid = avid_parser
         self._freshrss = freshrss
         self._ledger = ledger
+        self._archiver = archiver
         self._intake = AcquisitionIntake(
             ledger=ledger,
             sukebei=sukebei,
             javbus=javbus,
             cloud=cloud,
             failed_cooldown_seconds=config.failed_avid_cooldown_seconds,
+            on_submitted=on_submitted,
         )
 
     async def run(self, ctx: RunContext) -> None:
@@ -110,9 +123,57 @@ class RssPipeline:
             return
 
         ctx.check_cancelled()
+        wanted = await self._skip_library_held(wanted, task_dir, ctx)
+        if not wanted:
+            return
+
+        ctx.check_cancelled()
         resolved = await self._resolve_all(wanted, ctx)
         ctx.check_cancelled()
         await self._submit_all(resolved, task_dir, ctx)
+
+    # -- the library check ----------------------------------------------------
+
+    async def _skip_library_held(
+        self,
+        wanted: dict[str, list[dict]],
+        task_dir: str,
+        ctx: RunContext,
+    ) -> dict[str, list[dict]]:
+        """Drop AVIDs the library already holds, settling their ledger rows.
+
+        The ledger only knows acquisitions that passed through it, so a chart
+        re-listing something acquired before the ledger existed sails through
+        discovery; this is the check that asks the library itself. A held AVID
+        becomes an archived row pointing at the existing copy — terminal, so
+        its next sighting stops at the ledger without touching the mount. An
+        unreadable library is not a held one: the download proceeds and the
+        archive-time check gets the final word.
+        """
+        kept: dict[str, list[dict]] = {}
+        for avid, items in wanted.items():
+            ctx.check_cancelled()
+            try:
+                held = await asyncio.to_thread(self._archiver.library_holdings, avid, ctx, task_dir_path=task_dir)
+            except Exception:  # noqa: BLE001 - unverifiable is not held
+                ctx.exception('Failed to check the library for %s', avid)
+                held = ()
+            if not held:
+                kept[avid] = items
+                continue
+            ctx.add('already_in_library')
+            ctx.info('%s is already in the library at %s', avid, held[0])
+            record = await self._ledger.get(avid)
+            if record is not None and record.state in RECHECKABLE_STATES:
+                await self._ledger.transition(
+                    avid,
+                    expected=record.state,
+                    target=AcquisitionState.ARCHIVED,
+                    now=datetime.now(UTC),
+                    note='already in library',
+                    archived_paths=held,
+                )
+        return kept
 
     # -- magnet resolution ---------------------------------------------------
 

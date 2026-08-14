@@ -51,6 +51,7 @@ const STAT_LABELS: Record<string, string> = {
   categories_failed: '分类拉取失败',
   skipped_known: '已跟踪跳过',
   skipped_cooldown: '冷却跳过',
+  already_in_library: '库内已有',
   magnets_found: '磁力命中',
   magnets_failed: '磁力失败',
   magnets_added: '已提交离线',

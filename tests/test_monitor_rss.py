@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock
 import grpc
 import pytest
 
-from embyx_manager.config.models import RssCategory, RssConfig
+from embyx_manager.config.models import ArchiveConfig, RssCategory, RssConfig
 from embyx_manager.core.avid import AvidParser
 from embyx_manager.monitor.acquisitions import (
     AcquisitionRecord,
@@ -16,6 +16,7 @@ from embyx_manager.monitor.acquisitions import (
     MagnetAttemptRecord,
     MagnetCandidate,
 )
+from embyx_manager.monitor.archive import ArchivePipeline
 from embyx_manager.monitor.reports import RunContext
 from embyx_manager.monitor.rss import RssPipeline
 
@@ -45,6 +46,7 @@ class FakeLedger:
         self.next_action_at: dict[str, datetime | None] = {}
         self.attempts: dict[str, list[MagnetAttemptRecord]] = {}
         self.task_dirs: dict[str, str | None] = {}
+        self.archived_paths: dict[str, tuple[str, ...]] = {}
 
     async def discover(
         self,
@@ -97,12 +99,14 @@ class FakeLedger:
         next_action_at: datetime | None = None,
         archived_paths: object = None,
     ) -> bool:
-        del now, archived_paths
+        del now
         if self.states.get(avid) is not expected:
             return False
         self.states[avid] = target
         self.notes[avid] = note
         self.next_action_at[avid] = next_action_at
+        if archived_paths is not None:
+            self.archived_paths[avid] = tuple(archived_paths)  # type: ignore[arg-type]
         return True
 
     async def add_attempts(self, avid: str, candidates: list[MagnetCandidate], *, now: datetime) -> int:
@@ -267,6 +271,7 @@ def make_pipeline(
     add_result: object | None = None,
     add_side_effect: Exception | list[object] | None = None,
     freshrss_side_effect: object | None = None,
+    archive_config: ArchiveConfig | None = None,
 ) -> tuple[RssPipeline, SimpleNamespace]:
     deps = SimpleNamespace()
     deps.ledger = ledger or FakeLedger()
@@ -305,6 +310,9 @@ def make_pipeline(
         sukebei=deps.sukebei,
         javbus=deps.javbus,
         ledger=deps.ledger,
+        # An unconfigured archive has no routes, so the library check passes
+        # everything through without touching the filesystem.
+        archiver=ArchivePipeline(config=archive_config or ArchiveConfig(), avid_parser=AvidParser()),
     )
     return pipeline, deps
 
@@ -570,3 +578,78 @@ async def test_stats_cover_every_category_in_the_run() -> None:
     assert ctx.stats['unique_avids'] == 3
     assert ctx.stats['magnets_found'] == 2
     assert ctx.stats['magnets_added'] == 2
+
+
+# -- the library check ---------------------------------------------------------
+
+
+def library_config(tmp_path) -> ArchiveConfig:
+    """Routes mirroring production: a priority actor inbox and a rank inbox."""
+    return ArchiveConfig(
+        src_dir=str(tmp_path / 'mnt' / '115' / 'embyx_in'),
+        dst_dir=str(tmp_path / 'library'),
+        mapping={'rank': 'rank'},
+        priority_mapping={'clt': 'actor/clt'},
+    )
+
+
+def write_library_copy(tmp_path, relative: str):
+    path = tmp_path / 'library' / relative
+    path.parent.mkdir(parents=True)
+    path.write_bytes(b'v')
+    return path
+
+
+async def test_an_avid_the_library_holds_is_settled_without_a_download(tmp_path) -> None:
+    existing = write_library_copy(tmp_path, 'actor/clt/ABC/ABC-123.mp4')
+    pipeline, deps = make_pipeline(
+        items=[make_item('item-1', 'ABC-123 release')],
+        categories=(RssCategory(label='Rank', task_dir_path='/115/embyx_in/rank'),),
+        sukebei_magnets={'ABC-123': MAGNET_A},
+        archive_config=library_config(tmp_path),
+    )
+
+    ctx = make_ctx()
+    await pipeline.run(ctx)
+
+    deps.cloud.add_offline_files.assert_not_awaited()
+    deps.sukebei.get_magnet.assert_not_awaited()
+    deps.freshrss.read_items.assert_awaited_once_with(['item-1'])
+    assert deps.ledger.states['ABC-123'] is AcquisitionState.ARCHIVED
+    assert deps.ledger.notes['ABC-123'] == 'already in library'
+    assert deps.ledger.archived_paths['ABC-123'] == ('actor/clt/ABC/ABC-123.mp4',)
+    # A normal category leaves the priority copy where it is.
+    assert existing.exists()
+    assert ctx.stats['already_in_library'] == 1
+
+
+async def test_a_priority_category_pulls_the_copy_out_of_a_normal_route(tmp_path) -> None:
+    existing = write_library_copy(tmp_path, 'rank/ABC/ABC-123.mp4')
+    pipeline, deps = make_pipeline(
+        items=[make_item('item-1', 'ABC-123 release')],
+        categories=(RssCategory(label='Actor', task_dir_path='/115/embyx_in/clt'),),
+        sukebei_magnets={'ABC-123': MAGNET_A},
+        archive_config=library_config(tmp_path),
+    )
+
+    await pipeline.run(make_ctx())
+
+    deps.cloud.add_offline_files.assert_not_awaited()
+    assert deps.ledger.states['ABC-123'] is AcquisitionState.ARCHIVED
+    assert deps.ledger.archived_paths['ABC-123'] == ('actor/clt/ABC/ABC-123.mp4',)
+    assert not existing.exists()
+    assert (tmp_path / 'library' / 'actor' / 'clt' / 'ABC' / 'ABC-123.mp4').exists()
+
+
+async def test_an_absent_avid_still_downloads_when_routes_are_configured(tmp_path) -> None:
+    pipeline, deps = make_pipeline(
+        items=[make_item('item-1', 'ABC-123 release')],
+        categories=(RssCategory(label='Rank', task_dir_path='/115/embyx_in/rank'),),
+        sukebei_magnets={'ABC-123': MAGNET_A},
+        archive_config=library_config(tmp_path),
+    )
+
+    await pipeline.run(make_ctx())
+
+    deps.cloud.add_offline_files.assert_awaited_once_with([MAGNET_A], '/115/embyx_in/rank')
+    assert deps.ledger.states['ABC-123'] is AcquisitionState.DOWNLOADING

@@ -198,7 +198,7 @@ const SECTION_SPECS: SectionSpec[] = [
         key: 'tracker_interval_seconds',
         label: '下载追踪轮询间隔（秒）',
         kind: 'number',
-        hint: '查询 CloudDrive 离线任务列表的间隔。',
+        hint: '查询 CloudDrive 离线任务列表的间隔，只管真正需要等待的下载。新提交的磁力会在 15 秒、30 秒、1 分钟、2 分钟处自动快查（热门磁力常在此期间秒传完成），不受此间隔影响。',
       },
       {
         key: 'stall_timeout_hours',

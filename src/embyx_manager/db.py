@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 
 import asyncpg
 
-CURRENT_SCHEMA_VERSION = 9
+CURRENT_SCHEMA_VERSION = 10
 
 # Advisory-lock key space for embyx-manager; low word selects the resource.
 ADVISORY_NAMESPACE = 0x454D4258  # 'EMBX'
@@ -429,12 +429,27 @@ _MIGRATIONS[8] = (
     'ALTER TABLE archive_acquisitions DROP CONSTRAINT archive_acquisitions_source_check',
 )
 
+# The tracker now bursts fast checks right after a magnet is submitted, so the
+# polling interval only paces downloads that are genuinely waiting and its
+# default grew from 5 to 30 minutes. The store persists whole sections, so a
+# deployment that ever saved settings holds the old default explicitly; exactly
+# that value follows the default, while any other stored value was a choice and
+# stays.
+_MIGRATIONS[9] = (
+    """
+    UPDATE app_config
+    SET value_json = (value_json::jsonb || jsonb_build_object('tracker_interval_seconds', 1800))::text
+    WHERE section = 'archive'
+      AND value_json::jsonb ->> 'tracker_interval_seconds' = '300'
+    """,
+)
+
 # Fill actor became an acquisition intake source: its scans hand missing AVIDs
 # to the ledger instead of surfacing magnets, and its job's magnet_lookup stage
 # became a submitting stage. magnet_lookup stays valid so pre-upgrade job rows
 # still satisfy the constraint. The acquisition source needs nothing: migration
 # 8 made the column free text.
-_MIGRATIONS[9] = (
+_MIGRATIONS[10] = (
     'ALTER TABLE fill_actor_jobs DROP CONSTRAINT fill_actor_jobs_progress_stage_check',
     """
     ALTER TABLE fill_actor_jobs ADD CONSTRAINT fill_actor_jobs_progress_stage_check
