@@ -162,6 +162,44 @@ const SECTION_SPECS: SectionSpec[] = [
         hint: '这里列出的厂牌不再走上面的目标子目录，改为归入目标根目录下的指定子目录。同一个厂牌只能出现一次。',
         rootKeys: { dst: 'dst_dir' },
       },
+      {
+        key: 'task_dir_local',
+        label: '离线任务目录（挂载路径）',
+        kind: 'text',
+        placeholder: '/downloads/task',
+        hint: 'CloudDrive 离线任务目录在本机挂载中的绝对路径。下载追踪按番号定向归档这里的文件夹，不依赖上面的路由表。',
+      },
+      {
+        key: 'task_dst',
+        label: '离线任务目标子目录',
+        kind: 'text',
+        placeholder: 'library',
+        hint: '目标根目录下的子目录，追踪到的完成下载归档到这里（厂牌路由仍然优先）。与上面两项都填写后下载追踪才会运行。',
+      },
+      {
+        key: 'task_priority',
+        label: '离线任务按优先级归档',
+        kind: 'boolean',
+        hint: '开启后，追踪到的下载会把已归档在普通目标子目录的同番号文件移动过来，语义与优先子目录路由一致。',
+      },
+      {
+        key: 'tracker_interval_seconds',
+        label: '下载追踪轮询间隔（秒）',
+        kind: 'number',
+        hint: '查询 CloudDrive 离线任务列表的间隔。',
+      },
+      {
+        key: 'stall_timeout_hours',
+        label: '下载停滞判定（小时）',
+        kind: 'number',
+        hint: '进度在此时长内没有变化就判定为卡住，自动换下一个磁力链接。',
+      },
+      {
+        key: 'max_attempts',
+        label: '每个番号最多尝试磁力数',
+        kind: 'number',
+        hint: '下载出错、卡住、或下完发现没有可用视频时会自动换下一个；用尽后标记为待处理。',
+      },
     ],
     validate: (values) =>
       assertDisjointSources(
