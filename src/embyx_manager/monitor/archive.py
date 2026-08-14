@@ -1,9 +1,10 @@
 """Archiving one downloaded folder into the library.
 
-A folder holds one video, or the parts of one video, plus whatever the source
-bundled with it. Archiving reads the AVID, renames the video after it, moves it
-into the library under its brand, and deletes the folder: only the video is
-wanted, and leaving ad reels and artwork behind would waste cloud storage.
+A folder holds one video — possibly in parts, possibly in several cuts of
+which only the best is wanted — plus whatever the source bundled with it.
+Archiving reads the AVID, renames the video after it, moves it into the
+library under its brand, and deletes the folder: only the video is wanted, and
+leaving ad reels and artwork behind would waste cloud storage.
 
 The entry point is :meth:`ArchivePipeline.archive_folder`, which is told where
 to put the result and optionally which AVID to expect. The tracker calls it for
@@ -28,12 +29,25 @@ from enum import StrEnum
 from pathlib import Path
 
 from embyx_manager.config.models import ArchiveConfig
-from embyx_manager.core.avid import HIGH_RESOLUTION_TAGS, AvidParser, get_brand, variant_tags
+from embyx_manager.core.avid import HIGH_RESOLUTION_TAGS, AvidParser, get_brand, strip_variant_tags, variant_tags
 from embyx_manager.core.media import is_video
 from embyx_manager.monitor.reports import RunCancelledError, RunContext
 
 MIN_MULTI_PART_VIDEOS = 2
 COPY_SUFFIX_RE = re.compile(r'\s*\(\d+\)$')
+#: Separator debris left behind where a quality tag was stripped out of a name.
+_SEPARATOR_RUN_RE = re.compile(r'[-_. ]{2,}')
+#: A part number at the end of a name: ``xxx-2``, ``xxx_02``. Two digits at
+#: most, so a trailing ID number ("wsp-162") can never read as a part index.
+_TRAILING_INDEX_RE = re.compile(r'^(?P<base>.+?)[-_ ](?P<index>\d{1,2})$')
+#: A part letter at the end of a name: ``sdmu-371a``, with or without separator.
+_TRAILING_LETTER_RE = re.compile(r'^(?P<base>.+)(?P<letter>[a-z])$')
+#: hjd2048 releases bundle a phone-sized rip of the main video, always named
+#: ``{avid}-5``; it is an inferior cut of the whole video, never a part of it.
+_PHONE_RIP_RE = re.compile(r'^(?P<base>.+)[-_]5$')
+#: A phone rip is a fraction of the main file; anything above half its size is
+#: not confidently a rip and is left for an operator.
+PHONE_RIP_MAX_SHARE = 0.5
 
 
 class Outcome(StrEnum):
@@ -56,7 +70,7 @@ class ArchiveResult:
 
 @dataclass
 class _VideoSet:
-    """The videos in one folder that are worth archiving, and their AVID."""
+    """The videos in one folder that are worth archiving, in cd order."""
 
     avid: str
     videos: list[Path] = field(default_factory=list)
@@ -78,6 +92,76 @@ def multi_part_video_check(videos: list[Path]) -> bool:
 def is_4k_video(video: Path) -> bool:
     """Whether the file name marks this as the higher-resolution cut."""
     return bool(variant_tags(video.name) & HIGH_RESOLUTION_TAGS)
+
+
+def _variant_base(name: str) -> str:
+    """A file's stem with quality tags stripped, for comparing sibling files.
+
+    Two names with the same base are cuts of the same thing; a base that only
+    differs by a trailing index or letter is a part of it.
+    """
+    base = _SEPARATOR_RUN_RE.sub('-', strip_variant_tags(name))
+    return base.strip('-_. ').casefold()
+
+
+def _order_as_parts(videos: list[Path]) -> list[Path] | None:
+    """The videos ordered as cd1..cdN, or None when they do not read as one set.
+
+    Three naming shapes count as a set, all judged on the tag-stripped names:
+    every file carries an index and they run 1..N; an unindexed file leads
+    files indexed 2..N (``wsp-162`` + ``wsp-162-2``); every file carries a
+    letter and they run from A (``sdmu-371a`` + ``sdmu-371b``).
+    """
+    bases = {video: _variant_base(video.name) for video in videos}
+    return _indexed_run(videos, bases) or _unindexed_first(videos, bases) or _letter_run(videos, bases)
+
+
+def _indexed_run(videos: list[Path], bases: dict[Path, str]) -> list[Path] | None:
+    parsed: dict[Path, tuple[str, int]] = {}
+    for video in videos:
+        match = _TRAILING_INDEX_RE.match(bases[video])
+        if match is None:
+            return None
+        parsed[video] = (match['base'], int(match['index']))
+    if len({base for base, _ in parsed.values()}) != 1:
+        return None
+    ordered = sorted(videos, key=lambda video: parsed[video][1])
+    if [parsed[video][1] for video in ordered] != list(range(1, len(videos) + 1)):
+        return None
+    return ordered
+
+
+def _unindexed_first(videos: list[Path], bases: dict[Path, str]) -> list[Path] | None:
+    for lead in videos:
+        rest = [video for video in videos if video is not lead]
+        sibling_re = re.compile(re.escape(bases[lead]) + r'[-_ ](\d{1,2})$')
+        indices = {}
+        for video in rest:
+            match = sibling_re.match(bases[video])
+            if match is None:
+                break
+            indices[video] = int(match.group(1))
+        else:
+            ordered = sorted(rest, key=lambda video: indices[video])
+            if [indices[video] for video in ordered] == list(range(2, len(videos) + 1)):
+                return [lead, *ordered]
+    return None
+
+
+def _letter_run(videos: list[Path], bases: dict[Path, str]) -> list[Path] | None:
+    parsed: dict[Path, tuple[str, str]] = {}
+    for video in videos:
+        match = _TRAILING_LETTER_RE.match(bases[video])
+        if match is None:
+            return None
+        parsed[video] = (match['base'], match['letter'])
+    if len({base for base, _ in parsed.values()}) != 1:
+        return None
+    ordered = sorted(videos, key=lambda video: parsed[video][1])
+    letters = [parsed[video][1] for video in ordered]
+    if letters != [chr(ord('a') + offset) for offset in range(len(videos))]:
+        return None
+    return ordered
 
 
 def normalize_copy_suffix(stem: str) -> str:
@@ -261,30 +345,73 @@ class ArchivePipeline:
             ctx.warning('%s in %s, skipping', reason, folder.name)
             return ArchiveResult(Outcome.NEEDS_ATTENTION, avid=avid, reason=reason)
 
-        if len(videos) > 1 and not multi_part_video_check(videos):
-            kept = self._pick_high_resolution(folder, videos, avid, ctx)
-            if kept is None:
-                return ArchiveResult(
-                    Outcome.NEEDS_ATTENTION,
-                    avid=avid,
-                    reason='several unrelated videos in one folder',
-                )
-            videos = [kept]
+        if len(videos) > 1:
+            arranged = self._arrange_videos(folder, videos, avid, ctx)
+            if arranged is None:
+                reason = 'several unrelated videos in one folder'
+                ctx.warning('%s in %s, skipping', reason, folder.name)
+                return ArchiveResult(Outcome.NEEDS_ATTENTION, avid=avid, reason=reason)
+            videos = arranged
         return _VideoSet(avid=avid, videos=videos)
 
-    def _pick_high_resolution(self, folder: Path, videos: list[Path], avid: str, ctx: RunContext) -> Path | None:
-        """Choose the 4K cut when a folder ships several resolutions of one video."""
-        high_resolution = [video for video in videos if is_4k_video(video)]
-        if len(high_resolution) != 1:
-            ctx.warning('several videos in %s that are not one multi-part set, skipping', folder.name)
+    def _arrange_videos(self, folder: Path, videos: list[Path], avid: str, ctx: RunContext) -> list[Path] | None:
+        """Explain a folder holding several videos of one AVID, or give up.
+
+        In order: the files are one multi-part set; the same cut ships in
+        several resolutions and the best of each survives; what survives is a
+        multi-part set after all; the extras are phone rips of the main file.
+        Returns the videos to archive in cd order, or None for an operator.
+        """
+        if multi_part_video_check(videos):
+            return sorted(videos, key=lambda video: video.name)
+        collapsed = self._collapse_resolution_variants(folder, videos, ctx)
+        if collapsed is None:
             return None
-        kept = high_resolution[0]
-        if self._avid.get_avid(kept.name) != avid:
-            ctx.warning('the high-resolution cut in %s has a different avid, skipping', folder.name)
-            return None
-        dropped = ', '.join(video.name for video in videos if video != kept)
-        ctx.info('keeping the high-resolution %s in %s and dropping %s', kept.name, folder.name, dropped)
-        return kept
+        if len(collapsed) == 1:
+            return collapsed
+        return _order_as_parts(collapsed) or self._drop_phone_rips(folder, collapsed, avid, ctx)
+
+    def _collapse_resolution_variants(self, folder: Path, videos: list[Path], ctx: RunContext) -> list[Path] | None:
+        """Keep one file per cut when the same cut ships in several resolutions.
+
+        Files whose tag-stripped names are equal are the same cut; the one
+        marked high-resolution wins. A group without exactly one such marker
+        cannot be decided, and None sends the folder to an operator.
+        """
+        groups: dict[str, list[Path]] = {}
+        for video in videos:
+            groups.setdefault(_variant_base(video.name), []).append(video)
+        kept: list[Path] = []
+        for group in groups.values():
+            if len(group) == 1:
+                kept.append(group[0])
+                continue
+            high_resolution = [video for video in group if is_4k_video(video)]
+            if len(high_resolution) != 1:
+                return None
+            winner = high_resolution[0]
+            dropped = ', '.join(video.name for video in group if video is not winner)
+            ctx.info('keeping the high-resolution %s in %s and dropping %s', winner.name, folder.name, dropped)
+            kept.append(winner)
+        return sorted(kept, key=lambda video: video.name)
+
+    def _drop_phone_rips(self, folder: Path, videos: list[Path], avid: str, ctx: RunContext) -> list[Path] | None:
+        """Keep only the main video when every extra is a ``-5`` phone rip.
+
+        A companion qualifies only when its tag-stripped name is the AVID plus
+        ``-5`` and it is at most half the main file's size; anything else means
+        the folder is not understood and nothing is touched.
+        """
+        dominant = max(videos, key=lambda video: video.stat().st_size)
+        limit = dominant.stat().st_size * PHONE_RIP_MAX_SHARE
+        rips = [video for video in videos if video is not dominant]
+        for rip in rips:
+            match = _PHONE_RIP_RE.match(_variant_base(rip.name))
+            if match is None or self.avid_of(match['base']) != avid or rip.stat().st_size > limit:
+                return None
+        dropped = ', '.join(rip.name for rip in rips)
+        ctx.info('keeping %s in %s and dropping the phone rip %s', dominant.name, folder.name, dropped)
+        return [dominant]
 
     def _drop_duplicate_copies(self, folder: Path, videos: list[Path], ctx: RunContext) -> list[Path]:
         """Delete "name (1).mp4" copies that duplicate a same-sized original."""
@@ -342,7 +469,9 @@ class ArchivePipeline:
 
         multi_part = len(selection.videos) > 1
         targets: list[tuple[Path, Path]] = []
-        for index, video in enumerate(sorted(selection.videos, key=lambda path: path.name)):
+        # The selection's order is the cd order; an unnumbered first part would
+        # sort after its "-2" sibling by name.
+        for index, video in enumerate(selection.videos):
             suffix = f'-cd{index + 1}{video.suffix}' if multi_part else video.suffix
             target = brand_dir / f'{selection.avid}{suffix}'
             if target.exists():

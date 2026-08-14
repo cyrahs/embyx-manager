@@ -163,6 +163,160 @@ def test_high_resolution_cut_wins_over_the_smaller_one(tmp_path: Path) -> None:
     assert not folder.exists()
 
 
+# -- untangling several videos in one folder ----------------------------------
+# The naming shapes below are taken verbatim from the reconcile backlog of
+# 2026-08-14, where every entry was parked as "several unrelated videos in one
+# folder"; sizes mirror the real files in MB.
+
+
+def test_unnumbered_first_part_leads_its_numbered_siblings(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / '[44x.me]rvg-080'
+    write_video(folder / '[44x.me]rvg-080.mp4', size=5486)
+    write_video(folder / '[44x.me]rvg-080-2.mp4', size=6165)
+    write_video(folder / '[44x.me]rvg-080-3.mp4', size=5825)
+    write_video(folder / '[44x.me]rvg-080-4.mp4', size=5824)
+
+    result = archive(pipeline, folder)
+
+    assert result.outcome is Outcome.ARCHIVED
+    assert result.archived_paths == (
+        'sorted/RVG/RVG-080-cd1.mp4',
+        'sorted/RVG/RVG-080-cd2.mp4',
+        'sorted/RVG/RVG-080-cd3.mp4',
+        'sorted/RVG/RVG-080-cd4.mp4',
+    )
+    # The unnumbered file is the first part, although it sorts last by name.
+    assert (pipeline.dst_dir / 'sorted' / 'RVG' / 'RVG-080-cd1.mp4').stat().st_size == 5486
+    assert (pipeline.dst_dir / 'sorted' / 'RVG' / 'RVG-080-cd2.mp4').stat().st_size == 6165
+    assert not folder.exists()
+
+
+def test_letter_parts_become_cd_parts(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / 'PPT-057'
+    write_video(folder / 'PPT-057A_HD.mp4', size=4712)
+    write_video(folder / 'PPT-057B_HD.mp4', size=5865)
+    write_video(folder / 'PPT-057C_HD.mp4', size=3764)
+
+    result = archive(pipeline, folder)
+
+    assert result.outcome is Outcome.ARCHIVED
+    assert result.archived_paths == (
+        'sorted/PPT/PPT-057-cd1.mp4',
+        'sorted/PPT/PPT-057-cd2.mp4',
+        'sorted/PPT/PPT-057-cd3.mp4',
+    )
+
+
+def test_lowercase_letter_parts_become_cd_parts(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / 'dvdms-353'
+    write_video(folder / 'dvdms-353a.mp4', size=1752)
+    write_video(folder / 'dvdms-353b.mp4', size=1567)
+
+    result = archive(pipeline, folder)
+
+    assert result.outcome is Outcome.ARCHIVED
+    assert result.archived_paths == ('sorted/DVDMS/DVDMS-353-cd1.mp4', 'sorted/DVDMS/DVDMS-353-cd2.mp4')
+
+
+def test_letter_parts_with_a_quality_marker_and_odd_container(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / '[HD]XV923-WMV'
+    write_video(folder / 'xv923A.HD.wmv', size=2650)
+    write_video(folder / 'xv923B.HD.wmv', size=2508)
+
+    result = archive(pipeline, folder)
+
+    assert result.outcome is Outcome.ARCHIVED
+    assert result.archived_paths == ('sorted/XV/XV-923-cd1.wmv', 'sorted/XV/XV-923-cd2.wmv')
+
+
+def test_mixed_index_separators_are_still_one_set(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / 'TBW-19'
+    write_video(folder / 'TBW-19-1.mp4', size=465)
+    write_video(folder / 'TBW-19_02.mp4', size=912)
+
+    result = archive(pipeline, folder)
+
+    assert result.outcome is Outcome.ARCHIVED
+    assert result.archived_paths == ('sorted/TBW/TBW-19-cd1.mp4', 'sorted/TBW/TBW-19-cd2.mp4')
+    assert (pipeline.dst_dir / 'sorted' / 'TBW' / 'TBW-19-cd1.mp4').stat().st_size == 465
+
+
+def test_phone_rip_is_dropped_for_the_main_video(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / 'hjd2048.com-1129nhdtb201-h264'
+    write_video(folder / 'hjd2048.com-1129nhdtb201-h264.mp4', size=6527)
+    write_video(folder / 'nhdtb201-5.mp4', size=986)
+
+    result = archive(pipeline, folder)
+
+    assert result.outcome is Outcome.ARCHIVED
+    assert result.archived_paths == ('sorted/NHDTB/NHDTB-201.mp4',)
+    assert (pipeline.dst_dir / 'sorted' / 'NHDTB' / 'NHDTB-201.mp4').stat().st_size == 6527
+    assert not folder.exists()
+
+
+def test_phone_rip_is_dropped_when_the_main_video_carries_a_tag(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / 'OKAX449'
+    write_video(folder / 'okax449-h264.mp4', size=7196)
+    write_video(folder / 'okax449-5.mp4', size=1072)
+
+    result = archive(pipeline, folder)
+
+    assert result.outcome is Outcome.ARCHIVED
+    assert result.archived_paths == ('sorted/OKAX/OKAX-449.mp4',)
+
+
+def test_oversized_phone_rip_still_needs_attention(tmp_path: Path) -> None:
+    # A "-5" file above half the main file's size is not confidently a rip.
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / 'OKAX449'
+    write_video(folder / 'okax449-h264.mp4', size=1000)
+    write_video(folder / 'okax449-5.mp4', size=800)
+
+    result = archive(pipeline, folder)
+
+    assert result.outcome is Outcome.NEEDS_ATTENTION
+    assert result.reason == 'several unrelated videos in one folder'
+    assert (folder / 'okax449-h264.mp4').exists()
+    assert (folder / 'okax449-5.mp4').exists()
+
+
+def test_vr_set_keeps_the_high_resolution_cut_of_each_part(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / 'urvrsp-430'
+    write_video(folder / '4k2.com@urvrsp00430_1_8k.mp4', size=3467)
+    write_video(folder / '4k2.com@urvrsp00430_1_hq.mp4', size=1446)
+    write_video(folder / '4k2.com@urvrsp00430_2_8k.mp4', size=4067)
+    write_video(folder / '4k2.com@urvrsp00430_2_hq.mp4', size=4018)
+
+    result = archive(pipeline, folder)
+
+    assert result.outcome is Outcome.ARCHIVED
+    assert result.archived_paths == ('sorted/URVRSP/URVRSP-430-cd1.mp4', 'sorted/URVRSP/URVRSP-430-cd2.mp4')
+    assert (pipeline.dst_dir / 'sorted' / 'URVRSP' / 'URVRSP-430-cd1.mp4').stat().st_size == 3467
+    assert (pipeline.dst_dir / 'sorted' / 'URVRSP' / 'URVRSP-430-cd2.mp4').stat().st_size == 4067
+
+
+def test_same_avid_videos_that_read_as_nothing_still_need_attention(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / 'mystery'
+    write_video(folder / 'ABC-123.mp4')
+    write_video(folder / 'ABC-123 making of.mp4')
+
+    result = archive(pipeline, folder)
+
+    assert result.outcome is Outcome.NEEDS_ATTENTION
+    assert result.reason == 'several unrelated videos in one folder'
+    assert (folder / 'ABC-123.mp4').exists()
+    assert (folder / 'ABC-123 making of.mp4').exists()
+
+
 def test_duplicate_copies_are_dropped(tmp_path: Path) -> None:
     pipeline = make_pipeline(tmp_path)
     folder = pipeline.src_dir / 'intake' / 'dupes'
