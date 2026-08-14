@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 
 import asyncpg
 
-CURRENT_SCHEMA_VERSION = 7
+CURRENT_SCHEMA_VERSION = 8
 
 # Advisory-lock key space for embyx-manager; low word selects the resource.
 ADVISORY_NAMESPACE = 0x454D4258  # 'EMBX'
@@ -359,5 +359,24 @@ _MIGRATIONS[7] = (
     UPDATE app_config
     SET value_json = (value_json::jsonb - 'task_dir_local' - 'task_dst' - 'task_priority')::text
     WHERE section = 'archive'
+    """,
+)
+
+# Fill actor became an acquisition intake source: its scans hand missing AVIDs
+# to the ledger instead of surfacing magnets, and its job's magnet_lookup stage
+# became a submitting stage. magnet_lookup stays valid so pre-upgrade job rows
+# still satisfy the constraint.
+_MIGRATIONS[8] = (
+    'ALTER TABLE archive_acquisitions DROP CONSTRAINT archive_acquisitions_source_check',
+    """
+    ALTER TABLE archive_acquisitions ADD CONSTRAINT archive_acquisitions_source_check
+    CHECK (source IN ('rss_actor', 'rss_rank', 'manual', 'reconcile', 'fill_actor'))
+    """,
+    'ALTER TABLE fill_actor_jobs DROP CONSTRAINT fill_actor_jobs_progress_stage_check',
+    """
+    ALTER TABLE fill_actor_jobs ADD CONSTRAINT fill_actor_jobs_progress_stage_check
+    CHECK (progress_stage IN (
+        'queued', 'actor_catalog', 'library_scan', 'magnet_lookup', 'submitting', 'persisting', 'done', 'unknown'
+    ))
     """,
 )

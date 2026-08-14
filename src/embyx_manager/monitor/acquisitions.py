@@ -41,6 +41,7 @@ class AcquisitionSource(StrEnum):
     RSS_RANK = 'rss_rank'
     MANUAL = 'manual'
     RECONCILE = 'reconcile'
+    FILL_ACTOR = 'fill_actor'
 
 
 class AttemptState(StrEnum):

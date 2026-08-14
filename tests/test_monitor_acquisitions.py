@@ -66,6 +66,17 @@ async def test_discover_inserts_then_reports_the_avid_as_taken() -> None:
     assert await ledger.discover('ABC-123', source=AcquisitionSource.RSS_ACTOR, now=NOW) is False
 
 
+async def test_discover_accepts_the_fill_actor_source() -> None:
+    # Exercises the migration-v8 source CHECK constraint.
+    ledger = make_ledger()
+
+    assert await ledger.discover('ABC-123', source=AcquisitionSource.FILL_ACTOR, now=NOW) is True
+
+    record = await ledger.get('ABC-123')
+    assert record is not None
+    assert record.source is AcquisitionSource.FILL_ACTOR
+
+
 @pytest.mark.parametrize('state', [AcquisitionState.ARCHIVED, AcquisitionState.IGNORED])
 async def test_discover_skips_terminal_avids(state: AcquisitionState) -> None:
     ledger = make_ledger()
