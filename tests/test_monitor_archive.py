@@ -11,7 +11,6 @@ from embyx_manager.monitor.archive import (
     is_4k_video,
     multi_part_video_check,
     normalize_copy_suffix,
-    remove_00,
 )
 from embyx_manager.monitor.reports import RunCancelledError, RunContext
 
@@ -45,31 +44,20 @@ def make_priority_pipeline(tmp_path: Path, **overrides) -> ArchivePipeline:
     return pipeline
 
 
-@pytest.mark.parametrize(
-    ('avid', 'expected'),
-    [
-        ('ABC-00123', 'ABC-123'),
-        ('ABC-123', 'ABC-123'),
-        ('ABC-0012', 'ABC-0012'),
-    ],
-)
-def test_remove_00(avid: str, expected: str) -> None:
-    assert remove_00(avid) == expected
-
-
 def test_multi_part_video_check() -> None:
     assert multi_part_video_check([Path('a-1.mp4'), Path('a-2.mp4')]) is True
     assert multi_part_video_check([Path('a-A.mp4'), Path('a-B.mp4')]) is True
     assert multi_part_video_check([Path('a-1.mp4'), Path('b-extra.mp4')]) is False
-    with pytest.raises(ValueError, match='only one video file'):
-        multi_part_video_check([Path('a.mp4')])
+    # A lone video is simply not a multi-part set; callers no longer guard the call.
+    assert multi_part_video_check([Path('a.mp4')]) is False
+    assert multi_part_video_check([]) is False
 
 
 def test_is_4k_video() -> None:
     assert is_4k_video(Path('ABC-123 4k.mp4')) is True
     assert is_4k_video(Path('ABC-123-4K.mp4')) is True
+    assert is_4k_video(Path('ABC-123-2160p.mp4')) is True
     assert is_4k_video(Path('ABC-1234k.mp4')) is False
-    assert is_4k_video(Path('4k.mp4')) is False
     assert is_4k_video(Path('ABC-123.mp4')) is False
 
 
@@ -469,3 +457,19 @@ def test_run_continues_after_a_route_fails(tmp_path: Path, monkeypatch: pytest.M
     assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
     assert ctx.stats['videos_archived'] == 1
     assert ctx.stats['items_failed'] == 4
+
+
+def test_padded_content_id_archives_under_the_same_avid_rss_would_record(tmp_path: Path) -> None:
+    # RSS derived the AVID without un-padding while the archiver un-padded it, so
+    # the same release could be recorded as ABC-00123 and filed as ABC-123. Both
+    # now read it through one parser.
+    pipeline = make_pipeline(tmp_path)
+    parser = AvidParser()
+    intake = pipeline.src_dir / 'intake'
+    write_video(intake / 'abc00123.mp4')
+
+    pipeline.rename(intake, make_ctx())
+    pipeline.archive(intake, pipeline.dst_dir / 'sorted', make_ctx())
+
+    assert parser.get_avid('[sukebei] abc00123 1080p') == 'ABC-123'
+    assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()

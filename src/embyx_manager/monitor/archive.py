@@ -19,26 +19,20 @@ from contextlib import contextmanager
 from pathlib import Path
 
 from embyx_manager.config.models import ArchiveConfig
-from embyx_manager.core.avid import AvidParser, get_brand
+from embyx_manager.core.avid import HIGH_RESOLUTION_TAGS, AvidParser, get_brand, variant_tags
 from embyx_manager.core.media import has_video_suffix, is_video
 from embyx_manager.monitor.reports import RunCancelledError, RunContext
 
 MAX_RENAME_ATTEMPTS = 5
+MIN_MULTI_PART_VIDEOS = 2
 COPY_SUFFIX_RE = re.compile(r'\s*\(\d+\)$')
 POST_MUTATION_SLEEP_SECONDS = 5
 
 
-def remove_00(avid: str) -> str:
-    match = re.match(r'[A-Z0-9]+-00\d{3,4}', avid)
-    if match:
-        return re.sub('00', '', avid, count=1)
-    return avid
-
-
 def multi_part_video_check(videos: list[Path]) -> bool:
-    if len(videos) == 1:
-        msg = 'only one video file'
-        raise ValueError(msg)
+    """Whether these files are parts of one video rather than separate videos."""
+    if len(videos) < MIN_MULTI_PART_VIDEOS:
+        return False
     # check videos only have different digits
     non_digit_parts = {re.sub(r'\d+', '', video.name) for video in videos}
     if len(non_digit_parts) == 1:
@@ -49,12 +43,8 @@ def multi_part_video_check(videos: list[Path]) -> bool:
 
 
 def is_4k_video(video: Path) -> bool:
-    stem = video.stem.lower()
-    if not stem.endswith('4k'):
-        return False
-    if stem == '4k':
-        return False
-    return not stem[-3].isalnum()
+    """Whether the file name marks this as the higher-resolution cut."""
+    return bool(variant_tags(video.name) & HIGH_RESOLUTION_TAGS)
 
 
 def normalize_copy_suffix(stem: str) -> str:
@@ -192,7 +182,6 @@ class ArchivePipeline:
         if not avid:
             ctx.warning('failed to get avid for %s, skipping folder', ', '.join([t.name for t in videos]))
             return False
-        avid = remove_00(avid)
         if avid in exist_avids:
             ctx.warning('%s exists in %s, skipping', avid, root)
             return False
@@ -214,7 +203,6 @@ class ArchivePipeline:
         ctx.info('%s has no video files larger than %dMB', folder.name, self._config.min_size_mb)
         if not folder_avid:
             return
-        folder_avid = remove_00(folder_avid)
         folder_avid_dst_dir = self.find_dst_dir(folder_avid, dst_dir, ctx)
         if folder_avid_dst_dir is None or not folder_avid_dst_dir.exists():
             return
@@ -238,7 +226,7 @@ class ArchivePipeline:
         for video in root.iterdir():
             if not is_video(video):
                 continue
-            avid = remove_00(self._avid.get_avid(video.name))
+            avid = self._avid.get_avid(video.name)
             avids.setdefault(avid, set()).add(video)
         for avid, videos_set in avids.items():
             ctx.check_cancelled()
