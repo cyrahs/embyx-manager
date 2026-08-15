@@ -18,6 +18,12 @@ from embyx_manager.monitor.acquisitions import (
     MagnetAttemptRecord,
     MagnetCandidate,
 )
+from embyx_manager.monitor.manual import (
+    DirectoryListing,
+    ManualEntry,
+    ManualIntakeError,
+    ManualIntakeSource,
+)
 from embyx_manager.monitor.reports import PipelineName
 from embyx_manager.monitor.runs import PipelineRunRecord, PipelineRunRepository
 from embyx_manager.monitor.scheduler import (
@@ -161,6 +167,68 @@ class TriggerResponse(BaseModel):
     run_id: str
 
 
+class OfflineDirectoryView(BaseModel):
+    path: str
+    name: str
+    configured: bool
+    routed: bool
+
+
+class DirectoryListingView(BaseModel):
+    path: str
+    parent: str | None
+    entries: list[OfflineDirectoryView]
+    #: Where the picker opens: the last manual submission's directory.
+    default_path: str | None
+
+    @classmethod
+    def from_listing(cls, listing: DirectoryListing, default_path: str | None) -> 'DirectoryListingView':
+        return cls(
+            path=listing.path,
+            parent=listing.parent,
+            entries=[
+                OfflineDirectoryView(
+                    path=entry.path,
+                    name=entry.name,
+                    configured=entry.configured,
+                    routed=entry.routed,
+                )
+                for entry in listing.entries
+            ],
+            default_path=default_path,
+        )
+
+
+class ManualSubmitRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
+    #: One line per wanted video: an AVID, or any name one can be read from.
+    inputs: list[str]
+    #: The CloudDrive directory the offline tasks are queued under.
+    task_dir_path: str
+
+
+class ManualEntryView(BaseModel):
+    text: str
+    avid: str | None
+    outcome: str
+    archived_paths: tuple[str, ...]
+
+    @classmethod
+    def from_entry(cls, entry: ManualEntry) -> 'ManualEntryView':
+        return cls(
+            text=entry.text,
+            avid=entry.avid,
+            outcome=entry.outcome.value,
+            archived_paths=entry.archived_paths,
+        )
+
+
+class ManualSubmitView(BaseModel):
+    task_dir_path: str
+    items: list[ManualEntryView]
+
+
 def _parse_pipeline(pipeline: str) -> PipelineName:
     try:
         return PipelineName(pipeline)
@@ -179,6 +247,12 @@ class AcquisitionApi:
     ledger: AcquisitionRepository
     submit_magnet: Callable[[str, str], Awaitable[bool]] | None = None
     tracker_ready: Callable[[], str | None] | None = None
+    #: The manual input source; its routes are mounted only when it is supplied.
+    manual: ManualIntakeSource | None = None
+
+
+#: Which HTTP status each refused manual submission answers with.
+_MANUAL_STATUS = {'directory_not_found': 404}
 
 
 def create_monitor_router(  # noqa: C901, PLR0915 - route registration
@@ -370,6 +444,31 @@ def create_monitor_router(  # noqa: C901, PLR0915 - route registration
         if record.state is not AcquisitionState.NEEDS_ATTENTION:
             raise ApiError(409, 'not_parked')
         return await _move(record, AcquisitionState.DOWNLOADING)
+
+    manual = acquisitions.manual
+    if manual is not None:
+
+        @router.get('/manual/directories', dependencies=[Depends(mutation_auth)])
+        async def browse_directories(path: str = '/') -> DirectoryListingView:
+            """The CloudDrive directories under ``path``, for picking one to download into."""
+            try:
+                listing = await manual.browse(path)
+                default_path = await manual.default_directory()
+            except ManualIntakeError as exc:
+                raise ApiError(_MANUAL_STATUS.get(exc.code, 422), exc.code) from exc
+            return DirectoryListingView.from_listing(listing, default_path)
+
+        @router.post('/manual', dependencies=[Depends(mutation_auth)])
+        async def submit_manual(request: ManualSubmitRequest) -> ManualSubmitView:
+            """Hand an operator's own list of AVIDs to the shared acquisition intake."""
+            try:
+                submission = await manual.submit(request.inputs, task_dir_path=request.task_dir_path)
+            except ManualIntakeError as exc:
+                raise ApiError(_MANUAL_STATUS.get(exc.code, 422), exc.code) from exc
+            return ManualSubmitView(
+                task_dir_path=submission.task_dir_path,
+                items=[ManualEntryView.from_entry(entry) for entry in submission.entries],
+            )
 
     @router.get('/tracker')
     async def tracker_status() -> TrackerStatusView:

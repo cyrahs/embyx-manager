@@ -16,7 +16,12 @@ Three peer features; `/` redirects to the dashboard and no feature owns the app 
   - **mapping**: flat `.strm` tree mirrored to a per-title layout, with a real-time
     watchdog for incremental syncs plus a periodic full sync.
   Each pipeline has enable/disable, manual trigger (rss supports the Rank label), live
-  status, and per-run stats/errors/log tail.
+  status, and per-run stats/errors/log tail. The download-tracking panel also carries
+  **手动添加**, the third input source: paste AVIDs (or file names to read them from) and
+  pick the CloudDrive directory they download into, browsed from the tree and defaulting
+  to the last one used. Only a directory with an archive route can be picked — the tracker
+  locates a finished download through the route tables — and the tracker polls whatever
+  directory the ledger still has work in, so a picked one need not be a source's own.
 - **Fill Actor** (`/fill-actor`): scan a JavBus actor's catalog against the local library,
   submit missing titles to the acquisition tracker (same intake as the rss pipeline),
   prewarm RSSHub feeds, hand off FreshRSS subscriptions, and safely move matching files

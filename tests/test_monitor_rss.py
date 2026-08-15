@@ -209,6 +209,17 @@ class FakeLedger:
             if state in {AcquisitionState.DISCOVERED, AcquisitionState.DOWNLOADING}
         )
 
+    async def active_task_dirs(self) -> tuple[str, ...]:
+        active = await self.active_avids()
+        return tuple(sorted({task_dir for avid, task_dir in self.task_dirs.items() if avid in active and task_dir}))
+
+    async def latest_task_dir(self, *, source: str) -> str | None:
+        # Insertion order stands in for created_at: the fake records one sighting per AVID.
+        for avid in reversed(list(self.sources)):
+            if self.sources[avid] == source and self.task_dirs.get(avid):
+                return self.task_dirs[avid]
+        return None
+
     async def due_for_retry(self, *, now: datetime, limit: int = 50) -> tuple[AcquisitionRecord, ...]:
         due = sorted(
             avid

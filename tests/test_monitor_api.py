@@ -11,6 +11,16 @@ from embyx_manager.monitor.acquisitions import (
     MagnetCandidate,
 )
 from embyx_manager.monitor.api import AcquisitionApi, create_monitor_router
+from embyx_manager.monitor.manual import (
+    DirectoryListing,
+    DirectoryNotFoundError,
+    DirectoryNotRoutedError,
+    ManualEntry,
+    ManualIntakeError,
+    ManualOutcome,
+    ManualSubmission,
+    OfflineDirectory,
+)
 from embyx_manager.monitor.reports import PipelineName, RunState, RunTrigger
 from embyx_manager.monitor.runs import PipelineRunRecord
 from embyx_manager.monitor.scheduler import (
@@ -405,6 +415,121 @@ def test_ledger_routes_are_absent_without_a_ledger() -> None:
     client = make_client(FakeScheduler(), FakeRuns([]))
 
     assert client.get('/api/monitor/acquisitions').status_code == 404
+
+
+# -- the manual input source ---------------------------------------------------
+
+
+class FakeManual:
+    """Stands in for ManualIntakeSource; its own behaviour is tested separately."""
+
+    def __init__(self, error: ManualIntakeError | None = None) -> None:
+        self.error = error
+        self.browsed: list[str] = []
+        self.submitted: list[tuple[list[str], str]] = []
+
+    async def browse(self, path: str) -> DirectoryListing:
+        if self.error is not None:
+            raise self.error
+        self.browsed.append(path)
+        return DirectoryListing(
+            path=path,
+            parent='/',
+            entries=(
+                OfflineDirectory(path=f'{path}/embyx_in', name='embyx_in', configured=True, routed=True),
+                OfflineDirectory(path=f'{path}/misc', name='misc', configured=False, routed=False),
+            ),
+        )
+
+    async def default_directory(self) -> str | None:
+        return '/115/embyx_in'
+
+    async def submit(self, inputs: list[str], *, task_dir_path: str) -> ManualSubmission:
+        if self.error is not None:
+            raise self.error
+        self.submitted.append((list(inputs), task_dir_path))
+        return ManualSubmission(
+            task_dir_path=task_dir_path,
+            entries=(
+                ManualEntry(text='abc-123', avid='ABC-123', outcome=ManualOutcome.SUBMITTED),
+                ManualEntry(
+                    text='def-456',
+                    avid='DEF-456',
+                    outcome=ManualOutcome.ALREADY_IN_LIBRARY,
+                    archived_paths=('embyx/DEF/DEF-456.mp4',),
+                ),
+            ),
+        )
+
+
+def make_manual_client(manual: FakeManual) -> TestClient:
+    app = FastAPI()
+    app.include_router(
+        create_monitor_router(
+            FakeScheduler(),  # type: ignore[arg-type]
+            FakeRuns([]),  # type: ignore[arg-type]
+            mutation_auth=_noop_auth,
+            acquisitions=AcquisitionApi(ledger=FakeLedger(), manual=manual),  # type: ignore[arg-type]
+        ),
+    )
+
+    @app.exception_handler(ApiError)
+    async def handle(_request, exc):
+        return JSONResponse({'error': {'code': exc.code}}, status_code=exc.status_code)
+
+    return TestClient(app)
+
+
+def test_browsing_reports_the_directories_and_where_the_picker_opens() -> None:
+    manual = FakeManual()
+    client = make_manual_client(manual)
+
+    body = client.get('/api/monitor/manual/directories', params={'path': '/115'}).json()
+
+    assert manual.browsed == ['/115']
+    assert body['parent'] == '/'
+    assert body['default_path'] == '/115/embyx_in'
+    assert [(item['name'], item['routed']) for item in body['entries']] == [('embyx_in', True), ('misc', False)]
+
+
+def test_submitting_reports_the_outcome_of_every_line() -> None:
+    manual = FakeManual()
+    client = make_manual_client(manual)
+
+    body = client.post(
+        '/api/monitor/manual',
+        json={'inputs': ['abc-123', 'def-456'], 'task_dir_path': '/115/embyx_in'},
+    ).json()
+
+    assert manual.submitted == [(['abc-123', 'def-456'], '/115/embyx_in')]
+    assert body['task_dir_path'] == '/115/embyx_in'
+    assert [(item['avid'], item['outcome']) for item in body['items']] == [
+        ('ABC-123', 'submitted'),
+        ('DEF-456', 'already_in_library'),
+    ]
+    assert body['items'][1]['archived_paths'] == ['embyx/DEF/DEF-456.mp4']
+
+
+def test_a_directory_without_a_route_is_refused_with_its_reason() -> None:
+    client = make_manual_client(FakeManual(DirectoryNotRoutedError()))
+
+    response = client.post('/api/monitor/manual', json={'inputs': ['abc-123'], 'task_dir_path': '/115/misc'})
+
+    assert response.status_code == 422
+    assert response.json()['error']['code'] == 'directory_not_routed'
+
+
+def test_a_missing_directory_is_a_404() -> None:
+    client = make_manual_client(FakeManual(DirectoryNotFoundError()))
+
+    assert client.get('/api/monitor/manual/directories', params={'path': '/nope'}).status_code == 404
+
+
+def test_manual_routes_are_absent_without_the_source() -> None:
+    client, _ = make_ledger_client(FakeLedger())
+
+    assert client.get('/api/monitor/manual/directories').status_code == 404
+    assert client.post('/api/monitor/manual', json={'inputs': [], 'task_dir_path': '/x'}).status_code == 404
 
 
 NOW = now_stub()

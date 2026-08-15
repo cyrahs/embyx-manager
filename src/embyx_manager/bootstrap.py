@@ -48,6 +48,7 @@ from embyx_manager.monitor.acquisitions import AcquisitionRepository
 from embyx_manager.monitor.api import AcquisitionApi, create_monitor_router
 from embyx_manager.monitor.archive import ArchivePipeline
 from embyx_manager.monitor.intake import AcquisitionIntake
+from embyx_manager.monitor.manual import ManualIntakeSource
 from embyx_manager.monitor.mapping import MappingPipeline
 from embyx_manager.monitor.reconcile import ReconcileScanner
 from embyx_manager.monitor.reports import RunContext
@@ -291,7 +292,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
     async def archive_runner(ctx: RunContext) -> None:
         cloud = cloud_handle.current()
         if cloud is not None:
-            for task_dir in _offline_task_dirs(store):
+            for task_dir in await _polled_task_dirs(store, ledger):
                 try:
                     await cloud.list_directory(task_dir)
                 except Exception:  # noqa: BLE001
@@ -369,7 +370,10 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
             ledger=ledger,
             cloud=cloud,
             archiver=archiver,
-            settings=TrackerSettings.from_config(archive_config, task_dir_paths=_offline_task_dirs(store)),
+            settings=TrackerSettings.from_config(
+                archive_config,
+                task_dir_paths=await _polled_task_dirs(store, ledger),
+            ),
             submit_magnet=submit_magnet,
         )
         await tracker.poll(ctx)
@@ -411,6 +415,17 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
             ledger=ledger,
             submit_magnet=submit_magnet,
             tracker_ready=tracker_ready,
+            manual=ManualIntakeSource(
+                ledger=ledger,
+                intake_factory=intake_factory,
+                cloud_factory=cloud_handle.current,
+                archiver_factory=lambda: ArchivePipeline(
+                    config=store.get(ArchiveConfig),
+                    avid_parser=avid_handle.current(),
+                ),
+                parser_factory=avid_handle.current,
+                configured_dirs=lambda: _offline_task_dirs(store),
+            ),
         ),
     )
 
@@ -468,7 +483,7 @@ def _rss_configuration_gap(store: ConfigStore) -> str | None:
 
 
 def _offline_task_dirs(store: ConfigStore) -> tuple[str, ...]:
-    """Every directory offline tasks are queued under, in category order.
+    """Every directory a source declares offline tasks are queued under.
 
     Fill actor's own directory joins the RSS categories'. Sources may share
     one, so the list is deduplicated; the tracker polls each of these exactly
@@ -478,4 +493,16 @@ def _offline_task_dirs(store: ConfigStore) -> tuple[str, ...]:
     fill_actor_dir = store.get(FillActorConfig).task_dir_path
     if fill_actor_dir:
         dirs.append(fill_actor_dir)
+    return tuple(dict.fromkeys(dirs))
+
+
+async def _polled_task_dirs(store: ConfigStore, ledger: AcquisitionRepository) -> tuple[str, ...]:
+    """The configured directories plus any the ledger still has work in.
+
+    A manual submission may pick a directory no source declares. Polling only
+    the configured ones would leave its task missing from every listing, which
+    the tracker's sweep reads as CloudDrive having dropped it — so the poll set
+    follows the ledger for as long as those downloads are in flight.
+    """
+    dirs = [*_offline_task_dirs(store), *await ledger.active_task_dirs()]
     return tuple(dict.fromkeys(dirs))
