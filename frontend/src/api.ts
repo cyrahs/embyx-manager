@@ -4,6 +4,8 @@ import type {
   AcquisitionPage,
   ActiveApplyRequest,
   ConfigSection,
+  DirectoryListing,
+  ManualSubmission,
   PipelineId,
   PipelineStatus,
   RunDetail,
@@ -238,6 +240,9 @@ const CODE_MESSAGES: Record<string, string> = {
   unusable_magnet: '磁力链接无效，请检查后重试。',
   magnet_already_tried: '这条磁力已经尝试过了。',
   not_parked: '该番号当前不在待处理状态。',
+  directory_not_found: 'CloudDrive 上找不到这个目录。',
+  directory_not_routed: '该目录没有对应的归档路由，下载完成后无法入库；请先在设置里为它添加一条归档路由。',
+  too_many_inputs: '一次提交的番号太多了，请分批添加。',
   unknown_config_section: '未知的配置分区。',
   config_version_conflict: '配置已被其他会话修改，请刷新后重试。',
   invalid_config_values: '配置项校验未通过，请检查填写内容。',
@@ -687,6 +692,31 @@ export async function addAcquisitionMagnet(avid: string, magnet: string): Promis
     body: JSON.stringify({ magnet }),
   })
   return body as unknown as Acquisition
+}
+
+// ---------- the manual input source ----------
+
+export async function browseOfflineDirectories(path: string, signal?: AbortSignal): Promise<DirectoryListing> {
+  const params = new URLSearchParams({ path })
+  const body = await request(`/api/monitor/manual/directories?${params.toString()}`, { signal })
+  if (!isRecord(body) || !Array.isArray(body.entries)) {
+    throw new ApiError(0, 'invalid_response', '目录列表响应无效。')
+  }
+  return body as unknown as DirectoryListing
+}
+
+export async function submitManualAcquisitions(
+  inputs: string[],
+  taskDirPath: string,
+): Promise<ManualSubmission> {
+  const body = await request('/api/monitor/manual', {
+    method: 'POST',
+    body: JSON.stringify({ inputs, task_dir_path: taskDirPath }),
+  })
+  if (!isRecord(body) || !Array.isArray(body.items)) {
+    throw new ApiError(0, 'invalid_response', '手动添加响应无效。')
+  }
+  return body as unknown as ManualSubmission
 }
 
 export async function getTrackerStatus(signal?: AbortSignal): Promise<TrackerStatus> {

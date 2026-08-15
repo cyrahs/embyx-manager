@@ -46,6 +46,20 @@
   `fill_actor.task_dir_path` 显式声明自己的离线目录并入 tracker 轮询集合,
   后续生命周期全部由 tracker 接管;`rss.failed_avid_cooldown_seconds` 现在约束所有
   intake 来源的解析失败冷却。
+- **手动输入成为第三个账本输入源**(`source='manual'`,该值自迁移 v5 起即合法,无需迁移):
+  看板"下载追踪"面板的**手动添加**里逐行粘贴番号(或能解析出番号的文件名),经
+  `monitor/manual.py` 的 `ManualIntakeSource` 走同一个 `AcquisitionIntake`,逐行回报
+  已提交 / 已在追踪 / 库中已有 / 未找到磁力 / 提交失败 / 无法识别。两条与 RSS、fill actor
+  不同的约束,都源自"手动源没有自己配置的离线目录":
+  - **目录必须有归档路由**。tracker 是在归档路由表里定位完成的下载(`_locate`),没有路由
+    的目录里下完的文件夹永远找不到,因此提交直接拒绝(`directory_not_routed`),不写任何
+    最终无法收敛的账本行;浏览目录时逐项标注是否有路由与是否为来源目录。
+  - **tracker 轮询集合跟着账本走**。`ledger.active_task_dirs()`(活跃态行上钉住的目录)
+    并入配置目录:不轮询的目录里的任务在任何列表中都不出现,`_sweep_lost` 会当成
+    CloudDrive 把它删了,整条链路直接判 lost。目录在该处的下载全部落地后自动退出集合。
+  - 目录默认值取账本里最近一条 manual 行的目录(`ledger.latest_task_dir`),不另存配置——
+    "上次用的目录"是既成事实,再存一份必然漂移。提交前还会对库中已有的番号直接回报路径,
+    不建账本行。
 - **§Step 6 第 7 项的 resolver 补上接线**:tracker 每轮 poll 末尾跑
   `AcquisitionIntake.retry_due`,捞 `next_action_at` 到期的 `resolve_failed`/
   `exhausted` 行重新解析并提交。与 `enqueue` 不同,重试不经 `discover`(记录不在

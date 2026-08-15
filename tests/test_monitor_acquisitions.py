@@ -368,6 +368,48 @@ async def test_active_avids_covers_only_the_states_the_tracker_owns() -> None:
     assert await ledger.active_avids() == frozenset({'ABC-123', 'DEF-456'})
 
 
+async def test_active_task_dirs_covers_the_directories_still_in_flight() -> None:
+    """What the tracker adds to its poll set, so a manual directory is watched too."""
+    ledger = make_ledger()
+    await ledger.discover('ABC-123', source=AcquisitionSource.MANUAL, now=NOW, task_dir_path='/115/misc')
+    await ledger.discover('DEF-456', source=rss_source('Actor'), now=NOW, task_dir_path='/115/embyx_in')
+    # A second AVID in one directory is one entry; a settled one is none at all.
+    await ledger.discover('GHI-789', source=AcquisitionSource.MANUAL, now=NOW, task_dir_path='/115/misc')
+    await ledger.discover('JKL-012', source=AcquisitionSource.MANUAL, now=NOW, task_dir_path='/115/done')
+    await ledger.transition(
+        'JKL-012',
+        expected=AcquisitionState.DISCOVERED,
+        target=AcquisitionState.ARCHIVED,
+        now=NOW,
+    )
+    # Reconcile's rows carry no directory and must not become an empty entry.
+    await ledger.discover('MNO-345', source=AcquisitionSource.RECONCILE, now=NOW)
+
+    assert await ledger.active_task_dirs() == ('/115/embyx_in', '/115/misc')
+
+
+async def test_latest_task_dir_is_the_newest_row_of_that_source() -> None:
+    """How the manual picker remembers where the last batch went."""
+    ledger = make_ledger()
+    await ledger.discover('ABC-123', source=AcquisitionSource.MANUAL, now=NOW, task_dir_path='/115/embyx_in')
+    await ledger.discover(
+        'DEF-456',
+        source=AcquisitionSource.MANUAL,
+        now=NOW + timedelta(hours=1),
+        task_dir_path='/115/embyx_in/rank',
+    )
+    # Another source's newer row is not this source's memory.
+    await ledger.discover(
+        'GHI-789',
+        source=rss_source('Actor'),
+        now=NOW + timedelta(hours=2),
+        task_dir_path='/115/actor',
+    )
+
+    assert await ledger.latest_task_dir(source=AcquisitionSource.MANUAL) == '/115/embyx_in/rank'
+    assert await ledger.latest_task_dir(source=AcquisitionSource.FILL_ACTOR) is None
+
+
 async def test_listing_filters_by_state_and_counts() -> None:
     ledger = make_ledger()
     await start_downloading(ledger, 'ABC-123')

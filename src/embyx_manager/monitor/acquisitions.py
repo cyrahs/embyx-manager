@@ -330,6 +330,46 @@ class AcquisitionRepository:
         )
         return frozenset(row['avid'] for row in rows)
 
+    async def active_task_dirs(self) -> tuple[str, ...]:
+        """Offline directories holding an acquisition that is still in flight.
+
+        The tracker polls the configured directories, but a source may pin a
+        directory that is not one of them — the manual source lets an operator
+        pick any routed directory. Adding these to the poll set is what keeps
+        such a download visible: an unpolled task is missing from every listing,
+        which the sweep reads as CloudDrive having dropped it. A directory
+        leaves the set once nothing is in flight there.
+        """
+        pool = await self._database.get_pool()
+        rows = await pool.fetch(
+            """
+            SELECT DISTINCT task_dir_path FROM archive_acquisitions
+            WHERE state = ANY($1::text[]) AND task_dir_path IS NOT NULL
+            ORDER BY task_dir_path
+            """,
+            sorted(state.value for state in ACTIVE_STATES),
+        )
+        return tuple(row['task_dir_path'] for row in rows)
+
+    async def latest_task_dir(self, *, source: str) -> str | None:
+        """The offline directory this source's newest acquisition was queued under.
+
+        The manual source has no configured directory of its own, so its default
+        is whichever one the operator used last. Reading it back from the ledger
+        keeps that memory in step with what actually happened, and shared by
+        every browser signed into the deployment.
+        """
+        pool = await self._database.get_pool()
+        return await pool.fetchval(
+            """
+            SELECT task_dir_path FROM archive_acquisitions
+            WHERE source = $1 AND task_dir_path IS NOT NULL
+            ORDER BY created_at DESC, avid DESC
+            LIMIT 1
+            """,
+            source,
+        )
+
     # -- attempts ------------------------------------------------------------
 
     async def add_attempts(self, avid: str, candidates: Sequence[MagnetCandidate], *, now: datetime) -> int:

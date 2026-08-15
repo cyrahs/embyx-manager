@@ -207,6 +207,45 @@ export interface AcquisitionPage {
   counts: Partial<Record<AcquisitionState, number>>
 }
 
+// ---------- the manual input source ----------
+
+export interface OfflineDirectory {
+  path: string
+  name: string
+  /** An input source's own offline directory. */
+  configured: boolean
+  /** Has an archive route, which is what makes it submittable. */
+  routed: boolean
+}
+
+export interface DirectoryListing {
+  path: string
+  parent: string | null
+  entries: OfflineDirectory[]
+  /** Where the picker opens: the directory the last manual batch used. */
+  default_path: string | null
+}
+
+export type ManualOutcome =
+  | 'submitted'
+  | 'already_tracked'
+  | 'already_in_library'
+  | 'no_magnet'
+  | 'submit_failed'
+  | 'unreadable'
+
+export interface ManualEntry {
+  text: string
+  avid: string | null
+  outcome: ManualOutcome
+  archived_paths: string[]
+}
+
+export interface ManualSubmission {
+  task_dir_path: string
+  items: ManualEntry[]
+}
+
 export interface TrackerStatus {
   running: boolean
   reason: string | null

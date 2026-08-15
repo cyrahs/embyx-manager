@@ -12,6 +12,7 @@ import {
 import { localizeBackendText } from '../lib/backendText'
 import { Notice } from './Feedback'
 import { Spinner } from './Icons'
+import { ManualIntakeDialog } from './ManualIntake'
 import type {
   Acquisition,
   AcquisitionDetail,
@@ -262,6 +263,7 @@ export function AcquisitionPanel({ onUnauthorized }: { onUnauthorized: () => voi
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [magnet, setMagnet] = useState('')
+  const [manualOpen, setManualOpen] = useState(false)
   const [tick, setTick] = useState(0)
 
   // Kept in a ref so the polling effect never restarts because a parent
@@ -364,6 +366,9 @@ export function AcquisitionPanel({ onUnauthorized }: { onUnauthorized: () => voi
     <section className="panel dashboard-panel" aria-labelledby="acquisitions-title">
       <div className="panel-heading">
         <h2 id="acquisitions-title">下载追踪</h2>
+        <button type="button" className="button secondary manual-open" onClick={() => setManualOpen(true)}>
+          手动添加
+        </button>
         <div className="run-filter" role="group" aria-label="筛选状态">
           <button
             type="button"
@@ -445,6 +450,14 @@ export function AcquisitionPanel({ onUnauthorized }: { onUnauthorized: () => voi
             </tbody>
           </table>
         </div>
+      )}
+
+      {manualOpen && (
+        <ManualIntakeDialog
+          onClose={() => setManualOpen(false)}
+          onSubmitted={reload}
+          onUnauthorized={() => onUnauthorizedRef.current()}
+        />
       )}
     </section>
   )
