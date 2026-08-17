@@ -138,6 +138,24 @@ async def test_finished_download_is_archived_and_the_avid_closed(tmp_path: Path)
     assert cloud.removed == []
 
 
+async def test_finished_download_uses_expected_avid_when_file_has_single_zero_padding(tmp_path: Path) -> None:
+    tracker, ledger, _, _ = build(tmp_path, [offline_task('vrkm-1846', HASH_A, OfflineStatus.FINISHED)])
+    await seed(ledger, 'VRKM-1846', [HASH_A])
+    folder = tmp_path / 'task' / 'downloads' / 'vrkm-1846'
+    write_video(folder / 'masex.tv@vrkm01846_1_8k.mp4')
+    write_video(folder / 'masex.tv@vrkm01846_2_8k.mp4')
+
+    await tracker.poll(make_ctx())
+
+    assert ledger.states['VRKM-1846'] is AcquisitionState.ARCHIVED
+    assert ledger.attempt_states('VRKM-1846') == [AttemptState.ARCHIVED]
+    assert ledger.archived_paths['VRKM-1846'] == (
+        'sorted/VRKM/VRKM-1846-cd1.mp4',
+        'sorted/VRKM/VRKM-1846-cd2.mp4',
+    )
+    assert not folder.exists()
+
+
 async def test_a_finished_download_is_filed_by_the_route_that_holds_it(tmp_path: Path) -> None:
     """The task directory is one of the archive routes; here a priority one."""
     local = tmp_path / 'task'
