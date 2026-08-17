@@ -48,6 +48,10 @@ _PHONE_RIP_RE = re.compile(r'^(?P<base>.+)[-_]5$')
 #: A phone rip is a fraction of the main file; anything above half its size is
 #: not confidently a rip and is left for an operator.
 PHONE_RIP_MAX_SHARE = 0.5
+#: DMM content IDs sometimes carry one zero to fill their numeric part to five
+#: digits. Keep that spelling in the parser, but let a tracked download reconcile
+#: it with the four-digit AVID the RSS item supplied.
+_SINGLE_ZERO_PADDED_AVID_RE = re.compile(r'^(?P<brand>[A-Z]{2,10})-0(?P<number>\d{4})$')
 
 
 class Outcome(StrEnum):
@@ -166,6 +170,17 @@ def _letter_run(videos: list[Path], bases: dict[Path, str]) -> list[Path] | None
 
 def normalize_copy_suffix(stem: str) -> str:
     return COPY_SUFFIX_RE.sub('', stem)
+
+
+def _avids_are_padding_equivalent(first: str, second: str) -> bool:
+    """Whether two regular AVIDs differ only by one five-digit padding zero."""
+    if first == second:
+        return True
+    for padded, unpadded in ((first, second), (second, first)):
+        match = _SINGLE_ZERO_PADDED_AVID_RE.fullmatch(padded)
+        if match is not None and unpadded == f'{match["brand"]}-{match["number"]}':
+            return True
+    return False
 
 
 @contextmanager
@@ -322,7 +337,7 @@ class ArchivePipeline:
 
     # -- selection -----------------------------------------------------------
 
-    def _select_videos(  # noqa: PLR0911 - each early return names a distinct verdict
+    def _select_videos(
         self,
         folder: Path,
         ctx: RunContext,
@@ -345,22 +360,10 @@ class ArchivePipeline:
             return ArchiveResult(Outcome.JUNK, reason='no video above the size threshold')
 
         videos = self._drop_duplicate_copies(folder, videos, ctx)
-        avids = {self._avid.get_avid(video.name) for video in videos}
-        if len(avids) > 1:
-            reason = f'multiple avids in one folder: {", ".join(sorted(avids))}'
-            ctx.warning('%s in %s, skipping', reason, folder.name)
-            return ArchiveResult(Outcome.NEEDS_ATTENTION, reason=reason)
-        avid = next(iter(avids))
-        if not avid:
-            # The file names gave nothing; the folder name is the last clue.
-            avid = self._avid.get_avid(folder.name)
-        if not avid:
-            ctx.warning('failed to read an avid for %s, skipping', folder.name)
-            return ArchiveResult(Outcome.NEEDS_ATTENTION, reason='no avid could be read')
-        if expected_avid and avid != expected_avid:
-            reason = f'expected {expected_avid} but found {avid}'
-            ctx.warning('%s in %s, skipping', reason, folder.name)
-            return ArchiveResult(Outcome.NEEDS_ATTENTION, avid=avid, reason=reason)
+        identified = self._identify_avid(folder, videos, ctx, expected_avid=expected_avid)
+        if isinstance(identified, ArchiveResult):
+            return identified
+        avid = identified
 
         if len(videos) > 1:
             arranged = self._arrange_videos(folder, videos, avid, ctx)
@@ -370,6 +373,53 @@ class ArchivePipeline:
                 return ArchiveResult(Outcome.NEEDS_ATTENTION, avid=avid, reason=reason)
             videos = arranged
         return _VideoSet(avid=avid, videos=videos)
+
+    def _identify_avid(
+        self,
+        folder: Path,
+        videos: list[Path],
+        ctx: RunContext,
+        *,
+        expected_avid: str,
+    ) -> str | ArchiveResult:
+        """Read the videos' AVID and reconcile it with a trusted expected value."""
+        avids = {self._avid.get_avid(video.name) for video in videos}
+        if len(avids) > 1:
+            if expected_avid and all(_avids_are_padding_equivalent(expected_avid, avid) for avid in avids):
+                found = ', '.join(sorted(avids))
+                ctx.info(
+                    '%s in %s are padding-equivalent to expected %s; using expected avid',
+                    found,
+                    folder.name,
+                    expected_avid,
+                )
+                avid = expected_avid
+            else:
+                reason = f'multiple avids in one folder: {", ".join(sorted(avids))}'
+                ctx.warning('%s in %s, skipping', reason, folder.name)
+                return ArchiveResult(Outcome.NEEDS_ATTENTION, reason=reason)
+        else:
+            avid = next(iter(avids))
+        if not avid:
+            # The file names gave nothing; the folder name is the last clue.
+            avid = self._avid.get_avid(folder.name)
+        if not avid:
+            ctx.warning('failed to read an avid for %s, skipping', folder.name)
+            return ArchiveResult(Outcome.NEEDS_ATTENTION, reason='no avid could be read')
+        if expected_avid and avid != expected_avid:
+            if _avids_are_padding_equivalent(expected_avid, avid):
+                ctx.info(
+                    '%s in %s is padding-equivalent to expected %s; using expected avid',
+                    avid,
+                    folder.name,
+                    expected_avid,
+                )
+                avid = expected_avid
+            else:
+                reason = f'expected {expected_avid} but found {avid}'
+                ctx.warning('%s in %s, skipping', reason, folder.name)
+                return ArchiveResult(Outcome.NEEDS_ATTENTION, avid=avid, reason=reason)
+        return avid
 
     def _arrange_videos(self, folder: Path, videos: list[Path], avid: str, ctx: RunContext) -> list[Path] | None:
         """Explain a folder holding several videos of one AVID, or give up.
@@ -424,7 +474,11 @@ class ArchivePipeline:
         rips = [video for video in videos if video is not dominant]
         for rip in rips:
             match = _PHONE_RIP_RE.match(_variant_base(rip.name))
-            if match is None or self.avid_of(match['base']) != avid or rip.stat().st_size > limit:
+            if (
+                match is None
+                or not _avids_are_padding_equivalent(self.avid_of(match['base']), avid)
+                or rip.stat().st_size > limit
+            ):
                 return None
         dropped = ', '.join(rip.name for rip in rips)
         ctx.info('keeping %s in %s and dropping the phone rip %s', dominant.name, folder.name, dropped)

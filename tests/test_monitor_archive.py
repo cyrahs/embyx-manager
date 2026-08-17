@@ -402,6 +402,50 @@ def test_expected_avid_match_archives_normally(tmp_path: Path) -> None:
     assert (pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4').exists()
 
 
+def test_expected_avid_accepts_single_zero_padding_and_names_from_expected(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / 'vrkm-1846'
+    write_video(folder / 'masex.tv@vrkm01846_1_8k.mp4')
+    write_video(folder / 'masex.tv@vrkm01846_2_8k.mp4')
+
+    result = archive(pipeline, folder, expected_avid='VRKM-1846')
+
+    assert result.outcome is Outcome.ARCHIVED
+    assert result.avid == 'VRKM-1846'
+    assert result.archived_paths == (
+        'sorted/VRKM/VRKM-1846-cd1.mp4',
+        'sorted/VRKM/VRKM-1846-cd2.mp4',
+    )
+    assert not folder.exists()
+
+
+def test_expected_avid_collapses_mixed_single_zero_padding(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / 'download'
+    write_video(folder / 'VRKM-1846_1.mp4')
+    write_video(folder / 'VRKM-01846_2.mp4')
+
+    result = archive(pipeline, folder, expected_avid='VRKM-1846')
+
+    assert result.outcome is Outcome.ARCHIVED
+    assert result.archived_paths == (
+        'sorted/VRKM/VRKM-1846-cd1.mp4',
+        'sorted/VRKM/VRKM-1846-cd2.mp4',
+    )
+
+
+def test_expected_avid_does_not_ignore_other_padding_widths(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    folder = pipeline.src_dir / 'intake' / 'download'
+    write_video(folder / 'ABC-0123.mp4')
+
+    result = archive(pipeline, folder, expected_avid='ABC-123')
+
+    assert result.outcome is Outcome.NEEDS_ATTENTION
+    assert result.reason == 'expected ABC-123 but found ABC-0123'
+    assert (folder / 'ABC-0123.mp4').exists()
+
+
 def test_existing_destination_is_left_alone(tmp_path: Path) -> None:
     pipeline = make_pipeline(tmp_path)
     write_video(pipeline.dst_dir / 'sorted' / 'ABC' / 'ABC-123.mp4', size=999)
