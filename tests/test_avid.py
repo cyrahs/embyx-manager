@@ -76,6 +76,10 @@ def test_get_avid_strips_suspicious_domain_prefix(parser: AvidParser) -> None:
     assert parser.get_avid('hjd2048.com-0601meyd524-h264.mp4') == 'MEYD-524'
 
 
+def test_get_avid_reads_fanza_t_id_after_domain_prefix(parser: AvidParser) -> None:
+    assert parser.get_avid('hhd800.com@T-28621.mp4') == 'T-28621'
+
+
 def test_get_avid_falls_back_to_parent_directory(parser: AvidParser) -> None:
     assert parser.get_avid('ABC-123/whatever!!.mp4') == 'ABC-123'
 

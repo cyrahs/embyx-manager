@@ -66,6 +66,22 @@ _PADDED_NUMBER_RE = re.compile(r'^([A-Z]{2,10})-(00\d{3,4})$')
 _NON_CID_BRANDS = frozenset({'FC2', 'HEYZO', 'HEYDOUGA', 'GETCHU', 'GYUTTO', 'MKBD', 'MKD', 'S2M', 'S2MBD'})
 
 
+def _domain_variants(norm: str) -> tuple[str, str]:
+    """Return the domain-stripped first try and the safe fallback text.
+
+    A domain followed by more alphanumeric content is unambiguously release
+    noise, so it must stay stripped even when the remainder has no recognizable
+    ID. A domain at the end retains the historical fallback for corpus entries
+    such as ``... UUS75.COM`` where the domain-shaped token is the expected ID.
+    """
+    domain = _DOMAIN_RE.search(norm)
+    if domain is None:
+        return norm, norm
+    no_domain = _DOMAIN_RE.sub('', norm)
+    fallback = no_domain if any(char.isalnum() for char in norm[domain.end() :]) else norm
+    return no_domain, fallback
+
+
 def strip_extension(name: str) -> str:
     """Drop a trailing file extension, leaving long dotted titles intact."""
     suffix = Path(name).suffix
@@ -118,9 +134,11 @@ def _match_odd_numbering(norm: str) -> str:
     Tried after the regular patterns for every branch, so a name that looks
     ordinary is never claimed by one of these narrower rules.
     """
-    # 尝试匹配TMA制作的影片(如'T28-557', 他家的番号很乱)
-    if match := re.search(r'(T[23]8[-_]\d{3})', norm):
-        return match.group(1)
+    # T-series oddities: Fanza's T-28621 needs exactly five digits and an
+    # identifier boundary because a bare letter is otherwise too weak; TMA also
+    # has irregular ids such as T28-557.
+    if match := re.search(r'(?:^|(?<=[^A-Z\d]))(T[-_]\d{5})(?!\d)|(T[23]8[-_]\d{3})', norm):
+        return match.group(1).replace('_', '-') if match.group(1) else match.group(2)
     # 尝试匹配东热n, k系列; 部分存档把n0893写成N-0893, 规范形式不带分隔符
     if match := re.search(r'([NK])[-_]?(\d{4})', norm, re.IGNORECASE):
         return match.group(1) + match.group(2)
@@ -204,12 +222,12 @@ class AvidParser:
             if match:
                 return '259LUXU-' + match.group(1)
         else:
-            # 先尝试移除可疑域名进行匹配, 如果匹配不到再使用原始文件名进行匹配
-            no_domain = _DOMAIN_RE.sub('', norm)
+            no_domain, fallback_norm = _domain_variants(norm)
             if no_domain != norm:
                 avid = self.get_avid(no_domain)
                 if avid:
                     return avid
+                norm = fallback_norm
             # 匹配缩写成hey的heydouga影片。由于番号分三部分, 要先于后面分两部分的进行匹配
             match = re.search(r'(?:HEY)[-_]*(\d{4})[-_]0?(\d{3,5})', norm, re.IGNORECASE)
             if match:
