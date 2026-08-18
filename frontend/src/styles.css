@@ -177,14 +177,21 @@ main {
 
 /* ---------- scan panel ---------- */
 .scan-panel { padding: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.input-mode { padding: 2px; display: flex; gap: 2px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--bg); }
+.input-mode button { min-height: 26px; padding: 0 10px; border: 0; border-radius: 6px; color: var(--text-3); background: transparent; font-size: 12px; font-weight: 600; cursor: pointer; }
+.input-mode button:hover:not(:disabled) { color: var(--text); }
+.input-mode button.active { color: var(--accent-ink); background: var(--accent); }
+.input-mode button:disabled { cursor: not-allowed; opacity: .5; }
 .field-count { color: var(--text-3); font: 500 12px var(--font-mono); }
 .field-count.over { color: var(--red); }
 .input-frame { border: 1px solid var(--line-strong); border-radius: 8px; background: var(--bg); transition: border-color .15s, box-shadow .15s; overflow: hidden; }
 .input-frame:focus-within { border-color: #7d9138; box-shadow: 0 0 0 3px rgba(214, 255, 75, .08); }
 .input-frame.invalid { border-color: rgba(245, 144, 137, .75); }
-.input-frame textarea { display: block; width: 100%; resize: vertical; min-height: 76px; padding: 12px 14px; border: 0; outline: 0; color: var(--text); background: transparent; font: 400 13px/1.7 var(--font-mono); }
-.input-frame textarea::placeholder { color: #6b7178; }
-.input-frame textarea:disabled { opacity: .55; cursor: wait; }
+.input-frame textarea, .input-frame > input { display: block; width: 100%; padding: 12px 14px; border: 0; outline: 0; color: var(--text); background: transparent; font: 400 13px/1.7 var(--font-mono); }
+.input-frame textarea { resize: vertical; min-height: 76px; }
+.input-frame > input { min-height: 48px; }
+.input-frame textarea::placeholder, .input-frame > input::placeholder { color: #6b7178; }
+.input-frame textarea:disabled, .input-frame > input:disabled { opacity: .55; cursor: wait; }
 .input-footer { min-height: 32px; padding: 0 14px; border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 14px; color: var(--text-3); font-size: 12px; }
 .validation { margin: 10px 2px 0; color: var(--red); font-size: 12px; }
 .scan-actions { margin-top: 14px; display: flex; align-items: center; gap: 14px; }
@@ -423,6 +430,14 @@ main {
 .confirm-list { margin-top: 14px; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
 .confirm-list span { display: block; padding: 7px 11px; border-bottom: 1px solid var(--line); color: var(--text-2); font: 400 12px var(--font-mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .confirm-list span:last-child { border-bottom: 0; }
+.actor-choice-list { margin-top: 14px; display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.actor-choice-list label { min-height: 48px; padding: 8px 11px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--line); cursor: pointer; }
+.actor-choice-list label:last-child { border-bottom: 0; }
+.actor-choice-list label:hover { background: var(--surface-3); }
+.actor-choice-list input { accent-color: var(--accent); }
+.actor-choice-list span { min-width: 0; display: flex; flex: 1; align-items: baseline; justify-content: space-between; gap: 12px; }
+.actor-choice-list strong { color: var(--text); font-size: 13px; }
+.actor-choice-list code { color: var(--text-3); font: 400 12px var(--font-mono); }
 .dialog-actions { margin-top: 18px; display: flex; justify-content: flex-end; gap: 9px; }
 
 /* ---------- manual intake ---------- */

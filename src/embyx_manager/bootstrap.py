@@ -238,6 +238,10 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
             await client.aclose()
         return find_subscribed_actors(actor_ids, subscriptions)
 
+    async def javbus_actors_for_avid(avid: str) -> tuple[tuple[str, str], ...]:
+        actors = await javbus.get_video_actors(avid)
+        return tuple((actor.actor_id, actor.name) for actor in actors)
+
     feed_warmer = RSSHubFeedWarmer(
         repository=repository,
         rsshub_url=lambda: current_feeds().rsshub_url or None,
@@ -256,6 +260,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         freshrss_url=lambda: current_feeds().freshrss_url or None,
         freshrss_rsshub_url=lambda: current_feeds().freshrss_rsshub_url or None,
         existing_actor_lookup=existing_freshrss_actors,
+        avid_actor_lookup=javbus_actors_for_avid,
     )
 
     avid_handle = AvidParserHandle(store)

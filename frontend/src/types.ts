@@ -23,6 +23,17 @@ export interface ActorPlan {
   /** Optional: older plans and older backends omit it entirely. */
   error_message?: string | null
 }
+
+export interface AvidActor {
+  actor_id: string
+  name: string
+}
+
+export interface AvidActors {
+  avid: string
+  actors: AvidActor[]
+}
+
 export interface MoveCandidate {
   candidate_id: string
   video_id: string

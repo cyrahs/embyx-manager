@@ -190,6 +190,72 @@ describe('Fill Actor page', () => {
     expect(screen.getByRole('checkbox', { name: /ABC-001-CD2\.mp4/ })).toBeDisabled()
   })
 
+  it('resolves a single actor from an AVID and starts that actor scan directly', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.mocked(fetch)
+    fetchMock
+      .mockImplementationOnce(() => jsonResponse({ status: 'ok' }))
+      .mockImplementationOnce(() => jsonResponse({
+        avid: 'ABC-123',
+        actors: [{ actor_id: 'A123', name: '演员甲' }],
+      }))
+      .mockImplementationOnce(() => jsonResponse({
+        job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
+        plan,
+      }, 202))
+
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: 'AVID' }))
+    await user.type(screen.getByLabelText('AVID'), 'abc-123')
+    await user.click(screen.getByRole('button', { name: '开始扫描' }))
+
+    expect(await screen.findByText('扫描结果')).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      '/api/fill-actor/avid-actors',
+      expect.objectContaining({ body: JSON.stringify({ avid: 'abc-123' }), method: 'POST' }),
+    )
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      3,
+      '/api/fill-actor/plans',
+      expect.objectContaining({ body: JSON.stringify({ actor_ids: ['A123'] }), method: 'POST' }),
+    )
+  })
+
+  it('asks which actor to scan when an AVID has multiple actors', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.mocked(fetch)
+    fetchMock
+      .mockImplementationOnce(() => jsonResponse({ status: 'ok' }))
+      .mockImplementationOnce(() => jsonResponse({
+        avid: 'ABC-123',
+        actors: [
+          { actor_id: 'A123', name: '演员甲' },
+          { actor_id: 'B456', name: '演员乙' },
+        ],
+      }))
+      .mockImplementationOnce(() => jsonResponse({
+        job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
+        plan,
+      }, 202))
+
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: 'AVID' }))
+    await user.type(screen.getByLabelText('AVID'), 'ABC-123')
+    await user.click(screen.getByRole('button', { name: '开始扫描' }))
+
+    const dialog = await screen.findByRole('dialog', { name: '选择要补全的演员' })
+    await user.click(within(dialog).getByRole('radio', { name: /演员乙/ }))
+    await user.click(within(dialog).getByRole('button', { name: '扫描所选演员' }))
+
+    expect(await screen.findByText('扫描结果')).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      3,
+      '/api/fill-actor/plans',
+      expect.objectContaining({ body: JSON.stringify({ actor_ids: ['B456'] }), method: 'POST' }),
+    )
+  })
+
   it('asks before scanning actors that already exist in FreshRSS', async () => {
     const user = userEvent.setup()
     const fetchMock = vi.mocked(fetch)

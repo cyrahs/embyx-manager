@@ -11,6 +11,7 @@ import type {
   RunDetail,
   RunSummary,
   TestConnectionResult,
+  AvidActors,
   ActorFeedStatus,
   ApplyJobEnvelope,
   ApplyResult,
@@ -354,6 +355,28 @@ export function normalizePlanEnvelope(value: unknown): PlanEnvelope {
   return { plan, job, planId, feeds }
 }
 
+function normalizeAvidActors(value: unknown): AvidActors {
+  if (
+    !isRecord(value) ||
+    !isBoundedString(value.avid, 128) ||
+    !Array.isArray(value.actors) ||
+    value.actors.length < 1 ||
+    value.actors.length > 100
+  ) throw new ApiError(0, 'invalid_avid_actor_response', 'JavBus 演员信息响应无效，请稍后重试。')
+  const actors = value.actors.map((actor) => {
+    if (
+      !isRecord(actor) ||
+      !isBoundedString(actor.actor_id, 32) ||
+      !isBoundedString(actor.name, 256)
+    ) throw new ApiError(0, 'invalid_avid_actor_response', 'JavBus 演员信息响应无效，请稍后重试。')
+    return { actor_id: actor.actor_id, name: actor.name }
+  })
+  if (new Set(actors.map((actor) => actor.actor_id.toLowerCase())).size !== actors.length) {
+    throw new ApiError(0, 'invalid_avid_actor_response', 'JavBus 演员信息响应无效，请稍后重试。')
+  }
+  return { avid: value.avid, actors }
+}
+
 function invalidApplyJobResponse(): never {
   throw new ApiError(0, 'invalid_apply_job_response', '移动任务响应无效，请稍后重试。')
 }
@@ -515,6 +538,15 @@ export async function createPlan(actorIds: string[], continueIfSubscribed = fals
         actor_ids: actorIds,
         ...(continueIfSubscribed ? { continue_if_subscribed: true } : {}),
       }),
+    }),
+  )
+}
+
+export async function resolveAvidActors(avid: string): Promise<AvidActors> {
+  return normalizeAvidActors(
+    await request('/api/fill-actor/avid-actors', {
+      method: 'POST',
+      body: JSON.stringify({ avid }),
     }),
   )
 }

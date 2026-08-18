@@ -93,6 +93,28 @@ async def test_get_magnets_no_variables(client: JavBusClient) -> None:
     assert mock_get.call_count == 1
 
 
+async def test_get_video_actors_reads_names_and_deduplicates_ids(client: JavBusClient) -> None:
+    html = """
+    <html>
+        <a href="/star/a123">演员甲</a>
+        <a href="https://www.javbus.com/star/B456/"> 演员乙 </a>
+        <a href="/star/A123">重复演员</a>
+        <a href="/genre/7">其他链接</a>
+    </html>
+    """
+    response = MagicMock(text=html, status_code=200)
+    mock_get = AsyncMock(return_value=response)
+    set_get(client, mock_get)
+
+    actors = await client.get_video_actors('ABC-123')
+
+    assert [(actor.actor_id, actor.name) for actor in actors] == [
+        ('a123', '演员甲'),
+        ('B456', '演员乙'),
+    ]
+    mock_get.assert_awaited_once_with(url=f'{client.host}/ABC-123')
+
+
 async def test_scrape_one_page(client: JavBusClient) -> None:
     html = """
     <html>

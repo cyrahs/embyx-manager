@@ -23,10 +23,11 @@ Three peer features; `/` redirects to the dashboard and no feature owns the app 
   locates a finished download through the route tables — and the tracker polls whatever
   directory the ledger still has work in, so a picked one need not be a source's own.
 - **Fill Actor** (`/fill-actor`): scan a JavBus actor's catalog against the local library,
-  submit missing titles to the acquisition tracker (same intake as the rss pipeline),
-  prewarm RSSHub feeds, hand off FreshRSS subscriptions, and safely move matching files
-  through CloudDrive — carried over from embyx-web with the same durable job queue and
-  move-safety guarantees, now on PostgreSQL.
+  starting from actor IDs or an AVID (single actors continue directly; multi-actor titles
+  present a choice), submit missing titles to the acquisition tracker (same intake as the
+  rss pipeline), prewarm RSSHub feeds, hand off FreshRSS subscriptions, and safely move
+  matching files through CloudDrive — carried over from embyx-web with the same durable
+  job queue and move-safety guarantees, now on PostgreSQL.
 - **Settings** (`/settings`): CloudDrive, FreshRSS, RSSHub URLs, Fill Actor library
   roots, pipeline behavior, and avid parsing rules are stored in the database, editable
   from the browser, versioned against concurrent edits, and hot-applied without
