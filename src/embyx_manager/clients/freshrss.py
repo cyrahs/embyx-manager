@@ -87,9 +87,7 @@ class FreshRSSClient:
         return tuple(
             url
             for subscription in subscriptions
-            if isinstance(subscription, dict)
-            and isinstance((url := subscription.get('url')), str)
-            and url
+            if isinstance(subscription, dict) and isinstance((url := subscription.get('url')), str) and url
         )
 
     @retry(

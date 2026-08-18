@@ -9,11 +9,7 @@ def find_subscribed_actor_ids(
     subscription_urls: Sequence[str],
 ) -> tuple[str, ...]:
     """Return requested actors already present as an RSSHub JavBus star feed."""
-    subscribed = {
-        actor_id.casefold()
-        for url in subscription_urls
-        if (actor_id := _javbus_actor_id(url)) is not None
-    }
+    subscribed = {actor_id.casefold() for url in subscription_urls if (actor_id := _javbus_actor_id(url)) is not None}
     return tuple(actor_id for actor_id in actor_ids if actor_id.casefold() in subscribed)
 
 
