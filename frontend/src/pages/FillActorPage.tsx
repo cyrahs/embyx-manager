@@ -19,7 +19,7 @@ import { ActorFeeds } from '../components/fill-actor/ActorFeeds'
 import { ApplySummary, ConfirmDialog } from '../components/fill-actor/ApplyFeedback'
 import { ProgressPanel } from '../components/fill-actor/ProgressPanel'
 import { ActorFailures, PlanSummary, VideoGroup } from '../components/fill-actor/Results'
-import { ScanPanel } from '../components/fill-actor/ScanPanel'
+import { ExistingSubscriptionsDialog, ScanPanel } from '../components/fill-actor/ScanPanel'
 import { ArrowIcon, MoveIcon, SearchIcon, Spinner } from '../components/Icons'
 import { useApiTokenValue } from '../lib/apiToken'
 import {
@@ -73,6 +73,10 @@ export default function FillActorPage() {
     ? { plan_id: recoveredScanPlanId, operation: 'create_plan', state: 'running' }
     : null)
   const [submitting, setSubmitting] = useState(false)
+  const [subscriptionConflict, setSubscriptionConflict] = useState<{
+    actorIds: string[]
+    existingActorIds: string[]
+  } | null>(null)
   const [cancelling, setCancelling] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [pollWarning, setPollWarning] = useState<string | null>(null)
@@ -438,40 +442,61 @@ export default function FillActorPage() {
     activeApplyPlanController.current?.abort()
   }, [])
 
-  async function startScan() {
-    if (applyPending || !parsed.actorIds.length || parsed.invalid.length || parsed.actorIds.length > MAX_ACTORS) return
+  async function startScan(actorIds = parsed.actorIds, continueIfSubscribed = false) {
+    if (
+      applyPending
+      || !actorIds.length
+      || actorIds.length > MAX_ACTORS
+      || (!continueIfSubscribed && parsed.invalid.length)
+    ) return
     setSubmitting(true)
     setCancelling(false)
     setError(null)
     setPollWarning(null)
-    setActivePlanId(null)
-    setPlan(null)
-    setFeeds([])
-    setPlanId(null)
-    setJob(null)
-    setActiveApplyRequest(null)
-    setActiveApply(null)
-    setApplyJob(null)
-    setApplyResult(null)
-    setApplyPollWarning(null)
-    setApplyPausedForAuth(false)
-    setSelected(new Set())
-    setNeedsFreshPlan(false)
-    setQuery('')
-    lastAutoSelectedPlanKey.current = null
-    lastScrolledPlanKey.current = null
-    pollFailures.current = 0
-    setApplyPlanRetryTick(0)
-    requestGeneration.current += 1
-    applyGeneration.current += 1
-    applyPlanGeneration.current += 1
-    activePollController.current?.abort()
-    activeCancelController.current?.abort()
-    activeApplyController.current?.abort()
-    activeApplyPlanController.current?.abort()
     try {
-      consumeEnvelope(await createPlan(parsed.actorIds), setPlan, setPlanId, setJob, setFeeds, setError)
+      const envelope = await createPlan(actorIds, continueIfSubscribed)
+      setSubscriptionConflict(null)
+      setActivePlanId(null)
+      setPlan(null)
+      setFeeds([])
+      setPlanId(null)
+      setJob(null)
+      setActiveApplyRequest(null)
+      setActiveApply(null)
+      setApplyJob(null)
+      setApplyResult(null)
+      setApplyPollWarning(null)
+      setApplyPausedForAuth(false)
+      setSelected(new Set())
+      setNeedsFreshPlan(false)
+      setQuery('')
+      lastAutoSelectedPlanKey.current = null
+      lastScrolledPlanKey.current = null
+      pollFailures.current = 0
+      setApplyPlanRetryTick(0)
+      requestGeneration.current += 1
+      applyGeneration.current += 1
+      applyPlanGeneration.current += 1
+      activePollController.current?.abort()
+      activeCancelController.current?.abort()
+      activeApplyController.current?.abort()
+      activeApplyPlanController.current?.abort()
+      consumeEnvelope(envelope, setPlan, setPlanId, setJob, setFeeds, setError)
     } catch (scanError) {
+      if (scanError instanceof ApiError && scanError.code === 'actors_already_subscribed') {
+        const requested = new Map(actorIds.map((actorId) => [actorId.toLowerCase(), actorId]))
+        const existingActorIds = Array.isArray(scanError.details.actor_ids)
+          ? scanError.details.actor_ids.flatMap((actorId) => {
+              if (typeof actorId !== 'string') return []
+              const requestedActorId = requested.get(actorId.toLowerCase())
+              return requestedActorId ? [requestedActorId] : []
+            })
+          : []
+        if (existingActorIds.length) {
+          setSubscriptionConflict({ actorIds: [...actorIds], existingActorIds: [...new Set(existingActorIds)] })
+          return
+        }
+      }
       if (scanError instanceof ApiError && scanError.code === 'unauthorized') {
         setAuthRequired(true)
         requestApiToken()
@@ -574,7 +599,7 @@ export default function FillActorPage() {
     setError(null)
   }, [apiToken])
 
-  const scanLocked = submitting || jobPending || applyPending
+  const scanLocked = submitting || jobPending || applyPending || subscriptionConflict !== null
 
   return (
     <>
@@ -587,7 +612,7 @@ export default function FillActorPage() {
           submitting={submitting}
           jobPending={jobPending}
           applyPending={applyPending}
-          onScan={() => void startScan()}
+          onScan={() => void startScan(parsed.actorIds)}
           authRequired={authRequired}
           onRequestLogin={requestApiToken}
         />
@@ -637,7 +662,7 @@ export default function FillActorPage() {
             tone="warning"
             title="扫描结果已失效"
             body="文件状态或计划版本已经变化。请重新扫描后再选择文件，避免使用过期结果。"
-            action={<button className="text-button" type="button" disabled={applyPending} onClick={() => void startScan()}>重新扫描 <ArrowIcon /></button>}
+            action={<button className="text-button" type="button" disabled={applyPending} onClick={() => void startScan(parsed.actorIds)}>重新扫描 <ArrowIcon /></button>}
           />
         )}
 
@@ -747,6 +772,17 @@ export default function FillActorPage() {
           candidates={selectedCandidates}
           onCancel={() => setConfirmOpen(false)}
           onConfirm={() => void confirmApply()}
+        />
+      )}
+      {subscriptionConflict && (
+        <ExistingSubscriptionsDialog
+          actorIds={subscriptionConflict.existingActorIds}
+          onCancel={() => setSubscriptionConflict(null)}
+          onConfirm={() => {
+            const actorIds = subscriptionConflict.actorIds
+            setSubscriptionConflict(null)
+            void startScan(actorIds, true)
+          }}
         />
       )}
     </>

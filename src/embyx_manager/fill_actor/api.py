@@ -53,6 +53,7 @@ class CreatePlanRequest(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
     actor_ids: list[str] = Field(min_length=1)
+    continue_if_subscribed: bool = False
 
 
 class ApplyPlanRequest(BaseModel):
@@ -194,6 +195,7 @@ def create_fill_actor_router(  # noqa: C901, PLR0913, PLR0915 - one function per
     mutation_auth: Callable[..., Awaitable[None]],
     freshrss_url: str | Callable[[], str | None] | None = None,
     freshrss_rsshub_url: str | Callable[[], str | None] | None = None,
+    existing_actor_lookup: Callable[[Sequence[str]], Awaitable[Sequence[str]]] | None = None,
 ) -> APIRouter:
     """Every Fill Actor endpoint, mounted by the app root like any other feature."""
     router = APIRouter(prefix='/api/fill-actor')
@@ -225,10 +227,31 @@ def create_fill_actor_router(  # noqa: C901, PLR0913, PLR0915 - one function per
     @router.post(
         '/plans',
         status_code=202,
-        dependencies=[Depends(mutation_auth), Depends(require_scan_ready)],
+        response_model=None,
+        dependencies=[Depends(mutation_auth)],
     )
-    async def create_plan(request: CreatePlanRequest) -> PlanEnvelope:
-        job = await jobs.start_plan(request.actor_ids)
+    async def create_plan(request: CreatePlanRequest) -> PlanEnvelope | JSONResponse:
+        actor_ids = service.validate_actor_ids(request.actor_ids)
+        if existing_actor_lookup is not None and not request.continue_if_subscribed:
+            try:
+                existing = await existing_actor_lookup(actor_ids)
+            except Exception as exc:
+                LOGGER.exception('FreshRSS subscription preflight failed')
+                raise ApiError(502, 'freshrss_subscription_check_failed') from exc
+            existing_keys = {actor_id.casefold() for actor_id in existing}
+            subscribed_actor_ids = tuple(actor_id for actor_id in actor_ids if actor_id.casefold() in existing_keys)
+            if subscribed_actor_ids:
+                return JSONResponse(
+                    {
+                        'error': {
+                            'code': 'actors_already_subscribed',
+                            'actor_ids': subscribed_actor_ids,
+                        }
+                    },
+                    status_code=409,
+                )
+        await require_scan_ready()
+        job = await jobs.start_plan(actor_ids)
         feeds = await jobs.get_feeds(job.job_id)
         return PlanEnvelope(job=JobView.from_record(job), plan=None, feeds=feed_views(feeds))
 

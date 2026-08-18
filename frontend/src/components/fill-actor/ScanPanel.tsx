@@ -1,5 +1,7 @@
+import { useEffect, useRef } from 'react'
+
 import { MAX_ACTORS } from '../../lib/fill-actor/labels'
-import { ScanIcon, Spinner } from '../Icons'
+import { AlertIcon, ScanIcon, Spinner } from '../Icons'
 
 export function ScanPanel({
   input,
@@ -82,9 +84,59 @@ export function ScanPanel({
           onClick={onScan}
         >
           {submitting || jobPending || applyPending ? <Spinner /> : <ScanIcon />}
-          {submitting ? '正在提交' : jobPending ? '正在扫描' : applyPending ? '移动处理中' : '开始扫描'}
+          {submitting ? '正在检查' : jobPending ? '正在扫描' : applyPending ? '移动处理中' : '开始扫描'}
         </button>
       </div>
     </section>
+  )
+}
+
+export function ExistingSubscriptionsDialog({
+  actorIds,
+  onCancel,
+  onConfirm,
+}: {
+  actorIds: string[]
+  onCancel: () => void
+  onConfirm: () => void
+}) {
+  const confirmRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    confirmRef.current?.focus()
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onCancel()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [onCancel])
+
+  return (
+    <div className="dialog-backdrop" role="presentation" onMouseDown={onCancel}>
+      <div
+        className="dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="existing-subscriptions-title"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <span className="dialog-icon">
+          <AlertIcon />
+        </span>
+        <h2 id="existing-subscriptions-title">FreshRSS 已有这些演员</h2>
+        <p>以下演员已经订阅。仍要继续创建补全任务吗？</p>
+        <div className="confirm-list">
+          {actorIds.map((actorId) => <span key={actorId}>{actorId}</span>)}
+        </div>
+        <div className="dialog-actions">
+          <button className="button secondary" type="button" onClick={onCancel}>
+            取消
+          </button>
+          <button className="button primary" type="button" ref={confirmRef} onClick={onConfirm}>
+            仍要继续
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }

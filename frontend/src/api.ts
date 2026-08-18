@@ -209,12 +209,14 @@ export function setActiveApplyRequest(value: ActiveApplyRequest | null): void {
 export class ApiError extends Error {
   readonly status: number
   readonly code: string
+  readonly details: Readonly<Record<string, unknown>>
 
-  constructor(status: number, code: string, message: string) {
+  constructor(status: number, code: string, message: string, details: Record<string, unknown> = {}) {
     super(message)
     this.name = 'ApiError'
     this.status = status
     this.code = code
+    this.details = details
   }
 }
 
@@ -283,7 +285,7 @@ async function request(
         : typeof detail.detail === 'string'
           ? detail.detail
           : (CODE_MESSAGES[code] ?? (response.status === 401 ? CODE_MESSAGES.unauthorized : '请求未能完成，请稍后重试。'))
-    throw new ApiError(response.status, code, message)
+    throw new ApiError(response.status, code, message, detail)
   }
   return body
 }
@@ -505,11 +507,14 @@ function normalizeLegacyApplyResult(value: unknown): ApplyResult {
   return normalizeApplyResult(value)
 }
 
-export async function createPlan(actorIds: string[]): Promise<PlanEnvelope> {
+export async function createPlan(actorIds: string[], continueIfSubscribed = false): Promise<PlanEnvelope> {
   return normalizePlanEnvelope(
     await request('/api/fill-actor/plans', {
       method: 'POST',
-      body: JSON.stringify({ actor_ids: actorIds }),
+      body: JSON.stringify({
+        actor_ids: actorIds,
+        ...(continueIfSubscribed ? { continue_if_subscribed: true } : {}),
+      }),
     }),
   )
 }

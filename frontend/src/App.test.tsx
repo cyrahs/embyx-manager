@@ -190,6 +190,49 @@ describe('Fill Actor page', () => {
     expect(screen.getByRole('checkbox', { name: /ABC-001-CD2\.mp4/ })).toBeDisabled()
   })
 
+  it('asks before scanning actors that already exist in FreshRSS', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.mocked(fetch)
+    fetchMock
+      .mockImplementationOnce(() => jsonResponse({ status: 'ok' }))
+      .mockImplementationOnce(() => jsonResponse({
+        error: {
+          code: 'actors_already_subscribed',
+          actor_ids: ['A123'],
+        },
+      }, 409))
+      .mockImplementationOnce(() => jsonResponse({
+        job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
+        plan,
+      }, 202))
+
+    render(<App />)
+    await user.type(screen.getByLabelText('演员 ID'), 'A123 B456')
+    await user.click(screen.getByRole('button', { name: '开始扫描' }))
+
+    const dialog = await screen.findByRole('dialog', { name: 'FreshRSS 已有这些演员' })
+    expect(within(dialog).getByText('A123')).toBeInTheDocument()
+    expect(screen.queryByText('扫描结果')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('演员 ID')).toBeDisabled()
+
+    await user.click(within(dialog).getByRole('button', { name: '仍要继续' }))
+
+    expect(await screen.findByText('扫描结果')).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      '/api/fill-actor/plans',
+      expect.objectContaining({ body: JSON.stringify({ actor_ids: ['A123', 'B456'] }), method: 'POST' }),
+    )
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      3,
+      '/api/fill-actor/plans',
+      expect.objectContaining({
+        body: JSON.stringify({ actor_ids: ['A123', 'B456'], continue_if_subscribed: true }),
+        method: 'POST',
+      }),
+    )
+  })
+
   it('shows queued progress and polls until the persisted plan is ready', async () => {
     const user = userEvent.setup()
     const fetchMock = vi.mocked(fetch)

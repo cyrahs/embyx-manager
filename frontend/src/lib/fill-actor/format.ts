@@ -59,6 +59,8 @@ export function errorMessage(error: unknown): string {
       move_disabled: '文件移动当前由管理员暂停。',
       legacy_plan_requires_rescan: '该计划来自旧版本，请重新扫描后再操作。',
       not_ready: '移动依赖尚未就绪，请稍后重试。',
+      freshrss_subscription_check_failed: '无法检查 FreshRSS 订阅，请确认 FreshRSS 配置和连接后重试。',
+      actors_already_subscribed: 'FreshRSS 已存在对应演员订阅，请确认是否继续。',
     }
     const message = messages[error.code]
     if (message) return message
