@@ -43,6 +43,7 @@ from embyx_manager.fill_actor.persistence import (
     JobState,
 )
 from embyx_manager.fill_actor.service import FillActorService
+from embyx_manager.fill_actor.subscriptions import SubscribedActor
 
 LOGGER = logging.getLogger(__name__)
 
@@ -195,7 +196,7 @@ def create_fill_actor_router(  # noqa: C901, PLR0913, PLR0915 - one function per
     mutation_auth: Callable[..., Awaitable[None]],
     freshrss_url: str | Callable[[], str | None] | None = None,
     freshrss_rsshub_url: str | Callable[[], str | None] | None = None,
-    existing_actor_lookup: Callable[[Sequence[str]], Awaitable[Sequence[str]]] | None = None,
+    existing_actor_lookup: Callable[[Sequence[str]], Awaitable[Sequence[SubscribedActor]]] | None = None,
 ) -> APIRouter:
     """Every Fill Actor endpoint, mounted by the app root like any other feature."""
     router = APIRouter(prefix='/api/fill-actor')
@@ -238,14 +239,25 @@ def create_fill_actor_router(  # noqa: C901, PLR0913, PLR0915 - one function per
             except Exception as exc:
                 LOGGER.exception('FreshRSS subscription preflight failed')
                 raise ApiError(502, 'freshrss_subscription_check_failed') from exc
-            existing_keys = {actor_id.casefold() for actor_id in existing}
-            subscribed_actor_ids = tuple(actor_id for actor_id in actor_ids if actor_id.casefold() in existing_keys)
-            if subscribed_actor_ids:
+            requested = {actor_id.casefold(): actor_id for actor_id in actor_ids}
+            subscribed_actors: list[SubscribedActor] = []
+            seen: set[str] = set()
+            for actor in existing:
+                key = actor.actor_id.casefold()
+                if key not in requested or key in seen:
+                    continue
+                seen.add(key)
+                subscribed_actors.append(SubscribedActor(actor_id=requested[key], actor_name=actor.actor_name))
+            if subscribed_actors:
                 return JSONResponse(
                     {
                         'error': {
                             'code': 'actors_already_subscribed',
-                            'actor_ids': subscribed_actor_ids,
+                            'actor_ids': [actor.actor_id for actor in subscribed_actors],
+                            'actors': [
+                                {'actor_id': actor.actor_id, 'actor_name': actor.actor_name}
+                                for actor in subscribed_actors
+                            ],
                         }
                     },
                     status_code=409,

@@ -92,11 +92,11 @@ export function ScanPanel({
 }
 
 export function ExistingSubscriptionsDialog({
-  actorIds,
+  actors,
   onCancel,
   onConfirm,
 }: {
-  actorIds: string[]
+  actors: Array<{ actorId: string; actorName: string | null }>
   onCancel: () => void
   onConfirm: () => void
 }) {
@@ -126,7 +126,13 @@ export function ExistingSubscriptionsDialog({
         <h2 id="existing-subscriptions-title">FreshRSS 已有这些演员</h2>
         <p>以下演员已经订阅。仍要继续创建补全任务吗？</p>
         <div className="confirm-list">
-          {actorIds.map((actorId) => <span key={actorId}>{actorId}</span>)}
+          {actors.map((actor) => (
+            <span key={actor.actorId}>
+              {actor.actorName && actor.actorName.toLowerCase() !== actor.actorId.toLowerCase()
+                ? `${actor.actorName}（${actor.actorId}）`
+                : actor.actorId}
+            </span>
+          ))}
         </div>
         <div className="dialog-actions">
           <button className="button secondary" type="button" onClick={onCancel}>

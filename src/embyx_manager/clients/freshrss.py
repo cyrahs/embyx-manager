@@ -1,6 +1,7 @@
 """Async FreshRSS Google-Reader-API client."""
 
 import logging
+from dataclasses import dataclass
 
 import httpx
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
@@ -10,6 +11,12 @@ log = logging.getLogger('embyx-manager.freshrss')
 RETRYABLE_EXCEPTIONS = (httpx.HTTPError, httpx.RequestError, httpx.TimeoutException)
 ITEM_RETRYABLE_EXCEPTIONS = (*RETRYABLE_EXCEPTIONS, KeyError, TypeError, ValueError)
 _AUTH_FAILURE_STATUSES = frozenset({401, 403})
+
+
+@dataclass(frozen=True, slots=True)
+class FreshRSSSubscription:
+    url: str
+    title: str | None
 
 
 class FreshRSSClient:
@@ -70,8 +77,8 @@ class FreshRSSClient:
         retry=retry_if_exception_type(ITEM_RETRYABLE_EXCEPTIONS),
         reraise=True,
     )
-    async def get_subscription_urls(self) -> tuple[str, ...]:
-        """Return every visible subscription's source URL."""
+    async def get_subscriptions(self) -> tuple[FreshRSSSubscription, ...]:
+        """Return every visible subscription's source URL and display title."""
         res = await self._client.get(
             f'{self._url}/subscription/list',
             headers=self._headers,
@@ -84,11 +91,14 @@ class FreshRSSClient:
         if not isinstance(subscriptions, list):
             msg = 'FreshRSS subscriptions must be a list'
             raise TypeError(msg)
-        return tuple(
-            url
-            for subscription in subscriptions
-            if isinstance(subscription, dict) and isinstance((url := subscription.get('url')), str) and url
-        )
+        parsed: list[FreshRSSSubscription] = []
+        for subscription in subscriptions:
+            if not isinstance(subscription, dict) or not isinstance((url := subscription.get('url')), str) or not url:
+                continue
+            raw_title = subscription.get('title')
+            title = raw_title.strip() if isinstance(raw_title, str) else ''
+            parsed.append(FreshRSSSubscription(url=url, title=title or None))
+        return tuple(parsed)
 
     @retry(
         stop=stop_after_attempt(3),

@@ -43,7 +43,7 @@ from embyx_manager.fill_actor.feeds import RSSHubFeedWarmer
 from embyx_manager.fill_actor.jobs import FillActorJobManager
 from embyx_manager.fill_actor.postgres_repository import PostgresFillActorRepository
 from embyx_manager.fill_actor.service import FillActorPaths, FillActorRuntime, FillActorService
-from embyx_manager.fill_actor.subscriptions import find_subscribed_actor_ids
+from embyx_manager.fill_actor.subscriptions import SubscribedActor, find_subscribed_actors
 from embyx_manager.locking import PostgresAdvisoryLock
 from embyx_manager.monitor.acquisitions import AcquisitionRepository
 from embyx_manager.monitor.api import AcquisitionApi, create_monitor_router
@@ -227,16 +227,16 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
     def current_feeds() -> FeedsConfig:
         return store.get(FeedsConfig)
 
-    async def existing_freshrss_actor_ids(actor_ids: tuple[str, ...]) -> tuple[str, ...]:
+    async def existing_freshrss_actors(actor_ids: tuple[str, ...]) -> tuple[SubscribedActor, ...]:
         config = store.get(FreshRSSConfig)
         if not config.configured:
             return ()
         client = FreshRSSClient(url=config.url, api_key=config.api_key, proxy=config.proxy or None)
         try:
-            subscription_urls = await client.get_subscription_urls()
+            subscriptions = await client.get_subscriptions()
         finally:
             await client.aclose()
-        return find_subscribed_actor_ids(actor_ids, subscription_urls)
+        return find_subscribed_actors(actor_ids, subscriptions)
 
     feed_warmer = RSSHubFeedWarmer(
         repository=repository,
@@ -255,7 +255,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         mutation_auth=mutation_auth,
         freshrss_url=lambda: current_feeds().freshrss_url or None,
         freshrss_rsshub_url=lambda: current_feeds().freshrss_rsshub_url or None,
-        existing_actor_lookup=existing_freshrss_actor_ids,
+        existing_actor_lookup=existing_freshrss_actors,
     )
 
     avid_handle = AvidParserHandle(store)
