@@ -1,16 +1,36 @@
 """FreshRSS subscription matching for Fill Actor preflight checks."""
 
 from collections.abc import Sequence
+from dataclasses import dataclass
 from urllib.parse import unquote, urlsplit
 
+from embyx_manager.clients.freshrss import FreshRSSSubscription
 
-def find_subscribed_actor_ids(
+
+@dataclass(frozen=True, slots=True)
+class SubscribedActor:
+    actor_id: str
+    actor_name: str | None
+
+
+def find_subscribed_actors(
     actor_ids: Sequence[str],
-    subscription_urls: Sequence[str],
-) -> tuple[str, ...]:
+    subscriptions: Sequence[FreshRSSSubscription],
+) -> tuple[SubscribedActor, ...]:
     """Return requested actors already present as an RSSHub JavBus star feed."""
-    subscribed = {actor_id.casefold() for url in subscription_urls if (actor_id := _javbus_actor_id(url)) is not None}
-    return tuple(actor_id for actor_id in actor_ids if actor_id.casefold() in subscribed)
+    subscribed: dict[str, str | None] = {}
+    for subscription in subscriptions:
+        actor_id = _javbus_actor_id(subscription.url)
+        if actor_id is None:
+            continue
+        key = actor_id.casefold()
+        if key not in subscribed or subscribed[key] is None:
+            subscribed[key] = subscription.title
+    return tuple(
+        SubscribedActor(actor_id=actor_id, actor_name=subscribed[actor_id.casefold()])
+        for actor_id in actor_ids
+        if actor_id.casefold() in subscribed
+    )
 
 
 def _javbus_actor_id(url: str) -> str | None:

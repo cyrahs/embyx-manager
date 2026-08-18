@@ -39,6 +39,7 @@ from embyx_manager.fill_actor.service import (
     FillActorService,
     static_runtime,
 )
+from embyx_manager.fill_actor.subscriptions import SubscribedActor
 
 
 class ActorCatalog:
@@ -148,7 +149,7 @@ def test_plan_checks_freshrss_subscriptions_before_readiness_and_requires_confir
 
     async def existing_actor_lookup(actor_ids):
         lookups.append(tuple(actor_ids))
-        return ('ACTOR',)
+        return (SubscribedActor(actor_id='ACTOR', actor_name='演员甲'),)
 
     client, paths, _ = make_client(tmp_path, existing_actor_lookup=existing_actor_lookup)
     paths.move_in_path.rmdir()
@@ -165,6 +166,7 @@ def test_plan_checks_freshrss_subscriptions_before_readiness_and_requires_confir
         'error': {
             'code': 'actors_already_subscribed',
             'actor_ids': ['actor'],
+            'actors': [{'actor_id': 'actor', 'actor_name': '演员甲'}],
         }
     }
     assert continued.status_code == 503

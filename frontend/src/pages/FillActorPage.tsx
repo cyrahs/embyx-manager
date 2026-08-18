@@ -75,7 +75,7 @@ export default function FillActorPage() {
   const [submitting, setSubmitting] = useState(false)
   const [subscriptionConflict, setSubscriptionConflict] = useState<{
     actorIds: string[]
-    existingActorIds: string[]
+    existingActors: Array<{ actorId: string; actorName: string | null }>
   } | null>(null)
   const [cancelling, setCancelling] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -485,15 +485,29 @@ export default function FillActorPage() {
     } catch (scanError) {
       if (scanError instanceof ApiError && scanError.code === 'actors_already_subscribed') {
         const requested = new Map(actorIds.map((actorId) => [actorId.toLowerCase(), actorId]))
-        const existingActorIds = Array.isArray(scanError.details.actor_ids)
+        const detailedActors = Array.isArray(scanError.details.actors)
+          ? scanError.details.actors.flatMap((actor) => {
+              if (typeof actor !== 'object' || actor === null || Array.isArray(actor)) return []
+              const rawActorId = (actor as Record<string, unknown>).actor_id
+              if (typeof rawActorId !== 'string') return []
+              const requestedActorId = requested.get(rawActorId.toLowerCase())
+              if (!requestedActorId) return []
+              const rawActorName = (actor as Record<string, unknown>).actor_name
+              const actorName = typeof rawActorName === 'string' ? rawActorName.trim() || null : null
+              return [{ actorId: requestedActorId, actorName }]
+            })
+          : []
+        const fallbackActors = Array.isArray(scanError.details.actor_ids)
           ? scanError.details.actor_ids.flatMap((actorId) => {
               if (typeof actorId !== 'string') return []
               const requestedActorId = requested.get(actorId.toLowerCase())
-              return requestedActorId ? [requestedActorId] : []
+              return requestedActorId ? [{ actorId: requestedActorId, actorName: null }] : []
             })
           : []
-        if (existingActorIds.length) {
-          setSubscriptionConflict({ actorIds: [...actorIds], existingActorIds: [...new Set(existingActorIds)] })
+        const existingActors = detailedActors.length ? detailedActors : fallbackActors
+        const uniqueActors = [...new Map(existingActors.map((actor) => [actor.actorId.toLowerCase(), actor])).values()]
+        if (uniqueActors.length) {
+          setSubscriptionConflict({ actorIds: [...actorIds], existingActors: uniqueActors })
           return
         }
       }
@@ -776,7 +790,7 @@ export default function FillActorPage() {
       )}
       {subscriptionConflict && (
         <ExistingSubscriptionsDialog
-          actorIds={subscriptionConflict.existingActorIds}
+          actors={subscriptionConflict.existingActors}
           onCancel={() => setSubscriptionConflict(null)}
           onConfirm={() => {
             const actorIds = subscriptionConflict.actorIds
