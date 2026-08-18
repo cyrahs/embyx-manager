@@ -8,7 +8,7 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_ex
 log = logging.getLogger('embyx-manager.freshrss')
 
 RETRYABLE_EXCEPTIONS = (httpx.HTTPError, httpx.RequestError, httpx.TimeoutException)
-ITEM_RETRYABLE_EXCEPTIONS = (*RETRYABLE_EXCEPTIONS, KeyError, ValueError)
+ITEM_RETRYABLE_EXCEPTIONS = (*RETRYABLE_EXCEPTIONS, KeyError, TypeError, ValueError)
 _AUTH_FAILURE_STATUSES = frozenset({401, 403})
 
 
@@ -63,6 +63,32 @@ class FreshRSSClient:
             else:
                 break
         return items
+
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=1, max=10),
+        retry=retry_if_exception_type(ITEM_RETRYABLE_EXCEPTIONS),
+        reraise=True,
+    )
+    async def get_subscription_urls(self) -> tuple[str, ...]:
+        """Return every visible subscription's source URL."""
+        res = await self._client.get(
+            f'{self._url}/subscription/list',
+            headers=self._headers,
+            params={'output': 'json'},
+            timeout=self._timeout,
+        )
+        res.raise_for_status()
+        content = res.json()
+        subscriptions = content['subscriptions']
+        if not isinstance(subscriptions, list):
+            msg = 'FreshRSS subscriptions must be a list'
+            raise TypeError(msg)
+        return tuple(
+            url
+            for subscription in subscriptions
+            if isinstance(subscription, dict) and isinstance((url := subscription.get('url')), str) and url
+        )
 
     @retry(
         stop=stop_after_attempt(3),

@@ -108,6 +108,7 @@ def test_bootstrap_passes_feed_integration_urls_to_warmer_and_api(monkeypatch) -
     assert captured['fill_actor']['jobs'] is jobs
     assert callable(captured['fill_actor']['freshrss_url'])
     assert captured['fill_actor']['freshrss_url']() is None
+    assert callable(captured['fill_actor']['existing_actor_lookup'])
     # Fill Actor is mounted like every other feature, not baked into the app root.
     assert fill_actor_router in captured['api']['routers']
     assert set(captured['api']['feature_health']) == {'fill_actor'}

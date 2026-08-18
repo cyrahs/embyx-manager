@@ -77,6 +77,7 @@ def make_client(
     feed_warmer_factory=None,
     freshrss_url: str | None = None,
     freshrss_rsshub_url: str | None = None,
+    existing_actor_lookup=None,
     apply_enabled: bool = True,
 ) -> tuple[TestClient, FillActorPaths, MemoryFillActorRepository]:
     paths = FillActorPaths.from_iterable(
@@ -109,6 +110,7 @@ def make_client(
                 mutation_auth=make_mutation_auth(api_token),
                 freshrss_url=freshrss_url,
                 freshrss_rsshub_url=freshrss_rsshub_url,
+                existing_actor_lookup=existing_actor_lookup,
             ),
         ),
         feature_health={'fill_actor': fill_actor_health(service=service, repository=repository)},
@@ -139,6 +141,49 @@ def wait_for_apply_job(client: TestClient, job_id: str) -> dict:
             return payload
         time.sleep(0.005)
     pytest.fail('apply job did not complete')
+
+
+def test_plan_checks_freshrss_subscriptions_before_readiness_and_requires_confirmation(tmp_path: Path) -> None:
+    lookups: list[tuple[str, ...]] = []
+
+    async def existing_actor_lookup(actor_ids):
+        lookups.append(tuple(actor_ids))
+        return ('ACTOR',)
+
+    client, paths, _ = make_client(tmp_path, existing_actor_lookup=existing_actor_lookup)
+    paths.move_in_path.rmdir()
+
+    with client:
+        conflict = client.post('/api/fill-actor/plans', json={'actor_ids': ['actor']})
+        continued = client.post(
+            '/api/fill-actor/plans',
+            json={'actor_ids': ['actor'], 'continue_if_subscribed': True},
+        )
+
+    assert conflict.status_code == 409
+    assert conflict.json() == {
+        'error': {
+            'code': 'actors_already_subscribed',
+            'actor_ids': ['actor'],
+        }
+    }
+    assert continued.status_code == 503
+    assert continued.json() == {'error': {'code': 'not_ready'}}
+    assert lookups == [('actor',)]
+
+
+def test_plan_reports_freshrss_subscription_check_failure_without_starting_scan(tmp_path: Path) -> None:
+    async def failing_lookup(_actor_ids):
+        msg = 'FreshRSS unavailable'
+        raise RuntimeError(msg)
+
+    client, _, _ = make_client(tmp_path, existing_actor_lookup=failing_lookup)
+
+    with client:
+        response = client.post('/api/fill-actor/plans', json={'actor_ids': ['actor']})
+
+    assert response.status_code == 502
+    assert response.json() == {'error': {'code': 'freshrss_subscription_check_failed'}}
 
 
 def test_plan_job_and_apply_end_to_end(tmp_path: Path) -> None:
