@@ -174,8 +174,7 @@ class JavBusClient:
         response = await self._client.get(url=f'{self.host}/{video_id}')
         response.raise_for_status()
         doc = PyQuery(response.text)
-        actors: list[JavBusActor] = []
-        seen: set[str] = set()
+        actors: dict[str, JavBusActor] = {}
         for item in doc('a[href]').items():
             path = urlparse(str(item.attr('href') or '')).path.rstrip('/')
             match = re.fullmatch(r'/star/([^/]+)', path)
@@ -183,12 +182,30 @@ class JavBusClient:
                 continue
             actor_id = unquote(match.group(1)).strip()
             key = actor_id.casefold()
-            if not _ACTOR_ID_RE.fullmatch(actor_id) or key in seen:
+            if not _ACTOR_ID_RE.fullmatch(actor_id):
                 continue
-            seen.add(key)
-            name = ' '.join(item.text().split()) or actor_id
-            actors.append(JavBusActor(actor_id=actor_id, name=name))
-        return actors
+            name_candidates = (
+                item.text(),
+                item.attr('title'),
+                item.attr('aria-label'),
+                item('img').attr('title'),
+                item('img').attr('alt'),
+            )
+            name = next(
+                (
+                    cleaned
+                    for candidate in name_candidates
+                    if candidate and (cleaned := ' '.join(str(candidate).split())).casefold() != key
+                ),
+                '',
+            )
+            existing = actors.get(key)
+            if existing is None:
+                actors[key] = JavBusActor(actor_id=actor_id, name=name or actor_id)
+            elif existing.name.casefold() == key and name:
+                # JavBus can emit an empty metadata link before the named avatar card.
+                actors[key] = JavBusActor(actor_id=existing.actor_id, name=name)
+        return list(actors.values())
 
     @retry(
         stop=stop_after_attempt(3),

@@ -96,8 +96,9 @@ async def test_get_magnets_no_variables(client: JavBusClient) -> None:
 async def test_get_video_actors_reads_names_and_deduplicates_ids(client: JavBusClient) -> None:
     html = """
     <html>
-        <a href="/star/a123">演员甲</a>
-        <a href="https://www.javbus.com/star/B456/"> 演员乙 </a>
+        <a href="/star/a123"></a>
+        <a href="https://www.javbus.com/star/B456/"><img alt="演员乙"></a>
+        <a class="avatar-box" href="/star/A123"><span>演员甲</span></a>
         <a href="/star/A123">重复演员</a>
         <a href="/genre/7">其他链接</a>
     </html>
