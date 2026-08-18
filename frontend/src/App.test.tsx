@@ -199,6 +199,7 @@ describe('Fill Actor page', () => {
         error: {
           code: 'actors_already_subscribed',
           actor_ids: ['A123'],
+          actors: [{ actor_id: 'A123', actor_name: '演员甲' }],
         },
       }, 409))
       .mockImplementationOnce(() => jsonResponse({
@@ -211,7 +212,7 @@ describe('Fill Actor page', () => {
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
 
     const dialog = await screen.findByRole('dialog', { name: 'FreshRSS 已有这些演员' })
-    expect(within(dialog).getByText('A123')).toBeInTheDocument()
+    expect(within(dialog).getByText('演员甲（A123）')).toBeInTheDocument()
     expect(screen.queryByText('扫描结果')).not.toBeInTheDocument()
     expect(screen.getByLabelText('演员 ID')).toBeDisabled()
 
