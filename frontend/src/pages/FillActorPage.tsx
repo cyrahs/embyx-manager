@@ -9,6 +9,7 @@ import {
   getActivePlanId,
   getApplyJob,
   getPlan,
+  resolveAvidActors,
   setActiveApplyRequest,
   setActivePlanId,
   startApplyJob,
@@ -19,7 +20,7 @@ import { ActorFeeds } from '../components/fill-actor/ActorFeeds'
 import { ApplySummary, ConfirmDialog } from '../components/fill-actor/ApplyFeedback'
 import { ProgressPanel } from '../components/fill-actor/ProgressPanel'
 import { ActorFailures, PlanSummary, VideoGroup } from '../components/fill-actor/Results'
-import { ExistingSubscriptionsDialog, ScanPanel } from '../components/fill-actor/ScanPanel'
+import { AvidActorChoiceDialog, ExistingSubscriptionsDialog, ScanPanel } from '../components/fill-actor/ScanPanel'
 import { ArrowIcon, MoveIcon, SearchIcon, Spinner } from '../components/Icons'
 import { useApiTokenValue } from '../lib/apiToken'
 import {
@@ -37,6 +38,7 @@ import {
 import { MAX_ACTORS, STALE_CODES, VIDEO_GROUPS, jobErrorLabel } from '../lib/fill-actor/labels'
 import type {
   ActiveApplyRequest,
+  AvidActors,
   ActorFeedStatus,
   ApplyJobEnvelope,
   ApplyResult,
@@ -63,6 +65,9 @@ export default function FillActorPage() {
   const [recoveredApply] = useState(getActiveApplyRequest)
   const recoveredPlanId = recoveredScanPlanId ?? recoveredApply?.planId ?? null
   const [input, setInput] = useState('')
+  const [inputMode, setInputMode] = useState<'actor' | 'avid'>('actor')
+  const [resolvingAvid, setResolvingAvid] = useState(false)
+  const [avidActorChoice, setAvidActorChoice] = useState<AvidActors | null>(null)
   const [authRequired, setAuthRequired] = useState(false)
   const apiToken = useApiTokenValue()
   const { health, setHealth, requestApiToken } = useOutletContext<AppContext>()
@@ -447,7 +452,6 @@ export default function FillActorPage() {
       applyPending
       || !actorIds.length
       || actorIds.length > MAX_ACTORS
-      || (!continueIfSubscribed && parsed.invalid.length)
     ) return
     setSubmitting(true)
     setCancelling(false)
@@ -518,6 +522,33 @@ export default function FillActorPage() {
       setError(errorMessage(scanError))
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  async function submitInput() {
+    if (inputMode === 'actor') {
+      await startScan(parsed.actorIds)
+      return
+    }
+    const avid = input.trim()
+    if (!avid || resolvingAvid || submitting || jobPending || applyPending) return
+    setResolvingAvid(true)
+    setError(null)
+    try {
+      const result = await resolveAvidActors(avid)
+      if (result.actors.length === 1) {
+        await startScan([result.actors[0].actor_id])
+      } else {
+        setAvidActorChoice(result)
+      }
+    } catch (lookupError) {
+      if (lookupError instanceof ApiError && lookupError.code === 'unauthorized') {
+        setAuthRequired(true)
+        requestApiToken()
+      }
+      setError(errorMessage(lookupError))
+    } finally {
+      setResolvingAvid(false)
     }
   }
 
@@ -613,7 +644,7 @@ export default function FillActorPage() {
     setError(null)
   }, [apiToken])
 
-  const scanLocked = submitting || jobPending || applyPending || subscriptionConflict !== null
+  const scanLocked = resolvingAvid || submitting || jobPending || applyPending || subscriptionConflict !== null || avidActorChoice !== null
 
   return (
     <>
@@ -621,12 +652,15 @@ export default function FillActorPage() {
         <ScanPanel
           input={input}
           onInputChange={setInput}
+          inputMode={inputMode}
+          onInputModeChange={setInputMode}
           parsed={parsed}
           locked={scanLocked}
           submitting={submitting}
+          resolvingAvid={resolvingAvid}
           jobPending={jobPending}
           applyPending={applyPending}
-          onScan={() => void startScan(parsed.actorIds)}
+          onScan={() => void submitInput()}
           authRequired={authRequired}
           onRequestLogin={requestApiToken}
         />
@@ -676,7 +710,7 @@ export default function FillActorPage() {
             tone="warning"
             title="扫描结果已失效"
             body="文件状态或计划版本已经变化。请重新扫描后再选择文件，避免使用过期结果。"
-            action={<button className="text-button" type="button" disabled={applyPending} onClick={() => void startScan(parsed.actorIds)}>重新扫描 <ArrowIcon /></button>}
+            action={<button className="text-button" type="button" disabled={applyPending} onClick={() => void startScan(plan?.actors.map((actor) => actor.actor_id) ?? parsed.actorIds)}>重新扫描 <ArrowIcon /></button>}
           />
         )}
 
@@ -796,6 +830,18 @@ export default function FillActorPage() {
             const actorIds = subscriptionConflict.actorIds
             setSubscriptionConflict(null)
             void startScan(actorIds, true)
+          }}
+        />
+      )}
+
+      {avidActorChoice && (
+        <AvidActorChoiceDialog
+          avid={avidActorChoice.avid}
+          actors={avidActorChoice.actors}
+          onCancel={() => setAvidActorChoice(null)}
+          onConfirm={(actorId) => {
+            setAvidActorChoice(null)
+            void startScan([actorId])
           }}
         />
       )}

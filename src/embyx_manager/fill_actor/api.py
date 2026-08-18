@@ -57,6 +57,22 @@ class CreatePlanRequest(BaseModel):
     continue_if_subscribed: bool = False
 
 
+class ResolveAvidRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
+    avid: str = Field(min_length=1, max_length=128)
+
+
+class AvidActorView(BaseModel):
+    actor_id: str
+    name: str
+
+
+class AvidActorsView(BaseModel):
+    avid: str
+    actors: tuple[AvidActorView, ...]
+
+
 class ApplyPlanRequest(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
@@ -197,6 +213,7 @@ def create_fill_actor_router(  # noqa: C901, PLR0913, PLR0915 - one function per
     freshrss_url: str | Callable[[], str | None] | None = None,
     freshrss_rsshub_url: str | Callable[[], str | None] | None = None,
     existing_actor_lookup: Callable[[Sequence[str]], Awaitable[Sequence[SubscribedActor]]] | None = None,
+    avid_actor_lookup: Callable[[str], Awaitable[Sequence[tuple[str, str]]]] | None = None,
 ) -> APIRouter:
     """Every Fill Actor endpoint, mounted by the app root like any other feature."""
     router = APIRouter(prefix='/api/fill-actor')
@@ -223,6 +240,26 @@ def create_fill_actor_router(  # noqa: C901, PLR0913, PLR0915 - one function per
                 freshrss_rsshub_url=_current_url(freshrss_rsshub_url),
             )
             for feed in feeds
+        )
+
+    @router.post(
+        '/avid-actors',
+        dependencies=[Depends(mutation_auth)],
+    )
+    async def resolve_avid_actors(request: ResolveAvidRequest) -> AvidActorsView:
+        avid = request.avid.strip().upper()
+        if avid_actor_lookup is None:
+            raise ApiError(503, 'avid_actor_lookup_unavailable')
+        try:
+            actors = await avid_actor_lookup(avid)
+        except Exception as exc:
+            LOGGER.exception('JavBus AVID actor lookup failed avid=%s', avid)
+            raise ApiError(502, 'javbus_actor_lookup_failed') from exc
+        if not actors:
+            raise ApiError(404, 'avid_actors_not_found')
+        return AvidActorsView(
+            avid=avid,
+            actors=tuple(AvidActorView(actor_id=actor_id, name=name) for actor_id, name in actors),
         )
 
     @router.post(

@@ -6,7 +6,8 @@ import logging
 import random
 import re
 from collections.abc import Awaitable, Callable
-from urllib.parse import urlparse
+from dataclasses import dataclass
+from urllib.parse import unquote, urlparse
 
 import httpx
 import humanfriendly
@@ -20,6 +21,13 @@ PageProgressCallback = Callable[[int, int | None, int | None], Awaitable[None] |
 DEFAULT_HOST = 'https://www.javbus.com'
 DEFAULT_MAX_ACTOR_PAGES = 200
 _NOT_FOUND_STATUSES = frozenset({404, 410})
+_ACTOR_ID_RE = re.compile(r'^[A-Za-z0-9_-]{1,32}$')
+
+
+@dataclass(frozen=True)
+class JavBusActor:
+    actor_id: str
+    name: str
 
 
 class JavBusPaginationError(RuntimeError):
@@ -154,6 +162,33 @@ class JavBusClient:
             message = f'JavBus actor pagination returned an empty page at {empty_page}'
             raise JavBusPaginationError(message)
         return list(dict.fromkeys(video_id for page in pages for video_id in page))
+
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=1, max=10),
+        retry=retry_if_exception_type((httpx.HTTPError, httpx.TimeoutException)),
+        reraise=True,
+    )
+    async def get_video_actors(self, video_id: str) -> list[JavBusActor]:
+        """Read the credited actors from a JavBus video detail page."""
+        response = await self._client.get(url=f'{self.host}/{video_id}')
+        response.raise_for_status()
+        doc = PyQuery(response.text)
+        actors: list[JavBusActor] = []
+        seen: set[str] = set()
+        for item in doc('a[href]').items():
+            path = urlparse(str(item.attr('href') or '')).path.rstrip('/')
+            match = re.fullmatch(r'/star/([^/]+)', path)
+            if match is None:
+                continue
+            actor_id = unquote(match.group(1)).strip()
+            key = actor_id.casefold()
+            if not _ACTOR_ID_RE.fullmatch(actor_id) or key in seen:
+                continue
+            seen.add(key)
+            name = ' '.join(item.text().split()) or actor_id
+            actors.append(JavBusActor(actor_id=actor_id, name=name))
+        return actors
 
     @retry(
         stop=stop_after_attempt(3),

@@ -79,6 +79,7 @@ def make_client(
     freshrss_url: str | None = None,
     freshrss_rsshub_url: str | None = None,
     existing_actor_lookup=None,
+    avid_actor_lookup=None,
     apply_enabled: bool = True,
 ) -> tuple[TestClient, FillActorPaths, MemoryFillActorRepository]:
     paths = FillActorPaths.from_iterable(
@@ -112,6 +113,7 @@ def make_client(
                 freshrss_url=freshrss_url,
                 freshrss_rsshub_url=freshrss_rsshub_url,
                 existing_actor_lookup=existing_actor_lookup,
+                avid_actor_lookup=avid_actor_lookup,
             ),
         ),
         feature_health={'fill_actor': fill_actor_health(service=service, repository=repository)},
@@ -121,6 +123,40 @@ def make_client(
         max_request_bytes=max_request_bytes,
     )
     return TestClient(app), paths, repository
+
+
+def test_resolves_an_avid_to_javbus_actors(tmp_path: Path) -> None:
+    looked_up: list[str] = []
+
+    async def avid_actor_lookup(avid: str):
+        looked_up.append(avid)
+        return (('a123', '演员甲'), ('B456', '演员乙'))
+
+    client, _, _ = make_client(tmp_path, avid_actor_lookup=avid_actor_lookup)
+    with client:
+        response = client.post('/api/fill-actor/avid-actors', json={'avid': ' abc-123 '})
+
+    assert response.status_code == 200
+    assert response.json() == {
+        'avid': 'ABC-123',
+        'actors': [
+            {'actor_id': 'a123', 'name': '演员甲'},
+            {'actor_id': 'B456', 'name': '演员乙'},
+        ],
+    }
+    assert looked_up == ['ABC-123']
+
+
+def test_reports_when_javbus_has_no_actors_for_an_avid(tmp_path: Path) -> None:
+    async def avid_actor_lookup(_avid: str):
+        return ()
+
+    client, _, _ = make_client(tmp_path, avid_actor_lookup=avid_actor_lookup)
+    with client:
+        response = client.post('/api/fill-actor/avid-actors', json={'avid': 'ABC-123'})
+
+    assert response.status_code == 404
+    assert response.json() == {'error': {'code': 'avid_actors_not_found'}}
 
 
 def wait_for_plan(client: TestClient, plan_id: str) -> dict:

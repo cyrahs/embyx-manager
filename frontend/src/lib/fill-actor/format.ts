@@ -61,6 +61,10 @@ export function errorMessage(error: unknown): string {
       not_ready: '移动依赖尚未就绪，请稍后重试。',
       freshrss_subscription_check_failed: '无法检查 FreshRSS 订阅，请确认 FreshRSS 配置和连接后重试。',
       actors_already_subscribed: 'FreshRSS 已存在对应演员订阅，请确认是否继续。',
+      avid_actor_lookup_unavailable: '当前服务未启用 AVID 演员查询。',
+      javbus_actor_lookup_failed: '无法从 JavBus 获取该 AVID 的演员信息，请稍后重试。',
+      avid_actors_not_found: 'JavBus 的影片页面中没有找到演员信息。',
+      invalid_avid_actor_response: 'JavBus 演员信息响应无效，请稍后重试。',
     }
     const message = messages[error.code]
     if (message) return message
