@@ -167,6 +167,8 @@ export const FEED_ERROR_LABELS: Record<string, string> = {
 export const MOVE_ERROR_LABELS: Record<string, string> = {
   cloud_move_status_unknown: '远端状态待确认，请勿重复操作',
   cloud_move_in_progress: '已有移动正在核验',
+  cloud_move_not_observed: '云端未执行移动，请重新扫描后重试',
+  cloud_move_rejected: '云端拒绝了移动请求',
   cloud_destination_missing: '无法准备目标目录',
   cloud_destination_exists: '目标位置已有文件',
   cloud_source_changed: '远端源文件已变化',

@@ -19,7 +19,7 @@ export function ApplySummary({ result }: { result: ApplyResult }) {
             ? `，${failed} 个状态未知；系统只会观察，不会自动重复移动。`
             : failed
               ? `，${failed} 个未移动。失败项目已在列表中标记。`
-              : '。可继续选择其他文件或重新扫描。'}
+              : '。已移入的文件会自动归档入库，可继续选择其他文件或重新扫描。'}
         </p>
       </div>
     </section>
@@ -59,7 +59,7 @@ export function ConfirmDialog({
           <MoveIcon />
         </span>
         <h2 id="confirm-title">确认移入 {candidates.length} 个文件？</h2>
-        <p>文件将从附加片库移入待整理目录。操作会逐项执行，部分失败不会回滚已完成的文件。</p>
+        <p>文件将从附加片库移入待整理目录，随后自动归档入库。操作会逐项执行，部分失败不会回滚已完成的文件。</p>
         <div className="confirm-list">
           {candidates.slice(0, 5).map((candidate) => (
             <span key={candidate.candidate_id} title={candidate.file_name}>

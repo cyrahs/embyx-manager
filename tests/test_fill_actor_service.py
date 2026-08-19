@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 import threading
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -122,6 +123,7 @@ def make_service(
     max_actors: int = 20,
     move_in_by_brand: bool = False,
     apply_enabled: bool = True,
+    on_moved: Callable[[], None] | None = None,
 ) -> tuple[FillActorService, FakeAcquisitionGateway]:
     gateway = FakeAcquisitionGateway(outcomes)
     return (
@@ -137,6 +139,7 @@ def make_service(
             clock=clock,
             token_factory=TokenFactory(),
             max_actors=max_actors,
+            on_moved=on_moved,
         ),
         gateway,
     )
@@ -600,6 +603,85 @@ async def test_apply_moves_candidate_and_is_idempotent(paths: FillActorPaths) ->
     assert second.results[0].state is MoveState.MOVED
     assert not source.exists()
     assert (paths.move_in_path / source.name).read_bytes() == b'video'
+
+
+@pytest.mark.asyncio
+async def test_apply_notifies_when_files_moved(paths: FillActorPaths) -> None:
+    create_move_candidate(paths)
+    notified = 0
+
+    def on_moved() -> None:
+        nonlocal notified
+        notified += 1
+
+    service, _ = make_service(
+        paths,
+        catalog={'actor': ['ABC-001']},
+        brands={'ABC-001': 'ABC'},
+        on_moved=on_moved,
+    )
+    plan = await service.create_plan(['actor'])
+    candidate = plan.videos[0].move_candidates[0]
+
+    await service.apply(plan_id=plan.plan_id, revision=plan.revision, candidate_ids=[candidate.candidate_id])
+
+    assert notified == 1
+
+
+@pytest.mark.asyncio
+async def test_apply_does_not_notify_when_nothing_moved(paths: FillActorPaths) -> None:
+    source = create_move_candidate(paths)
+    notified = 0
+
+    def on_moved() -> None:
+        nonlocal notified
+        notified += 1
+
+    service, _ = make_service(
+        paths,
+        catalog={'actor': ['ABC-001']},
+        brands={'ABC-001': 'ABC'},
+        on_moved=on_moved,
+    )
+    plan = await service.create_plan(['actor'])
+    candidate = plan.videos[0].move_candidates[0]
+    source.write_bytes(b'changed after the scan')
+
+    result = await service.apply(
+        plan_id=plan.plan_id,
+        revision=plan.revision,
+        candidate_ids=[candidate.candidate_id],
+    )
+
+    assert result.results[0].state is MoveState.STALE
+    assert notified == 0
+
+
+@pytest.mark.asyncio
+async def test_apply_survives_a_failing_moved_notification(paths: FillActorPaths) -> None:
+    source = create_move_candidate(paths)
+
+    def on_moved() -> None:
+        msg = 'the scheduler is gone'
+        raise RuntimeError(msg)
+
+    service, _ = make_service(
+        paths,
+        catalog={'actor': ['ABC-001']},
+        brands={'ABC-001': 'ABC'},
+        on_moved=on_moved,
+    )
+    plan = await service.create_plan(['actor'])
+    candidate = plan.videos[0].move_candidates[0]
+
+    result = await service.apply(
+        plan_id=plan.plan_id,
+        revision=plan.revision,
+        candidate_ids=[candidate.candidate_id],
+    )
+
+    assert result.state is ApplyState.SUCCEEDED
+    assert not source.exists()
 
 
 @pytest.mark.asyncio

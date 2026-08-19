@@ -93,6 +93,9 @@ def _redact_error_message(exc: BaseException) -> str | None:
 
 
 CLOUD_VERIFY_ATTEMPTS = 5
+#: How long an unresolved cloud move is observed before an untouched source and an
+#: absent destination are read as "the move never happened", freeing the source.
+CLOUD_MOVE_OBSERVATION_GRACE = timedelta(minutes=15)
 CLOUD_HEALTH_SUCCESS_TTL_SECONDS = 30.0
 CLOUD_HEALTH_FAILURE_TTL_SECONDS = 5.0
 ProgressCallback = Callable[[JobProgressEvent], Awaitable[None]]
@@ -279,6 +282,7 @@ class FillActorService:
         repository: FillActorRepository | None = None,
         mutation_lock: AsyncFileLock | None = None,
         cloud_file_mover: CloudFileMover | None = None,
+        on_moved: Callable[[], None] | None = None,
     ) -> None:
         if max_actors < 1:
             msg = 'max_actors must be positive'
@@ -307,6 +311,7 @@ class FillActorService:
         self._repository = repository or MemoryFillActorRepository()
         self._mutation_lock = mutation_lock
         self._cloud_file_mover = cloud_file_mover
+        self._on_moved = on_moved
         self._in_flight: dict[tuple[str, str], asyncio.Task[MoveResult]] = {}
         self._mutation_futures: set[Future[MoveResult]] = set()
         self._scan_futures: dict[Future[object], threading.Event] = {}
@@ -862,6 +867,13 @@ class FillActorService:
                     ),
                 )
 
+        if self._on_moved is not None and any(result.state is MoveState.MOVED for result in results):
+            # Files are waiting in the staging tree; whoever archives them wants to know now.
+            try:
+                self._on_moved()
+            except Exception:
+                LOGGER.exception('the moved-files notification failed')
+
         return ApplyResult(
             plan_id=plan_id,
             revision=revision,
@@ -1392,7 +1404,8 @@ class FillActorService:
             try:
                 source = await self._stat_cloud_file(record.cloud_source_path)
                 destination_listing = await self._list_cloud_directory(record.cloud_destination_dir)
-            except Exception:  # noqa: BLE001
+            except Exception:
+                LOGGER.exception('CloudDrive preflight failed for %s', record.cloud_source_path)
                 return MoveResult(**base, state=MoveState.FAILED, error_code='cloud_preflight_failed')
             if source is None:
                 result = MoveResult(**base, state=MoveState.STALE, error_code='cloud_source_missing')
@@ -1442,7 +1455,8 @@ class FillActorService:
             try:
                 final_source = await self._stat_cloud_file(record.cloud_source_path)
                 final_destination = await self._stat_cloud_file(destination_path)
-            except Exception:  # noqa: BLE001
+            except Exception:
+                LOGGER.exception('CloudDrive preflight recheck failed for %s', record.cloud_source_path)
                 return MoveResult(**base, state=MoveState.FAILED, error_code='cloud_preflight_failed')
             if final_source is None or not record.cloud_file.matches_identity(final_source):
                 result = MoveResult(**base, state=MoveState.STALE, error_code='cloud_source_changed')
@@ -1472,7 +1486,12 @@ class FillActorService:
                     record.cloud_source_path,
                     record.cloud_destination_dir,
                 )
-            except Exception:  # noqa: BLE001
+            except Exception:
+                LOGGER.exception(
+                    'CloudDrive MoveFile failed for %s -> %s',
+                    record.cloud_source_path,
+                    record.cloud_destination_dir,
+                )
                 operation = await self._advance_cloud_operation(
                     operation,
                     CloudMoveOperationState.UNKNOWN,
@@ -1480,6 +1499,13 @@ class FillActorService:
                 )
                 return await self._observe_cloud_move(plan_id, record, operation)
 
+            if not response.success:
+                LOGGER.error(
+                    'CloudDrive rejected moving %s to %s: %s',
+                    record.cloud_source_path,
+                    record.cloud_destination_dir,
+                    response.error_message or 'no error message',
+                )
             operation = await self._advance_cloud_operation(operation, CloudMoveOperationState.VERIFYING)
             for attempt in range(CLOUD_VERIFY_ATTEMPTS):
                 result = await self._observe_cloud_move(
@@ -1521,7 +1547,7 @@ class FillActorService:
             )
         return await self._observe_cloud_move(plan_id, record, operation, final=True)
 
-    async def _observe_cloud_move(  # noqa: PLR0911
+    async def _observe_cloud_move(  # noqa: C901, PLR0911
         self,
         plan_id: str,
         record: _MoveRecord,
@@ -1537,7 +1563,8 @@ class FillActorService:
         try:
             source = await self._stat_cloud_file(operation.source_path)
             destination = await self._stat_cloud_file(destination_path)
-        except Exception:  # noqa: BLE001
+        except Exception:
+            LOGGER.exception('CloudDrive observation failed for %s', operation.source_path)
             if operation.state is not CloudMoveOperationState.UNKNOWN:
                 operation = await self._advance_cloud_operation(
                     operation,
@@ -1584,6 +1611,31 @@ class FillActorService:
                 move_state=MoveState.FAILED,
                 error_code='cloud_move_rejected',
             )
+        if (
+            final
+            and response is None
+            and source_matches
+            and destination is None
+            and self._now() - operation.updated_at >= CLOUD_MOVE_OBSERVATION_GRACE
+        ):
+            # The source sat untouched and the destination never appeared for the whole
+            # grace period: the submission demonstrably never took effect. A response in
+            # hand means this is the submitting call itself, which must stay observation-
+            # only; without one this is a later recovery pass, and concluding here frees
+            # the source for a fresh attempt from a new scan.
+            LOGGER.warning(
+                'concluding the CloudDrive move of %s never happened after %s of observation',
+                operation.source_path,
+                CLOUD_MOVE_OBSERVATION_GRACE,
+            )
+            return await self._complete_cloud_move(
+                plan_id,
+                record,
+                operation,
+                operation_state=CloudMoveOperationState.FAILED,
+                move_state=MoveState.FAILED,
+                error_code='cloud_move_not_observed',
+            )
         if not final:
             return MoveResult(**base, state=MoveState.FAILED, error_code='cloud_move_verifying')
         if operation.state is not CloudMoveOperationState.UNKNOWN:
@@ -1592,6 +1644,10 @@ class FillActorService:
                 CloudMoveOperationState.UNKNOWN,
                 error_code='cloud_move_status_unknown',
             )
+        LOGGER.warning(
+            'CloudDrive move of %s remains unverified; leaving the operation under observation',
+            operation.source_path,
+        )
         return MoveResult(**base, state=MoveState.FAILED, error_code='cloud_move_status_unknown')
 
     async def _complete_cloud_move(  # noqa: PLR0913

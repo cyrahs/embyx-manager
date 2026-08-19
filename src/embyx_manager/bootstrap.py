@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import threading
 from collections.abc import AsyncIterator
@@ -51,11 +52,12 @@ from embyx_manager.monitor.archive import ArchivePipeline
 from embyx_manager.monitor.intake import AcquisitionIntake
 from embyx_manager.monitor.manual import ManualIntakeSource
 from embyx_manager.monitor.mapping import MappingPipeline
+from embyx_manager.monitor.move_in import MoveInSweeper
 from embyx_manager.monitor.reconcile import ReconcileScanner
-from embyx_manager.monitor.reports import RunContext
+from embyx_manager.monitor.reports import PipelineName, RunContext
 from embyx_manager.monitor.rss import RssPipeline
 from embyx_manager.monitor.runs import PipelineRunRepository
-from embyx_manager.monitor.scheduler import MonitorScheduler
+from embyx_manager.monitor.scheduler import MonitorScheduler, PipelineBusyError, PipelineNotConfiguredError
 from embyx_manager.monitor.tracker import AcquisitionTracker, TrackerSettings
 from embyx_manager.settings import Settings
 
@@ -206,6 +208,23 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
             on_submitted=scheduler.notify_submission,
         )
 
+    archive_trigger_tasks: set[asyncio.Task[None]] = set()
+
+    async def _archive_moved_files() -> None:
+        try:
+            await scheduler.trigger(PipelineName.ARCHIVE)
+        except (PipelineBusyError, PipelineNotConfiguredError) as exc:
+            # The cron sweep will file the staged videos instead.
+            LOGGER.info('not starting an archive run for freshly moved files: %s', exc)
+        except Exception:
+            LOGGER.exception('failed to start an archive run for freshly moved files')
+
+    def notify_files_moved() -> None:
+        """Fill actor staged new files: archive them now rather than on the next cron."""
+        task = asyncio.create_task(_archive_moved_files(), name='fill-actor-move-archive')
+        archive_trigger_tasks.add(task)
+        task.add_done_callback(archive_trigger_tasks.discard)
+
     service = FillActorService(
         runtime=fill_actor_runtime.current,
         actor_catalog=JavBusActorCatalog(javbus),
@@ -222,6 +241,9 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         cloud_file_mover=CloudDriveFileMover(cloud_handle.current),
         repository=repository,
         mutation_lock=PostgresAdvisoryLock(database.get_pool),
+        # Resolved lazily: the scheduler is built later in this function and the
+        # hook only fires once the app is serving.
+        on_moved=notify_files_moved,
     )
 
     def current_feeds() -> FeedsConfig:
@@ -306,15 +328,30 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
 
     # Held across runs: settling a folder takes two passes to observe.
     reconcile_scanner: list[ReconcileScanner] = []
+    # Held across runs so a staged file is only reported as unreadable once.
+    move_in_sweeper: list[MoveInSweeper] = []
+
+    async def _refresh_move_in_listing(cloud: AsyncCloudDrive, api_root: str, ctx: RunContext) -> None:
+        """Ask CloudDrive to re-check the staging tree so the mount sees fresh moves."""
+        try:
+            entries = await cloud.list_directory(api_root)
+            for entry in entries:
+                if entry.get('is_directory') is True and isinstance(entry.get('path'), str):
+                    await cloud.list_directory(str(entry['path']))
+        except Exception:  # noqa: BLE001
+            ctx.exception('failed to refresh the CloudDrive move-in directory %s', api_root)
 
     async def archive_runner(ctx: RunContext) -> None:
         cloud = cloud_handle.current()
+        fill_config = store.get(FillActorConfig)
         if cloud is not None:
             for task_dir in await _polled_task_dirs(store, ledger):
                 try:
                     await cloud.list_directory(task_dir)
                 except Exception:  # noqa: BLE001
                     ctx.exception('failed to refresh the CloudDrive task directory %s', task_dir)
+            if fill_config.cloud_move_in_root:
+                await _refresh_move_in_listing(cloud, fill_config.cloud_move_in_root, ctx)
         archive_config = store.get(ArchiveConfig)
         archiver = ArchivePipeline(config=archive_config, avid_parser=avid_handle.current())
         if reconcile_scanner:
@@ -324,6 +361,26 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
                 ReconcileScanner(ledger=ledger, archiver=archiver, config=archive_config),
             )
         await reconcile_scanner[0].run(ctx)
+        if not fill_config.move_in_root:
+            return
+        if move_in_sweeper:
+            move_in_sweeper[0].rebind(
+                archiver=archiver,
+                avid_parser=avid_handle.current(),
+                move_in_root=Path(fill_config.move_in_root),
+                task_dir_path=fill_config.task_dir_path,
+            )
+        else:
+            move_in_sweeper.append(
+                MoveInSweeper(
+                    ledger=ledger,
+                    archiver=archiver,
+                    avid_parser=avid_handle.current(),
+                    move_in_root=Path(fill_config.move_in_root),
+                    task_dir_path=fill_config.task_dir_path,
+                ),
+            )
+        await move_in_sweeper[0].run(ctx)
 
     def tracker_ready() -> str | None:
         archive_config = store.get(ArchiveConfig)
