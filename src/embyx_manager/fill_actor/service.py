@@ -21,6 +21,7 @@ from embyx_manager.fill_actor.cloud_moves import (
     CloudFileMetadata,
     CloudFileMover,
     CloudMovePaths,
+    CloudMoveRefusedError,
     CloudMoveResponse,
     InvalidStrmTargetError,
 )
@@ -1486,6 +1487,19 @@ class FillActorService:
                     record.cloud_source_path,
                     record.cloud_destination_dir,
                 )
+            except CloudMoveRefusedError as refusal:
+                # The server said no before touching anything, so this is an answer,
+                # not an ambiguity. It is still confirmed against the remote state
+                # like any other outcome — the conclusion needs the destination to
+                # be absent — which is why it goes through verification first.
+                LOGGER.exception(
+                    'CloudDrive refused moving %s to %s (%s)',
+                    record.cloud_source_path,
+                    record.cloud_destination_dir,
+                    refusal.code,
+                )
+                operation = await self._advance_cloud_operation(operation, CloudMoveOperationState.VERIFYING)
+                return await self._observe_cloud_move(plan_id, record, operation, refusal=refusal)
             except Exception:
                 LOGGER.exception(
                     'CloudDrive MoveFile failed for %s -> %s',
@@ -1547,13 +1561,14 @@ class FillActorService:
             )
         return await self._observe_cloud_move(plan_id, record, operation, final=True)
 
-    async def _observe_cloud_move(  # noqa: C901, PLR0911
+    async def _observe_cloud_move(  # noqa: C901, PLR0911, PLR0913
         self,
         plan_id: str,
         record: _MoveRecord,
         operation: CloudMoveOperationRecord,
         *,
         response: CloudMoveResponse | None = None,
+        refusal: CloudMoveRefusedError | None = None,
         final: bool = True,
     ) -> MoveResult:
         base = self._cloud_result_base(record)
@@ -1610,6 +1625,18 @@ class FillActorService:
                 operation_state=CloudMoveOperationState.FAILED,
                 move_state=MoveState.FAILED,
                 error_code='cloud_move_rejected',
+            )
+        if refusal is not None and destination is None:
+            # The server refused and the file did not arrive: waiting cannot change
+            # this, so the operation ends here and the source is free to try again
+            # once whatever was refused has been fixed.
+            return await self._complete_cloud_move(
+                plan_id,
+                record,
+                operation,
+                operation_state=CloudMoveOperationState.FAILED,
+                move_state=MoveState.FAILED,
+                error_code=refusal.code,
             )
         if (
             final

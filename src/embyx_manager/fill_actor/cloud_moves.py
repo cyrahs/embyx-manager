@@ -14,6 +14,21 @@ class InvalidStrmTargetError(ValueError):
     """Raised when a mapping file cannot safely identify one CloudDrive file."""
 
 
+class CloudMoveRefusedError(Exception):
+    """The server refused the move outright, so nothing was mutated.
+
+    This is a conclusion, unlike a transport failure where the move may have
+    taken effect before the answer was lost: the source is untouched, and no
+    amount of waiting changes that. Something has to be fixed — a permission,
+    a path — before a retry can work, so the operator is told rather than left
+    watching a move that will never appear.
+    """
+
+    def __init__(self, code: str, message: str) -> None:
+        super().__init__(message)
+        self.code = code
+
+
 @dataclass(frozen=True)
 class CloudFileMetadata:
     path: str

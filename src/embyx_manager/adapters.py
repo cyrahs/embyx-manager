@@ -10,10 +10,17 @@ import logging
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 
+import grpc
+
 from embyx_manager.clients.clouddrive import AsyncCloudDrive
 from embyx_manager.clients.javbus import JavBusClient
 from embyx_manager.core import avid
-from embyx_manager.fill_actor.cloud_moves import CloudFileMetadata, CloudFileMover, CloudMoveResponse
+from embyx_manager.fill_actor.cloud_moves import (
+    CloudFileMetadata,
+    CloudFileMover,
+    CloudMoveRefusedError,
+    CloudMoveResponse,
+)
 from embyx_manager.fill_actor.ports import AcquisitionOutcome, PageProgressCallback
 from embyx_manager.monitor.acquisitions import AcquisitionSource
 from embyx_manager.monitor.intake import AcquisitionIntake
@@ -27,6 +34,23 @@ NANOSECONDS_PER_SECOND = 1_000_000_000
 class CloudDriveUnconfiguredError(RuntimeError):
     def __init__(self) -> None:
         super().__init__('CloudDrive connection is not configured')
+
+
+#: gRPC statuses that mean the server rejected the call before touching anything.
+#: Every other status leaves the outcome genuinely unknown — a deadline or a
+#: dropped connection can arrive after the move already happened — so only these
+#: may be reported as a conclusion.
+_MOVE_REFUSAL_CODES = {
+    grpc.StatusCode.PERMISSION_DENIED: 'cloud_move_permission_denied',
+    grpc.StatusCode.UNAUTHENTICATED: 'cloud_move_unauthenticated',
+    grpc.StatusCode.INVALID_ARGUMENT: 'cloud_move_invalid_request',
+    grpc.StatusCode.UNIMPLEMENTED: 'cloud_move_unsupported',
+}
+
+
+def _refusal_code(error: grpc.RpcError) -> str | None:
+    code = error.code() if callable(getattr(error, 'code', None)) else None
+    return _MOVE_REFUSAL_CODES.get(code)
 
 
 @dataclass(frozen=True)
@@ -143,7 +167,15 @@ class CloudDriveFileMover(CloudFileMover):
         return success
 
     async def move_file(self, source_api_path: str, destination_api_directory: str) -> CloudMoveResponse:
-        value = await self._cloud().move_file(source_api_path, destination_api_directory)
+        try:
+            value = await self._cloud().move_file(source_api_path, destination_api_directory)
+        except grpc.RpcError as exc:
+            refusal = _refusal_code(exc)
+            if refusal is None:
+                # The server may have acted before the answer was lost; the caller
+                # has to observe the remote state rather than conclude anything.
+                raise
+            raise CloudMoveRefusedError(refusal, exc.details() or refusal) from exc
         return CloudMoveResponse.from_mapping(
             {
                 'success': value.get('success'),

@@ -7,7 +7,12 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from embyx_manager.fill_actor.cloud_moves import CloudFileMetadata, CloudMovePaths, CloudMoveResponse
+from embyx_manager.fill_actor.cloud_moves import (
+    CloudFileMetadata,
+    CloudMovePaths,
+    CloudMoveRefusedError,
+    CloudMoveResponse,
+)
 from embyx_manager.fill_actor.models import MoveState, VideoState
 from embyx_manager.fill_actor.persistence import (
     CloudMoveOperationState,
@@ -76,6 +81,10 @@ class FakeCloudMover:
         self.move_calls.append((source_api_path, destination_api_directory))
         if self.behavior == 'raise_before_move':
             raise TimeoutError
+        if self.behavior == 'refused':
+            refusal_code = 'cloud_move_permission_denied'
+            refusal_message = 'move permission required'
+            raise CloudMoveRefusedError(refusal_code, refusal_message)
         if self.behavior == 'eventual_double_visibility':
             source_parent = str(PurePosixPath(source_api_path).parent)
             name = PurePosixPath(source_api_path).name
@@ -420,6 +429,56 @@ class SteppingClock:
 
     def __call__(self) -> datetime:
         return self.value
+
+
+@pytest.mark.asyncio
+async def test_refused_move_concludes_immediately_and_names_the_cause(
+    tmp_path: Path,
+    cloud_file: CloudFileMetadata,
+) -> None:
+    """A refusal is an answer: the operator sees why instead of watching a grace period."""
+    service, repository, mover, _mapping = make_service(tmp_path, cloud_file)
+    mover.behavior = 'refused'
+    plan, candidate = await create_candidate(service)
+
+    applied = await service.apply(
+        plan_id=plan.plan_id,
+        revision=plan.revision,
+        candidate_ids=[candidate.candidate_id],
+    )
+
+    assert applied.results[0].state is MoveState.FAILED
+    assert applied.results[0].error_code == 'cloud_move_permission_denied'
+    operation = await repository.get_cloud_move_operation(plan.plan_id, candidate.candidate_id)
+    assert operation is not None
+    assert operation.state.terminal
+
+
+@pytest.mark.asyncio
+async def test_a_refused_move_leaves_the_source_free_to_retry(
+    tmp_path: Path,
+    cloud_file: CloudFileMetadata,
+) -> None:
+    service, _repository, mover, _mapping = make_service(tmp_path, cloud_file)
+    mover.behavior = 'refused'
+    plan, candidate = await create_candidate(service)
+    await service.apply(
+        plan_id=plan.plan_id,
+        revision=plan.revision,
+        candidate_ids=[candidate.candidate_id],
+    )
+
+    # Once the permission is granted, a fresh scan moves the same file.
+    mover.behavior = 'success'
+    retry_plan, retry_candidate = await create_candidate(service)
+    retried = await service.apply(
+        plan_id=retry_plan.plan_id,
+        revision=retry_plan.revision,
+        candidate_ids=[retry_candidate.candidate_id],
+    )
+
+    assert retried.results[0].state is MoveState.MOVED
+    assert len(mover.move_calls) == 2
 
 
 @pytest.mark.asyncio

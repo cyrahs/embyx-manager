@@ -1,6 +1,7 @@
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
+import grpc
 import pytest
 
 from embyx_manager.adapters import (
@@ -10,6 +11,7 @@ from embyx_manager.adapters import (
     JavBusActorCatalog,
     LedgerAcquisitionGateway,
 )
+from embyx_manager.fill_actor.cloud_moves import CloudMoveRefusedError
 from embyx_manager.fill_actor.ports import AcquisitionOutcome
 from embyx_manager.monitor.acquisitions import AcquisitionSource
 from embyx_manager.monitor.intake import IntakeOutcome
@@ -152,3 +154,54 @@ async def test_cloud_mover_raises_when_unconfigured() -> None:
 
     with pytest.raises(CloudDriveUnconfiguredError):
         await mover.list_directory('/cloud/ABC')
+
+
+class _RpcError(grpc.RpcError):
+    def __init__(self, code: grpc.StatusCode, details: str) -> None:
+        super().__init__(details)
+        self._code = code
+        self._details = details
+
+    def code(self) -> grpc.StatusCode:
+        return self._code
+
+    def details(self) -> str:
+        return self._details
+
+
+@pytest.mark.parametrize(
+    ('status', 'expected'),
+    [
+        (grpc.StatusCode.PERMISSION_DENIED, 'cloud_move_permission_denied'),
+        (grpc.StatusCode.UNAUTHENTICATED, 'cloud_move_unauthenticated'),
+        (grpc.StatusCode.INVALID_ARGUMENT, 'cloud_move_invalid_request'),
+        (grpc.StatusCode.UNIMPLEMENTED, 'cloud_move_unsupported'),
+    ],
+)
+async def test_cloud_mover_reports_a_refused_move_as_a_conclusion(
+    status: grpc.StatusCode,
+    expected: str,
+) -> None:
+    cloud = SimpleNamespace(move_file=AsyncMock(side_effect=_RpcError(status, 'move permission required')))
+    mover = CloudDriveFileMover(lambda: cloud)  # type: ignore[arg-type, return-value]
+
+    with pytest.raises(CloudMoveRefusedError) as refused:
+        await mover.move_file('/cloud/src/ABC-001.mp4', '/cloud/dst')
+
+    assert refused.value.code == expected
+    assert 'move permission required' in str(refused.value)
+
+
+@pytest.mark.parametrize(
+    'status',
+    [grpc.StatusCode.DEADLINE_EXCEEDED, grpc.StatusCode.UNAVAILABLE, grpc.StatusCode.INTERNAL],
+)
+async def test_cloud_mover_leaves_an_ambiguous_failure_ambiguous(status: grpc.StatusCode) -> None:
+    """These can arrive after the server already moved the file, so they are not answers."""
+    cloud = SimpleNamespace(move_file=AsyncMock(side_effect=_RpcError(status, 'transport failed')))
+    mover = CloudDriveFileMover(lambda: cloud)  # type: ignore[arg-type, return-value]
+
+    with pytest.raises(grpc.RpcError) as raised:
+        await mover.move_file('/cloud/src/ABC-001.mp4', '/cloud/dst')
+
+    assert not isinstance(raised.value, CloudMoveRefusedError)
