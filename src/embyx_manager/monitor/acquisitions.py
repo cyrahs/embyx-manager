@@ -70,6 +70,10 @@ class AttemptState(StrEnum):
 ACTIVE_STATES = frozenset({AcquisitionState.DISCOVERED, AcquisitionState.DOWNLOADING})
 #: States a retry timer can lift.
 RETRYABLE_STATES = frozenset({AcquisitionState.RESOLVE_FAILED, AcquisitionState.EXHAUSTED})
+#: States the background resolve pass picks up when their ``next_action_at``
+#: arrives: cooled-down retries, plus discovered rows a source queued for a
+#: first resolve instead of resolving inline (fill-actor scans).
+DUE_STATES = RETRYABLE_STATES | {AcquisitionState.DISCOVERED}
 #: Attempt states that are still in flight at CloudDrive.
 IN_FLIGHT_ATTEMPT_STATES = frozenset({AttemptState.SUBMITTED, AttemptState.DOWNLOADING})
 #: Attempt states an offline task can still be acted on in; a hash is unique across these.
@@ -219,6 +223,7 @@ class AcquisitionRepository:
         source: str,
         now: datetime,
         task_dir_path: str | None = None,
+        next_action_at: datetime | None = None,
     ) -> bool:
         """Record an AVID sighting; return whether it still needs magnets resolved.
 
@@ -226,19 +231,24 @@ class AcquisitionRepository:
         ignored, waiting on an operator, or cooling down after a failed resolve.
 
         ``task_dir_path`` pins the offline directory this AVID's magnets go to;
-        None leaves it on the default directory of the moment.
+        None leaves it on the default directory of the moment. ``next_action_at``
+        hands the resolve to the background pass at that time instead of the
+        caller doing it inline; on an accepted re-discovery it re-arms the timer
+        the same way.
         """
         pool = await self._database.get_pool()
         inserted = await pool.fetchval(
             """
-            INSERT INTO archive_acquisitions (avid, state, source, task_dir_path, created_at, updated_at)
-            VALUES ($1, 'discovered', $2, $3, $4, $4)
+            INSERT INTO archive_acquisitions
+                (avid, state, source, task_dir_path, next_action_at, created_at, updated_at)
+            VALUES ($1, 'discovered', $2, $3, $4, $5, $5)
             ON CONFLICT (avid) DO NOTHING
             RETURNING avid
             """,
             avid,
             str(source),
             task_dir_path,
+            next_action_at,
             now,
         )
         if inserted is not None:
@@ -259,6 +269,14 @@ class AcquisitionRepository:
                 'UPDATE archive_acquisitions SET task_dir_path = $2 WHERE avid = $1',
                 avid,
                 task_dir_path,
+            )
+        if accepted and next_action_at is not None:
+            # A queueing source accepted an orphaned or cooled-down row: give it
+            # a timer or the background pass would never look at it again.
+            await pool.execute(
+                'UPDATE archive_acquisitions SET next_action_at = $2 WHERE avid = $1',
+                avid,
+                next_action_at,
             )
         return accepted
 
@@ -306,7 +324,12 @@ class AcquisitionRepository:
         return _row_count(status) == 1
 
     async def due_for_retry(self, *, now: datetime, limit: int = 50) -> tuple[AcquisitionRecord, ...]:
-        """Acquisitions whose cooldown has expired, oldest deadline first."""
+        """Acquisitions whose action timer has expired, oldest deadline first.
+
+        Covers cooled-down retries and queued discoveries alike; discovered
+        rows without a timer belong to a source that resolves inline and are
+        left alone.
+        """
         pool = await self._database.get_pool()
         rows = await pool.fetch(
             """
@@ -315,7 +338,7 @@ class AcquisitionRepository:
             ORDER BY next_action_at, avid
             LIMIT $3
             """,
-            sorted(state.value for state in RETRYABLE_STATES),
+            sorted(state.value for state in DUE_STATES),
             now,
             limit,
         )

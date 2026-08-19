@@ -77,6 +77,54 @@ async def test_enqueue_submits_the_first_candidate() -> None:
     assert deps.ledger.attempt_states('ABC-123') == [AttemptState.SUBMITTED]
 
 
+async def test_queue_records_a_due_discovery_without_resolving() -> None:
+    intake, deps = make_intake(sukebei_magnet=MAGNET_A)
+
+    outcome = await intake.queue('ABC-123', source=AcquisitionSource.FILL_ACTOR, task_dir_path=TASK_DIR, ctx=make_ctx())
+
+    assert outcome is IntakeOutcome.QUEUED
+    assert deps.ledger.states['ABC-123'] is AcquisitionState.DISCOVERED
+    assert deps.ledger.task_dirs['ABC-123'] == TASK_DIR
+    assert deps.ledger.next_action_at['ABC-123'] is not None
+    deps.sukebei.get_magnet.assert_not_awaited()
+    deps.cloud.add_offline_files.assert_not_awaited()
+
+
+async def test_queue_skips_an_avid_the_ledger_already_owns() -> None:
+    ledger = FakeLedger(known={'ABC-123': AcquisitionState.ARCHIVED})
+    intake, _ = make_intake(ledger=ledger)
+
+    outcome = await intake.queue('ABC-123', source=AcquisitionSource.FILL_ACTOR, task_dir_path=TASK_DIR, ctx=make_ctx())
+
+    assert outcome is IntakeOutcome.ALREADY_TRACKED
+
+
+async def test_retry_resolves_and_submits_a_queued_discovery() -> None:
+    ledger = FakeLedger(known={'ABC-123': AcquisitionState.DISCOVERED})
+    intake, deps = make_intake(ledger=ledger, sukebei_magnet=MAGNET_A)
+    record = await ledger.get('ABC-123')
+    assert record is not None
+
+    outcome = await intake.retry(record, ctx=make_ctx(), fallback_task_dir=TASK_DIR)
+
+    assert outcome is IntakeOutcome.SUBMITTED
+    deps.cloud.add_offline_files.assert_awaited_once_with([MAGNET_A], TASK_DIR)
+    assert deps.ledger.states['ABC-123'] is AcquisitionState.DOWNLOADING
+
+
+async def test_retry_parks_a_queued_discovery_with_no_magnet() -> None:
+    ledger = FakeLedger(known={'ABC-123': AcquisitionState.DISCOVERED})
+    intake, deps = make_intake(ledger=ledger)
+    record = await ledger.get('ABC-123')
+    assert record is not None
+
+    outcome = await intake.retry(record, ctx=make_ctx(), fallback_task_dir=TASK_DIR)
+
+    assert outcome is IntakeOutcome.NO_MAGNET
+    assert deps.ledger.states['ABC-123'] is AcquisitionState.RESOLVE_FAILED
+    assert deps.ledger.next_action_at['ABC-123'] is not None
+
+
 async def test_enqueue_skips_an_avid_the_ledger_already_owns() -> None:
     ledger = FakeLedger(known={'ABC-123': AcquisitionState.ARCHIVED})
     intake, deps = make_intake(ledger=ledger, sukebei_magnet=MAGNET_A)

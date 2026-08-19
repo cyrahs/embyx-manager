@@ -1,7 +1,14 @@
 import { useEffect, useState } from 'react'
 import { localizeBackendText } from '../../lib/backendText'
 import { clockText } from '../../lib/fill-actor/format'
-import { ACTOR_ERROR_LABELS, MOVE_ERROR_LABELS, MOVE_LABELS, VIDEO_GROUPS, type VideoGroupDef } from '../../lib/fill-actor/labels'
+import {
+  ACTOR_ERROR_LABELS,
+  MOVE_ERROR_LABELS,
+  MOVE_LABELS,
+  VIDEO_GROUPS,
+  videoWarningLabel,
+  type VideoGroupDef,
+} from '../../lib/fill-actor/labels'
 import type { ApplyResult, FillActorPlan, MoveCandidate, VideoPlan } from '../../types'
 import { AlertIcon, CheckIcon, ChevronIcon, FileIcon, StatusIcon } from '../Icons'
 
@@ -145,7 +152,7 @@ function VideoRow({
   applyResult: ApplyResult | null
   selectionLocked: boolean
 }) {
-  const warnings = video.warnings.length ? video.warnings.join(' · ') : null
+  const warnings = video.warnings.length ? video.warnings.map(videoWarningLabel).join(' · ') : null
   return (
     <article className="video-row">
       <span className="video-id">{video.video_id}</span>

@@ -212,6 +212,10 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         acquisition_gateway=LedgerAcquisitionGateway(
             intake_factory,
             task_dir=lambda: store.get(FillActorConfig).task_dir_path,
+            # Resolved lazily like the factory above; wakes the tracker loop so
+            # queued rows get their first resolve without waiting out the poll
+            # interval.
+            on_queued=lambda: scheduler.notify_submission(),  # noqa: PLW0108 - scheduler is built later
         ),
         brand_resolver=AvidBrandResolver(),
         max_actors=settings.max_actors,

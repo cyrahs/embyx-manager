@@ -3,6 +3,7 @@
 export type VideoState =
   | 'exists'
   | 'additional_found'
+  | 'queued'
   | 'submitted'
   | 'already_tracked'
   | 'submit_failed'

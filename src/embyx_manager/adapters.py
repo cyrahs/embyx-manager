@@ -16,7 +16,7 @@ from embyx_manager.core import avid
 from embyx_manager.fill_actor.cloud_moves import CloudFileMetadata, CloudFileMover, CloudMoveResponse
 from embyx_manager.fill_actor.ports import AcquisitionOutcome, PageProgressCallback
 from embyx_manager.monitor.acquisitions import AcquisitionSource
-from embyx_manager.monitor.intake import AcquisitionIntake
+from embyx_manager.monitor.intake import AcquisitionIntake, IntakeOutcome
 from embyx_manager.monitor.reports import RunContext
 
 LOGGER = logging.getLogger(__name__)
@@ -49,25 +49,34 @@ class LedgerAcquisitionGateway:
     ``intake_factory`` resolves the intake from the live configuration per call,
     or ``None`` while CloudDrive is unconfigured; ``task_dir`` names the offline
     directory fill-actor submissions are queued under, '' while unset. Either
-    gap fails the submission without creating ledger rows nothing would ever
-    advance.
+    gap fails the submission with an outcome naming the missing configuration,
+    without creating ledger rows nothing would ever advance.
+
+    Queueing only records the AVID; the tracker's background pass resolves
+    magnets and submits later. ``on_queued`` pokes that pass awake so the first
+    resolve starts within the fast-check window instead of a full poll interval.
     """
 
     intake_factory: Callable[[], AcquisitionIntake | None]
     task_dir: Callable[[], str]
+    on_queued: Callable[[], None] | None = None
 
-    async def submit_missing(self, video_id: str) -> AcquisitionOutcome:
+    async def queue_missing(self, video_id: str) -> AcquisitionOutcome:
         intake = self.intake_factory()
+        if intake is None:
+            return AcquisitionOutcome.CLOUD_NOT_CONFIGURED
         task_dir_path = self.task_dir()
-        if intake is None or not task_dir_path:
-            return AcquisitionOutcome.SUBMIT_FAILED
+        if not task_dir_path:
+            return AcquisitionOutcome.TASK_DIR_NOT_CONFIGURED
         ctx = RunContext(logger=LOGGER)
-        outcome = await intake.enqueue(
+        outcome = await intake.queue(
             video_id,
             source=AcquisitionSource.FILL_ACTOR,
             task_dir_path=task_dir_path,
             ctx=ctx,
         )
+        if outcome is IntakeOutcome.QUEUED and self.on_queued is not None:
+            self.on_queued()
         return AcquisitionOutcome(outcome.value)
 
 

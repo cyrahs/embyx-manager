@@ -99,10 +99,22 @@ ProgressCallback = Callable[[JobProgressEvent], Awaitable[None]]
 StopCallback = Callable[[], bool]
 
 _OUTCOME_STATES: dict[AcquisitionOutcome, VideoState] = {
+    AcquisitionOutcome.QUEUED: VideoState.QUEUED,
     AcquisitionOutcome.SUBMITTED: VideoState.SUBMITTED,
     AcquisitionOutcome.ALREADY_TRACKED: VideoState.ALREADY_TRACKED,
     AcquisitionOutcome.NO_MAGNET: VideoState.MISSING,
     AcquisitionOutcome.SUBMIT_FAILED: VideoState.SUBMIT_FAILED,
+    AcquisitionOutcome.CLOUD_NOT_CONFIGURED: VideoState.SUBMIT_FAILED,
+    AcquisitionOutcome.TASK_DIR_NOT_CONFIGURED: VideoState.SUBMIT_FAILED,
+}
+
+# Failed outcomes keep their name as the row warning so the dashboard can say
+# why nothing was submitted — a missing setting reads very differently from a
+# submission that was tried and refused.
+_OUTCOME_WARNINGS: dict[AcquisitionOutcome, str] = {
+    AcquisitionOutcome.SUBMIT_FAILED: 'submit_failed',
+    AcquisitionOutcome.CLOUD_NOT_CONFIGURED: 'cloud_not_configured',
+    AcquisitionOutcome.TASK_DIR_NOT_CONFIGURED: 'task_dir_not_configured',
 }
 
 
@@ -510,7 +522,7 @@ class FillActorService:
                 unit=JobProgressUnit.VIDEOS,
             ),
         )
-        submit_results = await self._submit_missing(missing_video_ids, progress=progress)
+        submit_results = await self._queue_missing(missing_video_ids, progress=progress)
         for video_id, outcome, warning in submit_results:
             current = public_videos[video_id]
             public_videos[video_id] = current.model_copy(
@@ -971,7 +983,7 @@ class FillActorService:
             return str(PurePosixPath(record.cloud_destination_dir) / record.cloud_file.name)
         return str(record.destination)
 
-    async def _submit_missing(
+    async def _queue_missing(
         self,
         video_ids: Sequence[str],
         *,
@@ -980,11 +992,10 @@ class FillActorService:
         async def submit(video_id: str) -> tuple[str, AcquisitionOutcome, str | None]:
             async with self._magnet_semaphore:
                 try:
-                    outcome = await self._acquisition_gateway.submit_missing(video_id)
+                    outcome = await self._acquisition_gateway.queue_missing(video_id)
                 except Exception:  # noqa: BLE001
                     return video_id, AcquisitionOutcome.SUBMIT_FAILED, 'acquisition_failed'
-                warning = 'submit_failed' if outcome is AcquisitionOutcome.SUBMIT_FAILED else None
-                return video_id, outcome, warning
+                return video_id, outcome, _OUTCOME_WARNINGS.get(outcome)
 
         queue = asyncio.Queue[str]()
         for video_id in video_ids:

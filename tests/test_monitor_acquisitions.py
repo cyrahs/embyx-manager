@@ -352,6 +352,44 @@ async def test_due_for_retry_returns_expired_cooldowns_in_order() -> None:
     assert [record.avid for record in due] == ['ABC-123', 'DEF-456']
 
 
+async def test_due_for_retry_includes_queued_discoveries() -> None:
+    """A fill-actor scan queues rows as discovered-with-a-timer; the background
+    pass must pick those up, while inline sources' discovered rows (no timer)
+    stay untouched."""
+    ledger = make_ledger()
+    await ledger.discover(
+        'ABC-123',
+        source=AcquisitionSource.FILL_ACTOR,
+        now=NOW,
+        task_dir_path='/115/fill',
+        next_action_at=NOW,
+    )
+    await ledger.discover('DEF-456', source=rss_source('Actor'), now=NOW)
+
+    due = await ledger.due_for_retry(now=NOW + timedelta(minutes=1))
+
+    assert [record.avid for record in due] == ['ABC-123']
+    assert due[0].task_dir_path == '/115/fill'
+
+
+async def test_discover_rearms_the_timer_for_a_queueing_source() -> None:
+    """Re-queueing an orphaned discovered row (no timer) must give it one, or
+    the background pass would never look at it."""
+    ledger = make_ledger()
+    await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW)
+
+    accepted = await ledger.discover(
+        'ABC-123',
+        source=AcquisitionSource.FILL_ACTOR,
+        now=NOW + timedelta(hours=1),
+        next_action_at=NOW + timedelta(hours=1),
+    )
+
+    assert accepted is True
+    due = await ledger.due_for_retry(now=NOW + timedelta(hours=2))
+    assert [record.avid for record in due] == ['ABC-123']
+
+
 async def test_active_avids_covers_only_the_states_the_tracker_owns() -> None:
     ledger = make_ledger()
     await start_downloading(ledger, 'ABC-123')
