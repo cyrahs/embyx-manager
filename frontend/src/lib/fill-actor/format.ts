@@ -9,7 +9,7 @@ import type {
   PlanJob,
 } from '../../types'
 import { errorMessage as sharedErrorMessage } from '../errors'
-import { ACTOR_ID, UNIT_LABELS } from './labels'
+import { ACTOR_ID, MAX_AVID_LENGTH, UNIT_LABELS } from './labels'
 
 export function parseActorIds(value: string) {
   const values = value
@@ -19,6 +19,17 @@ export function parseActorIds(value: string) {
   const actorIds = [...new Set(values)]
   const invalid = actorIds.filter((item) => !ACTOR_ID.test(item))
   return { actorIds, invalid, duplicateCount: values.length - actorIds.length }
+}
+
+/** AVIDs are case-folded to the upper form the server stores, which also settles duplicates. */
+export function parseAvids(value: string) {
+  const values = value
+    .split(/[\s,，;；]+/)
+    .map((item) => item.trim().toUpperCase())
+    .filter(Boolean)
+  const avids = [...new Set(values)]
+  const invalid = avids.filter((item) => item.length > MAX_AVID_LENGTH)
+  return { avids, invalid, duplicateCount: values.length - avids.length }
 }
 
 export function jobState(job: PlanJob | null): JobState | null {

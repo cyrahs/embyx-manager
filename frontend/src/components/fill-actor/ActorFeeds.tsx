@@ -3,7 +3,14 @@ import { FEED_ERROR_LABELS, FEED_STATE_LABELS } from '../../lib/fill-actor/label
 import type { ActorFeedStatus } from '../../types'
 import { ExternalIcon, FeedIcon, FeedStateIcon } from '../Icons'
 
-export function ActorFeeds({ feeds }: { feeds: ActorFeedStatus[] }) {
+export function ActorFeeds({
+  feeds,
+  actorNames,
+}: {
+  feeds: ActorFeedStatus[]
+  /** Actor display names keyed by lower-cased actor ID; missing ones fall back to the ID. */
+  actorNames: Record<string, string>
+}) {
   return (
     <section className="feed-panel" aria-labelledby="feed-title">
       <div className="feed-panel-heading">
@@ -28,11 +35,18 @@ export function ActorFeeds({ feeds }: { feeds: ActorFeedStatus[] }) {
                   ? `错误：${FEED_ERROR_LABELS[feed.error_code] ?? feed.error_code}`
                   : '缓存预热未能完成。'
                 : null
+          const actorName = actorNames[feed.actor_id.toLowerCase()]
+          const meta = [
+            // The ID moves to the second line once a name headlines the row, so it stays readable.
+            ...(actorName ? [feed.actor_id] : []),
+            `已尝试 ${feed.attempts} 次`,
+            formatFeedUpdatedAt(feed.updated_at),
+          ]
           return (
             <li className={`feed-row feed-${feed.state}`} key={feed.actor_id}>
               <span className="feed-actor">
-                <strong>{feed.actor_id}</strong>
-                <small>{`已尝试 ${feed.attempts} 次 · ${formatFeedUpdatedAt(feed.updated_at)}`}</small>
+                <strong>{actorName ?? feed.actor_id}</strong>
+                <small>{meta.join(' · ')}</small>
               </span>
               <span className="feed-state" role="status" aria-live="polite">
                 <FeedStateIcon state={feed.state} />

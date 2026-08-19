@@ -86,6 +86,7 @@ export function VideoGroup({
   applyResult,
   selectionLocked,
   filtered,
+  actorNames,
 }: {
   group: VideoGroupDef
   videos: VideoPlan[]
@@ -94,6 +95,8 @@ export function VideoGroup({
   applyResult: ApplyResult | null
   selectionLocked: boolean
   filtered: boolean
+  /** Actor display names keyed by lower-cased actor ID; missing ones fall back to the ID. */
+  actorNames: Record<string, string>
 }) {
   const [expanded, setExpanded] = useState(group.defaultExpanded)
   // An active filter reveals matches wherever they are; collapsing again would hide the answer.
@@ -131,6 +134,7 @@ export function VideoGroup({
               toggleCandidate={toggleCandidate}
               applyResult={applyResult}
               selectionLocked={selectionLocked}
+              actorNames={actorNames}
             />
           ))}
         </div>
@@ -145,14 +149,25 @@ function VideoRow({
   toggleCandidate,
   applyResult,
   selectionLocked,
+  actorNames,
 }: {
   video: VideoPlan
   selected: Set<string>
   toggleCandidate: (candidate: MoveCandidate) => void
   applyResult: ApplyResult | null
   selectionLocked: boolean
+  actorNames: Record<string, string>
 }) {
   const warnings = video.warnings.length ? video.warnings.map(videoWarningLabel).join(' · ') : null
+  // The column reads as a name once one is known; the ID stays in the tooltip, which is
+  // where it is still wanted — two actors can share a stage name, IDs never collide.
+  const actorLabels = video.actor_ids.map((actorId) => actorNames[actorId.toLowerCase()] ?? actorId)
+  const actorTitle = video.actor_ids
+    .map((actorId) => {
+      const name = actorNames[actorId.toLowerCase()]
+      return name ? `${name}（${actorId}）` : actorId
+    })
+    .join(' · ')
   return (
     <article className="video-row">
       <span className="video-id">{video.video_id}</span>
@@ -201,8 +216,8 @@ function VideoRow({
         })}
         {warnings && <span className="row-warning">{warnings}</span>}
       </div>
-      <span className="video-actors" title={video.actor_ids.join(' · ')}>
-        {video.actor_ids.join(' · ')}
+      <span className="video-actors" title={actorTitle}>
+        {actorLabels.join(' · ')}
       </span>
     </article>
   )

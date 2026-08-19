@@ -33,7 +33,11 @@ const ACTIVE_PLAN_KEY = 'embyx-manager-fill-actor-plan-id'
 const ACTIVE_APPLY_KEY = 'embyx-manager-fill-actor-apply'
 const LEGACY_ACTIVE_PLAN_KEY = 'embyx-manager-active-plan-id'
 const LEGACY_ACTIVE_APPLY_KEY = 'embyx-manager-active-apply'
+const ACTOR_NAMES_KEY = 'embyx-manager-fill-actor-actor-names'
 const PLAN_ID = /^[A-Za-z0-9_-]{1,256}$/
+const ACTOR_ID = /^[A-Za-z0-9_-]{1,32}$/
+const MAX_ACTOR_NAMES = 64
+const MAX_ACTOR_NAME_LENGTH = 128
 const REQUEST_ID = /^[A-Za-z0-9_-]{16,128}$/
 const APPLY_JOB_STATES = new Set<JobState>(['queued', 'running', 'completed', 'partial_failed', 'failed'])
 const MOVE_STATES = new Set<MoveState>(['moved', 'stale', 'conflict', 'invalid_path', 'failed'])
@@ -202,6 +206,43 @@ export function setActiveApplyRequest(value: ActiveApplyRequest | null): void {
     else window.sessionStorage.removeItem(ACTIVE_APPLY_KEY)
   } catch {
     // Storage restrictions must not block an already-authorized move.
+  }
+}
+
+/**
+ * Actor display names learned during this scan session — from an AVID lookup or from a
+ * FreshRSS subscription hit — so the feed list can name the actor it is warming instead of
+ * showing a bare ID. Kept beside the recovered plan so a reload does not lose them.
+ */
+function normalizeActorNames(value: unknown): Record<string, string> {
+  if (!isRecord(value)) return {}
+  const names: Record<string, string> = {}
+  // Newest last, so the cap drops the actors furthest from what is on screen now.
+  for (const [actorId, name] of Object.entries(value).slice(-MAX_ACTOR_NAMES)) {
+    if (!ACTOR_ID.test(actorId) || typeof name !== 'string') continue
+    const trimmed = name.trim().slice(0, MAX_ACTOR_NAME_LENGTH)
+    if (trimmed) names[actorId.toLowerCase()] = trimmed
+  }
+  return names
+}
+
+export function getActorNames(): Record<string, string> {
+  try {
+    const raw = window.sessionStorage.getItem(ACTOR_NAMES_KEY)
+    if (!raw) return {}
+    return normalizeActorNames(JSON.parse(raw) as unknown)
+  } catch {
+    return {}
+  }
+}
+
+export function setActorNames(value: Record<string, string>): void {
+  try {
+    const names = normalizeActorNames(value)
+    if (Object.keys(names).length) window.sessionStorage.setItem(ACTOR_NAMES_KEY, JSON.stringify(names))
+    else window.sessionStorage.removeItem(ACTOR_NAMES_KEY)
+  } catch {
+    // Names are a display nicety; storage restrictions must not block a scan.
   }
 }
 
