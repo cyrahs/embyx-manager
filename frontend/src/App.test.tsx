@@ -400,6 +400,36 @@ describe('Fill Actor page', () => {
       .toEqual({ a123: '演员甲' })
   })
 
+  it('keeps the bare ID when JavBus has no name for the actor', async () => {
+    const user = userEvent.setup()
+    vi.mocked(fetch)
+      .mockImplementationOnce(() => jsonResponse({ status: 'ok' }))
+      // The lookup falls back to the ID as the name when the video page carries none.
+      .mockImplementationOnce(() => jsonResponse({ avid: 'ABC-123', actors: [{ actor_id: 'A123', name: 'A123' }] }))
+      .mockImplementationOnce(() => jsonResponse({
+        job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
+        plan,
+        feeds: [{
+          actor_id: 'A123',
+          state: 'ready',
+          attempts: 2,
+          updated_at: '2026-07-13T10:02:00Z',
+          error_code: null,
+          freshrss_add_url: null,
+          freshrss_url: null,
+        }],
+      }, 202))
+
+    render(<App />)
+    await user.type(screen.getByLabelText('AVID'), 'ABC-123')
+    await user.click(screen.getByRole('button', { name: '开始扫描' }))
+
+    const feedPanel = await screen.findByRole('region', { name: 'RSSHub 缓存' })
+    expect(within(feedPanel).getByText('A123')).toBeInTheDocument()
+    expect(within(feedPanel).getByText('已尝试 2 次', { exact: false })).not.toHaveTextContent('A123')
+    expect(window.sessionStorage.getItem('embyx-manager-fill-actor-actor-names')).toBeNull()
+  })
+
   it('names the actor column on the result rows and filters on that name', async () => {
     const user = userEvent.setup()
     vi.mocked(fetch)

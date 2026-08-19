@@ -468,8 +468,11 @@ export default function FillActorPage() {
   /** Learns actor names wherever a lookup happens to return them; unnamed actors keep their ID. */
   function rememberActorNames(entries: Array<{ actorId: string; actorName: string | null }>) {
     const named = entries.flatMap((entry) => {
+      const actorId = entry.actorId.toLowerCase()
       const name = entry.actorName?.trim()
-      return name ? [[entry.actorId.toLowerCase(), name] as const] : []
+      // JavBus falls back to the ID when a page carries no name; storing that would only
+      // print the ID twice, once as the headline and once in the line below it.
+      return name && name.toLowerCase() !== actorId ? [[actorId, name] as const] : []
     })
     if (!named.length) return
     setActorNames((current) => ({ ...current, ...Object.fromEntries(named) }))
