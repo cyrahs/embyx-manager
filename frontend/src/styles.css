@@ -229,7 +229,7 @@ main {
 .notice svg { width: 16px; height: 16px; }
 .notice > div { flex: 1; min-width: 0; }
 .notice strong { color: var(--text); font-size: 13px; }
-.notice p { margin: 3px 0 0; color: var(--text-2); font-size: 12px; line-height: 1.6; }
+.notice p { margin: 3px 0 0; color: var(--text-2); font-size: 12px; line-height: 1.6; white-space: pre-line; }
 .notice-error { border-color: rgba(245, 144, 137, .34); background: rgba(245, 144, 137, .06); }
 .notice-error > span { color: var(--red); background: rgba(245, 144, 137, .12); }
 .notice-warning { border-color: rgba(245, 194, 116, .32); background: rgba(245, 194, 116, .05); }
@@ -430,6 +430,10 @@ main {
 .confirm-list { margin-top: 14px; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
 .confirm-list span { display: block; padding: 7px 11px; border-bottom: 1px solid var(--line); color: var(--text-2); font: 400 12px var(--font-mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .confirm-list span:last-child { border-bottom: 0; }
+.avid-choice-dialog { max-height: 86vh; overflow-y: auto; }
+.actor-choice-group + .actor-choice-group { margin-top: 4px; }
+.actor-choice-avid { margin-top: 14px; display: block; color: var(--text-3); font: 500 12px var(--font-mono); }
+.actor-choice-avid + .actor-choice-list { margin-top: 6px; }
 .actor-choice-list { margin-top: 14px; display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
 .actor-choice-list label { min-height: 48px; padding: 8px 11px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--line); cursor: pointer; }
 .actor-choice-list label:last-child { border-bottom: 0; }

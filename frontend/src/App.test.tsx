@@ -90,6 +90,12 @@ const twoCandidatePlan: FillActorPlan = {
     : video),
 }
 
+/** The scan panel opens in AVID mode, so an actor-ID scan starts by switching the input. */
+async function typeActorIds(user: ReturnType<typeof userEvent.setup>, value: string) {
+  await user.click(screen.getByRole('button', { name: '演员 ID' }))
+  await user.type(screen.getByLabelText('演员 ID'), value)
+}
+
 function jsonResponse(body: unknown, status = 200) {
   return Promise.resolve(new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } }))
 }
@@ -171,8 +177,7 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse({ job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' }, plan }))
 
     render(<App />)
-    const input = screen.getByLabelText('演员 ID')
-    await user.type(input, 'A123, B456 A123')
+    await typeActorIds(user, 'A123, B456 A123')
     expect(screen.getByText('1 个重复项已自动合并')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
 
@@ -205,7 +210,6 @@ describe('Fill Actor page', () => {
       }, 202))
 
     render(<App />)
-    await user.click(screen.getByRole('button', { name: 'AVID' }))
     await user.type(screen.getByLabelText('AVID'), 'abc-123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
 
@@ -213,13 +217,259 @@ describe('Fill Actor page', () => {
     expect(fetchMock).toHaveBeenNthCalledWith(
       2,
       '/api/fill-actor/avid-actors',
-      expect.objectContaining({ body: JSON.stringify({ avid: 'abc-123' }), method: 'POST' }),
+      expect.objectContaining({ body: JSON.stringify({ avid: 'ABC-123' }), method: 'POST' }),
     )
     expect(fetchMock).toHaveBeenNthCalledWith(
       3,
       '/api/fill-actor/plans',
       expect.objectContaining({ body: JSON.stringify({ actor_ids: ['A123'] }), method: 'POST' }),
     )
+  })
+
+  it('starts the AVID scan from Ctrl+Enter without reaching for the button', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.mocked(fetch)
+    fetchMock
+      .mockImplementationOnce(() => jsonResponse({ status: 'ok' }))
+      .mockImplementationOnce(() => jsonResponse({
+        avid: 'ABC-123',
+        actors: [{ actor_id: 'A123', name: '演员甲' }],
+      }))
+      .mockImplementationOnce(() => jsonResponse({
+        job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
+        plan,
+      }, 202))
+
+    render(<App />)
+    await user.type(screen.getByLabelText('AVID'), 'ABC-123{Control>}{Enter}{/Control}')
+
+    expect(await screen.findByText('扫描结果')).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      '/api/fill-actor/avid-actors',
+      expect.objectContaining({ body: JSON.stringify({ avid: 'ABC-123' }), method: 'POST' }),
+    )
+  })
+
+  it('resolves every AVID of a newline-separated batch into one scan', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.mocked(fetch)
+    fetchMock
+      .mockImplementationOnce(() => jsonResponse({ status: 'ok' }))
+      .mockImplementationOnce(() => jsonResponse({ avid: 'ABC-123', actors: [{ actor_id: 'A123', name: '演员甲' }] }))
+      .mockImplementationOnce(() => jsonResponse({ avid: 'DEF-456', actors: [{ actor_id: 'B456', name: '演员乙' }] }))
+      // The third AVID credits an actor the batch already has, which must not scan twice.
+      .mockImplementationOnce(() => jsonResponse({ avid: 'GHI-789', actors: [{ actor_id: 'A123', name: '演员甲' }] }))
+      .mockImplementationOnce(() => jsonResponse({
+        job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
+        plan,
+      }, 202))
+
+    render(<App />)
+    await user.type(screen.getByLabelText('AVID'), 'abc-123\ndef-456\nghi-789')
+    expect(screen.getByText('3 / 20')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '开始扫描' }))
+
+    expect(await screen.findByText('扫描结果')).toBeInTheDocument()
+    expect(fetchMock.mock.calls.slice(1, 4).map(([, init]) => init?.body)).toEqual([
+      JSON.stringify({ avid: 'ABC-123' }),
+      JSON.stringify({ avid: 'DEF-456' }),
+      JSON.stringify({ avid: 'GHI-789' }),
+    ])
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      5,
+      '/api/fill-actor/plans',
+      expect.objectContaining({ body: JSON.stringify({ actor_ids: ['A123', 'B456'] }), method: 'POST' }),
+    )
+  })
+
+  it('asks about every ambiguous AVID in one dialog and scans the picks with the settled ones', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.mocked(fetch)
+    fetchMock
+      .mockImplementationOnce(() => jsonResponse({ status: 'ok' }))
+      .mockImplementationOnce(() => jsonResponse({ avid: 'ABC-123', actors: [{ actor_id: 'A123', name: '演员甲' }] }))
+      .mockImplementationOnce(() => jsonResponse({
+        avid: 'DEF-456',
+        actors: [{ actor_id: 'B456', name: '演员乙' }, { actor_id: 'C789', name: '演员丙' }],
+      }))
+      .mockImplementationOnce(() => jsonResponse({
+        avid: 'GHI-789',
+        actors: [{ actor_id: 'D012', name: '演员丁' }, { actor_id: 'E345', name: '演员戊' }],
+      }))
+      .mockImplementationOnce(() => jsonResponse({
+        job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
+        plan,
+      }, 202))
+
+    render(<App />)
+    await user.type(screen.getByLabelText('AVID'), 'ABC-123\nDEF-456\nGHI-789')
+    await user.click(screen.getByRole('button', { name: '开始扫描' }))
+
+    const dialog = await screen.findByRole('dialog', { name: '选择要补全的演员' })
+    expect(within(dialog).getByText('2 个番号各包含多位演员，请分别选择本次要扫描的演员。')).toBeInTheDocument()
+    expect(within(dialog).getByText('DEF-456')).toBeInTheDocument()
+    expect(within(dialog).getByText('GHI-789')).toBeInTheDocument()
+    // The second group keeps its own default, so only the first one is switched here.
+    await user.click(within(dialog).getByRole('radio', { name: /演员丙/ }))
+    await user.click(within(dialog).getByRole('button', { name: '扫描所选演员' }))
+
+    expect(await screen.findByText('扫描结果')).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      5,
+      '/api/fill-actor/plans',
+      expect.objectContaining({ body: JSON.stringify({ actor_ids: ['A123', 'C789', 'D012'] }), method: 'POST' }),
+    )
+  })
+
+  it('scans the rest of the batch when one AVID cannot be resolved', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.mocked(fetch)
+    fetchMock
+      .mockImplementationOnce(() => jsonResponse({ status: 'ok' }))
+      .mockImplementationOnce(() => jsonResponse({ error: { code: 'avid_actors_not_found' } }, 404))
+      .mockImplementationOnce(() => jsonResponse({ avid: 'DEF-456', actors: [{ actor_id: 'B456', name: '演员乙' }] }))
+      .mockImplementationOnce(() => jsonResponse({
+        job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
+        plan,
+      }, 202))
+
+    render(<App />)
+    await user.type(screen.getByLabelText('AVID'), 'ABC-123\nDEF-456')
+    await user.click(screen.getByRole('button', { name: '开始扫描' }))
+
+    expect(await screen.findByText('扫描结果')).toBeInTheDocument()
+    expect(screen.getByText('1 个番号未能获取演员')).toBeInTheDocument()
+    expect(screen.getByText('ABC-123：JavBus 的影片页面中没有找到演员信息。')).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      4,
+      '/api/fill-actor/plans',
+      expect.objectContaining({ body: JSON.stringify({ actor_ids: ['B456'] }), method: 'POST' }),
+    )
+  })
+
+  it('refuses a batch longer than the scan limit before any lookup runs', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.mocked(fetch)
+    fetchMock.mockImplementation(() => jsonResponse({ status: 'ok' }))
+
+    render(<App />)
+    await user.type(
+      screen.getByLabelText('AVID'),
+      Array.from({ length: 21 }, (_, index) => `ABC-${index}`).join('\n'),
+    )
+
+    expect(screen.getByText('21 / 20')).toBeInTheDocument()
+    expect(screen.getByText('每次最多输入 20 个番号。')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '开始扫描' })).toBeDisabled()
+  })
+
+  it('names the warming feeds with the actor the AVID resolved to', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.mocked(fetch)
+    fetchMock
+      .mockImplementationOnce(() => jsonResponse({ status: 'ok' }))
+      .mockImplementationOnce(() => jsonResponse({
+        avid: 'ABC-123',
+        actors: [{ actor_id: 'A123', name: '演员甲' }],
+      }))
+      .mockImplementationOnce(() => jsonResponse({
+        job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
+        plan,
+        feeds: [{
+          actor_id: 'A123',
+          state: 'ready',
+          attempts: 2,
+          updated_at: '2026-07-13T10:02:00Z',
+          error_code: null,
+          freshrss_add_url: null,
+          freshrss_url: null,
+        }],
+      }, 202))
+
+    render(<App />)
+    await user.type(screen.getByLabelText('AVID'), 'ABC-123')
+    await user.click(screen.getByRole('button', { name: '开始扫描' }))
+
+    const feedPanel = await screen.findByRole('region', { name: 'RSSHub 缓存' })
+    const feedRow = within(feedPanel).getByText('演员甲').closest('li')
+    expect(feedRow).not.toBeNull()
+    expect(within(feedRow!).getByText('A123 · 已尝试 2 次', { exact: false })).toBeInTheDocument()
+    expect(within(feedRow!).getByText('缓存已就绪')).toBeInTheDocument()
+    expect(JSON.parse(window.sessionStorage.getItem('embyx-manager-fill-actor-actor-names') ?? '{}'))
+      .toEqual({ a123: '演员甲' })
+  })
+
+  it('names the actor column on the result rows and filters on that name', async () => {
+    const user = userEvent.setup()
+    vi.mocked(fetch)
+      .mockImplementationOnce(() => jsonResponse({ status: 'ok' }))
+      .mockImplementationOnce(() => jsonResponse({
+        avid: 'ABC-123',
+        actors: [{ actor_id: 'A123', name: '演员甲' }],
+      }))
+      .mockImplementationOnce(() => jsonResponse({
+        job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
+        plan,
+        feeds: [],
+      }, 202))
+
+    render(<App />)
+    await user.type(screen.getByLabelText('AVID'), 'ABC-123')
+    await user.click(screen.getByRole('button', { name: '开始扫描' }))
+
+    await screen.findByText('扫描结果')
+    const namedRow = screen.getByText('ABC-001').closest('article')
+    expect(namedRow).not.toBeNull()
+    expect(within(namedRow!).getByTitle('演员甲（A123）')).toHaveTextContent('演员甲')
+
+    const filter = screen.getByLabelText('筛选扫描结果')
+    // B456 never went through a lookup, so its rows keep showing the bare ID.
+    await user.type(filter, 'B456')
+    expect(within(screen.getByText('XYZ-002').closest('article')!).getByTitle('B456')).toHaveTextContent('B456')
+
+    await user.clear(filter)
+    await user.type(filter, '演员甲')
+
+    expect(screen.getByText('ABC-001')).toBeInTheDocument()
+    expect(screen.queryByText('XYZ-002')).not.toBeInTheDocument()
+  })
+
+  it('keeps naming a recovered scan\'s feeds after a reload drops the page state', async () => {
+    window.sessionStorage.setItem('embyx-manager-fill-actor-plan-id', 'plan-1')
+    window.sessionStorage.setItem('embyx-manager-fill-actor-actor-names', JSON.stringify({ a123: '演员甲' }))
+    vi.mocked(fetch)
+      .mockImplementationOnce(() => jsonResponse({ status: 'ok' }))
+      .mockImplementation(() => jsonResponse({
+        job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
+        plan,
+        feeds: [{
+          actor_id: 'A123',
+          state: 'ready',
+          attempts: 1,
+          updated_at: '2026-07-13T10:02:00Z',
+          error_code: null,
+          freshrss_add_url: null,
+          freshrss_url: null,
+        }],
+      }))
+
+    render(<App />)
+
+    const feedPanel = await screen.findByRole('region', { name: 'RSSHub 缓存' })
+    expect(within(feedPanel).getByText('演员甲')).toBeInTheDocument()
+  })
+
+  it('drops text that cannot mean anything in the mode being switched to', async () => {
+    const user = userEvent.setup()
+    vi.mocked(fetch).mockImplementation(() => jsonResponse({ status: 'ok' }))
+
+    render(<App />)
+    await user.type(screen.getByLabelText('AVID'), 'ABC-123')
+    await user.click(screen.getByRole('button', { name: '演员 ID' }))
+
+    expect(screen.getByLabelText('演员 ID')).toHaveValue('')
+    expect(screen.getByRole('button', { name: '开始扫描' })).toBeDisabled()
   })
 
   it('asks which actor to scan when an AVID has multiple actors', async () => {
@@ -240,7 +490,6 @@ describe('Fill Actor page', () => {
       }, 202))
 
     render(<App />)
-    await user.click(screen.getByRole('button', { name: 'AVID' }))
     await user.type(screen.getByLabelText('AVID'), 'ABC-123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
 
@@ -274,7 +523,7 @@ describe('Fill Actor page', () => {
       }, 202))
 
     render(<App />)
-    await user.type(screen.getByLabelText('演员 ID'), 'A123 B456')
+    await typeActorIds(user, 'A123 B456')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
 
     const dialog = await screen.findByRole('dialog', { name: 'FreshRSS 已有这些演员' })
@@ -309,7 +558,7 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse({ job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' }, plan }))
 
     render(<App />)
-    await user.type(screen.getByLabelText('演员 ID'), 'A123')
+    await typeActorIds(user, 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
 
     expect(await screen.findByText('任务已排队')).toBeInTheDocument()
@@ -354,7 +603,7 @@ describe('Fill Actor page', () => {
       .mockImplementation(() => jsonResponse(running, 202))
 
     render(<App />)
-    await user.type(screen.getByLabelText('演员 ID'), 'A123')
+    await typeActorIds(user, 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
 
     expect(await screen.findByText('正在扫描本地片库')).toBeInTheDocument()
@@ -386,7 +635,7 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse({ job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' }, plan }))
 
     render(<App />)
-    await user.type(screen.getByLabelText('演员 ID'), 'A123')
+    await typeActorIds(user, 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
 
     expect(await screen.findByText('暂时无法刷新任务状态，将自动重试。', {}, { timeout: 2_000 })).toBeInTheDocument()
@@ -470,7 +719,7 @@ describe('Fill Actor page', () => {
       )
 
     render(<App />)
-    await user.type(screen.getByLabelText('演员 ID'), 'A123')
+    await typeActorIds(user, 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
     await screen.findByText('扫描结果')
 
@@ -540,7 +789,7 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => terminalResponse)
 
     render(<App />)
-    await user.type(screen.getByLabelText('演员 ID'), 'A123')
+    await typeActorIds(user, 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
     await screen.findByText('扫描结果')
     await user.click(screen.getByRole('button', { name: '确认并移入' }))
@@ -624,7 +873,7 @@ describe('Fill Actor page', () => {
       }))
 
     render(<App />)
-    await user.type(screen.getByLabelText('演员 ID'), 'A123')
+    await typeActorIds(user, 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
     await screen.findByText('扫描结果')
     await user.click(screen.getByRole('button', { name: '确认并移入' }))
@@ -660,7 +909,7 @@ describe('Fill Actor page', () => {
       }))
 
     render(<App />)
-    await user.type(screen.getByLabelText('演员 ID'), 'A123')
+    await typeActorIds(user, 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
     await screen.findByText('扫描结果')
     await user.click(screen.getByRole('button', { name: '确认并移入' }))
@@ -778,7 +1027,7 @@ describe('Fill Actor page', () => {
 
     expect(await screen.findByText('扫描结果')).toBeInTheDocument()
     expect(await screen.findByText('正在移入文件', {}, { timeout: 3_000 })).toBeInTheDocument()
-    expect(screen.getByLabelText('演员 ID')).toBeDisabled()
+    expect(screen.getByLabelText('AVID')).toBeDisabled()
     expect(screen.getByText('文件移动已暂停')).toBeInTheDocument()
     expect(await screen.findByText('所选文件已全部移入', {}, { timeout: 4_000 })).toBeInTheDocument()
     await waitFor(() => expect(window.sessionStorage.getItem('embyx-manager-fill-actor-apply')).toBeNull())
@@ -922,7 +1171,7 @@ describe('Fill Actor page', () => {
       )
 
     render(<App />)
-    await user.type(screen.getByLabelText('演员 ID'), 'A123')
+    await typeActorIds(user, 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
     await screen.findByText('扫描结果')
     await user.click(screen.getByRole('button', { name: '确认并移入' }))
@@ -943,7 +1192,7 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse(plan))
 
     render(<App />)
-    await user.type(screen.getByLabelText('演员 ID'), 'A123')
+    await typeActorIds(user, 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
     await screen.findByText('扫描结果')
 
@@ -966,7 +1215,7 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse(plan))
 
     render(<App />)
-    await user.type(screen.getByLabelText('演员 ID'), 'A123')
+    await typeActorIds(user, 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
     await screen.findByText('扫描结果')
 
@@ -1051,7 +1300,7 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse(submittedPlan))
 
     render(<App />)
-    await user.type(screen.getByLabelText('演员 ID'), 'A123')
+    await typeActorIds(user, 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
     await screen.findByText('扫描结果')
 
@@ -1106,7 +1355,7 @@ describe('Fill Actor page', () => {
       }))
 
     render(<App />)
-    await user.type(screen.getByLabelText('演员 ID'), 'A123')
+    await typeActorIds(user, 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
 
     expect(await screen.findByText('缓存预热中')).toBeInTheDocument()
@@ -1154,7 +1403,7 @@ describe('Fill Actor page', () => {
       }))
 
     render(<App />)
-    await user.type(screen.getByLabelText('演员 ID'), 'A123')
+    await typeActorIds(user, 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
 
     expect(await screen.findByText('缓存已就绪')).toBeInTheDocument()
@@ -1196,7 +1445,7 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => pendingCancel)
 
     render(<App />)
-    await user.type(screen.getByLabelText('演员 ID'), 'A123')
+    await typeActorIds(user, 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
 
     await user.click(await screen.findByRole('button', { name: '取消扫描' }))
@@ -1245,7 +1494,7 @@ describe('Fill Actor page', () => {
       }))
 
     render(<App />)
-    await user.type(screen.getByLabelText('演员 ID'), 'A123')
+    await typeActorIds(user, 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
     await user.click(await screen.findByRole('button', { name: '取消扫描' }))
 
@@ -1273,7 +1522,7 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse({ error: { code: 'cancel_failed' } }, 503))
 
     render(<App />)
-    await user.type(screen.getByLabelText('演员 ID'), 'A123')
+    await typeActorIds(user, 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
     await user.click(await screen.findByRole('button', { name: '取消扫描' }))
 
@@ -1300,7 +1549,7 @@ describe('Fill Actor page', () => {
       }))
 
     render(<App />)
-    await user.type(screen.getByLabelText('演员 ID'), 'A123')
+    await typeActorIds(user, 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
     await user.click(await screen.findByRole('button', { name: '取消扫描' }))
 
@@ -1337,7 +1586,7 @@ describe('Fill Actor page', () => {
       }))
 
     render(<App />)
-    await user.type(screen.getByLabelText('演员 ID'), 'A123')
+    await typeActorIds(user, 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
     await user.click(await screen.findByRole('button', { name: '取消扫描' }))
 
@@ -1373,7 +1622,7 @@ describe('Fill Actor page', () => {
       }))
 
     render(<App />)
-    await user.type(screen.getByLabelText('演员 ID'), 'A123')
+    await typeActorIds(user, 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
     const cancelButton = await screen.findByRole('button', { name: '取消扫描' })
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3), { timeout: 2_000 })
@@ -1399,7 +1648,7 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse({ error: { code: 'expired_plan' } }, 410))
 
     render(<App />)
-    await user.type(screen.getByLabelText('演员 ID'), 'A123')
+    await typeActorIds(user, 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
     await screen.findByText('扫描结果')
     await user.click(screen.getByRole('button', { name: '确认并移入' }))
@@ -1419,7 +1668,7 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse({ error: { code: 'legacy_plan_requires_rescan' } }, 409))
 
     render(<App />)
-    await user.type(screen.getByLabelText('演员 ID'), 'A123')
+    await typeActorIds(user, 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
     await screen.findByText('扫描结果')
     await user.click(screen.getByRole('button', { name: '确认并移入' }))
@@ -1451,7 +1700,7 @@ describe('Fill Actor page', () => {
     })
 
     render(<App />)
-    await user.type(screen.getByLabelText('演员 ID'), 'A123')
+    await typeActorIds(user, 'A123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
     await screen.findByRole('dialog')
     await user.type(screen.getByLabelText('API Token'), 'rejected-then-saved')
@@ -1507,7 +1756,7 @@ describe('login gate', () => {
     render(<App />)
 
     expect(await screen.findByRole('heading', { name: '登录 Embyx Manager' })).toBeInTheDocument()
-    expect(screen.queryByLabelText('演员 ID')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('AVID')).not.toBeInTheDocument()
 
     await user.type(screen.getByLabelText('API Token'), 'wrong-token')
     await user.click(screen.getByRole('button', { name: '登录' }))
@@ -1518,7 +1767,7 @@ describe('login gate', () => {
     await user.type(screen.getByLabelText('API Token'), 'gate-token')
     await user.click(screen.getByRole('button', { name: '登录' }))
 
-    expect(await screen.findByLabelText('演员 ID')).toBeInTheDocument()
+    expect(await screen.findByLabelText('AVID')).toBeInTheDocument()
     expect(window.localStorage.getItem(TOKEN_KEY)).toBe('gate-token')
     expect(window.localStorage.getItem(AUTH_REQUIRED_KEY)).toBe('true')
   })
@@ -1529,7 +1778,7 @@ describe('login gate', () => {
     render(<App />)
 
     expect(screen.getByRole('heading', { name: '登录 Embyx Manager' })).toBeInTheDocument()
-    expect(screen.queryByLabelText('演员 ID')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('AVID')).not.toBeInTheDocument()
   })
 
   it('reuses a stored token across reloads and signs out on request', async () => {
@@ -1540,7 +1789,7 @@ describe('login gate', () => {
 
     render(<App />)
 
-    expect(await screen.findByLabelText('演员 ID')).toBeInTheDocument()
+    expect(await screen.findByLabelText('AVID')).toBeInTheDocument()
     await waitFor(() => expect(fetch).toHaveBeenCalledWith(
       '/api/auth/session',
       expect.objectContaining({ headers: expect.objectContaining({ Authorization: 'Bearer stored-token' }) }),
@@ -1570,7 +1819,7 @@ describe('login gate', () => {
     stubTokenServer('shared-token')
 
     render(<App />)
-    expect(await screen.findByLabelText('演员 ID')).toBeInTheDocument()
+    expect(await screen.findByLabelText('AVID')).toBeInTheDocument()
 
     act(() => {
       window.localStorage.removeItem(TOKEN_KEY)
@@ -1585,7 +1834,7 @@ describe('login gate', () => {
 
     render(<App />)
 
-    expect(await screen.findByLabelText('演员 ID')).toBeInTheDocument()
+    expect(await screen.findByLabelText('AVID')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '退出登录' })).not.toBeInTheDocument()
     expect(window.localStorage.getItem(AUTH_REQUIRED_KEY)).toBeNull()
   })

@@ -7,11 +7,13 @@ import {
   createPlan,
   getActiveApplyRequest,
   getActivePlanId,
+  getActorNames,
   getApplyJob,
   getPlan,
   resolveAvidActors,
   setActiveApplyRequest,
   setActivePlanId,
+  setActorNames as storeActorNames,
   startApplyJob,
 } from '../api'
 import type { AppContext } from '../App'
@@ -33,9 +35,10 @@ import {
   isJobPending,
   jobState,
   parseActorIds,
+  parseAvids,
   terminalApplyJob,
 } from '../lib/fill-actor/format'
-import { MAX_ACTORS, STALE_CODES, VIDEO_GROUPS, jobErrorLabel } from '../lib/fill-actor/labels'
+import { MAX_ACTORS, MAX_AVIDS, STALE_CODES, VIDEO_GROUPS, jobErrorLabel } from '../lib/fill-actor/labels'
 import type {
   ActiveApplyRequest,
   AvidActors,
@@ -49,12 +52,13 @@ import type {
   VideoPlan,
 } from '../types'
 
-function matchesQuery(video: VideoPlan, query: string) {
+function matchesQuery(video: VideoPlan, query: string, actorNames: Record<string, string>) {
   if (!query) return true
   const needle = query.toLowerCase()
   return (
     video.video_id.toLowerCase().includes(needle) ||
     video.actor_ids.some((actorId) => actorId.toLowerCase().includes(needle)) ||
+    video.actor_ids.some((actorId) => actorNames[actorId.toLowerCase()]?.toLowerCase().includes(needle)) ||
     video.move_candidates.some((candidate) => candidate.file_name.toLowerCase().includes(needle)) ||
     video.existing_files.some((file) => file.toLowerCase().includes(needle))
   )
@@ -65,9 +69,14 @@ export default function FillActorPage() {
   const [recoveredApply] = useState(getActiveApplyRequest)
   const recoveredPlanId = recoveredScanPlanId ?? recoveredApply?.planId ?? null
   const [input, setInput] = useState('')
-  const [inputMode, setInputMode] = useState<'actor' | 'avid'>('actor')
+  // AVID is the everyday entry point — an operator has the code in hand far more often than
+  // the actor ID — so the panel opens there and keeps actor IDs one click away.
+  const [inputMode, setInputMode] = useState<'actor' | 'avid'>('avid')
+  const [actorNames, setActorNames] = useState<Record<string, string>>(getActorNames)
   const [resolvingAvid, setResolvingAvid] = useState(false)
-  const [avidActorChoice, setAvidActorChoice] = useState<AvidActors | null>(null)
+  const [avidProgress, setAvidProgress] = useState<{ completed: number; total: number } | null>(null)
+  const [avidActorChoice, setAvidActorChoice] = useState<{ choices: AvidActors[]; settled: string[] } | null>(null)
+  const [avidFailures, setAvidFailures] = useState<Array<{ avid: string; message: string }>>([])
   const [authRequired, setAuthRequired] = useState(false)
   const apiToken = useApiTokenValue()
   const { health, setHealth, requestApiToken } = useOutletContext<AppContext>()
@@ -110,6 +119,7 @@ export default function FillActorPage() {
   const activeApplyController = useRef<AbortController | null>(null)
   const activeApplyPlanController = useRef<AbortController | null>(null)
   const parsed = useMemo(() => parseActorIds(input), [input])
+  const parsedAvids = useMemo(() => parseAvids(input), [input])
   const candidates = useMemo(() => candidateMap(plan), [plan])
   const submittedCount = useMemo(
     () =>
@@ -142,8 +152,8 @@ export default function FillActorPage() {
   const applyEnabled = fillActorHealth?.apply_ready === true
   const trimmedQuery = query.trim()
   const visibleVideos = useMemo(
-    () => (plan?.videos ?? []).filter((video) => matchesQuery(video, trimmedQuery)),
-    [plan, trimmedQuery],
+    () => (plan?.videos ?? []).filter((video) => matchesQuery(video, trimmedQuery, actorNames)),
+    [actorNames, plan, trimmedQuery],
   )
   const notConfigured = fillActorHealth?.configured === false
   const scanNotice = !fillActorHealth || fillActorHealth.scan_ready !== false
@@ -193,6 +203,11 @@ export default function FillActorPage() {
     if (planId && envelopePending) setActivePlanId(planId)
     else if (job || plan) setActivePlanId(null)
   }, [envelopePending, job, plan, planId])
+
+  // Names ride along with the recovered plan so a reload keeps naming the warming feeds.
+  useEffect(() => {
+    storeActorNames(actorNames)
+  }, [actorNames])
 
   useEffect(() => {
     if (!plan) return
@@ -450,6 +465,16 @@ export default function FillActorPage() {
     activeApplyPlanController.current?.abort()
   }, [])
 
+  /** Learns actor names wherever a lookup happens to return them; unnamed actors keep their ID. */
+  function rememberActorNames(entries: Array<{ actorId: string; actorName: string | null }>) {
+    const named = entries.flatMap((entry) => {
+      const name = entry.actorName?.trim()
+      return name ? [[entry.actorId.toLowerCase(), name] as const] : []
+    })
+    if (!named.length) return
+    setActorNames((current) => ({ ...current, ...Object.fromEntries(named) }))
+  }
+
   async function startScan(actorIds = parsed.actorIds, continueIfSubscribed = false) {
     if (
       applyPending
@@ -514,6 +539,7 @@ export default function FillActorPage() {
         const existingActors = detailedActors.length ? detailedActors : fallbackActors
         const uniqueActors = [...new Map(existingActors.map((actor) => [actor.actorId.toLowerCase(), actor])).values()]
         if (uniqueActors.length) {
+          rememberActorNames(uniqueActors)
           setSubscriptionConflict({ actorIds: [...actorIds], existingActors: uniqueActors })
           return
         }
@@ -528,30 +554,60 @@ export default function FillActorPage() {
     }
   }
 
+  /** Scans the actors an AVID batch resolved to, once every ambiguous AVID has been decided. */
+  async function scanResolvedActors(actorIds: string[]) {
+    const unique = [...new Map(actorIds.map((actorId) => [actorId.toLowerCase(), actorId])).values()]
+    if (!unique.length) return
+    if (unique.length > MAX_ACTORS) {
+      // startScan refuses this silently, which from the panel looks like a dead button.
+      setError(`这些番号共有 ${unique.length} 位演员，超过单次 ${MAX_ACTORS} 位的上限，请减少番号数量。`)
+      return
+    }
+    await startScan(unique)
+  }
+
   async function submitInput() {
     if (inputMode === 'actor') {
       await startScan(parsed.actorIds)
       return
     }
-    const avid = input.trim()
-    if (!avid || resolvingAvid || submitting || jobPending || applyPending) return
+    const avids = parsedAvids.avids
+    if (!avids.length || parsedAvids.invalid.length || avids.length > MAX_AVIDS) return
+    if (resolvingAvid || submitting || jobPending || applyPending) return
     setResolvingAvid(true)
+    setAvidProgress({ completed: 0, total: avids.length })
     setError(null)
+    setAvidFailures([])
+    const resolved: AvidActors[] = []
+    const failures: Array<{ avid: string; message: string }> = []
     try {
-      const result = await resolveAvidActors(avid)
-      if (result.actors.length === 1) {
-        await startScan([result.actors[0].actor_id])
-      } else {
-        setAvidActorChoice(result)
+      // One at a time: each lookup scrapes a JavBus page, and a batch should not fan out onto it.
+      for (const avid of avids) {
+        try {
+          const result = await resolveAvidActors(avid)
+          rememberActorNames(result.actors.map((actor) => ({ actorId: actor.actor_id, actorName: actor.name })))
+          resolved.push(result)
+        } catch (lookupError) {
+          if (lookupError instanceof ApiError && lookupError.code === 'unauthorized') {
+            setAuthRequired(true)
+            requestApiToken()
+            setError(errorMessage(lookupError))
+            return
+          }
+          failures.push({ avid, message: errorMessage(lookupError) })
+        } finally {
+          setAvidProgress((current) => current && { ...current, completed: current.completed + 1 })
+        }
       }
-    } catch (lookupError) {
-      if (lookupError instanceof ApiError && lookupError.code === 'unauthorized') {
-        setAuthRequired(true)
-        requestApiToken()
-      }
-      setError(errorMessage(lookupError))
+      // A bad AVID in the middle of a batch costs that one AVID, not the whole scan.
+      setAvidFailures(failures)
+      const settled = resolved.filter((result) => result.actors.length === 1).map((result) => result.actors[0].actor_id)
+      const ambiguous = resolved.filter((result) => result.actors.length > 1)
+      if (ambiguous.length) setAvidActorChoice({ choices: ambiguous, settled })
+      else await scanResolvedActors(settled)
     } finally {
       setResolvingAvid(false)
+      setAvidProgress(null)
     }
   }
 
@@ -656,11 +712,19 @@ export default function FillActorPage() {
           input={input}
           onInputChange={setInput}
           inputMode={inputMode}
-          onInputModeChange={setInputMode}
+          onInputModeChange={(mode) => {
+            if (mode === inputMode) return
+            // One AVID and a list of actor IDs never parse as each other, so carrying the
+            // old text across the switch only produces a validation error to clear by hand.
+            setInput('')
+            setInputMode(mode)
+          }}
           parsed={parsed}
+          parsedAvids={parsedAvids}
           locked={scanLocked}
           submitting={submitting}
           resolvingAvid={resolvingAvid}
+          avidProgress={avidProgress}
           jobPending={jobPending}
           applyPending={applyPending}
           onScan={() => void submitInput()}
@@ -704,6 +768,13 @@ export default function FillActorPage() {
 
         {applyResult && <ApplySummary result={applyResult} />}
 
+        {avidFailures.length > 0 && (
+          <Notice
+            tone="warning"
+            title={`${avidFailures.length} 个番号未能获取演员`}
+            body={avidFailures.map((failure) => `${failure.avid}：${failure.message}`).join('\n')}
+          />
+        )}
         {error && <Notice tone="error" title="操作未完成" body={error} />}
         {jobCancelled && (
           <Notice tone="neutral" title="扫描已取消" body="任务已停止，未生成可应用的扫描结果。" />
@@ -761,6 +832,7 @@ export default function FillActorPage() {
                       applyResult={applyResult}
                       selectionLocked={applyPending}
                       filtered={Boolean(trimmedQuery)}
+                      actorNames={actorNames}
                     />
                   )
                 })}
@@ -815,7 +887,7 @@ export default function FillActorPage() {
           </>
         )}
 
-        {feeds.length > 0 && !jobCancelled && <ActorFeeds feeds={feeds} />}
+        {feeds.length > 0 && !jobCancelled && <ActorFeeds feeds={feeds} actorNames={actorNames} />}
       </main>
 
       {confirmOpen && applyEnabled && (
@@ -839,12 +911,12 @@ export default function FillActorPage() {
 
       {avidActorChoice && (
         <AvidActorChoiceDialog
-          avid={avidActorChoice.avid}
-          actors={avidActorChoice.actors}
+          choices={avidActorChoice.choices}
           onCancel={() => setAvidActorChoice(null)}
-          onConfirm={(actorId) => {
+          onConfirm={(actorIds) => {
+            const settled = avidActorChoice.settled
             setAvidActorChoice(null)
-            void startScan([actorId])
+            void scanResolvedActors([...settled, ...actorIds])
           }}
         />
       )}

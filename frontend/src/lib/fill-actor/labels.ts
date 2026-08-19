@@ -2,6 +2,10 @@ import type { VideoState } from '../../types'
 
 export const ACTOR_ID = /^[A-Za-z0-9_-]{1,32}$/
 export const MAX_ACTORS = 20
+// Every AVID resolves to at least one actor, so more AVIDs than the actor cap can never scan.
+export const MAX_AVIDS = MAX_ACTORS
+/** The server's own bound on one AVID; anything longer is a paste accident, not an ID. */
+export const MAX_AVID_LENGTH = 128
 export const STALE_CODES = new Set([
   'expired_plan',
   'revision_mismatch',
