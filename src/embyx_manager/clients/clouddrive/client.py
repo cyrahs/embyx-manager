@@ -9,6 +9,11 @@ from embyx_manager.clients.clouddrive import clouddrive_pb2, clouddrive_pb2_grpc
 
 GRPC_TIMEOUT_SECONDS = 30.0
 
+#: MoveFile gets its own budget: a cloud-side move is executed by the provider and
+#: can take far longer than a listing. Cutting it off at the general timeout leaves
+#: the move in an unknown state that then has to be observed to a conclusion.
+MOVE_TIMEOUT_SECONDS = 300.0
+
 #: How soon CloudDrive re-checks the destination folder after an offline task is
 #: added. Zero disables the check, and with a persistent directory cache (115)
 #: nothing else ever expires the folder listing, so the finished download would
@@ -73,7 +78,7 @@ class CloudDriveClient:
             destPath=dest_path,
             conflictPolicy=conflict_policy,
         )
-        return self.stub.MoveFile(request, metadata=self._metadata(), timeout=GRPC_TIMEOUT_SECONDS)
+        return self.stub.MoveFile(request, metadata=self._metadata(), timeout=MOVE_TIMEOUT_SECONDS)
 
     def add_offline_file(
         self,

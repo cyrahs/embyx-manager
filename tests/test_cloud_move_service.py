@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -15,7 +16,15 @@ from embyx_manager.fill_actor.persistence import (
     MoveJournalState,
 )
 from embyx_manager.fill_actor.ports import AcquisitionOutcome
-from embyx_manager.fill_actor.service import FillActorPaths, FillActorService, static_runtime
+from embyx_manager.fill_actor.service import (
+    CLOUD_MOVE_OBSERVATION_GRACE,
+    FillActorPaths,
+    FillActorService,
+    static_runtime,
+)
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 SOURCE_API_PATH = '/cloud/library/source-b/ABC/ABC-001.mp4'
 DESTINATION_API_DIR = '/cloud/library/destination/ABC'
@@ -121,6 +130,7 @@ def make_service(
     repository: MemoryFillActorRepository | None = None,
     apply_enabled: bool = True,
     brand: str = 'ABC',
+    clock: Callable[[], datetime] | None = None,
 ) -> tuple[FillActorService, MemoryFillActorRepository, FakeCloudMover, Path]:
     actor = tmp_path / 'actor'
     additional = tmp_path / 'additional'
@@ -152,6 +162,7 @@ def make_service(
         brand_resolver=BrandResolver(brand),
         repository=repo,
         cloud_file_mover=mover,
+        clock=clock,
     )
     return service, repo, mover, mapping
 
@@ -401,6 +412,57 @@ async def test_unknown_cloud_move_is_observation_only_until_remote_state_converg
 
     assert reconciled[0].state is MoveState.MOVED
     assert len(mover.move_calls) == 1
+
+
+class SteppingClock:
+    def __init__(self) -> None:
+        self.value = datetime(2026, 8, 18, tzinfo=UTC)
+
+    def __call__(self) -> datetime:
+        return self.value
+
+
+@pytest.mark.asyncio
+async def test_never_observed_move_is_concluded_after_grace_and_retryable(
+    tmp_path: Path,
+    cloud_file: CloudFileMetadata,
+) -> None:
+    clock = SteppingClock()
+    service, repository, mover, _mapping = make_service(tmp_path, cloud_file, clock=clock)
+    mover.behavior = 'raise_before_move'
+    plan, candidate = await create_candidate(service)
+
+    applied = await service.apply(
+        plan_id=plan.plan_id,
+        revision=plan.revision,
+        candidate_ids=[candidate.candidate_id],
+    )
+    assert applied.results[0].error_code == 'cloud_move_status_unknown'
+
+    # Within the grace period recovery still only observes.
+    observed = await service.reconcile_moves()
+    assert observed[0].error_code == 'cloud_move_status_unknown'
+
+    clock.value += CLOUD_MOVE_OBSERVATION_GRACE
+    concluded = await service.reconcile_moves()
+
+    assert concluded[0].state is MoveState.FAILED
+    assert concluded[0].error_code == 'cloud_move_not_observed'
+    operation = await repository.get_cloud_move_operation(plan.plan_id, candidate.candidate_id)
+    assert operation is not None
+    assert operation.state.terminal
+
+    # The source is free again: a fresh scan may move it successfully.
+    mover.behavior = 'success'
+    new_plan, new_candidate = await create_candidate(service)
+    retried = await service.apply(
+        plan_id=new_plan.plan_id,
+        revision=new_plan.revision,
+        candidate_ids=[new_candidate.candidate_id],
+    )
+
+    assert retried.results[0].state is MoveState.MOVED
+    assert len(mover.move_calls) == 2
 
 
 @pytest.mark.asyncio

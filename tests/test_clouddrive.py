@@ -8,7 +8,7 @@ import pytest
 from embyx_manager.clients.clouddrive import AsyncCloudDrive, clouddrive_pb2
 from embyx_manager.clients.clouddrive import client as client_module
 from embyx_manager.clients.clouddrive.aio import OfflineStatus
-from embyx_manager.clients.clouddrive.client import GRPC_TIMEOUT_SECONDS, CloudDriveClient
+from embyx_manager.clients.clouddrive.client import GRPC_TIMEOUT_SECONDS, MOVE_TIMEOUT_SECONDS, CloudDriveClient
 from embyx_manager.core.magnet import extract_info_hash
 
 
@@ -48,12 +48,14 @@ def test_clouddrive_calls_include_timeout(monkeypatch: pytest.MonkeyPatch) -> No
         stub.GetSubFiles,
         stub.CreateFolder,
         stub.RenameFile,
-        stub.MoveFile,
         stub.AddOfflineFiles,
         stub.ListOfflineFilesByPath,
         stub.RemoveOfflineFiles,
     ]:
         assert grpc_call.call_args.kwargs['timeout'] == GRPC_TIMEOUT_SECONDS
+    # A cloud-side move is executed by the provider and gets a budget of its own.
+    assert stub.MoveFile.call_args.kwargs['timeout'] == MOVE_TIMEOUT_SECONDS
+    assert MOVE_TIMEOUT_SECONDS > GRPC_TIMEOUT_SECONDS
 
 
 def test_add_offline_file_asks_clouddrive_to_check_the_folder(monkeypatch: pytest.MonkeyPatch) -> None:

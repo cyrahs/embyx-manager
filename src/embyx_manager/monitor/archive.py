@@ -282,10 +282,32 @@ class ArchivePipeline:
         for avid, group in by_avid.items():
             ctx.check_cancelled()
             with _isolate(ctx, 'failed to archive the loose file %s', _display(root / avid, self.src_dir)):
-                archived = self._move_into_library(
-                    _VideoSet(avid=avid, videos=group), dst_subdir, ctx, priority=priority
-                )
-                ctx.add('videos_archived', len(archived))
+                self.archive_loose_group(avid, group, dst_subdir, ctx, priority=priority)
+
+    def archive_loose_group(
+        self,
+        avid: str,
+        videos: list[Path],
+        dst_subdir: str,
+        ctx: RunContext,
+        *,
+        priority: bool = False,
+    ) -> ArchiveResult:
+        """File one AVID's loose videos into the library; there is no folder to delete.
+
+        The videos travel in name order, which the ``-cdN`` naming of staged
+        parts already encodes.
+        """
+        ordered = sorted(videos, key=lambda video: video.name)
+        archived = self._move_into_library(_VideoSet(avid=avid, videos=ordered), dst_subdir, ctx, priority=priority)
+        if not archived:
+            return ArchiveResult(
+                Outcome.NEEDS_ATTENTION,
+                avid=avid,
+                reason='destination already holds this avid',
+            )
+        ctx.add('videos_archived', len(archived))
+        return ArchiveResult(Outcome.ARCHIVED, avid=avid, archived_paths=archived)
 
     # -- the one way in ------------------------------------------------------
 
