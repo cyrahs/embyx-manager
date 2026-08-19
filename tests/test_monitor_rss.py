@@ -55,11 +55,13 @@ class FakeLedger:
         source: str,
         now: datetime,
         task_dir_path: str | None = None,
+        next_action_at: datetime | None = None,
     ) -> bool:
         if avid not in self.states:
             self.states[avid] = AcquisitionState.DISCOVERED
             self.sources[avid] = source
             self.task_dirs[avid] = task_dir_path
+            self.next_action_at[avid] = next_action_at
             return True
         state = self.states[avid]
         if state is AcquisitionState.DISCOVERED:
@@ -71,6 +73,8 @@ class FakeLedger:
             return False
         if accepted and task_dir_path is not None:
             self.task_dirs[avid] = task_dir_path
+        if accepted and next_action_at is not None:
+            self.next_action_at[avid] = next_action_at
         return accepted
 
     async def get(self, avid: str) -> AcquisitionRecord | None:

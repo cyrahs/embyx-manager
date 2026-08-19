@@ -28,7 +28,7 @@ export const STAGE_LABELS: Record<string, string> = {
   video_scan: '正在扫描本地片库',
   scanning_videos: '正在扫描本地片库',
   videos: '正在扫描本地片库',
-  submitting: '正在提交下载任务',
+  submitting: '正在加入下载队列',
   magnet_lookup: '正在查询磁力资源',
   magnet_search: '正在查询磁力资源',
   magnets: '正在查询磁力资源',
@@ -72,6 +72,13 @@ export const VIDEO_GROUPS: VideoGroupDef[] = [
     defaultExpanded: true,
   },
   {
+    state: 'queued',
+    label: '已排队下载',
+    description: '已加入后台下载队列，自动查磁力并提交离线任务，进度见监控面板',
+    tone: 'violet',
+    defaultExpanded: false,
+  },
+  {
     state: 'submitted',
     label: '已提交下载',
     description: '已提交到下载追踪，进度见监控面板',
@@ -81,7 +88,7 @@ export const VIDEO_GROUPS: VideoGroupDef[] = [
   {
     state: 'submit_failed',
     label: '提交失败',
-    description: '提交下载任务失败，可在监控面板手动处理',
+    description: '提交下载任务失败，原因见条目标注',
     tone: 'red',
     defaultExpanded: true,
   },
@@ -132,6 +139,27 @@ export const MOVE_LABELS = {
 
 export const ACTOR_ERROR_LABELS: Record<string, string> = {
   actor_catalog_error: '演员作品目录抓取失败',
+}
+
+/** Per-video warning codes attached to scan results (fill_actor/service.py). */
+export const VIDEO_WARNING_LABELS: Record<string, string> = {
+  submit_failed: '提交离线任务失败',
+  acquisition_failed: '提交时发生异常',
+  cloud_not_configured: '未配置 CloudDrive，无法提交下载（设置 → CloudDrive）',
+  task_dir_not_configured: '未配置缺失作品离线目录，无法提交下载（设置 → 补全演员）',
+  brand_not_found: '无法从番号解析厂牌',
+  scan_failed: '扫描时发生局部错误',
+  cloud_scan_failed: '云端目录扫描失败',
+  mapping_convergence_pending: '云端文件已移入，本地映射尚未同步',
+  cloud_mapping_not_strm: '附加库文件不是 .strm 映射',
+  invalid_strm_target: '.strm 指向的云端路径无效',
+  cloud_source_missing: '云端找不到 .strm 指向的文件',
+  cloud_source_name_mismatch: '云端文件名与番号不匹配',
+}
+
+export function videoWarningLabel(code: string): string {
+  // Unknown codes surface verbatim so a newly added backend warning is never swallowed.
+  return VIDEO_WARNING_LABELS[code] ?? code
 }
 
 /** Job-level failure codes shown in the "扫描/移动任务失败" banner. */

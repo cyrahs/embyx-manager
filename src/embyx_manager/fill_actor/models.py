@@ -13,10 +13,14 @@ class VideoState(StrEnum):
     ADDITIONAL_FOUND = 'additional_found'
     #: Legacy: plans persisted before scans submitted to the download tracker.
     MAGNET_FOUND = 'magnet_found'
+    #: Recorded in the acquisition ledger; the tracker resolves and submits in
+    #: the background, so the dashboard is where its progress shows up.
+    QUEUED = 'queued'
+    #: Legacy: plans persisted while scans still resolved and submitted inline.
     SUBMITTED = 'submitted'
     ALREADY_TRACKED = 'already_tracked'
     SUBMIT_FAILED = 'submit_failed'
-    #: No magnet found anywhere; the ledger parks the AVID with a cooldown.
+    #: Legacy companion of ``SUBMITTED``: no magnet found during the inline resolve.
     MISSING = 'missing'
     INVALID_VIDEO_ID = 'invalid_video_id'
     SCAN_FAILED = 'scan_failed'

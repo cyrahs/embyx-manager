@@ -32,28 +32,47 @@ async def test_actor_catalog_forwards_progress_callback() -> None:
     client.scrape.assert_awaited_once_with('actor-1', progress_callback=progress)
 
 
-async def test_acquisition_gateway_maps_the_intake_outcome() -> None:
-    intake = SimpleNamespace(enqueue=AsyncMock(return_value=IntakeOutcome.SUBMITTED))
-    gateway = LedgerAcquisitionGateway(lambda: intake, task_dir=lambda: '/115/fill')  # type: ignore[arg-type, return-value]
+async def test_acquisition_gateway_queues_and_wakes_the_tracker() -> None:
+    intake = SimpleNamespace(queue=AsyncMock(return_value=IntakeOutcome.QUEUED))
+    nudges: list[bool] = []
+    gateway = LedgerAcquisitionGateway(  # type: ignore[arg-type, return-value]
+        lambda: intake,
+        task_dir=lambda: '/115/fill',
+        on_queued=lambda: nudges.append(True),
+    )
 
-    assert await gateway.submit_missing('ABC-001') is AcquisitionOutcome.SUBMITTED
-    assert intake.enqueue.await_args.args == ('ABC-001',)
-    assert intake.enqueue.await_args.kwargs['source'] is AcquisitionSource.FILL_ACTOR
-    assert intake.enqueue.await_args.kwargs['task_dir_path'] == '/115/fill'
+    assert await gateway.queue_missing('ABC-001') is AcquisitionOutcome.QUEUED
+    assert intake.queue.await_args.args == ('ABC-001',)
+    assert intake.queue.await_args.kwargs['source'] is AcquisitionSource.FILL_ACTOR
+    assert intake.queue.await_args.kwargs['task_dir_path'] == '/115/fill'
+    assert nudges == [True]
 
 
-async def test_acquisition_gateway_fails_while_clouddrive_is_unconfigured() -> None:
+async def test_acquisition_gateway_does_not_wake_the_tracker_for_tracked_avids() -> None:
+    intake = SimpleNamespace(queue=AsyncMock(return_value=IntakeOutcome.ALREADY_TRACKED))
+    nudges: list[bool] = []
+    gateway = LedgerAcquisitionGateway(  # type: ignore[arg-type, return-value]
+        lambda: intake,
+        task_dir=lambda: '/115/fill',
+        on_queued=lambda: nudges.append(True),
+    )
+
+    assert await gateway.queue_missing('ABC-001') is AcquisitionOutcome.ALREADY_TRACKED
+    assert nudges == []
+
+
+async def test_acquisition_gateway_reports_unconfigured_clouddrive() -> None:
     gateway = LedgerAcquisitionGateway(lambda: None, task_dir=lambda: '/115/fill')
 
-    assert await gateway.submit_missing('ABC-001') is AcquisitionOutcome.SUBMIT_FAILED
+    assert await gateway.queue_missing('ABC-001') is AcquisitionOutcome.CLOUD_NOT_CONFIGURED
 
 
-async def test_acquisition_gateway_fails_without_an_offline_directory() -> None:
-    intake = SimpleNamespace(enqueue=AsyncMock(return_value=IntakeOutcome.SUBMITTED))
+async def test_acquisition_gateway_reports_missing_offline_directory() -> None:
+    intake = SimpleNamespace(queue=AsyncMock(return_value=IntakeOutcome.QUEUED))
     gateway = LedgerAcquisitionGateway(lambda: intake, task_dir=lambda: '')  # type: ignore[arg-type, return-value]
 
-    assert await gateway.submit_missing('ABC-001') is AcquisitionOutcome.SUBMIT_FAILED
-    intake.enqueue.assert_not_awaited()
+    assert await gateway.queue_missing('ABC-001') is AcquisitionOutcome.TASK_DIR_NOT_CONFIGURED
+    intake.queue.assert_not_awaited()
 
 
 def test_brand_resolver_uses_avid_rules() -> None:

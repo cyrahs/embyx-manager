@@ -24,7 +24,7 @@ class ActorCatalog:
 
 
 class AcquisitionGateway:
-    async def submit_missing(self, _video_id: str) -> AcquisitionOutcome:
+    async def queue_missing(self, _video_id: str) -> AcquisitionOutcome:
         return AcquisitionOutcome.NO_MAGNET
 
 

@@ -64,7 +64,7 @@ class FakeAcquisitionGateway:
         self.values = values or {}
         self.calls: list[str] = []
 
-    async def submit_missing(self, video_id: str) -> AcquisitionOutcome:
+    async def queue_missing(self, video_id: str) -> AcquisitionOutcome:
         self.calls.append(video_id)
         value = self.values.get(video_id, AcquisitionOutcome.NO_MAGNET)
         if isinstance(value, Exception):
@@ -415,6 +415,22 @@ async def test_actor_catalog_failure_message_is_redacted_and_truncated(paths: Fi
 
 
 @pytest.mark.asyncio
+async def test_create_plan_queues_missing_videos_for_the_background_pass(paths: FillActorPaths) -> None:
+    service, gateway = make_service(
+        paths,
+        catalog={'actor': ['ABC-001']},
+        brands={'ABC-001': 'ABC'},
+        outcomes={'ABC-001': AcquisitionOutcome.QUEUED},
+    )
+
+    plan = await service.create_plan(['actor'])
+
+    assert gateway.calls == ['ABC-001']
+    assert plan.videos[0].state is VideoState.QUEUED
+    assert plan.videos[0].warnings == ()
+
+
+@pytest.mark.asyncio
 async def test_create_plan_reports_submit_failures(paths: FillActorPaths) -> None:
     service, _ = make_service(
         paths,
@@ -427,6 +443,32 @@ async def test_create_plan_reports_submit_failures(paths: FillActorPaths) -> Non
 
     assert plan.videos[0].state is VideoState.SUBMIT_FAILED
     assert plan.videos[0].warnings == ('submit_failed',)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ('outcome', 'warning'),
+    [
+        (AcquisitionOutcome.CLOUD_NOT_CONFIGURED, 'cloud_not_configured'),
+        (AcquisitionOutcome.TASK_DIR_NOT_CONFIGURED, 'task_dir_not_configured'),
+    ],
+)
+async def test_create_plan_names_the_missing_configuration(
+    paths: FillActorPaths,
+    outcome: AcquisitionOutcome,
+    warning: str,
+) -> None:
+    service, _ = make_service(
+        paths,
+        catalog={'actor': ['ABC-001']},
+        brands={'ABC-001': 'ABC'},
+        outcomes={'ABC-001': outcome},
+    )
+
+    plan = await service.create_plan(['actor'])
+
+    assert plan.videos[0].state is VideoState.SUBMIT_FAILED
+    assert plan.videos[0].warnings == (warning,)
 
 
 @pytest.mark.asyncio

@@ -112,7 +112,10 @@ export default function FillActorPage() {
   const parsed = useMemo(() => parseActorIds(input), [input])
   const candidates = useMemo(() => candidateMap(plan), [plan])
   const submittedCount = useMemo(
-    () => (plan?.videos ?? []).filter((video) => video.state === 'submitted' || video.state === 'submit_failed').length,
+    () =>
+      (plan?.videos ?? []).filter(
+        (video) => video.state === 'queued' || video.state === 'submitted' || video.state === 'submit_failed',
+      ).length,
     [plan],
   )
   const selectedCandidates = [...selected].map((id) => candidates.get(id)).filter(Boolean) as MoveCandidate[]
@@ -740,7 +743,7 @@ export default function FillActorPage() {
               </div>
               {submittedCount > 0 && (
                 <p className="submitted-hint">
-                  缺失作品已自动提交到下载追踪，进度见<Link to="/dashboard">监控面板</Link>。
+                  缺失作品已加入后台下载队列，磁力解析与提交进度见<Link to="/dashboard">监控面板</Link>。
                 </p>
               )}
 

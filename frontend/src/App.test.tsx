@@ -950,7 +950,7 @@ describe('Fill Actor page', () => {
     expect(screen.getByText('文件移动已暂停')).toBeInTheDocument()
     expect(screen.getByText(/当前仅支持扫描、提交下载和订阅操作/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '确认并移入' })).toBeDisabled()
-    expect(screen.getByText(/缺失作品已自动提交到下载追踪/)).toBeInTheDocument()
+    expect(screen.getByText(/缺失作品已加入后台下载队列/)).toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(fetchMock).toHaveBeenCalledTimes(2)
   })

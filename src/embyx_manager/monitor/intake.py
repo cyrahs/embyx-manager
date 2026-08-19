@@ -47,6 +47,7 @@ class IntakeOutcome(StrEnum):
     """What became of one AVID handed to the intake."""
 
     SUBMITTED = 'submitted'
+    QUEUED = 'queued'
     ALREADY_TRACKED = 'already_tracked'
     NO_MAGNET = 'no_magnet'
     SUBMIT_FAILED = 'submit_failed'
@@ -96,6 +97,28 @@ class AcquisitionIntake:
             return IntakeOutcome.SUBMITTED
         return IntakeOutcome.SUBMIT_FAILED
 
+    async def queue(self, avid: str, *, source: str, task_dir_path: str, ctx: RunContext) -> IntakeOutcome:
+        """Record one AVID for the background pass instead of resolving inline.
+
+        The row lands in ``discovered`` with its action timer already due, so
+        the next tracker pass resolves magnets and submits it — the caller
+        returns immediately and progress shows up on the dashboard. This is the
+        fill-actor scan's path: a scan queues its whole missing list in one
+        burst of inserts rather than serializing magnet lookups.
+        """
+        now = datetime.now(UTC)
+        accepted = await self._ledger.discover(
+            avid,
+            source=source,
+            now=now,
+            task_dir_path=task_dir_path,
+            next_action_at=now,
+        )
+        if not accepted:
+            return IntakeOutcome.ALREADY_TRACKED
+        ctx.add('queued')
+        return IntakeOutcome.QUEUED
+
     # -- cooldown retries -----------------------------------------------------
 
     async def retry_due(self, *, ctx: RunContext, fallback_task_dir: str | None = None, limit: int = 50) -> int:
@@ -116,13 +139,12 @@ class AcquisitionIntake:
         ctx: RunContext,
         fallback_task_dir: str | None = None,
     ) -> IntakeOutcome:
-        """One retry pass for a parked acquisition.
+        """One resolve-and-submit pass for a record picked off the action timer.
 
-        Unlike :meth:`enqueue`, the record is not in ``discovered``: the caller
-        picked it off the retry timer, so a pass that submits nothing must re-arm
-        the cooldown from the record's current state — leaving the expired
-        ``next_action_at`` in place would make every subsequent pass pick the
-        same row up again.
+        The record is a parked retry or a queued discovery awaiting its first
+        resolve. Either way a pass that submits nothing must re-arm the timer
+        from the record's current state — leaving the expired ``next_action_at``
+        in place would make every subsequent pass pick the same row up again.
 
         The submission goes to the directory pinned on the record; a record
         without one (created before directories were pinned, or by reconcile)
