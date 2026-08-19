@@ -105,9 +105,7 @@ class MoveInSweeper:
             if is_video(entry):
                 videos.append(entry)
             elif entry.is_dir():
-                videos.extend(
-                    child for child in sorted(entry.iterdir()) if not child.is_symlink() and is_video(child)
-                )
+                videos.extend(child for child in sorted(entry.iterdir()) if not child.is_symlink() and is_video(child))
         return videos
 
     async def _file_group(
