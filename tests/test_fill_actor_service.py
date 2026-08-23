@@ -348,8 +348,11 @@ async def test_create_plan_classifies_and_sorts_results(paths: FillActorPaths) -
     assert videos['ABC-003'].state is VideoState.SUBMITTED
     assert videos['BAD'].state is VideoState.INVALID_VIDEO_ID
     assert gateway.calls == ['ABC-003']
+    assert [candidate.source_label for candidate in videos['ABC-002'].move_candidates] == [
+        str(paths.additional_brand_paths[0]),
+        str(paths.additional_brand_paths[1]),
+    ]
     assert str(paths.actor_brand_path) not in plan.model_dump_json()
-    assert str(paths.additional_brand_paths[0]) not in plan.model_dump_json()
 
 
 @pytest.mark.asyncio

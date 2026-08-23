@@ -184,7 +184,9 @@ function VideoRow({
               <span className="candidate-name" title={candidate.file_name}>
                 {candidate.file_name}
               </span>
-              <span className="candidate-source">{localizeBackendText(candidate.source_label)}</span>
+              <span className="candidate-source" title={candidate.source_label}>
+                {localizeBackendText(candidate.source_label)}
+              </span>
               {candidate.destination_conflict && (
                 <span className="warning-pill">
                   <AlertIcon />
