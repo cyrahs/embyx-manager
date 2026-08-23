@@ -655,7 +655,7 @@ class FillActorService:
                     candidate_id=candidate_id,
                     video_id=video_id,
                     file_name=source.name,
-                    source_label=f'additional-{source_index + 1}',
+                    source_label=str(self._paths.additional_brand_paths[source_index]),
                     destination_conflict=destination.exists(),
                 )
             )
@@ -735,7 +735,7 @@ class FillActorService:
                     candidate_id=candidate_id,
                     video_id=video_id,
                     file_name=cloud_file.name,
-                    source_label=f'additional-{source_index + 1}',
+                    source_label=str(self._paths.additional_brand_paths[source_index]),
                     destination_conflict=destination_file is not None,
                 )
             )
