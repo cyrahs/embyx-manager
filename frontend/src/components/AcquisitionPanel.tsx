@@ -17,6 +17,7 @@ import type {
   Acquisition,
   AcquisitionDetail,
   AcquisitionState,
+  AttemptState,
   MagnetAttempt,
   TrackerStatus,
 } from '../types'
@@ -166,7 +167,13 @@ function AcquisitionRow({
   )
 }
 
+// The tracker stops refreshing progress once CloudDrive reports the task
+// finished, so a completed attempt keeps its last in-flight snapshot — often
+// 0% for instantly-seeded magnets. The state alone says the download is done.
+const COMPLETED_ATTEMPT_STATES: ReadonlySet<AttemptState> = new Set(['finished', 'archiving', 'archived'])
+
 function AttemptRow({ attempt }: { attempt: MagnetAttempt }) {
+  const completed = COMPLETED_ATTEMPT_STATES.has(attempt.state)
   return (
     <tr>
       <td>#{attempt.attempt_no}</td>
@@ -177,7 +184,7 @@ function AttemptRow({ attempt }: { attempt: MagnetAttempt }) {
         </span>
       </td>
       <td>
-        <ProgressBar value={attempt.progress} />
+        {completed ? <span className="acq-muted">—</span> : <ProgressBar value={attempt.progress} />}
       </td>
       <td className="acq-muted">{attempt.error ? localizeBackendText(attempt.error) : '—'}</td>
       <td className="acq-muted">{formatTime(attempt.updated_at)}</td>
