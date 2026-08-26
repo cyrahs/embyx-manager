@@ -318,17 +318,38 @@ interface SectionFormProps {
   onUnauthorized: () => void
 }
 
+/** Row ids are ephemeral UI keys; strip them so equality tracks real content only. */
+function serializeForm(form: Record<string, FormValue>): string {
+  return JSON.stringify(form, (key, value: unknown) => (key === 'id' ? undefined : value))
+}
+
 function SectionForm({ spec, data, onSaved, onUnauthorized }: SectionFormProps) {
   const [form, setForm] = useState<Record<string, FormValue>>(() =>
     Object.fromEntries(spec.fields.map((field) => [field.key, toFormValue(field.kind, data.values[field.key])])),
   )
+  const [baseline, setBaseline] = useState(() => serializeForm(form))
   const [saving, setSaving] = useState(false)
   const [testing, setTesting] = useState(false)
   const [message, setMessage] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null)
+  const dirty = serializeForm(form) !== baseline
 
   useEffect(() => {
-    setForm(Object.fromEntries(spec.fields.map((field) => [field.key, toFormValue(field.kind, data.values[field.key])])))
+    const next = Object.fromEntries(
+      spec.fields.map((field) => [field.key, toFormValue(field.kind, data.values[field.key])]),
+    )
+    setForm(next)
+    setBaseline(serializeForm(next))
   }, [data, spec.fields])
+
+  // Closing or reloading the tab with unsaved edits deserves the browser's confirm.
+  useEffect(() => {
+    if (!dirty) return
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault()
+    }
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => window.removeEventListener('beforeunload', onBeforeUnload)
+  }, [dirty])
 
   function collectValues(): Record<string, unknown> {
     const values: Record<string, unknown> = {}
@@ -389,7 +410,10 @@ function SectionForm({ spec, data, onSaved, onUnauthorized }: SectionFormProps) 
     <section className="panel settings-panel" aria-labelledby={`settings-${spec.section}`}>
       <div className="panel-heading">
         <h2 id={`settings-${spec.section}`}>{spec.title}</h2>
-        <span className="settings-version">v{data.version}</span>
+        <span className="settings-heading-meta">
+          {dirty && <span className="settings-dirty">未保存</span>}
+          <span className="settings-version">v{data.version}</span>
+        </span>
       </div>
       <p className="settings-desc">{spec.description}</p>
       <div className="settings-fields">
@@ -531,6 +555,15 @@ export default function SettingsPage() {
         <p className="dashboard-loading">
           <Spinner /> 正在加载配置…
         </p>
+      )}
+      {sections && (
+        <nav className="settings-nav" aria-label="设置分区导航">
+          {SECTION_SPECS.filter((spec) => sections[spec.section]).map((spec) => (
+            <a key={spec.section} href={`#settings-${spec.section}`}>
+              {spec.title}
+            </a>
+          ))}
+        </nav>
       )}
       {sections &&
         SECTION_SPECS.map((spec) => {
