@@ -117,24 +117,27 @@ export function ProgressPanel({
         <b>{value === null ? '计算中' : `${Math.round(value)}%`}</b>
       </div>
 
-      <dl className="progress-meta">
-        <div>
-          <dt>阶段进度</dt>
-          <dd>{count ?? '等待统计'}</dd>
-        </div>
-        <div>
-          <dt>阶段已用时</dt>
-          <dd>{elapsed === null ? '等待统计' : durationText(elapsed)}</dd>
-        </div>
-        <div>
-          <dt>当前阶段 ETA</dt>
-          <dd>{eta === null ? '计算中' : `约 ${durationText(eta)}`}</dd>
-        </div>
-        <div>
-          <dt>最后进展</dt>
-          <dd>{progressAge === null ? '等待首个结果' : `${durationText(progressAge)}前`}</dd>
-        </div>
-      </dl>
+      {/* Placeholders like 计算中 only make sense while the job is still moving. */}
+      {pending && (
+        <dl className="progress-meta">
+          <div>
+            <dt>阶段进度</dt>
+            <dd>{count ?? '等待统计'}</dd>
+          </div>
+          <div>
+            <dt>阶段已用时</dt>
+            <dd>{elapsed === null ? '等待统计' : durationText(elapsed)}</dd>
+          </div>
+          <div>
+            <dt>当前阶段 ETA</dt>
+            <dd>{eta === null ? '计算中' : `约 ${durationText(eta)}`}</dd>
+          </div>
+          <div>
+            <dt>最后进展</dt>
+            <dd>{progressAge === null ? '等待首个结果' : `${durationText(progressAge)}前`}</dd>
+          </div>
+        </dl>
+      )}
 
       {(pollWarning || progressWarning || heartbeatWarning) && (
         <div className="progress-warnings" role="status" aria-live="polite">

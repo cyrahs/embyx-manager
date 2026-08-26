@@ -15,7 +15,7 @@ import {
 import type { AppContext } from '../App'
 import { AcquisitionPanel } from '../components/AcquisitionPanel'
 import { Notice } from '../components/Feedback'
-import { Spinner } from '../components/Icons'
+import { ChevronIcon, Spinner } from '../components/Icons'
 import { localizeBackendText } from '../lib/backendText'
 import type { PipelineId, PipelineStatus, RunDetail, RunSummary } from '../types'
 
@@ -212,6 +212,16 @@ export default function DashboardPage() {
     }
   }
 
+  // Escape parity with every other dialog in the app.
+  useEffect(() => {
+    if (!selectedRun) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSelectedRun(null)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [selectedRun])
+
   return (
     <main>
       <section className="panel dashboard-panel" aria-labelledby="dashboard-title">
@@ -343,11 +353,22 @@ export default function DashboardPage() {
                   <th>开始时间</th>
                   <th>耗时</th>
                   <th>结果</th>
+                  <th className="row-chevron" aria-hidden="true" />
                 </tr>
               </thead>
               <tbody>
                 {runs.map((run) => (
-                  <tr key={run.run_id} onClick={() => void openRun(run.run_id)}>
+                  <tr
+                    key={run.run_id}
+                    tabIndex={0}
+                    aria-label={`查看 ${PIPELINE_LABELS[run.pipeline]} 运行详情`}
+                    onClick={() => void openRun(run.run_id)}
+                    onKeyDown={(event) => {
+                      if (event.key !== 'Enter' && event.key !== ' ') return
+                      event.preventDefault()
+                      void openRun(run.run_id)
+                    }}
+                  >
                     <td>{PIPELINE_LABELS[run.pipeline]}</td>
                     <td>{TRIGGER_LABELS[run.trigger] ?? run.trigger}</td>
                     <td>
@@ -361,6 +382,9 @@ export default function DashboardPage() {
                         .slice(0, 4)
                         .map(([label, value]) => `${label} ${value}`)
                         .join(' · ') || '—'}
+                    </td>
+                    <td className="row-chevron">
+                      <ChevronIcon expanded={false} />
                     </td>
                   </tr>
                 ))}

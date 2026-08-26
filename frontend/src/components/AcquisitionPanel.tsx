@@ -11,7 +11,7 @@ import {
 } from '../api'
 import { localizeBackendText } from '../lib/backendText'
 import { Notice } from './Feedback'
-import { Spinner } from './Icons'
+import { ChevronIcon, Spinner } from './Icons'
 import { ManualIntakeDialog } from './ManualIntake'
 import type {
   Acquisition,
@@ -123,18 +123,35 @@ function ProgressBar({ value }: { value: number | null }) {
 function AcquisitionRow({
   item,
   busy,
+  expanded,
   onOpen,
   onAct,
 }: {
   item: Acquisition
   busy: boolean
+  expanded: boolean
   onOpen: (avid: string) => void
   onAct: (avid: string, action: AcquisitionAction) => void
 }) {
   const closed = item.state === 'archived' || item.state === 'ignored'
   return (
-    <tr onClick={() => onOpen(item.avid)}>
-      <td>{item.avid}</td>
+    <tr
+      tabIndex={0}
+      aria-expanded={expanded}
+      aria-label={`${expanded ? '收起' : '展开'} ${item.avid} 的磁力尝试记录`}
+      onClick={() => onOpen(item.avid)}
+      onKeyDown={(event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return
+        event.preventDefault()
+        onOpen(item.avid)
+      }}
+    >
+      <td>
+        <span className="acq-avid">
+          <ChevronIcon expanded={expanded} />
+          {item.avid}
+        </span>
+      </td>
       <td>
         <span className={`run-state ${STATE_TONES[item.state] ?? ''}`}>
           {STATE_LABELS[item.state]}
@@ -413,7 +430,16 @@ export function AcquisitionPanel({ onUnauthorized }: { onUnauthorized: () => voi
           <Spinner /> 正在加载…
         </p>
       ) : page.items.length === 0 ? (
-        <p className="results-empty">没有符合条件的番号。</p>
+        <p className="results-empty">
+          {filter === null ? '还没有任何追踪记录。' : (
+            <>
+              当前筛选下没有番号。
+              <button type="button" className="text-button" onClick={() => setFilter(null)}>
+                查看全部
+              </button>
+            </>
+          )}
+        </p>
       ) : (
         <div className="run-table-wrap">
           <table className="run-table">
@@ -433,6 +459,7 @@ export function AcquisitionPanel({ onUnauthorized }: { onUnauthorized: () => voi
                   <AcquisitionRow
                     item={item}
                     busy={busy === item.avid}
+                    expanded={detail?.avid === item.avid}
                     onOpen={(avid) => void openDetail(avid)}
                     onAct={(avid, action) => void act(avid, action)}
                   />
