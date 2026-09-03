@@ -70,7 +70,30 @@
   JavBus 行随迁移停用,不受影响;2 条 Rank 行以 `http://rsshub.rss.svc.cluster.local/`
   重建(seed)并删除旧行。以后导入前应先把 FreshRSS 里的 RSSHub 地址换成集群全名,或给
   订阅加"改地址"功能(3b 待办)。
-- 旧的 JavBus `rss` 行仍保留为停用状态以便回退;确认无误后可批量删除。FreshRSS 可以下线。
+- 旧的 JavBus `rss` 行在删前逐条核验(每条都有已 seed、无错误的 talent 订阅)后已删除。
+  FreshRSS 可以下线。
+
+AVBase 收录范围审计(2026-09-03,起因:橘梨紗 的 talent 在 AVBase 零作品):
+
+- 对 316 个 JavBus star 页各取最近 8 部(共 2453 部)去 AVBase 查:**95% 收录,92% 的出演者
+  里带着映射到的 talent**;差的 3% 全是几十人的大合集,AVBase 合集出演者名单不全,不是错配。
+  逐部核对过的"未确认"行(沖田杏梨、葵/小野夕子、松嶋真麻/桃乃木かな、輝月あんり/天木ゆう、
+  宇都宮しをん/安齋らら)在有单体作品时 talent id 全部正确。
+- 缺失的 119 部分四类:53 部合集/再发行(Prestige プレミアムプライス ORT、ROOKIE RBB、
+  S1 OFJE、E-BODY MKCK、million MQNC 等 AVBase 不收的再版品牌);48 部 2023 年前的老单体
+  (退役演员被下架的作品:原紗央莉 SDMT/STAR、橘梨紗 STAR-4xx、伊東ちなみ MIDE-5xx、
+  蒼井そら);**真正的新作缺口只有 3 部**(OLYMPUS 的 OLM-332、マーレー 的 MBRBN-065/066,
+  两个 FANZA/MGS/DUGA 之外的小品牌),外加 ヨリヌキ/AIリマスター 这类再剪辑品。
+- **改名演员的旧名作品会从 AVBase 消失**:塔乃花鈴 → 輝星きら 之后,AVBase 只有 輝星きら 名下
+  42 部,塔乃花鈴 时期的 MIDA-388~501、REBD-994 都不在;JavBus 仍列着。对"发现新作"无影响,
+  对补全扫描有影响。
+- **番号补零形态不一致**:JavBus 写 `HTTM-0066`/`MXDLP-0337`,AVBase 写 `HTTM-066`/
+  `MXDLP-337`;`AvidParser` 两种形态各自保留,同一作品会在账本里落成两个键,库内持有检查
+  也对不上。待办:数字段按 int 归一后 `%03d`(metatube 的做法),但要先评估存量账本行。
+  另:`YRNKMTNDVAJ-741` 被解析成 `RNKMTNDVAJ-741`(首字母被当成标签剥掉)。
+- 结论:迁移正确;AVBase 作为发现源对活跃演员的新作覆盖 ≈ 99.9%;缺口在退役演员的下架
+  作品与再版品牌,这两类由 JavBus 磁力源(按番号)与 3b 的 fill-actor 补全(建议 JavBus 与
+  AVBase 目录取并集)兜底。
 
 ## 结论
 
