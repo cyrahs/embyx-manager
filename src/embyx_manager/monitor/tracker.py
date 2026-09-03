@@ -38,6 +38,7 @@ from embyx_manager.monitor.acquisitions import (
     MagnetAttemptRecord,
 )
 from embyx_manager.monitor.archive import ArchivePipeline, ArchiveResult, Outcome
+from embyx_manager.monitor.cadence import next_resolve_at
 from embyx_manager.monitor.reports import RunContext
 
 LOGGER = logging.getLogger('embyx-manager.tracker')
@@ -391,8 +392,14 @@ class AcquisitionTracker:
             target=AcquisitionState.EXHAUSTED,
             now=now,
             note='every magnet was tried',
-            # The resolver may find new magnets once the release has aged.
-            next_action_at=now + timedelta(hours=self._settings.stall_timeout_hours),
+            # The resolver may find new magnets once the release has aged; the
+            # schedule says when to look, the stall timeout only when no
+            # release date is known.
+            next_action_at=next_resolve_at(
+                now,
+                record.release_date,
+                fallback=timedelta(hours=self._settings.stall_timeout_hours),
+            ),
         )
         ctx.warning('%s: every magnet was tried', avid)
         ctx.add('exhausted')

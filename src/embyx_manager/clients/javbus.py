@@ -30,6 +30,15 @@ class JavBusActor:
     name: str
 
 
+@dataclass(frozen=True)
+class JavBusActorPage:
+    """A star page's display name and the video IDs listed on its first page."""
+
+    actor_id: str
+    name: str
+    video_ids: tuple[str, ...]
+
+
 class JavBusPaginationError(RuntimeError):
     """Raised when JavBus pagination cannot be completed without silently losing pages."""
 
@@ -58,6 +67,18 @@ class JavBusClient:
 
     async def aclose(self) -> None:
         await self._client.aclose()
+
+    async def get_actor(self, actor_id: str) -> JavBusActorPage | None:
+        """The star page's display name and first-page video IDs; None when there is no such star."""
+        response = await self._fetch_actor_page(actor_id, 1)
+        if response is None:
+            return None
+        doc = PyQuery(response.text)
+        name = ' '.join(doc('.avatar-box .pb10').eq(0).text().split())
+        if not name:
+            name = ' '.join(doc('title').text().split(' - ')[0].split())
+        ids, _ = self._parse_actor_page(actor_id, response.text)
+        return JavBusActorPage(actor_id=actor_id, name=name, video_ids=ids)
 
     async def scrape_one_page(self, actor_id: str, page: int) -> list[str]:
         res = await self._fetch_actor_page(actor_id, page)

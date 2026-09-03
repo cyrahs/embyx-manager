@@ -17,7 +17,7 @@ because that is a programming error rather than a race.
 import json
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 from enum import StrEnum
 from typing import Any
 
@@ -193,6 +193,8 @@ class AcquisitionRecord:
     updated_at: datetime
     #: The offline directory this AVID's magnets go to; None means the default.
     task_dir_path: str | None = None
+    #: The earliest release date a source knew; anchors the resolve schedule.
+    release_date: date | None = None
 
 
 @dataclass(frozen=True)
@@ -216,7 +218,7 @@ class AcquisitionRepository:
 
     # -- discovery ---------------------------------------------------------
 
-    async def discover(
+    async def discover(  # noqa: PLR0913 - one sighting carries everything its source knows
         self,
         avid: str,
         *,
@@ -224,6 +226,8 @@ class AcquisitionRepository:
         now: datetime,
         task_dir_path: str | None = None,
         next_action_at: datetime | None = None,
+        release_date: date | None = None,
+        wake: bool = False,
     ) -> bool:
         """Record an AVID sighting; return whether it still needs magnets resolved.
 
@@ -234,14 +238,17 @@ class AcquisitionRepository:
         None leaves it on the default directory of the moment. ``next_action_at``
         hands the resolve to the background pass at that time instead of the
         caller doing it inline; on an accepted re-discovery it re-arms the timer
-        the same way.
+        the same way. ``release_date`` is kept from the first source that knew
+        it. ``wake`` says the sighting itself carries a magnet: that is evidence
+        the wait is over, so a row still cooling down is accepted rather than
+        told to keep waiting.
         """
         pool = await self._database.get_pool()
         inserted = await pool.fetchval(
             """
             INSERT INTO archive_acquisitions
-                (avid, state, source, task_dir_path, next_action_at, created_at, updated_at)
-            VALUES ($1, 'discovered', $2, $3, $4, $5, $5)
+                (avid, state, source, task_dir_path, next_action_at, release_date, created_at, updated_at)
+            VALUES ($1, 'discovered', $2, $3, $4, $5, $6, $6)
             ON CONFLICT (avid) DO NOTHING
             RETURNING avid
             """,
@@ -249,6 +256,7 @@ class AcquisitionRepository:
             str(source),
             task_dir_path,
             next_action_at,
+            release_date,
             now,
         )
         if inserted is not None:
@@ -259,9 +267,15 @@ class AcquisitionRepository:
         if existing.state is AcquisitionState.DISCOVERED:
             accepted = True
         elif existing.state in RETRYABLE_STATES:
-            accepted = existing.next_action_at is None or existing.next_action_at <= now
+            accepted = wake or existing.next_action_at is None or existing.next_action_at <= now
         else:
             return False
+        if accepted and release_date is not None and existing.release_date is None:
+            await pool.execute(
+                'UPDATE archive_acquisitions SET release_date = $2 WHERE avid = $1',
+                avid,
+                release_date,
+            )
         if accepted and task_dir_path is not None and existing.task_dir_path != task_dir_path:
             # The retry follows whichever category just re-discovered it, so
             # repointing a category takes effect from its next pass.
@@ -637,6 +651,7 @@ def _acquisition_from_row(row: asyncpg.Record) -> AcquisitionRecord:
         created_at=row['created_at'],
         updated_at=row['updated_at'],
         task_dir_path=row['task_dir_path'],
+        release_date=row['release_date'],
     )
 
 

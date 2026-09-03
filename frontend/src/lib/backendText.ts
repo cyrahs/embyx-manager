@@ -46,6 +46,7 @@ const EXACT_TEXT: Record<string, string> = {
 const TEXT_PATTERNS: Array<[RegExp, (match: RegExpMatchArray) => string]> = [
   // Plans stored before source_label carried the library path used this index form.
   [/^additional-(\d+)$/, (m) => `附加库 ${m[1]}`],
+  [/^category (.+) is not configured$/, (m) => `分类「${m[1]}」未配置`],
   [/^no progress for (\d+)d at (\d+)%$/, (m) => `已 ${m[1]} 天无进度（停在 ${m[2]}%）`],
   [/^expected (\S+) but found (\S+)$/, (m) => `预期番号 ${m[1]}，实际识别为 ${m[2]}`],
   [/^multiple avids in one folder: (.+)$/, (m) => `同一文件夹中有多个番号：${m[1]}`],

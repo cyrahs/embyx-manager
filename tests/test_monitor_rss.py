@@ -1,8 +1,10 @@
 import dataclasses
 import logging
-from datetime import UTC, datetime
+from collections.abc import Sequence
+from datetime import UTC, date, datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
+from xml.sax.saxutils import escape
 
 import grpc
 import pytest
@@ -19,6 +21,12 @@ from embyx_manager.monitor.acquisitions import (
 from embyx_manager.monitor.archive import ArchivePipeline
 from embyx_manager.monitor.reports import RunContext
 from embyx_manager.monitor.rss import RssPipeline
+from embyx_manager.monitor.subscriptions import (
+    SubscriptionExistsError,
+    SubscriptionKind,
+    SubscriptionRecord,
+    trim_cursor,
+)
 
 HASH_A = 'C12FE1C06BBA254A9DC9F519B335AA7C1367A88A'
 HASH_B = 'D23FE1C06BBA254A9DC9F519B335AA7C1367A88B'
@@ -47,6 +55,7 @@ class FakeLedger:
         self.attempts: dict[str, list[MagnetAttemptRecord]] = {}
         self.task_dirs: dict[str, str | None] = {}
         self.archived_paths: dict[str, tuple[str, ...]] = {}
+        self.release_dates: dict[str, date | None] = {}
 
     async def discover(
         self,
@@ -56,21 +65,26 @@ class FakeLedger:
         now: datetime,
         task_dir_path: str | None = None,
         next_action_at: datetime | None = None,
+        release_date: date | None = None,
+        wake: bool = False,
     ) -> bool:
         if avid not in self.states:
             self.states[avid] = AcquisitionState.DISCOVERED
             self.sources[avid] = source
             self.task_dirs[avid] = task_dir_path
             self.next_action_at[avid] = next_action_at
+            self.release_dates[avid] = release_date
             return True
         state = self.states[avid]
         if state is AcquisitionState.DISCOVERED:
             accepted = True
         elif state in {AcquisitionState.RESOLVE_FAILED, AcquisitionState.EXHAUSTED}:
             due = self.next_action_at.get(avid)
-            accepted = due is None or due <= now
+            accepted = wake or due is None or due <= now
         else:
             return False
+        if accepted and release_date is not None and self.release_dates.get(avid) is None:
+            self.release_dates[avid] = release_date
         if accepted and task_dir_path is not None:
             self.task_dirs[avid] = task_dir_path
         if accepted and next_action_at is not None:
@@ -90,6 +104,7 @@ class FakeLedger:
             created_at=now_stub(),
             updated_at=now_stub(),
             task_dir_path=self.task_dirs.get(avid),
+            release_date=self.release_dates.get(avid),
         )
 
     async def transition(
@@ -271,8 +286,168 @@ def now_stub() -> datetime:
     return datetime(2026, 8, 13, tzinfo=UTC)
 
 
-def make_item(item_id: str, title: str, magnet_html: str = '') -> dict:
-    return {'id': item_id, 'title': title, 'summary': {'content': magnet_html}}
+def feed_url(label: str) -> str:
+    return f'https://feeds.test/{label}'
+
+
+def make_subscription(
+    subscription_id: int,
+    *,
+    category: str = 'Actor',
+    url: str | None = None,
+    name: str | None = None,
+    enabled: bool = True,
+    cursor: tuple[str, ...] = (),
+    seed_pending: bool = False,
+    talent_id: int | None = None,
+    aliases: tuple[str, ...] = (),
+) -> SubscriptionRecord:
+    return SubscriptionRecord(
+        id=subscription_id,
+        kind=SubscriptionKind.AVBASE_TALENT if talent_id is not None else SubscriptionKind.RSS,
+        category=category,
+        enabled=enabled,
+        url=None if talent_id is not None else (url or feed_url(category)),
+        talent_id=talent_id,
+        name=name,
+        aliases=aliases,
+        cursor=cursor,
+        seed_pending=seed_pending,
+        last_polled_at=None,
+        last_error=None,
+        created_at=now_stub(),
+        updated_at=now_stub(),
+    )
+
+
+class FakeSubscriptions:
+    """In-memory stand-in for SubscriptionRepository; the real one is CI-tested."""
+
+    def __init__(self, records: list[SubscriptionRecord] | None = None) -> None:
+        self.records: dict[int, SubscriptionRecord] = {record.id: record for record in records or []}
+        self.polls: list[tuple[int, tuple[str, ...] | None, str | None]] = []
+
+    async def list(self) -> tuple[SubscriptionRecord, ...]:
+        return tuple(
+            sorted(
+                self.records.values(), key=lambda record: (record.category, record.kind, record.display_name, record.id)
+            )
+        )
+
+    async def get(self, subscription_id: int) -> SubscriptionRecord | None:
+        return self.records.get(subscription_id)
+
+    async def add_rss(
+        self,
+        *,
+        url: str,
+        category: str,
+        now: datetime,
+        name: str | None = None,
+        seed_pending: bool = False,
+    ) -> SubscriptionRecord:
+        if any(record.url == url for record in self.records.values()):
+            raise SubscriptionExistsError(url)
+        record = dataclasses.replace(
+            make_subscription(
+                max(self.records, default=0) + 1,
+                category=category,
+                url=url,
+                name=name,
+                seed_pending=seed_pending,
+            ),
+            created_at=now,
+            updated_at=now,
+        )
+        self.records[record.id] = record
+        return record
+
+    async def add_talent(
+        self,
+        *,
+        talent_id: int,
+        name: str,
+        aliases: Sequence[str],
+        category: str,
+        now: datetime,
+        seed_pending: bool = False,
+    ) -> SubscriptionRecord:
+        if any(record.talent_id == talent_id for record in self.records.values()):
+            what = f'talent {talent_id}'
+            raise SubscriptionExistsError(what)
+        record = dataclasses.replace(
+            make_subscription(
+                max(self.records, default=0) + 1,
+                category=category,
+                name=name,
+                talent_id=talent_id,
+                aliases=tuple(aliases),
+                seed_pending=seed_pending,
+            ),
+            created_at=now,
+            updated_at=now,
+        )
+        self.records[record.id] = record
+        return record
+
+    async def update(
+        self,
+        subscription_id: int,
+        *,
+        now: datetime,
+        enabled: bool | None = None,
+        category: str | None = None,
+    ) -> SubscriptionRecord | None:
+        record = self.records.get(subscription_id)
+        if record is None:
+            return None
+        changes: dict[str, object] = {'updated_at': now}
+        if enabled is not None:
+            changes['enabled'] = enabled
+        if category is not None:
+            changes['category'] = category
+        record = dataclasses.replace(record, **changes)  # type: ignore[arg-type]
+        self.records[subscription_id] = record
+        return record
+
+    async def delete(self, subscription_id: int) -> bool:
+        return self.records.pop(subscription_id, None) is not None
+
+    async def record_poll(
+        self,
+        subscription_id: int,
+        *,
+        now: datetime,
+        cursor: Sequence[str] | None,
+        error: str | None,
+    ) -> None:
+        self.polls.append((subscription_id, None if cursor is None else tuple(cursor), error))
+        record = self.records[subscription_id]
+        changes: dict[str, object] = {'last_polled_at': now, 'last_error': error, 'updated_at': now}
+        if cursor is not None:
+            changes['cursor'] = trim_cursor(cursor)
+            changes['seed_pending'] = False
+        self.records[subscription_id] = dataclasses.replace(record, **changes)  # type: ignore[arg-type]
+
+
+def make_item(item_id: str, title: str, magnet_html: str = '', link: str | None = None) -> dict:
+    return {'id': item_id, 'title': title, 'content': magnet_html, 'link': link}
+
+
+def feed_xml(items: list[dict]) -> bytes:
+    """An RSS 2.0 body holding the given items, guid first so the key is the id."""
+    entries = []
+    for item in items:
+        parts = [f'<guid>{escape(item["id"])}</guid>', f'<title>{escape(item["title"])}</title>']
+        if item.get('link'):
+            parts.append(f'<link>{escape(item["link"])}</link>')
+        if item.get('content'):
+            parts.append(f'<description><![CDATA[{item["content"]}]]></description>')
+        entries.append('<item>' + ''.join(parts) + '</item>')
+    body = (
+        '<?xml version="1.0"?><rss version="2.0"><channel><title>test</title>' + ''.join(entries) + '</channel></rss>'
+    )
+    return body.encode()
 
 
 def make_pipeline(
@@ -280,27 +455,38 @@ def make_pipeline(
     items: list[dict] | None = None,
     items_by_label: dict[str, list[dict]] | None = None,
     categories: tuple[RssCategory, ...] = (RssCategory(label='Actor', task_dir_path=TASK_DIR),),
+    subscriptions: FakeSubscriptions | None = None,
     sukebei_magnets: dict[str, str] | None = None,
     javbus_magnets: dict[str, list[dict]] | None = None,
     ledger: FakeLedger | None = None,
     add_result: object | None = None,
     add_side_effect: Exception | list[object] | None = None,
-    freshrss_side_effect: object | None = None,
+    fetch_side_effect: object | None = None,
     archive_config: ArchiveConfig | None = None,
 ) -> tuple[RssPipeline, SimpleNamespace]:
     deps = SimpleNamespace()
     deps.ledger = ledger or FakeLedger()
-    if freshrss_side_effect is not None:
-        get_items = AsyncMock(side_effect=freshrss_side_effect)
-    elif items_by_label is not None:
-
-        async def by_label(label: str) -> list[dict]:
-            return items_by_label.get(label, [])
-
-        get_items = AsyncMock(side_effect=by_label)
+    # One subscription per label, numbered in label order, each serving its feed.
+    # A bare item list belongs to whichever category is configured, as the old
+    # single-label FreshRSS fixture did.
+    if items_by_label is not None:
+        feeds = items_by_label
     else:
-        get_items = AsyncMock(return_value=items or [])
-    deps.freshrss = SimpleNamespace(get_items=get_items, read_items=AsyncMock())
+        feeds = {categories[0].label if categories else 'Actor': items or []}
+    if subscriptions is None:
+        subscriptions = FakeSubscriptions(
+            [make_subscription(index, category=label) for index, label in enumerate(feeds, start=1)],
+        )
+    deps.subscriptions = subscriptions
+    bodies = {feed_url(label): feed_xml(feed_items) for label, feed_items in feeds.items()}
+    if fetch_side_effect is not None:
+        deps.fetch = AsyncMock(side_effect=fetch_side_effect)
+    else:
+
+        async def fetch(url: str) -> bytes:
+            return bodies[url]
+
+        deps.fetch = AsyncMock(side_effect=fetch)
 
     async def sukebei_get(avid: str) -> str | None:
         return (sukebei_magnets or {}).get(avid)
@@ -320,7 +506,8 @@ def make_pipeline(
     pipeline = RssPipeline(
         config=RssConfig(enabled=True, categories=categories),
         avid_parser=AvidParser(),
-        freshrss=deps.freshrss,
+        subscriptions=subscriptions,
+        fetch=deps.fetch,
         cloud=deps.cloud,
         sukebei=deps.sukebei,
         javbus=deps.javbus,
@@ -347,16 +534,16 @@ async def test_discovery_records_the_avid_and_submits_the_first_magnet() -> None
     assert ctx.stats['magnets_added'] == 1
 
 
-async def test_items_are_read_as_soon_as_the_avid_is_recorded() -> None:
-    # FreshRSS no longer doubles as the retry queue, so nothing is left unread
-    # to be picked up next run.
+async def test_items_enter_the_cursor_as_soon_as_they_are_seen() -> None:
+    # The cursor is not a retry queue: an item is remembered whatever became of
+    # its AVID, and the ledger's schedule drives the retry.
     pipeline, deps = make_pipeline(items=[make_item('item-1', 'ABC-123'), make_item('item-2', 'ABC-123')])
 
     ctx = make_ctx()
     await pipeline.run(ctx)
 
-    deps.freshrss.read_items.assert_awaited_once_with(['item-1', 'item-2'])
-    assert ctx.stats['items_marked_read'] == 2
+    assert deps.subscriptions.records[1].cursor == ('item-1', 'item-2')
+    assert deps.subscriptions.records[1].last_error is None
     assert deps.ledger.states['ABC-123'] is AcquisitionState.RESOLVE_FAILED
 
 
@@ -440,8 +627,8 @@ async def test_avids_the_ledger_already_owns_are_skipped(state: AcquisitionState
     deps.cloud.add_offline_files.assert_not_awaited()
     deps.sukebei.get_magnet.assert_not_awaited()
     assert ctx.stats['skipped_known'] == 1
-    # The item is still read: re-reading it would only re-derive the same AVID.
-    deps.freshrss.read_items.assert_awaited_once_with(['item-1'])
+    # The item still enters the cursor: re-reading it would only re-derive the same AVID.
+    assert deps.subscriptions.records[1].cursor == ('item-1',)
 
 
 async def test_a_failed_submission_falls_through_to_the_next_candidate() -> None:
@@ -495,18 +682,18 @@ async def test_empty_feed_does_nothing() -> None:
     ctx = make_ctx()
     await pipeline.run(ctx)
 
-    deps.freshrss.read_items.assert_not_awaited()
     deps.cloud.add_offline_files.assert_not_awaited()
     assert ctx.stats['items'] == 0
+    assert deps.subscriptions.records[1].last_error is None
 
 
-async def test_unparseable_titles_are_reported_and_left_unread() -> None:
+async def test_unparseable_titles_are_reported_once_and_not_re_read() -> None:
     pipeline, deps = make_pipeline(items=[make_item('item-1', '!!!')])
 
     ctx = make_ctx()
     await pipeline.run(ctx)
 
-    deps.freshrss.read_items.assert_not_awaited()
+    assert deps.subscriptions.records[1].cursor == ('item-1',)
     assert ctx.stats['unique_avids'] == 0
     assert any('Failed to get avid' in line for line in ctx.log_tail)
 
@@ -524,7 +711,7 @@ async def test_each_category_is_recorded_under_its_own_source() -> None:
     await pipeline.run(make_ctx())
 
     assert deps.ledger.sources == {'ABC-123': 'rss:Actor', 'DEF-456': 'rss:Rank'}
-    assert [call.args[0] for call in deps.freshrss.get_items.await_args_list] == ['Actor', 'Rank']
+    assert [call.args[0] for call in deps.fetch.await_args_list] == [feed_url('Actor'), feed_url('Rank')]
 
 
 async def test_a_category_downloads_into_its_own_directory() -> None:
@@ -550,13 +737,16 @@ async def test_no_categories_ingests_nothing() -> None:
 
     await pipeline.run(make_ctx())
 
-    deps.freshrss.get_items.assert_not_awaited()
+    deps.fetch.assert_not_awaited()
     assert deps.ledger.states == {}
+    # The subscription is reported rather than guessed a directory for.
+    assert deps.subscriptions.records[1].last_error == 'category Actor is not configured'
 
 
 async def test_one_failing_category_does_not_cost_the_others_their_pass() -> None:
     pipeline, deps = make_pipeline(
-        freshrss_side_effect=[RuntimeError('freshrss is down'), [make_item('item-2', 'DEF-456')]],
+        items_by_label={'Actor': [], 'Rank': []},
+        fetch_side_effect=[RuntimeError('rsshub is down'), feed_xml([make_item('item-2', 'DEF-456')])],
         categories=(
             RssCategory(label='Actor', task_dir_path=TASK_DIR),
             RssCategory(label='Rank', task_dir_path=TASK_DIR),
@@ -568,7 +758,9 @@ async def test_one_failing_category_does_not_cost_the_others_their_pass() -> Non
     await pipeline.run(ctx)
 
     assert deps.ledger.states['DEF-456'] is AcquisitionState.DOWNLOADING
-    assert ctx.stats['categories_failed'] == 1
+    assert ctx.stats['subscriptions_failed'] == 1
+    assert deps.subscriptions.records[1].last_error == 'RuntimeError: rsshub is down'
+    assert deps.subscriptions.records[2].last_error is None
 
 
 async def test_stats_cover_every_category_in_the_run() -> None:
@@ -629,7 +821,7 @@ async def test_an_avid_the_library_holds_is_settled_without_a_download(tmp_path)
 
     deps.cloud.add_offline_files.assert_not_awaited()
     deps.sukebei.get_magnet.assert_not_awaited()
-    deps.freshrss.read_items.assert_awaited_once_with(['item-1'])
+    assert deps.subscriptions.records[1].cursor == ('item-1',)
     assert deps.ledger.states['ABC-123'] is AcquisitionState.ARCHIVED
     assert deps.ledger.notes['ABC-123'] == 'already in library'
     assert deps.ledger.archived_paths['ABC-123'] == ('actor/clt/ABC/ABC-123.mp4',)
@@ -668,3 +860,122 @@ async def test_an_absent_avid_still_downloads_when_routes_are_configured(tmp_pat
 
     deps.cloud.add_offline_files.assert_awaited_once_with([MAGNET_A], '/115/embyx_in/rank')
     assert deps.ledger.states['ABC-123'] is AcquisitionState.DOWNLOADING
+
+
+def magnet_table(info_hash: str) -> str:
+    return f"""
+    <table><tbody><tr>
+      <td><a href="magnet:?xt=urn:btih:{info_hash}&dn=x">x</a></td>
+      <td>2 GiB</td>
+    </tr></tbody></table>
+    """
+
+
+async def test_an_item_carrying_a_magnet_wakes_a_parked_avid() -> None:
+    # The magnet is evidence the wait is over: the cooldown no longer applies.
+    ledger = FakeLedger(known={'ABC-123': AcquisitionState.RESOLVE_FAILED})
+    ledger.next_action_at['ABC-123'] = datetime.now(UTC) + timedelta(days=1)
+    pipeline, deps = make_pipeline(items=[make_item('item-1', 'ABC-123', magnet_table(HASH_B))], ledger=ledger)
+
+    ctx = make_ctx()
+    await pipeline.run(ctx)
+
+    deps.cloud.add_offline_files.assert_awaited_once_with([MAGNET_B], TASK_DIR)
+    assert deps.ledger.states['ABC-123'] is AcquisitionState.DOWNLOADING
+    assert ctx.stats.get('skipped_known', 0) == 0
+
+
+async def test_an_item_without_a_magnet_leaves_a_parked_avid_cooling() -> None:
+    ledger = FakeLedger(known={'ABC-123': AcquisitionState.RESOLVE_FAILED})
+    due = datetime.now(UTC) + timedelta(days=1)
+    ledger.next_action_at['ABC-123'] = due
+    pipeline, deps = make_pipeline(
+        items=[make_item('item-1', 'ABC-123')],
+        ledger=ledger,
+        sukebei_magnets={'ABC-123': MAGNET_A},
+    )
+
+    ctx = make_ctx()
+    await pipeline.run(ctx)
+
+    assert ctx.stats['skipped_known'] == 1
+    deps.cloud.add_offline_files.assert_not_awaited()
+    assert deps.ledger.next_action_at['ABC-123'] == due
+
+
+# -- subscriptions and cursors ------------------------------------------------
+
+
+async def test_items_seen_last_poll_are_not_read_again() -> None:
+    pipeline, deps = make_pipeline(items=[make_item('item-1', 'ABC-123')], sukebei_magnets={'ABC-123': MAGNET_A})
+    await pipeline.run(make_ctx())
+    # Pretend the download failed and the row is waiting: a re-read would try again.
+    deps.ledger.states['ABC-123'] = AcquisitionState.RESOLVE_FAILED
+    deps.ledger.next_action_at['ABC-123'] = None
+
+    ctx = make_ctx()
+    await pipeline.run(ctx)
+
+    assert ctx.stats['new_items'] == 0
+    assert ctx.stats.get('unique_avids', 0) == 0
+    deps.cloud.add_offline_files.assert_awaited_once()
+
+
+async def test_a_pending_seed_records_the_feed_without_ingesting_it() -> None:
+    subscriptions = FakeSubscriptions([make_subscription(1, seed_pending=True)])
+    pipeline, deps = make_pipeline(
+        items=[make_item('item-1', 'ABC-123')],
+        subscriptions=subscriptions,
+        sukebei_magnets={'ABC-123': MAGNET_A},
+    )
+
+    ctx = make_ctx()
+    await pipeline.run(ctx)
+
+    assert ctx.stats['subscriptions_seeded'] == 1
+    assert deps.ledger.states == {}
+    deps.fetch.assert_awaited_once_with(feed_url('Actor'))
+    record = subscriptions.records[1]
+    assert record.cursor == ('item-1',)
+    assert record.seed_pending is False
+
+
+async def test_a_disabled_subscription_is_not_polled() -> None:
+    subscriptions = FakeSubscriptions([make_subscription(1, enabled=False)])
+    pipeline, deps = make_pipeline(items=[make_item('item-1', 'ABC-123')], subscriptions=subscriptions)
+
+    await pipeline.run(make_ctx())
+
+    deps.fetch.assert_not_awaited()
+    assert deps.ledger.states == {}
+
+
+async def test_the_avid_falls_back_to_the_item_link_with_the_catalog_prefix_stripped() -> None:
+    # An AVBase talent feed: the title is the work's title, the ID only in the link.
+    pipeline, deps = make_pipeline(
+        items=[
+            make_item(
+                'https://www.avbase.net/works/MIZD-555',
+                '乳首ギンギンのけ反りギュンッ',
+                link='https://www.avbase.net/works/moodyz:MIZD-555',
+            ),
+        ],
+        sukebei_magnets={'MIZD-555': MAGNET_A},
+    )
+
+    await pipeline.run(make_ctx())
+
+    assert deps.ledger.states['MIZD-555'] is AcquisitionState.DOWNLOADING
+
+
+async def test_a_feed_that_cannot_be_parsed_is_reported_on_the_subscription() -> None:
+    pipeline, deps = make_pipeline(fetch_side_effect=[b'<html><body>not a feed</body></html>'])
+
+    ctx = make_ctx()
+    await pipeline.run(ctx)
+
+    assert ctx.stats['subscriptions_failed'] == 1
+    record = deps.subscriptions.records[1]
+    assert record.last_error is not None
+    assert record.last_error.startswith('FeedParseError')
+    assert record.cursor == ()

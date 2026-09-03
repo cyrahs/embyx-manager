@@ -17,6 +17,8 @@ _AUTH_FAILURE_STATUSES = frozenset({401, 403})
 class FreshRSSSubscription:
     url: str
     title: str | None
+    #: The first FreshRSS category the feed is filed under, if any.
+    category: str | None = None
 
 
 class FreshRSSClient:
@@ -97,7 +99,15 @@ class FreshRSSClient:
                 continue
             raw_title = subscription.get('title')
             title = raw_title.strip() if isinstance(raw_title, str) else ''
-            parsed.append(FreshRSSSubscription(url=url, title=title or None))
+            category = None
+            raw_categories = subscription.get('categories')
+            if isinstance(raw_categories, list):
+                for entry in raw_categories:
+                    label = entry.get('label') if isinstance(entry, dict) else None
+                    if isinstance(label, str) and label.strip():
+                        category = label.strip()
+                        break
+            parsed.append(FreshRSSSubscription(url=url, title=title or None, category=category))
         return tuple(parsed)
 
     @retry(

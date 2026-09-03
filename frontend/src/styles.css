@@ -749,6 +749,7 @@ main {
 .acq-avid { display: flex; align-items: center; gap: 6px; }
 .acq-avid .chevron { width: 14px; height: 14px; }
 .acq-muted { color: var(--text-2); }
+.acq-wait { display: block; margin-top: 2px; font-size: 12px; color: var(--text-2); }
 .acq-progress {
   position: relative;
   display: inline-block;
@@ -783,3 +784,12 @@ main {
   font-size: 13px;
 }
 .acq-magnet input:focus { outline: none; border-color: var(--accent); }
+
+/* Subscriptions panel (settings page). */
+.subscription-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 12px; }
+.subscription-form input[type='text'] { flex: 1 1 320px; min-width: 0; }
+.subscription-group { margin: 12px 0 0; }
+.subscription-group h3 { margin: 0 0 6px; font-size: 13.5px; }
+.subscription-url strong { display: block; }
+.subscription-url span { display: block; word-break: break-all; font-size: 12px; }
+.subscription-error { display: block; margin-top: 2px; font-size: 12px; color: var(--text-2); }

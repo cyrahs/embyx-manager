@@ -16,6 +16,7 @@ from embyx_manager.adapters import (
 )
 from embyx_manager.api import create_app, make_mutation_auth
 from embyx_manager.clients.clouddrive import AsyncCloudDrive, CloudDriveClient
+from embyx_manager.clients.feeds import HttpFeedFetcher
 from embyx_manager.clients.freshrss import FreshRSSClient
 from embyx_manager.clients.javbus import JavBusClient
 from embyx_manager.clients.sukebei import SukebeiClient
@@ -47,7 +48,7 @@ from embyx_manager.fill_actor.service import FillActorPaths, FillActorRuntime, F
 from embyx_manager.fill_actor.subscriptions import SubscribedActor, find_subscribed_actors
 from embyx_manager.locking import PostgresAdvisoryLock
 from embyx_manager.monitor.acquisitions import AcquisitionRepository
-from embyx_manager.monitor.api import AcquisitionApi, create_monitor_router
+from embyx_manager.monitor.api import AcquisitionApi, SubscriptionsApi, create_monitor_router
 from embyx_manager.monitor.archive import ArchivePipeline
 from embyx_manager.monitor.intake import AcquisitionIntake
 from embyx_manager.monitor.manual import ManualIntakeSource
@@ -58,6 +59,7 @@ from embyx_manager.monitor.reports import PipelineName, RunContext
 from embyx_manager.monitor.rss import RssPipeline
 from embyx_manager.monitor.runs import PipelineRunRepository
 from embyx_manager.monitor.scheduler import MonitorScheduler, PipelineBusyError, PipelineNotConfiguredError
+from embyx_manager.monitor.subscriptions import SubscriptionRepository
 from embyx_manager.monitor.tracker import AcquisitionTracker, TrackerSettings
 from embyx_manager.settings import Settings
 
@@ -192,6 +194,8 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
     repository = PostgresFillActorRepository(database)
     fill_actor_runtime = FillActorRuntimeHandle(store)
     ledger = AcquisitionRepository(database)
+    subscriptions = SubscriptionRepository(database)
+    feed_fetcher = HttpFeedFetcher()
 
     def intake_factory() -> AcquisitionIntake | None:
         cloud = cloud_handle.current()
@@ -253,11 +257,16 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
     def current_feeds() -> FeedsConfig:
         return store.get(FeedsConfig)
 
-    async def existing_freshrss_actors(actor_ids: tuple[str, ...]) -> tuple[SubscribedActor, ...]:
+    def freshrss_client() -> FreshRSSClient | None:
         config = store.get(FreshRSSConfig)
         if not config.configured:
+            return None
+        return FreshRSSClient(url=config.url, api_key=config.api_key, proxy=config.proxy or None)
+
+    async def existing_freshrss_actors(actor_ids: tuple[str, ...]) -> tuple[SubscribedActor, ...]:
+        client = freshrss_client()
+        if client is None:
             return ()
-        client = FreshRSSClient(url=config.url, api_key=config.api_key, proxy=config.proxy or None)
         try:
             subscriptions = await client.get_subscriptions()
         finally:
@@ -300,30 +309,20 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         if cloud is None:
             msg = 'CloudDrive is not configured'
             raise RuntimeError(msg)
-        freshrss_config = store.get(FreshRSSConfig)
-        rss_config = store.get(RssConfig)
-        client = FreshRSSClient(
-            url=freshrss_config.url,
-            api_key=freshrss_config.api_key,
-            proxy=freshrss_config.proxy or None,
+        pipeline = RssPipeline(
+            config=store.get(RssConfig),
+            avid_parser=avid_handle.current(),
+            subscriptions=subscriptions,
+            fetch=feed_fetcher.fetch,
+            cloud=cloud,
+            sukebei=sukebei,
+            javbus=javbus,
+            ledger=ledger,
+            archiver=ArchivePipeline(config=store.get(ArchiveConfig), avid_parser=avid_handle.current()),
+            # Resolved when the run executes, well after the scheduler exists.
+            on_submitted=scheduler.notify_submission,
         )
-
-        try:
-            pipeline = RssPipeline(
-                config=rss_config,
-                avid_parser=avid_handle.current(),
-                freshrss=client,
-                cloud=cloud,
-                sukebei=sukebei,
-                javbus=javbus,
-                ledger=ledger,
-                archiver=ArchivePipeline(config=store.get(ArchiveConfig), avid_parser=avid_handle.current()),
-                # Resolved when the run executes, well after the scheduler exists.
-                on_submitted=scheduler.notify_submission,
-            )
-            await pipeline.run(ctx)
-        finally:
-            await client.aclose()
+        await pipeline.run(ctx)
 
     def archive_ready() -> str | None:
         if not store.get(ArchiveConfig).configured:
@@ -506,6 +505,11 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
                 configured_dirs=lambda: _offline_task_dirs(store),
             ),
         ),
+        subscriptions=SubscriptionsApi(
+            repository=subscriptions,
+            categories=lambda: tuple(category.label for category in store.get(RssConfig).categories),
+            freshrss_factory=freshrss_client,
+        ),
     )
 
     @asynccontextmanager
@@ -524,6 +528,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
     async def _close_clients() -> None:
         try:
             await javbus.aclose()
+            await feed_fetcher.aclose()
         finally:
             try:
                 await sukebei.aclose()
@@ -551,8 +556,6 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
 
 
 def _rss_configuration_gap(store: ConfigStore) -> str | None:
-    if not store.get(FreshRSSConfig).configured:
-        return 'FreshRSS is not configured'
     clouddrive = store.get(CloudDriveConfig)
     if not clouddrive.configured:
         return 'CloudDrive is not configured'

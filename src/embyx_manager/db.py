@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 
 import asyncpg
 
-CURRENT_SCHEMA_VERSION = 10
+CURRENT_SCHEMA_VERSION = 12
 
 # Advisory-lock key space for embyx-manager; low word selects the resource.
 ADVISORY_NAMESPACE = 0x454D4258  # 'EMBX'
@@ -457,4 +457,40 @@ _MIGRATIONS[10] = (
         'queued', 'actor_catalog', 'library_scan', 'magnet_lookup', 'submitting', 'persisting', 'done', 'unknown'
     ))
     """,
+)
+
+# The resolve schedule anchors on the release date: a source that knows it
+# (a catalog scan or feed) records it at discovery, and empty passes are then
+# spaced by how far the release is instead of by the fixed cooldown. Existing
+# rows keep NULL and stay on the fixed cooldown.
+_MIGRATIONS[11] = ('ALTER TABLE archive_acquisitions ADD COLUMN release_date DATE',)
+
+# The backend polls feeds itself instead of reading FreshRSS: subscriptions
+# live here, each filed under one of the configured RSS categories. A plain
+# feed URL is one kind; an AVBase talent (feed URL derived from its id) is the
+# other. The cursor remembers which items a poll has seen, and seed_pending
+# marks a subscription whose first poll should only record them.
+_MIGRATIONS[12] = (
+    """
+    CREATE TABLE feed_subscriptions (
+        id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+        kind TEXT NOT NULL CHECK (kind IN ('rss', 'avbase_talent')),
+        category TEXT NOT NULL,
+        enabled BOOLEAN NOT NULL DEFAULT TRUE,
+        url TEXT,
+        talent_id INTEGER,
+        name TEXT,
+        aliases_json TEXT NOT NULL DEFAULT '[]',
+        cursor_json TEXT NOT NULL DEFAULT '[]',
+        seed_pending BOOLEAN NOT NULL DEFAULT FALSE,
+        last_polled_at TIMESTAMPTZ,
+        last_error TEXT,
+        created_at TIMESTAMPTZ NOT NULL,
+        updated_at TIMESTAMPTZ NOT NULL,
+        CHECK ((kind = 'rss') = (url IS NOT NULL)),
+        CHECK ((kind = 'avbase_talent') = (talent_id IS NOT NULL))
+    )
+    """,
+    'CREATE UNIQUE INDEX feed_subscriptions_url_idx ON feed_subscriptions (url) WHERE url IS NOT NULL',
+    'CREATE UNIQUE INDEX feed_subscriptions_talent_idx ON feed_subscriptions (talent_id) WHERE talent_id IS NOT NULL',
 )

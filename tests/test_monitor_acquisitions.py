@@ -1,5 +1,5 @@
 import asyncio
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 
 import asyncpg
 import pytest
@@ -519,3 +519,36 @@ async def test_an_avid_someone_else_owns_keeps_its_directory() -> None:
     record = await ledger.get('ABC-123')
     assert record is not None
     assert record.task_dir_path is None
+
+
+async def test_discover_keeps_the_first_release_date_it_learns() -> None:
+    ledger = make_ledger()
+    await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW)
+    first = await ledger.get('ABC-123')
+    assert first is not None
+    assert first.release_date is None
+
+    await ledger.discover('ABC-123', source=AcquisitionSource.FILL_ACTOR, now=NOW, release_date=date(2026, 10, 2))
+    await ledger.discover('ABC-123', source=AcquisitionSource.FILL_ACTOR, now=NOW, release_date=date(2026, 11, 2))
+
+    record = await ledger.get('ABC-123')
+    assert record is not None
+    assert record.release_date == date(2026, 10, 2)
+
+
+async def test_a_waking_sighting_accepts_a_cooling_row() -> None:
+    ledger = make_ledger()
+    await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW, release_date=date(2026, 8, 1))
+    await ledger.transition(
+        'ABC-123',
+        expected=AcquisitionState.DISCOVERED,
+        target=AcquisitionState.RESOLVE_FAILED,
+        now=NOW,
+        next_action_at=NOW + timedelta(hours=24),
+    )
+
+    assert await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW) is False
+    assert await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW, wake=True) is True
+    record = await ledger.get('ABC-123')
+    assert record is not None
+    assert record.release_date == date(2026, 8, 1)

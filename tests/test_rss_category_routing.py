@@ -20,7 +20,16 @@ from embyx_manager.monitor.reconcile import ReconcileScanner
 from embyx_manager.monitor.reports import RunContext
 from embyx_manager.monitor.rss import RssPipeline
 from embyx_manager.monitor.tracker import AcquisitionTracker, TrackerSettings
-from tests.test_monitor_rss import HASH_A, HASH_B, FakeLedger, make_item
+from tests.test_monitor_rss import (
+    HASH_A,
+    HASH_B,
+    FakeLedger,
+    FakeSubscriptions,
+    feed_url,
+    feed_xml,
+    make_item,
+    make_subscription,
+)
 from tests.test_monitor_tracker import offline_task, write_video
 
 # The deployment this mirrors: a shared inbox with the rank category nested in it.
@@ -79,15 +88,15 @@ async def test_a_category_stays_in_its_own_directory_from_feed_to_library(tmp_pa
             ),
         ),
         avid_parser=AvidParser(),
-        freshrss=SimpleNamespace(
-            get_items=AsyncMock(
-                side_effect=lambda label: {
-                    'Actor': [make_item('item-1', 'ABC-123 release')],
-                    # A javlibrary title: the id runs straight into the title.
-                    'Rank': [make_item('item-2', 'DEF-456中出し')],
-                }[label],
-            ),
-            read_items=AsyncMock(),
+        subscriptions=FakeSubscriptions(
+            [make_subscription(1, category='Actor'), make_subscription(2, category='Rank')],
+        ),
+        fetch=AsyncMock(
+            side_effect=lambda url: {
+                feed_url('Actor'): feed_xml([make_item('item-1', 'ABC-123 release')]),
+                # A javlibrary title: the id runs straight into the title.
+                feed_url('Rank'): feed_xml([make_item('item-2', 'DEF-456中出し')]),
+            }[url],
         ),
         cloud=cloud,
         sukebei=SimpleNamespace(get_magnet=AsyncMock(side_effect=MAGNETS.get)),

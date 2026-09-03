@@ -9,6 +9,7 @@ import { Notice } from '../components/Feedback'
 import { Spinner } from '../components/Icons'
 import { RssCategoriesField } from '../components/settings/RssCategoriesField'
 import { BrandRoutesField, DirRoutesField } from '../components/settings/RouteEditors'
+import { SubscriptionsPanel } from '../components/settings/SubscriptionsPanel'
 import { useApiTokenConfigured } from '../lib/apiToken'
 import { localizeBackendText } from '../lib/backendText'
 import type { RssCategoryRow } from '../lib/settings/rssCategories'
@@ -579,6 +580,7 @@ export default function SettingsPage() {
             />
           )
         })}
+      {sections && <SubscriptionsPanel onUnauthorized={requestApiToken} />}
     </main>
   )
 }

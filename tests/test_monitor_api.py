@@ -4,13 +4,14 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.testclient import TestClient
 
+from embyx_manager.clients.freshrss import FreshRSSSubscription
 from embyx_manager.errors import ApiError
 from embyx_manager.monitor.acquisitions import (
     AcquisitionState,
     AttemptState,
     MagnetCandidate,
 )
-from embyx_manager.monitor.api import AcquisitionApi, create_monitor_router
+from embyx_manager.monitor.api import AcquisitionApi, SubscriptionsApi, create_monitor_router
 from embyx_manager.monitor.manual import (
     DirectoryListing,
     DirectoryNotFoundError,
@@ -29,7 +30,7 @@ from embyx_manager.monitor.scheduler import (
     PipelineStatus,
     TrackerState,
 )
-from tests.test_monitor_rss import HASH_A, HASH_B, FakeLedger, now_stub
+from tests.test_monitor_rss import HASH_A, HASH_B, FakeLedger, FakeSubscriptions, make_subscription, now_stub
 
 
 def make_record(run_id: str, pipeline: PipelineName, state: RunState = RunState.COMPLETED) -> PipelineRunRecord:
@@ -109,9 +110,15 @@ async def _noop_auth() -> None:
     return None
 
 
-def make_client(scheduler: FakeScheduler, runs: FakeRuns) -> TestClient:
+def make_client(
+    scheduler: FakeScheduler,
+    runs: FakeRuns,
+    subscriptions: SubscriptionsApi | None = None,
+) -> TestClient:
     app = FastAPI()
-    app.include_router(create_monitor_router(scheduler, runs, mutation_auth=_noop_auth))  # type: ignore[arg-type]
+    app.include_router(
+        create_monitor_router(scheduler, runs, mutation_auth=_noop_auth, subscriptions=subscriptions),  # type: ignore[arg-type]
+    )
 
     @app.exception_handler(ApiError)
     async def handle(_request, exc):
@@ -533,3 +540,186 @@ def test_manual_routes_are_absent_without_the_source() -> None:
 
 
 NOW = now_stub()
+
+
+# -- subscriptions ---------------------------------------------------------------
+
+
+class FakeFreshRSS:
+    def __init__(self, subscriptions: list[FreshRSSSubscription]) -> None:
+        self._subscriptions = subscriptions
+        self.closed = False
+
+    async def get_subscriptions(self) -> tuple[FreshRSSSubscription, ...]:
+        return tuple(self._subscriptions)
+
+    async def aclose(self) -> None:
+        self.closed = True
+
+
+def subscriptions_api(
+    records: list = (),  # type: ignore[assignment]
+    *,
+    freshrss: FakeFreshRSS | None = None,
+    categories: tuple[str, ...] = ('Actor', 'Rank'),
+) -> SubscriptionsApi:
+    return SubscriptionsApi(
+        repository=FakeSubscriptions(list(records)),  # type: ignore[arg-type]
+        categories=lambda: categories,
+        freshrss_factory=(lambda: freshrss) if freshrss is not None else None,  # type: ignore[return-value]
+    )
+
+
+def test_subscriptions_are_listed_with_the_configured_categories() -> None:
+    api = subscriptions_api([make_subscription(1, url='https://rsshub.test/javbus/star/rwt', name='演员甲')])
+
+    with make_client(FakeScheduler(), FakeRuns([]), subscriptions=api) as client:
+        body = client.get('/api/monitor/subscriptions').json()
+
+    assert body['categories'] == ['Actor', 'Rank']
+    assert [(item['url'], item['feed_url'], item['name']) for item in body['items']] == [
+        ('https://rsshub.test/javbus/star/rwt', 'https://rsshub.test/javbus/star/rwt', '演员甲'),
+    ]
+
+
+def test_subscription_routes_are_absent_without_the_registry() -> None:
+    with make_client(FakeScheduler(), FakeRuns([])) as client:
+        assert client.get('/api/monitor/subscriptions').status_code == 404
+
+
+def test_creating_a_subscription_validates_the_url_and_category() -> None:
+    api = subscriptions_api()
+
+    with make_client(FakeScheduler(), FakeRuns([]), subscriptions=api) as client:
+        created = client.post(
+            '/api/monitor/subscriptions',
+            json={'url': ' https://rsshub.test/javbus/star/rwt ', 'category': 'Actor'},
+        )
+        assert created.status_code == 201
+        assert created.json()['url'] == 'https://rsshub.test/javbus/star/rwt'
+        assert created.json()['category'] == 'Actor'
+        assert created.json()['seed_pending'] is False
+
+        bad_url = client.post('/api/monitor/subscriptions', json={'url': 'ftp://x/y', 'category': 'Actor'})
+        assert bad_url.status_code == 422
+        assert bad_url.json() == {'error': {'code': 'invalid_feed_url'}}
+
+        bad_category = client.post(
+            '/api/monitor/subscriptions', json={'url': 'https://rsshub.test/o', 'category': 'Nope'}
+        )
+        assert bad_category.json() == {'error': {'code': 'unknown_category'}}
+
+        duplicate = client.post(
+            '/api/monitor/subscriptions',
+            json={'url': 'https://rsshub.test/javbus/star/rwt', 'category': 'Rank'},
+        )
+        assert duplicate.status_code == 409
+        assert duplicate.json() == {'error': {'code': 'subscription_exists'}}
+
+
+def test_a_subscription_can_be_disabled_moved_and_deleted() -> None:
+    api = subscriptions_api([make_subscription(1)])
+
+    with make_client(FakeScheduler(), FakeRuns([]), subscriptions=api) as client:
+        disabled = client.patch('/api/monitor/subscriptions/1', json={'enabled': False}).json()
+        assert disabled['enabled'] is False
+
+        moved = client.patch('/api/monitor/subscriptions/1', json={'category': 'Rank'}).json()
+        assert moved['category'] == 'Rank'
+        assert moved['enabled'] is False
+
+        assert client.patch('/api/monitor/subscriptions/1', json={'category': 'Nope'}).status_code == 422
+        assert client.patch('/api/monitor/subscriptions/9', json={'enabled': True}).status_code == 404
+
+        assert client.delete('/api/monitor/subscriptions/1').status_code == 204
+        assert client.delete('/api/monitor/subscriptions/1').status_code == 404
+
+
+def test_freshrss_import_previews_then_applies_with_a_pending_seed() -> None:
+    freshrss = FakeFreshRSS(
+        [
+            FreshRSSSubscription(url='https://rsshub.test/javbus/star/rwt', title='演员甲', category='Actor'),
+            FreshRSSSubscription(url='https://rsshub.test/javlibrary/rank', title='榜单', category='Rank'),
+            FreshRSSSubscription(url='https://rsshub.test/other', title='其他', category='Misc'),
+            FreshRSSSubscription(url='https://rsshub.test/existing', title='已有', category='Actor'),
+            FreshRSSSubscription(url='not a url', title='坏', category='Actor'),
+        ],
+    )
+    api = subscriptions_api([make_subscription(1, url='https://rsshub.test/existing')], freshrss=freshrss)
+
+    with make_client(FakeScheduler(), FakeRuns([]), subscriptions=api) as client:
+        preview = client.post('/api/monitor/subscriptions/freshrss-import', json={'apply': False}).json()
+        assert [(entry['url'], entry['status']) for entry in preview['entries']] == [
+            ('https://rsshub.test/javbus/star/rwt', 'new'),
+            ('https://rsshub.test/javlibrary/rank', 'new'),
+            ('https://rsshub.test/other', 'category_missing'),
+            ('https://rsshub.test/existing', 'exists'),
+            ('not a url', 'invalid_url'),
+        ]
+        assert preview['imported'] == 0
+        assert len(api.repository.records) == 1  # type: ignore[attr-defined]
+        assert freshrss.closed is True
+
+        applied = client.post('/api/monitor/subscriptions/freshrss-import', json={'apply': True}).json()
+
+    assert applied['imported'] == 2
+    assert [entry['status'] for entry in applied['entries']] == [
+        'imported',
+        'imported',
+        'category_missing',
+        'exists',
+        'invalid_url',
+    ]
+    records = api.repository.records  # type: ignore[attr-defined]
+    imported = [record for record in records.values() if record.url != 'https://rsshub.test/existing']
+    assert {(record.url, record.category, record.name, record.seed_pending) for record in imported} == {
+        ('https://rsshub.test/javbus/star/rwt', 'Actor', '演员甲', True),
+        ('https://rsshub.test/javlibrary/rank', 'Rank', '榜单', True),
+    }
+
+
+def test_freshrss_import_needs_freshrss() -> None:
+    with make_client(FakeScheduler(), FakeRuns([]), subscriptions=subscriptions_api()) as client:
+        response = client.post('/api/monitor/subscriptions/freshrss-import', json={'apply': True})
+
+    assert response.status_code == 503
+    assert response.json() == {'error': {'code': 'freshrss_not_configured'}}
+
+
+def test_creating_a_talent_subscription_stores_its_names_and_seeds_the_first_poll() -> None:
+    api = subscriptions_api()
+
+    with make_client(FakeScheduler(), FakeRuns([]), subscriptions=api) as client:
+        created = client.post(
+            '/api/monitor/subscriptions',
+            json={
+                'kind': 'avbase_talent',
+                'category': 'Actor',
+                'talent_id': 5022,
+                'name': '河北彩花',
+                'aliases': ['河北彩伽', ' 河北彩花 ', ''],
+                'seed': True,
+            },
+        )
+        assert created.status_code == 201
+        body = created.json()
+        assert body['kind'] == 'avbase_talent'
+        assert body['feed_url'] == 'https://www.avbase.net/talents/5022/feed'
+        assert body['aliases'] == ['河北彩伽']
+        assert body['seed_pending'] is True
+        assert body['cursor_size'] == 0
+
+        missing = client.post(
+            '/api/monitor/subscriptions',
+            json={'kind': 'avbase_talent', 'category': 'Actor', 'name': '河北彩花'},
+        )
+        assert missing.json() == {'error': {'code': 'invalid_talent'}}
+
+        duplicate = client.post(
+            '/api/monitor/subscriptions',
+            json={'kind': 'avbase_talent', 'category': 'Rank', 'talent_id': 5022, 'name': '河北彩花'},
+        )
+        assert duplicate.status_code == 409
+
+        unknown = client.post('/api/monitor/subscriptions', json={'kind': 'javbus', 'category': 'Actor'})
+        assert unknown.json() == {'error': {'code': 'unknown_subscription_kind'}}
