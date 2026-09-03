@@ -192,3 +192,28 @@ def test_release_dates_are_read_from_javascript_or_iso_text(value: object, expec
 def test_the_storefront_prefix_is_stripped_from_work_ids() -> None:
     assert strip_prefix('moodyz:MIZD-555') == 'MIZD-555'
     assert strip_prefix('DLDSS-515') == 'DLDSS-515'
+
+
+async def test_a_bare_work_id_is_found_through_the_search_and_its_prefixed_route() -> None:
+    detail = {
+        'pageProps': {
+            'work': {
+                'work_id': 'MDVR-394',
+                'prefix': 'moodyz',
+                'title': 'vr',
+                'min_date': '2026-01-01',
+                'casts': [{'actor': {'id': 1, 'name': '輝星きら', 'talent': {'id': 67548}}}],
+            },
+        },
+    }
+    listing = {
+        'pageProps': {'works': [{'work_id': 'MDVR-394', 'prefix': 'moodyz', 'actors': [{'id': 1, 'name': '輝星きら'}]}]}
+    }
+    client, session = make_client({'B1/works.json': listing, 'B1/works/moodyz%3AMDVR-394.json': detail})
+
+    work = await client.work('MDVR-394')
+
+    assert work is not None
+    assert work.cast[0].talent_id == 67548
+    assert [params for _, params in session.calls[1:]] == [{'q': 'MDVR-394'}, {'id': 'moodyz:MDVR-394'}]
+    assert await client.work('NOPE-1') is None

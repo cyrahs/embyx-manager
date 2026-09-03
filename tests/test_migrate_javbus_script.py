@@ -32,6 +32,10 @@ class FakeAvbase:
     async def work(self, work_id: str) -> AvbaseWork | None:
         return self.works.get(work_id)
 
+    async def search_works(self, query: str) -> list[AvbaseWork]:
+        work = self.works.get(query)
+        return [work] if work is not None else []
+
 
 class FakeJavBus:
     def __init__(self, pages: dict[str, JavBusActorPage]) -> None:
@@ -64,6 +68,8 @@ def work(work_id: str, *talent_ids: int) -> AvbaseWork:
         ('http://rsshub/javbus/star/rwt', 'rwt'),
         ('https://old.example/prefix/javbus/star/A-1/', 'A-1'),
         ('https://rsshub.example/javbus/star/rwt?format=rss', 'rwt'),
+        ('http://rsshub/javbus/ja/star/rwd', 'rwd'),
+        ('http://rsshub/javbus/en/star/x/extra', None),
         ('https://rsshub.example/javbus/actor/rwt', None),
         ('https://rsshub.example/javlibrary/rank', None),
     ],
@@ -116,6 +122,22 @@ async def test_the_star_page_name_is_tried_when_the_title_is_useless() -> None:
 
     assert (row.talent_id, row.method, row.javbus_name) == (46144, 'name', '石川澪')
     assert avbase.looked_up == ['renamed feed', '石川澪']
+    assert row.cross_check == 'skipped'
+
+
+async def test_a_name_match_is_cross_checked_against_a_work_off_the_star_page() -> None:
+    star = JavBusActorPage(actor_id='xvn', name='石川澪', video_ids=('GONE-1', 'A-1'))
+    javbus = FakeJavBus({'xvn': star})
+
+    confirmed = migrate.Row(star_id='xvn', url='u', title='JavBus - 石川澪', category='Actor')
+    await migrate.resolve_row(confirmed, FakeAvbase({'石川澪': MIO}, works={'A-1': work('A-1', 46144, 35)}), javbus)
+    assert confirmed.cross_check == 'ok'
+
+    # The star's works credit other names (a compilation, or another person): flagged, ordered last.
+    unconfirmed = migrate.Row(star_id='xvn', url='u', title='JavBus - 石川澪', category='Actor')
+    await migrate.resolve_row(unconfirmed, FakeAvbase({'石川澪': MIO}, works={'A-1': work('A-1', 35)}), javbus)
+    assert unconfirmed.cross_check == 'unconfirmed'
+    assert migrate.next_batch([unconfirmed, confirmed], batch=5, only=None) == [confirmed, unconfirmed]
 
 
 async def test_the_works_on_the_star_page_bridge_a_name_avbase_does_not_know() -> None:
@@ -254,3 +276,108 @@ def test_rows_round_trip_through_the_mapping_file(tmp_path: Path) -> None:
     migrate.save_mapping(path, rows)
 
     assert migrate.load_mapping(path) == rows
+
+
+def test_the_manager_listing_keeps_disabled_javbus_rows_and_applied_state_is_recovered() -> None:
+    items = [
+        {
+            'id': 1,
+            'kind': 'rss',
+            'url': 'http://rsshub/javbus/star/a',
+            'name': 'A',
+            'category': 'Actor',
+            'enabled': False,
+        },
+        {
+            'id': 2,
+            'kind': 'rss',
+            'url': 'http://rsshub/javbus/star/b',
+            'name': 'B',
+            'category': 'Actor',
+            'enabled': True,
+        },
+        {
+            'id': 3,
+            'kind': 'rss',
+            'url': 'http://rsshub/javlibrary/rank',
+            'name': 'R',
+            'category': 'Rank',
+            'enabled': True,
+        },
+        {
+            'id': 9,
+            'kind': 'avbase_talent',
+            'talent_id': 100,
+            'enabled': True,
+            'created_at': '2026-09-03T02:00:00+00:00',
+        },
+    ]
+
+    rows = migrate.rows_from_listing(items)
+    assert [(row.star_id, row.old_enabled) for row in rows] == [('a', False), ('b', True)]
+
+    rows[0].talent_id, rows[0].method = 100, 'name'
+    rows[1].talent_id, rows[1].method = 200, 'name'
+    migrate.reconcile_applied(rows, items)
+    assert rows[0].applied == {
+        'new_subscription_id': 9,
+        'old_disabled': True,
+        'at': '2026-09-03T02:00:00+00:00',
+        'reconciled': True,
+    }
+    assert rows[1].applied is None
+
+
+def test_resolving_a_subset_keeps_the_rest_of_the_mapping() -> None:
+    kept = migrate.Row(
+        star_id='a',
+        url='u',
+        title='A',
+        category='Actor',
+        talent_id=1,
+        method='name',
+        applied={'new_subscription_id': 9},
+    )
+    stale = migrate.Row(
+        star_id='b',
+        url='u',
+        title='B',
+        category='Actor',
+        talent_id=2,
+        method='name',
+        applied={'new_subscription_id': 8},
+    )
+    fresh = migrate.Row(star_id='b', url='u', title='B renamed', category='Actor', talent_id=2, method='name')
+
+    merged = migrate.merge_rows([kept, stale], [fresh])
+
+    assert [row.star_id for row in merged] == ['a', 'b']
+    assert merged[1].title == 'B renamed'
+    assert merged[1].applied == {'new_subscription_id': 8}
+
+
+def test_verify_reports_a_feed_check_that_blew_up_instead_of_stopping() -> None:
+    row = migrate.Row(
+        star_id='a',
+        url='u',
+        title=None,
+        category='Actor',
+        subscription_id=1,
+        talent_id=46144,
+        talent_name='石川澪',
+        method='name',
+        applied={'new_subscription_id': 2, 'old_disabled': True, 'at': '2026-09-03T00:00:00+00:00'},
+    )
+    listing = {
+        1: {'id': 1, 'kind': 'rss', 'enabled': False, 'talent_id': None},
+        2: {'id': 2, 'kind': 'avbase_talent', 'enabled': True, 'talent_id': 46144, 'last_polled_at': None},
+    }
+
+    def boom(_talent_id: int, _names: list[str]) -> dict:
+        msg = 'not a feed'
+        raise ValueError(msg)
+
+    result = migrate.verify_row(row, listing, feed_check=boom)
+
+    assert result['ok'] is False
+    assert result['problems'] == ['feed check failed: ValueError: not a feed']

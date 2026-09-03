@@ -8,7 +8,7 @@
 | --- | --- |
 | 1 账本发售日节奏 + 带磁力 sighting 唤醒 | 已实现(分支上,**Postgres 测试仅 CI 验证**) |
 | 2 订阅表 + 轮询器 + FreshRSS 导入 | 已实现(分支上,**Postgres 测试仅 CI 验证**) |
-| 3a AVBase 客户端 + talent 类型订阅 + JavBus→AVBase 迁移脚本 | 已实现(分支上) |
+| 3a AVBase 客户端 + talent 类型订阅 + JavBus→AVBase 迁移脚本 | 已合并部署;**线上迁移已于 2026-09-03 完成**(316 条 JavBus star 订阅 → 282 个 AVBase talent) |
 | 3b fill-actor 切换到 AVBase 目录 + "订阅此演员" + 删 RSSHub 预热/FreshRSS | 未开始 |
 | 4 JavBus 磁力评分排序(可选) | 未开始 |
 
@@ -55,6 +55,22 @@
   未找到;`talent(name)`/`talent_works(name)`/`work(id)` 三个入口。
 - API 的 `POST /api/monitor/subscriptions` 接受 `kind=avbase_talent`(talent_id、name、
   aliases、seed);视图增加 `cursor_size` 供核验。
+
+线上迁移记录(2026-09-03,手工分批):
+
+- FreshRSS 导入 318 条(316 条 JavBus star,其中 2 条是 `/javbus/ja/star/` 路径;2 条 Rank
+  javlibrary 榜单)。`resolve`:315 条名字桥命中,1 条(塔乃花鈴)靠番号桥落到 輝星きら
+  (改名);名字匹配再用 star 页作品在 AVBase 的出演者交叉核对,293 确认、10 未确认(合集
+  作品不列全出演者,不是错配)、13 找不到作品可核对。
+- 批次 3 → 10 → 30 → 60 → 100 → 113,每批 `apply` 后 `verify --trigger` 触发一轮轮询核验:
+  全部 316 条通过(新行存在、旧行停用、feed 名字对得上、seed 落地、游标数等于 feed 去重后
+  的条目数)。316 条 JavBus 行对应 282 个 talent(JavBus 每个别名一个 star 页,AVBase 合并)。
+- **坑:FreshRSS 导入的 URL 主机是 `http://rsshub/`**(FreshRSS 与 RSSHub 同 namespace 的短
+  名),manager 在 `media` namespace 解析不到,首轮轮询 315 条全部 `Name or service not known`。
+  JavBus 行随迁移停用,不受影响;2 条 Rank 行以 `http://rsshub.rss.svc.cluster.local/`
+  重建(seed)并删除旧行。以后导入前应先把 FreshRSS 里的 RSSHub 地址换成集群全名,或给
+  订阅加"改地址"功能(3b 待办)。
+- 旧的 JavBus `rss` 行仍保留为停用状态以便回退;确认无误后可批量删除。FreshRSS 可以下线。
 
 ## 结论
 

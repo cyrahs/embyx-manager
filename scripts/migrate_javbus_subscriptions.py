@@ -70,6 +70,8 @@ class Row:
     title: str | None
     category: str | None
     subscription_id: int | None = None
+    #: Whether the JavBus row was still enabled when read; disabled means migrated.
+    old_enabled: bool | None = None
     javbus_name: str | None = None
     talent_id: int | None = None
     talent_name: str | None = None
@@ -77,6 +79,11 @@ class Row:
     total_works: int | None = None
     method: str = 'unresolved'
     evidence: str = ''
+    #: For a name match: whether a work off the JavBus star page credits the
+    #: talent on AVBase too. ``ok`` confirms the match; ``unconfirmed`` means the
+    #: works found credit other names (compilations often do) — not proof of a
+    #: different person, but worth a look; ``skipped`` when no work was found.
+    cross_check: str = 'skipped'
     applied: dict[str, Any] | None = None
     verified: dict[str, Any] | None = None
 
@@ -88,18 +95,28 @@ class Row:
 # -- sources -------------------------------------------------------------------
 
 
+LOCALE_LENGTH = 2
+
+
 def star_id_of(url: str) -> str | None:
     parts = [unquote(part) for part in urlsplit(url).path.split('/') if part]
-    for index in range(len(parts) - 2):
-        if parts[index].casefold() == 'javbus' and parts[index + 1].casefold() == 'star':
-            return parts[index + 2] if index + 3 == len(parts) else None
+    for index, part in enumerate(parts):
+        if part.casefold() != 'javbus':
+            continue
+        rest = parts[index + 1 :]
+        # RSSHub passes the path through, so a locale may sit in between: /javbus/ja/star/<id>.
+        if rest and rest[0].casefold() != 'star' and len(rest[0]) == LOCALE_LENGTH:
+            rest = rest[1:]
+        if len(rest) == LOCALE_LENGTH and rest[0].casefold() == 'star':
+            return rest[1]
     return None
 
 
-def rows_from_manager(api: str) -> list[Row]:
+def rows_from_listing(items: list[dict[str, Any]]) -> list[Row]:
+    """Every JavBus star row in the manager's list, disabled (already migrated) ones included."""
     rows = []
-    for item in subscriptions(api):
-        if item['kind'] != 'rss' or not item['enabled']:
+    for item in items:
+        if item['kind'] != 'rss':
             continue
         star_id = star_id_of(item['url'])
         if star_id:
@@ -110,9 +127,43 @@ def rows_from_manager(api: str) -> list[Row]:
                     title=item.get('name'),
                     category=item['category'],
                     subscription_id=item['id'],
+                    old_enabled=item['enabled'],
                 )
             )
     return rows
+
+
+def reconcile_applied(rows: list[Row], items: list[dict[str, Any]]) -> None:
+    """Recover ``applied`` from the manager for rows the mapping file lost track of.
+
+    A migrated row is recognizable on its own: its JavBus subscription is
+    disabled and a talent subscription for the same talent exists.
+    """
+    talents = {item['talent_id']: item for item in items if item['kind'] == 'avbase_talent'}
+    by_id = {item['id']: item for item in items}
+    for row in rows:
+        if row.applied or not row.resolved:
+            continue
+        old = by_id.get(row.subscription_id) if row.subscription_id is not None else None
+        new = talents.get(row.talent_id)
+        if new is not None and old is not None and not old['enabled']:
+            row.applied = {
+                'new_subscription_id': new['id'],
+                'old_disabled': True,
+                'at': new['created_at'],
+                'reconciled': True,
+            }
+
+
+def merge_rows(existing: list[Row], resolved: list[Row]) -> list[Row]:
+    """Fold freshly resolved rows into the mapping, keeping what happened to the others."""
+    merged = {row.star_id: row for row in existing}
+    for row in resolved:
+        previous = merged.get(row.star_id)
+        if previous is not None:
+            row.applied, row.verified = previous.applied, previous.verified
+        merged[row.star_id] = row
+    return list(merged.values())
 
 
 def rows_from_opml(path: Path) -> list[Row]:
@@ -207,6 +258,21 @@ async def _resolve_by_works(row: Row, star: JavBusActorPage, avbase: AvbaseClien
     _record_talent(row, talent, method='avid', evidence=evidence)
 
 
+async def _cross_check(row: Row, star: JavBusActorPage, avbase: AvbaseClient) -> str:
+    """Does a work off the star page credit the resolved talent? Same-name confusions show up here."""
+    names = {row.talent_name, *row.aliases}
+    for avid in star.video_ids[:2]:
+        match = next(
+            (work for work in await avbase.search_works(avid) if work.work_id.casefold() == avid.casefold()),
+            None,
+        )
+        if match is None:
+            continue
+        credited = {member.name for member in match.cast}
+        return 'ok' if credited & names else 'unconfirmed'
+    return 'skipped'
+
+
 async def resolve_row(row: Row, avbase: AvbaseClient, javbus: JavBusClient) -> None:
     star = None
     try:
@@ -221,6 +287,7 @@ async def resolve_row(row: Row, avbase: AvbaseClient, javbus: JavBusClient) -> N
         candidates.append(star.name)
     tried = await _resolve_by_name(row, candidates, avbase)
     if row.resolved:
+        row.cross_check = await _cross_check(row, star, avbase) if star is not None else 'skipped'
         return
     if star is None or not star.video_ids:
         _unresolved(row, f'no AVBase talent for {tried}; no star page works to bridge with')
@@ -228,26 +295,43 @@ async def resolve_row(row: Row, avbase: AvbaseClient, javbus: JavBusClient) -> N
     await _resolve_by_works(row, star, avbase, tried)
 
 
+class GentleJavBus:
+    """JavBus rate-limits bursts of star pages: one at a time, with a pause between."""
+
+    def __init__(self, client: JavBusClient, *, delay: float = 0.7) -> None:
+        self._client = client
+        self._delay = delay
+        self._lock = asyncio.Lock()
+
+    async def get_actor(self, actor_id: str) -> JavBusActorPage | None:
+        async with self._lock:
+            page = await self._client.get_actor(actor_id)
+            await asyncio.sleep(self._delay)
+            return page
+
+
 async def resolve(rows: list[Row], *, concurrency: int) -> None:
     avbase = AvbaseClient(max_concurrency=concurrency)
-    javbus = JavBusClient()
+    javbus_client = JavBusClient()
+    javbus = GentleJavBus(javbus_client)
     semaphore = asyncio.Semaphore(concurrency)
 
     async def one(row: Row) -> None:
         async with semaphore:
             try:
-                await resolve_row(row, avbase, javbus)
+                await resolve_row(row, avbase, javbus)  # type: ignore[arg-type]
             except AvbaseError as exc:
                 row.method = 'error'
                 row.evidence = f'{type(exc).__name__}: {exc}'
             label = row.talent_name or row.title or ''
-            print(f'  {row.star_id:>8}  {row.method:<10} {row.talent_id or "-":>6}  {label}  - {row.evidence}')
+            check = f' [{row.cross_check}]' if row.resolved else ''
+            print(f'  {row.star_id:>8}  {row.method:<10} {row.talent_id or "-":>6}  {label}{check}  - {row.evidence}')
 
     try:
         await asyncio.gather(*(one(row) for row in rows))
     finally:
         await avbase.aclose()
-        await javbus.aclose()
+        await javbus_client.aclose()
 
 
 # -- apply / verify --------------------------------------------------------------
@@ -270,6 +354,8 @@ def next_batch(rows: list[Row], *, batch: int, only: set[str] | None) -> list[Ro
         for row in rows
         if row.resolved and not row.applied and row.category and (only is None or row.star_id in only)
     ]
+    # Confirmed matches go first; the unconfirmed ones land in the last batches, after a look.
+    todo.sort(key=lambda row: row.cross_check != 'ok')
     return todo[:batch]
 
 
@@ -317,7 +403,8 @@ def feed_check(talent_id: int, expected_names: list[str]) -> dict[str, Any]:
         'ok': names_ok,
         'reason': None if names_ok else f'feed is for {feed_name!r}, expected one of {expected_names}',
         'feed_name': feed_name,
-        'items': len(feed.items),
+        # Distinct keys: the cursor de-duplicates, and AVBase does list a work twice now and then.
+        'items': len({item.key for item in feed.items}),
     }
 
 
@@ -338,23 +425,32 @@ def verify_row(row: Row, listing: dict[int, dict[str, Any]], *, feed_check: Feed
         problems.append('new subscription disabled')
     if row.subscription_id is not None and old is not None and old['enabled']:
         problems.append('old javbus subscription still enabled')
-    feed = feed_check(row.talent_id or 0, [row.talent_name or '', *row.aliases])
+    try:
+        feed = feed_check(row.talent_id or 0, [row.talent_name or '', *row.aliases])
+    except Exception as exc:  # noqa: BLE001 - a transient feed failure is one row's problem, not the run's
+        feed = {'ok': False, 'reason': f'feed check failed: {type(exc).__name__}: {exc}'}
     result['feed'] = feed
     if not feed['ok']:
         problems.append(feed['reason'])
-    polled = False
-    if new is not None and new['last_polled_at'] and new['last_polled_at'] > row.applied['at']:
-        polled = True
-        if new['last_error']:
-            problems.append(f'poll error: {new["last_error"]}')
-        if new['seed_pending']:
-            problems.append('seed still pending after a poll')
-        if feed.get('items') is not None and new['cursor_size'] != feed['items']:
-            problems.append(f'cursor holds {new["cursor_size"]} items, feed has {feed["items"]}')
+    polled = new is not None and bool(new['last_polled_at']) and new['last_polled_at'] > row.applied['at']
+    if polled:
+        problems.extend(_poll_problems(new, feed))  # type: ignore[arg-type]
     result['polled'] = polled
     result['problems'] = problems
     result['ok'] = not problems
     return result
+
+
+def _poll_problems(new: dict[str, Any], feed: dict[str, Any]) -> list[str]:
+    """What a poll that has been past the new subscription should have left behind."""
+    problems = []
+    if new['last_error']:
+        problems.append(f'poll error: {new["last_error"]}')
+    if new['seed_pending']:
+        problems.append('seed still pending after a poll')
+    if feed.get('items') is not None and new['cursor_size'] != feed['items']:
+        problems.append(f'cursor holds {new["cursor_size"]} items, feed has {feed["items"]}')
+    return problems
 
 
 def trigger_and_wait(client: httpx.Client, api: str) -> None:
@@ -393,7 +489,8 @@ def print_status(rows: list[Row]) -> None:
     for row in rows:
         state = 'verified' if row.verified and row.verified.get('ok') else 'applied' if row.applied else row.method
         talent = f'{row.talent_id or "-":>6}  {row.talent_name or "-":<12}'
-        print(f'  {row.star_id:>8}  {state:<10} {talent} {row.category or "-":<8} {row.title or ""}')
+        check = row.cross_check if row.resolved else '-'
+        print(f'  {row.star_id:>8}  {state:<10} {talent} {check:<8} {row.category or "-":<8} {row.title or ""}')
         if row.verified and not row.verified.get('ok'):
             print(f'             problems: {row.verified["problems"]}')
 
@@ -402,7 +499,8 @@ def print_status(rows: list[Row]) -> None:
 
 
 def cmd_resolve(args: argparse.Namespace) -> None:
-    rows = rows_from_opml(args.opml) if args.opml else rows_from_manager(args.api)
+    items = None if args.opml else subscriptions(args.api)
+    rows = rows_from_opml(args.opml) if items is None else rows_from_listing(items)
     if args.only:
         wanted = set(args.only.split(','))
         rows = [row for row in rows if row.star_id in wanted or (row.title or '') in wanted]
@@ -410,14 +508,12 @@ def cmd_resolve(args: argparse.Namespace) -> None:
         rows = rows[: args.limit]
     print(f'resolving {len(rows)} javbus star subscriptions')
     asyncio.run(resolve(rows, concurrency=args.concurrency))
-    if args.mapping.exists() and not args.overwrite:
-        previous = {row.star_id: row for row in load_mapping(args.mapping)}
-        for row in rows:
-            old = previous.get(row.star_id)
-            if old is not None and old.applied:
-                row.applied, row.verified = old.applied, old.verified
-    save_mapping(args.mapping, rows)
-    print_status(rows)
+    existing = load_mapping(args.mapping) if args.mapping.exists() and not args.overwrite else []
+    merged = merge_rows(existing, rows)
+    if items is not None:
+        reconcile_applied(merged, items)
+    save_mapping(args.mapping, merged)
+    print_status(merged)
 
 
 def cmd_apply(args: argparse.Namespace) -> None:

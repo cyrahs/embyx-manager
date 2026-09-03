@@ -149,8 +149,33 @@ class AvbaseClient:
             works.extend(_work_from_listing(entry) for entry in props.get('works') or [])
         return works
 
+    async def search_works(self, query: str) -> list[AvbaseWork]:
+        """Works matching a query (an ID, a name, a title fragment) as the site's search lists them.
+
+        Listing entries credit actors by name only; talent ids come from :meth:`work`.
+        """
+        data = await self._data('works.json', {'q': query})
+        if data is None:
+            return []
+        return [_work_from_listing(entry) for entry in (data.get('pageProps') or {}).get('works') or []]
+
     async def work(self, work_id: str) -> AvbaseWork | None:
-        """One work by its ID, with its credited cast and their talent ids."""
+        """One work by its ID, with its credited cast and their talent ids.
+
+        A work from a storefront with a prefix only answers under
+        ``<prefix>:<id>``; a bare ID goes through the search first, which
+        reports the prefix, so callers can pass whatever ID they have.
+        """
+        if ':' in work_id:
+            return await self._work_route(work_id)
+        wanted = strip_prefix(work_id).casefold()
+        for candidate in await self.search_works(work_id):
+            if candidate.work_id.casefold() == wanted:
+                route_id = f'{candidate.prefix}:{candidate.work_id}' if candidate.prefix else candidate.work_id
+                return await self._work_route(route_id)
+        return None
+
+    async def _work_route(self, work_id: str) -> AvbaseWork | None:
         data = await self._data(f'works/{quote(work_id, safe="")}.json', {'id': work_id})
         if data is None:
             return None
