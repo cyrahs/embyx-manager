@@ -123,13 +123,14 @@ describe('app shell', () => {
     window.history.pushState({}, '', '/')
   })
 
-  it('orders the primary navigation as dashboard, fill actor, then settings', async () => {
+  it('orders the primary navigation as dashboard, fill actor, subscriptions, then settings', async () => {
     render(<App />)
 
     const navigation = await screen.findByRole('navigation', { name: '页面导航' })
     expect(within(navigation).getAllByRole('link').map((link) => link.textContent)).toEqual([
       '监控看板',
       '补全演员',
+      '订阅',
       '设置',
     ])
   })
@@ -374,15 +375,6 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
         plan,
-        feeds: [{
-          actor_id: 'A123',
-          state: 'ready',
-          attempts: 2,
-          updated_at: '2026-07-13T10:02:00Z',
-          error_code: null,
-          freshrss_add_url: null,
-          freshrss_url: null,
-        }],
       }, 202))
 
     render(<App />)
@@ -405,7 +397,6 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
         plan,
-        feeds: [],
       }, 202))
 
     render(<App />)
@@ -913,7 +904,7 @@ describe('Fill Actor page', () => {
         return jsonResponse({ status: 'ok', fill_actor: { apply_enabled: false, apply_ready: false } })
       }
       if (path === '/api/fill-actor/plans/plan-1') {
-        return jsonResponse({ job: { job_id: 'scan-1', plan_id: 'plan-1', state: 'completed' }, plan, feeds: [] })
+        return jsonResponse({ job: { job_id: 'scan-1', plan_id: 'plan-1', state: 'completed' }, plan })
       }
       if (path === '/api/fill-actor/apply-jobs/apply-resume') {
         applyPolls += 1
@@ -973,7 +964,7 @@ describe('Fill Actor page', () => {
     fetchMock.mockImplementation((path) => {
       if (path === '/api/health') return jsonResponse({ status: 'ok', fill_actor: { apply_enabled: true, apply_ready: true } })
       if (path === '/api/fill-actor/plans/plan-1') {
-        return jsonResponse({ job: { job_id: 'scan-1', plan_id: 'plan-1', state: 'completed' }, plan: twoCandidatePlan, feeds: [] })
+        return jsonResponse({ job: { job_id: 'scan-1', plan_id: 'plan-1', state: 'completed' }, plan: twoCandidatePlan })
       }
       if (path === `/api/fill-actor/apply-jobs/${requestId}`) {
         return jsonResponse({
@@ -1250,7 +1241,6 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'queued' },
         plan: null,
-        feeds: [],
       }, 202))
       .mockImplementationOnce(() => pendingCancel)
 
@@ -1263,15 +1253,6 @@ describe('Fill Actor page', () => {
     resolveCancel(new Response(JSON.stringify({
       job: { job_id: 'job-1', plan_id: 'plan-1', state: 'failed', error_code: 'job_cancelled' },
       plan: null,
-      feeds: [{
-        actor_id: 'A123',
-        state: 'failed',
-        attempts: 1,
-        updated_at: '2026-07-13T10:02:00Z',
-        error_code: 'rsshub_cancelled',
-        freshrss_add_url: null,
-        freshrss_url: null,
-      }],
     }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
 
     expect(await screen.findByText('扫描已取消')).toBeInTheDocument()
@@ -1294,13 +1275,11 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'running' },
         plan: null,
-        feeds: [],
       }, 202))
       .mockImplementationOnce(() => Promise.reject(new TypeError('temporary offline')))
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
         plan,
-        feeds: [],
       }))
 
     render(<App />)
@@ -1327,7 +1306,6 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'running' },
         plan: null,
-        feeds: [],
       }, 202))
       .mockImplementationOnce(() => jsonResponse({ error: { code: 'cancel_failed' } }, 503))
 
@@ -1349,13 +1327,11 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'running' },
         plan: null,
-        feeds: [],
       }, 202))
       .mockImplementationOnce(() => jsonResponse({ error: { code: 'unauthorized' } }, 401))
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
         plan,
-        feeds: [],
       }))
 
     render(<App />)
@@ -1386,13 +1362,11 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'running' },
         plan: null,
-        feeds: [],
       }, 202))
       .mockImplementationOnce(() => jsonResponse({ error: { code: 'plan_not_cancellable' } }, 409))
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
         plan,
-        feeds: [],
       }))
 
     render(<App />)
@@ -1422,13 +1396,11 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'running' },
         plan: null,
-        feeds: [],
       }, 202))
       .mockImplementationOnce(() => pendingPoll)
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'failed', error_code: 'job_cancelled' },
         plan: null,
-        feeds: [],
       }))
 
     render(<App />)
@@ -1442,7 +1414,6 @@ describe('Fill Actor page', () => {
     resolvePoll(new Response(JSON.stringify({
       job: { job_id: 'job-1', plan_id: 'plan-1', state: 'running' },
       plan: null,
-      feeds: [],
     }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
     await Promise.resolve()
     expect(screen.getByText('扫描已取消')).toBeInTheDocument()

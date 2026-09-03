@@ -8,6 +8,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, Response
 from pydantic import BaseModel, ConfigDict
 
+from embyx_manager.clients.avbase import AvbaseError, AvbaseTalent
 from embyx_manager.core.magnet import extract_info_hash
 from embyx_manager.errors import ApiError
 from embyx_manager.monitor.acquisitions import (
@@ -332,14 +333,16 @@ class UpdateSubscriptionRequest(BaseModel):
 
 @dataclass(frozen=True)
 class SubscriptionsApi:
-    """The subscription registry behind the settings page's feed list.
+    """The subscription registry behind the subscriptions page.
 
     ``categories`` returns the configured RSS category labels, the only values
-    a subscription may be filed under.
+    a subscription may be filed under. ``resolve_talent`` turns a pasted name,
+    id or AVBase URL into a talent so an actor can be subscribed without a scan.
     """
 
     repository: SubscriptionRepository
     categories: Callable[[], Sequence[str]]
+    resolve_talent: Callable[[str], Awaitable[AvbaseTalent | None]] | None = None
 
 
 #: Which HTTP status each refused manual submission answers with.
@@ -579,6 +582,30 @@ def create_monitor_router(  # noqa: C901, PLR0915 - route registration
     return router
 
 
+async def _talent_to_subscribe(
+    api: SubscriptionsApi, request: CreateSubscriptionRequest, name: str | None
+) -> tuple[int, str, tuple[str, ...]]:
+    """The talent a create request names: given outright, or looked up on AVBase."""
+    talent_id = request.talent_id
+    aliases_given = list(request.aliases)
+    if talent_id is None:
+        # No id: the name (or pasted URL) is looked up on AVBase.
+        if name is None or api.resolve_talent is None:
+            raise ApiError(422, 'invalid_talent')
+        try:
+            talent = await api.resolve_talent(name)
+        except AvbaseError as exc:
+            raise ApiError(502, 'avbase_unavailable') from exc
+        if talent is None:
+            raise ApiError(404, 'talent_not_found')
+        talent_id, name = talent.talent_id, talent.name
+        aliases_given = [*talent.aliases, *aliases_given]
+    if talent_id <= 0 or name is None:
+        raise ApiError(422, 'invalid_talent')
+    aliases = tuple(dict.fromkeys(alias.strip() for alias in aliases_given if alias.strip() and alias.strip() != name))
+    return talent_id, name, aliases
+
+
 def _mount_subscription_routes(  # noqa: C901 - route registration
     router: APIRouter,
     api: SubscriptionsApi,
@@ -617,13 +644,9 @@ def _mount_subscription_routes(  # noqa: C901 - route registration
                     seed_pending=request.seed,
                 )
             elif request.kind == 'avbase_talent':
-                if request.talent_id is None or request.talent_id <= 0 or name is None:
-                    raise ApiError(422, 'invalid_talent')
-                aliases = tuple(
-                    dict.fromkeys(alias.strip() for alias in request.aliases if alias.strip() and alias.strip() != name)
-                )
+                talent_id, name, aliases = await _talent_to_subscribe(api, request, name)
                 record = await repository.add_talent(
-                    talent_id=request.talent_id,
+                    talent_id=talent_id,
                     name=name,
                     aliases=aliases,
                     category=request.category,

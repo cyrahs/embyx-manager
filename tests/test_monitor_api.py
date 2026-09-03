@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.testclient import TestClient
 
+from embyx_manager.clients.avbase import AvbaseTalent, AvbaseUnavailableError
 from embyx_manager.errors import ApiError
 from embyx_manager.monitor.acquisitions import (
     AcquisitionState,
@@ -548,10 +549,12 @@ def subscriptions_api(
     records: list = (),  # type: ignore[assignment]
     *,
     categories: tuple[str, ...] = ('Actor', 'Rank'),
+    resolve_talent=None,
 ) -> SubscriptionsApi:
     return SubscriptionsApi(
         repository=FakeSubscriptions(list(records)),  # type: ignore[arg-type]
         categories=lambda: categories,
+        resolve_talent=resolve_talent,
     )
 
 
@@ -657,6 +660,51 @@ def test_creating_a_talent_subscription_stores_its_names_and_seeds_the_first_pol
 
         unknown = client.post('/api/monitor/subscriptions', json={'kind': 'javbus', 'category': 'Actor'})
         assert unknown.json() == {'error': {'code': 'unknown_subscription_kind'}}
+
+
+def test_a_talent_subscription_from_a_name_alone_is_resolved_on_avbase() -> None:
+    async def resolve(query: str) -> AvbaseTalent | None:
+        if query == 'down':
+            msg = 'challenge page'
+            raise AvbaseUnavailableError(msg)
+        if query in {'河北彩伽', 'https://www.avbase.net/talents/5022/feed'}:
+            return AvbaseTalent(talent_id=5022, name='河北彩花', aliases=('河北彩伽',), total_works=2)
+        return None
+
+    api = subscriptions_api(resolve_talent=resolve)
+
+    with make_client(FakeScheduler(), FakeRuns([]), subscriptions=api) as client:
+        created = client.post(
+            '/api/monitor/subscriptions',
+            json={'kind': 'avbase_talent', 'category': 'Actor', 'name': ' 河北彩伽 '},
+        )
+        assert created.status_code == 201
+        body = created.json()
+        assert (body['talent_id'], body['name'], body['aliases'], body['seed_pending']) == (
+            5022,
+            '河北彩花',
+            ['河北彩伽'],
+            False,
+        )
+
+        unknown = client.post(
+            '/api/monitor/subscriptions',
+            json={'kind': 'avbase_talent', 'category': 'Actor', 'name': 'nobody'},
+        )
+        assert unknown.status_code == 404
+        assert unknown.json() == {'error': {'code': 'talent_not_found'}}
+
+        down = client.post(
+            '/api/monitor/subscriptions', json={'kind': 'avbase_talent', 'category': 'Actor', 'name': 'down'}
+        )
+        assert down.status_code == 502
+        assert down.json() == {'error': {'code': 'avbase_unavailable'}}
+
+        duplicate = client.post(
+            '/api/monitor/subscriptions',
+            json={'kind': 'avbase_talent', 'category': 'Actor', 'name': 'https://www.avbase.net/talents/5022/feed'},
+        )
+        assert duplicate.status_code == 409
 
 
 def test_a_feed_url_can_be_changed_but_not_into_another_subscription_or_onto_a_talent() -> None:

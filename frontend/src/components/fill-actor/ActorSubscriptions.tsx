@@ -9,7 +9,7 @@
 import { useCallback, useEffect, useState } from 'react'
 
 import { ApiError, getConfigSections, isUnauthorized, listSubscriptions, subscribeTalent } from '../../api'
-import { defaultCategory } from '../../lib/fill-actor/subscriptions'
+import { defaultCategory } from '../../lib/subscriptions'
 import type { ActorPlan, Subscription } from '../../types'
 import { Notice } from '../Feedback'
 import { Spinner } from '../Icons'
@@ -61,6 +61,7 @@ export function ActorSubscriptions({ actors, onUnauthorized }: ActorSubscription
         name: actor.actor_name ?? actor.actor_id,
         aliases: actor.aliases ?? [],
         category,
+        seed: true,
       })
       setSubscribed((current) => new Map(current).set(created.talent_id as number, created))
       setError(null)

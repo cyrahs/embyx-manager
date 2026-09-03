@@ -9,7 +9,6 @@ import { Notice } from '../components/Feedback'
 import { Spinner } from '../components/Icons'
 import { RssCategoriesField } from '../components/settings/RssCategoriesField'
 import { BrandRoutesField, DirRoutesField } from '../components/settings/RouteEditors'
-import { SubscriptionsPanel } from '../components/settings/SubscriptionsPanel'
 import { useApiTokenConfigured } from '../lib/apiToken'
 import { localizeBackendText } from '../lib/backendText'
 import type { RssCategoryRow } from '../lib/settings/rssCategories'
@@ -136,7 +135,7 @@ const SECTION_SPECS: SectionSpec[] = [
   {
     section: 'rss',
     title: 'RSS 摄取',
-    description: '定时轮询下方「订阅源」里的 feed，把新番号交给下载追踪并提交 115 离线任务。',
+    description: '定时轮询「订阅」页里的演员与榜单 feed，把新番号交给下载追踪并提交 115 离线任务。',
     fields: [
       { key: 'enabled', label: '启用定时调度', kind: 'boolean' },
       { key: 'interval_seconds', label: '运行间隔（秒）', kind: 'number' },
@@ -559,7 +558,6 @@ export default function SettingsPage() {
             />
           )
         })}
-      {sections && <SubscriptionsPanel onUnauthorized={requestApiToken} />}
     </main>
   )
 }

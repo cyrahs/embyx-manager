@@ -18,6 +18,8 @@
 - 只补两个小厂牌(OLM、MBRBN)未上 AVBase 的新作不做处理——用户决定不理会。
 - "订阅此演员"直接建 `avbase_talent` 订阅并挂起 seed;订阅面板给 rss 类订阅加了改地址,方便修 RSSHub 主机名之类的问题。
 - FreshRSS 客户端/配置节、RSSHub 预热、`fill_actor_job_feeds` 表(迁移 v14 删除)一并移除。
+- 订阅管理从设置页移到独立的「订阅」页(2026-09-03 用户要求):演员(AVBase talent,可按名字/别名/id/链接添加,后端 `find_talent` 解析;数字 id 走 feed 的 channel link 反查名字)与榜单(普通 feed)两个子面板;分类配置仍在设置页。
+- 迁移脚本 `scripts/migrate_javbus_subscriptions.py` 及其测试在线上迁移完成后删除,记录保留在本文档。
 
 第 1 步相对本计划的偏差:
 
@@ -51,7 +53,7 @@
 第 3 步的拆分与偏差:
 
 - **JavBus star 订阅到 AVBase talent 的迁移是一次性的,由人手工分批完成**
-  (`scripts/migrate_javbus_subscriptions.py`),不做应用内的"升级"流程。脚本三段:
+  (`scripts/migrate_javbus_subscriptions.py`,跑完后已从仓库删除,记录见下文),不做应用内的"升级"流程。脚本三段:
   `resolve` 读订阅列表(部署后读 manager API,部署前可读 FreshRSS 的 OPML 导出),用
   名字桥(feed 标题、JavBus star 页名字,AVBase 任一别名都能命中)和番号桥(star 页首页
   作品在 AVBase 的 casts 交集)找到 talent,写 `mapping.json` 供审阅;`apply --batch N`

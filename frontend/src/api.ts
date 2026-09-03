@@ -291,10 +291,12 @@ const CODE_MESSAGES: Record<string, string> = {
   unknown_config_section: '未知的配置分区。',
   config_version_conflict: '配置已被其他会话修改，请刷新后重试。',
   invalid_config_values: '配置项校验未通过，请检查填写内容。',
-  unknown_category: '该分类未配置，请先在 RSS 摄取里添加。',
+  unknown_category: '该分类未配置，请先在设置的 RSS 摄取里添加。',
   invalid_feed_url: 'Feed 地址无效，请填写完整的 http(s) 地址。',
   subscription_exists: '这个 feed 已经订阅过了。',
-  invalid_talent: '演员订阅需要 AVBase talent id 和名字。',
+  invalid_talent: '请输入演员名、AVBase 演员链接或 talent id。',
+  talent_not_found: 'AVBase 上找不到这位演员，请检查名字或链接。',
+  avbase_unavailable: 'AVBase 暂时无法访问，请稍后再试。',
   unknown_subscription_kind: '未知的订阅类型。',
   unknown_subscription: '找不到这条订阅。',
   url_not_editable: '演员订阅的地址由 talent id 决定，不能修改。',
@@ -849,15 +851,17 @@ export async function updateSubscription(
   return body as unknown as Subscription
 }
 
+/** Without a talent_id the backend resolves `name` (a name, alias, id or AVBase link) itself. */
 export async function subscribeTalent(input: {
-  talent_id: number
+  talent_id?: number
   name: string
-  aliases: string[]
+  aliases?: string[]
   category: string
+  seed: boolean
 }): Promise<Subscription> {
   const body = await request('/api/monitor/subscriptions', {
     method: 'POST',
-    body: JSON.stringify({ kind: 'avbase_talent', ...input, seed: true }),
+    body: JSON.stringify({ kind: 'avbase_talent', ...input }),
   })
   return body as unknown as Subscription
 }

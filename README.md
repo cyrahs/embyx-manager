@@ -32,12 +32,17 @@ Three peer features; `/` redirects to the dashboard and no feature owns the app 
   tracker (same intake as the rss pipeline), subscribe the scanned actors' AVBase feeds
   in place, and safely move matching files through CloudDrive — carried over from
   embyx-web with the same durable job queue and move-safety guarantees, now on PostgreSQL.
+- **Subscriptions** (`/subscriptions`): what the rss pipeline polls, in two panels.
+  **Actors** are AVBase talents — added by name, alias, talent id or AVBase link (the
+  backend resolves it), or from the Fill Actor page after a scan — with aliases, state,
+  last poll and error per row. **Charts** are plain feed URLs (RSSHub rankings, sukebei
+  searches, any RSS/Atom) whose URL can be corrected in place. Every subscription files
+  under one of the RSS categories, which decide the offline directory.
 - **Settings** (`/settings`): CloudDrive, Fill Actor library roots, pipeline behavior,
-  and avid parsing rules are stored in the database, editable from the browser, versioned
-  against concurrent edits, and hot-applied without restarts. It also manages the rss
-  pipeline's **subscriptions** — feed URL plus category, enable/disable, edit the URL,
-  last poll and error. The CloudDrive panel has a connection-test button that uses the
-  unsaved form values (secrets fall back to stored ones). Secrets are never echoed back.
+  RSS categories, and avid parsing rules are stored in the database, editable from the
+  browser, versioned against concurrent edits, and hot-applied without restarts. The
+  CloudDrive panel has a connection-test button that uses the unsaved form values
+  (secrets fall back to stored ones). Secrets are never echoed back.
 
 ## Requirements
 

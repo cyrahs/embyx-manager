@@ -55,8 +55,8 @@ class SubscriptionRecord:
     aliases: tuple[str, ...]
     cursor: tuple[str, ...]
     #: True until the first poll, which then records the feed's current items as
-    #: seen without ingesting them — for subscriptions whose backlog was covered
-    #: elsewhere (a catalog scan, or FreshRSS having read them already).
+    #: seen without ingesting them — for subscriptions whose backlog a catalog
+    #: scan already covered.
     seed_pending: bool
     last_polled_at: datetime | None
     last_error: str | None

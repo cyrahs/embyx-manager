@@ -9,6 +9,7 @@ from embyx_manager.clients.avbase import (
     AvbaseTalent,
     AvbaseUnavailableError,
     parse_release_date,
+    parse_talent_query,
     strip_prefix,
 )
 
@@ -187,6 +188,67 @@ async def test_a_work_carries_its_cast_with_talent_ids() -> None:
 )
 def test_release_dates_are_read_from_javascript_or_iso_text(value: object, expected: date | None) -> None:
     assert parse_release_date(value) == expected
+
+
+FEED_XML = (
+    '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel>'
+    '<title><![CDATA[「河北彩花」のフィード]]></title>'
+    '<link>https://www.avbase.net/talents/%E6%B2%B3%E5%8C%97%E5%BD%A9%E8%8A%B1</link>'
+    '</channel></rss>'
+)
+
+
+@pytest.mark.parametrize(
+    ('query', 'expected'),
+    [
+        ('河北彩伽', (None, '河北彩伽')),
+        (' 5022 ', (5022, '')),
+        ('https://www.avbase.net/talents/5022', (5022, '')),
+        ('https://www.avbase.net/talents/5022/feed', (5022, '')),
+        ('https://www.avbase.net/talents/%E6%B2%B3%E5%8C%97%E5%BD%A9%E8%8A%B1?tab=works', (None, '河北彩花')),
+    ],
+)
+def test_a_talent_query_is_a_name_an_id_or_a_talent_url(query: str, expected: tuple[int | None, str]) -> None:
+    assert parse_talent_query(query) == expected
+
+
+@pytest.mark.parametrize('query', ['', '   ', 'https://www.avbase.net/works/MIZD-555', '/actors/1'])
+def test_other_text_is_not_a_talent_query(query: str) -> None:
+    with pytest.raises(ValueError, match='talent'):
+        parse_talent_query(query)
+
+
+async def test_a_talent_is_found_from_its_id_through_the_feed() -> None:
+    client, session = make_client(
+        {
+            'B1/talents/%E6%B2%B3%E5%8C%97%E5%BD%A9%E8%8A%B1.json': talent_props(),
+            'B1/talents/%E6%B2%B3%E5%8C%97%E5%BD%A9%E4%BC%BD.json': talent_props(),
+            f'{HOST}/talents/5022/feed': FEED_XML,
+        }
+    )
+    try:
+        by_url = await client.find_talent('https://www.avbase.net/talents/5022/feed')
+        by_name = await client.find_talent('河北彩伽')
+        missing = await client.find_talent('99999')
+        nonsense = await client.find_talent('https://www.avbase.net/works/MIZD-555')
+    finally:
+        await client.aclose()
+
+    assert by_url == AvbaseTalent(talent_id=5022, name='河北彩花', aliases=('河北彩伽',), total_works=2)
+    assert by_name == by_url
+    assert missing is None
+    assert nonsense is None
+    assert (f'{HOST}/talents/5022/feed', {}) in session.calls
+
+
+async def test_a_feed_naming_a_talent_whose_page_is_gone_still_yields_the_id() -> None:
+    client, _ = make_client({f'{HOST}/talents/5022/feed': FEED_XML})
+    try:
+        talent = await client.find_talent('5022')
+    finally:
+        await client.aclose()
+
+    assert talent == AvbaseTalent(talent_id=5022, name='河北彩花', aliases=(), total_works=0)
 
 
 def test_the_storefront_prefix_is_stripped_from_work_ids() -> None:

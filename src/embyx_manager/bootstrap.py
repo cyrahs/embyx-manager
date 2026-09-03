@@ -485,6 +485,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         subscriptions=SubscriptionsApi(
             repository=subscriptions,
             categories=lambda: tuple(category.label for category in store.get(RssConfig).categories),
+            resolve_talent=avbase.find_talent,
         ),
     )
 
