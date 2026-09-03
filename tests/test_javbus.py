@@ -96,7 +96,8 @@ async def test_get_magnets_success(client: JavBusClient) -> None:
 def test_magnet_score_prefers_tags_over_size() -> None:
     gib = 1 << 30
     assert magnet_score(gib, ('字幕',)) > magnet_score(100 * gib, ())
-    assert magnet_score(gib, ('高清', '字幕')) > magnet_score(200 * gib, ('高清',))
+    # A second badge is worth a (3/2)^8 ≈ 25x size gap, more than any same-title spread.
+    assert magnet_score(gib, ('高清', '字幕')) > magnet_score(20 * gib, ('高清',))
     assert magnet_score(2 * gib, ()) > magnet_score(gib, ())
     # An unreadable size cannot be trusted, badges or not.
     assert magnet_score(0, ('高清', '字幕')) == 0

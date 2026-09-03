@@ -378,7 +378,8 @@ class JavBusClient:
             except humanfriendly.InvalidSize:
                 size_int = 0
             # The first anchor is the title; the rest are the quality badges.
-            tags = tuple(tag for anchor in row('td:first-child a').items()[1:] if (tag := anchor.text().strip()))
+            badges = list(row('td:first-child a').items())[1:]
+            tags = tuple(tag for anchor in badges if (tag := anchor.text().strip()))
 
             results.append(
                 {
