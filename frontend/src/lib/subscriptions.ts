@@ -22,6 +22,19 @@ export function defaultRankCategory(categories: string[]): string {
   return categories.find((label) => /rank|榜/i.test(label)) ?? categories[0] ?? ''
 }
 
+/** The offline directory a category files into, for showing where new subscriptions land. */
+export function categoryDir(sections: ConfigSection[], label: string): string | null {
+  const rss = sections.find((section) => section.section === 'rss')?.values.categories
+  if (!Array.isArray(rss)) return null
+  for (const entry of rss) {
+    const record = (entry ?? {}) as Record<string, unknown>
+    if (record.label === label && typeof record.task_dir_path === 'string' && record.task_dir_path) {
+      return record.task_dir_path
+    }
+  }
+  return null
+}
+
 export function stateLabel(item: Subscription): string {
   if (!item.enabled) return '停用'
   if (item.seed_pending) return '待初始化'

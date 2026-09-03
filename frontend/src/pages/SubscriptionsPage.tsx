@@ -111,6 +111,7 @@ export default function SubscriptionsPage() {
             <RssSubscriptionsPanel
               items={feeds}
               categories={subscriptions.categories}
+              sections={subscriptions.sections}
               busy={subscriptions.busy}
               onAdd={subscriptions.addFeed}
               onToggle={subscriptions.toggle}
