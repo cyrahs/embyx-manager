@@ -464,6 +464,7 @@ async def test_postgres_repository_applies_explicit_schema_migration() -> None:
         'fill_actor_jobs',
         'fill_actor_job_feeds',
         'fill_actor_move_journal',
+        'feed_subscriptions',
         'health_probe',
     }
 
