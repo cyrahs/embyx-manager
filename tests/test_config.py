@@ -77,7 +77,7 @@ async def test_store_rejects_invalid_values() -> None:
     await store.load()
 
     with pytest.raises(ValueError, match='absolute path'):
-        await store.update('mapping', {'src_dir': 'relative/strm'})
+        await store.update('fill_actor', {'actor_root': 'relative/actors'})
 
 
 def test_masked_values_blank_secrets() -> None:
@@ -143,7 +143,7 @@ def test_config_api_round_trip_masks_secrets() -> None:
             assert conflict.status_code == 409
             assert conflict.json()['error']['code'] == 'config_version_conflict'
 
-            invalid = client.put('/api/config/mapping', json={'values': {'src_dir': 'not-absolute'}})
+            invalid = client.put('/api/config/fill_actor', json={'values': {'actor_root': 'not-absolute'}})
             assert invalid.status_code == 422
 
             unknown = client.get('/api/config/nope')
