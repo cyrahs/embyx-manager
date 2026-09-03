@@ -115,6 +115,22 @@ describe('subscriptions page', () => {
     vi.restoreAllMocks()
   })
 
+  it('tags only the rows filed under another category than the panel files into', async () => {
+    // The list is the first request the page makes.
+    vi.mocked(fetch).mockImplementationOnce(() =>
+      jsonResponse({
+        items: [TALENT, { ...TALENT, id: 7, name: '七沢みあ', talent_id: 2037, category: 'Rank' }],
+        categories: ['Actor', 'Rank'],
+      }),
+    )
+    renderPage()
+
+    const plain = (await screen.findByText('石川澪')).closest('tr') as HTMLElement
+    const elsewhere = screen.getByText('七沢みあ').closest('tr') as HTMLElement
+    expect(within(plain).queryByText('Actor')).not.toBeInTheDocument()
+    expect(within(elsewhere).getByText('Rank')).toBeInTheDocument()
+  })
+
   it('splits actors and charts into two tabs with their counts', async () => {
     const user = userEvent.setup()
     renderPage()
@@ -142,8 +158,9 @@ describe('subscriptions page', () => {
     renderPage()
     await screen.findByText('石川澪')
 
-    // The default category is the one filing into fill actor's own directory.
-    expect(screen.getByLabelText('分类')).toHaveValue('Actor')
+    // The panel files into the category whose directory is fill actor's own.
+    expect(screen.getByText('新添加的归入分类「Actor」，下载落在 /115/embyx_in/clt')).toBeInTheDocument()
+    expect(screen.queryByLabelText('分类')).not.toBeInTheDocument()
     await user.type(screen.getByLabelText('演员名或 AVBase 链接'), '河北彩伽')
     await user.click(screen.getByRole('button', { name: '添加演员' }))
 
@@ -190,7 +207,7 @@ describe('subscriptions page', () => {
     await screen.findByText('石川澪')
     await user.click(screen.getByRole('tab', { name: /榜单/ }))
 
-    expect(screen.getByLabelText('分类')).toHaveValue('Rank')
+    expect(screen.getByText('新添加的归入分类「Rank」，下载落在 /115/embyx_in/rank')).toBeInTheDocument()
     await user.type(screen.getByLabelText('Feed 地址'), 'https://rsshub.test/new')
     await user.click(screen.getByRole('button', { name: '添加' }))
     expect(await screen.findByText('https://rsshub.test/new')).toBeInTheDocument()

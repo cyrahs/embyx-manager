@@ -17,26 +17,19 @@ export function PolledCell({ item }: { item: Subscription }) {
   return <td className="acq-muted">{formatTime(item.last_polled_at)}</td>
 }
 
-export function CategorySelect({
-  label,
-  value,
-  categories,
-  onChange,
-}: {
-  label: string
-  value: string
-  categories: string[]
-  onChange: (value: string) => void
-}) {
+/** Where new rows of this panel file, and a tag for rows that were filed elsewhere. */
+export function FilingHint({ category, dir }: { category: string; dir: string | null }) {
+  if (!category) return null
   return (
-    <select aria-label={label} value={value} onChange={(event) => onChange(event.target.value)}>
-      {categories.map((category) => (
-        <option key={category} value={category}>
-          {category}
-        </option>
-      ))}
-    </select>
+    <p className="subscription-hint">
+      新添加的归入分类「{category}」{dir ? `，下载落在 ${dir}` : ''}
+    </p>
   )
+}
+
+export function CategoryTag({ item, panelCategory }: { item: Subscription; panelCategory: string }) {
+  if (item.category === panelCategory) return null
+  return <span className="subscription-tag">{item.category}</span>
 }
 
 interface RowActionsProps {

@@ -6,12 +6,12 @@
  * always skips them, since the scan just covered the backlog.
  */
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
-import { defaultCategory, matchesFilter, talentPageUrl } from '../../lib/subscriptions'
+import { categoryDir, defaultCategory, matchesFilter, talentPageUrl } from '../../lib/subscriptions'
 import type { ConfigSection, Subscription } from '../../types'
 import { ExternalIcon } from '../Icons'
-import { CategorySelect, PolledCell, RowActions, StateCell } from './SubscriptionRowBits'
+import { CategoryTag, FilingHint, PolledCell, RowActions, StateCell } from './SubscriptionRowBits'
 
 const FILTER_THRESHOLD = 8
 
@@ -35,14 +35,12 @@ export function TalentSubscriptionsPanel({
   onRemove,
 }: TalentSubscriptionsPanelProps) {
   const [query, setQuery] = useState('')
-  const [category, setCategory] = useState('')
   const [seed, setSeed] = useState(false)
   const [filter, setFilter] = useState('')
   const [pendingDelete, setPendingDelete] = useState<number | null>(null)
 
-  useEffect(() => {
-    setCategory((current) => (current && categories.includes(current) ? current : defaultCategory(sections, categories)))
-  }, [sections, categories])
+  // The panel decides the category: the one filing into fill actor's own directory.
+  const category = defaultCategory(sections, categories)
 
   const visible = items.filter((item) => matchesFilter(item, filter))
 
@@ -63,7 +61,6 @@ export function TalentSubscriptionsPanel({
           })
         }}
       >
-        <CategorySelect label="分类" value={category} categories={categories} onChange={setCategory} />
         <input
           type="text"
           aria-label="演员名或 AVBase 链接"
@@ -81,6 +78,7 @@ export function TalentSubscriptionsPanel({
           添加演员
         </button>
       </form>
+      <FilingHint category={category} dir={categoryDir(sections, category)} />
       {items.length > FILTER_THRESHOLD && (
         <div className="subscription-filter">
           <input
@@ -103,7 +101,6 @@ export function TalentSubscriptionsPanel({
             <thead>
               <tr>
                 <th>演员</th>
-                <th>分类</th>
                 <th>状态</th>
                 <th>上次拉取</th>
                 <th>操作</th>
@@ -115,7 +112,10 @@ export function TalentSubscriptionsPanel({
                 return (
                   <tr key={item.id}>
                     <td className="subscription-url">
-                      <strong>{item.name ?? `talent ${item.talent_id}`}</strong>
+                      <strong>
+                        {item.name ?? `talent ${item.talent_id}`}
+                        <CategoryTag item={item} panelCategory={category} />
+                      </strong>
                       {item.aliases.length > 0 && <span className="acq-muted">别名：{item.aliases.join('、')}</span>}
                       {page && (
                         <a className="subscription-link" href={page} target="_blank" rel="noreferrer">
@@ -123,7 +123,6 @@ export function TalentSubscriptionsPanel({
                         </a>
                       )}
                     </td>
-                    <td>{item.category}</td>
                     <StateCell item={item} />
                     <PolledCell item={item} />
                     <RowActions
