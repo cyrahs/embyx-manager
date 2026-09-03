@@ -4,15 +4,16 @@
  * route); the poller keeps the cursor, so the correction does not replay items.
  */
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
-import { defaultRankCategory } from '../../lib/subscriptions'
-import type { Subscription } from '../../types'
-import { CategorySelect, PolledCell, RowActions, StateCell } from './SubscriptionRowBits'
+import { categoryDir, defaultRankCategory } from '../../lib/subscriptions'
+import type { ConfigSection, Subscription } from '../../types'
+import { CategoryTag, FilingHint, PolledCell, RowActions, StateCell } from './SubscriptionRowBits'
 
 interface RssSubscriptionsPanelProps {
   items: Subscription[]
   categories: string[]
+  sections: ConfigSection[]
   busy: boolean
   onAdd: (url: string, category: string) => Promise<boolean>
   onToggle: (item: Subscription) => Promise<boolean>
@@ -23,6 +24,7 @@ interface RssSubscriptionsPanelProps {
 export function RssSubscriptionsPanel({
   items,
   categories,
+  sections,
   busy,
   onAdd,
   onToggle,
@@ -30,13 +32,11 @@ export function RssSubscriptionsPanel({
   onRemove,
 }: RssSubscriptionsPanelProps) {
   const [url, setUrl] = useState('')
-  const [category, setCategory] = useState('')
   const [editing, setEditing] = useState<{ id: number; url: string } | null>(null)
   const [pendingDelete, setPendingDelete] = useState<number | null>(null)
 
-  useEffect(() => {
-    setCategory((current) => (current && categories.includes(current) ? current : defaultRankCategory(categories)))
-  }, [categories])
+  // The panel decides the category: the one named like a ranking.
+  const category = defaultRankCategory(categories)
 
   return (
     <section aria-labelledby="rss-subscriptions-title">
@@ -55,7 +55,6 @@ export function RssSubscriptionsPanel({
           })
         }}
       >
-        <CategorySelect label="分类" value={category} categories={categories} onChange={setCategory} />
         <input
           type="text"
           aria-label="Feed 地址"
@@ -69,6 +68,7 @@ export function RssSubscriptionsPanel({
           添加
         </button>
       </form>
+      <FilingHint category={category} dir={categoryDir(sections, category)} />
       {items.length === 0 ? (
         <p className="route-empty">还没有榜单订阅。</p>
       ) : (
@@ -77,7 +77,6 @@ export function RssSubscriptionsPanel({
             <thead>
               <tr>
                 <th>订阅</th>
-                <th>分类</th>
                 <th>状态</th>
                 <th>上次拉取</th>
                 <th>操作</th>
@@ -87,7 +86,10 @@ export function RssSubscriptionsPanel({
               {items.map((item) => (
                 <tr key={item.id}>
                   <td className="subscription-url">
-                    {item.name && <strong>{item.name}</strong>}
+                    <strong>
+                      {item.name}
+                      <CategoryTag item={item} panelCategory={category} />
+                    </strong>
                     {editing?.id === item.id ? (
                       <form
                         className="subscription-edit"
@@ -117,7 +119,6 @@ export function RssSubscriptionsPanel({
                       <span className="acq-muted">{item.feed_url}</span>
                     )}
                   </td>
-                  <td>{item.category}</td>
                   <StateCell item={item} />
                   <PolledCell item={item} />
                   <RowActions
