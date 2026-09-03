@@ -3,14 +3,12 @@ import type {
   AcquisitionDetail,
   AcquisitionPage,
   ActiveApplyRequest,
-  ActorFeedStatus,
   ApplyJobEnvelope,
   ApplyResult,
   AvidActors,
   ConfigSection,
   DirectoryListing,
   FillActorPlan,
-  FreshRssImportResult,
   JobProgress,
   JobState,
   ManualSubmission,
@@ -213,9 +211,9 @@ export function setActiveApplyRequest(value: ActiveApplyRequest | null): void {
 }
 
 /**
- * Actor display names learned during this scan session — from an AVID lookup or from a
- * FreshRSS subscription hit — so the feed list can name the actor it is warming instead of
- * showing a bare ID. Kept beside the recovered plan so a reload does not lose them.
+ * Actor display names learned during this scan session from an AVID lookup, so the page
+ * can name an actor instead of showing a bare id. Kept beside the recovered plan so a
+ * reload does not lose them.
  */
 function normalizeActorNames(value: unknown): Record<string, string> {
   if (!isRecord(value)) return {}
@@ -299,8 +297,7 @@ const CODE_MESSAGES: Record<string, string> = {
   invalid_talent: '演员订阅需要 AVBase talent id 和名字。',
   unknown_subscription_kind: '未知的订阅类型。',
   unknown_subscription: '找不到这条订阅。',
-  freshrss_not_configured: '尚未配置 FreshRSS，无法导入。',
-  freshrss_import_failed: '读取 FreshRSS 的订阅列表失败。',
+  url_not_editable: '演员订阅的地址由 talent id 决定，不能修改。',
 }
 
 /** `undefined` uses the signed-in token; `null` deliberately sends none. */
@@ -361,50 +358,21 @@ function looksLikeJob(value: unknown): value is PlanJob {
   )
 }
 
-function normalizeActorFeedStatus(value: unknown): ActorFeedStatus | null {
-  if (!isRecord(value)) return null
-  if (!(
-    typeof value.actor_id === 'string' &&
-    ['queued', 'warming', 'ready', 'failed'].includes(String(value.state)) &&
-    typeof value.attempts === 'number' &&
-    Number.isFinite(value.attempts) &&
-    typeof value.updated_at === 'string' &&
-    (value.error_code === null || typeof value.error_code === 'string') &&
-    (value.freshrss_add_url === null || typeof value.freshrss_add_url === 'string') &&
-    (value.freshrss_url === undefined || value.freshrss_url === null || typeof value.freshrss_url === 'string')
-  )) return null
-  return {
-    actor_id: value.actor_id,
-    state: value.state as ActorFeedStatus['state'],
-    attempts: value.attempts,
-    updated_at: value.updated_at,
-    error_code: value.error_code,
-    freshrss_add_url: value.freshrss_add_url,
-    freshrss_url: value.freshrss_url ?? null,
-  }
-}
-
 // ---------- fill actor ----------
 
 export function normalizePlanEnvelope(value: unknown): PlanEnvelope {
-  if (looksLikePlan(value)) return { plan: value, job: null, planId: value.plan_id, feeds: [] }
-  if (!isRecord(value)) return { plan: null, job: null, planId: null, feeds: [] }
+  if (looksLikePlan(value)) return { plan: value, job: null, planId: value.plan_id }
+  if (!isRecord(value)) return { plan: null, job: null, planId: null }
 
   const plan = looksLikePlan(value.plan) ? value.plan : null
   const job = looksLikeJob(value.job) ? value.job : looksLikeJob(value) ? value : null
-  const feeds = Array.isArray(value.feeds)
-    ? value.feeds.flatMap((feed) => {
-        const normalized = normalizeActorFeedStatus(feed)
-        return normalized ? [normalized] : []
-      })
-    : []
   const planId =
     plan?.plan_id ??
     (typeof value.plan_id === 'string' ? value.plan_id : null) ??
     (job && typeof job.plan_id === 'string' ? job.plan_id : null) ??
     (job && typeof job.job_id === 'string' ? job.job_id : null) ??
     (job && typeof job.id === 'string' ? job.id : null)
-  return { plan, job, planId, feeds }
+  return { plan, job, planId }
 }
 
 function normalizeAvidActors(value: unknown): AvidActors {
@@ -414,17 +382,17 @@ function normalizeAvidActors(value: unknown): AvidActors {
     !Array.isArray(value.actors) ||
     value.actors.length < 1 ||
     value.actors.length > 100
-  ) throw new ApiError(0, 'invalid_avid_actor_response', 'JavBus 演员信息响应无效，请稍后重试。')
+  ) throw new ApiError(0, 'invalid_avid_actor_response', '演员信息响应无效，请稍后重试。')
   const actors = value.actors.map((actor) => {
     if (
       !isRecord(actor) ||
       !isBoundedString(actor.actor_id, 32) ||
       !isBoundedString(actor.name, 256)
-    ) throw new ApiError(0, 'invalid_avid_actor_response', 'JavBus 演员信息响应无效，请稍后重试。')
+    ) throw new ApiError(0, 'invalid_avid_actor_response', '演员信息响应无效，请稍后重试。')
     return { actor_id: actor.actor_id, name: actor.name }
   })
   if (new Set(actors.map((actor) => actor.actor_id.toLowerCase())).size !== actors.length) {
-    throw new ApiError(0, 'invalid_avid_actor_response', 'JavBus 演员信息响应无效，请稍后重试。')
+    throw new ApiError(0, 'invalid_avid_actor_response', '演员信息响应无效，请稍后重试。')
   }
   return { avid: value.avid, actors }
 }
@@ -582,14 +550,11 @@ function normalizeLegacyApplyResult(value: unknown): ApplyResult {
   return normalizeApplyResult(value)
 }
 
-export async function createPlan(actorIds: string[], continueIfSubscribed = false): Promise<PlanEnvelope> {
+export async function createPlan(actorIds: string[]): Promise<PlanEnvelope> {
   return normalizePlanEnvelope(
     await request('/api/fill-actor/plans', {
       method: 'POST',
-      body: JSON.stringify({
-        actor_ids: actorIds,
-        ...(continueIfSubscribed ? { continue_if_subscribed: true } : {}),
-      }),
+      body: JSON.stringify({ actor_ids: actorIds }),
     }),
   )
 }
@@ -844,7 +809,7 @@ export async function updateConfigSection(
 }
 
 export async function testConnection(
-  target: 'clouddrive' | 'freshrss',
+  target: 'clouddrive',
   values: Record<string, unknown>,
 ): Promise<TestConnectionResult> {
   const body = await request(`/api/config/${target}/test`, {
@@ -875,7 +840,7 @@ export async function createSubscription(url: string, category: string): Promise
 
 export async function updateSubscription(
   id: number,
-  changes: { enabled?: boolean; category?: string },
+  changes: { enabled?: boolean; category?: string; url?: string },
 ): Promise<Subscription> {
   const body = await request(`/api/monitor/subscriptions/${id}`, {
     method: 'PATCH',
@@ -884,17 +849,19 @@ export async function updateSubscription(
   return body as unknown as Subscription
 }
 
-export async function deleteSubscription(id: number): Promise<void> {
-  await request(`/api/monitor/subscriptions/${id}`, { method: 'DELETE' })
+export async function subscribeTalent(input: {
+  talent_id: number
+  name: string
+  aliases: string[]
+  category: string
+}): Promise<Subscription> {
+  const body = await request('/api/monitor/subscriptions', {
+    method: 'POST',
+    body: JSON.stringify({ kind: 'avbase_talent', ...input, seed: true }),
+  })
+  return body as unknown as Subscription
 }
 
-export async function importFreshRssSubscriptions(apply: boolean): Promise<FreshRssImportResult> {
-  const body = await request('/api/monitor/subscriptions/freshrss-import', {
-    method: 'POST',
-    body: JSON.stringify({ apply }),
-  })
-  if (!isRecord(body) || !Array.isArray(body.entries) || typeof body.imported !== 'number') {
-    throw new ApiError(0, 'invalid_response', 'FreshRSS 导入响应无效。')
-  }
-  return body as unknown as FreshRssImportResult
+export async function deleteSubscription(id: number): Promise<void> {
+  await request(`/api/monitor/subscriptions/${id}`, { method: 'DELETE' })
 }

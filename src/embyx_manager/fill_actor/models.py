@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -45,6 +45,10 @@ class ActorPlan(FrozenModel):
     scraped_count: int = Field(ge=0)
     video_ids: tuple[str, ...] = ()
     error_code: str | None = None
+    #: The catalog's identity for the actor; absent on plans from before the catalog knew names.
+    actor_name: str | None = None
+    talent_id: int | None = None
+    aliases: tuple[str, ...] = ()
     #: Redacted, truncated diagnostic text; optional so plans stored before it existed still load.
     error_message: str | None = None
 
@@ -61,6 +65,8 @@ class VideoPlan(FrozenModel):
     video_id: str
     actor_ids: tuple[str, ...]
     state: VideoState
+    #: When the catalog dated the release; anchors the ledger's resolve schedule.
+    release_date: date | None = None
     existing_files: tuple[str, ...] = ()
     move_candidates: tuple[MoveCandidate, ...] = ()
     warnings: tuple[str, ...] = ()

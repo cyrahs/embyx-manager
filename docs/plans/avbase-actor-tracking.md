@@ -9,9 +9,15 @@
 | 1 账本发售日节奏 + 带磁力 sighting 唤醒 | 已实现(分支上,**Postgres 测试仅 CI 验证**) |
 | 2 订阅表 + 轮询器 + FreshRSS 导入 | 已实现(分支上,**Postgres 测试仅 CI 验证**) |
 | 3a AVBase 客户端 + talent 类型订阅 + JavBus→AVBase 迁移脚本 | 已合并部署;**线上迁移已于 2026-09-03 完成**(316 条 JavBus star 订阅 → 282 个 AVBase talent) |
-| 3b fill-actor 切换到 AVBase 目录 + "订阅此演员" + 删 RSSHub 预热/FreshRSS | 未开始 |
+| 3b fill-actor 走 AVBase ∪ JavBus 并集目录 + "订阅此演员" + 订阅改地址 + 删 RSSHub 预热/FreshRSS | 已实现(分支上) |
 | 3c 番号补零归一到目录拼写(`%03d`)+ 账本键迁移 v13 | 已实现(分支上,**Postgres 测试仅 CI 验证**) |
 | 4 JavBus 磁力评分排序(可选) | 未开始 |
+
+3b 相对方案的偏差:
+- 目录取 AVBase ∪ JavBus 并集(先按名字/别名找 talent,再用同一组名字搜 JavBus star 页),而不是只走 AVBase:覆盖审计发现改名前的旧作和下架作品只有 JavBus 还列着。
+- 只补两个小厂牌(OLM、MBRBN)未上 AVBase 的新作不做处理——用户决定不理会。
+- "订阅此演员"直接建 `avbase_talent` 订阅并挂起 seed;订阅面板给 rss 类订阅加了改地址,方便修 RSSHub 主机名之类的问题。
+- FreshRSS 客户端/配置节、RSSHub 预热、`fill_actor_job_feeds` 表(迁移 v14 删除)一并移除。
 
 第 1 步相对本计划的偏差:
 

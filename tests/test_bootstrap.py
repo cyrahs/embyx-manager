@@ -65,16 +65,11 @@ def _reset_public_schema(dsn: str) -> None:
     asyncio.run(reset())
 
 
-def test_bootstrap_passes_feed_integration_urls_to_warmer_and_api(monkeypatch) -> None:
+def test_bootstrap_wires_fill_actor_onto_the_catalog_and_the_app_root(monkeypatch) -> None:
     captured: dict[str, dict] = {}
-    warmer = object()
     jobs = object()
     fill_actor_router = object()
     app = object()
-
-    def make_warmer(**kwargs):
-        captured['warmer'] = kwargs
-        return warmer
 
     def make_jobs(**kwargs):
         captured['jobs'] = kwargs
@@ -88,7 +83,6 @@ def test_bootstrap_passes_feed_integration_urls_to_warmer_and_api(monkeypatch) -
         captured['api'] = kwargs
         return app
 
-    monkeypatch.setattr(bootstrap, 'RSSHubFeedWarmer', make_warmer)
     monkeypatch.setattr(bootstrap, 'FillActorJobManager', make_jobs)
     monkeypatch.setattr(bootstrap, 'create_fill_actor_router', make_fill_actor_router)
     monkeypatch.setattr(bootstrap, 'create_app', make_app)
@@ -96,23 +90,15 @@ def test_bootstrap_passes_feed_integration_urls_to_warmer_and_api(monkeypatch) -
     settings = Settings(database_url='postgresql://unused.invalid/db')
 
     assert build_app(settings) is app
-    # URLs now resolve from the live config store; with defaults they are None.
-    assert callable(captured['warmer']['rsshub_url'])
-    assert captured['warmer']['rsshub_url']() is None
-    assert callable(captured['warmer']['freshrss_url'])
-    assert captured['jobs']['feed_warmer'] is warmer
     # Paths and the move switch come from the config store, so a freshly built service
     # is unconfigured until that section is loaded.
     assert captured['jobs']['service'].configured is False
     assert captured['jobs']['service'].apply_enabled is False
+    assert 'feed_warmer' not in captured['jobs']
     assert captured['fill_actor']['jobs'] is jobs
-    assert callable(captured['fill_actor']['freshrss_url'])
-    assert captured['fill_actor']['freshrss_url']() is None
-    assert callable(captured['fill_actor']['existing_actor_lookup'])
     assert callable(captured['fill_actor']['avid_actor_lookup'])
     # Fill Actor is mounted like every other feature, not baked into the app root.
     assert fill_actor_router in captured['api']['routers']
     assert set(captured['api']['feature_health']) == {'fill_actor'}
     assert 'service' not in captured['api']
     assert 'jobs' not in captured['api']
-    assert callable(captured['fill_actor']['freshrss_rsshub_url'])

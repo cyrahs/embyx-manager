@@ -29,13 +29,11 @@ from embyx_manager.fill_actor.errors import (
     UnknownCandidateError,
     UnknownPlanError,
 )
-from embyx_manager.fill_actor.feeds import build_freshrss_add_url
 from embyx_manager.fill_actor.jobs import FillActorJobManager
 from embyx_manager.fill_actor.models import ApplyResult, FillActorPlan
 from embyx_manager.fill_actor.persistence import (
     CancelJobOutcome,
     FillActorRepository,
-    JobFeedRecord,
     JobOperation,
     JobProgress,
     JobRecord,
@@ -43,7 +41,6 @@ from embyx_manager.fill_actor.persistence import (
     JobState,
 )
 from embyx_manager.fill_actor.service import FillActorService
-from embyx_manager.fill_actor.subscriptions import SubscribedActor
 
 LOGGER = logging.getLogger(__name__)
 
@@ -54,7 +51,6 @@ class CreatePlanRequest(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
     actor_ids: list[str] = Field(min_length=1)
-    continue_if_subscribed: bool = False
 
 
 class ResolveAvidRequest(BaseModel):
@@ -161,42 +157,9 @@ class JobView(BaseModel):
         )
 
 
-class ActorFeedView(BaseModel):
-    actor_id: str
-    state: str
-    attempts: int
-    updated_at: datetime
-    error_code: str | None
-    freshrss_add_url: str | None
-    freshrss_url: str | None
-
-    @classmethod
-    def from_record(
-        cls,
-        record: JobFeedRecord,
-        *,
-        freshrss_url: str | None = None,
-        freshrss_rsshub_url: str | None = None,
-    ) -> 'ActorFeedView':
-        return cls(
-            actor_id=record.actor_id,
-            state=record.state.value,
-            attempts=record.attempts,
-            updated_at=record.updated_at,
-            error_code=record.error_code.value if record.error_code is not None else None,
-            freshrss_add_url=build_freshrss_add_url(
-                record.actor_id,
-                freshrss_url=freshrss_url,
-                freshrss_rsshub_url=freshrss_rsshub_url,
-            ),
-            freshrss_url=freshrss_url,
-        )
-
-
 class PlanEnvelope(BaseModel):
     job: JobView
     plan: FillActorPlan | None
-    feeds: tuple[ActorFeedView, ...]
 
 
 class ApplyJobEnvelope(BaseModel):
@@ -204,15 +167,12 @@ class ApplyJobEnvelope(BaseModel):
     result: ApplyResult | None
 
 
-def create_fill_actor_router(  # noqa: C901, PLR0913, PLR0915 - one function per endpoint over shared wiring
+def create_fill_actor_router(  # noqa: C901, PLR0915 - one function per endpoint over shared wiring
     *,
     service: FillActorService,
     repository: FillActorRepository,
     jobs: FillActorJobManager,
     mutation_auth: Callable[..., Awaitable[None]],
-    freshrss_url: str | Callable[[], str | None] | None = None,
-    freshrss_rsshub_url: str | Callable[[], str | None] | None = None,
-    existing_actor_lookup: Callable[[Sequence[str]], Awaitable[Sequence[SubscribedActor]]] | None = None,
     avid_actor_lookup: Callable[[str], Awaitable[Sequence[tuple[str, str]]]] | None = None,
 ) -> APIRouter:
     """Every Fill Actor endpoint, mounted by the app root like any other feature."""
@@ -232,16 +192,6 @@ def create_fill_actor_router(  # noqa: C901, PLR0913, PLR0915 - one function per
         if not await repository.health_check():
             raise ApiError(503, 'not_ready')
 
-    def feed_views(feeds: Sequence[JobFeedRecord]) -> tuple[ActorFeedView, ...]:
-        return tuple(
-            ActorFeedView.from_record(
-                feed,
-                freshrss_url=_current_url(freshrss_url),
-                freshrss_rsshub_url=_current_url(freshrss_rsshub_url),
-            )
-            for feed in feeds
-        )
-
     @router.post(
         '/avid-actors',
         dependencies=[Depends(mutation_auth)],
@@ -253,8 +203,8 @@ def create_fill_actor_router(  # noqa: C901, PLR0913, PLR0915 - one function per
         try:
             actors = await avid_actor_lookup(avid)
         except Exception as exc:
-            LOGGER.exception('JavBus AVID actor lookup failed avid=%s', avid)
-            raise ApiError(502, 'javbus_actor_lookup_failed') from exc
+            LOGGER.exception('AVID actor lookup failed avid=%s', avid)
+            raise ApiError(502, 'avid_actor_lookup_failed') from exc
         if not actors:
             raise ApiError(404, 'avid_actors_not_found')
         return AvidActorsView(
@@ -270,39 +220,9 @@ def create_fill_actor_router(  # noqa: C901, PLR0913, PLR0915 - one function per
     )
     async def create_plan(request: CreatePlanRequest) -> PlanEnvelope | JSONResponse:
         actor_ids = service.validate_actor_ids(request.actor_ids)
-        if existing_actor_lookup is not None and not request.continue_if_subscribed:
-            try:
-                existing = await existing_actor_lookup(actor_ids)
-            except Exception as exc:
-                LOGGER.exception('FreshRSS subscription preflight failed')
-                raise ApiError(502, 'freshrss_subscription_check_failed') from exc
-            requested = {actor_id.casefold(): actor_id for actor_id in actor_ids}
-            subscribed_actors: list[SubscribedActor] = []
-            seen: set[str] = set()
-            for actor in existing:
-                key = actor.actor_id.casefold()
-                if key not in requested or key in seen:
-                    continue
-                seen.add(key)
-                subscribed_actors.append(SubscribedActor(actor_id=requested[key], actor_name=actor.actor_name))
-            if subscribed_actors:
-                return JSONResponse(
-                    {
-                        'error': {
-                            'code': 'actors_already_subscribed',
-                            'actor_ids': [actor.actor_id for actor in subscribed_actors],
-                            'actors': [
-                                {'actor_id': actor.actor_id, 'actor_name': actor.actor_name}
-                                for actor in subscribed_actors
-                            ],
-                        }
-                    },
-                    status_code=409,
-                )
         await require_scan_ready()
         job = await jobs.start_plan(actor_ids)
-        feeds = await jobs.get_feeds(job.job_id)
-        return PlanEnvelope(job=JobView.from_record(job), plan=None, feeds=feed_views(feeds))
+        return PlanEnvelope(job=JobView.from_record(job), plan=None)
 
     @router.get('/plans/{plan_id}')
     async def get_plan(plan_id: str) -> PlanEnvelope:
@@ -314,8 +234,7 @@ def create_fill_actor_router(  # noqa: C901, PLR0913, PLR0915 - one function per
             raise UnknownPlanError(plan_id)
         if plan is None and job.plan_id is None and job.error_code is None:
             raise UnknownPlanError(plan_id)
-        feeds = await jobs.get_feeds(plan_id)
-        return PlanEnvelope(job=JobView.from_record(job), plan=plan, feeds=feed_views(feeds))
+        return PlanEnvelope(job=JobView.from_record(job), plan=plan)
 
     @router.post(
         '/plans/{plan_id}/cancel',
@@ -327,8 +246,7 @@ def create_fill_actor_router(  # noqa: C901, PLR0913, PLR0915 - one function per
             raise UnknownPlanError(plan_id)
         if result.outcome is CancelJobOutcome.ALREADY_TERMINAL:
             raise ApiError(409, 'plan_not_cancellable')
-        feeds = await jobs.get_feeds(plan_id)
-        return PlanEnvelope(job=JobView.from_record(result.job), plan=None, feeds=feed_views(feeds))
+        return PlanEnvelope(job=JobView.from_record(result.job), plan=None)
 
     @router.post(
         '/plans/{plan_id}/apply-jobs',
@@ -471,11 +389,6 @@ async def handle_fill_actor_error(_request: Request, exc: Exception) -> JSONResp
     if not isinstance(exc, FillActorError):  # pragma: no cover - registered for FillActorError only
         raise exc
     return JSONResponse({'error': {'code': exc.code}}, status_code=_service_error_status(exc))
-
-
-def _current_url(value: str | Callable[[], str | None] | None) -> str | None:
-    resolved = value() if callable(value) else value
-    return resolved or None
 
 
 def _service_error_status(exc: FillActorError) -> int:

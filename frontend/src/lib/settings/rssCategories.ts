@@ -1,6 +1,6 @@
 /** Row model for the RSS section's category list.
  *
- * A category pairs a FreshRSS category name with the 115 offline directory its
+ * A category pairs a subscription category name with the 115 offline directory its
  * downloads belong in. The stored shape is a list of objects; the settings UI
  * edits it as rows, and these helpers convert between the two while rejecting
  * entries the pipeline would refuse.
@@ -44,7 +44,7 @@ export function fromRssCategories(rows: RssCategoryRow[]): StoredRssCategory[] {
     const label = row.label.trim()
     const taskDir = trimTaskDir(row.taskDir)
     if (!label && !taskDir) continue
-    if (!label) throw new Error('每个分类都要填写 FreshRSS 分类名')
+    if (!label) throw new Error('每个分类都要填写分类名')
     // A repeated category would ingest the same items twice in one run, and its
     // second directory would silently lose to the first.
     if (seen.has(label)) throw new Error(`分类「${label}」出现了多次`)

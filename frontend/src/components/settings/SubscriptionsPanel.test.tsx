@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { SubscriptionsPanel } from './SubscriptionsPanel'
@@ -10,19 +10,31 @@ function jsonResponse(body: unknown, status = 200) {
 const SUBSCRIPTION = {
   id: 1,
   kind: 'rss',
-  category: 'Actor',
+  category: 'Rank',
   enabled: true,
-  url: 'https://rsshub.test/javbus/star/rwt',
-  feed_url: 'https://rsshub.test/javbus/star/rwt',
+  url: 'http://rsshub/javlibrary/mostwanted/cn',
+  feed_url: 'http://rsshub/javlibrary/mostwanted/cn',
   talent_id: null,
-  name: '演员甲',
+  name: '最想要',
   aliases: [],
   seed_pending: false,
-  cursor_size: 0,
+  cursor_size: 20,
   last_polled_at: null,
-  last_error: 'category Actor is not configured',
+  last_error: 'ConnectError: [Errno -2] Name or service not known',
   created_at: '2026-09-02T00:00:00Z',
   updated_at: '2026-09-02T00:00:00Z',
+}
+
+const TALENT = {
+  ...SUBSCRIPTION,
+  id: 2,
+  kind: 'avbase_talent',
+  category: 'Actor',
+  url: null,
+  feed_url: 'https://www.avbase.net/talents/46144/feed',
+  talent_id: 46144,
+  name: '石川澪',
+  last_error: null,
 }
 
 describe('subscriptions panel', () => {
@@ -34,19 +46,19 @@ describe('subscriptions panel', () => {
         const url = String(input)
         const method = init?.method ?? 'GET'
         if (url === '/api/monitor/subscriptions' && method === 'GET') {
-          return jsonResponse({ items: [SUBSCRIPTION], categories: ['Actor', 'Rank'] })
+          return jsonResponse({ items: [SUBSCRIPTION, TALENT], categories: ['Actor', 'Rank'] })
         }
         if (url === '/api/monitor/subscriptions' && method === 'POST') {
-          return jsonResponse({ ...SUBSCRIPTION, id: 2, url: 'https://rsshub.test/new', feed_url: 'https://rsshub.test/new' }, 201)
+          return jsonResponse({ ...SUBSCRIPTION, id: 3, url: 'https://rsshub.test/new', feed_url: 'https://rsshub.test/new' }, 201)
         }
         if (url === '/api/monitor/subscriptions/1' && method === 'PATCH') {
-          return jsonResponse({ ...SUBSCRIPTION, enabled: false })
-        }
-        if (url === '/api/monitor/subscriptions/freshrss-import') {
-          const apply = Boolean((JSON.parse(String(init?.body)) as { apply: boolean }).apply)
+          const body = JSON.parse(String(init?.body)) as { enabled?: boolean; url?: string }
           return jsonResponse({
-            entries: [{ url: 'https://rsshub.test/x', title: '甲', category: 'Actor', status: apply ? 'imported' : 'new' }],
-            imported: apply ? 1 : 0,
+            ...SUBSCRIPTION,
+            enabled: body.enabled ?? SUBSCRIPTION.enabled,
+            url: body.url ?? SUBSCRIPTION.url,
+            feed_url: body.url ?? SUBSCRIPTION.feed_url,
+            last_error: body.url ? null : SUBSCRIPTION.last_error,
           })
         }
         return jsonResponse({ error: { code: 'unknown' } }, 404)
@@ -61,15 +73,17 @@ describe('subscriptions panel', () => {
   it('lists subscriptions under their category with the last poll error', async () => {
     render(<SubscriptionsPanel onUnauthorized={vi.fn()} />)
 
-    expect(await screen.findByText('演员甲')).toBeInTheDocument()
-    expect(screen.getByText('分类「Actor」未配置')).toBeInTheDocument()
+    expect(await screen.findByText('最想要')).toBeInTheDocument()
+    expect(screen.getByText('石川澪')).toBeInTheDocument()
     expect(screen.getByText('拉取出错')).toBeInTheDocument()
+    // Only a plain feed has a URL to change.
+    expect(screen.getAllByRole('button', { name: '改地址' })).toHaveLength(1)
   })
 
   it('adds a feed to the chosen category', async () => {
     const user = userEvent.setup()
     render(<SubscriptionsPanel onUnauthorized={vi.fn()} />)
-    await screen.findByText('演员甲')
+    await screen.findByText('最想要')
 
     await user.type(screen.getByLabelText('Feed 地址'), 'https://rsshub.test/new')
     await user.click(screen.getByRole('button', { name: '添加' }))
@@ -85,27 +99,37 @@ describe('subscriptions panel', () => {
   it('toggles a subscription off in place', async () => {
     const user = userEvent.setup()
     render(<SubscriptionsPanel onUnauthorized={vi.fn()} />)
-    await screen.findByText('演员甲')
+    await screen.findByText('最想要')
 
-    await user.click(screen.getByRole('button', { name: '停用' }))
+    const row = screen.getByText('最想要').closest('tr') as HTMLElement
+    await user.click(within(row).getByRole('button', { name: '停用' }))
 
-    expect(await screen.findByText('停用', { selector: '.run-state' })).toBeInTheDocument()
+    expect(await within(row).findByText('停用', { selector: '.run-state' })).toBeInTheDocument()
     expect(fetch).toHaveBeenCalledWith(
       '/api/monitor/subscriptions/1',
       expect.objectContaining({ method: 'PATCH', body: JSON.stringify({ enabled: false }) }),
     )
   })
 
-  it('previews a FreshRSS import before applying it', async () => {
+  it('corrects a feed URL in place', async () => {
     const user = userEvent.setup()
     render(<SubscriptionsPanel onUnauthorized={vi.fn()} />)
-    await screen.findByText('演员甲')
+    await screen.findByText('最想要')
 
-    await user.click(screen.getByRole('button', { name: '从 FreshRSS 导入（预览）' }))
-    expect(await screen.findByText('将导入')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '改地址' }))
+    const field = screen.getByLabelText('新的 Feed 地址')
+    await user.clear(field)
+    await user.type(field, 'http://rsshub.rss.svc.cluster.local/javlibrary/mostwanted/cn')
+    await user.click(screen.getByRole('button', { name: '保存' }))
 
-    await user.click(screen.getByRole('button', { name: '确认导入 1 条' }))
-    expect(await screen.findByText('已导入')).toBeInTheDocument()
-    expect(screen.getByRole('status')).toHaveTextContent('已导入 1 条订阅')
+    expect(await screen.findByText('http://rsshub.rss.svc.cluster.local/javlibrary/mostwanted/cn')).toBeInTheDocument()
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/monitor/subscriptions/1',
+      expect.objectContaining({
+        method: 'PATCH',
+        body: JSON.stringify({ url: 'http://rsshub.rss.svc.cluster.local/javlibrary/mostwanted/cn' }),
+      }),
+    )
+    expect(screen.queryByText('拉取出错')).not.toBeInTheDocument()
   })
 })

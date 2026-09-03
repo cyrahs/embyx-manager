@@ -46,7 +46,7 @@ interface SectionSpec {
   title: string
   description: string
   fields: FieldSpec[]
-  testTarget?: 'clouddrive' | 'freshrss'
+  testTarget?: 'clouddrive'
   /** Cross-field check run after every field is collected; throws a message to show. */
   validate?: (values: Record<string, unknown>) => void
 }
@@ -61,17 +61,6 @@ const SECTION_SPECS: SectionSpec[] = [
       { key: 'address', label: '服务地址', kind: 'text', placeholder: 'clouddrive.internal:19798' },
       { key: 'api_token', label: 'API Token', kind: 'secret' },
       { key: 'secure', label: '使用 TLS 连接', kind: 'boolean' },
-    ],
-  },
-  {
-    section: 'freshrss',
-    title: 'FreshRSS',
-    description: 'Google Reader API 兼容接口，RSS 摄取流水线从这里读取未读条目。',
-    testTarget: 'freshrss',
-    fields: [
-      { key: 'url', label: 'API 地址', kind: 'text', placeholder: 'https://freshrss.example/api/greader.php' },
-      { key: 'api_key', label: 'API Key', kind: 'secret' },
-      { key: 'proxy', label: 'HTTP 代理（可选）', kind: 'text' },
     ],
   },
   {
@@ -145,19 +134,9 @@ const SECTION_SPECS: SectionSpec[] = [
     ],
   },
   {
-    section: 'feeds',
-    title: 'RSSHub / FreshRSS 集成',
-    description: '补全演员页面的订阅预热与 FreshRSS 跳转所用的地址。',
-    fields: [
-      { key: 'rsshub_url', label: 'RSSHub 地址（服务端可达）', kind: 'text' },
-      { key: 'freshrss_url', label: 'FreshRSS 站点地址（浏览器可达）', kind: 'text' },
-      { key: 'freshrss_rsshub_url', label: 'RSSHub 地址（FreshRSS 可达）', kind: 'text' },
-    ],
-  },
-  {
     section: 'rss',
     title: 'RSS 摄取',
-    description: '定时从 FreshRSS 拉取并提交 115 离线任务。',
+    description: '定时轮询下方「订阅源」里的 feed，把新番号交给下载追踪并提交 115 离线任务。',
     fields: [
       { key: 'enabled', label: '启用定时调度', kind: 'boolean' },
       { key: 'interval_seconds', label: '运行间隔（秒）', kind: 'number' },
@@ -165,7 +144,7 @@ const SECTION_SPECS: SectionSpec[] = [
         key: 'categories',
         label: '分类与离线目录',
         kind: 'rss-categories',
-        hint: '每行一个 FreshRSS 分类，以及该分类的 115 离线目录（CloudDrive 云端路径，必填）。每次定时运行会依次拉取所有分类。每个离线目录都要在归档整理里配一条对应的来源子目录路由，完成的下载才会被归档；多个分类可以共用一个目录。删除分类前请确认它没有正在下载的任务——下载追踪只轮询这里列出的目录。',
+        hint: '每行一个分类名，以及该分类的 115 离线目录（CloudDrive 云端路径，必填）。每次定时运行会依次拉取所有分类。每个离线目录都要在归档整理里配一条对应的来源子目录路由，完成的下载才会被归档；多个分类可以共用一个目录。删除分类前请确认它没有正在下载的任务——下载追踪只轮询这里列出的目录。',
       },
       { key: 'failed_avid_cooldown_seconds', label: '失败番号冷却（秒）', kind: 'number' },
     ],

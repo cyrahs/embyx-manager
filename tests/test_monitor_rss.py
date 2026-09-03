@@ -397,15 +397,20 @@ class FakeSubscriptions:
         now: datetime,
         enabled: bool | None = None,
         category: str | None = None,
+        url: str | None = None,
     ) -> SubscriptionRecord | None:
         record = self.records.get(subscription_id)
         if record is None:
             return None
+        if url is not None and any(other.url == url for other in self.records.values() if other.id != subscription_id):
+            raise SubscriptionExistsError(url)
         changes: dict[str, object] = {'updated_at': now}
         if enabled is not None:
             changes['enabled'] = enabled
         if category is not None:
             changes['category'] = category
+        if url is not None:
+            changes['url'] = url
         record = dataclasses.replace(record, **changes)  # type: ignore[arg-type]
         self.records[subscription_id] = record
         return record

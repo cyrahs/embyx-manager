@@ -7,14 +7,17 @@ callables.
 """
 
 import logging
-from collections.abc import Callable, Iterable, Mapping
+import re
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+from datetime import date
 
+from embyx_manager.clients.avbase import AvbaseClient, AvbaseError, AvbaseTalent
 from embyx_manager.clients.clouddrive import AsyncCloudDrive
-from embyx_manager.clients.javbus import JavBusClient
+from embyx_manager.clients.javbus import JavBusActor, JavBusClient
 from embyx_manager.core import avid
 from embyx_manager.fill_actor.cloud_moves import CloudFileMetadata, CloudFileMover, CloudMoveResponse
-from embyx_manager.fill_actor.ports import AcquisitionOutcome, PageProgressCallback
+from embyx_manager.fill_actor.ports import AcquisitionOutcome, CatalogListing, PageProgressCallback
 from embyx_manager.monitor.acquisitions import AcquisitionSource
 from embyx_manager.monitor.intake import AcquisitionIntake, IntakeOutcome
 from embyx_manager.monitor.reports import RunContext
@@ -22,6 +25,8 @@ from embyx_manager.monitor.reports import RunContext
 LOGGER = logging.getLogger(__name__)
 
 NANOSECONDS_PER_SECOND = 1_000_000_000
+#: What a JavBus star id looks like; a name that happens to fit is simply also tried as one.
+_STAR_ID_RE = re.compile(r'^[A-Za-z0-9_-]{1,32}$')
 
 
 class CloudDriveUnconfiguredError(RuntimeError):
@@ -29,17 +34,112 @@ class CloudDriveUnconfiguredError(RuntimeError):
         super().__init__('CloudDrive connection is not configured')
 
 
-@dataclass(frozen=True)
-class JavBusActorCatalog:
-    client: JavBusClient
+class ActorNotFoundError(LookupError):
+    def __init__(self, actor_ref: str) -> None:
+        super().__init__(f'neither AVBase nor JavBus knows an actor called {actor_ref!r}')
 
-    async def list_video_ids(
+
+@dataclass(frozen=True)
+class UnionActorCatalog:
+    """AVBase's catalog joined with JavBus's, so neither's gaps become the scan's.
+
+    AVBase knows the actor under every alias and dates every work, but drops
+    delisted titles and an actor's pre-rename catalog; JavBus keeps those but
+    holds one star page per alias. The actor may be named either way: an
+    AVBase name (any alias) or a JavBus star id. JavBus being unreachable only
+    costs its share of the listing; AVBase being unreachable is reported when
+    JavBus cannot stand in.
+    """
+
+    avbase: AvbaseClient
+    javbus: JavBusClient
+
+    async def list_videos(
         self,
-        actor_id: str,
+        actor_ref: str,
         *,
         progress_callback: PageProgressCallback | None = None,
-    ) -> Iterable[str]:
-        return await self.client.scrape(actor_id, progress_callback=progress_callback)
+    ) -> CatalogListing:
+        ref = actor_ref.strip()
+        talent = await self._find_talent(ref)
+        names = list(talent.names) if talent is not None else []
+        stars = await self._find_stars(ref, names)
+        if talent is None and not stars:
+            raise ActorNotFoundError(ref)
+
+        video_ids: dict[str, None] = {}
+        release_dates: dict[str, date] = {}
+        counts: dict[str, int] = {}
+        if talent is not None:
+            listed = 0
+            async for page, pages, works in self.avbase.talent_pages(talent.name):
+                if progress_callback is not None:
+                    await progress_callback(page, pages, page)
+                for work in works:
+                    video_ids.setdefault(work.work_id, None)
+                    listed += 1
+                    if work.release_date is not None:
+                        release_dates.setdefault(work.work_id, work.release_date)
+            counts['avbase'] = listed
+        for star in stars:
+            try:
+                ids = await self.javbus.scrape(star.actor_id, progress_callback=progress_callback)
+            except Exception:  # noqa: BLE001 - JavBus is the supplement, not the source of truth
+                LOGGER.warning('JavBus star %s could not be listed; continuing without it', star.actor_id)
+                counts[f'javbus:{star.actor_id}'] = -1
+                continue
+            counts[f'javbus:{star.actor_id}'] = len(ids)
+            for video_id in ids:
+                video_ids.setdefault(video_id, None)
+        return CatalogListing(
+            actor_name=talent.name if talent is not None else stars[0].name,
+            talent_id=talent.talent_id if talent is not None else None,
+            aliases=tuple(talent.aliases) if talent is not None else (),
+            video_ids=tuple(video_ids),
+            release_dates=release_dates,
+            source_counts=counts,
+        )
+
+    async def _find_talent(self, ref: str) -> AvbaseTalent | None:
+        try:
+            talent = await self.avbase.talent(ref)
+            if talent is None and _STAR_ID_RE.fullmatch(ref):
+                # A JavBus star id: the star page names the actor, and AVBase may know that name.
+                page = await self._star_page(ref)
+                if page is not None and page.name:
+                    talent = await self.avbase.talent(page.name)
+        except AvbaseError:
+            LOGGER.warning('AVBase could not be read for %r; falling back to JavBus alone', ref)
+            return None
+        return talent
+
+    async def _star_page(self, star_id: str):  # noqa: ANN202 - JavBusActorPage, kept out of the signature
+        try:
+            return await self.javbus.get_actor(star_id)
+        except Exception:  # noqa: BLE001
+            LOGGER.warning('JavBus star page %s could not be read', star_id)
+            return None
+
+    async def _find_stars(self, ref: str, names: list[str]) -> list[JavBusActor]:
+        # Ordered: the primary name first, then aliases, so the listing is reproducible.
+        wanted: dict[str, None] = dict.fromkeys(names or [ref])
+        stars: dict[str, JavBusActor] = {}
+        if _STAR_ID_RE.fullmatch(ref):
+            page = await self._star_page(ref)
+            if page is not None:
+                stars[page.actor_id.casefold()] = JavBusActor(actor_id=page.actor_id, name=page.name)
+                wanted.setdefault(page.name, None)
+        for name in wanted:
+            try:
+                found = await self.javbus.search_stars(name)
+            except Exception:  # noqa: BLE001
+                LOGGER.warning('JavBus star search for %r failed', name)
+                continue
+            for star in found:
+                # JavBus search is fuzzy: only a star credited under one of the actor's names counts.
+                if star.name in wanted:
+                    stars.setdefault(star.actor_id.casefold(), star)
+        return list(stars.values())
 
 
 @dataclass(frozen=True)
@@ -61,7 +161,7 @@ class LedgerAcquisitionGateway:
     task_dir: Callable[[], str]
     on_queued: Callable[[], None] | None = None
 
-    async def queue_missing(self, video_id: str) -> AcquisitionOutcome:
+    async def queue_missing(self, video_id: str, *, release_date: date | None = None) -> AcquisitionOutcome:
         intake = self.intake_factory()
         if intake is None:
             return AcquisitionOutcome.CLOUD_NOT_CONFIGURED
@@ -74,6 +174,7 @@ class LedgerAcquisitionGateway:
             source=AcquisitionSource.FILL_ACTOR,
             task_dir_path=task_dir_path,
             ctx=ctx,
+            release_date=release_date,
         )
         if outcome is IntakeOutcome.QUEUED and self.on_queued is not None:
             self.on_queued()

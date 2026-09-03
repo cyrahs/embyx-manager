@@ -24,20 +24,19 @@ Three peer features; `/` redirects to the dashboard and no feature owns the app 
   to the last one used. Only a directory with an archive route can be picked — the tracker
   locates a finished download through the route tables — and the tracker polls whatever
   directory the ledger still has work in, so a picked one need not be a source's own.
-- **Fill Actor** (`/fill-actor`): scan a JavBus actor's catalog against the local library,
-  starting from actor IDs or an AVID (single actors continue directly; multi-actor titles
-  present a choice), submit missing titles to the acquisition tracker (same intake as the
-  rss pipeline), prewarm RSSHub feeds, hand off FreshRSS subscriptions, and safely move
-  matching files through CloudDrive — carried over from embyx-web with the same durable
-  job queue and move-safety guarantees, now on PostgreSQL.
-- **Settings** (`/settings`): CloudDrive, FreshRSS, RSSHub URLs, Fill Actor library
-  roots, pipeline behavior, and avid parsing rules are stored in the database, editable
-  from the browser, versioned against concurrent edits, and hot-applied without
-  restarts. It also manages the rss pipeline's **subscriptions** — feed URL plus
-  category, enable/disable, last poll and error — and can import an existing FreshRSS
-  subscription list in one step. CloudDrive and FreshRSS
-  panels have connection-test buttons that use the unsaved form values (secrets fall back
-  to stored ones). Secrets are never echoed back.
+- **Fill Actor** (`/fill-actor`): scan an actor's catalog against the local library —
+  AVBase's (any alias, with release dates) joined with JavBus's (delisted and pre-rename
+  titles) — starting from actor names, JavBus star ids, or an AVID (single actors continue
+  directly; multi-actor titles present a choice), submit missing titles to the acquisition
+  tracker (same intake as the rss pipeline), subscribe the scanned actors' AVBase feeds
+  in place, and safely move matching files through CloudDrive — carried over from
+  embyx-web with the same durable job queue and move-safety guarantees, now on PostgreSQL.
+- **Settings** (`/settings`): CloudDrive, Fill Actor library roots, pipeline behavior,
+  and avid parsing rules are stored in the database, editable from the browser, versioned
+  against concurrent edits, and hot-applied without restarts. It also manages the rss
+  pipeline's **subscriptions** — feed URL plus category, enable/disable, edit the URL,
+  last poll and error. The CloudDrive panel has a connection-test button that uses the
+  unsaved form values (secrets fall back to stored ones). Secrets are never echoed back.
 
 ## Requirements
 
@@ -124,7 +123,7 @@ status, run history, config) stay open by design.
 uv run embyx-manager import-config /path/to/config.toml --database-url postgresql://...
 ```
 
-Maps the embyx-monitor `[clouddrive]`, `[freshrss]`, `[avid]`, `[archive]`, and
+Maps the embyx-monitor `[clouddrive]`, `[avid]`, `[archive]`, and
 `[mapping]` sections into the config store. Pipelines stay disabled until enabled from
 the dashboard.
 
@@ -193,7 +192,7 @@ Deployment notes:
   sentinel file in each, then point the Settings page's Fill Actor card at those paths;
 - bind non-loopback only with `EMBYX_MANAGER_API_TOKEN` and
   `EMBYX_MANAGER_TLS_TERMINATED=true` behind a TLS-terminating proxy;
-- CloudDrive/FreshRSS/RSSHub endpoints and credentials are entered on the Settings page
+- CloudDrive endpoints and credentials are entered on the Settings page
   (stored in PostgreSQL), not in the environment.
 
 ## License

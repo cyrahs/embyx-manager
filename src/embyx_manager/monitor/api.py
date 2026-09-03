@@ -8,7 +8,6 @@ from typing import Any
 from fastapi import APIRouter, Depends, Response
 from pydantic import BaseModel, ConfigDict
 
-from embyx_manager.clients.freshrss import FreshRSSClient
 from embyx_manager.core.magnet import extract_info_hash
 from embyx_manager.errors import ApiError
 from embyx_manager.monitor.acquisitions import (
@@ -34,6 +33,7 @@ from embyx_manager.monitor.scheduler import (
 )
 from embyx_manager.monitor.subscriptions import (
     SubscriptionExistsError,
+    SubscriptionKind,
     SubscriptionRecord,
     SubscriptionRepository,
     validate_feed_url,
@@ -326,26 +326,8 @@ class UpdateSubscriptionRequest(BaseModel):
 
     enabled: bool | None = None
     category: str | None = None
-
-
-class FreshRSSImportRequest(BaseModel):
-    model_config = ConfigDict(extra='forbid')
-
-    #: False previews what would happen; True writes the new subscriptions.
-    apply: bool = False
-
-
-class FreshRSSImportEntryView(BaseModel):
-    url: str
-    title: str | None
-    category: str | None
-    #: new / imported / exists / category_missing / invalid_url
-    status: str
-
-
-class FreshRSSImportView(BaseModel):
-    entries: list[FreshRSSImportEntryView]
-    imported: int
+    #: A new feed URL; only an rss subscription has one to change.
+    url: str | None = None
 
 
 @dataclass(frozen=True)
@@ -353,14 +335,11 @@ class SubscriptionsApi:
     """The subscription registry behind the settings page's feed list.
 
     ``categories`` returns the configured RSS category labels, the only values
-    a subscription may be filed under. ``freshrss_factory`` builds a client
-    from the stored FreshRSS configuration, or returns None while it is not
-    configured; it exists only for the one-time import.
+    a subscription may be filed under.
     """
 
     repository: SubscriptionRepository
     categories: Callable[[], Sequence[str]]
-    freshrss_factory: Callable[[], FreshRSSClient | None] | None = None
 
 
 #: Which HTTP status each refused manual submission answers with.
@@ -600,7 +579,7 @@ def create_monitor_router(  # noqa: C901, PLR0915 - route registration
     return router
 
 
-def _mount_subscription_routes(  # noqa: C901, PLR0915 - route registration
+def _mount_subscription_routes(  # noqa: C901 - route registration
     router: APIRouter,
     api: SubscriptionsApi,
     mutation_auth: Any,
@@ -661,12 +640,27 @@ def _mount_subscription_routes(  # noqa: C901, PLR0915 - route registration
     async def update_subscription(subscription_id: int, request: UpdateSubscriptionRequest) -> SubscriptionView:
         if request.category is not None and request.category not in labels():
             raise ApiError(422, 'unknown_category')
-        record = await repository.update(
-            subscription_id,
-            now=datetime.now(UTC),
-            enabled=request.enabled,
-            category=request.category,
-        )
+        url = None
+        if request.url is not None:
+            try:
+                url = validate_feed_url(request.url)
+            except ValueError as exc:
+                raise ApiError(422, 'invalid_feed_url') from exc
+            current = await repository.get(subscription_id)
+            if current is None:
+                raise ApiError(404, 'unknown_subscription')
+            if current.kind is not SubscriptionKind.RSS:
+                raise ApiError(422, 'url_not_editable')
+        try:
+            record = await repository.update(
+                subscription_id,
+                now=datetime.now(UTC),
+                enabled=request.enabled,
+                category=request.category,
+                url=url,
+            )
+        except SubscriptionExistsError as exc:
+            raise ApiError(409, 'subscription_exists') from exc
         if record is None:
             raise ApiError(404, 'unknown_subscription')
         return SubscriptionView.from_record(record)
@@ -676,66 +670,3 @@ def _mount_subscription_routes(  # noqa: C901, PLR0915 - route registration
         if not await repository.delete(subscription_id):
             raise ApiError(404, 'unknown_subscription')
         return Response(status_code=204)
-
-    @router.post('/subscriptions/freshrss-import', dependencies=[Depends(mutation_auth)])
-    async def import_from_freshrss(request: FreshRSSImportRequest) -> FreshRSSImportView:
-        """Bring FreshRSS's subscription list over, feed by feed, category by category.
-
-        Imported subscriptions start with a pending seed: FreshRSS already read
-        what those feeds hold today, so the first poll only remembers it.
-        """
-        client = api.freshrss_factory() if api.freshrss_factory is not None else None
-        if client is None:
-            raise ApiError(503, 'freshrss_not_configured')
-        try:
-            remote = await client.get_subscriptions()
-        except Exception as exc:
-            raise ApiError(502, 'freshrss_import_failed') from exc
-        finally:
-            await client.aclose()
-        existing = {record.url for record in await repository.list() if record.url}
-        configured = set(labels())
-        now = datetime.now(UTC)
-        entries: list[FreshRSSImportEntryView] = []
-        imported = 0
-        for subscription in remote:
-            category = subscription.category or ''
-            try:
-                url = validate_feed_url(subscription.url)
-            except ValueError:
-                entries.append(
-                    FreshRSSImportEntryView(
-                        url=subscription.url,
-                        title=subscription.title,
-                        category=subscription.category,
-                        status='invalid_url',
-                    )
-                )
-                continue
-            if url in existing:
-                status = 'exists'
-            elif category not in configured:
-                status = 'category_missing'
-            else:
-                status = 'new'
-            if request.apply and status == 'new':
-                try:
-                    await repository.add_rss(
-                        url=url,
-                        category=category,
-                        name=subscription.title,
-                        now=now,
-                        seed_pending=True,
-                    )
-                except SubscriptionExistsError:
-                    status = 'exists'
-                else:
-                    status = 'imported'
-                    imported += 1
-                    existing.add(url)
-            entries.append(
-                FreshRSSImportEntryView(
-                    url=url, title=subscription.title, category=subscription.category, status=status
-                )
-            )
-        return FreshRSSImportView(entries=entries, imported=imported)

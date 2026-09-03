@@ -12,7 +12,6 @@ const EXACT_TEXT: Record<string, string> = {
   'archive source, destination, and routes must be configured': '需要先配置归档的源目录、目标目录和路由',
   'CloudDrive and its task directory must be configured': '需要先配置 CloudDrive 及其任务目录',
   'mapping source and destination directories must be configured': '需要先配置映射的源目录和目标目录',
-  'FreshRSS is not configured': '尚未配置 FreshRSS',
   'CloudDrive is not configured': '尚未配置 CloudDrive',
   'CloudDrive must be configured': '需要先配置 CloudDrive',
   'CloudDrive task directory is not configured': '尚未配置 CloudDrive 任务目录',

@@ -7,7 +7,7 @@ import random
 import re
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from urllib.parse import unquote, urlparse
+from urllib.parse import quote, unquote, urlparse
 
 import httpx
 import humanfriendly
@@ -67,6 +67,32 @@ class JavBusClient:
 
     async def aclose(self) -> None:
         await self._client.aclose()
+
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=1, max=10),
+        retry=retry_if_exception_type((httpx.HTTPError, httpx.TimeoutException)),
+        reraise=True,
+    )
+    async def search_stars(self, name: str) -> list[JavBusActor]:
+        """Stars JavBus lists for ``name``; JavBus keeps one star page per alias, so a person may be several."""
+        response = await self._client.get(f'{self.host}/searchstar/{quote(name, safe="")}')
+        if response.status_code in _NOT_FOUND_STATUSES:
+            return []
+        response.raise_for_status()
+        doc = PyQuery(response.text)
+        found: dict[str, JavBusActor] = {}
+        for item in doc('a[href]').items():
+            path = urlparse(str(item.attr('href') or '')).path.rstrip('/')
+            match = re.fullmatch(r'/star/([^/]+)', path)
+            if match is None:
+                continue
+            actor_id = unquote(match.group(1)).strip()
+            if not _ACTOR_ID_RE.fullmatch(actor_id):
+                continue
+            star_name = ' '.join(item('.pb10').text().split()) or ' '.join(item.text().split())
+            found.setdefault(actor_id.casefold(), JavBusActor(actor_id=actor_id, name=star_name or actor_id))
+        return list(found.values())
 
     async def get_actor(self, actor_id: str) -> JavBusActorPage | None:
         """The star page's display name and first-page video IDs; None when there is no such star."""

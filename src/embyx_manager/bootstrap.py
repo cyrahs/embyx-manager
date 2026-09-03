@@ -11,22 +11,20 @@ from fastapi import FastAPI
 from embyx_manager.adapters import (
     AvidBrandResolver,
     CloudDriveFileMover,
-    JavBusActorCatalog,
     LedgerAcquisitionGateway,
+    UnionActorCatalog,
 )
 from embyx_manager.api import create_app, make_mutation_auth
+from embyx_manager.clients.avbase import AvbaseClient, AvbaseError
 from embyx_manager.clients.clouddrive import AsyncCloudDrive, CloudDriveClient
 from embyx_manager.clients.feeds import HttpFeedFetcher
-from embyx_manager.clients.freshrss import FreshRSSClient
 from embyx_manager.clients.javbus import JavBusClient
 from embyx_manager.clients.sukebei import SukebeiClient
 from embyx_manager.config import (
     ArchiveConfig,
     CloudDriveConfig,
     ConfigStore,
-    FeedsConfig,
     FillActorConfig,
-    FreshRSSConfig,
     MappingConfig,
     RssConfig,
 )
@@ -41,11 +39,9 @@ from embyx_manager.fill_actor.api import (
 )
 from embyx_manager.fill_actor.cloud_moves import CloudMovePaths
 from embyx_manager.fill_actor.errors import FillActorError
-from embyx_manager.fill_actor.feeds import RSSHubFeedWarmer
 from embyx_manager.fill_actor.jobs import FillActorJobManager
 from embyx_manager.fill_actor.postgres_repository import PostgresFillActorRepository
 from embyx_manager.fill_actor.service import FillActorPaths, FillActorRuntime, FillActorService
-from embyx_manager.fill_actor.subscriptions import SubscribedActor, find_subscribed_actors
 from embyx_manager.locking import PostgresAdvisoryLock
 from embyx_manager.monitor.acquisitions import AcquisitionRepository
 from embyx_manager.monitor.api import AcquisitionApi, SubscriptionsApi, create_monitor_router
@@ -188,6 +184,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
     database = Database(settings.database_url)
     store = ConfigStore(database)
     javbus = JavBusClient()
+    avbase = AvbaseClient()
     sukebei = SukebeiClient()
     cloud_handle = CloudDriveHandle(store)
 
@@ -231,7 +228,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
 
     service = FillActorService(
         runtime=fill_actor_runtime.current,
-        actor_catalog=JavBusActorCatalog(javbus),
+        actor_catalog=UnionActorCatalog(avbase=avbase, javbus=javbus),
         acquisition_gateway=LedgerAcquisitionGateway(
             intake_factory,
             task_dir=lambda: store.get(FillActorConfig).task_dir_path,
@@ -254,36 +251,19 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         on_moved=notify_files_moved,
     )
 
-    def current_feeds() -> FeedsConfig:
-        return store.get(FeedsConfig)
-
-    def freshrss_client() -> FreshRSSClient | None:
-        config = store.get(FreshRSSConfig)
-        if not config.configured:
-            return None
-        return FreshRSSClient(url=config.url, api_key=config.api_key, proxy=config.proxy or None)
-
-    async def existing_freshrss_actors(actor_ids: tuple[str, ...]) -> tuple[SubscribedActor, ...]:
-        client = freshrss_client()
-        if client is None:
-            return ()
+    async def actors_for_avid(avid: str) -> tuple[tuple[str, str], ...]:
+        """Who is credited on a video: AVBase's cast (a name resolves every alias), else JavBus's stars."""
         try:
-            subscriptions = await client.get_subscriptions()
-        finally:
-            await client.aclose()
-        return find_subscribed_actors(actor_ids, subscriptions)
-
-    async def javbus_actors_for_avid(avid: str) -> tuple[tuple[str, str], ...]:
+            work = await avbase.work(avid)
+        except AvbaseError:
+            LOGGER.warning('AVBase could not be read for %s; asking JavBus instead', avid)
+            work = None
+        if work is not None and work.cast:
+            return tuple(dict.fromkeys((member.name, member.name) for member in work.cast))
         actors = await javbus.get_video_actors(avid)
         return tuple((actor.actor_id, actor.name) for actor in actors)
 
-    feed_warmer = RSSHubFeedWarmer(
-        repository=repository,
-        rsshub_url=lambda: current_feeds().rsshub_url or None,
-        freshrss_url=lambda: current_feeds().freshrss_url or None,
-        freshrss_rsshub_url=lambda: current_feeds().freshrss_rsshub_url or None,
-    )
-    jobs = FillActorJobManager(service=service, repository=repository, feed_warmer=feed_warmer)
+    jobs = FillActorJobManager(service=service, repository=repository)
 
     mutation_auth = make_mutation_auth(settings.api_token)
     config_router = create_config_router(store, mutation_auth=mutation_auth)
@@ -292,10 +272,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         repository=repository,
         jobs=jobs,
         mutation_auth=mutation_auth,
-        freshrss_url=lambda: current_feeds().freshrss_url or None,
-        freshrss_rsshub_url=lambda: current_feeds().freshrss_rsshub_url or None,
-        existing_actor_lookup=existing_freshrss_actors,
-        avid_actor_lookup=javbus_actors_for_avid,
+        avid_actor_lookup=actors_for_avid,
     )
 
     avid_handle = AvidParserHandle(store)
@@ -508,7 +485,6 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         subscriptions=SubscriptionsApi(
             repository=subscriptions,
             categories=lambda: tuple(category.label for category in store.get(RssConfig).categories),
-            freshrss_factory=freshrss_client,
         ),
     )
 
@@ -529,6 +505,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         try:
             await javbus.aclose()
             await feed_fetcher.aclose()
+            await avbase.aclose()
         finally:
             try:
                 await sukebei.aclose()

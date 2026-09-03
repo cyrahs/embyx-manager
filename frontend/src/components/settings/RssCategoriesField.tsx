@@ -1,6 +1,6 @@
 /** Row editor for the RSS section's categories.
  *
- * Each row is one FreshRSS category and the 115 offline directory its downloads
+ * Each row is one subscription category and the 115 offline directory its downloads
  * go to, with a preview of where a finished download will actually land so the
  * pairing is readable without knowing the stored shape.
  */
@@ -28,7 +28,7 @@ export function RssCategoriesField({ rows, onChange }: RssCategoriesFieldProps) 
           <div className="route-row" key={row.id}>
             <input
               type="text"
-              aria-label="FreshRSS 分类名"
+              aria-label="分类名"
               placeholder="Rank"
               autoComplete="off"
               spellCheck={false}

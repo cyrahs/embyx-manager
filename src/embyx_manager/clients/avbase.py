@@ -13,7 +13,7 @@ answers 404, so a real miss is only reported after the id was confirmed.
 import asyncio
 import logging
 import re
-from collections.abc import Mapping
+from collections.abc import AsyncIterator, Mapping
 from dataclasses import dataclass
 from datetime import date
 from typing import Any, Protocol
@@ -133,21 +133,24 @@ class AvbaseClient:
         props = await self._talent_page(name, page=1)
         return _talent_from_props(props) if props is not None else None
 
-    async def talent_works(self, name: str) -> list[AvbaseWork]:
-        """Every work of the talent credited as ``name``, newest release first."""
+    async def talent_pages(self, name: str) -> AsyncIterator[tuple[int, int, list[AvbaseWork]]]:
+        """The talent's works page by page as ``(page, pages, works)``, newest release first."""
         first = await self._talent_page(name, page=1)
         if first is None:
             msg = f'AVBase has no talent named {name!r}'
             raise AvbaseError(msg)
-        works = [_work_from_listing(entry) for entry in first.get('works') or []]
         total = int(first.get('total') or 0)
         pages = max(1, -(-total // WORKS_PER_PAGE))
+        yield 1, pages, [_work_from_listing(entry) for entry in first.get('works') or []]
         for page in range(2, pages + 1):
             props = await self._talent_page(name, page=page)
             if props is None:
                 break
-            works.extend(_work_from_listing(entry) for entry in props.get('works') or [])
-        return works
+            yield page, pages, [_work_from_listing(entry) for entry in props.get('works') or []]
+
+    async def talent_works(self, name: str) -> list[AvbaseWork]:
+        """Every work of the talent credited as ``name``, newest release first."""
+        return [work async for _, _, works in self.talent_pages(name) for work in works]
 
     async def search_works(self, query: str) -> list[AvbaseWork]:
         """Works matching a query (an ID, a name, a title fragment) as the site's search lists them.

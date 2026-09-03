@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 
 import { MAX_ACTORS, MAX_AVIDS } from '../../lib/fill-actor/labels'
 import type { AvidActors } from '../../types'
-import { AlertIcon, ScanIcon, Spinner } from '../Icons'
+import { ScanIcon, Spinner } from '../Icons'
 
 export function ScanPanel({
   input,
@@ -85,7 +85,7 @@ export function ScanPanel({
             disabled={locked}
             onClick={() => onInputModeChange('actor')}
           >
-            演员 ID
+            演员
           </button>
         </div>
       </div>
@@ -94,11 +94,11 @@ export function ScanPanel({
         {actorMode ? (
           <textarea
             ref={actorRef}
-            aria-label="演员 ID"
+            aria-label="演员"
             value={input}
             onChange={(event) => onInputChange(event.target.value)}
             onKeyDown={submitOnModifiedEnter}
-            placeholder={'例如：A12345, B67890\n支持空格、逗号或换行分隔'}
+            placeholder={'例如：石川澪, 河北彩伽, rwt\n支持空格、逗号或换行分隔'}
             rows={3}
             disabled={locked}
           />
@@ -115,7 +115,7 @@ export function ScanPanel({
           />
         )}
         <div className="input-footer">
-          <span>{actorMode ? '仅支持字母、数字、下划线和连字符' : '将从 JavBus 影片页获取演员信息'}</span>
+          <span>{actorMode ? 'AVBase 演员名（任一别名）或 JavBus 演员 ID' : '将从 AVBase（或 JavBus）影片页获取出演者'}</span>
           <span className={`field-count ${tooMany ? 'over' : ''}`}>{counted.length} / {limit}</span>
           {duplicateCount > 0 && <span>{duplicateCount} 个重复项已自动合并</span>}
         </div>
@@ -233,62 +233,6 @@ export function AvidActorChoiceDialog({
             onClick={() => onConfirm([...selectedRef.current.values()].filter(Boolean))}
           >
             扫描所选演员
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export function ExistingSubscriptionsDialog({
-  actors,
-  onCancel,
-  onConfirm,
-}: {
-  actors: Array<{ actorId: string; actorName: string | null }>
-  onCancel: () => void
-  onConfirm: () => void
-}) {
-  const confirmRef = useRef<HTMLButtonElement>(null)
-
-  useEffect(() => {
-    confirmRef.current?.focus()
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onCancel()
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [onCancel])
-
-  return (
-    <div className="dialog-backdrop" role="presentation" onMouseDown={onCancel}>
-      <div
-        className="dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="existing-subscriptions-title"
-        onMouseDown={(event) => event.stopPropagation()}
-      >
-        <span className="dialog-icon">
-          <AlertIcon />
-        </span>
-        <h2 id="existing-subscriptions-title">FreshRSS 已有这些演员</h2>
-        <p>以下演员已经订阅。仍要继续创建补全任务吗？</p>
-        <div className="confirm-list">
-          {actors.map((actor) => (
-            <span key={actor.actorId}>
-              {actor.actorName && actor.actorName.toLowerCase() !== actor.actorId.toLowerCase()
-                ? `${actor.actorName}（${actor.actorId}）`
-                : actor.actorId}
-            </span>
-          ))}
-        </div>
-        <div className="dialog-actions">
-          <button className="button secondary" type="button" onClick={onCancel}>
-            取消
-          </button>
-          <button className="button primary" type="button" ref={confirmRef} onClick={onConfirm}>
-            仍要继续
           </button>
         </div>
       </div>

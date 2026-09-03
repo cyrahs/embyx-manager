@@ -18,11 +18,11 @@ import {
 } from '../api'
 import type { AppContext } from '../App'
 import { Notice } from '../components/Feedback'
-import { ActorFeeds } from '../components/fill-actor/ActorFeeds'
+import { ActorSubscriptions } from '../components/fill-actor/ActorSubscriptions'
 import { ApplySummary, ConfirmDialog } from '../components/fill-actor/ApplyFeedback'
 import { ProgressPanel } from '../components/fill-actor/ProgressPanel'
 import { ActorFailures, PlanSummary, VideoGroup } from '../components/fill-actor/Results'
-import { AvidActorChoiceDialog, ExistingSubscriptionsDialog, ScanPanel } from '../components/fill-actor/ScanPanel'
+import { AvidActorChoiceDialog, ScanPanel } from '../components/fill-actor/ScanPanel'
 import { ArrowIcon, MoveIcon, SearchIcon, Spinner } from '../components/Icons'
 import { useApiTokenValue } from '../lib/apiToken'
 import {
@@ -42,7 +42,6 @@ import { MAX_ACTORS, MAX_AVIDS, STALE_CODES, VIDEO_GROUPS, jobErrorLabel } from 
 import type {
   ActiveApplyRequest,
   AvidActors,
-  ActorFeedStatus,
   ApplyJobEnvelope,
   ApplyResult,
   FillActorPlan,
@@ -81,16 +80,11 @@ export default function FillActorPage() {
   const apiToken = useApiTokenValue()
   const { health, setHealth, requestApiToken } = useOutletContext<AppContext>()
   const [plan, setPlan] = useState<FillActorPlan | null>(null)
-  const [feeds, setFeeds] = useState<ActorFeedStatus[]>([])
   const [planId, setPlanId] = useState<string | null>(recoveredPlanId)
   const [job, setJob] = useState<PlanJob | null>(() => recoveredScanPlanId
     ? { plan_id: recoveredScanPlanId, operation: 'create_plan', state: 'running' }
     : null)
   const [submitting, setSubmitting] = useState(false)
-  const [subscriptionConflict, setSubscriptionConflict] = useState<{
-    actorIds: string[]
-    existingActors: Array<{ actorId: string; actorName: string | null }>
-  } | null>(null)
   const [cancelling, setCancelling] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [pollWarning, setPollWarning] = useState<string | null>(null)
@@ -145,8 +139,7 @@ export default function FillActorPage() {
   const jobPending = isJobPending(job)
   const applyPending = Boolean(activeApply && isJobPending(applyJob))
   const jobCancelled = isJobCancelled(job)
-  const feedsPending = feeds.some((feed) => feed.state === 'queued' || feed.state === 'warming')
-  const envelopePending = jobPending || feedsPending
+  const envelopePending = jobPending
   // This page owns its readiness display: the top bar reports the app, not this feature.
   const fillActorHealth = health?.fill_actor
   const applyEnabled = fillActorHealth?.apply_ready === true
@@ -204,7 +197,7 @@ export default function FillActorPage() {
     else if (job || plan) setActivePlanId(null)
   }, [envelopePending, job, plan, planId])
 
-  // Names ride along with the recovered plan so a reload keeps naming the warming feeds.
+  // Names ride along with the recovered plan so a reload keeps naming the result rows.
   useEffect(() => {
     storeActorNames(actorNames)
   }, [actorNames])
@@ -238,7 +231,7 @@ export default function FillActorPage() {
   }, [plan])
 
   useEffect(() => {
-    if (!planId || (!isJobPending(job) && !feedsPending) || cancelling) return
+    if (!planId || !isJobPending(job) || cancelling) return
     const generation = requestGeneration.current
     const controller = new AbortController()
     activePollController.current = controller
@@ -249,7 +242,7 @@ export default function FillActorPage() {
           if (generation !== requestGeneration.current) return
           pollFailures.current = 0
           setPollWarning(null)
-          consumeEnvelope(envelope, setPlan, setPlanId, setJob, setFeeds, setError)
+          consumeEnvelope(envelope, setPlan, setPlanId, setJob, setError)
         })
         .catch((pollError: unknown) => {
           if (generation !== requestGeneration.current) return
@@ -272,7 +265,7 @@ export default function FillActorPage() {
       controller.abort()
       if (activePollController.current === controller) activePollController.current = null
     }
-  }, [cancelling, feedsPending, job, planId])
+  }, [cancelling, job, planId])
 
   useEffect(() => {
     if (!activeApply || applyPausedForAuth) return
@@ -430,7 +423,6 @@ export default function FillActorPage() {
           }
           setPlan(envelope.plan)
           setPlanId(envelope.planId ?? targetPlanId)
-          setFeeds(envelope.feeds)
           setApplyPlanRetryTick(0)
         })
         .catch((recoveryError: unknown) => {
@@ -478,7 +470,7 @@ export default function FillActorPage() {
     setActorNames((current) => ({ ...current, ...Object.fromEntries(named) }))
   }
 
-  async function startScan(actorIds = parsed.actorIds, continueIfSubscribed = false) {
+  async function startScan(actorIds = parsed.actorIds) {
     if (
       applyPending
       || !actorIds.length
@@ -489,11 +481,9 @@ export default function FillActorPage() {
     setError(null)
     setPollWarning(null)
     try {
-      const envelope = await createPlan(actorIds, continueIfSubscribed)
-      setSubscriptionConflict(null)
+      const envelope = await createPlan(actorIds)
       setActivePlanId(null)
       setPlan(null)
-      setFeeds([])
       setPlanId(null)
       setJob(null)
       setActiveApplyRequest(null)
@@ -516,37 +506,8 @@ export default function FillActorPage() {
       activeCancelController.current?.abort()
       activeApplyController.current?.abort()
       activeApplyPlanController.current?.abort()
-      consumeEnvelope(envelope, setPlan, setPlanId, setJob, setFeeds, setError)
+      consumeEnvelope(envelope, setPlan, setPlanId, setJob, setError)
     } catch (scanError) {
-      if (scanError instanceof ApiError && scanError.code === 'actors_already_subscribed') {
-        const requested = new Map(actorIds.map((actorId) => [actorId.toLowerCase(), actorId]))
-        const detailedActors = Array.isArray(scanError.details.actors)
-          ? scanError.details.actors.flatMap((actor) => {
-              if (typeof actor !== 'object' || actor === null || Array.isArray(actor)) return []
-              const rawActorId = (actor as Record<string, unknown>).actor_id
-              if (typeof rawActorId !== 'string') return []
-              const requestedActorId = requested.get(rawActorId.toLowerCase())
-              if (!requestedActorId) return []
-              const rawActorName = (actor as Record<string, unknown>).actor_name
-              const actorName = typeof rawActorName === 'string' ? rawActorName.trim() || null : null
-              return [{ actorId: requestedActorId, actorName }]
-            })
-          : []
-        const fallbackActors = Array.isArray(scanError.details.actor_ids)
-          ? scanError.details.actor_ids.flatMap((actorId) => {
-              if (typeof actorId !== 'string') return []
-              const requestedActorId = requested.get(actorId.toLowerCase())
-              return requestedActorId ? [{ actorId: requestedActorId, actorName: null }] : []
-            })
-          : []
-        const existingActors = detailedActors.length ? detailedActors : fallbackActors
-        const uniqueActors = [...new Map(existingActors.map((actor) => [actor.actorId.toLowerCase(), actor])).values()]
-        if (uniqueActors.length) {
-          rememberActorNames(uniqueActors)
-          setSubscriptionConflict({ actorIds: [...actorIds], existingActors: uniqueActors })
-          return
-        }
-      }
       if (scanError instanceof ApiError && scanError.code === 'unauthorized') {
         setAuthRequired(true)
         requestApiToken()
@@ -644,7 +605,7 @@ export default function FillActorPage() {
       }
       if (generation !== requestGeneration.current) return
       pollFailures.current = 0
-      consumeEnvelope(envelope, setPlan, setPlanId, setJob, setFeeds, setError)
+      consumeEnvelope(envelope, setPlan, setPlanId, setJob, setError)
     } catch (cancelError) {
       if (generation !== requestGeneration.current) return
       if (cancelError instanceof DOMException && cancelError.name === 'AbortError') return
@@ -706,7 +667,7 @@ export default function FillActorPage() {
     setError(null)
   }, [apiToken])
 
-  const scanLocked = resolvingAvid || submitting || jobPending || applyPending || subscriptionConflict !== null || avidActorChoice !== null
+  const scanLocked = resolvingAvid || submitting || jobPending || applyPending || avidActorChoice !== null
 
   return (
     <>
@@ -890,7 +851,7 @@ export default function FillActorPage() {
           </>
         )}
 
-        {feeds.length > 0 && !jobCancelled && <ActorFeeds feeds={feeds} actorNames={actorNames} />}
+        {plan && !jobCancelled && <ActorSubscriptions actors={plan.actors} onUnauthorized={requestApiToken} />}
       </main>
 
       {confirmOpen && applyEnabled && (
@@ -898,17 +859,6 @@ export default function FillActorPage() {
           candidates={selectedCandidates}
           onCancel={() => setConfirmOpen(false)}
           onConfirm={() => void confirmApply()}
-        />
-      )}
-      {subscriptionConflict && (
-        <ExistingSubscriptionsDialog
-          actors={subscriptionConflict.existingActors}
-          onCancel={() => setSubscriptionConflict(null)}
-          onConfirm={() => {
-            const actorIds = subscriptionConflict.actorIds
-            setSubscriptionConflict(null)
-            void startScan(actorIds, true)
-          }}
         />
       )}
 
@@ -932,12 +882,10 @@ function consumeEnvelope(
   setPlan: (plan: FillActorPlan | null) => void,
   setPlanId: (id: string | null) => void,
   setJob: (job: PlanJob | null) => void,
-  setFeeds: (feeds: ActorFeedStatus[]) => void,
   setError: (error: string | null) => void,
 ) {
   setPlanId(envelope.planId)
   setJob(envelope.job)
-  setFeeds(envelope.feeds)
   if (envelope.plan) setPlan(envelope.plan)
   const state = jobState(envelope.job)
   if (isJobCancelled(envelope.job)) {

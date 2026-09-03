@@ -15,7 +15,7 @@ from embyx_manager.fill_actor.persistence import (
     MoveJournalRecord,
     MoveJournalState,
 )
-from embyx_manager.fill_actor.ports import AcquisitionOutcome
+from embyx_manager.fill_actor.ports import AcquisitionOutcome, CatalogListing
 from embyx_manager.fill_actor.service import (
     CLOUD_MOVE_OBSERVATION_GRACE,
     FillActorPaths,
@@ -33,12 +33,12 @@ DESTINATION_API_ROOT = '/cloud/library/destination'
 
 
 class ActorCatalog:
-    async def list_video_ids(self, _actor_id: str) -> tuple[str, ...]:
-        return ('ABC-001',)
+    async def list_videos(self, _actor_ref: str) -> CatalogListing:
+        return CatalogListing(actor_name=None, talent_id=None, aliases=(), video_ids=('ABC-001',))
 
 
 class AcquisitionGateway:
-    async def queue_missing(self, _video_id: str) -> AcquisitionOutcome:
+    async def queue_missing(self, _video_id: str, *, release_date=None) -> AcquisitionOutcome:  # noqa: ARG002
         return AcquisitionOutcome.NO_MAGNET
 
 

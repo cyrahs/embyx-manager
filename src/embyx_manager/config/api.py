@@ -10,13 +10,11 @@ import logging
 from typing import Any
 
 import grpc
-import httpx
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, ConfigDict, Field
 
 from embyx_manager.clients.clouddrive import AsyncCloudDrive, CloudDriveClient
-from embyx_manager.clients.freshrss import FreshRSSClient
-from embyx_manager.config.models import CloudDriveConfig, FreshRSSConfig
+from embyx_manager.config.models import CloudDriveConfig
 from embyx_manager.config.store import (
     ConfigStore,
     ConfigVersionConflictError,
@@ -69,7 +67,7 @@ def _section_view(store: ConfigStore, section: str) -> SectionView:
     )
 
 
-def create_config_router(store: ConfigStore, *, mutation_auth: Any) -> APIRouter:  # noqa: C901
+def create_config_router(store: ConfigStore, *, mutation_auth: Any) -> APIRouter:
     router = APIRouter(prefix='/api/config')
 
     @router.get('')
@@ -99,13 +97,6 @@ def create_config_router(store: ConfigStore, *, mutation_auth: Any) -> APIRouter
         if not config.configured:
             return TestConnectionResult(ok=False, detail='address and api_token are required')
         return await _run_clouddrive_test(config)
-
-    @router.post('/freshrss/test', dependencies=[Depends(mutation_auth)])
-    async def test_freshrss(request: TestConnectionRequest) -> TestConnectionResult:
-        config = _merge_for_test(store, FreshRSSConfig, request.values)
-        if not config.configured:
-            return TestConnectionResult(ok=False, detail='url and api_key are required')
-        return await _run_freshrss_test(config)
 
     return router
 
@@ -151,23 +142,3 @@ async def _run_clouddrive_test(config: CloudDriveConfig) -> TestConnectionResult
         return TestConnectionResult(ok=True, detail='connected')
     finally:
         await cloud.aclose()
-
-
-async def _run_freshrss_test(config: FreshRSSConfig) -> TestConnectionResult:
-    client = FreshRSSClient(url=config.url, api_key=config.api_key, proxy=config.proxy or None)
-    try:
-        async with asyncio.timeout(TEST_TIMEOUT_SECONDS):
-            await client.fetch_token()
-    except TimeoutError:
-        return TestConnectionResult(ok=False, detail='connection timed out')
-    except httpx.HTTPStatusError as exc:
-        status = exc.response.status_code
-        if status in {401, 403}:
-            return TestConnectionResult(ok=False, detail=f'authentication failed (HTTP {status}); check the API key')
-        return TestConnectionResult(ok=False, detail=f'unexpected response: HTTP {status}')
-    except httpx.RequestError as exc:
-        return TestConnectionResult(ok=False, detail=f'connection failed: {exc.__class__.__name__}')
-    else:
-        return TestConnectionResult(ok=True, detail='authenticated')
-    finally:
-        await client.aclose()

@@ -11,7 +11,7 @@ import pytest
 import embyx_manager.fill_actor.service as fill_actor_service_module
 from embyx_manager.fill_actor.models import MoveState
 from embyx_manager.fill_actor.persistence import MoveJournalRecord, MoveJournalState
-from embyx_manager.fill_actor.ports import AcquisitionOutcome
+from embyx_manager.fill_actor.ports import AcquisitionOutcome, CatalogListing
 from embyx_manager.fill_actor.postgres_repository import PostgresFillActorRepository
 from embyx_manager.fill_actor.service import FillActorPaths, FillActorService, static_runtime
 from embyx_manager.locking import AsyncFileLock
@@ -19,12 +19,12 @@ from tests.conftest import make_postgres_repository
 
 
 class ActorCatalog:
-    async def list_video_ids(self, _actor_id: str) -> list[str]:
-        return ['ABC-001']
+    async def list_videos(self, _actor_ref: str) -> CatalogListing:
+        return CatalogListing(actor_name=None, talent_id=None, aliases=(), video_ids=('ABC-001',))
 
 
 class AcquisitionGateway:
-    async def queue_missing(self, _video_id: str) -> AcquisitionOutcome:
+    async def queue_missing(self, _video_id: str, *, release_date=None) -> AcquisitionOutcome:  # noqa: ARG002
         return AcquisitionOutcome.NO_MAGNET
 
 

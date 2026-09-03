@@ -4,13 +4,11 @@ import time
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
-import httpx
 import pytest
 from fastapi.testclient import TestClient
 
 from embyx_manager.api import create_app, make_mutation_auth
 from embyx_manager.fill_actor.api import (
-    ActorFeedView,
     JobProgressView,
     create_fill_actor_router,
     fill_actor_health,
@@ -18,12 +16,9 @@ from embyx_manager.fill_actor.api import (
     handle_fill_actor_error,
 )
 from embyx_manager.fill_actor.errors import FillActorError
-from embyx_manager.fill_actor.feeds import RSSHubFeedWarmer
 from embyx_manager.fill_actor.jobs import FillActorJobManager
 from embyx_manager.fill_actor.persistence import (
     JOB_CANCELLED_ERROR_CODE,
-    JobFeedRecord,
-    JobFeedState,
     JobOperation,
     JobProgress,
     JobProgressUnit,
@@ -32,19 +27,18 @@ from embyx_manager.fill_actor.persistence import (
     JobState,
     MemoryFillActorRepository,
 )
-from embyx_manager.fill_actor.ports import AcquisitionOutcome
+from embyx_manager.fill_actor.ports import AcquisitionOutcome, CatalogListing
 from embyx_manager.fill_actor.service import (
     FillActorPaths,
     FillActorRuntime,
     FillActorService,
     static_runtime,
 )
-from embyx_manager.fill_actor.subscriptions import SubscribedActor
 
 
 class ActorCatalog:
-    async def list_video_ids(self, _actor_id: str) -> list[str]:
-        return ['ABC-001']
+    async def list_videos(self, _actor_ref: str) -> CatalogListing:
+        return CatalogListing(actor_name=None, talent_id=None, aliases=(), video_ids=('ABC-001',))
 
 
 class BlockingActorCatalog:
@@ -52,15 +46,15 @@ class BlockingActorCatalog:
         self.started = threading.Event()
         self.release = threading.Event()
 
-    async def list_video_ids(self, _actor_id: str) -> list[str]:
+    async def list_videos(self, _actor_ref: str) -> CatalogListing:
         self.started.set()
         while not self.release.is_set():  # noqa: ASYNC110 - bridges TestClient's thread and event loop
             await asyncio.sleep(0.005)
-        return ['ABC-001']
+        return CatalogListing(actor_name=None, talent_id=None, aliases=(), video_ids=('ABC-001',))
 
 
 class AcquisitionGateway:
-    async def queue_missing(self, _video_id: str) -> AcquisitionOutcome:
+    async def queue_missing(self, _video_id: str, *, release_date=None) -> AcquisitionOutcome:  # noqa: ARG002
         return AcquisitionOutcome.NO_MAGNET
 
 
@@ -75,10 +69,6 @@ def make_client(
     api_token: str | None = None,
     max_request_bytes: int = 65_536,
     actor_catalog=None,
-    feed_warmer_factory=None,
-    freshrss_url: str | None = None,
-    freshrss_rsshub_url: str | None = None,
-    existing_actor_lookup=None,
     avid_actor_lookup=None,
     apply_enabled: bool = True,
 ) -> tuple[TestClient, FillActorPaths, MemoryFillActorRepository]:
@@ -100,8 +90,7 @@ def make_client(
         brand_resolver=BrandResolver(),
         repository=repository,
     )
-    feed_warmer = feed_warmer_factory(repository) if feed_warmer_factory is not None else None
-    jobs = FillActorJobManager(service=service, repository=repository, feed_warmer=feed_warmer)
+    jobs = FillActorJobManager(service=service, repository=repository)
     app = create_app(
         app_ready=repository.health_check,
         routers=(
@@ -110,9 +99,6 @@ def make_client(
                 repository=repository,
                 jobs=jobs,
                 mutation_auth=make_mutation_auth(api_token),
-                freshrss_url=freshrss_url,
-                freshrss_rsshub_url=freshrss_rsshub_url,
-                existing_actor_lookup=existing_actor_lookup,
                 avid_actor_lookup=avid_actor_lookup,
             ),
         ),
@@ -178,50 +164,6 @@ def wait_for_apply_job(client: TestClient, job_id: str) -> dict:
             return payload
         time.sleep(0.005)
     pytest.fail('apply job did not complete')
-
-
-def test_plan_checks_freshrss_subscriptions_before_readiness_and_requires_confirmation(tmp_path: Path) -> None:
-    lookups: list[tuple[str, ...]] = []
-
-    async def existing_actor_lookup(actor_ids):
-        lookups.append(tuple(actor_ids))
-        return (SubscribedActor(actor_id='ACTOR', actor_name='演员甲'),)
-
-    client, paths, _ = make_client(tmp_path, existing_actor_lookup=existing_actor_lookup)
-    paths.move_in_path.rmdir()
-
-    with client:
-        conflict = client.post('/api/fill-actor/plans', json={'actor_ids': ['actor']})
-        continued = client.post(
-            '/api/fill-actor/plans',
-            json={'actor_ids': ['actor'], 'continue_if_subscribed': True},
-        )
-
-    assert conflict.status_code == 409
-    assert conflict.json() == {
-        'error': {
-            'code': 'actors_already_subscribed',
-            'actor_ids': ['actor'],
-            'actors': [{'actor_id': 'actor', 'actor_name': '演员甲'}],
-        }
-    }
-    assert continued.status_code == 503
-    assert continued.json() == {'error': {'code': 'not_ready'}}
-    assert lookups == [('actor',)]
-
-
-def test_plan_reports_freshrss_subscription_check_failure_without_starting_scan(tmp_path: Path) -> None:
-    async def failing_lookup(_actor_ids):
-        msg = 'FreshRSS unavailable'
-        raise RuntimeError(msg)
-
-    client, _, _ = make_client(tmp_path, existing_actor_lookup=failing_lookup)
-
-    with client:
-        response = client.post('/api/fill-actor/plans', json={'actor_ids': ['actor']})
-
-    assert response.status_code == 502
-    assert response.json() == {'error': {'code': 'freshrss_subscription_check_failed'}}
 
 
 def test_plan_job_and_apply_end_to_end(tmp_path: Path) -> None:
@@ -388,97 +330,6 @@ def test_apply_job_does_not_accept_an_apply_operation_as_its_parent(tmp_path: Pa
     assert response.json() == {'error': {'code': 'unknown_plan'}}
 
 
-def test_plan_envelope_exposes_persisted_feed_status_and_freshrss_action(tmp_path: Path) -> None:
-    async def handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(
-            200,
-            headers={'content-type': 'application/xml', 'rsshub-cache-status': 'HIT'},
-            content=b'<rss version="2.0"><channel /></rss>' if request.method == 'GET' else b'',
-        )
-
-    http_client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
-
-    def feed_warmer_factory(repository):
-        return RSSHubFeedWarmer(
-            repository=repository,
-            rsshub_url='http://rsshub.internal.test',
-            freshrss_url='https://freshrss.example.test',
-            freshrss_rsshub_url='https://rsshub.example.test',
-            client=http_client,
-            poll_interval=0.001,
-        )
-
-    client, _, _ = make_client(
-        tmp_path,
-        feed_warmer_factory=feed_warmer_factory,
-        freshrss_url='https://freshrss.example.test',
-        freshrss_rsshub_url='https://rsshub.example.test',
-        apply_enabled=False,
-    )
-    with client:
-        created = client.post('/api/fill-actor/plans', json={'actor_ids': ['actor']})
-        assert created.status_code == 202
-        assert created.json()['feeds'][0]['actor_id'] == 'actor'
-        plan_id = created.json()['job']['plan_id']
-        payload = wait_for_plan(client, plan_id)
-
-    assert payload['job']['state'] == 'completed'
-    assert payload['feeds'] == [
-        {
-            'actor_id': 'actor',
-            'state': 'ready',
-            'attempts': 2,
-            'updated_at': payload['feeds'][0]['updated_at'],
-            'error_code': None,
-            'freshrss_add_url': (
-                'https://freshrss.example.test/i/?c=feed&a=add&url_rss='
-                'https%3A%2F%2Frsshub.example.test%2Fjavbus%2Fstar%2Factor'
-            ),
-            'freshrss_url': 'https://freshrss.example.test',
-        }
-    ]
-
-
-def test_feed_view_rebuilds_legacy_add_url_from_current_configuration() -> None:
-    updated_at = datetime(2026, 7, 13, 12, 0, tzinfo=UTC)
-    record = JobFeedRecord(
-        job_id='legacy-job',
-        actor_id='actor',
-        state=JobFeedState.READY,
-        attempts=2,
-        updated_at=updated_at,
-        freshrss_add_url='https://legacy.example.test/i/?c=feed&a=add',
-    )
-
-    payload = ActorFeedView.from_record(
-        record,
-        freshrss_url='https://current-freshrss.example.test',
-        freshrss_rsshub_url='https://current-rsshub.example.test',
-    ).model_dump()
-
-    assert payload['freshrss_add_url'] == (
-        'https://current-freshrss.example.test/i/?c=feed&a=add&url_rss='
-        'https%3A%2F%2Fcurrent-rsshub.example.test%2Fjavbus%2Fstar%2Factor'
-    )
-    assert payload['freshrss_url'] == 'https://current-freshrss.example.test'
-
-
-def test_feed_view_hides_legacy_freshrss_actions_when_current_configuration_is_disabled() -> None:
-    record = JobFeedRecord(
-        job_id='legacy-job',
-        actor_id='actor',
-        state=JobFeedState.READY,
-        attempts=2,
-        updated_at=datetime(2026, 7, 13, 12, 0, tzinfo=UTC),
-        freshrss_add_url='https://legacy.example.test/i/?c=feed&a=add',
-    )
-
-    payload = ActorFeedView.from_record(record).model_dump()
-
-    assert payload['freshrss_add_url'] is None
-    assert payload['freshrss_url'] is None
-
-
 def test_mutations_require_configured_bearer_token(tmp_path: Path) -> None:
     token = 'test-bearer-value'
     client, _, _ = make_client(tmp_path, api_token=token)
@@ -581,7 +432,7 @@ def test_cancel_unknown_or_completed_plan_has_stable_response(tmp_path: Path) ->
 def test_api_maps_service_errors_without_raw_messages(tmp_path: Path) -> None:
     client, _, _ = make_client(tmp_path)
     with client:
-        invalid = client.post('/api/fill-actor/plans', json={'actor_ids': ['bad actor']})
+        invalid = client.post('/api/fill-actor/plans', json={'actor_ids': ['bad/actor']})
         malformed = client.post('/api/fill-actor/plans', json={'actor_ids': ['actor'], 'unexpected': True})
         invalid_request_id = client.post(
             '/api/fill-actor/plans/not-found/apply-jobs',

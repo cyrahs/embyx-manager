@@ -1,10 +1,11 @@
 import asyncio
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
 
-from embyx_manager.clients.javbus import JavBusClient, JavBusPaginationError
+from embyx_manager.clients.javbus import JavBusActor, JavBusClient, JavBusPaginationError
 
 MAIN_PAGE_HTML = """
 <html>
@@ -258,3 +259,24 @@ async def test_scrape_rejects_an_empty_page_inside_discovered_range(client: JavB
         pytest.raises(JavBusPaginationError, match='empty page at 2'),
     ):
         await client.scrape('ACTOR-1')
+
+
+async def test_search_stars_reads_every_star_page_the_search_lists(client: JavBusClient) -> None:
+    html = """
+    <div id="waterfall">
+      <a class="avatar-box text-center" href="https://www.javbus.com/star/sl1"><span class="pb10">河北彩花</span></a>
+      <a class="avatar-box text-center" href="https://www.javbus.com/star/new1"><span class="pb10">河北彩伽</span></a>
+      <a href="https://www.javbus.com/star/sl1">dup</a>
+      <a href="https://www.javbus.com/genre/1">not a star</a>
+    </div>
+    """
+    client._client.get = AsyncMock(  # noqa: SLF001
+        return_value=SimpleNamespace(status_code=200, text=html, raise_for_status=lambda: None)
+    )
+
+    stars = await client.search_stars('河北彩')
+
+    assert stars == [JavBusActor(actor_id='sl1', name='河北彩花'), JavBusActor(actor_id='new1', name='河北彩伽')]
+    client._client.get.assert_awaited_once_with(  # noqa: SLF001
+        'https://www.javbus.com/searchstar/%E6%B2%B3%E5%8C%97%E5%BD%A9',
+    )

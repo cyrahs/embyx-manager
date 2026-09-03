@@ -2,8 +2,8 @@
  *
  * Categories come from the RSS section above; a subscription only ever files
  * into one of them, because the category is what decides the offline directory.
- * The FreshRSS import is a one-time bridge: preview what its subscription list
- * maps to, then write the new ones with a pending seed so nothing is re-read.
+ * A feed URL can be corrected in place; a talent subscription's URL follows
+ * from its id and is not edited here.
  */
 
 import { useCallback, useEffect, useState } from 'react'
@@ -12,23 +12,14 @@ import {
   ApiError,
   createSubscription,
   deleteSubscription,
-  importFreshRssSubscriptions,
   isUnauthorized,
   listSubscriptions,
   updateSubscription,
 } from '../../api'
 import { localizeBackendText } from '../../lib/backendText'
-import type { FreshRssImportEntry, Subscription } from '../../types'
+import type { Subscription } from '../../types'
 import { Notice } from '../Feedback'
 import { Spinner } from '../Icons'
-
-const IMPORT_STATUS_LABELS: Record<string, string> = {
-  new: '将导入',
-  imported: '已导入',
-  exists: '已存在',
-  category_missing: '分类未配置',
-  invalid_url: '地址无效',
-}
 
 function formatTime(value: string | null): string {
   if (!value) return '—'
@@ -62,8 +53,7 @@ export function SubscriptionsPanel({ onUnauthorized }: SubscriptionsPanelProps) 
   const [url, setUrl] = useState('')
   const [category, setCategory] = useState('')
   const [pendingDelete, setPendingDelete] = useState<number | null>(null)
-  const [preview, setPreview] = useState<FreshRssImportEntry[] | null>(null)
-  const [importMessage, setImportMessage] = useState<string | null>(null)
+  const [editing, setEditing] = useState<{ id: number; url: string } | null>(null)
 
   const load = useCallback(async (signal?: AbortSignal) => {
     try {
@@ -99,6 +89,9 @@ export function SubscriptionsPanel({ onUnauthorized }: SubscriptionsPanelProps) 
     }
   }
 
+  const replace = (updated: Subscription) =>
+    setItems((current) => current.map((entry) => (entry.id === updated.id ? updated : entry)))
+
   const add = () =>
     run(async () => {
       await createSubscription(url.trim(), category)
@@ -107,10 +100,14 @@ export function SubscriptionsPanel({ onUnauthorized }: SubscriptionsPanelProps) 
     }, '添加订阅失败。')
 
   const toggle = (item: Subscription) =>
+    run(async () => replace(await updateSubscription(item.id, { enabled: !item.enabled })), '更新订阅失败。')
+
+  const saveUrl = () =>
     run(async () => {
-      const updated = await updateSubscription(item.id, { enabled: !item.enabled })
-      setItems((current) => current.map((entry) => (entry.id === updated.id ? updated : entry)))
-    }, '更新订阅失败。')
+      if (!editing) return
+      replace(await updateSubscription(editing.id, { url: editing.url.trim() }))
+      setEditing(null)
+    }, '修改地址失败。')
 
   const remove = (item: Subscription) =>
     run(async () => {
@@ -119,21 +116,6 @@ export function SubscriptionsPanel({ onUnauthorized }: SubscriptionsPanelProps) 
       setItems((current) => current.filter((entry) => entry.id !== item.id))
     }, '删除订阅失败。')
 
-  const previewImport = () =>
-    run(async () => {
-      const result = await importFreshRssSubscriptions(false)
-      setPreview(result.entries)
-      setImportMessage(null)
-    }, '读取 FreshRSS 订阅失败。')
-
-  const applyImport = () =>
-    run(async () => {
-      const result = await importFreshRssSubscriptions(true)
-      setPreview(result.entries)
-      setImportMessage(`已导入 ${result.imported} 条订阅。首次拉取只记录当前条目，不会把 FreshRSS 已读过的重新下载。`)
-      await load()
-    }, '导入失败。')
-
   const groups = new Map<string, Subscription[]>()
   for (const label of categories) groups.set(label, [])
   for (const item of items) {
@@ -141,7 +123,6 @@ export function SubscriptionsPanel({ onUnauthorized }: SubscriptionsPanelProps) 
     if (list) list.push(item)
     else groups.set(item.category, [item])
   }
-  const importable = preview?.filter((entry) => entry.status === 'new').length ?? 0
 
   return (
     <section className="panel settings-panel" aria-labelledby="settings-subscriptions">
@@ -149,8 +130,8 @@ export function SubscriptionsPanel({ onUnauthorized }: SubscriptionsPanelProps) 
         <h2 id="settings-subscriptions">订阅源</h2>
       </div>
       <p className="settings-desc">
-        rss 流水线轮询的 feed 列表：RSSHub 路由、AVBase 演员 feed、sukebei 搜索等任意 RSS/Atom
-        地址。每条订阅归属一个分类，分类决定它的下载落在哪个离线目录。
+        rss 流水线轮询的 feed 列表：AVBase 演员订阅（在补全演员页面添加）、RSSHub 路由、sukebei 搜索等任意
+        RSS/Atom 地址。每条订阅归属一个分类，分类决定它的下载落在哪个离线目录。
       </p>
       {error && <Notice tone="error" title="订阅操作失败" body={error} />}
       <form
@@ -170,7 +151,7 @@ export function SubscriptionsPanel({ onUnauthorized }: SubscriptionsPanelProps) 
         <input
           type="text"
           aria-label="Feed 地址"
-          placeholder="https://rsshub.example/javbus/star/rwt"
+          placeholder="https://rsshub.example/javlibrary/mostwanted/cn"
           autoComplete="off"
           spellCheck={false}
           value={url}
@@ -212,7 +193,32 @@ export function SubscriptionsPanel({ onUnauthorized }: SubscriptionsPanelProps) 
                       <tr key={item.id}>
                         <td className="subscription-url">
                           {item.name && <strong>{item.name}</strong>}
-                          <span className="acq-muted">{item.feed_url}</span>
+                          {editing?.id === item.id ? (
+                            <form
+                              className="subscription-edit"
+                              onSubmit={(event) => {
+                                event.preventDefault()
+                                void saveUrl()
+                              }}
+                            >
+                              <input
+                                type="text"
+                                aria-label="新的 Feed 地址"
+                                autoComplete="off"
+                                spellCheck={false}
+                                value={editing.url}
+                                onChange={(event) => setEditing({ id: item.id, url: event.target.value })}
+                              />
+                              <button type="submit" className="text-button" disabled={busy || !editing.url.trim()}>
+                                保存
+                              </button>
+                              <button type="button" className="text-button" disabled={busy} onClick={() => setEditing(null)}>
+                                取消
+                              </button>
+                            </form>
+                          ) : (
+                            <span className="acq-muted">{item.feed_url}</span>
+                          )}
                         </td>
                         <td>
                           <span className={`run-state ${stateTone(item)}`}>{stateLabel(item)}</span>
@@ -226,6 +232,16 @@ export function SubscriptionsPanel({ onUnauthorized }: SubscriptionsPanelProps) 
                             <button type="button" className="text-button" disabled={busy} onClick={() => void toggle(item)}>
                               {item.enabled ? '停用' : '启用'}
                             </button>
+                            {item.kind === 'rss' && editing?.id !== item.id && (
+                              <button
+                                type="button"
+                                className="text-button"
+                                disabled={busy}
+                                onClick={() => setEditing({ id: item.id, url: item.url ?? '' })}
+                              >
+                                改地址
+                              </button>
+                            )}
                             {pendingDelete === item.id ? (
                               <button type="button" className="text-button" disabled={busy} onClick={() => void remove(item)}>
                                 确认删除
@@ -245,54 +261,6 @@ export function SubscriptionsPanel({ onUnauthorized }: SubscriptionsPanelProps) 
             </div>
           ),
         )
-      )}
-      <div className="settings-actions">
-        <button className="button secondary" type="button" disabled={busy} onClick={() => void previewImport()}>
-          {busy ? <Spinner /> : null}
-          从 FreshRSS 导入（预览）
-        </button>
-        {importable > 0 && (
-          <button className="button primary" type="button" disabled={busy} onClick={() => void applyImport()}>
-            确认导入 {importable} 条
-          </button>
-        )}
-      </div>
-      {importMessage && (
-        <p className="settings-hint" role="status">
-          {importMessage}
-        </p>
-      )}
-      {preview && (
-        <div className="run-table-wrap">
-          <table className="run-table">
-            <thead>
-              <tr>
-                <th>FreshRSS 订阅</th>
-                <th>分类</th>
-                <th>结果</th>
-              </tr>
-            </thead>
-            <tbody>
-              {preview.length === 0 && (
-                <tr>
-                  <td colSpan={3} className="acq-muted">
-                    FreshRSS 里没有订阅。
-                  </td>
-                </tr>
-              )}
-              {preview.map((entry) => (
-                <tr key={entry.url}>
-                  <td className="subscription-url">
-                    {entry.title && <strong>{entry.title}</strong>}
-                    <span className="acq-muted">{entry.url}</span>
-                  </td>
-                  <td>{entry.category ?? '—'}</td>
-                  <td>{IMPORT_STATUS_LABELS[entry.status] ?? entry.status}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       )}
     </section>
   )

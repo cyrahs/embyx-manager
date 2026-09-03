@@ -27,7 +27,7 @@ function panelTitle(kind: 'scan' | 'apply', job: PlanJob | null, submitting: boo
     if (state === 'completed' || state === 'partial_failed') return '文件移动已完成'
     return '文件移动未完成'
   }
-  if (submitting) return '正在检查 FreshRSS'
+  if (submitting) return '正在提交扫描任务'
   if (state === 'queued') return '任务已排队'
   if (stage) return STAGE_LABELS[stage] ?? '正在处理扫描任务'
   return '正在恢复扫描状态'

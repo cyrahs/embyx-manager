@@ -389,38 +389,6 @@ main {
 .dock-actions .button.primary { margin-left: 6px; min-height: 38px; }
 
 /* ---------- feeds ---------- */
-.feed-panel { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); overflow: hidden; }
-.feed-panel-heading { min-height: 50px; padding: 10px 14px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 11px; }
-.feed-panel-icon { width: 28px; height: 28px; flex: 0 0 auto; border-radius: 7px; display: grid; place-items: center; color: var(--violet); background: rgba(180, 166, 242, .12); }
-.feed-panel-icon svg { width: 16px; height: 16px; }
-.feed-panel-heading > div { flex: 1; min-width: 0; }
-.feed-panel-heading h2 { margin: 0; color: var(--text); font-size: 14px; font-weight: 600; }
-.feed-panel-heading p { margin: 2px 0 0; color: var(--text-3); font-size: 12px; }
-.feed-panel-count { color: var(--text-3); font: 500 12px var(--font-mono); }
-.feed-list { margin: 0; padding: 0; list-style: none; }
-.feed-row {
-  min-height: 42px;
-  padding: 7px 14px;
-  border-bottom: 1px solid var(--line);
-  display: grid;
-  grid-template-columns: minmax(120px, 1fr) 108px minmax(0, 1.4fr) auto;
-  align-items: center;
-  gap: 14px;
-}
-.feed-row:last-child { border-bottom: 0; }
-.feed-actor { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
-.feed-actor strong { color: var(--text); font: 500 12px var(--font-mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.feed-actor small { color: var(--text-3); font-size: 11px; }
-.feed-state { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); font-size: 12px; font-weight: 600; }
-.feed-state svg, .feed-state .spinner { width: 14px; height: 14px; }
-.feed-warming .feed-state { color: var(--amber); }
-.feed-ready .feed-state { color: var(--green); }
-.feed-failed .feed-state { color: var(--red); }
-.feed-detail { min-width: 0; color: var(--text-3); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
-.feed-failed .feed-detail { color: #d69691; }
-.feed-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
-.freshrss-button { min-height: 30px; padding: 0 10px; font-size: 12px; }
-.freshrss-button svg { width: 13px; height: 13px; }
 
 /* ---------- dialog ---------- */
 .dialog-backdrop { position: fixed; z-index: 50; inset: 0; padding: 20px; display: grid; place-items: center; background: rgba(4, 5, 6, .72); }
@@ -793,3 +761,11 @@ main {
 .subscription-url strong { display: block; }
 .subscription-url span { display: block; word-break: break-all; font-size: 12px; }
 .subscription-error { display: block; margin-top: 2px; font-size: 12px; color: var(--text-2); }
+
+/* Actor subscriptions (fill-actor results). */
+.actor-subscription-list { list-style: none; margin: 0; padding: 0; }
+.actor-subscription-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid var(--border, rgba(127, 127, 127, 0.2)); }
+.actor-subscription-name { display: flex; flex-direction: column; gap: 2px; }
+.actor-subscription-name small { font-size: 12px; }
+.subscription-edit { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.subscription-edit input[type='text'] { flex: 1 1 260px; min-width: 0; }
