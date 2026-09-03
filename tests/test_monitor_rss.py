@@ -1,6 +1,6 @@
 import dataclasses
 import logging
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
@@ -47,6 +47,7 @@ class FakeLedger:
         self.attempts: dict[str, list[MagnetAttemptRecord]] = {}
         self.task_dirs: dict[str, str | None] = {}
         self.archived_paths: dict[str, tuple[str, ...]] = {}
+        self.release_dates: dict[str, date | None] = {}
 
     async def discover(
         self,
@@ -56,21 +57,26 @@ class FakeLedger:
         now: datetime,
         task_dir_path: str | None = None,
         next_action_at: datetime | None = None,
+        release_date: date | None = None,
+        wake: bool = False,
     ) -> bool:
         if avid not in self.states:
             self.states[avid] = AcquisitionState.DISCOVERED
             self.sources[avid] = source
             self.task_dirs[avid] = task_dir_path
             self.next_action_at[avid] = next_action_at
+            self.release_dates[avid] = release_date
             return True
         state = self.states[avid]
         if state is AcquisitionState.DISCOVERED:
             accepted = True
         elif state in {AcquisitionState.RESOLVE_FAILED, AcquisitionState.EXHAUSTED}:
             due = self.next_action_at.get(avid)
-            accepted = due is None or due <= now
+            accepted = wake or due is None or due <= now
         else:
             return False
+        if accepted and release_date is not None and self.release_dates.get(avid) is None:
+            self.release_dates[avid] = release_date
         if accepted and task_dir_path is not None:
             self.task_dirs[avid] = task_dir_path
         if accepted and next_action_at is not None:
@@ -90,6 +96,7 @@ class FakeLedger:
             created_at=now_stub(),
             updated_at=now_stub(),
             task_dir_path=self.task_dirs.get(avid),
+            release_date=self.release_dates.get(avid),
         )
 
     async def transition(
@@ -668,3 +675,44 @@ async def test_an_absent_avid_still_downloads_when_routes_are_configured(tmp_pat
 
     deps.cloud.add_offline_files.assert_awaited_once_with([MAGNET_A], '/115/embyx_in/rank')
     assert deps.ledger.states['ABC-123'] is AcquisitionState.DOWNLOADING
+
+
+def magnet_table(info_hash: str) -> str:
+    return f"""
+    <table><tbody><tr>
+      <td><a href="magnet:?xt=urn:btih:{info_hash}&dn=x">x</a></td>
+      <td>2 GiB</td>
+    </tr></tbody></table>
+    """
+
+
+async def test_an_item_carrying_a_magnet_wakes_a_parked_avid() -> None:
+    # The magnet is evidence the wait is over: the cooldown no longer applies.
+    ledger = FakeLedger(known={'ABC-123': AcquisitionState.RESOLVE_FAILED})
+    ledger.next_action_at['ABC-123'] = datetime.now(UTC) + timedelta(days=1)
+    pipeline, deps = make_pipeline(items=[make_item('item-1', 'ABC-123', magnet_table(HASH_B))], ledger=ledger)
+
+    ctx = make_ctx()
+    await pipeline.run(ctx)
+
+    deps.cloud.add_offline_files.assert_awaited_once_with([MAGNET_B], TASK_DIR)
+    assert deps.ledger.states['ABC-123'] is AcquisitionState.DOWNLOADING
+    assert ctx.stats.get('skipped_known', 0) == 0
+
+
+async def test_an_item_without_a_magnet_leaves_a_parked_avid_cooling() -> None:
+    ledger = FakeLedger(known={'ABC-123': AcquisitionState.RESOLVE_FAILED})
+    due = datetime.now(UTC) + timedelta(days=1)
+    ledger.next_action_at['ABC-123'] = due
+    pipeline, deps = make_pipeline(
+        items=[make_item('item-1', 'ABC-123')],
+        ledger=ledger,
+        sukebei_magnets={'ABC-123': MAGNET_A},
+    )
+
+    ctx = make_ctx()
+    await pipeline.run(ctx)
+
+    assert ctx.stats['skipped_known'] == 1
+    deps.cloud.add_offline_files.assert_not_awaited()
+    assert deps.ledger.next_action_at['ABC-123'] == due

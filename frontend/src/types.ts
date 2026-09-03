@@ -195,6 +195,8 @@ export interface Acquisition {
   note: string | null
   archived_paths: string[]
   next_action_at: string | null
+  /** ISO date the source knew the release by; anchors the resolve schedule. */
+  release_date: string | null
   created_at: string
   updated_at: string
 }

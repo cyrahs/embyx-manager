@@ -11,7 +11,8 @@ Three peer features; `/` redirects to the dashboard and no feature owns the app 
 - **Monitor dashboard** (`/dashboard`, the landing page): the embyx-monitor pipelines
   rebuilt as scheduled services with persisted run history —
   - **rss**: unread FreshRSS items → magnet resolution (sukebei → RSS table → javbus) →
-    115 offline tasks, with a database-backed failed-AVID cooldown;
+    115 offline tasks, re-resolving on a schedule anchored to the release date
+    (a fixed cooldown when no source knew it);
   - **archive**: intake normalization (flatten/rename) and per-brand archiving;
   - **mapping**: flat `.strm` tree mirrored to a per-title layout, with a real-time
     watchdog for incremental syncs plus a periodic full sync.

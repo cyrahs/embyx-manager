@@ -107,6 +107,19 @@ function formatTime(value: string | null): string {
   return date.toLocaleString('zh-CN', { hour12: false })
 }
 
+/** What a row without a magnet is waiting on: the release itself, or the next probe. */
+function waitHint(item: Acquisition): string | null {
+  if (item.state !== 'resolve_failed' && item.state !== 'exhausted' && item.state !== 'discovered') return null
+  if (item.release_date) {
+    const release = new Date(`${item.release_date}T00:00:00Z`)
+    if (!Number.isNaN(release.getTime()) && release.getTime() > Date.now()) {
+      return `等待发售 · 发售日 ${item.release_date}`
+    }
+  }
+  if (item.next_action_at) return `下次探测 ${formatTime(item.next_action_at)}`
+  return null
+}
+
 function ProgressBar({ value }: { value: number | null }) {
   if (value === null) return <span className="acq-muted">—</span>
   return (
@@ -132,6 +145,7 @@ function AcquisitionRow({
   onAct: (avid: string, action: AcquisitionAction) => void
 }) {
   const closed = item.state === 'archived' || item.state === 'ignored'
+  const hint = waitHint(item)
   return (
     <tr onClick={() => onOpen(item.avid)}>
       <td>{item.avid}</td>
@@ -141,7 +155,10 @@ function AcquisitionRow({
         </span>
       </td>
       <td className="acq-muted">{sourceLabel(item.source)}</td>
-      <td className="acq-muted">{item.note ? localizeBackendText(item.note) : '—'}</td>
+      <td className="acq-muted">
+        {item.note ? localizeBackendText(item.note) : '—'}
+        {hint && <small className="acq-wait">{hint}</small>}
+      </td>
       <td className="acq-muted">{formatTime(item.updated_at)}</td>
       <td onClick={(event) => event.stopPropagation()}>
         <div className="acq-actions">

@@ -722,6 +722,7 @@ main {
 /* ---------- download tracking ---------- */
 .acq-meta { margin: 0 0 12px; color: var(--text-2); font-size: 12.5px; }
 .acq-muted { color: var(--text-2); }
+.acq-wait { display: block; margin-top: 2px; font-size: 12px; color: var(--text-2); }
 .acq-progress {
   position: relative;
   display: inline-block;

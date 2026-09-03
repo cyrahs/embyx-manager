@@ -1,0 +1,256 @@
+# 演员跟踪从 JavBus 迁到 AVBase,并摘掉 FreshRSS:调研与方案
+
+日期:2026-09-02。同日确认两项决定:FreshRSS 摘掉;Rank 继续走 RSSHub。
+
+## 实施进度
+
+| 步骤 | 状态 |
+| --- | --- |
+| 1 账本发售日节奏 + 带磁力 sighting 唤醒 | 已实现(分支上,**Postgres 测试仅 CI 验证**) |
+| 2 订阅表 + 轮询器 + 导入命令 | 未开始 |
+| 3 AVBase 客户端 + fill-actor 切换 + 删 RSSHub 预热 | 未开始 |
+| 4 JavBus 磁力评分排序(可选) | 未开始 |
+
+第 1 步相对本计划的偏差:
+
+- **长尾不"放弃"**,而是压到每 30 天一次(`cadence.LONG_TAIL_FLOOR`)。计划写的是"N 次后
+  exhausted/needs_attention",但那会把"老片没磁力"变成操作员队列里的噪音;每月三次请求
+  的代价可以忽略,而重传确实会出现。
+- 节奏用**时间**而非探测计数分段(发售前 7 天以上每周一次、发售窗口每 4 小时、之后按
+  发售龄 1d/3d/7d 退避),不需要新增计数列;看板显示"等待发售 · 发售日"或"下次探测"
+  而不是"第 N 次探测"。
+- `park_unresolved` 改为从行的当前状态 CAS(原来固定假设 `discovered`):被唤醒的
+  `resolve_failed` 行这次仍找不到磁力时才能正确续期,否则会带着过期的计时器空转。
+- tracker 的"候选用尽"(`exhausted`)也改用同一节奏,无发售日时回退到停滞超时。
+- 迁移 v11 加 `archive_acquisitions.release_date DATE`(可空);第 1 步没有任何来源写入
+  它——AVBase JSON 在第 3 步接入,所以这一步实际生效的是唤醒和从当前状态续期,节奏
+  对存量行仍是固定冷却。
+
+## 结论
+
+JavBus 的 star feed 之所以"出现即有磁力",是因为它同时扮演两个角色:作品目录与磁力目录。
+JavBus 默认只列出已有磁力的作品,RSSHub 路由又把磁力表直接塞进 item,所以订阅一个 feed
+就等于"作品 + 磁力 + 质量筛选"三件事一起完成。AVBase 只做前一个角色:它是作品与演员身份
+的权威目录(别名聚合、发售日、原生 RSS),但 feed 里的作品比发售日早 3~5 周,比磁力出现
+早 4~6 周,而且不含磁力。
+
+因此"结合两者优点"的关键不是再找一个数据源,而是把**发现**与**磁力出现**拆成两个事件:
+
+- 发现由 AVBase 负责(talent feed + JSON 目录),解决别名与全量覆盖;
+- 磁力出现由账本按发售窗口主动探测(sukebei + JavBus 详情页,与现在相同的磁力源);
+- 账本的冷却节奏从"固定 24h"改为"以发售日为锚的分段节奏",这是整个方案里唯一真正
+  需要新逻辑的地方。
+
+不改账本节奏而直接把 AVBase feed 接进现有 RSS 管线,后果是每部作品在 24h 冷却里空转
+约 30 次才等到发售,磁力出现后最多再等 24h,事件驱动退化成盲轮询。
+
+第二个决定:**FreshRSS 摘掉**。它在链路里的六个职责——定时抓取、未读队列、分类到目录、
+订阅注册表、订阅 UI 与预检、guid 去重——中,定时抓取与去重常驻后端和账本已经覆盖,未读
+队列自迁移 v5 起就不再承担重试,分类到目录本来就是后端配置,只有"订阅注册表 + 管理 UI"
+需要新建。用户自动化之后已不再用 FreshRSS 的阅读界面,摘掉没有损失。RSSHub 保留,但只
+作为 Rank 这类"任意页面"的抓取器,不再是 fill-actor 的前置条件。
+
+## 已核实的事实
+
+### 现状:JavBus 路径
+
+- fill-actor 扫描:`JavBusClient.scrape` 分页抓 `/star/<id>`,带 `Cookie: existmag=all`
+  拿到**全量**作品(含无磁力的);缺失番号经 `AcquisitionIntake.queue` 入账本
+  `discovered` + `next_action_at=now`,tracker 后台首次解析。
+- RSS 路径:RSSHub `/javbus/star/<id>` → FreshRSS 分类 → `RssPipeline`:从 item **标题**
+  解析番号,item 内嵌磁力表取最大者作 `rss_item` 候选,排序 sukebei → rss_item → javbus
+  (按体积)。
+- RSSHub 的 javbus 路由(`lib/routes/javbus/index.tsx`)**不设** `existmag` cookie,所以
+  拿到的是 JavBus 默认列表——只有已有磁力的作品;每个 item 再请求详情页与
+  `uncledatoolsbyajax.php`,把磁力表渲染进 description,并把评分最高的磁力
+  (`score = 链接数^8 × 体积`,链接数即字幕/高清标签数)作为 enclosure。这就是"出现即有
+  磁力,且往往是可靠磁力"的全部机制。
+- 冷却:`rss.failed_avid_cooldown_seconds` 默认 86400;`retry_due` 在每次 tracker poll
+  末尾运行(`tracker_interval_seconds` 默认 1800,每次最多 50 行)。
+- `AcquisitionRepository.discover` 对冷却未到期的行返回 False:再次 sighting——哪怕这次
+  item 带着磁力——会被计为 `skipped_known` 并标读,磁力信息随之丢弃,只能等冷却到期后
+  由 sukebei/javbus 重新解析。
+
+### 现状:FreshRSS 与 RSSHub
+
+- 后端只用 FreshRSS 的三个接口:`stream/contents`(按标签取未读)、`edit-tag`(标读)、
+  `subscription/list`(fill-actor 的"已订阅"预检)。
+- 订阅内容:Actor 分类 = RSSHub `/javbus/star/<id>`;Rank 分类 = RSSHub javlibrary 榜单
+  (item 标题含番号且无分隔符,解析器已验证可用,见 [[rss-categories-offline-dirs]])。
+- FreshRSS/RSSHub 专用代码约 1250 行:`clients/freshrss.py`、`fill_actor/feeds.py`
+  (RSSHub 预热器)、`fill_actor/subscriptions.py`、前端 `ActorFeeds`、两组测试;外加
+  `fill_actor_job_feeds` 表、设置页的 `freshrss` 与 `feeds` 两张卡。
+- RSSHub 预热器存在的原因是 javbus 路由首抓要逐个请求详情页,FreshRSS 首抓会超时。
+  后端自己抓 RSSHub 后超时与重试由自己控制,预热器失去意义。
+
+### AVBase
+
+| 项目 | 事实 |
+| --- | --- |
+| talent feed | `https://www.avbase.net/talents/<talent_id>/feed`,talent 页面 `<link rel="alternate" type="application/rss+xml">` 暴露 |
+| 服务端可达性 | feed 端点对 curl 直接 200;**HTML 与 `_next/data` JSON 对 httpx/curl 返回 403 Cloudflare challenge**;用 curl_cffi 浏览器指纹(chrome/safari/firefox)全部 200 |
+| feed 内容 | 固定 30 条,不接受 page/limit/on_sale 参数;**按登记时间正序**(最旧在前);pubDate 是登记时间 |
+| feed 标题 | **不含番号**,只有作品标题(如 `べっぴんなのに厨二病 石川澪`);番号只在 `<link>`/`<guid>`:`https://www.avbase.net/works/FWAY-091`(无 prefix);`<category>` 列出全部出演者名 |
+| 登记 vs 发售 | 石川澪 feed 30 条,登记日全部比发售日早 24~35 天(如 MIZD-555 登记 8/31,发售 10/2) |
+| 别名 | talent 聚合多个 actor 记录:河北彩花/河北彩伽 同 talent 5022,麻里梨夏 有 4 个名字;任一别名 URL 都解析到同一 talent;feed 按 talent 聚合,别名作品全部进 feed |
+| JSON 目录 | `/_next/data/<buildId>/talents/<name>.json?name=<name>&page=N`:30 条/页,`total`,每条 `work_id`/`prefix`/`min_date`(发售日)/`casts`;buildId 来自首页 `__NEXT_DATA__`,随部署变化 |
+| AVID → 演员 | `/_next/data/<buildId>/works/<id>.json?id=<id>`:`casts[].actor.{id,name,talent.id}` |
+| id ↔ name | 数字 id 不能直接开页面(`/talents/46144` 404);feed 的 channel `<link>` 给出 name URL,可由 id 反查 |
+| 非标准 work_id | `gyutto-285412`、`P162F-01`、`takesyobo:TSDS-43136`;现有解析器把 `sodcreate:3DSVR-2013` 解析成 `DSVR-2013`(错),需先剥离 `prefix:` |
+
+### Sukebei
+
+- 原生 RSS `https://sukebei.nyaa.si/?page=rss&q=<关键字>&c=2_2&f=0`,item 自带
+  `nyaa:infoHash`、`nyaa:size`、`nyaa:trusted`;`f=2` 只要可信上传者;`|` 表示 OR。
+  后端自己控制节奏后不再需要它做触发 feed,记录在此只为说明"按演员名搜索有效"。
+- 时序样本:DLDSS-515 AVBase 发售日 9/3,sukebei 首个种子 8/6(FANZA 先行配信);
+  MIDA-798 发售 8/28,种子 8/27。**`min_date` 只是发售的近似下界,先行配信可提前约 4 周。**
+
+## 差距:JavBus 的"低摩擦"由三件事构成,AVBase 一件都没有
+
+1. **过滤**——feed 只含已有磁力的作品,订阅方不需要等待逻辑。
+2. **磁力随 item 到达**——零额外请求,一次轮询内完成提交。
+3. **质量筛选**——多人上传 + 字幕/高清标签,RSSHub 取评分最高者。
+
+AVBase feed 是"作品被登记"的信号,不是"可下载"的信号。它的优点在另一维度:别名聚合、
+全量目录、发售日、服务端直接可抓。两者不是替代关系,是分工关系。
+
+## 方案
+
+### A. 角色分离
+
+| 角色 | 来源 | 状态 |
+| --- | --- | --- |
+| 发现(discover) | 后端订阅轮询:AVBase talent 订阅(抓开放 feed)+ 通用 RSS 订阅(RSSHub javlibrary 榜单等);fill-actor 扫描 AVBase JSON 目录 | 新 |
+| 磁力解析 | sukebei 搜索 + JavBus 详情页(`get_magnets`)+ 订阅 item 内嵌磁力 | 不变 |
+| 磁力出现 | 账本在发售窗口内主动探测;带磁力的 item 唤醒冷却中的行 | 新 |
+
+"触发 feed"不再是独立概念:后端自己控制节奏,不需要等别人推送。若保留 JavBus star feed
+作为一条通用 RSS 订阅,其 item 自带磁力,自然成为唤醒源,但它不再承担演员身份:fill-actor
+与订阅预检都改用 AVBase talent,JavBus 详情页作为磁力源照旧,它只按番号工作,与别名无关。
+
+### B. 账本:以发售日为锚的分段节奏(核心)
+
+账本行增加 `release_date`(AVBase `min_date`,可空),`next_action_at` 由策略函数计算,
+替代单一的 `failed_avid_cooldown_seconds`:
+
+| 阶段 | 相对发售日 | 节奏 | 理由 |
+| --- | --- | --- | --- |
+| 预热 | `< release - 7d` | 每 7d 一次探测 | 先行配信会提前放出种子,完全不探测会漏;每周一次代价可忽略 |
+| 发售窗口 | `release - 7d ~ release + 14d` | 每 2~4h | 磁力最可能在此出现;配合 1800s 的 tracker poll 即每 4~8 轮一次 |
+| 长尾 | `> release + 14d` | 1d → 3d → 7d 指数退避 | 老作品磁力偶发;N 次后 `exhausted`/`needs_attention`,不再无限轮询 |
+| 无发售日 | — | 沿用现有固定冷却 | manual/reconcile 建的行,以及取不到发售日的订阅行 |
+
+配套两条改动:
+
+- **带磁力的 sighting 唤醒冷却中的行**。`discover` 目前对冷却中的行一律返回 False;
+  改为当调用方带 `item_magnet` 时,把 `next_action_at` 拉到 now(或直接 inline 解析),
+  并把该磁力作为 `rss_item` 候选记入 attempts。磁力出现到提交只隔一次轮询,与今天的
+  JavBus 路径持平。
+- **看板可见**:等待中的行显示"等待发售(发售日 X)/等待磁力(第 N 次探测)",替代今天
+  含义模糊的 `resolve_failed`。
+
+`release_date` 的来源:fill-actor 扫描时 JSON 里就有;订阅轮询的 item 没有发售日,首次
+解析时用 works JSON 补一次(需要 Cloudflare 绕过,见 G),取不到就落回固定冷却。
+
+### C. 订阅模型与轮询器(替代 FreshRSS)
+
+新表 `subscriptions`(迁移 v10 或下一号):
+
+| 列 | 含义 |
+| --- | --- |
+| `id`、`kind`、`enabled`、时间戳 | `kind` ∈ {`avbase_talent`, `rss`} |
+| `category` | 引用 `rss.categories` 的 label;离线目录与账本 source `rss:<label>` 由分类决定 |
+| `talent_id`、`name`、`aliases_json` | `avbase_talent` 专用 |
+| `url` | `rss` 专用,完整 URL,通常指向 RSSHub |
+| `cursor_json` | 上一轮抓到的 item key 集合,长度不超过 feed 本身 |
+| `last_polled_at`、`last_error` | 面向 UI |
+
+唯一约束 `(kind, talent_id)` 与 `(kind, url)`。分类保留而不是每条订阅自带目录:目录决定
+归档路由(迁移 v8 的取舍),同类订阅共用一个目录,改目录改一处;账本 source 与看板分组
+不变。配置段名 `rss` 与 `PipelineName.RSS` 也保留——它抓的仍是 feed,改名只有迁移成本
+没有语义收益。
+
+轮询器 = 现有 `RssPipeline` 去掉 FreshRSS 读写:
+
+- 每次运行按分类遍历启用的订阅;一条订阅失败只计 `subscriptions_failed`,不影响其他,
+  与今天分类之间的隔离同理。
+- 抓取:`avbase_talent` 抓 `https://www.avbase.net/talents/<id>/feed`(开放端点,httpx
+  即可);`rss` 抓 `url`。解析用 defusedxml(已有依赖),不引入 feedparser。
+- item → 番号:标题优先,失败时取链接最后一段并剥离 `prefix:`,再过 `AvidParser`;
+  `rss_magnet.get_magnet_from_item` 继续从内容里取内嵌磁力(JavBus 类 feed)。非标准 id
+  被解析器拒绝即跳过,不入账本。
+- 去重:账本 `discover` 按番号去重;`cursor_json` 只用于跳过上一轮已见的 item,让解析
+  不出番号的 item 只告警一次。
+- 首次轮询:由 fill-actor 扫描创建的订阅,创建时游标直接填满当前 feed——扫描已经覆盖
+  全量目录,不必再吃 30 条旧作;手动创建的订阅正常摄取 30 条,库中已有的由
+  `_skip_library_held` 兜住,其余按 B 的长尾节奏处理。
+- 运行记录、看板"立即运行"、`rss.interval_seconds` 不变;统计项从 items/marked_read
+  改为 subscriptions_polled/items/new_avids/subscriptions_failed。
+
+订阅管理 UI:设置页新面板,按分类列出;添加时输入演员名、别名或 talent 页面 URL
+(服务端归一到同一 talent),或一条 RSS URL;启用/禁用、删除;显示上次轮询时间与错误。
+删除订阅不影响在途账本行(目录钉在行上)也不影响 tracker 轮询集合(目录仍在分类里),
+这一点与删分类的坑不同。
+
+### D. fill-actor 换 AVBase
+
+- 新 `clients/avbase.py`:
+  - 传输层用 curl_cffi(浏览器 TLS 指纹),httpx 过不了 Cloudflare;作为独立依赖,失败时
+    fill-actor 报 `actor_catalog_error`,不影响订阅轮询(feed 不受拦截);
+  - buildId 从首页 `__NEXT_DATA__` 取并缓存,JSON 路由 404 时刷新一次再重试;
+  - `list_video_ids(talent)`:按 `total` 分页(30/页),产出 `work_id` 并剥离 `prefix:`,
+    同时带回 `min_date` 供 B 使用;
+  - `talent_by_name(name)`:任一别名解析到 talent id + 主名 + 别名列表;
+  - `talents_for_avid(avid)`:works JSON 的 `casts`。
+- actor 的语义从 JavBus star id 变为 AVBase talent;用户输入允许名字、别名或 talent URL。
+- 扫描结果页加"订阅此演员":写一条 `avbase_talent` 订阅到指定分类(默认取目录等于
+  `fill_actor.task_dir_path` 的分类)并填满游标;预检 `actors_already_subscribed` 改查
+  订阅表。
+- 删除:`RSSHubFeedWarmer`、`fill_actor_job_feeds` 表与 `JobFeedRecord` 状态机、
+  `fill_actor/subscriptions.py`、前端 `ActorFeeds`、`feeds` 配置段。`freshrss` 配置段与
+  `FreshRSSClient` 在 E 的导入完成后一并删除。
+
+### E. FreshRSS 下线与订阅导入
+
+一次性命令 `embyx-manager import-subscriptions --freshrss-url … --api-key …`(与
+`import-config` 同类,集群内 Job 运行):
+
+- 读 `subscription/list`;`/javbus/star/<id>` 的 feed 用标题里的演员名查 AVBase talent,
+  命中写 `avbase_talent`,未命中打印清单人工处理;
+- 其他 feed(javlibrary 榜单等)原样写成 `rss` 类型,分类取 FreshRSS 的 category 名,与
+  `rss.categories` 的 label 对不上就报错退出,不猜;
+- 导入后游标填满,FreshRSS 里已读过的不重吃;之后 FreshRSS 可下线;
+- 迁移剥离 `freshrss`/`feeds` 两段配置(`extra='forbid'`,同 v7 手法)。
+
+### F. 磁力质量:把 JavBus 的优点留在解析层
+
+- JavBus 详情页仍是候选来源;可把 RSSHub 的评分思路搬进 `JavBusClient.get_magnets`
+  的排序——标签数(字幕/高清)与体积加权,而不是今天的纯体积排序。这是 JavBus 磁力
+  "往往可靠"的实际来源,与它的 feed 无关。
+- 订阅 item 的内嵌磁力以 `rss_item` 进候选,排序位置不变。
+
+### G. 风险与边界
+
+- **Cloudflare 策略随时可能收紧**。设计上让"发现"只依赖 feed(当前开放),让"目录扫描"
+  与"发售日补全"依赖 JSON(需指纹模拟)。JSON 挂掉只影响 fill-actor 全量扫描与发售日,
+  订阅轮询退化为固定冷却,不断档。
+- **buildId 随部署变化**:每次 AVBase 发版 JSON 路由 404,客户端要能自动刷新。
+- **RSSHub 成为 Rank 的单点**:后端抓 RSSHub 的超时与重试自己控制;javbus 路由首抓慢
+  的问题由请求超时兜住,不再需要预热。
+- **先行配信**:发售窗口前的种子要等到预热探测;若某位演员这类情况多,可缩短预热间隔。
+- **feed 只有 30 条**:高产演员(麻里梨夏 1571 部)只覆盖最近 30 次登记,轮询间隔小于
+  登记频率即可,登记频率远低于每周 30 部。
+
+### H. 实施顺序(每步独立可合并,且每步之后都是可运行的中间态)
+
+1. 账本 `release_date` + 分段节奏策略 + 带磁力 sighting 唤醒;看板文案。与来源无关。
+2. 订阅表 + 轮询器(先只做 `rss` 类型,用 RSSHub 的 javbus/javlibrary feed 复现今天的
+   行为)+ 管理 UI + 导入命令。**这一步之后 FreshRSS 即可下线**,JavBus 仍在。
+3. `clients/avbase.py` + `avbase_talent` 类型 + fill-actor 目录/AVID 查演员切换 +
+   "订阅此演员";删除 RSSHub 预热、`fill_actor_job_feeds`、`feeds`/`freshrss` 配置、
+   `FreshRSSClient`。**这一步之后 JavBus 只剩磁力源角色**。
+4. 可选:JavBus 磁力评分排序。
+
+第 3 步是唯一引入新依赖(curl_cffi)的一步;第 2 步是唯一动部署拓扑的一步(下线
+FreshRSS)。两步互不阻塞,但按此顺序每一步都能单独上线观察。

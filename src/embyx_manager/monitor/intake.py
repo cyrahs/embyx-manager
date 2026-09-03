@@ -4,8 +4,8 @@ Every input source (the RSS categories, fill actor) funnels newly wanted AVIDs
 through this component. It records the AVID in the acquisition ledger, resolves
 a ranked list of magnet candidates, and submits the first one to CloudDrive;
 the tracker owns the download from there. An AVID with no usable magnet is
-parked in RESOLVE_FAILED with a cooldown, and the tracker's retry pass hands it
-back here once the cooldown expires.
+parked in RESOLVE_FAILED until the resolve schedule (``cadence``) says to look
+again, and the tracker's retry pass hands it back here at that time.
 
 Sources name the offline directory each submission is queued under — pinned on
 the acquisition at discovery — so one source's downloads can be filed by an
@@ -13,7 +13,7 @@ archive route of its own.
 """
 
 from collections.abc import Callable, Sequence
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from enum import StrEnum
 
 import grpc
@@ -25,15 +25,21 @@ from embyx_manager.clients.javbus import JavBusClient
 from embyx_manager.clients.sukebei import SukebeiClient
 from embyx_manager.core.magnet import extract_info_hash
 from embyx_manager.monitor.acquisitions import (
+    RETRYABLE_STATES,
     AcquisitionRecord,
     AcquisitionRepository,
     AcquisitionState,
     AttemptState,
     MagnetCandidate,
 )
+from embyx_manager.monitor.cadence import next_resolve_at
 from embyx_manager.monitor.reports import RunContext
 
 MAX_CANDIDATES = 5
+
+#: States a resolve pass that submits nothing parks from: a fresh discovery, or
+#: a cooled-down row that a sighting woke for another look.
+PARKABLE_STATES = frozenset({AcquisitionState.DISCOVERED}) | RETRYABLE_STATES
 
 CLOUD_RETRY = retry(
     stop=stop_after_attempt(3),
@@ -72,7 +78,7 @@ class AcquisitionIntake:
         self._failed_cooldown = timedelta(seconds=failed_cooldown_seconds)
         self._on_submitted = on_submitted
 
-    async def enqueue(
+    async def enqueue(  # noqa: PLR0913 - one sighting carries everything its source knows
         self,
         avid: str,
         *,
@@ -80,9 +86,22 @@ class AcquisitionIntake:
         task_dir_path: str,
         ctx: RunContext,
         item_magnet: str | None = None,
+        release_date: date | None = None,
     ) -> IntakeOutcome:
-        """Run the whole intake for one AVID and report how far it got."""
-        if not await self._ledger.discover(avid, source=source, now=datetime.now(UTC), task_dir_path=task_dir_path):
+        """Run the whole intake for one AVID and report how far it got.
+
+        A sighting that brings its own magnet wakes an AVID still cooling down
+        from an empty pass: the magnet is the evidence the wait is over.
+        """
+        accepted = await self._ledger.discover(
+            avid,
+            source=source,
+            now=datetime.now(UTC),
+            task_dir_path=task_dir_path,
+            release_date=release_date,
+            wake=item_magnet is not None,
+        )
+        if not accepted:
             return IntakeOutcome.ALREADY_TRACKED
         try:
             candidates = await self.resolve(avid, ctx=ctx, item_magnet=item_magnet)
@@ -97,7 +116,15 @@ class AcquisitionIntake:
             return IntakeOutcome.SUBMITTED
         return IntakeOutcome.SUBMIT_FAILED
 
-    async def queue(self, avid: str, *, source: str, task_dir_path: str, ctx: RunContext) -> IntakeOutcome:
+    async def queue(
+        self,
+        avid: str,
+        *,
+        source: str,
+        task_dir_path: str,
+        ctx: RunContext,
+        release_date: date | None = None,
+    ) -> IntakeOutcome:
         """Record one AVID for the background pass instead of resolving inline.
 
         The row lands in ``discovered`` with its action timer already due, so
@@ -113,6 +140,7 @@ class AcquisitionIntake:
             now=now,
             task_dir_path=task_dir_path,
             next_action_at=now,
+            release_date=release_date,
         )
         if not accepted:
             return IntakeOutcome.ALREADY_TRACKED
@@ -180,7 +208,7 @@ class AcquisitionIntake:
             target=AcquisitionState.RESOLVE_FAILED,
             now=now,
             note=note,
-            next_action_at=now + self._failed_cooldown,
+            next_action_at=next_resolve_at(now, record.release_date, fallback=self._failed_cooldown),
         )
 
     # -- magnet resolution ---------------------------------------------------
@@ -226,16 +254,15 @@ class AcquisitionIntake:
         return candidates[:MAX_CANDIDATES]
 
     async def park_unresolved(self, avid: str) -> None:
-        """Park an AVID with no usable magnet; the cooldown gates its next try."""
-        now = datetime.now(UTC)
-        await self._ledger.transition(
-            avid,
-            expected=AcquisitionState.DISCOVERED,
-            target=AcquisitionState.RESOLVE_FAILED,
-            now=now,
-            note='no magnet found',
-            next_action_at=now + self._failed_cooldown,
-        )
+        """Park an AVID with no usable magnet; the schedule sets its next try.
+
+        The row is a fresh discovery or a cooled-down one a sighting woke, so
+        the CAS starts from whatever state it is in now.
+        """
+        record = await self._ledger.get(avid)
+        if record is None or record.state not in PARKABLE_STATES:
+            return
+        await self._repark(record, note='no magnet found')
 
     # -- CloudDrive offline tasks ---------------------------------------------
 

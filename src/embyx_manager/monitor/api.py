@@ -2,7 +2,7 @@
 
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends
@@ -121,6 +121,7 @@ class AcquisitionView(BaseModel):
     note: str | None
     archived_paths: tuple[str, ...]
     next_action_at: datetime | None
+    release_date: date | None
     created_at: datetime
     updated_at: datetime
 
@@ -133,6 +134,7 @@ class AcquisitionView(BaseModel):
             note=record.note,
             archived_paths=record.archived_paths,
             next_action_at=record.next_action_at,
+            release_date=record.release_date,
             created_at=record.created_at,
             updated_at=record.updated_at,
         )

@@ -1,5 +1,5 @@
 import logging
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
@@ -295,3 +295,87 @@ async def test_resolve_slots_the_item_magnet_between_sukebei_and_javbus() -> Non
 
     assert [candidate.magnet for candidate in candidates] == [MAGNET_A, MAGNET_B, MAGNET_C]
     assert [candidate.source for candidate in candidates] == ['sukebei', 'rss_item', 'javbus']
+
+
+async def test_a_sighting_with_a_magnet_wakes_a_cooling_row() -> None:
+    intake, deps = make_intake(ledger=parked_ledger(AcquisitionState.RESOLVE_FAILED, due=False))
+
+    outcome = await intake.enqueue(
+        'ABC-123',
+        source=AcquisitionSource.MANUAL,
+        task_dir_path=TASK_DIR,
+        ctx=make_ctx(),
+        item_magnet=MAGNET_A,
+    )
+
+    assert outcome is IntakeOutcome.SUBMITTED
+    deps.cloud.add_offline_files.assert_awaited_once_with([MAGNET_A], TASK_DIR)
+    assert deps.ledger.states['ABC-123'] is AcquisitionState.DOWNLOADING
+    assert deps.ledger.attempt_states('ABC-123') == [AttemptState.SUBMITTED]
+
+
+async def test_a_sighting_without_a_magnet_leaves_a_cooling_row_alone() -> None:
+    intake, deps = make_intake(
+        ledger=parked_ledger(AcquisitionState.RESOLVE_FAILED, due=False),
+        sukebei_magnet=MAGNET_A,
+    )
+
+    outcome = await enqueue(intake)
+
+    assert outcome is IntakeOutcome.ALREADY_TRACKED
+    deps.sukebei.get_magnet.assert_not_awaited()
+
+
+async def test_a_woken_row_that_resolves_nothing_is_reparked_from_its_own_state() -> None:
+    # A magnet without a usable hash wakes the row but cannot be submitted; the
+    # park must start from resolve_failed, not assume a fresh discovery.
+    ledger = parked_ledger(AcquisitionState.RESOLVE_FAILED, due=False)
+    stale_deadline = ledger.next_action_at['ABC-123']
+    intake, deps = make_intake(ledger=ledger)
+
+    outcome = await intake.enqueue(
+        'ABC-123',
+        source=AcquisitionSource.MANUAL,
+        task_dir_path=TASK_DIR,
+        ctx=make_ctx(),
+        item_magnet='magnet:?dn=ABC-123',
+    )
+
+    assert outcome is IntakeOutcome.NO_MAGNET
+    assert deps.ledger.states['ABC-123'] is AcquisitionState.RESOLVE_FAILED
+    assert deps.ledger.next_action_at['ABC-123'] != stale_deadline
+    assert deps.ledger.next_action_at['ABC-123'] > datetime.now(UTC)
+
+
+async def test_park_follows_the_release_schedule_when_the_date_is_known() -> None:
+    intake, deps = make_intake()
+    release = (datetime.now(UTC) + timedelta(days=60)).date()
+
+    outcome = await intake.enqueue(
+        'ABC-123',
+        source=AcquisitionSource.FILL_ACTOR,
+        task_dir_path=TASK_DIR,
+        ctx=make_ctx(),
+        release_date=release,
+    )
+
+    assert outcome is IntakeOutcome.NO_MAGNET
+    assert deps.ledger.release_dates['ABC-123'] == release
+    # Weeks ahead of the release: a weekly probe, not the one-hour fallback cooldown.
+    wait = deps.ledger.next_action_at['ABC-123'] - datetime.now(UTC)
+    assert timedelta(days=6, hours=23) < wait <= timedelta(days=7)
+
+
+async def test_queue_stores_the_release_date() -> None:
+    intake, deps = make_intake()
+    release = date(2026, 10, 2)
+
+    await intake.queue(
+        'ABC-123',
+        source=AcquisitionSource.FILL_ACTOR,
+        task_dir_path=TASK_DIR,
+        ctx=make_ctx(),
+        release_date=release,
+    )
+
+    assert deps.ledger.release_dates['ABC-123'] == release

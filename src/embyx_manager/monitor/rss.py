@@ -108,9 +108,21 @@ class RssPipeline:
 
         now = datetime.now(UTC)
         wanted: dict[str, list[dict]] = {}
+        item_magnets: dict[str, str | None] = {}
         for avid, avid_items in avid_item.items():
-            if await self._ledger.discover(avid, source=source, now=now, task_dir_path=task_dir):
+            # An item carrying a magnet is evidence the wait is over: it wakes a
+            # row still cooling down from an earlier empty pass.
+            item_magnet = get_magnet_from_item(avid_items[0], avid)
+            accepted = await self._ledger.discover(
+                avid,
+                source=source,
+                now=now,
+                task_dir_path=task_dir,
+                wake=item_magnet is not None,
+            )
+            if accepted:
                 wanted[avid] = avid_items
+                item_magnets[avid] = item_magnet
             else:
                 ctx.add('skipped_known')
         if len(wanted) != len(avid_item):
@@ -128,7 +140,7 @@ class RssPipeline:
             return
 
         ctx.check_cancelled()
-        resolved = await self._resolve_all(wanted, ctx)
+        resolved = await self._resolve_all(wanted, item_magnets, ctx)
         ctx.check_cancelled()
         await self._submit_all(resolved, task_dir, ctx)
 
@@ -180,10 +192,11 @@ class RssPipeline:
     async def _resolve_all(
         self,
         avid_item: dict[str, list[dict]],
+        item_magnets: dict[str, str | None],
         ctx: RunContext,
     ) -> dict[str, list[MagnetCandidate]]:
         resolved: dict[str, list[MagnetCandidate]] = {}
-        await asyncio.gather(*(self._resolve_safely(avid, items, resolved, ctx) for avid, items in avid_item.items()))
+        await asyncio.gather(*(self._resolve_safely(avid, item_magnets.get(avid), resolved, ctx) for avid in avid_item))
         ctx.add('magnets_found', sum(len(candidates) for candidates in resolved.values()))
         ctx.info('Found magnets for %d of %d avids', len(resolved), len(avid_item))
 
@@ -198,12 +211,12 @@ class RssPipeline:
     async def _resolve_safely(
         self,
         avid: str,
-        items: list[dict],
+        item_magnet: str | None,
         resolved: dict[str, list[MagnetCandidate]],
         ctx: RunContext,
     ) -> None:
         try:
-            candidates = await self._intake.resolve(avid, ctx=ctx, item_magnet=get_magnet_from_item(items[0], avid))
+            candidates = await self._intake.resolve(avid, ctx=ctx, item_magnet=item_magnet)
         except Exception:  # noqa: BLE001
             ctx.exception('Failed to get magnets for %s', avid)
             return

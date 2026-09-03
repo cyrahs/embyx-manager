@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 
 import asyncpg
 
-CURRENT_SCHEMA_VERSION = 10
+CURRENT_SCHEMA_VERSION = 11
 
 # Advisory-lock key space for embyx-manager; low word selects the resource.
 ADVISORY_NAMESPACE = 0x454D4258  # 'EMBX'
@@ -458,3 +458,9 @@ _MIGRATIONS[10] = (
     ))
     """,
 )
+
+# The resolve schedule anchors on the release date: a source that knows it
+# (a catalog scan or feed) records it at discovery, and empty passes are then
+# spaced by how far the release is instead of by the fixed cooldown. Existing
+# rows keep NULL and stay on the fixed cooldown.
+_MIGRATIONS[11] = ('ALTER TABLE archive_acquisitions ADD COLUMN release_date DATE',)
