@@ -18,6 +18,7 @@ const SUBSCRIPTION = {
   name: '演员甲',
   aliases: [],
   seed_pending: false,
+  cursor_size: 0,
   last_polled_at: null,
   last_error: 'category Actor is not configured',
   created_at: '2026-09-02T00:00:00Z',

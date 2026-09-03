@@ -684,3 +684,42 @@ def test_freshrss_import_needs_freshrss() -> None:
 
     assert response.status_code == 503
     assert response.json() == {'error': {'code': 'freshrss_not_configured'}}
+
+
+def test_creating_a_talent_subscription_stores_its_names_and_seeds_the_first_poll() -> None:
+    api = subscriptions_api()
+
+    with make_client(FakeScheduler(), FakeRuns([]), subscriptions=api) as client:
+        created = client.post(
+            '/api/monitor/subscriptions',
+            json={
+                'kind': 'avbase_talent',
+                'category': 'Actor',
+                'talent_id': 5022,
+                'name': '河北彩花',
+                'aliases': ['河北彩伽', ' 河北彩花 ', ''],
+                'seed': True,
+            },
+        )
+        assert created.status_code == 201
+        body = created.json()
+        assert body['kind'] == 'avbase_talent'
+        assert body['feed_url'] == 'https://www.avbase.net/talents/5022/feed'
+        assert body['aliases'] == ['河北彩伽']
+        assert body['seed_pending'] is True
+        assert body['cursor_size'] == 0
+
+        missing = client.post(
+            '/api/monitor/subscriptions',
+            json={'kind': 'avbase_talent', 'category': 'Actor', 'name': '河北彩花'},
+        )
+        assert missing.json() == {'error': {'code': 'invalid_talent'}}
+
+        duplicate = client.post(
+            '/api/monitor/subscriptions',
+            json={'kind': 'avbase_talent', 'category': 'Rank', 'talent_id': 5022, 'name': '河北彩花'},
+        )
+        assert duplicate.status_code == 409
+
+        unknown = client.post('/api/monitor/subscriptions', json={'kind': 'javbus', 'category': 'Actor'})
+        assert unknown.json() == {'error': {'code': 'unknown_subscription_kind'}}

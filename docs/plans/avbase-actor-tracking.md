@@ -8,7 +8,8 @@
 | --- | --- |
 | 1 账本发售日节奏 + 带磁力 sighting 唤醒 | 已实现(分支上,**Postgres 测试仅 CI 验证**) |
 | 2 订阅表 + 轮询器 + FreshRSS 导入 | 已实现(分支上,**Postgres 测试仅 CI 验证**) |
-| 3 AVBase 客户端 + fill-actor 切换 + 删 RSSHub 预热 | 未开始 |
+| 3a AVBase 客户端 + talent 类型订阅 + JavBus→AVBase 迁移脚本 | 已实现(分支上) |
+| 3b fill-actor 切换到 AVBase 目录 + "订阅此演员" + 删 RSSHub 预热/FreshRSS | 未开始 |
 | 4 JavBus 磁力评分排序(可选) | 未开始 |
 
 第 1 步相对本计划的偏差:
@@ -39,6 +40,21 @@
   这一步起就能作为普通 RSS URL 订阅。
 - `rss` 流水线的就绪条件不再要求 FreshRSS;FreshRSS 配置段与客户端保留到导入完成后的
   第 3 步再删。
+
+第 3 步的拆分与偏差:
+
+- **JavBus star 订阅到 AVBase talent 的迁移是一次性的,由人手工分批完成**
+  (`scripts/migrate_javbus_subscriptions.py`),不做应用内的"升级"流程。脚本三段:
+  `resolve` 读订阅列表(部署后读 manager API,部署前可读 FreshRSS 的 OPML 导出),用
+  名字桥(feed 标题、JavBus star 页名字,AVBase 任一别名都能命中)和番号桥(star 页首页
+  作品在 AVBase 的 casts 交集)找到 talent,写 `mapping.json` 供审阅;`apply --batch N`
+  逐批创建 `avbase_talent` 订阅(`seed_pending`)并**停用**而非删除旧的 JavBus 行,便于
+  回退;`verify` 核验新行存在、旧行停用、talent feed 可达且名字对得上、轮询后 seed 落地
+  且无错误。实测四位真实演员(含改名的河北彩花/彩伽)都由名字桥命中。
+- `clients/avbase.py` 用 curl_cffi 过 Cloudflare:buildId 从首页取、404 时刷新一次再判
+  未找到;`talent(name)`/`talent_works(name)`/`work(id)` 三个入口。
+- API 的 `POST /api/monitor/subscriptions` 接受 `kind=avbase_talent`(talent_id、name、
+  aliases、seed);视图增加 `cursor_size` 供核验。
 
 ## 结论
 

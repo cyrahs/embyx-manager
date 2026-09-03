@@ -298,6 +298,8 @@ export interface Subscription {
   aliases: string[]
   /** The first poll only records the feed's current items instead of ingesting them. */
   seed_pending: boolean
+  /** How many feed items the poller remembers having seen. */
+  cursor_size: number
   last_polled_at: string | null
   last_error: string | null
   created_at: string

@@ -271,6 +271,8 @@ class SubscriptionView(BaseModel):
     name: str | None
     aliases: tuple[str, ...]
     seed_pending: bool
+    #: How many feed items the poller remembers having seen.
+    cursor_size: int
     last_polled_at: datetime | None
     last_error: str | None
     created_at: datetime
@@ -289,6 +291,7 @@ class SubscriptionView(BaseModel):
             name=record.name,
             aliases=record.aliases,
             seed_pending=record.seed_pending,
+            cursor_size=len(record.cursor),
             last_polled_at=record.last_polled_at,
             last_error=record.last_error,
             created_at=record.created_at,
@@ -305,9 +308,17 @@ class SubscriptionListView(BaseModel):
 class CreateSubscriptionRequest(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
-    url: str
+    kind: str = 'rss'
     category: str
     name: str | None = None
+    #: rss: the feed URL.
+    url: str | None = None
+    #: avbase_talent: the talent id and every other name it is credited under.
+    talent_id: int | None = None
+    aliases: list[str] = []
+    #: True makes the first poll record the feed's current items instead of
+    #: ingesting them — for a subscription whose backlog was covered elsewhere.
+    seed: bool = False
 
 
 class UpdateSubscriptionRequest(BaseModel):
@@ -609,15 +620,39 @@ def _mount_subscription_routes(  # noqa: C901, PLR0915 - route registration
 
     @router.post('/subscriptions', dependencies=[Depends(mutation_auth)], status_code=201)
     async def create_subscription(request: CreateSubscriptionRequest) -> SubscriptionView:
-        try:
-            url = validate_feed_url(request.url)
-        except ValueError as exc:
-            raise ApiError(422, 'invalid_feed_url') from exc
         if request.category not in labels():
             raise ApiError(422, 'unknown_category')
         name = (request.name or '').strip() or None
+        now = datetime.now(UTC)
         try:
-            record = await repository.add_rss(url=url, category=request.category, name=name, now=datetime.now(UTC))
+            if request.kind == 'rss':
+                try:
+                    url = validate_feed_url(request.url or '')
+                except ValueError as exc:
+                    raise ApiError(422, 'invalid_feed_url') from exc
+                record = await repository.add_rss(
+                    url=url,
+                    category=request.category,
+                    name=name,
+                    now=now,
+                    seed_pending=request.seed,
+                )
+            elif request.kind == 'avbase_talent':
+                if request.talent_id is None or request.talent_id <= 0 or name is None:
+                    raise ApiError(422, 'invalid_talent')
+                aliases = tuple(
+                    dict.fromkeys(alias.strip() for alias in request.aliases if alias.strip() and alias.strip() != name)
+                )
+                record = await repository.add_talent(
+                    talent_id=request.talent_id,
+                    name=name,
+                    aliases=aliases,
+                    category=request.category,
+                    now=now,
+                    seed_pending=request.seed,
+                )
+            else:
+                raise ApiError(422, 'unknown_subscription_kind')
         except SubscriptionExistsError as exc:
             raise ApiError(409, 'subscription_exists') from exc
         return SubscriptionView.from_record(record)

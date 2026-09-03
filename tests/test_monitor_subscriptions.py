@@ -100,3 +100,24 @@ async def test_record_poll_stores_the_cursor_and_settles_the_seed() -> None:
     assert record.cursor == ('k1', 'k2')
     assert record.last_error == 'boom'
     assert record.last_polled_at == NOW + timedelta(hours=1)
+
+
+async def test_talent_subscriptions_derive_their_feed_url_and_are_unique_per_talent() -> None:
+    repository = make_repository()
+
+    created = await repository.add_talent(
+        talent_id=5022,
+        name='河北彩花',
+        aliases=('河北彩伽',),
+        category='Actor',
+        now=NOW,
+        seed_pending=True,
+    )
+
+    assert created.kind is SubscriptionKind.AVBASE_TALENT
+    assert created.url is None
+    assert created.feed_url == 'https://www.avbase.net/talents/5022/feed'
+    assert created.aliases == ('河北彩伽',)
+    assert created.seed_pending is True
+    with pytest.raises(SubscriptionExistsError):
+        await repository.add_talent(talent_id=5022, name='x', aliases=(), category='Rank', now=NOW)

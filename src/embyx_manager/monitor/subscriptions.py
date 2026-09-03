@@ -141,6 +141,37 @@ class SubscriptionRepository:
             raise SubscriptionExistsError(url) from exc
         return _from_row(row)
 
+    async def add_talent(  # noqa: PLR0913
+        self,
+        *,
+        talent_id: int,
+        name: str,
+        aliases: Sequence[str],
+        category: str,
+        now: datetime,
+        seed_pending: bool = False,
+    ) -> SubscriptionRecord:
+        pool = await self._database.get_pool()
+        try:
+            row = await pool.fetchrow(
+                """
+                INSERT INTO feed_subscriptions
+                    (kind, category, enabled, talent_id, name, aliases_json, seed_pending, created_at, updated_at)
+                VALUES ('avbase_talent', $1, TRUE, $2, $3, $4, $5, $6, $6)
+                RETURNING *
+                """,
+                category,
+                talent_id,
+                name,
+                json.dumps(list(aliases)),
+                seed_pending,
+                now,
+            )
+        except asyncpg.UniqueViolationError as exc:
+            what = f'talent {talent_id}'
+            raise SubscriptionExistsError(what) from exc
+        return _from_row(row)
+
     async def update(
         self,
         subscription_id: int,

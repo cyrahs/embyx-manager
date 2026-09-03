@@ -299,16 +299,18 @@ def make_subscription(
     enabled: bool = True,
     cursor: tuple[str, ...] = (),
     seed_pending: bool = False,
+    talent_id: int | None = None,
+    aliases: tuple[str, ...] = (),
 ) -> SubscriptionRecord:
     return SubscriptionRecord(
         id=subscription_id,
-        kind=SubscriptionKind.RSS,
+        kind=SubscriptionKind.AVBASE_TALENT if talent_id is not None else SubscriptionKind.RSS,
         category=category,
         enabled=enabled,
-        url=url or feed_url(category),
-        talent_id=None,
+        url=None if talent_id is not None else (url or feed_url(category)),
+        talent_id=talent_id,
         name=name,
-        aliases=(),
+        aliases=aliases,
         cursor=cursor,
         seed_pending=seed_pending,
         last_polled_at=None,
@@ -352,6 +354,34 @@ class FakeSubscriptions:
                 category=category,
                 url=url,
                 name=name,
+                seed_pending=seed_pending,
+            ),
+            created_at=now,
+            updated_at=now,
+        )
+        self.records[record.id] = record
+        return record
+
+    async def add_talent(
+        self,
+        *,
+        talent_id: int,
+        name: str,
+        aliases: Sequence[str],
+        category: str,
+        now: datetime,
+        seed_pending: bool = False,
+    ) -> SubscriptionRecord:
+        if any(record.talent_id == talent_id for record in self.records.values()):
+            what = f'talent {talent_id}'
+            raise SubscriptionExistsError(what)
+        record = dataclasses.replace(
+            make_subscription(
+                max(self.records, default=0) + 1,
+                category=category,
+                name=name,
+                talent_id=talent_id,
+                aliases=tuple(aliases),
                 seed_pending=seed_pending,
             ),
             created_at=now,

@@ -255,6 +255,8 @@ const CODE_MESSAGES: Record<string, string> = {
   unknown_category: '该分类未配置，请先在 RSS 摄取里添加。',
   invalid_feed_url: 'Feed 地址无效，请填写完整的 http(s) 地址。',
   subscription_exists: '这个 feed 已经订阅过了。',
+  invalid_talent: '演员订阅需要 AVBase talent id 和名字。',
+  unknown_subscription_kind: '未知的订阅类型。',
   unknown_subscription: '找不到这条订阅。',
   freshrss_not_configured: '尚未配置 FreshRSS，无法导入。',
   freshrss_import_failed: '读取 FreshRSS 的订阅列表失败。',
