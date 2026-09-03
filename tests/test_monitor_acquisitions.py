@@ -575,3 +575,15 @@ async def test_migration_13_renames_ledger_keys_to_the_catalog_spelling() -> Non
     assert await ledger.get('TBW-19') is not None
     assert await ledger.get('TBW-019') is not None
     assert await ledger.get('FC2-1234567') is not None
+
+
+async def test_a_release_date_can_be_filled_in_once_but_never_overwritten() -> None:
+    ledger = make_ledger()
+    await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW)
+
+    assert await ledger.set_release_date('ABC-123', date(2026, 10, 2)) is True
+    assert await ledger.set_release_date('ABC-123', date(2027, 1, 1)) is False
+    assert await ledger.set_release_date('NOPE-1', date(2026, 10, 2)) is False
+    record = await ledger.get('ABC-123')
+    assert record is not None
+    assert record.release_date == date(2026, 10, 2)

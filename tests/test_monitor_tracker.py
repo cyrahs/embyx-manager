@@ -1,5 +1,5 @@
 import logging
-from datetime import timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from unittest.mock import AsyncMock
 
@@ -281,6 +281,26 @@ async def test_running_out_of_magnets_marks_the_avid_exhausted(tmp_path: Path) -
     assert ledger.next_action_at['ABC-123'] is not None
     assert submitted == []
     assert ctx.stats['exhausted'] == 1
+
+
+async def test_exhausting_a_row_without_a_release_date_looks_it_up_first(tmp_path: Path) -> None:
+    tracker, ledger, _, _ = build(tmp_path, [offline_task('x', HASH_A, OfflineStatus.ERROR)])
+    await seed(ledger, 'ABC-123', [HASH_A])
+    asked: list[str] = []
+
+    async def lookup(avid: str) -> date | None:
+        asked.append(avid)
+        return datetime.now(UTC).date() + timedelta(days=60)
+
+    tracker._release_date_lookup = lookup  # noqa: SLF001 - wiring the optional hook after build()
+
+    await tracker.poll(make_ctx())
+
+    assert asked == ['ABC-123']
+    assert ledger.release_dates['ABC-123'] == datetime.now(UTC).date() + timedelta(days=60)
+    # Two months out: the weekly preheat rather than the stall timeout.
+    wait = ledger.next_action_at['ABC-123'] - datetime.now(UTC)
+    assert timedelta(days=6, hours=23) < wait <= timedelta(days=7)
 
 
 async def test_the_attempt_cap_stops_the_retry_chain(tmp_path: Path) -> None:

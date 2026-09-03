@@ -91,6 +91,12 @@ class FakeLedger:
             self.next_action_at[avid] = next_action_at
         return accepted
 
+    async def set_release_date(self, avid: str, release_date: date) -> bool:
+        if avid not in self.states or self.release_dates.get(avid) is not None:
+            return False
+        self.release_dates[avid] = release_date
+        return True
+
     async def get(self, avid: str) -> AcquisitionRecord | None:
         if avid not in self.states:
             return None

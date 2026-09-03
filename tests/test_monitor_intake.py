@@ -3,6 +3,8 @@ from datetime import UTC, date, datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
+import httpx
+
 from embyx_manager.monitor.acquisitions import (
     AcquisitionSource,
     AcquisitionState,
@@ -32,7 +34,9 @@ def make_intake(
     sukebei_magnet: str | None = None,
     sukebei_error: Exception | None = None,
     javbus_magnets: list[dict] | None = None,
+    javbus_error: Exception | None = None,
     add_side_effect: Exception | list[object] | None = None,
+    release_date_lookup: object = None,
 ) -> tuple[AcquisitionIntake, SimpleNamespace]:
     deps = SimpleNamespace()
     deps.ledger = ledger or FakeLedger()
@@ -40,7 +44,10 @@ def make_intake(
         deps.sukebei = SimpleNamespace(get_magnet=AsyncMock(side_effect=sukebei_error))
     else:
         deps.sukebei = SimpleNamespace(get_magnet=AsyncMock(return_value=sukebei_magnet))
-    deps.javbus = SimpleNamespace(get_magnets=AsyncMock(return_value=javbus_magnets or []))
+    if javbus_error is not None:
+        deps.javbus = SimpleNamespace(get_magnets=AsyncMock(side_effect=javbus_error))
+    else:
+        deps.javbus = SimpleNamespace(get_magnets=AsyncMock(return_value=javbus_magnets or []))
     if add_side_effect is not None:
         deps.cloud = SimpleNamespace(add_offline_files=AsyncMock(side_effect=add_side_effect))
     else:
@@ -51,6 +58,7 @@ def make_intake(
         javbus=deps.javbus,
         cloud=deps.cloud,
         failed_cooldown_seconds=3600,
+        release_date_lookup=release_date_lookup,  # type: ignore[arg-type]
     )
     return intake, deps
 
@@ -379,3 +387,79 @@ async def test_queue_stores_the_release_date() -> None:
     )
 
     assert deps.ledger.release_dates['ABC-123'] == release
+
+
+# -- release dates filled in at parking time ---------------------------------
+
+
+async def test_parking_a_row_without_a_release_date_looks_it_up_and_anchors_the_schedule() -> None:
+    asked: list[str] = []
+
+    async def lookup(avid: str) -> date | None:
+        asked.append(avid)
+        return datetime.now(UTC).date() + timedelta(days=30)
+
+    intake, deps = make_intake(release_date_lookup=lookup)
+
+    assert await enqueue(intake) is IntakeOutcome.NO_MAGNET
+
+    assert asked == ['ABC-123']
+    assert deps.ledger.release_dates['ABC-123'] == datetime.now(UTC).date() + timedelta(days=30)
+    # A month out: the weekly preheat, not the one-hour fallback cooldown.
+    wait = deps.ledger.next_action_at['ABC-123'] - datetime.now(UTC)
+    assert timedelta(days=6, hours=23) < wait <= timedelta(days=7)
+
+
+async def test_a_row_that_already_has_a_release_date_is_not_looked_up() -> None:
+    lookup = AsyncMock(return_value=date(2026, 1, 1))
+    intake, deps = make_intake(release_date_lookup=lookup)
+
+    await intake.enqueue(
+        'ABC-123', source='rss:Actor', task_dir_path=TASK_DIR, ctx=make_ctx(), release_date=date(2030, 1, 1)
+    )
+
+    lookup.assert_not_called()
+    assert deps.ledger.release_dates['ABC-123'] == date(2030, 1, 1)
+
+
+async def test_an_unknown_release_date_keeps_the_fallback_cooldown() -> None:
+    intake, deps = make_intake(release_date_lookup=AsyncMock(return_value=None))
+
+    assert await enqueue(intake) is IntakeOutcome.NO_MAGNET
+
+    assert deps.ledger.release_dates['ABC-123'] is None
+    wait = deps.ledger.next_action_at['ABC-123'] - datetime.now(UTC)
+    assert timedelta(minutes=59) < wait <= timedelta(hours=1)
+
+
+async def test_a_retry_fills_in_the_release_date_of_an_old_row() -> None:
+    ledger = FakeLedger()
+    await ledger.discover('ABC-123', source='rss:Actor', now=datetime.now(UTC), task_dir_path=TASK_DIR)
+    released = datetime.now(UTC).date() - timedelta(days=3)
+    intake, deps = make_intake(ledger=ledger, release_date_lookup=AsyncMock(return_value=released))
+
+    record = await ledger.get('ABC-123')
+    assert record is not None
+    assert await intake.retry(record, ctx=make_ctx()) is IntakeOutcome.NO_MAGNET
+
+    assert deps.ledger.release_dates['ABC-123'] == released
+    # Inside the release window: four-hourly.
+    wait = deps.ledger.next_action_at['ABC-123'] - datetime.now(UTC)
+    assert timedelta(hours=3, minutes=59) < wait <= timedelta(hours=4)
+
+
+async def test_javbus_not_listing_a_work_yet_is_not_an_error() -> None:
+    request = httpx.Request('GET', 'https://www.javbus.com/ABC-123')
+    missing = httpx.HTTPStatusError('404', request=request, response=httpx.Response(404, request=request))
+    intake, _ = make_intake(javbus_error=missing)
+    ctx = make_ctx()
+
+    assert await intake.resolve('ABC-123', ctx=ctx) == []
+    assert len(ctx.errors) == 0
+
+    broken = httpx.HTTPStatusError('503', request=request, response=httpx.Response(503, request=request))
+    intake, _ = make_intake(javbus_error=broken)
+    ctx = make_ctx()
+
+    assert await intake.resolve('ABC-123', ctx=ctx) == []
+    assert len(ctx.errors) == 1
