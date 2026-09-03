@@ -494,3 +494,48 @@ _MIGRATIONS[12] = (
     'CREATE UNIQUE INDEX feed_subscriptions_url_idx ON feed_subscriptions (url) WHERE url IS NOT NULL',
     'CREATE UNIQUE INDEX feed_subscriptions_talent_idx ON feed_subscriptions (talent_id) WHERE talent_id IS NOT NULL',
 )
+
+# The AVID parser now spells BRAND-NUMBER with the catalog's three-digit
+# padding (HTTM-0066 -> HTTM-066, TBW-19 -> TBW-019), so keys recorded under
+# the old spelling would never match a new sighting or a scan. Rename them,
+# letting the attempts follow through the foreign key; a key whose padded form
+# is already taken (or that two old keys would collapse into) is left alone,
+# since the two rows may carry different history. Brands whose numbers are not
+# catalog ids keep their digits as they are.
+_MIGRATIONS[13] = (
+    'ALTER TABLE archive_magnet_attempts DROP CONSTRAINT archive_magnet_attempts_avid_fkey',
+    """
+    ALTER TABLE archive_magnet_attempts ADD CONSTRAINT archive_magnet_attempts_avid_fkey
+        FOREIGN KEY (avid) REFERENCES archive_acquisitions (avid) ON UPDATE CASCADE ON DELETE CASCADE
+    """,
+    """
+    WITH candidates AS (
+        SELECT
+            avid,
+            split_part(avid, '-', 1) || '-' || CASE
+                WHEN length(ltrim(split_part(avid, '-', 2), '0')) >= 3 THEN ltrim(split_part(avid, '-', 2), '0')
+                ELSE lpad(ltrim(split_part(avid, '-', 2), '0'), 3, '0')
+            END AS normalized
+        FROM archive_acquisitions
+        WHERE avid ~ '^[A-Z0-9]*[A-Z][A-Z0-9]*-[0-9]+$'
+          AND split_part(avid, '-', 1) NOT IN (
+              'FC2', 'HEYZO', 'HEYDOUGA', 'GETCHU', 'GYUTTO', 'MKBD', 'MKD',
+              'S2M', 'S2MBD', 'MK3D2DBD', 'CW3D2BD', 'CW3D2DBD'
+          )
+    )
+    UPDATE archive_acquisitions AS row
+    SET avid = candidates.normalized
+    FROM candidates
+    WHERE row.avid = candidates.avid
+      AND candidates.normalized <> candidates.avid
+      AND NOT EXISTS (SELECT 1 FROM archive_acquisitions taken WHERE taken.avid = candidates.normalized)
+      AND (SELECT count(*) FROM candidates same WHERE same.normalized = candidates.normalized) = 1
+    """,
+)
+
+# The backend no longer reads FreshRSS or warms RSSHub feeds for fill actor:
+# the per-job feed table and the two config sections have nothing to describe.
+_MIGRATIONS[14] = (
+    'DROP TABLE IF EXISTS fill_actor_job_feeds',
+    "DELETE FROM app_config WHERE section IN ('freshrss', 'feeds')",
+)
