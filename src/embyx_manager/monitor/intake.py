@@ -249,7 +249,8 @@ class AcquisitionIntake:
         except Exception:  # noqa: BLE001
             ctx.exception('Failed to get magnets from javbus for %s', avid)
         else:
-            for magnet in sorted(magnets, key=lambda entry: entry['size_int'], reverse=True):
+            # Already ranked by the client: quality tags first, then size.
+            for magnet in magnets:
                 collect(magnet['magnet'], 'javbus', magnet['size_int'])
         return candidates[:MAX_CANDIDATES]
 

@@ -12,7 +12,8 @@ Three peer features; `/` redirects to the dashboard and no feature owns the app 
   rebuilt as scheduled services with persisted run history —
   - **rss**: subscribed feeds — RSSHub routes, AVBase talent feeds, sukebei searches, any
     RSS/Atom URL, polled by the backend itself → magnet resolution (sukebei → feed item →
-    javbus) → 115 offline tasks, re-resolving on a schedule anchored to the release date
+    javbus, whose magnets are ranked by subtitle/HD tags before size) → 115 offline tasks,
+    re-resolving on a schedule anchored to the release date
     (a fixed cooldown when no source knew it);
   - **archive**: intake normalization (flatten/rename) and per-brand archiving;
   - **mapping**: flat `.strm` tree mirrored to a per-title layout, with a real-time
@@ -24,20 +25,24 @@ Three peer features; `/` redirects to the dashboard and no feature owns the app 
   to the last one used. Only a directory with an archive route can be picked — the tracker
   locates a finished download through the route tables — and the tracker polls whatever
   directory the ledger still has work in, so a picked one need not be a source's own.
-- **Fill Actor** (`/fill-actor`): scan a JavBus actor's catalog against the local library,
-  starting from actor IDs or an AVID (single actors continue directly; multi-actor titles
-  present a choice), submit missing titles to the acquisition tracker (same intake as the
-  rss pipeline), prewarm RSSHub feeds, hand off FreshRSS subscriptions, and safely move
-  matching files through CloudDrive — carried over from embyx-web with the same durable
-  job queue and move-safety guarantees, now on PostgreSQL.
-- **Settings** (`/settings`): CloudDrive, FreshRSS, RSSHub URLs, Fill Actor library
-  roots, pipeline behavior, and avid parsing rules are stored in the database, editable
-  from the browser, versioned against concurrent edits, and hot-applied without
-  restarts. It also manages the rss pipeline's **subscriptions** — feed URL plus
-  category, enable/disable, last poll and error — and can import an existing FreshRSS
-  subscription list in one step. CloudDrive and FreshRSS
-  panels have connection-test buttons that use the unsaved form values (secrets fall back
-  to stored ones). Secrets are never echoed back.
+- **Fill Actor** (`/fill-actor`): scan an actor's catalog against the local library —
+  AVBase's (any alias, with release dates) joined with JavBus's (delisted and pre-rename
+  titles) — starting from actor names, JavBus star ids, or an AVID (single actors continue
+  directly; multi-actor titles present a choice), submit missing titles to the acquisition
+  tracker (same intake as the rss pipeline), subscribe the scanned actors' AVBase feeds
+  in place, and safely move matching files through CloudDrive — carried over from
+  embyx-web with the same durable job queue and move-safety guarantees, now on PostgreSQL.
+- **Subscriptions** (`/subscriptions`): what the rss pipeline polls, in two panels.
+  **Actors** are AVBase talents — added by name, alias, talent id or AVBase link (the
+  backend resolves it), or from the Fill Actor page after a scan — with aliases, state,
+  last poll and error per row. **Charts** are plain feed URLs (RSSHub rankings, sukebei
+  searches, any RSS/Atom) whose URL can be corrected in place. Every subscription files
+  under one of the RSS categories, which decide the offline directory.
+- **Settings** (`/settings`): CloudDrive, Fill Actor library roots, pipeline behavior,
+  RSS categories, and avid parsing rules are stored in the database, editable from the
+  browser, versioned against concurrent edits, and hot-applied without restarts. The
+  CloudDrive panel has a connection-test button that uses the unsaved form values
+  (secrets fall back to stored ones). Secrets are never echoed back.
 
 ## Requirements
 
@@ -124,7 +129,7 @@ status, run history, config) stay open by design.
 uv run embyx-manager import-config /path/to/config.toml --database-url postgresql://...
 ```
 
-Maps the embyx-monitor `[clouddrive]`, `[freshrss]`, `[avid]`, `[archive]`, and
+Maps the embyx-monitor `[clouddrive]`, `[avid]`, `[archive]`, and
 `[mapping]` sections into the config store. Pipelines stay disabled until enabled from
 the dashboard.
 
@@ -193,7 +198,7 @@ Deployment notes:
   sentinel file in each, then point the Settings page's Fill Actor card at those paths;
 - bind non-loopback only with `EMBYX_MANAGER_API_TOKEN` and
   `EMBYX_MANAGER_TLS_TERMINATED=true` behind a TLS-terminating proxy;
-- CloudDrive/FreshRSS/RSSHub endpoints and credentials are entered on the Settings page
+- CloudDrive endpoints and credentials are entered on the Settings page
   (stored in PostgreSQL), not in the environment.
 
 ## License
@@ -203,4 +208,6 @@ GPL-3.0-or-later; see [LICENSE](LICENSE).
 The AVID parser in `src/embyx_manager/core/avid.py` is derived from
 [JavSP](https://github.com/Yuukiy/JavSP) (GPL-3.0). Parts of its tag-stripping rules and
 test corpus come from [metatube-sdk-go](https://github.com/metatube-community/metatube-sdk-go)
-(Apache-2.0); the affected files carry the corresponding notices.
+(Apache-2.0); the affected files carry the corresponding notices. IDs are spelled the way
+AVBase (and metatube) spell them: the number as an integer zero-padded to three
+digits, so `HTTM-0066` and `TBW-19` key the ledger as `HTTM-066` and `TBW-019`.

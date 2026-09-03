@@ -13,13 +13,14 @@ answers 404, so a real miss is only reported after the id was confirmed.
 import asyncio
 import logging
 import re
-from collections.abc import Mapping
+from collections.abc import AsyncIterator, Mapping
 from dataclasses import dataclass
 from datetime import date
 from typing import Any, Protocol
-from urllib.parse import quote
+from urllib.parse import quote, unquote, urlsplit
 
 from curl_cffi.requests import AsyncSession
+from defusedxml.ElementTree import fromstring
 
 log = logging.getLogger('embyx-manager.avbase')
 
@@ -133,24 +134,82 @@ class AvbaseClient:
         props = await self._talent_page(name, page=1)
         return _talent_from_props(props) if props is not None else None
 
-    async def talent_works(self, name: str) -> list[AvbaseWork]:
-        """Every work of the talent credited as ``name``, newest release first."""
+    async def find_talent(self, query: str) -> AvbaseTalent | None:
+        """The talent behind whatever a person pastes: a name, an id, or a talent URL.
+
+        Talent pages are addressed by name, so a numeric id (or an id URL, which
+        is what the feed links carry) goes through the feed, whose channel link
+        names the talent; the name then finds the aliases as usual.
+        """
+        try:
+            talent_id, name = parse_talent_query(query)
+        except ValueError:
+            return None
+        if talent_id is not None:
+            return await self._talent_by_id(talent_id)
+        return await self.talent(name) if name else None
+
+    async def _talent_by_id(self, talent_id: int) -> AvbaseTalent | None:
+        response = await self._get(f'{self.host}/talents/{talent_id}/feed')
+        if response.status_code == _HTTP_NOT_FOUND:
+            return None
+        if response.status_code != _HTTP_OK:
+            msg = f'AVBase answered HTTP {response.status_code} for the feed of talent {talent_id}'
+            raise AvbaseUnavailableError(msg)
+        name = _talent_name_from_feed(response.text)
+        if name is None:
+            return None
+        talent = await self.talent(name)
+        if talent is not None and talent.talent_id == talent_id:
+            return talent
+        return AvbaseTalent(talent_id=talent_id, name=name, aliases=(), total_works=0)
+
+    async def talent_pages(self, name: str) -> AsyncIterator[tuple[int, int, list[AvbaseWork]]]:
+        """The talent's works page by page as ``(page, pages, works)``, newest release first."""
         first = await self._talent_page(name, page=1)
         if first is None:
             msg = f'AVBase has no talent named {name!r}'
             raise AvbaseError(msg)
-        works = [_work_from_listing(entry) for entry in first.get('works') or []]
         total = int(first.get('total') or 0)
         pages = max(1, -(-total // WORKS_PER_PAGE))
+        yield 1, pages, [_work_from_listing(entry) for entry in first.get('works') or []]
         for page in range(2, pages + 1):
             props = await self._talent_page(name, page=page)
             if props is None:
                 break
-            works.extend(_work_from_listing(entry) for entry in props.get('works') or [])
-        return works
+            yield page, pages, [_work_from_listing(entry) for entry in props.get('works') or []]
+
+    async def talent_works(self, name: str) -> list[AvbaseWork]:
+        """Every work of the talent credited as ``name``, newest release first."""
+        return [work async for _, _, works in self.talent_pages(name) for work in works]
+
+    async def search_works(self, query: str) -> list[AvbaseWork]:
+        """Works matching a query (an ID, a name, a title fragment) as the site's search lists them.
+
+        Listing entries credit actors by name only; talent ids come from :meth:`work`.
+        """
+        data = await self._data('works.json', {'q': query})
+        if data is None:
+            return []
+        return [_work_from_listing(entry) for entry in (data.get('pageProps') or {}).get('works') or []]
 
     async def work(self, work_id: str) -> AvbaseWork | None:
-        """One work by its ID, with its credited cast and their talent ids."""
+        """One work by its ID, with its credited cast and their talent ids.
+
+        A work from a storefront with a prefix only answers under
+        ``<prefix>:<id>``; a bare ID goes through the search first, which
+        reports the prefix, so callers can pass whatever ID they have.
+        """
+        if ':' in work_id:
+            return await self._work_route(work_id)
+        wanted = strip_prefix(work_id).casefold()
+        for candidate in await self.search_works(work_id):
+            if candidate.work_id.casefold() == wanted:
+                route_id = f'{candidate.prefix}:{candidate.work_id}' if candidate.prefix else candidate.work_id
+                return await self._work_route(route_id)
+        return None
+
+    async def _work_route(self, work_id: str) -> AvbaseWork | None:
         data = await self._data(f'works/{quote(work_id, safe="")}.json', {'id': work_id})
         if data is None:
             return None
@@ -199,6 +258,48 @@ class AvbaseClient:
     async def _get(self, url: str, *, params: Mapping[str, Any] | None = None) -> _Response:
         async with self._semaphore:
             return await self._session.get(url, params=params)
+
+
+_TALENT_PATH_RE = re.compile(r'/talents/([^/?#]+)(?:/feed)?/?$')
+
+
+def parse_talent_query(query: str) -> tuple[int | None, str]:
+    """Split a pasted talent reference into a numeric id or a name.
+
+    Accepts a bare name or alias, a bare id, or an AVBase talent URL of either
+    form (with or without the trailing ``/feed``). Anything else is a ValueError.
+    """
+    text = query.strip()
+    if '://' in text or text.startswith('/'):
+        match = _TALENT_PATH_RE.search(urlsplit(text).path)
+        if match is None:
+            msg = f'not an AVBase talent URL: {query!r}'
+            raise ValueError(msg)
+        text = unquote(match.group(1)).strip()
+    if not text:
+        msg = 'empty talent reference'
+        raise ValueError(msg)
+    if text.isdigit():
+        return int(text), ''
+    return None, text
+
+
+def _talent_name_from_feed(xml_text: str) -> str | None:
+    """The talent name from its feed: the channel link is the name-addressed page."""
+    try:
+        # A str with an encoding declaration is refused by ElementTree; bytes are not.
+        root = fromstring(xml_text.encode('utf-8'), forbid_dtd=True)
+    except Exception:  # noqa: BLE001 - any malformed feed simply names nobody
+        return None
+    channel = root.find('channel')
+    if channel is None:
+        return None
+    link = (channel.findtext('link') or '').strip()
+    segment = unquote(urlsplit(link).path.rstrip('/').rsplit('/', 1)[-1]).strip() if link else ''
+    if segment and not segment.isdigit():
+        return segment
+    match = re.search(r'「(.+?)」', channel.findtext('title') or '')
+    return match.group(1).strip() if match else None
 
 
 def strip_prefix(work_id: str) -> str:

@@ -8,9 +8,18 @@
 | --- | --- |
 | 1 账本发售日节奏 + 带磁力 sighting 唤醒 | 已实现(分支上,**Postgres 测试仅 CI 验证**) |
 | 2 订阅表 + 轮询器 + FreshRSS 导入 | 已实现(分支上,**Postgres 测试仅 CI 验证**) |
-| 3a AVBase 客户端 + talent 类型订阅 + JavBus→AVBase 迁移脚本 | 已实现(分支上) |
-| 3b fill-actor 切换到 AVBase 目录 + "订阅此演员" + 删 RSSHub 预热/FreshRSS | 未开始 |
-| 4 JavBus 磁力评分排序(可选) | 未开始 |
+| 3a AVBase 客户端 + talent 类型订阅 + JavBus→AVBase 迁移脚本 | 已合并部署;**线上迁移已于 2026-09-03 完成**(316 条 JavBus star 订阅 → 282 个 AVBase talent) |
+| 3b fill-actor 走 AVBase ∪ JavBus 并集目录 + "订阅此演员" + 订阅改地址 + 删 RSSHub 预热/FreshRSS | 已实现(分支上) |
+| 3c 番号补零归一到目录拼写(`%03d`)+ 账本键迁移 v13 | 已实现(分支上,**Postgres 测试仅 CI 验证**) |
+| 4 JavBus 磁力评分排序 | 已实现(分支上):`get_magnets` 按 `(1+标签数)^8 × 体积` 排序,intake 不再按体积重排 |
+
+3b 相对方案的偏差:
+- 目录取 AVBase ∪ JavBus 并集(先按名字/别名找 talent,再用同一组名字搜 JavBus star 页),而不是只走 AVBase:覆盖审计发现改名前的旧作和下架作品只有 JavBus 还列着。
+- 只补两个小厂牌(OLM、MBRBN)未上 AVBase 的新作不做处理——用户决定不理会。
+- "订阅此演员"直接建 `avbase_talent` 订阅并挂起 seed;订阅面板给 rss 类订阅加了改地址,方便修 RSSHub 主机名之类的问题。
+- FreshRSS 客户端/配置节、RSSHub 预热、`fill_actor_job_feeds` 表(迁移 v14 删除)一并移除。
+- 订阅管理从设置页移到独立的「订阅」页(2026-09-03 用户要求):演员(AVBase talent,可按名字/别名/id/链接添加,后端 `find_talent` 解析;数字 id 走 feed 的 channel link 反查名字)与榜单(普通 feed)两个子面板;分类配置仍在设置页。
+- 迁移脚本 `scripts/migrate_javbus_subscriptions.py` 及其测试在线上迁移完成后删除,记录保留在本文档。
 
 第 1 步相对本计划的偏差:
 
@@ -44,7 +53,7 @@
 第 3 步的拆分与偏差:
 
 - **JavBus star 订阅到 AVBase talent 的迁移是一次性的,由人手工分批完成**
-  (`scripts/migrate_javbus_subscriptions.py`),不做应用内的"升级"流程。脚本三段:
+  (`scripts/migrate_javbus_subscriptions.py`,跑完后已从仓库删除,记录见下文),不做应用内的"升级"流程。脚本三段:
   `resolve` 读订阅列表(部署后读 manager API,部署前可读 FreshRSS 的 OPML 导出),用
   名字桥(feed 标题、JavBus star 页名字,AVBase 任一别名都能命中)和番号桥(star 页首页
   作品在 AVBase 的 casts 交集)找到 talent,写 `mapping.json` 供审阅;`apply --batch N`
@@ -55,6 +64,45 @@
   未找到;`talent(name)`/`talent_works(name)`/`work(id)` 三个入口。
 - API 的 `POST /api/monitor/subscriptions` 接受 `kind=avbase_talent`(talent_id、name、
   aliases、seed);视图增加 `cursor_size` 供核验。
+
+线上迁移记录(2026-09-03,手工分批):
+
+- FreshRSS 导入 318 条(316 条 JavBus star,其中 2 条是 `/javbus/ja/star/` 路径;2 条 Rank
+  javlibrary 榜单)。`resolve`:315 条名字桥命中,1 条(塔乃花鈴)靠番号桥落到 輝星きら
+  (改名);名字匹配再用 star 页作品在 AVBase 的出演者交叉核对,293 确认、10 未确认(合集
+  作品不列全出演者,不是错配)、13 找不到作品可核对。
+- 批次 3 → 10 → 30 → 60 → 100 → 113,每批 `apply` 后 `verify --trigger` 触发一轮轮询核验:
+  全部 316 条通过(新行存在、旧行停用、feed 名字对得上、seed 落地、游标数等于 feed 去重后
+  的条目数)。316 条 JavBus 行对应 282 个 talent(JavBus 每个别名一个 star 页,AVBase 合并)。
+- **坑:FreshRSS 导入的 URL 主机是 `http://rsshub/`**(FreshRSS 与 RSSHub 同 namespace 的短
+  名),manager 在 `media` namespace 解析不到,首轮轮询 315 条全部 `Name or service not known`。
+  JavBus 行随迁移停用,不受影响;2 条 Rank 行以 `http://rsshub.rss.svc.cluster.local/`
+  重建(seed)并删除旧行。以后导入前应先把 FreshRSS 里的 RSSHub 地址换成集群全名,或给
+  订阅加"改地址"功能(3b 待办)。
+- 旧的 JavBus `rss` 行在删前逐条核验(每条都有已 seed、无错误的 talent 订阅)后已删除。
+  FreshRSS 可以下线。
+
+AVBase 收录范围审计(2026-09-03,起因:橘梨紗 的 talent 在 AVBase 零作品):
+
+- 对 316 个 JavBus star 页各取最近 8 部(共 2453 部)去 AVBase 查:**95% 收录,92% 的出演者
+  里带着映射到的 talent**;差的 3% 全是几十人的大合集,AVBase 合集出演者名单不全,不是错配。
+  逐部核对过的"未确认"行(沖田杏梨、葵/小野夕子、松嶋真麻/桃乃木かな、輝月あんり/天木ゆう、
+  宇都宮しをん/安齋らら)在有单体作品时 talent id 全部正确。
+- 缺失的 119 部分四类:53 部合集/再发行(Prestige プレミアムプライス ORT、ROOKIE RBB、
+  S1 OFJE、E-BODY MKCK、million MQNC 等 AVBase 不收的再版品牌);48 部 2023 年前的老单体
+  (退役演员被下架的作品:原紗央莉 SDMT/STAR、橘梨紗 STAR-4xx、伊東ちなみ MIDE-5xx、
+  蒼井そら);**真正的新作缺口只有 3 部**(OLYMPUS 的 OLM-332、マーレー 的 MBRBN-065/066,
+  两个 FANZA/MGS/DUGA 之外的小品牌),外加 ヨリヌキ/AIリマスター 这类再剪辑品。
+- **改名演员的旧名作品会从 AVBase 消失**:塔乃花鈴 → 輝星きら 之后,AVBase 只有 輝星きら 名下
+  42 部,塔乃花鈴 时期的 MIDA-388~501、REBD-994 都不在;JavBus 仍列着。对"发现新作"无影响,
+  对补全扫描有影响。
+- **番号补零形态不一致**:JavBus 写 `HTTM-0066`/`MXDLP-0337`,AVBase 写 `HTTM-066`/
+  `MXDLP-337`;`AvidParser` 两种形态各自保留,同一作品会在账本里落成两个键,库内持有检查
+  也对不上。待办:数字段按 int 归一后 `%03d`(metatube 的做法),但要先评估存量账本行。
+  另:`YRNKMTNDVAJ-741` 被解析成 `RNKMTNDVAJ-741`(首字母被当成标签剥掉)。
+- 结论:迁移正确;AVBase 作为发现源对活跃演员的新作覆盖 ≈ 99.9%;缺口在退役演员的下架
+  作品与再版品牌,这两类由 JavBus 磁力源(按番号)与 3b 的 fill-actor 补全(建议 JavBus 与
+  AVBase 目录取并集)兜底。
 
 ## 结论
 

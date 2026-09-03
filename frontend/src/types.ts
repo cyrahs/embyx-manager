@@ -14,8 +14,6 @@ export type VideoState =
 export type MoveState = 'moved' | 'stale' | 'conflict' | 'invalid_path' | 'failed'
 export type ApplyState = 'succeeded' | 'partial_failed' | 'failed'
 export type JobState = 'queued' | 'running' | 'completed' | 'partial_failed' | 'failed'
-export type ActorFeedState = 'queued' | 'warming' | 'ready' | 'failed'
-
 export interface ActorPlan {
   actor_id: string
   scraped_count: number
@@ -23,6 +21,10 @@ export interface ActorPlan {
   error_code: string | null
   /** Optional: older plans and older backends omit it entirely. */
   error_message?: string | null
+  /** The catalog's identity for the actor; absent on plans from before it was recorded. */
+  actor_name?: string | null
+  talent_id?: number | null
+  aliases?: string[]
 }
 
 export interface AvidActor {
@@ -102,21 +104,10 @@ export interface PlanJob {
   progress?: JobProgress | null
 }
 
-export interface ActorFeedStatus {
-  actor_id: string
-  state: ActorFeedState
-  attempts: number
-  updated_at: string
-  error_code: string | null
-  freshrss_add_url: string | null
-  freshrss_url: string | null
-}
-
 export interface PlanEnvelope {
   plan: FillActorPlan | null
   job: PlanJob | null
   planId: string | null
-  feeds: ActorFeedStatus[]
 }
 
 export interface ApplyJobEnvelope {
@@ -311,16 +302,3 @@ export interface SubscriptionList {
   categories: string[]
 }
 
-export type FreshRssImportStatus = 'new' | 'imported' | 'exists' | 'category_missing' | 'invalid_url'
-
-export interface FreshRssImportEntry {
-  url: string
-  title: string | null
-  category: string | null
-  status: FreshRssImportStatus
-}
-
-export interface FreshRssImportResult {
-  entries: FreshRssImportEntry[]
-  imported: number
-}

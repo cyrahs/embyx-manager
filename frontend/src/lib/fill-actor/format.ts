@@ -53,15 +53,6 @@ export function candidateMap(plan: FillActorPlan | null) {
   return map
 }
 
-export function safeFreshRssUrl(value: string | null): string | null {
-  if (!value) return null
-  try {
-    const url = new URL(value)
-    return url.protocol === 'https:' || url.protocol === 'http:' ? value : null
-  } catch {
-    return null
-  }
-}
 
 /** Fill Actor's own error codes, layered over the app-wide fallback. */
 export function errorMessage(error: unknown): string {
@@ -70,12 +61,10 @@ export function errorMessage(error: unknown): string {
       move_disabled: '文件移动当前由管理员暂停。',
       legacy_plan_requires_rescan: '该计划来自旧版本，请重新扫描后再操作。',
       not_ready: '移动依赖尚未就绪，请稍后重试。',
-      freshrss_subscription_check_failed: '无法检查 FreshRSS 订阅，请确认 FreshRSS 配置和连接后重试。',
-      actors_already_subscribed: 'FreshRSS 已存在对应演员订阅，请确认是否继续。',
       avid_actor_lookup_unavailable: '当前服务未启用 AVID 演员查询。',
-      javbus_actor_lookup_failed: '无法从 JavBus 获取该 AVID 的演员信息，请稍后重试。',
-      avid_actors_not_found: 'JavBus 的影片页面中没有找到演员信息。',
-      invalid_avid_actor_response: 'JavBus 演员信息响应无效，请稍后重试。',
+      avid_actor_lookup_failed: '无法获取该 AVID 的演员信息，请稍后重试。',
+      avid_actors_not_found: 'AVBase 和 JavBus 的影片页里都没有出演者信息。',
+      invalid_avid_actor_response: '演员信息响应无效，请稍后重试。',
     }
     const message = messages[error.code]
     if (message) return message
@@ -227,8 +216,3 @@ export function clockText(value: string | number | Date): string {
   return TIME_FORMAT.format(new Date(value))
 }
 
-export function formatFeedUpdatedAt(value: string): string {
-  const timestamp = Date.parse(value)
-  if (!Number.isFinite(timestamp)) return '更新时间未知'
-  return `更新于 ${clockText(timestamp)}`
-}

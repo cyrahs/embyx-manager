@@ -48,13 +48,6 @@ def _import_config(config_path: Path, database_url: str) -> None:
                     {'label': 'Rank', 'task_dir_path': task_dir_path},
                 ],
             }
-    freshrss = raw.get('freshrss', {})
-    if freshrss:
-        sections['freshrss'] = {
-            'url': str(freshrss.get('freshrss_url', '')),
-            'api_key': str(freshrss.get('freshrss_api_key', '')),
-            'proxy': str(freshrss.get('proxy', '')),
-        }
     avid = raw.get('avid', {})
     if avid:
         sections['avid'] = {

@@ -1,13 +1,12 @@
 from contextlib import asynccontextmanager
 from types import SimpleNamespace
 
-import httpx
 import pytest
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.testclient import TestClient
 
-from embyx_manager.config import CloudDriveConfig, ConfigStore, ConfigVersionConflictError, FeedsConfig
+from embyx_manager.config import CloudDriveConfig, ConfigStore, ConfigVersionConflictError, MappingConfig
 from embyx_manager.config import api as config_api
 from embyx_manager.config.api import create_config_router
 from embyx_manager.config.store import masked_values, secret_flags
@@ -55,21 +54,21 @@ async def test_store_version_conflict() -> None:
     postgres_test_dsn()
     store = make_store()
     await store.load()
-    await store.update('freshrss', {'url': 'https://rss.example.test'})
+    await store.update('clouddrive', {'address': 'cd.internal:19798'})
 
     with pytest.raises(ConfigVersionConflictError):
-        await store.update('freshrss', {'url': 'https://other.example.test'}, expected_version=0)
+        await store.update('clouddrive', {'address': 'cd2.internal:19798'}, expected_version=0)
 
 
 async def test_store_refresh_converges_second_replica() -> None:
     postgres_test_dsn()
     writer = make_store()
     await writer.load()
-    await writer.update('feeds', {'rsshub_url': 'http://rsshub.internal.test'})
+    await writer.update('mapping', {'src_dir': '/mnt/strm', 'dst_dir': '/mnt/library'})
 
     replica = make_store()
     await replica.load()
-    assert replica.get(FeedsConfig).rsshub_url == 'http://rsshub.internal.test'
+    assert replica.get(MappingConfig).src_dir == '/mnt/strm'
 
 
 async def test_store_rejects_invalid_values() -> None:
@@ -77,8 +76,8 @@ async def test_store_rejects_invalid_values() -> None:
     store = make_store()
     await store.load()
 
-    with pytest.raises(ValueError, match='absolute HTTP'):
-        await store.update('feeds', {'rsshub_url': 'ftp://bad.example'})
+    with pytest.raises(ValueError, match='absolute path'):
+        await store.update('fill_actor', {'actor_root': 'relative/actors'})
 
 
 def test_masked_values_blank_secrets() -> None:
@@ -144,7 +143,7 @@ def test_config_api_round_trip_masks_secrets() -> None:
             assert conflict.status_code == 409
             assert conflict.json()['error']['code'] == 'config_version_conflict'
 
-            invalid = client.put('/api/config/feeds', json={'values': {'rsshub_url': 'not-a-url'}})
+            invalid = client.put('/api/config/fill_actor', json={'values': {'actor_root': 'not-absolute'}})
             assert invalid.status_code == 422
 
             unknown = client.get('/api/config/nope')
@@ -205,36 +204,3 @@ def test_clouddrive_test_endpoint_requires_connection_values() -> None:
     assert response.status_code == 200
     assert response.json()['ok'] is False
     assert 'required' in response.json()['detail']
-
-
-def test_freshrss_test_endpoint_reports_auth_failure(monkeypatch) -> None:
-    postgres_test_dsn()
-
-    class FakeFreshRSS:
-        def __init__(self, **kwargs) -> None:
-            self.kwargs = kwargs
-
-        async def fetch_token(self) -> str:
-            request = httpx.Request('GET', 'https://rss.example.test/token')
-            response = httpx.Response(401, request=request)
-            message = 'unauthorized'
-            raise httpx.HTTPStatusError(message, request=request, response=response)
-
-        async def aclose(self) -> None:
-            return None
-
-    monkeypatch.setattr(config_api, 'FreshRSSClient', FakeFreshRSS)
-
-    try:
-        with make_config_client() as client:
-            client.put(
-                '/api/config/freshrss',
-                json={'values': {'url': 'https://rss.example.test', 'api_key': 'stored-key'}},
-            )
-            response = client.post('/api/config/freshrss/test', json={})
-    finally:
-        reset_public_schema()
-
-    assert response.status_code == 200
-    assert response.json()['ok'] is False
-    assert 'authentication failed' in response.json()['detail']

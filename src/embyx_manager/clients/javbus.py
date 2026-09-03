@@ -7,7 +7,7 @@ import random
 import re
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from urllib.parse import unquote, urlparse
+from urllib.parse import quote, unquote, urlparse
 
 import httpx
 import humanfriendly
@@ -43,6 +43,16 @@ class JavBusPaginationError(RuntimeError):
     """Raised when JavBus pagination cannot be completed without silently losing pages."""
 
 
+def magnet_score(size_int: int, tags: tuple[str, ...]) -> int:
+    """Rank a JavBus magnet: every quality tag outweighs any plausible size gap.
+
+    The weighting is RSSHub's javbus route's, ``links^8 x size`` with the title
+    link counted, so the picks match what the old feed enclosures gave. A
+    magnet whose size could not be read scores zero and sorts last.
+    """
+    return (1 + len(tags)) ** 8 * size_int
+
+
 class JavBusClient:
     def __init__(
         self,
@@ -67,6 +77,32 @@ class JavBusClient:
 
     async def aclose(self) -> None:
         await self._client.aclose()
+
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=1, max=10),
+        retry=retry_if_exception_type((httpx.HTTPError, httpx.TimeoutException)),
+        reraise=True,
+    )
+    async def search_stars(self, name: str) -> list[JavBusActor]:
+        """Stars JavBus lists for ``name``; JavBus keeps one star page per alias, so a person may be several."""
+        response = await self._client.get(f'{self.host}/searchstar/{quote(name, safe="")}')
+        if response.status_code in _NOT_FOUND_STATUSES:
+            return []
+        response.raise_for_status()
+        doc = PyQuery(response.text)
+        found: dict[str, JavBusActor] = {}
+        for item in doc('a[href]').items():
+            path = urlparse(str(item.attr('href') or '')).path.rstrip('/')
+            match = re.fullmatch(r'/star/([^/]+)', path)
+            if match is None:
+                continue
+            actor_id = unquote(match.group(1)).strip()
+            if not _ACTOR_ID_RE.fullmatch(actor_id):
+                continue
+            star_name = ' '.join(item('.pb10').text().split()) or ' '.join(item.text().split())
+            found.setdefault(actor_id.casefold(), JavBusActor(actor_id=actor_id, name=star_name or actor_id))
+        return list(found.values())
 
     async def get_actor(self, actor_id: str) -> JavBusActorPage | None:
         """The star page's display name and first-page video IDs; None when there is no such star."""
@@ -284,11 +320,16 @@ class JavBusClient:
         reraise=True,
     )
     async def get_magnets(self, video_id: str) -> list[dict]:
-        """Get magnet links with filesize for a video ID.
+        """Get magnet links with filesize for a video ID, best first.
+
+        JavBus marks a magnet's quality with tags next to its title (字幕, 高清);
+        a tagged upload is the one a person would pick over a merely larger one,
+        so the list is ranked by :func:`magnet_score` rather than by size alone.
 
         Returns:
-            List of dicts with keys: magnet, size, size_int
-            Example: [{"magnet": "magnet:?xt=...", "size": "2.02GB", "size_int": 2168958156}]
+            List of dicts with keys: magnet, size, size_int, tags, score
+            Example: [{"magnet": "magnet:?xt=...", "size": "2.02GB", "size_int": 2168958156,
+                       "tags": ("高清", "字幕"), "score": 14230814501516}]
         """
         url = f'{self.host}/{video_id}'
         res = await self._client.get(url)
@@ -336,7 +377,19 @@ class JavBusClient:
                 size_int = humanfriendly.parse_size(size_text)
             except humanfriendly.InvalidSize:
                 size_int = 0
+            # The first anchor is the title; the rest are the quality badges.
+            badges = list(row('td:first-child a').items())[1:]
+            tags = tuple(tag for anchor in badges if (tag := anchor.text().strip()))
 
-            results.append({'magnet': magnet_link, 'size': size_text, 'size_int': size_int})
+            results.append(
+                {
+                    'magnet': magnet_link,
+                    'size': size_text,
+                    'size_int': size_int,
+                    'tags': tags,
+                    'score': magnet_score(size_int, tags),
+                },
+            )
 
+        results.sort(key=lambda entry: entry['score'], reverse=True)
         return results

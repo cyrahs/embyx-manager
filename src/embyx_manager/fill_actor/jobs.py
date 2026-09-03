@@ -13,7 +13,6 @@ from embyx_manager.fill_actor.errors import (
     FillActorError,
     JobQueueFullError,
 )
-from embyx_manager.fill_actor.feeds import RSSHubFeedWarmer
 from embyx_manager.fill_actor.models import ApplyResult, FillActorPlan, VideoState
 from embyx_manager.fill_actor.persistence import (
     ApplyJobRecord,
@@ -21,7 +20,6 @@ from embyx_manager.fill_actor.persistence import (
     CancelJobResult,
     EnqueueApplyJobOutcome,
     FillActorRepository,
-    JobFeedRecord,
     JobOperation,
     JobProgress,
     JobProgressEvent,
@@ -239,7 +237,6 @@ class FillActorJobManager:
         lease_duration: timedelta = timedelta(seconds=30),
         poll_interval: float = 0.25,
         progress_flush_interval: float = 0.75,
-        feed_warmer: RSSHubFeedWarmer | None = None,
     ) -> None:
         if max_concurrent_jobs < 1 or max_active_jobs < max_concurrent_jobs:
             msg = 'job capacity must be positive and at least the worker count'
@@ -257,7 +254,6 @@ class FillActorJobManager:
         self._lease_duration = lease_duration
         self._poll_interval = poll_interval
         self._progress_flush_interval = progress_flush_interval
-        self._feed_warmer = feed_warmer
         self._wake = asyncio.Event()
         self._lifecycle_lock = asyncio.Lock()
         self._workers: tuple[asyncio.Task[None], ...] = ()
@@ -302,10 +298,7 @@ class FillActorJobManager:
                 updated_at=now,
             ),
         )
-        feeds: tuple[JobFeedRecord, ...] = ()
-        if self._feed_warmer is not None:
-            feeds = self._feed_warmer.initial_records(job_id=job.job_id, actor_ids=normalized, now=now)
-        if not await self._repository.enqueue_job(job, max_active=self._max_active_jobs, feeds=feeds):
+        if not await self._repository.enqueue_job(job, max_active=self._max_active_jobs):
             raise JobQueueFullError(str(self._max_active_jobs))
         self._wake.set()
         return job
@@ -367,9 +360,6 @@ class FillActorJobManager:
         record = await self._repository.get_plan(plan_id)
         return await self._service.get_plan(plan_id) if record is not None else None
 
-    async def get_feeds(self, plan_id: str) -> tuple[JobFeedRecord, ...]:
-        return await self._repository.list_job_feeds(plan_id)
-
     async def cancel_plan(self, plan_id: str) -> CancelJobResult:
         operation = asyncio.create_task(
             self._cancel_and_signal(plan_id),
@@ -403,8 +393,6 @@ class FillActorJobManager:
                 task.cancel()
             if tasks:
                 await asyncio.gather(*tasks, return_exceptions=True)
-            if self._feed_warmer is not None:
-                await self._feed_warmer.aclose()
 
     async def _worker_loop(self) -> None:
         while True:
@@ -554,15 +542,12 @@ class FillActorJobManager:
             flush_interval=self._progress_flush_interval,
         )
         heartbeat: asyncio.Task[None] | None = None
-        feed_task: asyncio.Task[None] | None = None
         try:
             if not await self._revalidate_claim(job):
                 await reporter.mark_unowned()
                 return
             heartbeat = asyncio.create_task(self._heartbeat(job, reporter, execution))
-            feed_task = await self._start_feed_warmup(job)
             plan = await self._service.create_plan(job.actor_ids, plan_id=job.plan_id, progress=reporter)
-            await self._wait_feed_warmup(feed_task, job)
             await self._stop_heartbeat(heartbeat)
             heartbeat = None
             partial = any(actor.error_code is not None for actor in plan.actors) or any(
@@ -576,7 +561,7 @@ class FillActorJobManager:
                 )
         except asyncio.CancelledError:
             cleanup = asyncio.create_task(
-                self._cleanup_stopped_plan(job, execution, reporter, heartbeat, feed_task),
+                self._cleanup_stopped_plan(execution, reporter, heartbeat),
                 name=f'fill-actor-cleanup-{job.job_id}',
             )
             await self._wait_managed_task(cleanup)
@@ -585,7 +570,7 @@ class FillActorJobManager:
             raise
         except FillActorError as exc:
             cleanup = asyncio.create_task(
-                self._cleanup_failed_plan(job, reporter, heartbeat, feed_task, error_code=exc.code),
+                self._cleanup_failed_plan(reporter, heartbeat, error_code=exc.code),
                 name=f'fill-actor-cleanup-{job.job_id}',
             )
             await self._wait_managed_task(cleanup)
@@ -593,10 +578,8 @@ class FillActorJobManager:
         except Exception:  # noqa: BLE001
             cleanup = asyncio.create_task(
                 self._cleanup_failed_plan(
-                    job,
                     reporter,
                     heartbeat,
-                    feed_task,
                     error_code='plan_creation_failed',
                 ),
                 name=f'fill-actor-cleanup-{job.job_id}',
@@ -718,50 +701,17 @@ class FillActorJobManager:
                 exc_info=(type(exception), exception, exception.__traceback__),
             )
 
-    async def _start_feed_warmup(self, job: JobRecord) -> asyncio.Task[None] | None:
-        if self._feed_warmer is None:
-            return None
-        try:
-            return await self._feed_warmer.start_job(job, owner_id=self._owner_id)
-        except Exception:
-            LOGGER.exception('RSSHub feed warm-up could not start')
-            await self._feed_warmer.abort_job(None, job, owner_id=self._owner_id)
-            return None
-
-    async def _wait_feed_warmup(self, task: asyncio.Task[None] | None, job: JobRecord) -> None:
-        if task is None:
-            return
-        try:
-            await task
-        except asyncio.CancelledError:
-            raise
-        except Exception:
-            LOGGER.exception('RSSHub feed warm-up failed unexpectedly')
-            await self._abort_feed_warmup(None, job)
-
-    async def _abort_feed_warmup(self, task: asyncio.Task[None] | None, job: JobRecord) -> None:
-        if self._feed_warmer is not None:
-            await self._feed_warmer.abort_job(task, job, owner_id=self._owner_id)
-
-    async def _abort_feed_warmup_safely(self, task: asyncio.Task[None] | None, job: JobRecord) -> None:
-        try:
-            await self._abort_feed_warmup(task, job)
-        except Exception:
-            LOGGER.exception('RSSHub feed warm-up cleanup failed')
-
     async def _cleanup_stopped_plan(
         self,
-        job: JobRecord,
         execution: _JobExecution,
         reporter: _OwnedProgressReporter,
         heartbeat: asyncio.Task[None] | None,
-        feed_task: asyncio.Task[None] | None,
     ) -> None:
-        if heartbeat is not None:
-            await self._stop_heartbeat(heartbeat)
         try:
-            await self._abort_feed_warmup_safely(feed_task, job)
+            if heartbeat is not None:
+                await self._stop_heartbeat(heartbeat)
         finally:
+            # The job reaches a terminal state whatever the heartbeat's stop did.
             if execution.stop_reason in {_ExecutionStopReason.USER_CANCEL, _ExecutionStopReason.OWNERSHIP_LOST}:
                 await reporter.mark_unowned()
             else:
@@ -769,17 +719,14 @@ class FillActorJobManager:
 
     async def _cleanup_failed_plan(
         self,
-        job: JobRecord,
         reporter: _OwnedProgressReporter,
         heartbeat: asyncio.Task[None] | None,
-        feed_task: asyncio.Task[None] | None,
         *,
         error_code: str,
     ) -> None:
-        if heartbeat is not None:
-            await self._stop_heartbeat(heartbeat)
         try:
-            await self._abort_feed_warmup_safely(feed_task, job)
+            if heartbeat is not None:
+                await self._stop_heartbeat(heartbeat)
         finally:
             await self._finish_terminal(reporter, JobState.FAILED, error_code=error_code)
 

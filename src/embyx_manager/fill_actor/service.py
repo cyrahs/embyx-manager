@@ -9,14 +9,15 @@ import re
 import secrets
 import threading
 from collections import Counter
-from collections.abc import AsyncIterator, Awaitable, Callable, Iterable, Sequence
+from collections.abc import AsyncIterator, Awaitable, Callable, Iterable, Mapping, Sequence
 from concurrent.futures import Future, ThreadPoolExecutor
 from contextlib import asynccontextmanager, suppress
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from functools import partial
 from pathlib import Path, PurePosixPath
 
+from embyx_manager.core.avid import AvidParser
 from embyx_manager.fill_actor.cloud_moves import (
     CloudFileMetadata,
     CloudFileMover,
@@ -67,7 +68,10 @@ from embyx_manager.locking import AsyncFileLock
 
 LOGGER = logging.getLogger(__name__)
 
-ACTOR_ID_RE = re.compile(r'^[A-Za-z0-9_-]{1,32}$')
+#: Ids are spelled the way the ledger keys them; the deployment's own rules only matter for noisy titles.
+_VIDEO_ID_PARSER = AvidParser()
+#: An actor is named by an AVBase name (any alias) or a JavBus star id: any short text without path separators.
+ACTOR_REF_RE = re.compile(r'^[^\x00-\x1f/\\]{1,64}$')
 DATED_VIDEO_ID_RE = re.compile(r'^(.+)_\d{4}-\d{2}-\d{2}$')
 MAX_ERROR_MESSAGE_LENGTH = 200
 # Query strings carry signed URLs and access tokens; keep the endpoint, drop the parameters.
@@ -380,6 +384,7 @@ class FillActorService:
         normalized_actor_ids = self._validate_actor_ids(actor_ids)
         actor_plans: list[ActorPlan] = []
         video_actors: dict[str, set[str]] = {}
+        release_dates: dict[str, date] = {}
         actor_total = len(normalized_actor_ids)
 
         await self._report_progress(
@@ -423,11 +428,12 @@ class FillActorService:
                 )
 
             try:
-                list_video_ids = self._actor_catalog.list_video_ids
-                if self._accepts_keyword(list_video_ids, 'progress_callback'):
-                    raw_video_ids = tuple(await list_video_ids(actor_id, progress_callback=report_page))
+                list_videos = self._actor_catalog.list_videos
+                if self._accepts_keyword(list_videos, 'progress_callback'):
+                    listing = await list_videos(actor_id, progress_callback=report_page)
                 else:
-                    raw_video_ids = tuple(await list_video_ids(actor_id))
+                    listing = await list_videos(actor_id)
+                raw_video_ids = tuple(listing.video_ids)
             except Exception as exc:
                 # The traceback only ever reaches the log; the plan carries a redacted one-liner.
                 # Job-backed scans always pass plan_id, so job_id + actor_id locates the original exception.
@@ -452,10 +458,19 @@ class FillActorService:
                     {self._normalize_video_id(video_id) for video_id in raw_video_ids if video_id.strip()}
                 )
                 actor_plans.append(
-                    ActorPlan(actor_id=actor_id, scraped_count=len(set(raw_video_ids)), video_ids=tuple(video_ids))
+                    ActorPlan(
+                        actor_id=actor_id,
+                        scraped_count=len(set(raw_video_ids)),
+                        video_ids=tuple(video_ids),
+                        actor_name=listing.actor_name,
+                        talent_id=listing.talent_id,
+                        aliases=tuple(listing.aliases),
+                    )
                 )
                 for video_id in video_ids:
                     video_actors.setdefault(video_id, set()).add(actor_id)
+                for raw_video_id, release_date in listing.release_dates.items():
+                    release_dates.setdefault(self._normalize_video_id(raw_video_id), release_date)
                 if len(video_actors) > self._max_videos:
                     raise TooManyVideosError(str(len(video_actors)))
             await self._report_progress(
@@ -501,7 +516,7 @@ class FillActorService:
                     warnings=('scan_failed',),
                 )
             else:
-                public_videos[video_id] = video_plan
+                public_videos[video_id] = video_plan.model_copy(update={'release_date': release_dates.get(video_id)})
                 records.update({record.candidate_id: record for record in video_records})
                 if needs_acquisition:
                     missing_video_ids.append(video_id)
@@ -527,7 +542,7 @@ class FillActorService:
                 unit=JobProgressUnit.VIDEOS,
             ),
         )
-        submit_results = await self._queue_missing(missing_video_ids, progress=progress)
+        submit_results = await self._queue_missing(missing_video_ids, release_dates, progress=progress)
         for video_id, outcome, warning in submit_results:
             current = public_videos[video_id]
             public_videos[video_id] = current.model_copy(
@@ -907,16 +922,17 @@ class FillActorService:
         if len(normalized) > self._max_actors:
             raise TooManyActorsError(str(len(normalized)))
         for actor_id in normalized:
-            if not ACTOR_ID_RE.fullmatch(actor_id):
+            if not ACTOR_REF_RE.fullmatch(actor_id):
                 raise InvalidActorIdError(actor_id)
         return normalized
 
     @staticmethod
     def _normalize_video_id(video_id: str) -> str:
+        """The id as the ledger keys it: JavBus's date suffix dropped, then the parser's spelling."""
         cleaned = video_id.strip()
         if match := DATED_VIDEO_ID_RE.fullmatch(cleaned):
             cleaned = match.group(1)
-        return cleaned.upper()
+        return _VIDEO_ID_PARSER.get_avid(cleaned) or cleaned.upper()
 
     @staticmethod
     def _find_matching_files(
@@ -998,13 +1014,17 @@ class FillActorService:
     async def _queue_missing(
         self,
         video_ids: Sequence[str],
+        release_dates: Mapping[str, date],
         *,
         progress: ProgressCallback | None = None,
     ) -> list[tuple[str, AcquisitionOutcome, str | None]]:
         async def submit(video_id: str) -> tuple[str, AcquisitionOutcome, str | None]:
             async with self._magnet_semaphore:
                 try:
-                    outcome = await self._acquisition_gateway.queue_missing(video_id)
+                    outcome = await self._acquisition_gateway.queue_missing(
+                        video_id,
+                        release_date=release_dates.get(video_id),
+                    )
                 except Exception:  # noqa: BLE001
                     return video_id, AcquisitionOutcome.SUBMIT_FAILED, 'acquisition_failed'
                 return video_id, outcome, _OUTCOME_WARNINGS.get(outcome)

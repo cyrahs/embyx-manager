@@ -33,9 +33,6 @@ from embyx_manager.fill_actor.persistence import (
     EnqueueApplyJobOutcome,
     EnqueueApplyJobResult,
     FileFingerprint,
-    JobFeedErrorCode,
-    JobFeedRecord,
-    JobFeedState,
     JobOperation,
     JobProgress,
     JobProgressUnit,
@@ -274,17 +271,7 @@ class PostgresFillActorRepository:
         async with pool.acquire() as connection:
             await self._execute_save_job(connection, record)
 
-    async def enqueue_job(
-        self,
-        record: JobRecord,
-        *,
-        max_active: int,
-        feeds: Sequence[JobFeedRecord] = (),
-    ) -> bool:
-        feed_keys = [(feed.job_id, feed.actor_id) for feed in feeds]
-        if any(feed.job_id != record.job_id for feed in feeds) or len(feed_keys) != len(set(feed_keys)):
-            msg = 'job feeds must be unique and belong to the enqueued job'
-            raise ValueError(msg)
+    async def enqueue_job(self, record: JobRecord, *, max_active: int) -> bool:
         pool = await self.get_pool()
         async with pool.acquire() as connection, connection.transaction():
             await connection.execute(
@@ -302,21 +289,6 @@ class PostgresFillActorRepository:
             if active >= max_active or exists is not None:
                 return False
             await self._execute_save_job(connection, record)
-            for feed in feeds:
-                await connection.execute(
-                    """
-                    INSERT INTO fill_actor_job_feeds (
-                        job_id, actor_id, state, attempts, updated_at, error_code, freshrss_add_url
-                    ) VALUES ($1, $2, $3, $4, $5, $6, $7)
-                    """,
-                    feed.job_id,
-                    feed.actor_id,
-                    feed.state.value,
-                    feed.attempts,
-                    normalize_datetime(feed.updated_at),
-                    feed.error_code.value if feed.error_code is not None else None,
-                    feed.freshrss_add_url,
-                )
             return True
 
     async def enqueue_apply_job(
@@ -593,16 +565,6 @@ class PostgresFillActorRepository:
             if _row_count(status) != 1:  # pragma: no cover - FOR UPDATE serializes competing writers
                 msg = 'cancelled job transition was not atomic'
                 raise RuntimeError(msg)
-            await connection.execute(
-                """
-                UPDATE fill_actor_job_feeds
-                SET state = 'failed', updated_at = $1, error_code = $2
-                WHERE job_id = $3 AND state IN ('queued', 'warming')
-                """,
-                normalize_datetime(now),
-                JobFeedErrorCode.CANCELLED.value,
-                job_id,
-            )
             cancelled_row = await connection.fetchrow(
                 'SELECT * FROM fill_actor_jobs WHERE job_id = $1',
                 job_id,
@@ -635,16 +597,6 @@ class PostgresFillActorRepository:
             )
             if not rows:
                 return 0
-            await connection.execute(
-                """
-                UPDATE fill_actor_job_feeds
-                SET state = 'failed', updated_at = $1, error_code = $2
-                WHERE job_id = ANY($3::text[]) AND state IN ('queued', 'warming')
-                """,
-                normalize_datetime(now),
-                JobFeedErrorCode.CANCELLED.value,
-                [row['job_id'] for row in rows],
-            )
             return len(rows)
 
     async def get_job(self, job_id: str) -> JobRecord | None:
@@ -662,60 +614,6 @@ class PostgresFillActorRepository:
                 [state.value for state in states],
             )
         return tuple(_job_from_row(row) for row in rows)
-
-    async def list_job_feeds(self, job_id: str) -> tuple[JobFeedRecord, ...]:
-        pool = await self.get_pool()
-        rows = await pool.fetch(
-            'SELECT * FROM fill_actor_job_feeds WHERE job_id = $1 ORDER BY actor_id',
-            job_id,
-        )
-        return tuple(_job_feed_from_row(row) for row in rows)
-
-    async def update_owned_job_feed(  # noqa: PLR0913
-        self,
-        *,
-        job_id: str,
-        actor_id: str,
-        owner_id: str,
-        state: JobFeedState,
-        attempts: int,
-        error_code: JobFeedErrorCode | None,
-        now: datetime,
-    ) -> bool:
-        record = JobFeedRecord(
-            job_id=job_id,
-            actor_id=actor_id,
-            state=state,
-            attempts=attempts,
-            updated_at=now,
-            error_code=error_code,
-        )
-        pool = await self.get_pool()
-        status = await pool.execute(
-            """
-            UPDATE fill_actor_job_feeds SET
-                state = $1, attempts = $2, updated_at = $3, error_code = $4
-            WHERE job_id = $5 AND actor_id = $6
-              AND state IN ('queued', 'warming')
-              AND attempts <= $2
-              AND EXISTS (
-                  SELECT 1 FROM fill_actor_jobs
-                  WHERE fill_actor_jobs.job_id = fill_actor_job_feeds.job_id
-                    AND fill_actor_jobs.owner_id = $7
-                    AND fill_actor_jobs.state = 'running'
-                    AND fill_actor_jobs.lease_expires_at IS NOT NULL
-                    AND fill_actor_jobs.lease_expires_at > $3
-              )
-            """,
-            record.state.value,
-            record.attempts,
-            normalize_datetime(record.updated_at),
-            record.error_code.value if record.error_code is not None else None,
-            record.job_id,
-            record.actor_id,
-            owner_id,
-        )
-        return _row_count(status) == 1
 
     async def save_move_journal(self, record: MoveJournalRecord) -> None:
         pool = await self.get_pool()
@@ -1046,18 +944,6 @@ def _apply_job_from_row(row: asyncpg.Record) -> ApplyJobRecord:
         revision=row['revision'],
         candidate_ids=tuple(json.loads(row['candidate_ids_json'])),
         result=ApplyResult.model_validate_json(result_json) if result_json is not None else None,
-    )
-
-
-def _job_feed_from_row(row: asyncpg.Record) -> JobFeedRecord:
-    return JobFeedRecord(
-        job_id=row['job_id'],
-        actor_id=row['actor_id'],
-        state=JobFeedState(row['state']),
-        attempts=row['attempts'],
-        updated_at=row['updated_at'],
-        error_code=JobFeedErrorCode(row['error_code']) if row['error_code'] else None,
-        freshrss_add_url=row['freshrss_add_url'],
     )
 
 

@@ -36,28 +36,28 @@ from embyx_manager.fill_actor.persistence import (
     JobStage,
     MemoryFillActorRepository,
 )
-from embyx_manager.fill_actor.ports import AcquisitionOutcome
+from embyx_manager.fill_actor.ports import AcquisitionOutcome, CatalogListing
 
 
 class FakeActorCatalog:
     def __init__(self, values: dict[str, list[str] | Exception]) -> None:
         self.values = values
 
-    async def list_video_ids(self, actor_id: str) -> list[str]:
-        value = self.values[actor_id]
+    async def list_videos(self, actor_ref: str) -> CatalogListing:
+        value = self.values[actor_ref]
         if isinstance(value, Exception):
             raise value
-        return value
+        return CatalogListing(actor_name=None, talent_id=None, aliases=(), video_ids=tuple(value))
 
 
 class PageProgressActorCatalog:
-    async def list_video_ids(self, _actor_id: str, *, progress_callback=None) -> list[str]:
+    async def list_videos(self, _actor_ref: str, *, progress_callback=None) -> CatalogListing:
         assert progress_callback is not None
         await progress_callback(0, None, None)
         await progress_callback(0, 26, None)
         await progress_callback(1, 26, 1)
         await progress_callback(26, 26, 26)
-        return ['ABC-001', 'ABC-002']
+        return CatalogListing(actor_name=None, talent_id=None, aliases=(), video_ids=('ABC-001', 'ABC-002'))
 
 
 class FakeAcquisitionGateway:
@@ -65,7 +65,7 @@ class FakeAcquisitionGateway:
         self.values = values or {}
         self.calls: list[str] = []
 
-    async def queue_missing(self, video_id: str) -> AcquisitionOutcome:
+    async def queue_missing(self, video_id: str, *, release_date=None) -> AcquisitionOutcome:  # noqa: ARG002
         self.calls.append(video_id)
         value = self.values.get(video_id, AcquisitionOutcome.NO_MAGNET)
         if isinstance(value, Exception):
@@ -554,7 +554,7 @@ async def test_create_plan_reports_unavailable_scan_root(
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('actor_ids', [[], ['bad actor'], ['x' * 33]])
+@pytest.mark.parametrize('actor_ids', [[], ['bad/actor'], ['x' * 65]])
 async def test_create_plan_rejects_invalid_actor_ids(paths: FillActorPaths, actor_ids: list[str]) -> None:
     service, _ = make_service(paths, catalog={}, brands={})
 
@@ -903,24 +903,6 @@ async def test_plan_marks_duplicate_destinations_as_conflicts(paths: FillActorPa
     plan = await service.create_plan(['actor'])
 
     candidates = plan.videos[0].move_candidates
-    assert len(candidates) == 2
-    assert all(candidate.destination_conflict for candidate in candidates)
-
-
-@pytest.mark.asyncio
-async def test_plan_marks_duplicate_destinations_across_video_results(paths: FillActorPaths) -> None:
-    brand_path = paths.additional_brand_paths[0] / 'ABC'
-    brand_path.mkdir()
-    (brand_path / 'ABC-001-CD1.mp4').write_bytes(b'video')
-    service, _ = make_service(
-        paths,
-        catalog={'actor': ['ABC-001', 'ABC-001-CD1']},
-        brands={'ABC-001': 'ABC', 'ABC-001-CD1': 'ABC'},
-    )
-
-    plan = await service.create_plan(['actor'])
-
-    candidates = [candidate for video in plan.videos for candidate in video.move_candidates]
     assert len(candidates) == 2
     assert all(candidate.destination_conflict for candidate in candidates)
 

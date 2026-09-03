@@ -49,7 +49,7 @@ RSS_SOURCE_PREFIX = 'rss:'
 
 
 def rss_source(label: str) -> str:
-    """The ledger source for items ingested from one FreshRSS category."""
+    """The ledger source for items ingested from one subscription category."""
     return f'{RSS_SOURCE_PREFIX}{label}'
 
 

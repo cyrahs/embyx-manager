@@ -3,9 +3,7 @@ from embyx_manager.config.models import (
     ArchiveConfig,
     AvidRulesConfig,
     CloudDriveConfig,
-    FeedsConfig,
     FillActorConfig,
-    FreshRSSConfig,
     MappingConfig,
     RssConfig,
 )
@@ -18,9 +16,7 @@ __all__ = [
     'CloudDriveConfig',
     'ConfigStore',
     'ConfigVersionConflictError',
-    'FeedsConfig',
     'FillActorConfig',
-    'FreshRSSConfig',
     'MappingConfig',
     'RssConfig',
 ]

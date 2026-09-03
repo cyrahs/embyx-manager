@@ -242,8 +242,9 @@ def test_mixed_index_separators_are_still_one_set(tmp_path: Path) -> None:
     result = archive(pipeline, folder)
 
     assert result.outcome is Outcome.ARCHIVED
-    assert result.archived_paths == ('sorted/TBW/TBW-19-cd1.mp4', 'sorted/TBW/TBW-19-cd2.mp4')
-    assert (pipeline.dst_dir / 'sorted' / 'TBW' / 'TBW-19-cd1.mp4').stat().st_size == 465
+    # The id is spelled the catalog way on the way in: TBW-19 files land as TBW-019.
+    assert result.archived_paths == ('sorted/TBW/TBW-019-cd1.mp4', 'sorted/TBW/TBW-019-cd2.mp4')
+    assert (pipeline.dst_dir / 'sorted' / 'TBW' / 'TBW-019-cd1.mp4').stat().st_size == 465
 
 
 def test_phone_rip_is_dropped_for_the_main_video(tmp_path: Path) -> None:
@@ -434,16 +435,16 @@ def test_expected_avid_collapses_mixed_single_zero_padding(tmp_path: Path) -> No
     )
 
 
-def test_expected_avid_does_not_ignore_other_padding_widths(tmp_path: Path) -> None:
+def test_expected_avid_matches_the_file_across_padding_widths(tmp_path: Path) -> None:
+    # A JavBus-padded file name and a catalog-spelled expectation are one id.
     pipeline = make_pipeline(tmp_path)
     folder = pipeline.src_dir / 'intake' / 'download'
     write_video(folder / 'ABC-0123.mp4')
 
     result = archive(pipeline, folder, expected_avid='ABC-123')
 
-    assert result.outcome is Outcome.NEEDS_ATTENTION
-    assert result.reason == 'expected ABC-123 but found ABC-0123'
-    assert (folder / 'ABC-0123.mp4').exists()
+    assert result.outcome is Outcome.ARCHIVED
+    assert result.archived_paths == ('sorted/ABC/ABC-123.mp4',)
 
 
 def test_existing_destination_is_left_alone(tmp_path: Path) -> None:

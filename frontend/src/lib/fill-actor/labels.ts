@@ -1,6 +1,7 @@
 import type { VideoState } from '../../types'
 
-export const ACTOR_ID = /^[A-Za-z0-9_-]{1,32}$/
+/** An AVBase name (any alias) or a JavBus star id: any short text without path separators. */
+export const ACTOR_ID = /^[^/\\]{1,64}$/
 export const MAX_ACTORS = 20
 // Every AVID resolves to at least one actor, so more AVIDs than the actor cap can never scan.
 export const MAX_AVIDS = MAX_ACTORS
@@ -14,13 +15,6 @@ export const STALE_CODES = new Set([
 ])
 export const BUSINESS_PROGRESS_WARNING_SECONDS = 60
 export const HEARTBEAT_WARNING_SECONDS = 35
-
-export const FEED_STATE_LABELS = {
-  queued: '等待缓存',
-  warming: '缓存预热中',
-  ready: '缓存已就绪',
-  failed: '缓存失败',
-} as const
 
 export const STAGE_LABELS: Record<string, string> = {
   queued: '任务已排队',
@@ -185,15 +179,6 @@ export const JOB_ERROR_LABELS: Record<string, string> = {
 export function jobErrorLabel(code: string): string {
   // Unknown codes surface verbatim so a newly added backend error is never swallowed.
   return JOB_ERROR_LABELS[code] ?? code
-}
-
-export const FEED_ERROR_LABELS: Record<string, string> = {
-  rsshub_timeout: 'RSSHub 请求超时',
-  rsshub_network_error: 'RSSHub 网络错误',
-  rsshub_http_error: 'RSSHub 响应出错',
-  rsshub_invalid_feed: '订阅源内容无效',
-  rsshub_not_ready: '缓存尚未就绪',
-  rsshub_cancelled: '预热已取消',
 }
 
 export const MOVE_ERROR_LABELS: Record<string, string> = {

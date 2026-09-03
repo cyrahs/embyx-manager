@@ -26,7 +26,7 @@ const PIPELINE_LABELS: Record<PipelineId, string> = {
 }
 
 const PIPELINE_DESCRIPTIONS: Record<PipelineId, string> = {
-  rss: 'FreshRSS 未读条目 → 磁力解析 → 115 离线任务',
+  rss: '订阅源新条目 → 磁力解析 → 115 离线任务',
   archive: '下载目录整理、重命名并按厂牌归档入库',
   mapping: '.strm 平铺结构镜像为每部一目录（含实时增量）',
 }

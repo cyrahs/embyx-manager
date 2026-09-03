@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.testclient import TestClient
 
-from embyx_manager.clients.freshrss import FreshRSSSubscription
+from embyx_manager.clients.avbase import AvbaseTalent, AvbaseUnavailableError
 from embyx_manager.errors import ApiError
 from embyx_manager.monitor.acquisitions import (
     AcquisitionState,
@@ -175,7 +175,7 @@ def test_trigger_busy_and_unconfigured_and_unknown() -> None:
         scheduler.busy = True
         busy = client.post('/api/monitor/rss/trigger', json={})
         scheduler.busy = False
-        scheduler.unconfigured_reason = 'FreshRSS is not configured'
+        scheduler.unconfigured_reason = 'CloudDrive is not configured'
         unconfigured = client.post('/api/monitor/rss/trigger', json={})
         unknown = client.post('/api/monitor/nope/trigger', json={})
 
@@ -545,28 +545,16 @@ NOW = now_stub()
 # -- subscriptions ---------------------------------------------------------------
 
 
-class FakeFreshRSS:
-    def __init__(self, subscriptions: list[FreshRSSSubscription]) -> None:
-        self._subscriptions = subscriptions
-        self.closed = False
-
-    async def get_subscriptions(self) -> tuple[FreshRSSSubscription, ...]:
-        return tuple(self._subscriptions)
-
-    async def aclose(self) -> None:
-        self.closed = True
-
-
 def subscriptions_api(
     records: list = (),  # type: ignore[assignment]
     *,
-    freshrss: FakeFreshRSS | None = None,
     categories: tuple[str, ...] = ('Actor', 'Rank'),
+    resolve_talent=None,
 ) -> SubscriptionsApi:
     return SubscriptionsApi(
         repository=FakeSubscriptions(list(records)),  # type: ignore[arg-type]
         categories=lambda: categories,
-        freshrss_factory=(lambda: freshrss) if freshrss is not None else None,  # type: ignore[return-value]
+        resolve_talent=resolve_talent,
     )
 
 
@@ -635,57 +623,6 @@ def test_a_subscription_can_be_disabled_moved_and_deleted() -> None:
         assert client.delete('/api/monitor/subscriptions/1').status_code == 404
 
 
-def test_freshrss_import_previews_then_applies_with_a_pending_seed() -> None:
-    freshrss = FakeFreshRSS(
-        [
-            FreshRSSSubscription(url='https://rsshub.test/javbus/star/rwt', title='演员甲', category='Actor'),
-            FreshRSSSubscription(url='https://rsshub.test/javlibrary/rank', title='榜单', category='Rank'),
-            FreshRSSSubscription(url='https://rsshub.test/other', title='其他', category='Misc'),
-            FreshRSSSubscription(url='https://rsshub.test/existing', title='已有', category='Actor'),
-            FreshRSSSubscription(url='not a url', title='坏', category='Actor'),
-        ],
-    )
-    api = subscriptions_api([make_subscription(1, url='https://rsshub.test/existing')], freshrss=freshrss)
-
-    with make_client(FakeScheduler(), FakeRuns([]), subscriptions=api) as client:
-        preview = client.post('/api/monitor/subscriptions/freshrss-import', json={'apply': False}).json()
-        assert [(entry['url'], entry['status']) for entry in preview['entries']] == [
-            ('https://rsshub.test/javbus/star/rwt', 'new'),
-            ('https://rsshub.test/javlibrary/rank', 'new'),
-            ('https://rsshub.test/other', 'category_missing'),
-            ('https://rsshub.test/existing', 'exists'),
-            ('not a url', 'invalid_url'),
-        ]
-        assert preview['imported'] == 0
-        assert len(api.repository.records) == 1  # type: ignore[attr-defined]
-        assert freshrss.closed is True
-
-        applied = client.post('/api/monitor/subscriptions/freshrss-import', json={'apply': True}).json()
-
-    assert applied['imported'] == 2
-    assert [entry['status'] for entry in applied['entries']] == [
-        'imported',
-        'imported',
-        'category_missing',
-        'exists',
-        'invalid_url',
-    ]
-    records = api.repository.records  # type: ignore[attr-defined]
-    imported = [record for record in records.values() if record.url != 'https://rsshub.test/existing']
-    assert {(record.url, record.category, record.name, record.seed_pending) for record in imported} == {
-        ('https://rsshub.test/javbus/star/rwt', 'Actor', '演员甲', True),
-        ('https://rsshub.test/javlibrary/rank', 'Rank', '榜单', True),
-    }
-
-
-def test_freshrss_import_needs_freshrss() -> None:
-    with make_client(FakeScheduler(), FakeRuns([]), subscriptions=subscriptions_api()) as client:
-        response = client.post('/api/monitor/subscriptions/freshrss-import', json={'apply': True})
-
-    assert response.status_code == 503
-    assert response.json() == {'error': {'code': 'freshrss_not_configured'}}
-
-
 def test_creating_a_talent_subscription_stores_its_names_and_seeds_the_first_poll() -> None:
     api = subscriptions_api()
 
@@ -723,3 +660,75 @@ def test_creating_a_talent_subscription_stores_its_names_and_seeds_the_first_pol
 
         unknown = client.post('/api/monitor/subscriptions', json={'kind': 'javbus', 'category': 'Actor'})
         assert unknown.json() == {'error': {'code': 'unknown_subscription_kind'}}
+
+
+def test_a_talent_subscription_from_a_name_alone_is_resolved_on_avbase() -> None:
+    async def resolve(query: str) -> AvbaseTalent | None:
+        if query == 'down':
+            msg = 'challenge page'
+            raise AvbaseUnavailableError(msg)
+        if query in {'河北彩伽', 'https://www.avbase.net/talents/5022/feed'}:
+            return AvbaseTalent(talent_id=5022, name='河北彩花', aliases=('河北彩伽',), total_works=2)
+        return None
+
+    api = subscriptions_api(resolve_talent=resolve)
+
+    with make_client(FakeScheduler(), FakeRuns([]), subscriptions=api) as client:
+        created = client.post(
+            '/api/monitor/subscriptions',
+            json={'kind': 'avbase_talent', 'category': 'Actor', 'name': ' 河北彩伽 '},
+        )
+        assert created.status_code == 201
+        body = created.json()
+        assert (body['talent_id'], body['name'], body['aliases'], body['seed_pending']) == (
+            5022,
+            '河北彩花',
+            ['河北彩伽'],
+            False,
+        )
+
+        unknown = client.post(
+            '/api/monitor/subscriptions',
+            json={'kind': 'avbase_talent', 'category': 'Actor', 'name': 'nobody'},
+        )
+        assert unknown.status_code == 404
+        assert unknown.json() == {'error': {'code': 'talent_not_found'}}
+
+        down = client.post(
+            '/api/monitor/subscriptions', json={'kind': 'avbase_talent', 'category': 'Actor', 'name': 'down'}
+        )
+        assert down.status_code == 502
+        assert down.json() == {'error': {'code': 'avbase_unavailable'}}
+
+        duplicate = client.post(
+            '/api/monitor/subscriptions',
+            json={'kind': 'avbase_talent', 'category': 'Actor', 'name': 'https://www.avbase.net/talents/5022/feed'},
+        )
+        assert duplicate.status_code == 409
+
+
+def test_a_feed_url_can_be_changed_but_not_into_another_subscription_or_onto_a_talent() -> None:
+    api = subscriptions_api(
+        [
+            make_subscription(1, url='http://rsshub/javlibrary/rank'),
+            make_subscription(2, url='https://rsshub.example/other'),
+            make_subscription(3, name='石川澪', talent_id=46144),
+        ],
+    )
+
+    with make_client(FakeScheduler(), FakeRuns([]), subscriptions=api) as client:
+        moved = client.patch(
+            '/api/monitor/subscriptions/1',
+            json={'url': 'http://rsshub.rss.svc.cluster.local/javlibrary/rank'},
+        )
+        assert moved.status_code == 200
+        assert moved.json()['url'] == 'http://rsshub.rss.svc.cluster.local/javlibrary/rank'
+
+        taken = client.patch('/api/monitor/subscriptions/1', json={'url': 'https://rsshub.example/other'})
+        assert taken.status_code == 409
+
+        bad = client.patch('/api/monitor/subscriptions/1', json={'url': 'ftp://x'})
+        assert bad.json() == {'error': {'code': 'invalid_feed_url'}}
+
+        talent = client.patch('/api/monitor/subscriptions/3', json={'url': 'https://rsshub.example/x'})
+        assert talent.json() == {'error': {'code': 'url_not_editable'}}

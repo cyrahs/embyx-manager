@@ -2,7 +2,7 @@ import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
-import { applyCandidates, getActiveApplyRequest, normalizeApplyJobEnvelope, normalizePlanEnvelope } from './api'
+import { applyCandidates, getActiveApplyRequest, normalizeApplyJobEnvelope } from './api'
 import type { FillActorPlan } from './types'
 
 const plan: FillActorPlan = {
@@ -92,8 +92,8 @@ const twoCandidatePlan: FillActorPlan = {
 
 /** The scan panel opens in AVID mode, so an actor-ID scan starts by switching the input. */
 async function typeActorIds(user: ReturnType<typeof userEvent.setup>, value: string) {
-  await user.click(screen.getByRole('button', { name: '演员 ID' }))
-  await user.type(screen.getByLabelText('演员 ID'), value)
+  await user.click(screen.getByRole('button', { name: '演员' }))
+  await user.type(screen.getByLabelText('演员'), value)
 }
 
 function jsonResponse(body: unknown, status = 200) {
@@ -123,13 +123,14 @@ describe('app shell', () => {
     window.history.pushState({}, '', '/')
   })
 
-  it('orders the primary navigation as dashboard, fill actor, then settings', async () => {
+  it('orders the primary navigation as dashboard, fill actor, subscriptions, then settings', async () => {
     render(<App />)
 
     const navigation = await screen.findByRole('navigation', { name: '页面导航' })
     expect(within(navigation).getAllByRole('link').map((link) => link.textContent)).toEqual([
       '监控看板',
       '补全演员',
+      '订阅',
       '设置',
     ])
   })
@@ -341,7 +342,7 @@ describe('Fill Actor page', () => {
 
     expect(await screen.findByText('扫描结果')).toBeInTheDocument()
     expect(screen.getByText('1 个番号未能获取演员')).toBeInTheDocument()
-    expect(screen.getByText('ABC-123：JavBus 的影片页面中没有找到演员信息。')).toBeInTheDocument()
+    expect(screen.getByText('ABC-123：AVBase 和 JavBus 的影片页里都没有出演者信息。')).toBeInTheDocument()
     expect(fetchMock).toHaveBeenNthCalledWith(
       4,
       '/api/fill-actor/plans',
@@ -365,42 +366,6 @@ describe('Fill Actor page', () => {
     expect(screen.getByRole('button', { name: '开始扫描' })).toBeDisabled()
   })
 
-  it('names the warming feeds with the actor the AVID resolved to', async () => {
-    const user = userEvent.setup()
-    const fetchMock = vi.mocked(fetch)
-    fetchMock
-      .mockImplementationOnce(() => jsonResponse({ status: 'ok' }))
-      .mockImplementationOnce(() => jsonResponse({
-        avid: 'ABC-123',
-        actors: [{ actor_id: 'A123', name: '演员甲' }],
-      }))
-      .mockImplementationOnce(() => jsonResponse({
-        job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
-        plan,
-        feeds: [{
-          actor_id: 'A123',
-          state: 'ready',
-          attempts: 2,
-          updated_at: '2026-07-13T10:02:00Z',
-          error_code: null,
-          freshrss_add_url: null,
-          freshrss_url: null,
-        }],
-      }, 202))
-
-    render(<App />)
-    await user.type(screen.getByLabelText('AVID'), 'ABC-123')
-    await user.click(screen.getByRole('button', { name: '开始扫描' }))
-
-    const feedPanel = await screen.findByRole('region', { name: 'RSSHub 缓存' })
-    const feedRow = within(feedPanel).getByText('演员甲').closest('li')
-    expect(feedRow).not.toBeNull()
-    expect(within(feedRow!).getByText('A123 · 已尝试 2 次', { exact: false })).toBeInTheDocument()
-    expect(within(feedRow!).getByText('缓存已就绪')).toBeInTheDocument()
-    expect(JSON.parse(window.sessionStorage.getItem('embyx-manager-fill-actor-actor-names') ?? '{}'))
-      .toEqual({ a123: '演员甲' })
-  })
-
   it('keeps the bare ID when JavBus has no name for the actor', async () => {
     const user = userEvent.setup()
     vi.mocked(fetch)
@@ -410,24 +375,14 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
         plan,
-        feeds: [{
-          actor_id: 'A123',
-          state: 'ready',
-          attempts: 2,
-          updated_at: '2026-07-13T10:02:00Z',
-          error_code: null,
-          freshrss_add_url: null,
-          freshrss_url: null,
-        }],
       }, 202))
 
     render(<App />)
     await user.type(screen.getByLabelText('AVID'), 'ABC-123')
     await user.click(screen.getByRole('button', { name: '开始扫描' }))
 
-    const feedPanel = await screen.findByRole('region', { name: 'RSSHub 缓存' })
-    expect(within(feedPanel).getByText('A123')).toBeInTheDocument()
-    expect(within(feedPanel).getByText('已尝试 2 次', { exact: false })).not.toHaveTextContent('A123')
+    expect(await screen.findByRole('heading', { name: '扫描结果' })).toBeInTheDocument()
+    // A name equal to the ID is nothing worth remembering.
     expect(window.sessionStorage.getItem('embyx-manager-fill-actor-actor-names')).toBeNull()
   })
 
@@ -442,7 +397,6 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
         plan,
-        feeds: [],
       }, 202))
 
     render(<App />)
@@ -466,40 +420,15 @@ describe('Fill Actor page', () => {
     expect(screen.queryByText('XYZ-002')).not.toBeInTheDocument()
   })
 
-  it('keeps naming a recovered scan\'s feeds after a reload drops the page state', async () => {
-    window.sessionStorage.setItem('embyx-manager-fill-actor-plan-id', 'plan-1')
-    window.sessionStorage.setItem('embyx-manager-fill-actor-actor-names', JSON.stringify({ a123: '演员甲' }))
-    vi.mocked(fetch)
-      .mockImplementationOnce(() => jsonResponse({ status: 'ok' }))
-      .mockImplementation(() => jsonResponse({
-        job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
-        plan,
-        feeds: [{
-          actor_id: 'A123',
-          state: 'ready',
-          attempts: 1,
-          updated_at: '2026-07-13T10:02:00Z',
-          error_code: null,
-          freshrss_add_url: null,
-          freshrss_url: null,
-        }],
-      }))
-
-    render(<App />)
-
-    const feedPanel = await screen.findByRole('region', { name: 'RSSHub 缓存' })
-    expect(within(feedPanel).getByText('演员甲')).toBeInTheDocument()
-  })
-
   it('drops text that cannot mean anything in the mode being switched to', async () => {
     const user = userEvent.setup()
     vi.mocked(fetch).mockImplementation(() => jsonResponse({ status: 'ok' }))
 
     render(<App />)
     await user.type(screen.getByLabelText('AVID'), 'ABC-123')
-    await user.click(screen.getByRole('button', { name: '演员 ID' }))
+    await user.click(screen.getByRole('button', { name: '演员' }))
 
-    expect(screen.getByLabelText('演员 ID')).toHaveValue('')
+    expect(screen.getByLabelText('演员')).toHaveValue('')
     expect(screen.getByRole('button', { name: '开始扫描' })).toBeDisabled()
   })
 
@@ -533,50 +462,6 @@ describe('Fill Actor page', () => {
       3,
       '/api/fill-actor/plans',
       expect.objectContaining({ body: JSON.stringify({ actor_ids: ['B456'] }), method: 'POST' }),
-    )
-  })
-
-  it('asks before scanning actors that already exist in FreshRSS', async () => {
-    const user = userEvent.setup()
-    const fetchMock = vi.mocked(fetch)
-    fetchMock
-      .mockImplementationOnce(() => jsonResponse({ status: 'ok' }))
-      .mockImplementationOnce(() => jsonResponse({
-        error: {
-          code: 'actors_already_subscribed',
-          actor_ids: ['A123'],
-          actors: [{ actor_id: 'A123', actor_name: '演员甲' }],
-        },
-      }, 409))
-      .mockImplementationOnce(() => jsonResponse({
-        job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
-        plan,
-      }, 202))
-
-    render(<App />)
-    await typeActorIds(user, 'A123 B456')
-    await user.click(screen.getByRole('button', { name: '开始扫描' }))
-
-    const dialog = await screen.findByRole('dialog', { name: 'FreshRSS 已有这些演员' })
-    expect(within(dialog).getByText('演员甲（A123）')).toBeInTheDocument()
-    expect(screen.queryByText('扫描结果')).not.toBeInTheDocument()
-    expect(screen.getByLabelText('演员 ID')).toBeDisabled()
-
-    await user.click(within(dialog).getByRole('button', { name: '仍要继续' }))
-
-    expect(await screen.findByText('扫描结果')).toBeInTheDocument()
-    expect(fetchMock).toHaveBeenNthCalledWith(
-      2,
-      '/api/fill-actor/plans',
-      expect.objectContaining({ body: JSON.stringify({ actor_ids: ['A123', 'B456'] }), method: 'POST' }),
-    )
-    expect(fetchMock).toHaveBeenNthCalledWith(
-      3,
-      '/api/fill-actor/plans',
-      expect.objectContaining({
-        body: JSON.stringify({ actor_ids: ['A123', 'B456'], continue_if_subscribed: true }),
-        method: 'POST',
-      }),
     )
   })
 
@@ -828,7 +713,7 @@ describe('Fill Actor page', () => {
 
     expect(await screen.findByText('0 / 2 个文件')).toBeInTheDocument()
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuetext', '0 / 2 个文件')
-    expect(screen.getByLabelText('演员 ID')).toBeDisabled()
+    expect(screen.getByLabelText('演员')).toBeDisabled()
     expect(screen.getByRole('button', { name: '移动处理中' })).toBeDisabled()
     expect(screen.getByRole('button', { name: '正在移入' })).toBeDisabled()
     expect(screen.getByRole('checkbox', { name: /ABC-001\.mp4/ })).toBeDisabled()
@@ -1019,7 +904,7 @@ describe('Fill Actor page', () => {
         return jsonResponse({ status: 'ok', fill_actor: { apply_enabled: false, apply_ready: false } })
       }
       if (path === '/api/fill-actor/plans/plan-1') {
-        return jsonResponse({ job: { job_id: 'scan-1', plan_id: 'plan-1', state: 'completed' }, plan, feeds: [] })
+        return jsonResponse({ job: { job_id: 'scan-1', plan_id: 'plan-1', state: 'completed' }, plan })
       }
       if (path === '/api/fill-actor/apply-jobs/apply-resume') {
         applyPolls += 1
@@ -1079,7 +964,7 @@ describe('Fill Actor page', () => {
     fetchMock.mockImplementation((path) => {
       if (path === '/api/health') return jsonResponse({ status: 'ok', fill_actor: { apply_enabled: true, apply_ready: true } })
       if (path === '/api/fill-actor/plans/plan-1') {
-        return jsonResponse({ job: { job_id: 'scan-1', plan_id: 'plan-1', state: 'completed' }, plan: twoCandidatePlan, feeds: [] })
+        return jsonResponse({ job: { job_id: 'scan-1', plan_id: 'plan-1', state: 'completed' }, plan: twoCandidatePlan })
       }
       if (path === `/api/fill-actor/apply-jobs/${requestId}`) {
         return jsonResponse({
@@ -1344,121 +1229,6 @@ describe('Fill Actor page', () => {
     expect(screen.getByRole('link', { name: '监控面板' })).toHaveAttribute('href', '/dashboard')
   })
 
-  it('keeps polling completed plans while RSSHub warms and retains terminal feed states', async () => {
-    const user = userEvent.setup()
-    const fetchMock = vi.mocked(fetch)
-    const warmingFeed = {
-      actor_id: 'A123',
-      state: 'warming',
-      attempts: 1,
-      updated_at: '2026-07-13T10:01:00Z',
-      error_code: null,
-      freshrss_add_url: 'https://freshrss.example/i/?c=feed&a=add',
-      freshrss_url: 'https://freshrss.example/',
-    }
-    const readyFeed = {
-      ...warmingFeed,
-      state: 'ready',
-      attempts: 2,
-      updated_at: '2026-07-13T10:02:00Z',
-      freshrss_add_url: 'https://freshrss.example/i/?c=subscription&a=add&url_rss=https%3A%2F%2Frsshub.example%2Factress%2FA123',
-    }
-    const failedFeed = {
-      actor_id: 'B456',
-      state: 'failed',
-      attempts: 3,
-      updated_at: '2026-07-13T10:02:00Z',
-      error_code: 'rsshub_timeout',
-      freshrss_add_url: null,
-      freshrss_url: null,
-    }
-    fetchMock
-      .mockImplementationOnce(() => jsonResponse({ status: 'ok' }))
-      .mockImplementationOnce(() => jsonResponse({
-        job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
-        plan,
-        feeds: [warmingFeed],
-      }))
-      .mockImplementationOnce(() => jsonResponse({
-        job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
-        plan,
-        feeds: [readyFeed, failedFeed],
-      }))
-
-    render(<App />)
-    await typeActorIds(user, 'A123')
-    await user.click(screen.getByRole('button', { name: '开始扫描' }))
-
-    expect(await screen.findByText('缓存预热中')).toBeInTheDocument()
-    expect(screen.getByText('RSSHub 正在预热缓存，页面会自动更新。')).toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: '一键添加到 FreshRSS' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: '打开 FreshRSS' })).not.toBeInTheDocument()
-
-    const addLink = await screen.findByRole('link', { name: '一键添加到 FreshRSS' }, { timeout: 2_000 })
-    const freshrssLink = screen.getByRole('link', { name: '打开 FreshRSS' })
-    expect(addLink).toHaveAttribute('href', readyFeed.freshrss_add_url)
-    expect(addLink).toHaveAttribute('target', '_blank')
-    expect(addLink).toHaveAttribute('rel', 'noopener noreferrer')
-    expect(freshrssLink).toHaveAttribute('href', readyFeed.freshrss_url)
-    expect(freshrssLink).toHaveAttribute('target', '_blank')
-    expect(freshrssLink).toHaveAttribute('rel', 'noopener noreferrer')
-    expect(screen.getByText('缓存已就绪')).toBeInTheDocument()
-    expect(screen.getByText('缓存失败')).toBeInTheDocument()
-    expect(screen.getByText('错误：RSSHub 请求超时')).toBeInTheDocument()
-    expect(screen.getByText('已尝试 2 次', { exact: false })).toBeInTheDocument()
-    expect(fetchMock).toHaveBeenNthCalledWith(
-      3,
-      '/api/fill-actor/plans/plan-1',
-      expect.objectContaining({ cache: 'no-store', signal: expect.any(AbortSignal) }),
-    )
-    expect(fetchMock).toHaveBeenCalledTimes(3)
-  })
-
-  it('hides unsafe FreshRSS actions even when the feed is ready', async () => {
-    const user = userEvent.setup()
-    const fetchMock = vi.mocked(fetch)
-    fetchMock
-      .mockImplementationOnce(() => jsonResponse({ status: 'ok' }))
-      .mockImplementationOnce(() => jsonResponse({
-        job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
-        plan,
-        feeds: [{
-          actor_id: 'A123',
-          state: 'ready',
-          attempts: 2,
-          updated_at: '2026-07-13T10:02:00Z',
-          error_code: null,
-          freshrss_add_url: 'javascript:alert(1)',
-          freshrss_url: 'data:text/html,unsafe',
-        }],
-      }))
-
-    render(<App />)
-    await typeActorIds(user, 'A123')
-    await user.click(screen.getByRole('button', { name: '开始扫描' }))
-
-    expect(await screen.findByText('缓存已就绪')).toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: '一键添加到 FreshRSS' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: '打开 FreshRSS' })).not.toBeInTheDocument()
-  })
-
-  it('normalizes old feed responses without a FreshRSS site URL', () => {
-    const oldFeed = {
-      actor_id: 'A123',
-      state: 'ready',
-      attempts: 2,
-      updated_at: '2026-07-13T10:02:00Z',
-      error_code: null,
-      freshrss_add_url: 'https://freshrss.example/i/?c=feed&a=add',
-    }
-
-    expect(normalizePlanEnvelope({
-      job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
-      plan: null,
-      feeds: [oldFeed],
-    }).feeds).toEqual([{ ...oldFeed, freshrss_url: null }])
-  })
-
   it('cancels a queued scan once, disables the action in flight, and renders a neutral terminal state', async () => {
     const user = userEvent.setup()
     const fetchMock = vi.mocked(fetch)
@@ -1471,7 +1241,6 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'queued' },
         plan: null,
-        feeds: [],
       }, 202))
       .mockImplementationOnce(() => pendingCancel)
 
@@ -1484,15 +1253,6 @@ describe('Fill Actor page', () => {
     resolveCancel(new Response(JSON.stringify({
       job: { job_id: 'job-1', plan_id: 'plan-1', state: 'failed', error_code: 'job_cancelled' },
       plan: null,
-      feeds: [{
-        actor_id: 'A123',
-        state: 'failed',
-        attempts: 1,
-        updated_at: '2026-07-13T10:02:00Z',
-        error_code: 'rsshub_cancelled',
-        freshrss_add_url: null,
-        freshrss_url: null,
-      }],
     }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
 
     expect(await screen.findByText('扫描已取消')).toBeInTheDocument()
@@ -1515,13 +1275,11 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'running' },
         plan: null,
-        feeds: [],
       }, 202))
       .mockImplementationOnce(() => Promise.reject(new TypeError('temporary offline')))
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
         plan,
-        feeds: [],
       }))
 
     render(<App />)
@@ -1548,7 +1306,6 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'running' },
         plan: null,
-        feeds: [],
       }, 202))
       .mockImplementationOnce(() => jsonResponse({ error: { code: 'cancel_failed' } }, 503))
 
@@ -1570,13 +1327,11 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'running' },
         plan: null,
-        feeds: [],
       }, 202))
       .mockImplementationOnce(() => jsonResponse({ error: { code: 'unauthorized' } }, 401))
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
         plan,
-        feeds: [],
       }))
 
     render(<App />)
@@ -1607,13 +1362,11 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'running' },
         plan: null,
-        feeds: [],
       }, 202))
       .mockImplementationOnce(() => jsonResponse({ error: { code: 'plan_not_cancellable' } }, 409))
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'completed' },
         plan,
-        feeds: [],
       }))
 
     render(<App />)
@@ -1643,13 +1396,11 @@ describe('Fill Actor page', () => {
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'running' },
         plan: null,
-        feeds: [],
       }, 202))
       .mockImplementationOnce(() => pendingPoll)
       .mockImplementationOnce(() => jsonResponse({
         job: { job_id: 'job-1', plan_id: 'plan-1', state: 'failed', error_code: 'job_cancelled' },
         plan: null,
-        feeds: [],
       }))
 
     render(<App />)
@@ -1663,7 +1414,6 @@ describe('Fill Actor page', () => {
     resolvePoll(new Response(JSON.stringify({
       job: { job_id: 'job-1', plan_id: 'plan-1', state: 'running' },
       plan: null,
-      feeds: [],
     }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
     await Promise.resolve()
     expect(screen.getByText('扫描已取消')).toBeInTheDocument()

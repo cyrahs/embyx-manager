@@ -711,8 +711,10 @@ async def test_repeated_cancel_waits_for_one_cleanup_and_clears_progress_timer(
     cleanup_release = asyncio.Event()
     cleanup_cancelled = asyncio.Event()
     cleanup_calls = 0
+    stop_heartbeat = manager._stop_heartbeat  # noqa: SLF001
 
-    async def blocked_abort(_task, _job) -> None:
+    async def blocked_stop(heartbeat) -> None:
+        # The cleanup's one awaited step, held open so a second cancel has to wait for it.
         nonlocal cleanup_calls
         cleanup_calls += 1
         cleanup_started.set()
@@ -721,10 +723,11 @@ async def test_repeated_cancel_waits_for_one_cleanup_and_clears_progress_timer(
         except asyncio.CancelledError:
             cleanup_cancelled.set()
             raise
+        await stop_heartbeat(heartbeat)
         msg = 'simulated cleanup repository failure'
         raise OSError(msg)
 
-    monkeypatch.setattr(manager, '_abort_feed_warmup', blocked_abort)
+    monkeypatch.setattr(manager, '_stop_heartbeat', blocked_stop)
     job = await manager.start_plan(['actor'])
     await asyncio.wait_for(service.started.wait(), timeout=1)
     first = asyncio.create_task(manager.cancel_plan(job.job_id))
@@ -772,15 +775,18 @@ async def test_cancel_during_failed_plan_cleanup_waits_and_clears_progress_timer
     cleanup_release = asyncio.Event()
     cleanup_cancelled = asyncio.Event()
 
-    async def blocked_abort(_task, _job) -> None:
+    stop_heartbeat = manager._stop_heartbeat  # noqa: SLF001
+
+    async def blocked_stop(heartbeat) -> None:
         cleanup_started.set()
         try:
             await cleanup_release.wait()
         except asyncio.CancelledError:
             cleanup_cancelled.set()
             raise
+        await stop_heartbeat(heartbeat)
 
-    monkeypatch.setattr(manager, '_abort_feed_warmup', blocked_abort)
+    monkeypatch.setattr(manager, '_stop_heartbeat', blocked_stop)
     job = await manager.start_plan(['actor'])
     await asyncio.wait_for(cleanup_started.wait(), timeout=1)
     assert service.started.is_set()

@@ -55,8 +55,8 @@ class SubscriptionRecord:
     aliases: tuple[str, ...]
     cursor: tuple[str, ...]
     #: True until the first poll, which then records the feed's current items as
-    #: seen without ingesting them — for subscriptions whose backlog was covered
-    #: elsewhere (a catalog scan, or FreshRSS having read them already).
+    #: seen without ingesting them — for subscriptions whose backlog a catalog
+    #: scan already covered.
     seed_pending: bool
     last_polled_at: datetime | None
     last_error: str | None
@@ -179,20 +179,26 @@ class SubscriptionRepository:
         now: datetime,
         enabled: bool | None = None,
         category: str | None = None,
+        url: str | None = None,
     ) -> SubscriptionRecord | None:
         pool = await self._database.get_pool()
-        row = await pool.fetchrow(
-            """
-            UPDATE feed_subscriptions
-            SET enabled = COALESCE($2, enabled), category = COALESCE($3, category), updated_at = $4
-            WHERE id = $1
-            RETURNING *
-            """,
-            subscription_id,
-            enabled,
-            category,
-            now,
-        )
+        try:
+            row = await pool.fetchrow(
+                """
+                UPDATE feed_subscriptions
+                SET enabled = COALESCE($2, enabled), category = COALESCE($3, category),
+                    url = COALESCE($5, url), updated_at = $4
+                WHERE id = $1
+                RETURNING *
+                """,
+                subscription_id,
+                enabled,
+                category,
+                now,
+                url,
+            )
+        except asyncpg.UniqueViolationError as exc:
+            raise SubscriptionExistsError(url or '') from exc
         return _from_row(row) if row is not None else None
 
     async def delete(self, subscription_id: int) -> bool:

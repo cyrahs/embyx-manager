@@ -1,4 +1,4 @@
-import type { ActorFeedStatus, VideoState } from '../types'
+import type { VideoState } from '../types'
 
 export function Spinner() {
   return <span className="spinner" aria-hidden="true" />
@@ -82,15 +82,6 @@ export function ExternalIcon() {
   )
 }
 
-export function FeedIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8" />
-      <circle cx="5" cy="19" r="1" />
-    </svg>
-  )
-}
-
 export function MagnetIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -122,18 +113,6 @@ export function FileIcon() {
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path d="M6 3h8l4 4v14H6z" />
       <path d="M14 3v5h4" />
-    </svg>
-  )
-}
-
-export function FeedStateIcon({ state }: { state: ActorFeedStatus['state'] }) {
-  if (state === 'ready') return <CheckIcon />
-  if (state === 'failed') return <AlertIcon />
-  if (state === 'warming') return <Spinner />
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="12" r="8" />
-      <path d="M12 8v5l3 2" />
     </svg>
   )
 }

@@ -1,35 +1,117 @@
+from datetime import date
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
 import pytest
 
 from embyx_manager.adapters import (
+    ActorNotFoundError,
     AvidBrandResolver,
     CloudDriveFileMover,
     CloudDriveUnconfiguredError,
-    JavBusActorCatalog,
     LedgerAcquisitionGateway,
+    UnionActorCatalog,
 )
+from embyx_manager.clients.avbase import AvbaseTalent, AvbaseWork
+from embyx_manager.clients.javbus import JavBusActor, JavBusActorPage
 from embyx_manager.fill_actor.ports import AcquisitionOutcome
 from embyx_manager.monitor.acquisitions import AcquisitionSource
 from embyx_manager.monitor.intake import IntakeOutcome
 
 
-async def test_actor_catalog_delegates_to_javbus() -> None:
-    client = SimpleNamespace(scrape=AsyncMock(return_value=['ABC-001', 'ABC-002']))
-    catalog = JavBusActorCatalog(client)  # type: ignore[arg-type]
+class FakeAvbase:
+    def __init__(self, talents: dict[str, AvbaseTalent], pages: list[tuple[int, int, list[AvbaseWork]]]) -> None:
+        self.talents = talents
+        self.pages = pages
+        self.looked_up: list[str] = []
 
-    assert await catalog.list_video_ids('actor-1') == ['ABC-001', 'ABC-002']
-    client.scrape.assert_awaited_once_with('actor-1', progress_callback=None)
+    async def talent(self, name: str) -> AvbaseTalent | None:
+        self.looked_up.append(name)
+        return self.talents.get(name)
+
+    async def talent_pages(self, _name: str):
+        for page in self.pages:
+            yield page
 
 
-async def test_actor_catalog_forwards_progress_callback() -> None:
-    client = SimpleNamespace(scrape=AsyncMock(return_value=[]))
-    catalog = JavBusActorCatalog(client)  # type: ignore[arg-type]
+class FakeJavBus:
+    def __init__(
+        self, *, stars: dict[str, list[JavBusActor]], pages: dict[str, JavBusActorPage], catalogs: dict[str, list[str]]
+    ) -> None:
+        self.stars = stars
+        self.pages = pages
+        self.catalogs = catalogs
+        self.scraped: list[str] = []
+
+    async def search_stars(self, name: str) -> list[JavBusActor]:
+        return self.stars.get(name, [])
+
+    async def get_actor(self, actor_id: str) -> JavBusActorPage | None:
+        return self.pages.get(actor_id)
+
+    async def scrape(self, actor_id: str, progress_callback=None) -> list[str]:  # noqa: ARG002
+        self.scraped.append(actor_id)
+        return self.catalogs[actor_id]
+
+
+SAIKA = AvbaseTalent(talent_id=5022, name='河北彩花', aliases=('河北彩伽',), total_works=2)
+
+
+def work(work_id: str, day: date | None) -> AvbaseWork:
+    return AvbaseWork(work_id=work_id, prefix='', title=work_id, release_date=day, cast=())
+
+
+async def test_the_union_catalog_joins_avbase_works_with_every_javbus_star_of_the_actor() -> None:
+    avbase = FakeAvbase(
+        {'河北彩伽': SAIKA, '河北彩花': SAIKA},
+        [(1, 2, [work('SONE-100', date(2026, 1, 1))]), (2, 2, [work('SSIS-900', None)])],
+    )
+    javbus = FakeJavBus(
+        stars={
+            '河北彩花': [JavBusActor(actor_id='sl1', name='河北彩花'), JavBusActor(actor_id='zzz', name='河北彩花子')],
+            '河北彩伽': [JavBusActor(actor_id='new1', name='河北彩伽')],
+        },
+        pages={},
+        catalogs={'sl1': ['SSIS-900', 'OLD-001'], 'new1': ['SONE-100', 'SONE-101']},
+    )
+    catalog = UnionActorCatalog(avbase=avbase, javbus=javbus)  # type: ignore[arg-type]
     progress = AsyncMock()
 
-    await catalog.list_video_ids('actor-1', progress_callback=progress)
-    client.scrape.assert_awaited_once_with('actor-1', progress_callback=progress)
+    listing = await catalog.list_videos('河北彩伽', progress_callback=progress)
+
+    assert (listing.actor_name, listing.talent_id, listing.aliases) == ('河北彩花', 5022, ('河北彩伽',))
+    # AVBase first, then each JavBus star page; the fuzzy search hit under another name is dropped.
+    assert listing.video_ids == ('SONE-100', 'SSIS-900', 'OLD-001', 'SONE-101')
+    assert listing.release_dates == {'SONE-100': date(2026, 1, 1)}
+    assert listing.source_counts == {'avbase': 2, 'javbus:sl1': 2, 'javbus:new1': 2}
+    assert sorted(javbus.scraped) == ['new1', 'sl1']
+    progress.assert_any_await(1, 2, 1)
+
+
+async def test_a_javbus_star_id_names_the_actor_through_its_star_page() -> None:
+    avbase = FakeAvbase({'河北彩花': SAIKA}, [(1, 1, [work('SONE-100', None)])])
+    javbus = FakeJavBus(
+        stars={'河北彩花': [JavBusActor(actor_id='sl1', name='河北彩花')]},
+        pages={'sl1': JavBusActorPage(actor_id='sl1', name='河北彩花', video_ids=('SSIS-900',))},
+        catalogs={'sl1': ['SSIS-900']},
+    )
+    catalog = UnionActorCatalog(avbase=avbase, javbus=javbus)  # type: ignore[arg-type]
+
+    listing = await catalog.list_videos('sl1')
+
+    assert listing.talent_id == 5022
+    assert avbase.looked_up == ['sl1', '河北彩花']
+    assert listing.video_ids == ('SONE-100', 'SSIS-900')
+
+
+async def test_an_actor_neither_catalog_knows_is_an_error() -> None:
+    catalog = UnionActorCatalog(  # type: ignore[arg-type]
+        avbase=FakeAvbase({}, []),
+        javbus=FakeJavBus(stars={}, pages={}, catalogs={}),
+    )
+
+    with pytest.raises(ActorNotFoundError):
+        await catalog.list_videos('nobody')
 
 
 async def test_acquisition_gateway_queues_and_wakes_the_tracker() -> None:

@@ -1,10 +1,11 @@
 import asyncio
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
 
-from embyx_manager.clients.javbus import JavBusClient, JavBusPaginationError
+from embyx_manager.clients.javbus import JavBusActor, JavBusClient, JavBusPaginationError, magnet_score
 
 MAIN_PAGE_HTML = """
 <html>
@@ -32,6 +33,10 @@ AJAX_RESPONSE_HTML = """
     <tr>
         <td width="70%">
             <a href="magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2">release2</a>
+            <a class="btn btn-mini-new btn-primary"
+               href="magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2">高清</a>
+            <a class="btn btn-mini-new btn-warning"
+               href="magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2">字幕</a>
         </td>
         <td style="text-align:center">
             <a href="magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2">1.5GB</a>
@@ -74,6 +79,10 @@ async def test_get_magnets_success(client: JavBusClient) -> None:
     magnet2 = next(m for m in magnets if 'a1b2c3d4e5f67890abcdef1234567890abcdef12' in m['magnet'])
     assert magnet2['magnet'] == f'magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn={video_id}'
     assert magnet2['size'] == '1.5GB'
+    # The smaller upload carries the quality badges, so it is offered first.
+    assert magnet1['tags'] == ()
+    assert magnet2['tags'] == ('高清', '字幕')
+    assert magnets == [magnet2, magnet1]
 
     assert mock_get.call_count == 2
     args, _ = mock_get.call_args_list[0]
@@ -82,6 +91,16 @@ async def test_get_magnets_success(client: JavBusClient) -> None:
     assert 'uncledatoolsbyajax.php' in str(args[0])
     assert 'gid=12345' in str(args[0])
     assert kwargs['headers']['Referer'].endswith(f'/{video_id}')
+
+
+def test_magnet_score_prefers_tags_over_size() -> None:
+    gib = 1 << 30
+    assert magnet_score(gib, ('字幕',)) > magnet_score(100 * gib, ())
+    # A second badge is worth a (3/2)^8 ≈ 25x size gap, more than any same-title spread.
+    assert magnet_score(gib, ('高清', '字幕')) > magnet_score(20 * gib, ('高清',))
+    assert magnet_score(2 * gib, ()) > magnet_score(gib, ())
+    # An unreadable size cannot be trusted, badges or not.
+    assert magnet_score(0, ('高清', '字幕')) == 0
 
 
 async def test_get_magnets_no_variables(client: JavBusClient) -> None:
@@ -258,3 +277,24 @@ async def test_scrape_rejects_an_empty_page_inside_discovered_range(client: JavB
         pytest.raises(JavBusPaginationError, match='empty page at 2'),
     ):
         await client.scrape('ACTOR-1')
+
+
+async def test_search_stars_reads_every_star_page_the_search_lists(client: JavBusClient) -> None:
+    html = """
+    <div id="waterfall">
+      <a class="avatar-box text-center" href="https://www.javbus.com/star/sl1"><span class="pb10">河北彩花</span></a>
+      <a class="avatar-box text-center" href="https://www.javbus.com/star/new1"><span class="pb10">河北彩伽</span></a>
+      <a href="https://www.javbus.com/star/sl1">dup</a>
+      <a href="https://www.javbus.com/genre/1">not a star</a>
+    </div>
+    """
+    client._client.get = AsyncMock(  # noqa: SLF001
+        return_value=SimpleNamespace(status_code=200, text=html, raise_for_status=lambda: None)
+    )
+
+    stars = await client.search_stars('河北彩')
+
+    assert stars == [JavBusActor(actor_id='sl1', name='河北彩花'), JavBusActor(actor_id='new1', name='河北彩伽')]
+    client._client.get.assert_awaited_once_with(  # noqa: SLF001
+        'https://www.javbus.com/searchstar/%E6%B2%B3%E5%8C%97%E5%BD%A9',
+    )

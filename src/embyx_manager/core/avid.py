@@ -61,9 +61,14 @@ HIGH_RESOLUTION_TAGS = frozenset({'2K', '4K', '6K', '8K', '2160P', '2160I', 'UHD
 #: Content-ID zero padding: DMM pads the number to five digits, so ABC-00123 and
 #: ABC-123 are the same video. Only 00-prefixed runs are touched, which leaves a
 #: genuinely three-digit ID like ABP-012 alone.
-_PADDED_NUMBER_RE = re.compile(r'^([A-Z]{2,10})-(00\d{3,4})$')
-#: Brands whose numbers are not DMM content IDs and must not be un-padded.
-_NON_CID_BRANDS = frozenset({'FC2', 'HEYZO', 'HEYDOUGA', 'GETCHU', 'GYUTTO', 'MKBD', 'MKD', 'S2M', 'S2MBD'})
+#: The ordinary BRAND-NUMBER shape; the brand has at least one letter, so purely
+#: numeric ids (4102-023, 123456-789) keep their own spelling.
+_NUMBER_FORM_RE = re.compile(r'^([A-Z0-9]*[A-Z][A-Z0-9]*)-(\d+)$')
+#: Brands whose numbers are catalog serials or two-digit volumes rather than DVD
+#: codes, and are left as written: FC2 and friends, and the 3D+2D Blu-ray lines.
+_NON_CID_BRANDS = frozenset(
+    {'FC2', 'HEYZO', 'HEYDOUGA', 'GETCHU', 'GYUTTO', 'MKBD', 'MKD', 'S2M', 'S2MBD', 'MK3D2DBD', 'CW3D2BD', 'CW3D2DBD'}
+)
 
 
 def _domain_variants(norm: str) -> tuple[str, str]:
@@ -155,8 +160,15 @@ def _match_odd_numbering(norm: str) -> str:
     return ''
 
 
-def _unpad_content_id(avid: str) -> str:
-    match = _PADDED_NUMBER_RE.match(avid)
+def _normalize_number(avid: str) -> str:
+    """Spell the number the way the catalogs do: an integer, zero-padded to three digits.
+
+    Sources disagree on padding — JavBus writes HTTM-0066 and TBW-19 where AVBase
+    (and metatube) write HTTM-066 and TBW-019 — and the ledger keys on the id, so
+    one spelling has to win. AVBase's does, since it is the discovery source.
+    Numbers with more than three significant digits keep them all (IPZZ-1234).
+    """
+    match = _NUMBER_FORM_RE.match(avid)
     if match is None or match.group(1) in _NON_CID_BRANDS:
         return avid
     return f'{match.group(1)}-{int(match.group(2)):03d}'
@@ -191,7 +203,7 @@ class AvidParser:
         for exception in self._config.id_exceptions:
             if exception in upper:
                 return exception
-        return _unpad_content_id(self.get_id(title).upper())
+        return _normalize_number(self.get_id(title).upper())
 
     def get_id(self, filepath_str: str) -> str:  # noqa: C901, PLR0911, PLR0912
         """从给定的文件路径中提取番号(DVD ID)"""

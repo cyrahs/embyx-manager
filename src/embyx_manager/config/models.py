@@ -97,46 +97,6 @@ class CloudDriveConfig(ConfigSection):
         return bool(self.address and self.api_token)
 
 
-class FreshRSSConfig(ConfigSection):
-    SECRET_FIELDS: ClassVar[frozenset[str]] = frozenset({'api_key'})
-
-    url: str = ''
-    api_key: str = ''
-    proxy: str = ''
-
-    @field_validator('url')
-    @classmethod
-    def _validate_url(cls, value: str) -> str:
-        return normalize_http_base_url('freshrss.url', value)
-
-    @property
-    def configured(self) -> bool:
-        return bool(self.url and self.api_key)
-
-
-class FeedsConfig(ConfigSection):
-    """RSSHub / FreshRSS URLs used by the fill-actor page's feed integration."""
-
-    rsshub_url: str = ''
-    freshrss_url: str = ''
-    freshrss_rsshub_url: str = ''
-
-    @field_validator('rsshub_url')
-    @classmethod
-    def _validate_rsshub(cls, value: str) -> str:
-        return normalize_http_base_url('feeds.rsshub_url', value)
-
-    @field_validator('freshrss_url')
-    @classmethod
-    def _validate_freshrss(cls, value: str) -> str:
-        return normalize_http_base_url('feeds.freshrss_url', value)
-
-    @field_validator('freshrss_rsshub_url')
-    @classmethod
-    def _validate_freshrss_rsshub(cls, value: str) -> str:
-        return normalize_http_base_url('feeds.freshrss_rsshub_url', value)
-
-
 class AvidRulesConfig(ConfigSection):
     """Video-ID parsing rules shared by the pipelines."""
 
@@ -145,7 +105,7 @@ class AvidRulesConfig(ConfigSection):
 
 
 class RssCategory(BaseModel):
-    """One FreshRSS category and the offline directory its items download to.
+    """One subscription category and the offline directory its items download to.
 
     Every category names its own directory. There is deliberately no shared
     default to fall back on: the directory decides which archive route files the
@@ -154,7 +114,7 @@ class RssCategory(BaseModel):
 
     model_config = ConfigDict(extra='forbid')
 
-    #: The FreshRSS category (label) whose unread items this entry ingests.
+    #: The category (label) whose subscriptions this entry ingests.
     label: str
     #: The CloudDrive API path this category's offline tasks are queued under.
     task_dir_path: str
@@ -432,8 +392,6 @@ class FillActorConfig(ConfigSection):
 
 SECTION_MODELS: dict[str, type[ConfigSection]] = {
     'clouddrive': CloudDriveConfig,
-    'freshrss': FreshRSSConfig,
-    'feeds': FeedsConfig,
     'avid': AvidRulesConfig,
     'rss': RssConfig,
     'archive': ArchiveConfig,
