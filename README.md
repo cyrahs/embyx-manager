@@ -12,7 +12,8 @@ Three peer features; `/` redirects to the dashboard and no feature owns the app 
   rebuilt as scheduled services with persisted run history —
   - **rss**: subscribed feeds — RSSHub routes, AVBase talent feeds, sukebei searches, any
     RSS/Atom URL, polled by the backend itself → magnet resolution (sukebei → feed item →
-    javbus) → 115 offline tasks, re-resolving on a schedule anchored to the release date
+    javbus, whose magnets are ranked by subtitle/HD tags before size) → 115 offline tasks,
+    re-resolving on a schedule anchored to the release date
     (a fixed cooldown when no source knew it);
   - **archive**: intake normalization (flatten/rename) and per-brand archiving;
   - **mapping**: flat `.strm` tree mirrored to a per-title layout, with a real-time

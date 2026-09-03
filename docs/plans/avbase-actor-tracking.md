@@ -11,7 +11,7 @@
 | 3a AVBase 客户端 + talent 类型订阅 + JavBus→AVBase 迁移脚本 | 已合并部署;**线上迁移已于 2026-09-03 完成**(316 条 JavBus star 订阅 → 282 个 AVBase talent) |
 | 3b fill-actor 走 AVBase ∪ JavBus 并集目录 + "订阅此演员" + 订阅改地址 + 删 RSSHub 预热/FreshRSS | 已实现(分支上) |
 | 3c 番号补零归一到目录拼写(`%03d`)+ 账本键迁移 v13 | 已实现(分支上,**Postgres 测试仅 CI 验证**) |
-| 4 JavBus 磁力评分排序(可选) | 未开始 |
+| 4 JavBus 磁力评分排序 | 已实现(分支上):`get_magnets` 按 `(1+标签数)^8 × 体积` 排序,intake 不再按体积重排 |
 
 3b 相对方案的偏差:
 - 目录取 AVBase ∪ JavBus 并集(先按名字/别名找 talent,再用同一组名字搜 JavBus star 页),而不是只走 AVBase:覆盖审计发现改名前的旧作和下架作品只有 JavBus 还列着。

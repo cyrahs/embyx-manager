@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import httpx
 import pytest
 
-from embyx_manager.clients.javbus import JavBusActor, JavBusClient, JavBusPaginationError
+from embyx_manager.clients.javbus import JavBusActor, JavBusClient, JavBusPaginationError, magnet_score
 
 MAIN_PAGE_HTML = """
 <html>
@@ -33,6 +33,10 @@ AJAX_RESPONSE_HTML = """
     <tr>
         <td width="70%">
             <a href="magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2">release2</a>
+            <a class="btn btn-mini-new btn-primary"
+               href="magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2">高清</a>
+            <a class="btn btn-mini-new btn-warning"
+               href="magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2">字幕</a>
         </td>
         <td style="text-align:center">
             <a href="magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2">1.5GB</a>
@@ -75,6 +79,10 @@ async def test_get_magnets_success(client: JavBusClient) -> None:
     magnet2 = next(m for m in magnets if 'a1b2c3d4e5f67890abcdef1234567890abcdef12' in m['magnet'])
     assert magnet2['magnet'] == f'magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn={video_id}'
     assert magnet2['size'] == '1.5GB'
+    # The smaller upload carries the quality badges, so it is offered first.
+    assert magnet1['tags'] == ()
+    assert magnet2['tags'] == ('高清', '字幕')
+    assert magnets == [magnet2, magnet1]
 
     assert mock_get.call_count == 2
     args, _ = mock_get.call_args_list[0]
@@ -83,6 +91,15 @@ async def test_get_magnets_success(client: JavBusClient) -> None:
     assert 'uncledatoolsbyajax.php' in str(args[0])
     assert 'gid=12345' in str(args[0])
     assert kwargs['headers']['Referer'].endswith(f'/{video_id}')
+
+
+def test_magnet_score_prefers_tags_over_size() -> None:
+    gib = 1 << 30
+    assert magnet_score(gib, ('字幕',)) > magnet_score(100 * gib, ())
+    assert magnet_score(gib, ('高清', '字幕')) > magnet_score(200 * gib, ('高清',))
+    assert magnet_score(2 * gib, ()) > magnet_score(gib, ())
+    # An unreadable size cannot be trusted, badges or not.
+    assert magnet_score(0, ('高清', '字幕')) == 0
 
 
 async def test_get_magnets_no_variables(client: JavBusClient) -> None:
