@@ -10,8 +10,9 @@ Three peer features; `/` redirects to the dashboard and no feature owns the app 
 
 - **Monitor dashboard** (`/dashboard`, the landing page): the embyx-monitor pipelines
   rebuilt as scheduled services with persisted run history —
-  - **rss**: unread FreshRSS items → magnet resolution (sukebei → RSS table → javbus) →
-    115 offline tasks, re-resolving on a schedule anchored to the release date
+  - **rss**: subscribed feeds — RSSHub routes, AVBase talent feeds, sukebei searches, any
+    RSS/Atom URL, polled by the backend itself → magnet resolution (sukebei → feed item →
+    javbus) → 115 offline tasks, re-resolving on a schedule anchored to the release date
     (a fixed cooldown when no source knew it);
   - **archive**: intake normalization (flatten/rename) and per-brand archiving;
   - **mapping**: flat `.strm` tree mirrored to a per-title layout, with a real-time
@@ -32,7 +33,9 @@ Three peer features; `/` redirects to the dashboard and no feature owns the app 
 - **Settings** (`/settings`): CloudDrive, FreshRSS, RSSHub URLs, Fill Actor library
   roots, pipeline behavior, and avid parsing rules are stored in the database, editable
   from the browser, versioned against concurrent edits, and hot-applied without
-  restarts. CloudDrive and FreshRSS
+  restarts. It also manages the rss pipeline's **subscriptions** — feed URL plus
+  category, enable/disable, last poll and error — and can import an existing FreshRSS
+  subscription list in one step. CloudDrive and FreshRSS
   panels have connection-test buttons that use the unsaved form values (secrets fall back
   to stored ones). Secrets are never echoed back.
 

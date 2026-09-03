@@ -7,7 +7,7 @@
 | 步骤 | 状态 |
 | --- | --- |
 | 1 账本发售日节奏 + 带磁力 sighting 唤醒 | 已实现(分支上,**Postgres 测试仅 CI 验证**) |
-| 2 订阅表 + 轮询器 + 导入命令 | 未开始 |
+| 2 订阅表 + 轮询器 + FreshRSS 导入 | 已实现(分支上,**Postgres 测试仅 CI 验证**) |
 | 3 AVBase 客户端 + fill-actor 切换 + 删 RSSHub 预热 | 未开始 |
 | 4 JavBus 磁力评分排序(可选) | 未开始 |
 
@@ -25,6 +25,20 @@
 - 迁移 v11 加 `archive_acquisitions.release_date DATE`(可空);第 1 步没有任何来源写入
   它——AVBase JSON 在第 3 步接入,所以这一步实际生效的是唤醒和从当前状态续期,节奏
   对存量行仍是固定冷却。
+
+第 2 步相对本计划的偏差:
+
+- **导入不在导入时抓 feed 填游标**,而是给订阅打 `seed_pending` 标记,由首次轮询把当时的
+  条目记为已见、不摄取。导入因此瞬间完成,不受 RSSHub 冷抓取速度影响;fill-actor 在
+  第 3 步创建订阅时用同一标记。
+- **导入是设置页的按钮而不是 CLI**:FreshRSS 地址与 API key 本来就在数据库里,先预览
+  (每条 feed 标为 将导入/已存在/分类未配置/地址无效)再确认写入,不需要起集群 Job。
+- 表名 `feed_subscriptions`;`avbase_talent` 类型已在 schema 与轮询器里(feed URL 由
+  talent id 推导),但要到第 3 步才有创建入口。
+- 番号取自标题,标题解析不出再取链接末段并剥离 `prefix:`——所以 AVBase talent feed 从
+  这一步起就能作为普通 RSS URL 订阅。
+- `rss` 流水线的就绪条件不再要求 FreshRSS;FreshRSS 配置段与客户端保留到导入完成后的
+  第 3 步再删。
 
 ## 结论
 

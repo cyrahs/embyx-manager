@@ -281,3 +281,44 @@ export interface TestConnectionResult {
   ok: boolean
   detail: string
 }
+
+export type SubscriptionKind = 'rss' | 'avbase_talent'
+
+export interface Subscription {
+  id: number
+  kind: SubscriptionKind
+  /** One of the RSS section's category labels; decides the offline directory. */
+  category: string
+  enabled: boolean
+  url: string | null
+  /** The URL actually polled: `url` for rss, derived from `talent_id` for avbase_talent. */
+  feed_url: string
+  talent_id: number | null
+  name: string | null
+  aliases: string[]
+  /** The first poll only records the feed's current items instead of ingesting them. */
+  seed_pending: boolean
+  last_polled_at: string | null
+  last_error: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface SubscriptionList {
+  items: Subscription[]
+  categories: string[]
+}
+
+export type FreshRssImportStatus = 'new' | 'imported' | 'exists' | 'category_missing' | 'invalid_url'
+
+export interface FreshRssImportEntry {
+  url: string
+  title: string | null
+  category: string | null
+  status: FreshRssImportStatus
+}
+
+export interface FreshRssImportResult {
+  entries: FreshRssImportEntry[]
+  imported: number
+}

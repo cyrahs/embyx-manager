@@ -47,6 +47,10 @@ const TRIGGER_LABELS: Record<string, string> = {
 
 const STAT_LABELS: Record<string, string> = {
   items: 'RSS 条目',
+  new_items: '新条目',
+  subscriptions_polled: '订阅拉取',
+  subscriptions_failed: '订阅拉取失败',
+  subscriptions_seeded: '订阅初始化',
   unique_avids: '番号',
   categories_failed: '分类拉取失败',
   skipped_known: '已跟踪跳过',

@@ -95,7 +95,12 @@ async def test_get_subscriptions_reads_freshrss_urls_and_titles(client: FreshRSS
         raise_for_status=lambda: None,
         json=lambda: {
             'subscriptions': [
-                {'id': 'feed/1', 'title': '演员甲', 'url': 'https://rsshub.example/javbus/star/A123'},
+                {
+                    'id': 'feed/1',
+                    'title': '演员甲',
+                    'url': 'https://rsshub.example/javbus/star/A123',
+                    'categories': [{'id': 'user/-/label/Actor', 'label': 'Actor'}],
+                },
                 {'id': 'feed/2', 'url': 'https://example.test/unrelated'},
                 {'id': 'feed/3'},
             ]
@@ -104,7 +109,7 @@ async def test_get_subscriptions_reads_freshrss_urls_and_titles(client: FreshRSS
     client._client.get = AsyncMock(return_value=response)  # noqa: SLF001
 
     assert await client.get_subscriptions() == (
-        FreshRSSSubscription(url='https://rsshub.example/javbus/star/A123', title='演员甲'),
+        FreshRSSSubscription(url='https://rsshub.example/javbus/star/A123', title='演员甲', category='Actor'),
         FreshRSSSubscription(url='https://example.test/unrelated', title=None),
     )
     client._client.get.assert_awaited_once_with(  # noqa: SLF001

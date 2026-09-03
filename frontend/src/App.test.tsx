@@ -106,6 +106,7 @@ describe('app shell', () => {
     vi.stubGlobal('fetch', vi.fn().mockImplementation((input) => {
       const url = String(input)
       if (url.startsWith('/api/monitor/status') || url.startsWith('/api/monitor/runs')) return jsonResponse([])
+      if (url.startsWith('/api/monitor/subscriptions')) return jsonResponse({ items: [], categories: [] })
       if (url.startsWith('/api/config')) return jsonResponse([])
       return jsonResponse({ status: 'ok', database: true })
     }))
@@ -1608,6 +1609,7 @@ describe('login gate', () => {
         ])
       }
       if (url.startsWith('/api/monitor/runs')) return jsonResponse([])
+      if (url.startsWith('/api/monitor/subscriptions')) return jsonResponse({ items: [], categories: [] })
       if (url.startsWith('/api/config')) {
         return jsonResponse([{ section: 'rss', values: { enabled: false }, secrets: {}, version: 1 }])
       }
