@@ -15,6 +15,7 @@ archive route of its own.
 from collections.abc import Callable, Sequence
 from datetime import UTC, date, datetime, timedelta
 from enum import StrEnum
+from http import HTTPStatus
 
 import grpc
 import httpx
@@ -33,6 +34,7 @@ from embyx_manager.monitor.acquisitions import (
     MagnetCandidate,
 )
 from embyx_manager.monitor.cadence import next_resolve_at
+from embyx_manager.monitor.release_dates import ReleaseDateLookup, ensure_release_date
 from embyx_manager.monitor.reports import RunContext
 
 MAX_CANDIDATES = 5
@@ -69,14 +71,20 @@ class AcquisitionIntake:
         cloud: AsyncCloudDrive,
         failed_cooldown_seconds: int,
         on_submitted: Callable[[], None] | None = None,
+        release_date_lookup: ReleaseDateLookup | None = None,
     ) -> None:
-        """``on_submitted()`` is called whenever a magnet lands at CloudDrive."""
+        """``on_submitted()`` is called whenever a magnet lands at CloudDrive.
+
+        ``release_date_lookup(avid)`` fills in the release date of a row parked
+        without one, so the resolve schedule can anchor on it.
+        """
         self._ledger = ledger
         self._sukebei = sukebei
         self._javbus = javbus
         self._cloud = cloud
         self._failed_cooldown = timedelta(seconds=failed_cooldown_seconds)
         self._on_submitted = on_submitted
+        self._release_date_lookup = release_date_lookup
 
     async def enqueue(  # noqa: PLR0913 - one sighting carries everything its source knows
         self,
@@ -201,6 +209,9 @@ class AcquisitionIntake:
         return outcome
 
     async def _repark(self, record: AcquisitionRecord, *, note: str) -> None:
+        # The first empty pass is when the release date starts to matter, so a
+        # row recorded without one (a feed sighting) is completed here.
+        release_date = await ensure_release_date(self._ledger, record, self._release_date_lookup)
         now = datetime.now(UTC)
         await self._ledger.transition(
             record.avid,
@@ -208,7 +219,7 @@ class AcquisitionIntake:
             target=AcquisitionState.RESOLVE_FAILED,
             now=now,
             note=note,
-            next_action_at=next_resolve_at(now, record.release_date, fallback=self._failed_cooldown),
+            next_action_at=next_resolve_at(now, release_date, fallback=self._failed_cooldown),
         )
 
     # -- magnet resolution ---------------------------------------------------
@@ -246,6 +257,12 @@ class AcquisitionIntake:
         collect(item_magnet, 'rss_item')
         try:
             magnets = await self._javbus.get_magnets(avid)
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == HTTPStatus.NOT_FOUND:
+                # JavBus lists a work only once it is released; nothing failed.
+                ctx.info('JavBus does not list %s yet', avid)
+            else:
+                ctx.exception('Failed to get magnets from javbus for %s', avid)
         except Exception:  # noqa: BLE001
             ctx.exception('Failed to get magnets from javbus for %s', avid)
         else:

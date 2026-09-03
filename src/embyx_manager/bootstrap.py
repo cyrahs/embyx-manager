@@ -51,6 +51,7 @@ from embyx_manager.monitor.manual import ManualIntakeSource
 from embyx_manager.monitor.mapping import MappingPipeline
 from embyx_manager.monitor.move_in import MoveInSweeper
 from embyx_manager.monitor.reconcile import ReconcileScanner
+from embyx_manager.monitor.release_dates import ReleaseDateFinder
 from embyx_manager.monitor.reports import PipelineName, RunContext
 from embyx_manager.monitor.rss import RssPipeline
 from embyx_manager.monitor.runs import PipelineRunRepository
@@ -193,6 +194,9 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
     ledger = AcquisitionRepository(database)
     subscriptions = SubscriptionRepository(database)
     feed_fetcher = HttpFeedFetcher()
+    # Feed sightings carry no release date; the catalog fills it in when a row
+    # first has to wait for a magnet, so the resolve schedule can anchor on it.
+    release_dates = ReleaseDateFinder(avbase.search_works)
 
     def intake_factory() -> AcquisitionIntake | None:
         cloud = cloud_handle.current()
@@ -207,6 +211,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
             # Resolved lazily: the scheduler is built later in this function
             # and the factory only runs once the app is serving.
             on_submitted=scheduler.notify_submission,
+            release_date_lookup=release_dates,
         )
 
     archive_trigger_tasks: set[asyncio.Task[None]] = set()
@@ -430,6 +435,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
                 task_dir_paths=await _polled_task_dirs(store, ledger),
             ),
             submit_magnet=submit_magnet,
+            release_date_lookup=release_dates,
         )
         await tracker.poll(ctx)
         # The resolver leg of the tracker pass (plan §Step 6 item 7): parked

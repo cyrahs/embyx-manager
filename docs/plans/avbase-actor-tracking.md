@@ -12,6 +12,7 @@
 | 3b fill-actor 走 AVBase ∪ JavBus 并集目录 + "订阅此演员" + 订阅改地址 + 删 RSSHub 预热/FreshRSS | 已实现(分支上) |
 | 3c 番号补零归一到目录拼写(`%03d`)+ 账本键迁移 v13 | 已实现(分支上,**Postgres 测试仅 CI 验证**) |
 | 4 JavBus 磁力评分排序 | 已实现(分支上):`get_magnets` 按 `(1+标签数)^8 × 体积` 排序,intake 不再按体积重排 |
+| 5 feed 发现补发售日(节奏真正生效) | 已实现(分支上):停车时查 AVBase 写回账本,JavBus 404 不再计错;见 I 节 |
 
 3b 相对方案的偏差:
 - 目录取 AVBase ∪ JavBus 并集(先按名字/别名找 talent,再用同一组名字搜 JavBus star 页),而不是只走 AVBase:覆盖审计发现改名前的旧作和下架作品只有 JavBus 还列着。
@@ -319,6 +320,50 @@ AVBase feed 是"作品被登记"的信号,不是"可下载"的信号。它的优
 - **先行配信**:发售窗口前的种子要等到预热探测;若某位演员这类情况多,可缩短预热间隔。
 - **feed 只有 30 条**:高产演员(麻里梨夏 1571 部)只覆盖最近 30 次登记,轮询间隔小于
   登记频率即可,登记频率远低于每周 30 部。
+
+### I. 第 5 步:feed 发现补发售日,让分段节奏真正生效
+
+**现状(2026-09-03 线上核实)**:演员 feed 发现的番号进账本时 `release_date` 为空——
+AVBase feed 的 item 只有标题、`/works/<ID>` 链接、登记时间(`pubDate`)和一句占位描述,
+没有发售日;轮询器也没有去查。于是 `next_resolve_at` 走 `fallback`:固定 24h 一次,
+不分发售前后,也没有退避。当天 12 条发现里 11 条 `resolve_failed`,全部排在 24h 后重试。
+第 1 步写好的节奏(发售前每周一探、窗口内 4h、长尾 1d/3d/7d、30 天下限)对 feed 来源
+完全没有起作用;只有 fill-actor 扫描(3b 起从目录带出日期)在用。
+
+**日期从哪来**:`AvbaseClient.search_works(avid)` 一次请求就返回该作品的 `min_date`
+(实测 MIZD-555 → 2026-10-02),不必再走 `work()` 的第二跳。这是 Cloudflare 后面的
+JSON 路由,fill-actor 扫描已经在用同一条通道,没有新依赖。
+
+**在哪里查——选"停车时查",而不是"发现时查"**:
+- 发现时查(`_ingest` 里 `discover` 之前)要给每个新番号都发请求,包括那些当场就
+  能解析到磁力的;而且只覆盖 feed 这一条路,账本里已有的旧行永远补不上。
+- 停车时查:`Intake.park_unresolved` 与 `_repark`(以及 tracker 的 `retry_due` 重排)
+  在算下次时间前,若 `record.release_date is None`,先查一次并写回账本,再用日期
+  算 `next_resolve_at`。只有真正没磁力的行才产生请求;新发现与历史遗留行走同一条
+  路径,旧行会在各自下一次重试(≤24h)时自然补上,不需要单独的回填任务。
+- 查不到(AVBase 没收录)或查失败(Cloudflare 收紧、超时):记日志、按 `fallback`
+  排期,绝不阻塞磁力解析。查不到的番号进程内做带 TTL 的负缓存(例如 7 天),避免每
+  24h 重复打一次;不为它加列、不加迁移。
+
+**改动清单**:
+1. `AcquisitionRepository.set_release_date(avid, date)`:仅在为空时写入(`WHERE release_date IS NULL`)。
+2. `Intake.__init__` 增加可选 `release_date_lookup: Callable[[str], Awaitable[date | None]]`;
+   `_repark`/`park_unresolved` 在排期前调用一次 `_ensure_release_date(record)`。
+   bootstrap 注入 `lambda avid: first(search_works(avid)).release_date`,并在 bootstrap
+   层包一层负缓存与异常兜底(intake 不认识 AVBase)。
+3. tracker `retry_due` 重排处同样先补日期(它自己调用 `next_resolve_at`,不经过 intake)。
+   更干净的做法是把"补日期 + 算下次时间"合成 intake 的一个方法,tracker 也调它。
+4. 并发与节流:复用 `AvbaseClient` 的信号量(4);`retry_due` 每 30 分钟最多 50 行,
+   回填期最坏 50 次查询/半小时,可接受。
+5. 测试:intake 用假 lookup 验证(a)首次停车补日期并按窗口排期,(b)查不到时按 fallback
+   且不再重复查,(c)查失败不影响停车;ledger 的 `set_release_date` 只填空值(Postgres,CI)。
+
+**顺带**:`retry_due`/轮询里 JavBus 对未发售作品的 404 现在记成 ERROR 并计入
+`error_count`,每轮都有一串。有了发售日后,`release_date > today` 的 404 可以降为
+info 且不计错,让 `error_count` 重新有信号意义。放在同一步里做,一个判断的事。
+
+**不做的**:不在发现时预查所有番号;不加"发售日校验"迁移;不为 Rank feed 单独处理
+(它们经同一条停车路径,自然也会补上)。
 
 ### H. 实施顺序(每步独立可合并,且每步之后都是可运行的中间态)
 

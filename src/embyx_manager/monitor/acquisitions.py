@@ -299,6 +299,16 @@ class AcquisitionRepository:
         row = await pool.fetchrow('SELECT * FROM archive_acquisitions WHERE avid = $1', avid)
         return _acquisition_from_row(row) if row is not None else None
 
+    async def set_release_date(self, avid: str, release_date: date) -> bool:
+        """Fill in a release date the row was recorded without; never overwrites."""
+        pool = await self._database.get_pool()
+        status = await pool.execute(
+            'UPDATE archive_acquisitions SET release_date = $2 WHERE avid = $1 AND release_date IS NULL',
+            avid,
+            release_date,
+        )
+        return _row_count(status) == 1
+
     # -- acquisition transitions -------------------------------------------
 
     async def transition(  # noqa: PLR0913 - one CAS entry point for every ledger move

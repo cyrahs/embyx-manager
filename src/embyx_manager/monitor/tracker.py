@@ -39,6 +39,7 @@ from embyx_manager.monitor.acquisitions import (
 )
 from embyx_manager.monitor.archive import ArchivePipeline, ArchiveResult, Outcome
 from embyx_manager.monitor.cadence import next_resolve_at
+from embyx_manager.monitor.release_dates import ReleaseDateLookup, ensure_release_date
 from embyx_manager.monitor.reports import RunContext
 
 LOGGER = logging.getLogger('embyx-manager.tracker')
@@ -95,7 +96,7 @@ class TrackerSettings:
 
 
 class AcquisitionTracker:
-    def __init__(
+    def __init__(  # noqa: PLR0913 - every collaborator is injected
         self,
         *,
         ledger: AcquisitionRepository,
@@ -103,6 +104,7 @@ class AcquisitionTracker:
         archiver: ArchivePipeline,
         settings: TrackerSettings,
         submit_magnet: SubmitMagnet,
+        release_date_lookup: ReleaseDateLookup | None = None,
     ) -> None:
         """``submit_magnet(avid, magnet)`` adds one offline task; True when accepted."""
         self._ledger = ledger
@@ -110,6 +112,7 @@ class AcquisitionTracker:
         self._archiver = archiver
         self._settings = settings
         self._submit = submit_magnet
+        self._release_date_lookup = release_date_lookup
 
     async def poll(self, ctx: RunContext) -> None:
         """One pass over the offline task lists of every configured directory."""
@@ -385,6 +388,7 @@ class AcquisitionTracker:
         record = await self._ledger.get(avid)
         if record is None or record.state is not AcquisitionState.DOWNLOADING:
             return
+        release_date = await ensure_release_date(self._ledger, record, self._release_date_lookup)
         now = datetime.now(UTC)
         await self._ledger.transition(
             avid,
@@ -397,7 +401,7 @@ class AcquisitionTracker:
             # release date is known.
             next_action_at=next_resolve_at(
                 now,
-                record.release_date,
+                release_date,
                 fallback=timedelta(hours=self._settings.stall_timeout_hours),
             ),
         )
