@@ -10,6 +10,7 @@
 | 2 订阅表 + 轮询器 + FreshRSS 导入 | 已实现(分支上,**Postgres 测试仅 CI 验证**) |
 | 3a AVBase 客户端 + talent 类型订阅 + JavBus→AVBase 迁移脚本 | 已合并部署;**线上迁移已于 2026-09-03 完成**(316 条 JavBus star 订阅 → 282 个 AVBase talent) |
 | 3b fill-actor 切换到 AVBase 目录 + "订阅此演员" + 删 RSSHub 预热/FreshRSS | 未开始 |
+| 3c 番号补零归一到目录拼写(`%03d`)+ 账本键迁移 v13 | 已实现(分支上,**Postgres 测试仅 CI 验证**) |
 | 4 JavBus 磁力评分排序(可选) | 未开始 |
 
 第 1 步相对本计划的偏差:

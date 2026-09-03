@@ -203,4 +203,6 @@ GPL-3.0-or-later; see [LICENSE](LICENSE).
 The AVID parser in `src/embyx_manager/core/avid.py` is derived from
 [JavSP](https://github.com/Yuukiy/JavSP) (GPL-3.0). Parts of its tag-stripping rules and
 test corpus come from [metatube-sdk-go](https://github.com/metatube-community/metatube-sdk-go)
-(Apache-2.0); the affected files carry the corresponding notices.
+(Apache-2.0); the affected files carry the corresponding notices. IDs are spelled the way
+AVBase (and metatube) spell them: the number as an integer zero-padded to three
+digits, so `HTTM-0066` and `TBW-19` key the ledger as `HTTM-066` and `TBW-019`.

@@ -4,6 +4,7 @@ from datetime import UTC, date, datetime, timedelta
 import asyncpg
 import pytest
 
+from embyx_manager.db import _MIGRATIONS
 from embyx_manager.monitor.acquisitions import (
     AcquisitionRepository,
     AcquisitionSource,
@@ -552,3 +553,25 @@ async def test_a_waking_sighting_accepts_a_cooling_row() -> None:
     record = await ledger.get('ABC-123')
     assert record is not None
     assert record.release_date == date(2026, 8, 1)
+
+
+async def test_migration_13_renames_ledger_keys_to_the_catalog_spelling() -> None:
+    """Keys written before the padding rule follow it; a taken key is left alone."""
+    ledger = make_ledger()
+    await start_downloading(ledger, 'HTTM-0066')
+    await ledger.discover('TBW-19', source=rss_source('Actor'), now=NOW)
+    await ledger.discover('TBW-019', source=rss_source('Actor'), now=NOW)
+    await ledger.discover('FC2-1234567', source=rss_source('Actor'), now=NOW)
+
+    pool = await make_database().get_pool()
+    await pool.execute(_MIGRATIONS[13][2])
+
+    assert await ledger.get('HTTM-0066') is None
+    renamed = await ledger.get('HTTM-066')
+    assert renamed is not None
+    assert renamed.state is AcquisitionState.DOWNLOADING
+    # The attempts followed the rename through the foreign key.
+    assert [attempt.avid for attempt in await ledger.attempts_for('HTTM-066')] == ['HTTM-066', 'HTTM-066']
+    assert await ledger.get('TBW-19') is not None
+    assert await ledger.get('TBW-019') is not None
+    assert await ledger.get('FC2-1234567') is not None

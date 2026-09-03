@@ -135,14 +135,14 @@ def test_content_id_padding_is_removed(parser: AvidParser, title: str, expected:
     assert parser.get_avid(title) == expected
 
 
-@pytest.mark.parametrize('title', ['FC2-00123', '259LUXU-00123'])
-def test_brands_without_content_ids_keep_their_digits(parser: AvidParser, title: str) -> None:
+@pytest.mark.parametrize('title', ['FC2-00123', 'MK3D2DBD-01'])
+def test_serial_and_volume_brands_keep_their_digits(parser: AvidParser, title: str) -> None:
     assert parser.get_avid(title) == title
 
 
-def test_padding_removal_needs_the_full_content_id_padding(parser: AvidParser) -> None:
-    # A single leading zero is part of the number, not DMM's five-digit padding.
-    assert parser.get_avid('ABC-0123') == 'ABC-0123'
+def test_any_leading_zero_beyond_three_digits_is_padding(parser: AvidParser) -> None:
+    # JavBus pads to four digits where the catalogs use three.
+    assert parser.get_avid('ABC-0123') == 'ABC-123'
 
 
 # -- release noise ------------------------------------------------------------
@@ -204,3 +204,27 @@ def test_variant_tags(name: str, expected: set[str]) -> None:
 )
 def test_high_resolution_detection(name: str, *, high_resolution: bool) -> None:
     assert bool(variant_tags(name) & HIGH_RESOLUTION_TAGS) is high_resolution
+
+
+@pytest.mark.parametrize(
+    ('title', 'expected'),
+    [
+        # JavBus pads to four digits, AVBase to three; the ledger keys on the id.
+        ('HTTM-0066', 'HTTM-066'),
+        ('MXDLP-0337.mp4', 'MXDLP-337'),
+        # The digit prefix is dropped by the ordinary pattern, on every source alike.
+        ('3DSVR-0707', 'DSVR-707'),
+        ('TBW-19', 'TBW-019'),
+        ('abp-01', 'ABP-001'),
+        # More than three significant digits are all kept.
+        ('IPZZ-1234', 'IPZZ-1234'),
+        ('259LUXU-1234', '259LUXU-1234'),
+        # Catalog serials and ids of other shapes are left as written.
+        ('FC2-PPV-1234567', 'FC2-1234567'),
+        ('T-28621', 'T-28621'),
+        ('IBW-949z', 'IBW-949Z'),
+        ('MKD-S03', 'MKD-S03'),
+    ],
+)
+def test_get_avid_normalizes_the_number_to_three_digits(parser: AvidParser, title: str, expected: str) -> None:
+    assert parser.get_avid(title) == expected
