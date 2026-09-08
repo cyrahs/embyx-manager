@@ -37,7 +37,8 @@ Three peer features; `/` redirects to the dashboard and no feature owns the app 
   backend resolves it), or from the Fill Actor page after a scan — with aliases, state,
   last poll and error per row. **Charts** are plain feed URLs (RSSHub rankings, sukebei
   searches, any RSS/Atom) whose URL can be corrected in place. Every subscription files
-  under one of the RSS categories, which decide the offline directory.
+  under one of the RSS categories, which decide the offline directory; categories rank in
+  their configured order, so an AVID a chart re-lists stays with the actor category ahead of it.
 - **Settings** (`/settings`): CloudDrive, Fill Actor library roots, pipeline behavior,
   RSS categories, and avid parsing rules are stored in the database, editable from the
   browser, versioned against concurrent edits, and hot-applied without restarts. The

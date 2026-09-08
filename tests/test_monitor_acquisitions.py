@@ -511,6 +511,53 @@ async def test_rediscovery_repoints_a_retryable_row_at_its_category_directory() 
     assert record.task_dir_path == '/115/new'
 
 
+async def test_a_sighting_that_yields_leaves_the_row_with_its_owner() -> None:
+    """The chart's sighting still wakes the row, but the actor keeps the directory and the source."""
+    ledger = make_ledger()
+    await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW, task_dir_path='/115/clt')
+    await ledger.transition(
+        'ABC-123',
+        expected=AcquisitionState.DISCOVERED,
+        target=AcquisitionState.RESOLVE_FAILED,
+        now=NOW,
+        next_action_at=NOW + timedelta(days=1),
+    )
+
+    accepted = await ledger.discover(
+        'ABC-123',
+        source=rss_source('Rank'),
+        now=NOW,
+        task_dir_path='/115/rank',
+        wake=True,
+        yields_to=(rss_source('Actor'),),
+    )
+
+    assert accepted is True
+    record = await ledger.get('ABC-123')
+    assert record is not None
+    assert record.task_dir_path == '/115/clt'
+    assert record.source == 'rss:Actor'
+
+
+async def test_taking_a_row_into_another_directory_hands_it_to_that_source() -> None:
+    ledger = make_ledger()
+    await ledger.discover('ABC-123', source=rss_source('Rank'), now=NOW, task_dir_path='/115/rank')
+    await ledger.transition(
+        'ABC-123',
+        expected=AcquisitionState.DISCOVERED,
+        target=AcquisitionState.RESOLVE_FAILED,
+        now=NOW,
+        next_action_at=NOW,
+    )
+
+    assert await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW, task_dir_path='/115/clt') is True
+
+    record = await ledger.get('ABC-123')
+    assert record is not None
+    assert record.task_dir_path == '/115/clt'
+    assert record.source == 'rss:Actor'
+
+
 async def test_an_avid_someone_else_owns_keeps_its_directory() -> None:
     ledger = make_ledger()
     await start_downloading(ledger, 'ABC-123')
