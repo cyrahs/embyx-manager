@@ -16,6 +16,11 @@ subscription in it. A category names the offline directory its downloads belong
 in, which is how one group of feeds ends up in a library subdirectory of its
 own; subscriptions are otherwise independent, so one failing does not cost the
 others their pass.
+
+The order categories are configured in is their precedence. An AVID that more
+than one category sights belongs to the earliest of them: a chart re-listing a
+tracked actor's work still contributes its magnet, but the download files into
+the actor's directory, not the chart's.
 """
 
 import asyncio
@@ -158,6 +163,7 @@ class RssPipeline:
         # Pinned onto each acquisition so its retries keep landing here even if
         # the category is later repointed or removed.
         task_dir = category.task_dir_path
+        yields_to = self._outranking_sources(category)
 
         avid_item: dict[str, list[FeedItem]] = {}
         for item in items:
@@ -171,6 +177,7 @@ class RssPipeline:
         now = datetime.now(UTC)
         wanted: dict[str, list[FeedItem]] = {}
         item_magnets: dict[str, str | None] = {}
+        dirs: dict[str, str] = {}
         for avid, avid_items in avid_item.items():
             # An item carrying a magnet is evidence the wait is over: it wakes a
             # row still cooling down from an earlier empty pass.
@@ -181,26 +188,48 @@ class RssPipeline:
                 now=now,
                 task_dir_path=task_dir,
                 wake=item_magnet is not None,
+                yields_to=yields_to,
             )
-            if accepted:
-                wanted[avid] = avid_items
-                item_magnets[avid] = item_magnet
-            else:
+            if not accepted:
                 ctx.add('skipped_known')
+                continue
+            wanted[avid] = avid_items
+            item_magnets[avid] = item_magnet
+            dirs[avid] = await self._filing_dir(avid, task_dir, yields_to, ctx)
         if len(wanted) != len(avid_item):
             ctx.info('Skipping %d avids already tracked', len(avid_item) - len(wanted))
         if not wanted:
             return
 
         ctx.check_cancelled()
-        wanted = await self._skip_library_held(wanted, task_dir, ctx)
+        wanted = await self._skip_library_held(wanted, dirs, ctx)
         if not wanted:
             return
 
         ctx.check_cancelled()
         resolved = await self._resolve_all(wanted, item_magnets, ctx)
         ctx.check_cancelled()
-        await self._submit_all(resolved, task_dir, ctx)
+        await self._submit_all(resolved, dirs, ctx)
+
+    def _outranking_sources(self, category: RssCategory) -> tuple[str, ...]:
+        """The ledger sources of the categories configured ahead of this one."""
+        ahead: list[str] = []
+        for configured in self._config.categories:
+            if configured.label == category.label:
+                break
+            ahead.append(rss_source(configured.label))
+        return tuple(ahead)
+
+    async def _filing_dir(self, avid: str, task_dir: str, yields_to: tuple[str, ...], ctx: RunContext) -> str:
+        """The directory this sighting's download goes to: the row's, when a category ahead owns it."""
+        if not yields_to:
+            return task_dir
+        record = await self._ledger.get(avid)
+        if record is None or not record.task_dir_path or record.task_dir_path == task_dir:
+            return task_dir
+        ctx.add('filed_by_owner')
+        ctx.info('%s belongs to %s; filing into %s', avid, record.source, record.task_dir_path)
+        return record.task_dir_path
 
     def _avid_of(self, item: FeedItem) -> str:
         """The AVID an item is about: from its title, else from its link.
@@ -221,7 +250,7 @@ class RssPipeline:
     async def _skip_library_held(
         self,
         wanted: dict[str, list[FeedItem]],
-        task_dir: str,
+        dirs: dict[str, str],
         ctx: RunContext,
     ) -> dict[str, list[FeedItem]]:
         """Drop AVIDs the library already holds, settling their ledger rows.
@@ -238,7 +267,7 @@ class RssPipeline:
         for avid, items in wanted.items():
             ctx.check_cancelled()
             try:
-                held = await asyncio.to_thread(self._archiver.library_holdings, avid, ctx, task_dir_path=task_dir)
+                held = await asyncio.to_thread(self._archiver.library_holdings, avid, ctx, task_dir_path=dirs[avid])
             except Exception:  # noqa: BLE001 - unverifiable is not held
                 ctx.exception('Failed to check the library for %s', avid)
                 held = ()
@@ -297,10 +326,15 @@ class RssPipeline:
 
     # -- CloudDrive offline tasks ---------------------------------------------
 
-    async def _submit_all(self, resolved: dict[str, list[MagnetCandidate]], task_dir: str, ctx: RunContext) -> None:
+    async def _submit_all(
+        self,
+        resolved: dict[str, list[MagnetCandidate]],
+        dirs: dict[str, str],
+        ctx: RunContext,
+    ) -> None:
         for avid, candidates in resolved.items():
             ctx.check_cancelled()
-            await self._intake.record_and_submit(avid, candidates, task_dir, ctx=ctx)
+            await self._intake.record_and_submit(avid, candidates, dirs[avid], ctx=ctx)
 
 
 def _describe(exc: BaseException) -> str:

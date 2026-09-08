@@ -15,7 +15,7 @@ because that is a programming error rather than a race.
 """
 
 import json
-from collections.abc import Iterable, Sequence
+from collections.abc import Collection, Iterable, Sequence
 from dataclasses import dataclass
 from datetime import date, datetime
 from enum import StrEnum
@@ -228,6 +228,7 @@ class AcquisitionRepository:
         next_action_at: datetime | None = None,
         release_date: date | None = None,
         wake: bool = False,
+        yields_to: Collection[str] = (),
     ) -> bool:
         """Record an AVID sighting; return whether it still needs magnets resolved.
 
@@ -242,6 +243,14 @@ class AcquisitionRepository:
         it. ``wake`` says the sighting itself carries a magnet: that is evidence
         the wait is over, so a row still cooling down is accepted rather than
         told to keep waiting.
+
+        An accepted re-discovery normally takes the row over: its directory is
+        repointed at ``task_dir_path`` and, when that moves it to another
+        source's directory, the source follows. ``yields_to`` names the sources
+        this sighting must not take a row from — a chart re-listing an actor's
+        work leaves it filed under the actor. The sighting still counts (its
+        magnet still wakes the row); only the ownership stays put, so the caller
+        reads the directory back off the row before submitting.
         """
         pool = await self._database.get_pool()
         inserted = await pool.fetchval(
@@ -276,13 +285,17 @@ class AcquisitionRepository:
                 avid,
                 release_date,
             )
-        if accepted and task_dir_path is not None and existing.task_dir_path != task_dir_path:
+        owned_elsewhere = existing.source != str(source) and existing.source in yields_to
+        if accepted and task_dir_path is not None and existing.task_dir_path != task_dir_path and not owned_elsewhere:
             # The retry follows whichever category just re-discovered it, so
-            # repointing a category takes effect from its next pass.
+            # repointing a category takes effect from its next pass. A directory
+            # that belongs to another source carries the source along: the row
+            # is now that source's to file.
             await pool.execute(
-                'UPDATE archive_acquisitions SET task_dir_path = $2 WHERE avid = $1',
+                'UPDATE archive_acquisitions SET task_dir_path = $2, source = $3 WHERE avid = $1',
                 avid,
                 task_dir_path,
+                str(source),
             )
         if accepted and next_action_at is not None:
             # A queueing source accepted an orphaned or cooled-down row: give it

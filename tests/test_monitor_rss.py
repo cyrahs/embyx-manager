@@ -67,6 +67,7 @@ class FakeLedger:
         next_action_at: datetime | None = None,
         release_date: date | None = None,
         wake: bool = False,
+        yields_to: Sequence[str] = (),
     ) -> bool:
         if avid not in self.states:
             self.states[avid] = AcquisitionState.DISCOVERED
@@ -85,8 +86,11 @@ class FakeLedger:
             return False
         if accepted and release_date is not None and self.release_dates.get(avid) is None:
             self.release_dates[avid] = release_date
-        if accepted and task_dir_path is not None:
+        owner = self.sources.get(avid, source)
+        owned_elsewhere = owner != source and owner in yields_to
+        if accepted and task_dir_path is not None and self.task_dirs.get(avid) != task_dir_path and not owned_elsewhere:
             self.task_dirs[avid] = task_dir_path
+            self.sources[avid] = source
         if accepted and next_action_at is not None:
             self.next_action_at[avid] = next_action_at
         return accepted
@@ -741,6 +745,53 @@ async def test_a_category_downloads_into_its_own_directory() -> None:
     assert submitted == {MAGNET_A: TASK_DIR, MAGNET_B: '/115/embyx_in/rank'}
     # Each AVID carries its category's directory, so a later retry follows it.
     assert deps.ledger.task_dirs == {'ABC-123': TASK_DIR, 'DEF-456': '/115/embyx_in/rank'}
+
+
+async def test_a_chart_sighting_files_a_tracked_actors_work_under_the_actor() -> None:
+    """Categories rank in configuration order: the actor's row keeps its directory, the chart's magnet still helps."""
+    ledger = FakeLedger(known={'ABC-123': AcquisitionState.RESOLVE_FAILED})
+    ledger.sources['ABC-123'] = 'rss:Actor'
+    ledger.task_dirs['ABC-123'] = TASK_DIR
+    ledger.next_action_at['ABC-123'] = datetime.now(UTC) + timedelta(days=1)
+    pipeline, deps = make_pipeline(
+        items_by_label={'Actor': [], 'Rank': [make_item('item-1', 'ABC-123', magnet_table(HASH_B))]},
+        categories=(
+            RssCategory(label='Actor', task_dir_path=TASK_DIR),
+            RssCategory(label='Rank', task_dir_path='/115/embyx_in/rank'),
+        ),
+        ledger=ledger,
+    )
+
+    ctx = make_ctx()
+    await pipeline.run(ctx)
+
+    deps.cloud.add_offline_files.assert_awaited_once_with([MAGNET_B], TASK_DIR)
+    assert deps.ledger.task_dirs['ABC-123'] == TASK_DIR
+    assert deps.ledger.sources['ABC-123'] == 'rss:Actor'
+    assert deps.ledger.states['ABC-123'] is AcquisitionState.DOWNLOADING
+    assert ctx.stats['filed_by_owner'] == 1
+
+
+async def test_an_actor_sighting_takes_a_charts_row_into_the_actors_directory() -> None:
+    ledger = FakeLedger(known={'ABC-123': AcquisitionState.RESOLVE_FAILED})
+    ledger.sources['ABC-123'] = 'rss:Rank'
+    ledger.task_dirs['ABC-123'] = '/115/embyx_in/rank'
+    ledger.next_action_at['ABC-123'] = None
+    pipeline, deps = make_pipeline(
+        items_by_label={'Actor': [make_item('item-1', 'ABC-123')], 'Rank': []},
+        categories=(
+            RssCategory(label='Actor', task_dir_path=TASK_DIR),
+            RssCategory(label='Rank', task_dir_path='/115/embyx_in/rank'),
+        ),
+        ledger=ledger,
+        sukebei_magnets={'ABC-123': MAGNET_A},
+    )
+
+    await pipeline.run(make_ctx())
+
+    deps.cloud.add_offline_files.assert_awaited_once_with([MAGNET_A], TASK_DIR)
+    assert deps.ledger.task_dirs['ABC-123'] == TASK_DIR
+    assert deps.ledger.sources['ABC-123'] == 'rss:Actor'
 
 
 async def test_no_categories_ingests_nothing() -> None:
