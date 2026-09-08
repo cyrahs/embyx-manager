@@ -6,6 +6,7 @@ Ported from embyx-monitor's mapping.py with injected configuration and
 structured run reporting.
 """
 
+import errno
 import filecmp
 import shutil
 from pathlib import Path
@@ -135,13 +136,30 @@ class MappingPipeline:
         if not empty_dirs:
             return
         empty_dirs.sort(reverse=True)
+        kept: set[Path] = set()
         for empty_dir in empty_dirs:
             ctx.check_cancelled()
-            if not empty_dir.exists():
+            if empty_dir in kept or not empty_dir.exists():
                 continue
-            shutil.rmtree(empty_dir)
+            rel = empty_dir.relative_to(self.dst_dir)
+            try:
+                shutil.rmtree(empty_dir)
+            except OSError as exc:
+                # One undeletable directory must not abort the whole run: the
+                # remaining empty directories still need cleaning. ENOTEMPTY in
+                # particular means the filesystem disagrees with the listing we
+                # just saw (a stale NFS directory cache does exactly this), so
+                # the directory is not derived-output garbage and stays put,
+                # and so do its ancestors: they are not empty either.
+                kept.update(empty_dir.parents)
+                ctx.add('dirs_skipped')
+                if exc.errno == errno.ENOTEMPTY:
+                    ctx.warning('skipped directory that is not empty on disk: %s', rel)
+                else:
+                    ctx.exception('failed to delete empty directory %s', rel)
+                continue
             ctx.add('dirs_deleted')
-            ctx.info('deleted empty directory: %s', empty_dir.relative_to(self.dst_dir))
+            ctx.info('deleted empty directory: %s', rel)
 
     def _delete_empty_dirs_for_path(self, path: Path, ctx: RunContext) -> None:
         if not self.dst_dir.exists():
@@ -154,7 +172,15 @@ class MappingPipeline:
             except FileNotFoundError:
                 current = current.parent
                 continue
-            current.rmdir()
+            try:
+                current.rmdir()
+            except OSError as exc:
+                if exc.errno != errno.ENOTEMPTY:
+                    raise
+                # The listing said empty but the filesystem says otherwise
+                # (stale NFS directory cache); treat it as the non-empty stop.
+                ctx.warning('skipped directory that is not empty on disk: %s', current.relative_to(self.dst_dir))
+                break
             ctx.add('dirs_deleted')
             ctx.info('deleted empty directory: %s', current.relative_to(self.dst_dir))
             current = current.parent
