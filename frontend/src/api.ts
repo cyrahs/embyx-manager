@@ -16,6 +16,10 @@ import type {
   MoveState,
   PipelineId,
   PipelineStatus,
+  Playlist,
+  PlaylistFill,
+  PlaylistList,
+  PlaylistMissing,
   PlanEnvelope,
   PlanJob,
   RunDetail,
@@ -300,6 +304,8 @@ const CODE_MESSAGES: Record<string, string> = {
   unknown_subscription_kind: '未知的订阅类型。',
   unknown_subscription: '找不到这条订阅。',
   url_not_editable: '演员订阅的地址由 talent id 决定，不能修改。',
+  unknown_playlist: '找不到这个列表。',
+  fill_directory_unavailable: '还没有可用的补全目录：在设置里填「补全离线目录」，或给 RSS 分类起名 Rank。',
 }
 
 /** `undefined` uses the signed-in token; `null` deliberately sends none. */
@@ -811,7 +817,7 @@ export async function updateConfigSection(
 }
 
 export async function testConnection(
-  target: 'clouddrive',
+  target: 'clouddrive' | 'emby',
   values: Record<string, unknown>,
 ): Promise<TestConnectionResult> {
   const body = await request(`/api/config/${target}/test`, {
@@ -868,4 +874,38 @@ export async function subscribeTalent(input: {
 
 export async function deleteSubscription(id: number): Promise<void> {
   await request(`/api/monitor/subscriptions/${id}`, { method: 'DELETE' })
+}
+
+// ---------- playlists ----------
+
+export async function listPlaylists(signal?: AbortSignal): Promise<PlaylistList> {
+  const body = await request('/api/playlists', { signal })
+  if (!isRecord(body) || !Array.isArray(body.items)) {
+    throw new ApiError(0, 'invalid_response', '列表响应无效。')
+  }
+  return body as unknown as PlaylistList
+}
+
+export async function getPlaylistMissing(key: string, signal?: AbortSignal): Promise<PlaylistMissing> {
+  const body = await request(`/api/playlists/${encodeURIComponent(key)}/missing`, { signal })
+  if (!isRecord(body) || !Array.isArray(body.items)) {
+    throw new ApiError(0, 'invalid_response', '缺失清单响应无效。')
+  }
+  return body as unknown as PlaylistMissing
+}
+
+export async function updatePlaylist(key: string, changes: { enabled: boolean }): Promise<Playlist> {
+  const body = await request(`/api/playlists/${encodeURIComponent(key)}`, {
+    method: 'PATCH',
+    body: JSON.stringify(changes),
+  })
+  return body as unknown as Playlist
+}
+
+export async function fillPlaylist(key: string): Promise<PlaylistFill> {
+  const body = await request(`/api/playlists/${encodeURIComponent(key)}/fill`, { method: 'POST' })
+  if (!isRecord(body) || !Array.isArray(body.items) || !isRecord(body.counts)) {
+    throw new ApiError(0, 'invalid_response', '补全响应无效。')
+  }
+  return body as unknown as PlaylistFill
 }

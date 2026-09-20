@@ -14,7 +14,8 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel, ConfigDict, Field
 
 from embyx_manager.clients.clouddrive import AsyncCloudDrive, CloudDriveClient
-from embyx_manager.config.models import CloudDriveConfig
+from embyx_manager.clients.emby import EmbyAuthError, EmbyClient, EmbyError
+from embyx_manager.config.models import CloudDriveConfig, EmbyConfig
 from embyx_manager.config.store import (
     ConfigStore,
     ConfigVersionConflictError,
@@ -67,7 +68,7 @@ def _section_view(store: ConfigStore, section: str) -> SectionView:
     )
 
 
-def create_config_router(store: ConfigStore, *, mutation_auth: Any) -> APIRouter:
+def create_config_router(store: ConfigStore, *, mutation_auth: Any) -> APIRouter:  # noqa: C901 - route registration
     router = APIRouter(prefix='/api/config')
 
     @router.get('')
@@ -97,6 +98,13 @@ def create_config_router(store: ConfigStore, *, mutation_auth: Any) -> APIRouter
         if not config.configured:
             return TestConnectionResult(ok=False, detail='address and api_token are required')
         return await _run_clouddrive_test(config)
+
+    @router.post('/emby/test', dependencies=[Depends(mutation_auth)])
+    async def test_emby(request: TestConnectionRequest) -> TestConnectionResult:
+        config = _merge_for_test(store, EmbyConfig, request.values)
+        if not config.configured:
+            return TestConnectionResult(ok=False, detail='address and api_key are required')
+        return await _run_emby_test(config)
 
     return router
 
@@ -142,3 +150,16 @@ async def _run_clouddrive_test(config: CloudDriveConfig) -> TestConnectionResult
         return TestConnectionResult(ok=True, detail='connected')
     finally:
         await cloud.aclose()
+
+
+async def _run_emby_test(config: EmbyConfig) -> TestConnectionResult:
+    client = EmbyClient(config.address, config.api_key, timeout=TEST_TIMEOUT_SECONDS)
+    try:
+        info = await client.system_info()
+    except EmbyAuthError:
+        return TestConnectionResult(ok=False, detail='the API key was rejected')
+    except EmbyError as exc:
+        return TestConnectionResult(ok=False, detail=f'connection failed: {exc}')
+    finally:
+        await client.aclose()
+    return TestConnectionResult(ok=True, detail=f'{info.name} {info.version}'.strip())

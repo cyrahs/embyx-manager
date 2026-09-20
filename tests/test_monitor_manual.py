@@ -287,3 +287,19 @@ async def test_submit_without_clouddrive(tmp_path: Path) -> None:
 
     with pytest.raises(CloudUnavailableError):
         await source.submit(['ABC-123'], task_dir_path=INBOX)
+
+
+async def test_submit_takes_another_sources_label_and_lifts_the_cap(tmp_path: Path) -> None:
+    """A playlist fill is the manual path under its own name, with no paste limit."""
+    source, deps = make_source(tmp_path)
+    avids = [f'PL-{n:03d}' for n in range(1, MAX_MANUAL_INPUTS + 2)]
+
+    with pytest.raises(TooManyInputsError):
+        await source.submit(avids, task_dir_path=RANK_DIR)
+
+    submission = await source.submit(avids, task_dir_path=RANK_DIR, source='playlist:k7', limit=None)
+
+    assert len(submission.entries) == MAX_MANUAL_INPUTS + 1
+    assert {entry.outcome for entry in submission.entries} == {ManualOutcome.SUBMITTED}
+    assert deps.ledger.sources['PL-001'] == 'playlist:k7'
+    assert all(dst == RANK_DIR for _, dst in deps.cloud.submitted)

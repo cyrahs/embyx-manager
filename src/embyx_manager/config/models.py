@@ -97,6 +97,27 @@ class CloudDriveConfig(ConfigSection):
         return bool(self.address and self.api_token)
 
 
+class EmbyConfig(ConfigSection):
+    """The Emby server the playlist sync maintains lists on."""
+
+    SECRET_FIELDS: ClassVar[frozenset[str]] = frozenset({'api_key'})
+
+    #: HTTP base URL; inside the cluster the instance's Service, e.g.
+    #: http://embyx.media.svc.cluster.local.
+    address: str = ''
+    #: An API key generated on the server (Settings → Advanced → API Keys).
+    api_key: str = ''
+
+    @field_validator('address')
+    @classmethod
+    def _validate_address(cls, value: str) -> str:
+        return normalize_http_base_url('emby.address', value)
+
+    @property
+    def configured(self) -> bool:
+        return bool(self.address and self.api_key)
+
+
 class AvidRulesConfig(ConfigSection):
     """Video-ID parsing rules shared by the pipelines."""
 
@@ -292,6 +313,41 @@ class MappingConfig(ConfigSection):
         return bool(self.src_dir and self.dst_dir)
 
 
+class PlaylistsConfig(ConfigSection):
+    """The ranking-to-playlist sync: schedule, source, and where fills go."""
+
+    enabled: bool = False
+    interval_seconds: int = 86_400
+    #: The page whose script names the current ranking database.
+    source_url: str = 'https://jinjier.art/sql'
+    #: The CloudDrive API directory a list's missing titles are queued under;
+    #: empty means the RSS category labelled "Rank", which is where rankings
+    #: already download to.
+    task_dir_path: str = ''
+
+    @field_validator('interval_seconds')
+    @classmethod
+    def _positive(cls, value: int) -> int:
+        if value <= 0:
+            msg = 'playlists.interval_seconds must be positive'
+            raise ValueError(msg)
+        return value
+
+    @field_validator('source_url')
+    @classmethod
+    def _validate_source_url(cls, value: str) -> str:
+        normalized = normalize_http_base_url('playlists.source_url', value)
+        if not normalized:
+            msg = 'playlists.source_url must not be empty'
+            raise ValueError(msg)
+        return normalized
+
+    @field_validator('task_dir_path')
+    @classmethod
+    def _validate_task_dir(cls, value: str) -> str:
+        return normalize_absolute_path('playlists.task_dir_path', value)
+
+
 class FillActorConfig(ConfigSection):
     """Library roots and move settings for the Fill Actor feature.
 
@@ -393,9 +449,11 @@ class FillActorConfig(ConfigSection):
 
 SECTION_MODELS: dict[str, type[ConfigSection]] = {
     'clouddrive': CloudDriveConfig,
+    'emby': EmbyConfig,
     'avid': AvidRulesConfig,
     'rss': RssConfig,
     'archive': ArchiveConfig,
     'mapping': MappingConfig,
+    'playlists': PlaylistsConfig,
     'fill_actor': FillActorConfig,
 }

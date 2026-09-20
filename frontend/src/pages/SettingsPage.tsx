@@ -45,7 +45,7 @@ interface SectionSpec {
   title: string
   description: string
   fields: FieldSpec[]
-  testTarget?: 'clouddrive'
+  testTarget?: 'clouddrive' | 'emby'
   /** Cross-field check run after every field is collected; throws a message to show. */
   validate?: (values: Record<string, unknown>) => void
 }
@@ -60,6 +60,22 @@ const SECTION_SPECS: SectionSpec[] = [
       { key: 'address', label: '服务地址', kind: 'text', placeholder: 'clouddrive.internal:19798' },
       { key: 'api_token', label: 'API Token', kind: 'secret' },
       { key: 'secure', label: '使用 TLS 连接', kind: 'boolean' },
+    ],
+  },
+  {
+    section: 'emby',
+    title: 'Emby',
+    description: 'embyx 实例的 HTTP API，供「列表」页把榜单同步成 Emby 播放列表。',
+    testTarget: 'emby',
+    fields: [
+      {
+        key: 'address',
+        label: '服务地址',
+        kind: 'text',
+        placeholder: 'http://embyx.media.svc.cluster.local',
+        hint: '集群内填 Service 地址；测试连接会回显服务器名与版本。',
+      },
+      { key: 'api_key', label: 'API Key', kind: 'secret', hint: '在 Emby 的 设置 → 高级 → API 密钥 里生成。' },
     ],
   },
   {
@@ -220,6 +236,29 @@ const SECTION_SPECS: SectionSpec[] = [
       { key: 'dst_dir', label: '目标目录（Emby）', kind: 'text' },
       { key: 'debounce_seconds', label: '增量防抖（秒）', kind: 'number' },
       { key: 'full_sync_interval_seconds', label: '全量兜底间隔（秒）', kind: 'number' },
+    ],
+  },
+  {
+    section: 'playlists',
+    title: '榜单播放列表',
+    description:
+      '定时读取 jinjier.art 的榜单数据库，把「列表」页里启用的榜单按名次同步成 Emby 播放列表。需要先在上面的 Emby 卡片里配好地址与 API Key。',
+    fields: [
+      { key: 'enabled', label: '启用定时同步', kind: 'boolean' },
+      { key: 'interval_seconds', label: '同步间隔（秒）', kind: 'number', hint: '数据源大约每月更新一次，每天检查一次足够。' },
+      {
+        key: 'source_url',
+        label: '数据源页面',
+        kind: 'text',
+        placeholder: 'https://jinjier.art/sql',
+        hint: '该页面的脚本里写着当前数据库文件名；只在站点改结构时需要改。',
+      },
+      {
+        key: 'task_dir_path',
+        label: '补全离线目录（CloudDrive 路径）',
+        kind: 'text',
+        hint: '「补全」把榜单缺失的番号排进这个 115 离线目录。留空则用 RSS 分类里标签为 Rank 的目录。',
+      },
     ],
   },
   {

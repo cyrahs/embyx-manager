@@ -18,6 +18,11 @@ Three peer features; `/` redirects to the dashboard and no feature owns the app 
   - **archive**: intake normalization (flatten/rename) and per-brand archiving;
   - **mapping**: flat `.strm` tree mirrored to a per-title layout, with a real-time
     watchdog for incremental syncs plus a periodic full sync.
+  - **playlists**: the ranking lists jinjier.art publishes (JavDB censored TOP250,
+    JavLibrary TOP500, JavDB yearly TOP250s, the JAV awards) mirrored as Emby playlists in
+    ranking order, from the titles the library already holds; uncensored, FC2 and western
+    entries are left out. Each list can be enabled or disabled; a disabled list has its
+    playlist removed. Needs the Emby settings card.
   Each pipeline has enable/disable, manual trigger (rss supports the Rank label), live
   status, and per-run stats/errors/log tail. The download-tracking panel also carries
   **手动添加**, the third input source: paste AVIDs (or file names to read them from) and
@@ -42,7 +47,15 @@ Three peer features; `/` redirects to the dashboard and no feature owns the app 
   Before a chart files a work nobody sighted before, AVBase is asked who is credited on it: a
   subscribed talent's work files under the talent's category even when the talent's feed listed
   it before the subscription was seeded.
-- **Settings** (`/settings`): CloudDrive, Fill Actor library roots, pipeline behavior,
+- **Lists** (`/playlists`): the ranking lists the playlists pipeline manages, grouped into
+  charts, JavDB years and awards editions, each with how many titles the library holds and
+  how many it lacks. A list can be enabled or disabled (its playlist follows on the next
+  sync), the missing column expands into the titles in ranking order with their
+  download-tracking state, **补全** queues every title a list lacks through the shared
+  acquisition intake (into the playlists section's directory, else the RSS category named
+  Rank), and **立即同步** runs the pipeline now.
+- **Settings** (`/settings`): CloudDrive, Emby (address and API key, with a connection
+  test), Fill Actor library roots, pipeline behavior,
   RSS categories, and avid parsing rules are stored in the database, editable from the
   browser, versioned against concurrent edits, and hot-applied without restarts. The
   CloudDrive panel has a connection-test button that uses the unsaved form values

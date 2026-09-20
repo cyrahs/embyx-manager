@@ -23,12 +23,14 @@ const PIPELINE_LABELS: Record<PipelineId, string> = {
   rss: 'RSS 磁力摄取',
   archive: '归档整理',
   mapping: 'STRM 映射',
+  playlists: '榜单播放列表',
 }
 
 const PIPELINE_DESCRIPTIONS: Record<PipelineId, string> = {
   rss: '订阅源新条目 → 磁力解析 → 115 离线任务',
   archive: '下载目录整理、重命名并按厂牌归档入库',
   mapping: '.strm 平铺结构镜像为每部一目录（含实时增量）',
+  playlists: 'jinjier.art 榜单 → 按名次同步成 Emby 播放列表',
 }
 
 const STATE_LABELS: Record<string, string> = {
@@ -89,6 +91,16 @@ const STAT_LABELS: Record<string, string> = {
   error: '离线出错',
   stalled: '长期无进度',
   lost: '任务丢失',
+  lists: '榜单',
+  library_titles: '库内影片',
+  source_updated: '数据源更新',
+  lists_synced: '已同步',
+  lists_created: '新建列表',
+  lists_rebuilt: '重建列表',
+  lists_unchanged: '无变化',
+  lists_removed: '移除列表',
+  lists_failed: '同步失败',
+  missing_total: '缺失',
 }
 
 function formatTime(value: string | null): string {
@@ -141,7 +153,7 @@ export default function DashboardPage() {
     setRuns(runList)
     const versions: Record<string, { enabled: boolean; version: number }> = {}
     for (const section of sections) {
-      if (['rss', 'archive', 'mapping'].includes(section.section)) {
+      if (['rss', 'archive', 'mapping', 'playlists'].includes(section.section)) {
         versions[section.section] = {
           enabled: Boolean(section.values.enabled),
           version: section.version,
@@ -332,7 +344,7 @@ export default function DashboardPage() {
         <div className="panel-heading">
           <h2 id="runs-title">运行历史</h2>
           <div className="run-filter" role="group" aria-label="筛选流水线">
-            {(['all', 'rss', 'archive', 'mapping'] as const).map((option) => (
+            {(['all', 'rss', 'archive', 'mapping', 'playlists'] as const).map((option) => (
               <button
                 key={option}
                 type="button"

@@ -798,3 +798,9 @@ main {
 .subscription-edit { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .subscription-edit input[type='text'] { flex: 1 1 200px; min-width: 0; }
 .subscription-edit .text-button { white-space: nowrap; }
+
+/* ---------- playlists ---------- */
+.playlist-group { margin-top: 18px; }
+.playlist-group-title { margin: 0 0 8px; color: var(--text-2); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.run-table td.playlist-title { white-space: normal; max-width: 520px; color: var(--text-2); font-size: 12.5px; }
+.playlist-fill-summary { display: block; margin-top: 2px; font-size: 12px; }
