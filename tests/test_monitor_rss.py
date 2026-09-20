@@ -20,7 +20,7 @@ from embyx_manager.monitor.acquisitions import (
 )
 from embyx_manager.monitor.archive import ArchivePipeline
 from embyx_manager.monitor.reports import RunContext
-from embyx_manager.monitor.rss import RssPipeline
+from embyx_manager.monitor.rss import CreditedWork, RssPipeline
 from embyx_manager.monitor.subscriptions import (
     SubscriptionExistsError,
     SubscriptionKind,
@@ -478,8 +478,10 @@ def make_pipeline(
     add_side_effect: Exception | list[object] | None = None,
     fetch_side_effect: object | None = None,
     archive_config: ArchiveConfig | None = None,
+    cast_lookup: object | None = None,
 ) -> tuple[RssPipeline, SimpleNamespace]:
     deps = SimpleNamespace()
+    deps.cast_lookup = cast_lookup
     deps.ledger = ledger or FakeLedger()
     # One subscription per label, numbered in label order, each serving its feed.
     # A bare item list belongs to whichever category is configured, as the old
@@ -530,6 +532,7 @@ def make_pipeline(
         # An unconfigured archive has no routes, so the library check passes
         # everything through without touching the filesystem.
         archiver=ArchivePipeline(config=archive_config or ArchiveConfig(), avid_parser=AvidParser()),
+        cast_lookup=cast_lookup,
     )
     return pipeline, deps
 
@@ -792,6 +795,184 @@ async def test_an_actor_sighting_takes_a_charts_row_into_the_actors_directory() 
     deps.cloud.add_offline_files.assert_awaited_once_with([MAGNET_A], TASK_DIR)
     assert deps.ledger.task_dirs['ABC-123'] == TASK_DIR
     assert deps.ledger.sources['ABC-123'] == 'rss:Actor'
+
+
+RANK_DIR = '/115/embyx_in/rank'
+ACTOR_THEN_RANK = (
+    RssCategory(label='Actor', task_dir_path=TASK_DIR),
+    RssCategory(label='Rank', task_dir_path=RANK_DIR),
+)
+
+
+def cast_lookup_stub(casts: dict[str, CreditedWork | None]) -> AsyncMock:
+    async def lookup(avid: str) -> CreditedWork | None:
+        return casts.get(avid)
+
+    return AsyncMock(side_effect=lookup)
+
+
+def actor_and_rank_subscriptions(*, talent_id: int = 45338, category: str = 'Actor', enabled: bool = True):
+    return FakeSubscriptions(
+        [
+            make_subscription(1, category=category, name='香水じゅん', talent_id=talent_id, enabled=enabled),
+            make_subscription(2, category='Rank', url=feed_url('Rank')),
+        ],
+    )
+
+
+async def test_a_chart_files_a_subscribed_talents_unseen_work_under_the_talent() -> None:
+    """The talent's feed listed the work before its subscription was seeded, so only the chart sights it."""
+    lookup = cast_lookup_stub({'HMN-911': CreditedWork(talent_ids=frozenset({45338}), release_date=date(2026, 9, 18))})
+    pipeline, deps = make_pipeline(
+        items_by_label={'Rank': [make_item('item-1', 'HMN-911')]},
+        categories=ACTOR_THEN_RANK,
+        subscriptions=actor_and_rank_subscriptions(),
+        sukebei_magnets={'HMN-911': MAGNET_A},
+        cast_lookup=lookup,
+    )
+
+    ctx = make_ctx()
+    await pipeline.run(ctx)
+
+    deps.cloud.add_offline_files.assert_awaited_once_with([MAGNET_A], TASK_DIR)
+    assert deps.ledger.sources['HMN-911'] == 'rss:Actor'
+    assert deps.ledger.task_dirs['HMN-911'] == TASK_DIR
+    assert deps.ledger.release_dates['HMN-911'] == date(2026, 9, 18)
+    assert ctx.stats['filed_by_cast'] == 1
+
+
+async def test_a_chart_takes_over_its_own_cooled_row_when_the_cast_is_subscribed() -> None:
+    ledger = FakeLedger(known={'HMN-911': AcquisitionState.RESOLVE_FAILED})
+    ledger.sources['HMN-911'] = 'rss:Rank'
+    ledger.task_dirs['HMN-911'] = RANK_DIR
+    ledger.next_action_at['HMN-911'] = None
+    pipeline, deps = make_pipeline(
+        items_by_label={'Rank': [make_item('item-1', 'HMN-911')]},
+        categories=ACTOR_THEN_RANK,
+        subscriptions=actor_and_rank_subscriptions(),
+        ledger=ledger,
+        sukebei_magnets={'HMN-911': MAGNET_A},
+        cast_lookup=cast_lookup_stub({'HMN-911': CreditedWork(talent_ids=frozenset({45338}))}),
+    )
+
+    await pipeline.run(make_ctx())
+
+    deps.cloud.add_offline_files.assert_awaited_once_with([MAGNET_A], TASK_DIR)
+    assert deps.ledger.sources['HMN-911'] == 'rss:Actor'
+    assert deps.ledger.task_dirs['HMN-911'] == TASK_DIR
+
+
+@pytest.mark.parametrize(
+    'casts',
+    [
+        pytest.param({}, id='not-in-catalog'),
+        pytest.param({'HMN-911': CreditedWork(talent_ids=frozenset({99}))}, id='nobody-subscribed'),
+        pytest.param({'HMN-911': CreditedWork(talent_ids=frozenset())}, id='no-cast'),
+    ],
+)
+async def test_a_chart_keeps_a_work_nobody_subscribed_is_credited_on(casts: dict) -> None:
+    pipeline, deps = make_pipeline(
+        items_by_label={'Rank': [make_item('item-1', 'HMN-911')]},
+        categories=ACTOR_THEN_RANK,
+        subscriptions=actor_and_rank_subscriptions(),
+        sukebei_magnets={'HMN-911': MAGNET_A},
+        cast_lookup=cast_lookup_stub(casts),
+    )
+
+    ctx = make_ctx()
+    await pipeline.run(ctx)
+
+    deps.cloud.add_offline_files.assert_awaited_once_with([MAGNET_A], RANK_DIR)
+    assert deps.ledger.sources['HMN-911'] == 'rss:Rank'
+    assert 'filed_by_cast' not in ctx.stats
+
+
+@pytest.mark.parametrize(
+    'subscriptions',
+    [
+        pytest.param(actor_and_rank_subscriptions(enabled=False), id='disabled'),
+        pytest.param(actor_and_rank_subscriptions(category='Rank'), id='same-category'),
+    ],
+)
+async def test_only_an_enabled_subscription_in_a_category_ahead_claims_a_work(subscriptions: FakeSubscriptions) -> None:
+    pipeline, deps = make_pipeline(
+        items_by_label={'Rank': [make_item('item-1', 'HMN-911')]},
+        categories=ACTOR_THEN_RANK,
+        subscriptions=subscriptions,
+        sukebei_magnets={'HMN-911': MAGNET_A},
+        cast_lookup=cast_lookup_stub({'HMN-911': CreditedWork(talent_ids=frozenset({45338}))}),
+    )
+
+    await pipeline.run(make_ctx())
+
+    deps.cloud.add_offline_files.assert_awaited_once_with([MAGNET_A], RANK_DIR)
+    assert deps.ledger.sources['HMN-911'] == 'rss:Rank'
+
+
+async def test_an_unreadable_catalog_files_the_chart_sighting_as_itself() -> None:
+    pipeline, deps = make_pipeline(
+        items_by_label={'Rank': [make_item('item-1', 'HMN-911')]},
+        categories=ACTOR_THEN_RANK,
+        subscriptions=actor_and_rank_subscriptions(),
+        sukebei_magnets={'HMN-911': MAGNET_A},
+        cast_lookup=AsyncMock(side_effect=RuntimeError('avbase down')),
+    )
+
+    ctx = make_ctx()
+    await pipeline.run(ctx)
+
+    deps.cloud.add_offline_files.assert_awaited_once_with([MAGNET_A], RANK_DIR)
+    assert deps.ledger.sources['HMN-911'] == 'rss:Rank'
+    assert deps.ledger.states['HMN-911'] is AcquisitionState.DOWNLOADING
+
+
+async def test_the_catalog_is_not_asked_about_works_the_ledger_already_settled() -> None:
+    """A row past discovery, or one a category ahead owns, needs no lookup: the sighting cannot move it."""
+    ledger = FakeLedger(known={'ABC-123': AcquisitionState.DOWNLOADING, 'DEF-456': AcquisitionState.RESOLVE_FAILED})
+    ledger.sources['ABC-123'] = 'rss:Rank'
+    ledger.sources['DEF-456'] = 'rss:Actor'
+    ledger.task_dirs['DEF-456'] = TASK_DIR
+    ledger.next_action_at['DEF-456'] = None
+    lookup = cast_lookup_stub({})
+    pipeline, deps = make_pipeline(
+        items_by_label={
+            'Actor': [make_item('item-0', 'GHI-789')],
+            'Rank': [make_item('item-1', 'ABC-123'), make_item('item-2', 'DEF-456')],
+        },
+        categories=ACTOR_THEN_RANK,
+        ledger=ledger,
+        sukebei_magnets={'DEF-456': MAGNET_B, 'GHI-789': MAGNET_A},
+        cast_lookup=lookup,
+    )
+
+    await pipeline.run(make_ctx())
+
+    # The first category has nobody to yield to, so its own sightings never consult the catalog either.
+    lookup.assert_not_awaited()
+    assert deps.ledger.task_dirs['DEF-456'] == TASK_DIR
+
+
+async def test_the_catalog_is_asked_once_per_work_per_run() -> None:
+    lookup = cast_lookup_stub({'HMN-911': CreditedWork(talent_ids=frozenset({45338}))})
+    subscriptions = FakeSubscriptions(
+        [
+            make_subscription(1, category='Actor', name='香水じゅん', talent_id=45338),
+            make_subscription(2, category='Rank', url=feed_url('Rank'), name='most wanted'),
+            make_subscription(3, category='Rank', url=feed_url('Rank2'), name='best rated'),
+        ],
+    )
+    pipeline, deps = make_pipeline(
+        items_by_label={'Rank': [make_item('item-1', 'HMN-911')], 'Rank2': [make_item('item-2', 'HMN-911')]},
+        categories=ACTOR_THEN_RANK,
+        subscriptions=subscriptions,
+        sukebei_magnets={'HMN-911': MAGNET_A},
+        cast_lookup=lookup,
+    )
+
+    await pipeline.run(make_ctx())
+
+    lookup.assert_awaited_once_with('HMN-911')
+    deps.cloud.add_offline_files.assert_awaited_once_with([MAGNET_A], TASK_DIR)
 
 
 async def test_no_categories_ingests_nothing() -> None:
