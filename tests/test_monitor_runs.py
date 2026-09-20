@@ -77,3 +77,14 @@ async def test_prune_keeps_recent_runs_per_pipeline() -> None:
     assert deleted == 2
     remaining = await runs.list_runs(PipelineName.RSS, limit=10)
     assert [run.run_id for run in remaining] == [kept[3], kept[2]]
+
+
+async def test_every_pipeline_can_start_a_run() -> None:
+    """The table's check constraint spells out the pipeline names; a new PipelineName must be added there too."""
+    runs = make_runs()
+
+    for pipeline in PipelineName:
+        run_id = await runs.start_run(pipeline, RunTrigger.MANUAL)
+        record = await runs.get_run(run_id)
+        assert record is not None
+        assert record.pipeline is pipeline
