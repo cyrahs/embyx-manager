@@ -171,6 +171,40 @@ describe('playlists page', () => {
     )
   })
 
+  it('keeps polling while a sync runs and reloads the lists when it finishes', async () => {
+    const user = userEvent.setup()
+    let statusCalls = 0
+    let listCalls = 0
+    vi.mocked(fetch).mockImplementation((input, init?: RequestInit) => {
+      const url = String(input)
+      if (url === '/api/monitor/status') {
+        statusCalls += 1
+        // Idle before the click; running for the two polls after it; idle again.
+        const running = statusCalls >= 2 && statusCalls <= 3
+        return jsonResponse([{ ...STATUS[0], running_run_id: running ? 'r1' : null }])
+      }
+      if (url === '/api/playlists' && (init?.method ?? 'GET') === 'GET') {
+        listCalls += 1
+        return jsonResponse({
+          items: [{ ...TOP, missing: listCalls > 1 ? 7 : 30 }],
+          source: { database_name: '20260112', fetched_at: '2026-09-20T11:00:00Z' },
+          fill_task_dir: '/115/embyx_in/rank',
+          fill_reason: null,
+        })
+      }
+      if (url === '/api/monitor/playlists/trigger') return jsonResponse({ run_id: 'r1' }, 202)
+      return jsonResponse({ error: { code: 'unknown' } }, 404)
+    })
+    renderPage()
+
+    await user.click(await screen.findByRole('button', { name: '立即同步' }))
+
+    expect(await screen.findByRole('button', { name: '同步中…' })).toBeDisabled()
+    await waitFor(() => expect(screen.getByRole('button', { name: '立即同步' })).toBeInTheDocument(), { timeout: 8000 })
+    expect(screen.getByText(/缺失 7 部/)).toBeInTheDocument()
+    expect(statusCalls).toBeGreaterThanOrEqual(4)
+  }, 10000)
+
   it('points at settings when the pipeline is not configured', async () => {
     vi.mocked(fetch).mockImplementation((input) => {
       const url = String(input)
