@@ -19,6 +19,7 @@ class PipelineName(StrEnum):
     RSS = 'rss'
     ARCHIVE = 'archive'
     MAPPING = 'mapping'
+    PLAYLISTS = 'playlists'
 
 
 class RunTrigger(StrEnum):

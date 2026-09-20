@@ -123,7 +123,7 @@ describe('app shell', () => {
     window.history.pushState({}, '', '/')
   })
 
-  it('orders the primary navigation as dashboard, fill actor, subscriptions, then settings', async () => {
+  it('orders the primary navigation as dashboard, fill actor, subscriptions, playlists, then settings', async () => {
     render(<App />)
 
     const navigation = await screen.findByRole('navigation', { name: '页面导航' })
@@ -131,6 +131,7 @@ describe('app shell', () => {
       '监控看板',
       '补全演员',
       '订阅',
+      '列表',
       '设置',
     ])
   })
@@ -147,6 +148,7 @@ describe('app shell', () => {
   it.each([
     ['/dashboard', '监控看板 · Embyx Manager'],
     ['/fill-actor', '补全演员 · Embyx Manager'],
+    ['/playlists', '列表 · Embyx Manager'],
     ['/settings', '设置 · Embyx Manager'],
   ])('names %s in the tab title', async (path, title) => {
     window.history.pushState({}, '', path)

@@ -53,6 +53,14 @@ def rss_source(label: str) -> str:
     return f'{RSS_SOURCE_PREFIX}{label}'
 
 
+#: A playlist's fill carries the list it came from, like an RSS category.
+PLAYLIST_SOURCE_PREFIX = 'playlist:'
+
+
+def playlist_source(key: str) -> str:
+    return f'{PLAYLIST_SOURCE_PREFIX}{key}'
+
+
 class AttemptState(StrEnum):
     PENDING = 'pending'
     SUBMITTED = 'submitted'
@@ -298,6 +306,17 @@ class AcquisitionRepository:
         pool = await self._database.get_pool()
         row = await pool.fetchrow('SELECT * FROM archive_acquisitions WHERE avid = $1', avid)
         return _acquisition_from_row(row) if row is not None else None
+
+    async def states_for(self, avids: Sequence[str]) -> dict[str, AcquisitionState]:
+        """The ledger state of every listed AVID that has a row; absent ones are not tracked."""
+        if not avids:
+            return {}
+        pool = await self._database.get_pool()
+        rows = await pool.fetch(
+            'SELECT avid, state FROM archive_acquisitions WHERE avid = ANY($1::text[])',
+            list(avids),
+        )
+        return {row['avid']: AcquisitionState(row['state']) for row in rows}
 
     async def set_release_date(self, avid: str, release_date: date) -> bool:
         """Fill in a release date the row was recorded without; never overwrites."""

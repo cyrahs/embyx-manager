@@ -195,10 +195,21 @@ class ManualIntakeSource:
 
     # -- submitting ------------------------------------------------------------
 
-    async def submit(self, inputs: Sequence[str], *, task_dir_path: str) -> ManualSubmission:
-        """Run every input line through the shared intake; report each one's fate."""
+    async def submit(
+        self,
+        inputs: Sequence[str],
+        *,
+        task_dir_path: str,
+        source: str = AcquisitionSource.MANUAL,
+        limit: int | None = MAX_MANUAL_INPUTS,
+    ) -> ManualSubmission:
+        """Run every input line through the shared intake; report each one's fate.
+
+        Other callers with a ready-made list (a playlist's gap) pass their own
+        ``source`` label and lift the ``limit``, which guards pasted input only.
+        """
         lines = [line.strip() for line in inputs if line.strip()]
-        if len(lines) > MAX_MANUAL_INPUTS:
+        if limit is not None and len(lines) > limit:
             raise TooManyInputsError
         intake = self.intake_factory()
         cloud = self.cloud_factory()
@@ -223,9 +234,11 @@ class ManualIntakeSource:
                 entries.append(ManualEntry(text=line, avid=None, outcome=ManualOutcome.UNREADABLE))
                 continue
             entries.append(
-                await self._submit_one(line, avid, task_dir=task_dir, archiver=archiver, intake=intake, ctx=ctx),
+                await self._submit_one(
+                    line, avid, task_dir=task_dir, archiver=archiver, intake=intake, ctx=ctx, source=source
+                ),
             )
-        ctx.info('Manual submission: %d lines into %s', len(lines), task_dir)
+        ctx.info('%s submission: %d lines into %s', source, len(lines), task_dir)
         return ManualSubmission(task_dir_path=task_dir, entries=tuple(entries))
 
     async def _submit_one(  # noqa: PLR0913 - one call site, all of it per-line state
@@ -237,6 +250,7 @@ class ManualIntakeSource:
         archiver: ArchivePipeline,
         intake: AcquisitionIntake,
         ctx: RunContext,
+        source: str,
     ) -> ManualEntry:
         held = await self._library_holdings(avid, task_dir, archiver, ctx)
         if held:
@@ -252,7 +266,7 @@ class ManualIntakeSource:
             )
         outcome = await intake.enqueue(
             avid,
-            source=AcquisitionSource.MANUAL,
+            source=source,
             task_dir_path=task_dir,
             ctx=ctx,
         )

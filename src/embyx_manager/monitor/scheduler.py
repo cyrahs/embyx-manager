@@ -8,6 +8,7 @@ tasks:
   server's local time;
 - a mapping loop with one full sync at startup, a periodic full sync as a
   safety net, and debounced incremental syncs fed by a watchdog observer;
+- a playlists loop running every ``playlists.interval_seconds``;
 - manual triggers from the dashboard, one in-flight run per pipeline.
 
 Configuration is read from the live config store at every decision point, so
@@ -27,7 +28,7 @@ from cronsim import CronSim, CronSimError
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
-from embyx_manager.config.models import ArchiveConfig, MappingConfig, RssConfig
+from embyx_manager.config.models import ArchiveConfig, MappingConfig, PlaylistsConfig, RssConfig
 from embyx_manager.config.store import ConfigStore
 from embyx_manager.monitor.reports import (
     PipelineName,
@@ -134,19 +135,23 @@ class MonitorScheduler:
         mapping_ready: Callable[[], str | None],
         tracker_poll: Callable[[RunContext], object] | None = None,
         tracker_ready: Callable[[], str | None] | None = None,
+        playlists_runner: Callable[[RunContext], object] | None = None,
+        playlists_ready: Callable[[], str | None] | None = None,
     ) -> None:
         """Runner callables execute one pipeline pass.
 
-        ``rss_runner(ctx)`` and ``archive_runner(ctx)`` return awaitables;
-        ``mapping_factory()`` builds a MappingPipeline-compatible object from the
-        current configuration. ``*_ready()`` return None when runnable or a
-        human-readable reason string when not.
+        ``rss_runner(ctx)``, ``archive_runner(ctx)`` and ``playlists_runner(ctx)``
+        return awaitables; ``mapping_factory()`` builds a MappingPipeline-compatible
+        object from the current configuration. ``*_ready()`` return None when
+        runnable or a human-readable reason string when not. Without a playlists
+        runner that pipeline reports itself unavailable and never schedules.
         """
         self._store = store
         self._runs = runs
         self._rss_runner = rss_runner
         self._archive_runner = archive_runner
         self._mapping_factory = mapping_factory
+        self._playlists_runner = playlists_runner
         self._tracker_poll = tracker_poll
         self._tracker_ready = tracker_ready
         self._tracker_state = TrackerState()
@@ -158,6 +163,7 @@ class MonitorScheduler:
             PipelineName.RSS: rss_ready,
             PipelineName.ARCHIVE: archive_ready,
             PipelineName.MAPPING: mapping_ready,
+            PipelineName.PLAYLISTS: playlists_ready or _playlists_unavailable,
         }
         self._active: dict[PipelineName, tuple[str, RunContext]] = {}
         self._locks = {name: asyncio.Lock() for name in PipelineName}
@@ -166,6 +172,7 @@ class MonitorScheduler:
         self._next_rss_at: datetime | None = None
         self._next_archive_at: datetime | None = None
         self._next_full_sync_at: datetime | None = None
+        self._next_playlists_at: datetime | None = None
         # watchdog state (event-loop confined)
         self._observer: Observer | None = None
         self._observed_dir: str | None = None
@@ -188,6 +195,8 @@ class MonitorScheduler:
         ]
         if self._tracker_poll is not None:
             self._tasks.append(asyncio.create_task(self._tracker_loop(), name='acquisition-tracker-loop'))
+        if self._playlists_runner is not None:
+            self._tasks.append(asyncio.create_task(self._playlists_loop(), name='monitor-playlists-loop'))
 
     async def aclose(self) -> None:
         self._stop.set()
@@ -233,6 +242,8 @@ class MonitorScheduler:
                 next_at = self._next_full_sync_at
             elif name is PipelineName.ARCHIVE:
                 next_at = self._next_archive_at
+            elif name is PipelineName.PLAYLISTS:
+                next_at = self._next_playlists_at
             else:
                 next_at = self._next_rss_at
             statuses.append(
@@ -280,6 +291,8 @@ class MonitorScheduler:
                     await self._rss_runner(ctx)
                 elif pipeline is PipelineName.ARCHIVE:
                     await self._archive_runner(ctx)
+                elif pipeline is PipelineName.PLAYLISTS:
+                    await self._run_playlists(ctx)
                 elif incremental_batch is not None:
                     await self._run_mapping_incremental(ctx, incremental_batch)
                 else:
@@ -334,6 +347,26 @@ class MonitorScheduler:
             elapsed = time.monotonic() - started
             delay = max(0.0, interval - elapsed)
             self._next_rss_at = datetime.now(UTC).replace(microsecond=0) + _seconds(delay)
+            if await self._wait_stop(delay):
+                break
+
+    # -- playlists loop -----------------------------------------------------------
+
+    async def _run_playlists(self, ctx: RunContext) -> None:
+        if self._playlists_runner is None:
+            raise PipelineNotConfiguredError(PipelineName.PLAYLISTS, _playlists_unavailable())
+        await self._playlists_runner(ctx)
+
+    async def _playlists_loop(self) -> None:
+        while not self._stop.is_set():
+            interval = max(60, self._store.get(PlaylistsConfig).interval_seconds)
+            started = time.monotonic()
+            self._next_playlists_at = None
+            if self._pipeline_enabled(PipelineName.PLAYLISTS) and self._ready[PipelineName.PLAYLISTS]() is None:
+                await self._execute(PipelineName.PLAYLISTS, RunTrigger.SCHEDULED)
+            elapsed = time.monotonic() - started
+            delay = max(0.0, interval - elapsed)
+            self._next_playlists_at = datetime.now(UTC).replace(microsecond=0) + _seconds(delay)
             if await self._wait_stop(delay):
                 break
 
@@ -558,6 +591,8 @@ class MonitorScheduler:
             return self._store.get(RssConfig).enabled
         if pipeline is PipelineName.ARCHIVE:
             return self._store.get(ArchiveConfig).enabled
+        if pipeline is PipelineName.PLAYLISTS:
+            return self._store.get(PlaylistsConfig).enabled
         return self._store.get(MappingConfig).enabled
 
     def _mapping_runnable(self) -> bool:
@@ -569,6 +604,10 @@ class MonitorScheduler:
         with contextlib.suppress(TimeoutError):
             await asyncio.wait_for(self._stop.wait(), seconds)
         return self._stop.is_set()
+
+
+def _playlists_unavailable() -> str:
+    return 'playlist sync is not available in this deployment'
 
 
 def _seconds(value: float) -> timedelta:

@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.testclient import TestClient
 
-from embyx_manager.config import CloudDriveConfig, ConfigStore, ConfigVersionConflictError, MappingConfig
+from embyx_manager.config import CloudDriveConfig, ConfigStore, ConfigVersionConflictError, EmbyConfig, MappingConfig
 from embyx_manager.config import api as config_api
 from embyx_manager.config.api import create_config_router
 from embyx_manager.config.store import masked_values, secret_flags
@@ -204,3 +204,109 @@ def test_clouddrive_test_endpoint_requires_connection_values() -> None:
     assert response.status_code == 200
     assert response.json()['ok'] is False
     assert 'required' in response.json()['detail']
+
+
+def test_emby_test_endpoint_uses_form_values_and_stored_secret(monkeypatch) -> None:
+    postgres_test_dsn()
+    captured: dict[str, object] = {}
+
+    class FakeEmby:
+        def __init__(self, base_url, api_key, **kwargs) -> None:
+            captured.update(base_url=base_url, api_key=api_key, **kwargs)
+
+        async def system_info(self) -> object:
+            return SimpleNamespace(name='embyx', version='4.10.0.40', server_id='srv')
+
+        async def aclose(self) -> None:
+            captured['closed'] = True
+
+    monkeypatch.setattr(config_api, 'EmbyClient', FakeEmby)
+
+    try:
+        with make_config_client() as client:
+            client.put(
+                '/api/config/emby',
+                json={'values': {'address': 'http://embyx.media.svc.cluster.local', 'api_key': 'stored-key'}},
+            )
+            response = client.post(
+                '/api/config/emby/test',
+                json={'values': {'address': 'http://override.internal:8096/'}},
+            )
+    finally:
+        reset_public_schema()
+
+    body = response.json()
+    assert response.status_code == 200
+    assert body == {'ok': True, 'detail': 'embyx 4.10.0.40'}
+    assert captured['base_url'] == 'http://override.internal:8096'
+    assert captured['api_key'] == 'stored-key'
+    assert captured['closed'] is True
+
+
+def test_emby_test_endpoint_reports_a_rejected_key(monkeypatch) -> None:
+    postgres_test_dsn()
+
+    class RejectingEmby:
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        async def system_info(self) -> object:
+            msg = 'GET /System/Info: the API key was rejected'
+            raise config_api.EmbyAuthError(msg)
+
+        async def aclose(self) -> None:
+            pass
+
+    monkeypatch.setattr(config_api, 'EmbyClient', RejectingEmby)
+
+    try:
+        with make_config_client() as client:
+            response = client.post(
+                '/api/config/emby/test',
+                json={'values': {'address': 'http://embyx.internal', 'api_key': 'bad'}},
+            )
+    finally:
+        reset_public_schema()
+
+    assert response.json() == {'ok': False, 'detail': 'the API key was rejected'}
+
+
+def test_emby_test_endpoint_requires_connection_values() -> None:
+    postgres_test_dsn()
+    try:
+        with make_config_client() as client:
+            response = client.post('/api/config/emby/test', json={})
+    finally:
+        reset_public_schema()
+
+    assert response.status_code == 200
+    assert response.json()['ok'] is False
+    assert 'required' in response.json()['detail']
+
+
+def test_emby_config_normalizes_the_address_and_reports_configured() -> None:
+    assert EmbyConfig().configured is False
+    assert EmbyConfig(address='http://embyx.internal:8096/', api_key='k').address == 'http://embyx.internal:8096'
+    assert EmbyConfig(address='http://embyx.internal', api_key='k').configured is True
+    assert EmbyConfig(address='http://embyx.internal').configured is False
+
+    with pytest.raises(ValueError, match=r'emby\.address'):
+        EmbyConfig(address='embyx.internal:8096')
+    with pytest.raises(ValueError, match=r'emby\.address'):
+        EmbyConfig(address='http://user:pw@embyx.internal')
+
+
+def test_playlists_config_validates_its_fields() -> None:
+    from embyx_manager.config import PlaylistsConfig  # noqa: PLC0415 - scoped to this test
+
+    default = PlaylistsConfig()
+    assert (default.enabled, default.interval_seconds, default.source_url) == (False, 86_400, 'https://jinjier.art/sql')
+    assert PlaylistsConfig(source_url='https://mirror.test/sql/').source_url == 'https://mirror.test/sql'
+    assert PlaylistsConfig(task_dir_path='/115/embyx_in/rank/').task_dir_path == '/115/embyx_in/rank'
+
+    with pytest.raises(ValueError, match='interval_seconds'):
+        PlaylistsConfig(interval_seconds=0)
+    with pytest.raises(ValueError, match='source_url'):
+        PlaylistsConfig(source_url='')
+    with pytest.raises(ValueError, match='task_dir_path'):
+        PlaylistsConfig(task_dir_path='relative/dir')

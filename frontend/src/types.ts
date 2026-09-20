@@ -126,7 +126,7 @@ export interface ActiveApplyRequest {
 
 // ---------- monitor ----------
 
-export type PipelineId = 'rss' | 'archive' | 'mapping'
+export type PipelineId = 'rss' | 'archive' | 'mapping' | 'playlists'
 export type RunState = 'running' | 'completed' | 'failed' | 'cancelled'
 
 export interface RunSummary {
@@ -302,3 +302,50 @@ export interface SubscriptionList {
   categories: string[]
 }
 
+// ---------- playlists ----------
+
+export interface Playlist {
+  key: string
+  kind: number
+  note: string
+  name: string
+  enabled: boolean
+  total: number
+  present: number
+  missing: number
+  emby_playlist_id: string | null
+  last_synced_at: string | null
+  last_error: string | null
+}
+
+export interface PlaylistSource {
+  database_name: string
+  fetched_at: string
+}
+
+export interface PlaylistList {
+  items: Playlist[]
+  source: PlaylistSource | null
+  fill_task_dir: string | null
+  fill_reason: string | null
+}
+
+export interface PlaylistFill {
+  key: string
+  task_dir_path: string
+  items: { avid: string; outcome: ManualOutcome }[]
+  counts: Partial<Record<ManualOutcome, number>>
+}
+
+export interface PlaylistMissingEntry {
+  rank: number
+  avid: string
+  title: string
+  tracked: AcquisitionState | null
+}
+
+export interface PlaylistMissing {
+  key: string
+  name: string
+  items: PlaylistMissingEntry[]
+}

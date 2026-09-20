@@ -17,15 +17,19 @@ from embyx_manager.adapters import (
 from embyx_manager.api import create_app, make_mutation_auth
 from embyx_manager.clients.avbase import AvbaseClient, AvbaseError
 from embyx_manager.clients.clouddrive import AsyncCloudDrive, CloudDriveClient
+from embyx_manager.clients.emby import EmbyClient
 from embyx_manager.clients.feeds import HttpFeedFetcher
 from embyx_manager.clients.javbus import JavBusClient
+from embyx_manager.clients.jinjier import JinjierClient
 from embyx_manager.clients.sukebei import SukebeiClient
 from embyx_manager.config import (
     ArchiveConfig,
     CloudDriveConfig,
     ConfigStore,
+    EmbyConfig,
     FillActorConfig,
     MappingConfig,
+    PlaylistsConfig,
     RssConfig,
 )
 from embyx_manager.config.api import create_config_router
@@ -50,6 +54,9 @@ from embyx_manager.monitor.intake import AcquisitionIntake
 from embyx_manager.monitor.manual import ManualIntakeSource
 from embyx_manager.monitor.mapping import MappingPipeline
 from embyx_manager.monitor.move_in import MoveInSweeper
+from embyx_manager.monitor.playlist_sync import PlaylistSyncPipeline
+from embyx_manager.monitor.playlists import PlaylistRepository
+from embyx_manager.monitor.playlists_api import PlaylistFillApi, create_playlists_router, resolve_fill_dir
 from embyx_manager.monitor.reconcile import ReconcileScanner
 from embyx_manager.monitor.release_dates import ReleaseDateFinder
 from embyx_manager.monitor.reports import PipelineName, RunContext
@@ -456,6 +463,31 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
     def mapping_factory() -> MappingPipeline:
         return MappingPipeline(config=store.get(MappingConfig), avid_parser=avid_handle.current())
 
+    playlists = PlaylistRepository(database)
+
+    def playlists_ready() -> str | None:
+        if not store.get(EmbyConfig).configured:
+            return 'Emby address and API key must be configured'
+        return None
+
+    async def playlists_runner(ctx: RunContext) -> None:
+        emby_config = store.get(EmbyConfig)
+        emby = EmbyClient(emby_config.address, emby_config.api_key)
+        source = JinjierClient(store.get(PlaylistsConfig).source_url)
+        try:
+            pipeline = PlaylistSyncPipeline(
+                repository=playlists,
+                source=source,
+                emby=emby,
+                avid_of=avid_handle.current().get_avid,
+            )
+            await pipeline.run(ctx)
+        finally:
+            try:
+                await emby.aclose()
+            finally:
+                await source.aclose()
+
     scheduler = MonitorScheduler(
         store=store,
         runs=pipeline_runs,
@@ -467,6 +499,28 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         mapping_ready=mapping_ready,
         tracker_poll=tracker_poll,
         tracker_ready=tracker_ready,
+        playlists_runner=playlists_runner,
+        playlists_ready=playlists_ready,
+    )
+    manual_source = ManualIntakeSource(
+        ledger=ledger,
+        intake_factory=intake_factory,
+        cloud_factory=cloud_handle.current,
+        archiver_factory=lambda: ArchivePipeline(
+            config=store.get(ArchiveConfig),
+            avid_parser=avid_handle.current(),
+        ),
+        parser_factory=avid_handle.current,
+        configured_dirs=lambda: _offline_task_dirs(store),
+    )
+    playlists_router = create_playlists_router(
+        playlists,
+        mutation_auth=mutation_auth,
+        ledger=ledger,
+        fill=PlaylistFillApi(
+            manual=manual_source,
+            task_dir=lambda: resolve_fill_dir(store.get(PlaylistsConfig), store.get(RssConfig)),
+        ),
     )
     monitor_router = create_monitor_router(
         scheduler,
@@ -476,17 +530,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
             ledger=ledger,
             submit_magnet=submit_magnet,
             tracker_ready=tracker_ready,
-            manual=ManualIntakeSource(
-                ledger=ledger,
-                intake_factory=intake_factory,
-                cloud_factory=cloud_handle.current,
-                archiver_factory=lambda: ArchivePipeline(
-                    config=store.get(ArchiveConfig),
-                    avid_parser=avid_handle.current(),
-                ),
-                parser_factory=avid_handle.current,
-                configured_dirs=lambda: _offline_task_dirs(store),
-            ),
+            manual=manual_source,
         ),
         subscriptions=SubscriptionsApi(
             repository=subscriptions,
@@ -525,7 +569,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
     frontend_dist = Path(__file__).resolve().parent / 'static'
     return create_app(
         app_ready=repository.health_check,
-        routers=(fill_actor_router, config_router, monitor_router),
+        routers=(fill_actor_router, config_router, monitor_router, playlists_router),
         feature_health={'fill_actor': fill_actor_health(service=service, repository=repository)},
         exception_handlers={FillActorError: handle_fill_actor_error},
         # The runtime comes up first and goes down last; features stack on top of it.

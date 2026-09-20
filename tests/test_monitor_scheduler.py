@@ -384,3 +384,54 @@ async def test_mapping_loop_runs_startup_full_sync_and_watchdog_batch(tmp_path: 
     assert len(watchdog_runs) == 1
     assert watchdog_runs[0].stats.get('files_updated') == 1
     assert (tmp_path / 'emby' / 'ABC-123' / 'ABC-123.strm').exists()
+
+
+async def test_playlists_pipeline_is_unavailable_until_a_runner_is_wired() -> None:
+    scheduler = make_scheduler(FakeStore(), FakeRuns())
+
+    status = {entry.pipeline: entry for entry in scheduler.status()}[PipelineName.PLAYLISTS]
+    assert status.configured is False
+    assert status.reason == 'playlist sync is not available in this deployment'
+    with pytest.raises(PipelineNotConfiguredError):
+        await scheduler.trigger(PipelineName.PLAYLISTS)
+    await scheduler.aclose()
+
+
+async def test_playlists_runner_is_triggered_and_scheduled_by_its_own_config() -> None:
+    from embyx_manager.config.models import PlaylistsConfig  # noqa: PLC0415 - scoped to this test
+
+    store = FakeStore(playlists=PlaylistsConfig(enabled=True, interval_seconds=3600))
+    runs = FakeRuns()
+    calls: list[str] = []
+
+    async def playlists_runner(ctx: RunContext) -> None:
+        calls.append('run')
+        ctx.add('lists_synced', 3)
+
+    scheduler = MonitorScheduler(
+        store=store,  # type: ignore[arg-type]
+        runs=runs,  # type: ignore[arg-type]
+        rss_runner=lambda _ctx: None,  # type: ignore[arg-type,return-value]
+        archive_runner=lambda _ctx: None,  # type: ignore[arg-type,return-value]
+        mapping_factory=lambda: None,
+        rss_ready=lambda: 'off',
+        archive_ready=lambda: 'off',
+        mapping_ready=lambda: 'off',
+        playlists_runner=playlists_runner,
+        playlists_ready=ready,
+    )
+    await scheduler.start()
+    await asyncio.sleep(0.05)
+    # The loop ran once at start-up and now waits out the interval.
+    assert calls == ['run']
+    status = {entry.pipeline: entry for entry in scheduler.status()}[PipelineName.PLAYLISTS]
+    assert status.enabled is True
+    assert status.next_scheduled_at is not None
+    assert status.next_scheduled_at > datetime.now(UTC) + timedelta(minutes=50)
+
+    run_id = await scheduler.trigger(PipelineName.PLAYLISTS)
+    await asyncio.sleep(0.05)
+    assert runs.records[run_id].state is RunState.COMPLETED
+    assert runs.records[run_id].stats == {'lists_synced': 3}
+    assert calls == ['run', 'run']
+    await scheduler.aclose()

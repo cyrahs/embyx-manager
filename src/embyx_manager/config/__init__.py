@@ -3,8 +3,10 @@ from embyx_manager.config.models import (
     ArchiveConfig,
     AvidRulesConfig,
     CloudDriveConfig,
+    EmbyConfig,
     FillActorConfig,
     MappingConfig,
+    PlaylistsConfig,
     RssConfig,
 )
 from embyx_manager.config.store import ConfigStore, ConfigVersionConflictError
@@ -16,7 +18,9 @@ __all__ = [
     'CloudDriveConfig',
     'ConfigStore',
     'ConfigVersionConflictError',
+    'EmbyConfig',
     'FillActorConfig',
     'MappingConfig',
+    'PlaylistsConfig',
     'RssConfig',
 ]

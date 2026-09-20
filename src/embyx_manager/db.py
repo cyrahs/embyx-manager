@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 
 import asyncpg
 
-CURRENT_SCHEMA_VERSION = 14
+CURRENT_SCHEMA_VERSION = 15
 
 # Advisory-lock key space for embyx-manager; low word selects the resource.
 ADVISORY_NAMESPACE = 0x454D4258  # 'EMBX'
@@ -538,4 +538,36 @@ _MIGRATIONS[13] = (
 _MIGRATIONS[14] = (
     'DROP TABLE IF EXISTS fill_actor_job_feeds',
     "DELETE FROM app_config WHERE section IN ('freshrss', 'feeds')",
+)
+
+# Ranking lists mirrored as Emby playlists. One row per list the source
+# publishes; entries are the ranked codes after the library's exclusions, and
+# present/missing are what the last sync found in Emby. enabled is the
+# operator's choice and survives every re-download. The single-row source table
+# remembers which database file the entries came from.
+_MIGRATIONS[15] = (
+    """
+    CREATE TABLE playlists (
+        key TEXT PRIMARY KEY,
+        kind INTEGER NOT NULL,
+        note TEXT NOT NULL,
+        name TEXT NOT NULL,
+        enabled BOOLEAN NOT NULL DEFAULT TRUE,
+        entries_json TEXT NOT NULL DEFAULT '[]',
+        present_json TEXT NOT NULL DEFAULT '[]',
+        missing_json TEXT NOT NULL DEFAULT '[]',
+        emby_playlist_id TEXT,
+        last_synced_at TIMESTAMPTZ,
+        last_error TEXT,
+        created_at TIMESTAMPTZ NOT NULL,
+        updated_at TIMESTAMPTZ NOT NULL
+    )
+    """,
+    """
+    CREATE TABLE playlist_source (
+        id BOOLEAN PRIMARY KEY DEFAULT TRUE CHECK (id),
+        database_name TEXT NOT NULL,
+        fetched_at TIMESTAMPTZ NOT NULL
+    )
+    """,
 )
