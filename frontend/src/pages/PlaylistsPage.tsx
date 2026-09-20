@@ -29,6 +29,8 @@ import { formatTime } from '../lib/subscriptions'
 import type { AcquisitionState, ManualOutcome, PipelineStatus, Playlist, PlaylistFill, PlaylistMissing } from '../types'
 
 const KIND_AWARDS = 4
+/** How often the page asks whether a running sync has finished. */
+export const SYNC_POLL_MS = 2000
 const FIRST_YEAR_KIND = 2008
 
 const TRACKED_LABELS: Record<AcquisitionState, string> = {
@@ -131,6 +133,29 @@ export default function PlaylistsPage() {
     void load(controller.signal)
     return () => controller.abort()
   }, [load])
+
+  // A sync runs in the background: keep asking until it is over, then show its result.
+  const runningRunId = pipeline?.running_run_id ?? null
+  useEffect(() => {
+    if (!runningRunId) return
+    const controller = new AbortController()
+    const timer = window.setInterval(() => {
+      void getMonitorStatus(controller.signal)
+        .then((statuses) => {
+          const current = statuses.find((status) => status.pipeline === 'playlists') ?? null
+          if (current?.running_run_id) return
+          window.clearInterval(timer)
+          void load(controller.signal)
+        })
+        .catch(() => {
+          // A failed poll is retried on the next tick.
+        })
+    }, SYNC_POLL_MS)
+    return () => {
+      window.clearInterval(timer)
+      controller.abort()
+    }
+  }, [runningRunId, load])
 
   async function run(id: string, action: () => Promise<void>, fallback: string) {
     setBusy(id)
