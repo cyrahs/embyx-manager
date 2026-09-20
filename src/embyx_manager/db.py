@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 
 import asyncpg
 
-CURRENT_SCHEMA_VERSION = 15
+CURRENT_SCHEMA_VERSION = 16
 
 # Advisory-lock key space for embyx-manager; low word selects the resource.
 ADVISORY_NAMESPACE = 0x454D4258  # 'EMBX'
@@ -569,5 +569,17 @@ _MIGRATIONS[15] = (
         database_name TEXT NOT NULL,
         fetched_at TIMESTAMPTZ NOT NULL
     )
+    """,
+)
+
+# pipeline_runs was created with the three original pipelines spelled into its
+# check constraint, so the first playlists run was refused at the database.
+# The constraint now lists every pipeline name; adding a pipeline means adding
+# it here as well as to PipelineName (tests/test_monitor_runs.py checks both).
+_MIGRATIONS[16] = (
+    'ALTER TABLE pipeline_runs DROP CONSTRAINT pipeline_runs_pipeline_check',
+    """
+    ALTER TABLE pipeline_runs ADD CONSTRAINT pipeline_runs_pipeline_check
+    CHECK (pipeline IN ('rss', 'archive', 'mapping', 'playlists'))
     """,
 )
