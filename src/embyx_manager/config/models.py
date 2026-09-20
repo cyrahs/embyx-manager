@@ -162,9 +162,10 @@ class RssCategory(BaseModel):
 class RssConfig(ConfigSection):
     enabled: bool = False
     interval_seconds: int = 1800
-    #: Every configured category is ingested on each scheduled run; a manual
-    #: trigger may scope itself to one of them by label. Empty until an operator
-    #: adds one, because a category cannot be guessed: it needs a directory.
+    #: Every configured category is ingested on each scheduled run, in this
+    #: order, which is also their precedence: an AVID sighted by more than one
+    #: category files under the earliest. Empty until an operator adds one,
+    #: because a category cannot be guessed: it needs a directory.
     categories: tuple[RssCategory, ...] = ()
     #: Resolve-failure cooldown for every acquisition intake source (RSS and fill
     #: actor alike), not just RSS — the shared intake reads it from this section.

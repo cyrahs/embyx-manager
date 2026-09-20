@@ -42,7 +42,11 @@ Three peer features; `/` redirects to the dashboard and no feature owns the app 
   backend resolves it), or from the Fill Actor page after a scan — with aliases, state,
   last poll and error per row. **Charts** are plain feed URLs (RSSHub rankings, sukebei
   searches, any RSS/Atom) whose URL can be corrected in place. Every subscription files
-  under one of the RSS categories, which decide the offline directory.
+  under one of the RSS categories, which decide the offline directory; categories rank in
+  their configured order, so an AVID a chart re-lists stays with the actor category ahead of it.
+  Before a chart files a work nobody sighted before, AVBase is asked who is credited on it: a
+  subscribed talent's work files under the talent's category even when the talent's feed listed
+  it before the subscription was seeded.
 - **Lists** (`/playlists`): the ranking lists the playlists pipeline manages, grouped into
   charts, JavDB years and awards editions, each with how many titles the library holds and
   how many it lacks. A list can be enabled or disabled (its playlist follows on the next

@@ -1,5 +1,7 @@
+import errno
 import logging
 import os
+import shutil
 import time
 from pathlib import Path
 
@@ -138,3 +140,87 @@ def test_non_avid_strm_is_skipped_with_warning(tmp_path: Path) -> None:
 
     assert not any(pipeline.dst_dir.glob('**/*.strm'))
     assert any('failed to get avid' in line for line in ctx.log_tail)
+
+
+def test_full_sync_skips_dir_that_is_not_empty_on_disk(tmp_path: Path, monkeypatch) -> None:
+    """A stale NFS directory cache lists a directory as empty while the server
+    still holds its .strm; rmtree then fails with ENOTEMPTY. That one directory
+    must be skipped, not abort the run, and the other empty dirs still go."""
+    pipeline = make_pipeline(tmp_path)
+    stale = write_strm(pipeline.src_dir / 'stale' / 'STALE-001.strm')
+    gone = write_strm(pipeline.src_dir / 'gone' / 'GONE-001.strm')
+    pipeline.run_full(make_ctx())
+    stale.unlink()
+    gone.unlink()
+
+    stale_dir = pipeline.dst_dir / 'stale' / 'STALE-001'
+    real_rmtree = shutil.rmtree
+
+    def fake_rmtree(path, *args, **kwargs):
+        if Path(path) == stale_dir:
+            raise OSError(errno.ENOTEMPTY, 'Directory not empty', str(path))
+        real_rmtree(path, *args, **kwargs)
+
+    monkeypatch.setattr(shutil, 'rmtree', fake_rmtree)
+
+    ctx = make_ctx()
+    pipeline.run_full(ctx)
+
+    assert stale_dir.exists()
+    assert not (pipeline.dst_dir / 'gone').exists()
+    assert ctx.stats['dirs_skipped'] == 1
+    assert ctx.stats['dirs_deleted'] >= 1
+    assert ctx.errors == ()
+    assert any('not empty on disk' in line and 'STALE-001' in line for line in ctx.log_tail)
+
+
+def test_full_sync_reports_other_delete_errors_and_continues(tmp_path: Path, monkeypatch) -> None:
+    pipeline = make_pipeline(tmp_path)
+    write_strm(pipeline.src_dir / 'a' / 'AAA-001.strm').unlink()
+    write_strm(pipeline.src_dir / 'b' / 'BBB-001.strm')
+    pipeline.run_full(make_ctx())
+    (pipeline.src_dir / 'b' / 'BBB-001.strm').unlink()
+    (pipeline.dst_dir / 'locked' / 'LOCK-001').mkdir(parents=True)
+    real_rmtree = shutil.rmtree
+
+    def fake_rmtree(path, *args, **kwargs):
+        if Path(path).name == 'LOCK-001':
+            raise OSError(errno.EACCES, 'Permission denied', str(path))
+        real_rmtree(path, *args, **kwargs)
+
+    monkeypatch.setattr(shutil, 'rmtree', fake_rmtree)
+
+    ctx = make_ctx()
+    pipeline.run_full(ctx)
+
+    assert not (pipeline.dst_dir / 'b').exists()
+    assert ctx.stats['dirs_skipped'] == 1
+    assert len(ctx.errors) == 1
+    assert 'LOCK-001' in ctx.errors[0]
+
+
+def test_incremental_delete_stops_at_dir_that_is_not_empty_on_disk(tmp_path: Path, monkeypatch) -> None:
+    pipeline = make_pipeline(tmp_path)
+    source = write_strm(pipeline.src_dir / 'brand' / 'ABC-123.strm')
+    pipeline.run_full(make_ctx())
+    source.unlink()
+
+    title_dir = pipeline.dst_dir / 'brand' / 'ABC-123'
+    real_rmdir = Path.rmdir
+
+    def fake_rmdir(self: Path) -> None:
+        if self == title_dir:
+            raise OSError(errno.ENOTEMPTY, 'Directory not empty', str(self))
+        real_rmdir(self)
+
+    monkeypatch.setattr(Path, 'rmdir', fake_rmdir)
+
+    ctx = make_ctx()
+    _, failed_deleted = pipeline.run_incremental(ctx, changed=set(), deleted={source})
+
+    assert failed_deleted == set()
+    assert not (title_dir / 'ABC-123.strm').exists()
+    assert title_dir.exists()
+    assert ctx.stats['files_deleted'] == 1
+    assert 'dirs_deleted' not in ctx.stats
+    assert ctx.errors == ()

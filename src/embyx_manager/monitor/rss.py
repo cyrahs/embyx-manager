@@ -16,11 +16,24 @@ subscription in it. A category names the offline directory its downloads belong
 in, which is how one group of feeds ends up in a library subdirectory of its
 own; subscriptions are otherwise independent, so one failing does not cost the
 others their pass.
+
+The order categories are configured in is their precedence. An AVID that more
+than one category sights belongs to the earliest of them: a chart re-listing a
+tracked actor's work still contributes its magnet, but the download files into
+the actor's directory, not the chart's.
+
+Precedence also reaches works the earlier category never sighted. A talent's
+feed lists a work weeks before release, so a subscription seeded after the
+listing never reads it as new, and the chart is the first to see it once it is
+out. Before a lower category files a new row, the catalog is asked who is
+credited on the work: if one of them is a talent subscribed in a category
+ahead, the row is filed as that category's from the start.
 """
 
 import asyncio
 from collections.abc import Awaitable, Callable
-from datetime import UTC, datetime
+from dataclasses import dataclass
+from datetime import UTC, date, datetime
 
 from embyx_manager.clients.clouddrive import AsyncCloudDrive
 from embyx_manager.clients.javbus import JavBusClient
@@ -47,6 +60,29 @@ RECHECKABLE_STATES = frozenset(
 
 FeedFetcher = Callable[[str], Awaitable[bytes]]
 
+
+@dataclass(frozen=True)
+class CreditedWork:
+    """What the catalog knows about a work that bears on filing it."""
+
+    #: The talents credited on the work, by catalog id.
+    talent_ids: frozenset[int]
+    release_date: date | None = None
+
+
+#: ``lookup(avid)`` answers the catalog's credits for the work, or None when it is not listed.
+CastLookup = Callable[[str], Awaitable[CreditedWork | None]]
+
+
+@dataclass(frozen=True)
+class _Filing:
+    """The category a sighting files under: normally its own, else one ahead that credits a subscribed talent."""
+
+    source: str
+    task_dir: str
+    yields_to: tuple[str, ...]
+
+
 _ERROR_LIMIT = 500
 
 
@@ -64,14 +100,25 @@ class RssPipeline:
         ledger: AcquisitionRepository,
         archiver: ArchivePipeline,
         on_submitted: Callable[[], None] | None = None,
+        cast_lookup: CastLookup | None = None,
     ) -> None:
-        """``fetch(url)`` returns a feed body; ``on_submitted()`` fires per magnet at CloudDrive."""
+        """``fetch(url)`` returns a feed body; ``on_submitted()`` fires per magnet at CloudDrive.
+
+        ``cast_lookup(avid)`` asks the catalog who is credited on a work, so a
+        lower category can file a subscribed talent's work under the talent's
+        category; without it, only sightings decide.
+        """
         self._config = config
         self._avid = avid_parser
         self._subscriptions = subscriptions
         self._fetch = fetch
         self._ledger = ledger
         self._archiver = archiver
+        self._cast_lookup = cast_lookup
+        #: Category label per subscribed talent id, from the enabled talent subscriptions of this run.
+        self._talent_categories: dict[int, str] = {}
+        #: Catalog answers for this run: the same work is often on more than one chart.
+        self._credits: dict[str, CreditedWork | None] = {}
         self._intake = AcquisitionIntake(
             ledger=ledger,
             sukebei=sukebei,
@@ -84,9 +131,12 @@ class RssPipeline:
     async def run(self, ctx: RunContext) -> None:
         """Poll every enabled subscription, category by category."""
         by_category: dict[str, list[SubscriptionRecord]] = {}
+        self._talent_categories = {}
         for subscription in await self._subscriptions.list():
             if subscription.enabled:
                 by_category.setdefault(subscription.category, []).append(subscription)
+                if subscription.talent_id is not None:
+                    self._talent_categories.setdefault(subscription.talent_id, subscription.category)
         for category in self._config.categories:
             for subscription in by_category.pop(category.label, ()):
                 ctx.check_cancelled()
@@ -158,6 +208,7 @@ class RssPipeline:
         # Pinned onto each acquisition so its retries keep landing here even if
         # the category is later repointed or removed.
         task_dir = category.task_dir_path
+        yields_to = self._outranking_sources(category)
 
         avid_item: dict[str, list[FeedItem]] = {}
         for item in items:
@@ -171,36 +222,121 @@ class RssPipeline:
         now = datetime.now(UTC)
         wanted: dict[str, list[FeedItem]] = {}
         item_magnets: dict[str, str | None] = {}
+        dirs: dict[str, str] = {}
         for avid, avid_items in avid_item.items():
             # An item carrying a magnet is evidence the wait is over: it wakes a
             # row still cooling down from an earlier empty pass.
             item_magnet = get_magnet_from_html(avid_items[0].content, avid)
+            filing, cast = await self._filing_for(
+                avid,
+                category=category,
+                own=_Filing(source=source, task_dir=task_dir, yields_to=yields_to),
+                ctx=ctx,
+            )
             accepted = await self._ledger.discover(
                 avid,
-                source=source,
+                source=filing.source,
                 now=now,
-                task_dir_path=task_dir,
+                task_dir_path=filing.task_dir,
+                release_date=cast.release_date if cast is not None else None,
                 wake=item_magnet is not None,
+                yields_to=filing.yields_to,
             )
-            if accepted:
-                wanted[avid] = avid_items
-                item_magnets[avid] = item_magnet
-            else:
+            if not accepted:
                 ctx.add('skipped_known')
+                continue
+            wanted[avid] = avid_items
+            item_magnets[avid] = item_magnet
+            dirs[avid] = await self._filing_dir(avid, filing.task_dir, filing.yields_to, ctx)
         if len(wanted) != len(avid_item):
             ctx.info('Skipping %d avids already tracked', len(avid_item) - len(wanted))
         if not wanted:
             return
 
         ctx.check_cancelled()
-        wanted = await self._skip_library_held(wanted, task_dir, ctx)
+        wanted = await self._skip_library_held(wanted, dirs, ctx)
         if not wanted:
             return
 
         ctx.check_cancelled()
         resolved = await self._resolve_all(wanted, item_magnets, ctx)
         ctx.check_cancelled()
-        await self._submit_all(resolved, task_dir, ctx)
+        await self._submit_all(resolved, dirs, ctx)
+
+    def _outranking_sources(self, category: RssCategory) -> tuple[str, ...]:
+        """The ledger sources of the categories configured ahead of this one."""
+        ahead: list[str] = []
+        for configured in self._config.categories:
+            if configured.label == category.label:
+                break
+            ahead.append(rss_source(configured.label))
+        return tuple(ahead)
+
+    async def _filing_for(
+        self,
+        avid: str,
+        *,
+        category: RssCategory,
+        own: _Filing,
+        ctx: RunContext,
+    ) -> tuple[_Filing, CreditedWork | None]:
+        """Where this sighting files, and what the catalog said about the work if it was asked.
+
+        A category with none ahead of it, or a row a category ahead already
+        owns or that is past discovery, files as the sighting itself. Otherwise
+        the catalog's credits decide: a talent subscribed in a category ahead
+        claims the work for that category, the earliest configured one when
+        several qualify.
+        """
+        if not own.yields_to or self._cast_lookup is None:
+            return own, None
+        record = await self._ledger.get(avid)
+        if record is not None and (record.source in own.yields_to or record.state not in RECHECKABLE_STATES):
+            return own, None
+        cast = await self._cast_of(avid, ctx)
+        if cast is None:
+            return own, None
+        subscribed = {
+            self._talent_categories[talent] for talent in cast.talent_ids if talent in self._talent_categories
+        }
+        for owner in self._config.categories[: len(own.yields_to)]:
+            if owner.label not in subscribed:
+                continue
+            ctx.add('filed_by_cast')
+            ctx.info(
+                '%s credits a talent subscribed in %s; filing it there instead of %s', avid, owner.label, category.label
+            )
+            owner_source = rss_source(owner.label)
+            owner_filing = _Filing(
+                source=owner_source,
+                task_dir=owner.task_dir_path,
+                yields_to=own.yields_to[: own.yields_to.index(owner_source)],
+            )
+            return owner_filing, cast
+        return own, cast
+
+    async def _cast_of(self, avid: str, ctx: RunContext) -> CreditedWork | None:
+        if avid in self._credits:
+            return self._credits[avid]
+        assert self._cast_lookup is not None  # noqa: S101 - callers check; the fallback below is the contract
+        try:
+            cast = await self._cast_lookup(avid)
+        except Exception:  # noqa: BLE001 - an unreadable catalog files the sighting as itself
+            ctx.exception('Failed to look up the cast of %s', avid)
+            cast = None
+        self._credits[avid] = cast
+        return cast
+
+    async def _filing_dir(self, avid: str, task_dir: str, yields_to: tuple[str, ...], ctx: RunContext) -> str:
+        """The directory this sighting's download goes to: the row's, when a category ahead owns it."""
+        if not yields_to:
+            return task_dir
+        record = await self._ledger.get(avid)
+        if record is None or not record.task_dir_path or record.task_dir_path == task_dir:
+            return task_dir
+        ctx.add('filed_by_owner')
+        ctx.info('%s belongs to %s; filing into %s', avid, record.source, record.task_dir_path)
+        return record.task_dir_path
 
     def _avid_of(self, item: FeedItem) -> str:
         """The AVID an item is about: from its title, else from its link.
@@ -221,7 +357,7 @@ class RssPipeline:
     async def _skip_library_held(
         self,
         wanted: dict[str, list[FeedItem]],
-        task_dir: str,
+        dirs: dict[str, str],
         ctx: RunContext,
     ) -> dict[str, list[FeedItem]]:
         """Drop AVIDs the library already holds, settling their ledger rows.
@@ -238,7 +374,7 @@ class RssPipeline:
         for avid, items in wanted.items():
             ctx.check_cancelled()
             try:
-                held = await asyncio.to_thread(self._archiver.library_holdings, avid, ctx, task_dir_path=task_dir)
+                held = await asyncio.to_thread(self._archiver.library_holdings, avid, ctx, task_dir_path=dirs[avid])
             except Exception:  # noqa: BLE001 - unverifiable is not held
                 ctx.exception('Failed to check the library for %s', avid)
                 held = ()
@@ -297,10 +433,15 @@ class RssPipeline:
 
     # -- CloudDrive offline tasks ---------------------------------------------
 
-    async def _submit_all(self, resolved: dict[str, list[MagnetCandidate]], task_dir: str, ctx: RunContext) -> None:
+    async def _submit_all(
+        self,
+        resolved: dict[str, list[MagnetCandidate]],
+        dirs: dict[str, str],
+        ctx: RunContext,
+    ) -> None:
         for avid, candidates in resolved.items():
             ctx.check_cancelled()
-            await self._intake.record_and_submit(avid, candidates, task_dir, ctx=ctx)
+            await self._intake.record_and_submit(avid, candidates, dirs[avid], ctx=ctx)
 
 
 def _describe(exc: BaseException) -> str:

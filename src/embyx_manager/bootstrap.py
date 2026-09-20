@@ -60,7 +60,7 @@ from embyx_manager.monitor.playlists_api import PlaylistFillApi, create_playlist
 from embyx_manager.monitor.reconcile import ReconcileScanner
 from embyx_manager.monitor.release_dates import ReleaseDateFinder
 from embyx_manager.monitor.reports import PipelineName, RunContext
-from embyx_manager.monitor.rss import RssPipeline
+from embyx_manager.monitor.rss import CreditedWork, RssPipeline
 from embyx_manager.monitor.runs import PipelineRunRepository
 from embyx_manager.monitor.scheduler import MonitorScheduler, PipelineBusyError, PipelineNotConfiguredError
 from embyx_manager.monitor.subscriptions import SubscriptionRepository
@@ -275,6 +275,20 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         actors = await javbus.get_video_actors(avid)
         return tuple((actor.actor_id, actor.name) for actor in actors)
 
+    async def credited_cast(avid: str) -> CreditedWork | None:
+        """The talents AVBase credits on a work, for filing a chart sighting under a subscribed talent."""
+        try:
+            work = await avbase.work(avid)
+        except AvbaseError:
+            LOGGER.warning('AVBase could not be read for %s; filing it by sighting alone', avid)
+            return None
+        if work is None:
+            return None
+        return CreditedWork(
+            talent_ids=frozenset(member.talent_id for member in work.cast if member.talent_id is not None),
+            release_date=work.release_date,
+        )
+
     jobs = FillActorJobManager(service=service, repository=repository)
 
     mutation_auth = make_mutation_auth(settings.api_token)
@@ -310,6 +324,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
             archiver=ArchivePipeline(config=store.get(ArchiveConfig), avid_parser=avid_handle.current()),
             # Resolved when the run executes, well after the scheduler exists.
             on_submitted=scheduler.notify_submission,
+            cast_lookup=credited_cast,
         )
         await pipeline.run(ctx)
 
