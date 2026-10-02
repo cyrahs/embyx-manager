@@ -54,6 +54,13 @@ Three peer features; `/` redirects to the dashboard and no feature owns the app 
   download-tracking state, **补全** queues every title a list lacks through the shared
   acquisition intake (into the playlists section's directory, else the RSS category named
   Rank), and **立即同步** runs the pipeline now.
+- **Merge** (`/merge`, 分盘合并): every library title stored as `-cdN` parts, with ten or
+  more parts first (Emby stacks cd1–cd9 only). **合并** queues a title: a Kubernetes Job
+  concatenates the parts losslessly (`ffmpeg -c copy`) onto the downloads volume, CloudDrive
+  copies the result into a staging folder under `/115/upload`, and once size and SHA-1 match
+  the originals go to 115's recycle bin and the merged file moves into the title's intake
+  route under `embyx_in`, where the archive files it as usual. One title merges at a time; a
+  failed step can be retried where it stopped.
 - **Settings** (`/settings`): CloudDrive, Emby (address and API key, with a connection
   test), Fill Actor library roots, pipeline behavior,
   RSS categories, and avid parsing rules are stored in the database, editable from the
@@ -216,7 +223,11 @@ Deployment notes:
 - bind non-loopback only with `EMBYX_MANAGER_API_TOKEN` and
   `EMBYX_MANAGER_TLS_TERMINATED=true` behind a TLS-terminating proxy;
 - CloudDrive endpoints and credentials are entered on the Settings page
-  (stored in PostgreSQL), not in the environment.
+  (stored in PostgreSQL), not in the environment;
+- merging needs a ServiceAccount that may create, read and delete Jobs and read pods in
+  the app's namespace, a Job template mounted at `EMBYX_MANAGER_MERGE_JOB_TEMPLATE`
+  (the app fills in name, image and arguments), and `POD_NAME`/`POD_NAMESPACE` from the
+  downward API; without them the merge tab lists titles but cannot merge.
 
 ## License
 

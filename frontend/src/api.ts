@@ -12,6 +12,8 @@ import type {
   JobProgress,
   JobState,
   ManualSubmission,
+  MergeTask,
+  MergeTaskList,
   MergeTitleList,
   MoveResult,
   MoveState,
@@ -307,6 +309,17 @@ const CODE_MESSAGES: Record<string, string> = {
   url_not_editable: '演员订阅的地址由 talent id 决定，不能修改。',
   unknown_playlist: '找不到这个列表。',
   fill_directory_unavailable: '还没有可用的补全目录：在设置里填「补全离线目录」，或给 RSS 分类起名 Rank。',
+  merge_unavailable: '这个部署暂时不能合并，请看页面上的原因。',
+  merge_title_not_found: '重新扫描后找不到这部作品，请刷新列表。',
+  merge_title_incomplete: '这部作品缺盘或有异常，不能合并。',
+  merge_container_unsupported: '各分盘的容器格式不一致或不受支持，不能合并。',
+  merge_source_required: '无法判断来源资源库，请先选一个。',
+  merge_source_unknown: '所选的来源资源库不在归档路由里。',
+  merge_task_exists: '这部作品已经有一个未完成的合并任务。',
+  merge_task_not_found: '找不到这个合并任务。',
+  merge_task_not_cancellable: '这个任务已经删除了原分盘，不能再取消，只能重试。',
+  merge_task_not_failed: '只有失败的任务可以重试。',
+  merge_task_changed: '任务状态刚刚变化了，请刷新后重试。',
 }
 
 /** `undefined` uses the signed-in token; `null` deliberately sends none. */
@@ -919,4 +932,30 @@ export async function listMergeTitles(signal?: AbortSignal): Promise<MergeTitleL
     throw new ApiError(0, 'invalid_response', '分盘列表响应无效。')
   }
   return body as unknown as MergeTitleList
+}
+
+export async function listMergeTasks(signal?: AbortSignal): Promise<MergeTaskList> {
+  const body = await request('/api/merge/tasks', { signal })
+  if (!isRecord(body) || !Array.isArray(body.items)) {
+    throw new ApiError(0, 'invalid_response', '合并任务响应无效。')
+  }
+  return body as unknown as MergeTaskList
+}
+
+export async function createMergeTask(avid: string, source: string | null): Promise<MergeTask> {
+  const body = await request('/api/merge/tasks', {
+    method: 'POST',
+    body: JSON.stringify(source ? { avid, source } : { avid }),
+  })
+  return body as unknown as MergeTask
+}
+
+export async function cancelMergeTask(id: number): Promise<MergeTask> {
+  const body = await request(`/api/merge/tasks/${id}/cancel`, { method: 'POST' })
+  return body as unknown as MergeTask
+}
+
+export async function retryMergeTask(id: number): Promise<MergeTask> {
+  const body = await request(`/api/merge/tasks/${id}/retry`, { method: 'POST' })
+  return body as unknown as MergeTask
 }

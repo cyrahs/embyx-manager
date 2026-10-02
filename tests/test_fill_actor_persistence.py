@@ -463,6 +463,7 @@ async def test_postgres_repository_applies_explicit_schema_migration() -> None:
         'feed_subscriptions',
         'playlists',
         'playlist_source',
+        'merge_tasks',
         'health_probe',
     }
 

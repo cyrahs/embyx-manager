@@ -374,3 +374,41 @@ export interface MergeTitleList {
   scanned_at: string | null
   reason: string | null
 }
+
+export type MergeState =
+  | 'queued'
+  | 'merging'
+  | 'uploading'
+  | 'verifying'
+  | 'replacing'
+  | 'archiving'
+  | 'done'
+  | 'failed'
+  | 'cancelled'
+
+export interface MergeTask {
+  id: number
+  avid: string
+  source: string
+  library_dir: string
+  part_count: number
+  state: MergeState
+  failed_state: MergeState | null
+  phase: string | null
+  progress: number | null
+  merged_bytes: number | null
+  uploaded_bytes: number | null
+  upload_attempts: number
+  error: string | null
+  notice: string | null
+  created_at: string
+  updated_at: string
+  finished_at: string | null
+  cancellable: boolean
+  retryable: boolean
+}
+
+export interface MergeTaskList {
+  items: MergeTask[]
+  unavailable: string | null
+}

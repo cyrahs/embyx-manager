@@ -1,28 +1,73 @@
-/** Multi-part titles in the library, and the intake route each would re-enter through.
+/** Multi-part titles in the library, merging them, and the tasks doing so.
  *
  * Emby stacks parts cd1 through cd9 into one item and shows cd10 onwards as
  * items of their own, so titles with ten parts or more come first. Both groups
  * can be merged; titles with missing or unreadable parts are listed apart and
- * cannot be.
+ * cannot be. A merge runs as a Job in the cluster, uploads through CloudDrive
+ * into the 115 staging directory, and once the upload checks out replaces the
+ * original parts and re-enters the archive through the title's intake route.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import { ApiError, listMergeTitles } from '../api'
+import { ApiError, cancelMergeTask, createMergeTask, listMergeTasks, listMergeTitles, retryMergeTask } from '../api'
 import { Notice } from '../components/Feedback'
 import { ChevronIcon, Spinner } from '../components/Icons'
 import { localizeBackendText } from '../lib/backendText'
 import { formatTime } from '../lib/subscriptions'
-import type { MergeTitle, MergeTitleList, MergeTitleProblem } from '../types'
+import type { MergeState, MergeTask, MergeTaskList, MergeTitle, MergeTitleList, MergeTitleProblem } from '../types'
 
 /** Emby stacks a single digit only. */
 const MAX_STACKED_PARTS = 9
+const POLL_MS = 5_000
 
 const PROBLEM_LABELS: Record<MergeTitleProblem, string> = {
   unreadable_strm: 'strm 无法读取',
   outside_library: '文件不在库目录下',
   scattered_parts: '分盘不在同一目录',
+}
+
+const STATE_LABELS: Record<MergeState, string> = {
+  queued: '排队中',
+  merging: '合并中',
+  uploading: '上传中',
+  verifying: '校验中',
+  replacing: '替换原盘',
+  archiving: '等待归档',
+  done: '已完成',
+  failed: '失败',
+  cancelled: '已取消',
+}
+
+const PHASE_LABELS: Record<string, string> = {
+  starting: '启动 Job',
+  checking: '检查空间',
+  probing: '读取分盘信息',
+  merging: '合并',
+  verifying: '核对时长',
+  hashing: '计算 SHA-1',
+}
+
+const FINISHED: ReadonlySet<MergeState> = new Set(['done', 'cancelled'])
+/** States the loop is still working through, which the page keeps polling for. */
+const MOVING: ReadonlySet<MergeState> = new Set(['queued', 'merging', 'uploading', 'verifying', 'replacing', 'archiving'])
+
+function formatBytes(bytes: number | null): string {
+  if (bytes === null) return '—'
+  if (bytes >= 1024 ** 3) return `${(bytes / 1024 ** 3).toFixed(1)} GiB`
+  return `${(bytes / 1024 ** 2).toFixed(0)} MiB`
+}
+
+function percent(value: number | null): string {
+  return value === null ? '' : ` ${Math.round(value * 100)}%`
+}
+
+function taskProgress(task: MergeTask): string {
+  if (task.state === 'merging') return `${PHASE_LABELS[task.phase ?? ''] ?? task.phase ?? ''}${percent(task.progress)}`
+  if (task.state === 'uploading') return `${formatBytes(task.uploaded_bytes ?? 0)} / ${formatBytes(task.merged_bytes)}`
+  if (task.state === 'failed' && task.failed_state) return `在「${STATE_LABELS[task.failed_state]}」时失败`
+  return ''
 }
 
 function sourceLabel(title: MergeTitle): string {
@@ -56,7 +101,52 @@ function groupTitles(items: MergeTitle[]): Group[] {
   ]
 }
 
-function TitleTable({ items }: { items: MergeTitle[] }) {
+interface MergeControls {
+  /** Merging is unavailable in this deployment. */
+  blocked: boolean
+  routes: string[]
+  openTasks: Map<string, MergeTask>
+  busy: string | null
+  onMerge: (title: MergeTitle, source: string | null) => void
+}
+
+function MergeAction({ title, controls }: { title: MergeTitle; controls: MergeControls }) {
+  const [source, setSource] = useState('')
+  const task = controls.openTasks.get(title.avid)
+  if (task) return <span className="acq-muted">{STATE_LABELS[task.state]}</span>
+  if (!title.mergeable) return <span className="acq-muted">—</span>
+  const disabled = controls.blocked || controls.busy !== null
+  if (title.source) {
+    return (
+      <button className="text-button" type="button" disabled={disabled} onClick={() => controls.onMerge(title, null)}>
+        {controls.busy === title.avid ? <Spinner /> : null}
+        合并
+      </button>
+    )
+  }
+  return (
+    <span className="merge-source-pick">
+      <select aria-label={`${title.avid} 的来源资源库`} value={source} onChange={(event) => setSource(event.target.value)}>
+        <option value="">选来源…</option>
+        {controls.routes.map((route) => (
+          <option key={route} value={route}>
+            {route}
+          </option>
+        ))}
+      </select>
+      <button
+        className="text-button"
+        type="button"
+        disabled={disabled || !source}
+        onClick={() => controls.onMerge(title, source)}
+      >
+        合并
+      </button>
+    </span>
+  )
+}
+
+function TitleTable({ items, controls }: { items: MergeTitle[]; controls: MergeControls }) {
   if (items.length === 0) return <p className="route-empty">没有作品。</p>
   return (
     <div className="run-table-wrap">
@@ -68,6 +158,7 @@ function TitleTable({ items }: { items: MergeTitle[] }) {
             <th>库目录</th>
             <th>来源资源库</th>
             <th>备注</th>
+            <th>操作</th>
           </tr>
         </thead>
         <tbody>
@@ -80,6 +171,9 @@ function TitleTable({ items }: { items: MergeTitle[] }) {
               <td className="acq-muted">{item.library_dir ? `${item.library_dir}/${item.brand ?? ''}` : '—'}</td>
               <td className={item.source ? undefined : 'acq-muted'}>{sourceLabel(item)}</td>
               <td className="acq-muted">{problemLabel(item) || '—'}</td>
+              <td>
+                <MergeAction title={item} controls={controls} />
+              </td>
             </tr>
           ))}
         </tbody>
@@ -88,16 +182,80 @@ function TitleTable({ items }: { items: MergeTitle[] }) {
   )
 }
 
+function TaskTable({
+  tasks,
+  busy,
+  onCancel,
+  onRetry,
+}: {
+  tasks: MergeTask[]
+  busy: string | null
+  onCancel: (task: MergeTask) => void
+  onRetry: (task: MergeTask) => void
+}) {
+  return (
+    <div className="run-table-wrap">
+      <table className="run-table">
+        <thead>
+          <tr>
+            <th>番号</th>
+            <th>盘数</th>
+            <th>来源</th>
+            <th>状态</th>
+            <th>进度</th>
+            <th>说明</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tasks.map((task) => {
+            const message = task.error ?? task.notice
+            return (
+              <tr key={task.id}>
+                <td>
+                  <strong>{task.avid}</strong>
+                </td>
+                <td>{task.part_count}</td>
+                <td>{task.source}</td>
+                <td>{STATE_LABELS[task.state]}</td>
+                <td className="acq-muted">{taskProgress(task) || '—'}</td>
+                <td className={task.error ? undefined : 'acq-muted'}>{message ? localizeBackendText(message) : '—'}</td>
+                <td>
+                  {task.retryable && (
+                    <button className="text-button" type="button" disabled={busy !== null} onClick={() => onRetry(task)}>
+                      重试
+                    </button>
+                  )}
+                  {task.cancellable && (
+                    <button className="text-button" type="button" disabled={busy !== null} onClick={() => onCancel(task)}>
+                      {task.state === 'failed' ? '移除' : '取消'}
+                    </button>
+                  )}
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 export default function MergePage() {
   const [page, setPage] = useState<MergeTitleList | null>(null)
+  const [tasks, setTasks] = useState<MergeTaskList | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [busy, setBusy] = useState<string | null>(null)
   const [open, setOpen] = useState<Record<string, boolean>>({})
 
   const load = useCallback(async (signal?: AbortSignal) => {
     setLoading(true)
     try {
-      setPage(await listMergeTitles(signal))
+      const [titles, taskList] = await Promise.all([listMergeTitles(signal), listMergeTasks(signal)])
+      setPage(titles)
+      setTasks(taskList)
       setError(null)
     } catch (failure) {
       if (failure instanceof DOMException && failure.name === 'AbortError') return
@@ -113,7 +271,68 @@ export default function MergePage() {
     return () => controller.abort()
   }, [load])
 
+  const tasksRef = useRef<MergeTaskList | null>(null)
+  useEffect(() => {
+    tasksRef.current = tasks
+  }, [tasks])
+
+  const moving = tasks?.items.some((task) => MOVING.has(task.state)) ?? false
+  useEffect(() => {
+    if (!moving) return
+    const timer = window.setInterval(() => {
+      listMergeTasks()
+        .then((next) => {
+          const previous = tasksRef.current
+          // A title that just finished leaves the library's multi-part list.
+          const finished = next.items.some(
+            (task) => task.state === 'done' && previous?.items.find((old) => old.id === task.id)?.state !== 'done',
+          )
+          setTasks(next)
+          if (finished) void listMergeTitles().then(setPage).catch(() => undefined)
+        })
+        .catch(() => undefined)
+    }, POLL_MS)
+    return () => window.clearInterval(timer)
+  }, [moving])
+
+  const act = useCallback(async (key: string, action: () => Promise<unknown>) => {
+    setBusy(key)
+    setActionError(null)
+    try {
+      await action()
+      setTasks(await listMergeTasks())
+    } catch (failure) {
+      setActionError(failure instanceof ApiError ? failure.message : '操作没有完成，请稍后重试。')
+    } finally {
+      setBusy(null)
+    }
+  }, [])
+
+  const onMerge = useCallback(
+    (title: MergeTitle, source: string | null) => {
+      const route = source ?? title.source
+      const confirmed = window.confirm(
+        `合并 ${title.avid} 的 ${title.part_count} 个分盘，经 /115/upload 校验后放进 ${route} 的 embyx_in 重新归档。` +
+          '\n上传校验通过后会删除原分盘（进 115 回收站）。确定吗？',
+      )
+      if (!confirmed) return
+      void act(title.avid, () => createMergeTask(title.avid, source))
+    },
+    [act],
+  )
+
   const groups = useMemo(() => groupTitles(page?.items ?? []), [page])
+  const openTasks = useMemo(
+    () => new Map((tasks?.items ?? []).filter((task) => !FINISHED.has(task.state)).map((task) => [task.avid, task])),
+    [tasks],
+  )
+  const controls: MergeControls = {
+    blocked: Boolean(tasks?.unavailable),
+    routes: page?.routes ?? [],
+    openTasks,
+    busy,
+    onMerge,
+  }
 
   return (
     <main>
@@ -126,7 +345,7 @@ export default function MergePage() {
           </button>
         </div>
         <p className="settings-desc">
-          扫描库里所有带 -cdN 分盘的作品。合并后的文件会经 /115/upload 中转，再按来源资源库走 embyx_in 的默认归档流程入库。
+          扫描库里所有带 -cdN 分盘的作品。合并在集群里单独的 Job 中进行，合并后的文件经 /115/upload 中转并校验 SHA-1，再按来源资源库走 embyx_in 的默认归档流程入库。
         </p>
         {page?.reason && (
           <Notice
@@ -136,7 +355,28 @@ export default function MergePage() {
             action={<Link className="text-button" to="/settings">前往设置</Link>}
           />
         )}
+        {tasks?.unavailable && (
+          <Notice tone="warning" title="暂时不能合并" body={localizeBackendText(tasks.unavailable)} />
+        )}
         {error && <Notice tone="error" title="扫描失败" body={error} />}
+        {actionError && <Notice tone="error" title="操作失败" body={actionError} />}
+        {tasks && tasks.items.length > 0 && (
+          <section className="playlist-group" aria-labelledby="merge-tasks">
+            <h3 id="merge-tasks" className="playlist-group-title">
+              合并任务
+            </h3>
+            <TaskTable
+              tasks={tasks.items}
+              busy={busy}
+              onCancel={(task) => {
+                const verb = task.state === 'failed' ? '移除' : '取消'
+                if (!window.confirm(`${verb} ${task.avid} 的合并任务？已经合并或上传的中间文件会被删掉，原分盘不受影响。`)) return
+                void act(`task-${task.id}`, () => cancelMergeTask(task.id))
+              }}
+              onRetry={(task) => void act(`task-${task.id}`, () => retryMergeTask(task.id))}
+            />
+          </section>
+        )}
         {page && !page.reason && (
           <p className="acq-meta">
             扫描时间 {formatTime(page.scanned_at)} · 共 {page.items.length} 部分盘作品 · 资源库 {page.routes.join(' / ') || '—'}
@@ -168,7 +408,7 @@ export default function MergePage() {
                   )}
                 </h3>
                 <p className="settings-hint">{group.hint}</p>
-                {expanded && <TitleTable items={group.items} />}
+                {expanded && <TitleTable items={group.items} controls={controls} />}
               </section>
             )
           })

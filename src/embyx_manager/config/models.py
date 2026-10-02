@@ -447,6 +447,44 @@ class FillActorConfig(ConfigSection):
         return bool(self.actor_root and self.additional_roots and self.move_in_root)
 
 
+class MergeConfig(ConfigSection):
+    """Where the merge tab writes, uploads through and stages a merged title.
+
+    The defaults match the merge Job the cluster runs (charys117/nas-gitops,
+    ``apps/emby/embyx-manager/merge-job.json``): it mounts the downloads volume
+    at ``/downloads`` and CloudDrive serves the same volume as ``/downloads``.
+    """
+
+    #: Where the Job writes merged files; the app mounts the same directory.
+    work_dir: str = '/downloads/upload'
+    #: The same directory as a CloudDrive API path, for the upload copy.
+    cloud_work_dir: str = '/downloads/upload'
+    #: The 115 directory a merged file is uploaded into and checked in.
+    cloud_staging_dir: str = '/115/upload'
+    #: The CloudDrive mount the library's strm files point into; stripping it
+    #: from a strm target gives the CloudDrive API path.
+    cloud_mount_prefix: str = '/mnt/cd2'
+    #: Space a merge leaves free on the work volume beyond the merged file.
+    free_space_reserve_gib: int = 20
+
+    @field_validator('work_dir', 'cloud_work_dir', 'cloud_staging_dir', 'cloud_mount_prefix')
+    @classmethod
+    def _validate_paths(cls, value: str, info: ValidationInfo) -> str:
+        return normalize_absolute_path(f'merge.{info.field_name}', value)
+
+    @field_validator('free_space_reserve_gib')
+    @classmethod
+    def _non_negative(cls, value: int) -> int:
+        if value < 0:
+            msg = 'merge.free_space_reserve_gib must not be negative'
+            raise ValueError(msg)
+        return value
+
+    @property
+    def configured(self) -> bool:
+        return bool(self.work_dir and self.cloud_work_dir and self.cloud_staging_dir and self.cloud_mount_prefix)
+
+
 SECTION_MODELS: dict[str, type[ConfigSection]] = {
     'clouddrive': CloudDriveConfig,
     'emby': EmbyConfig,
@@ -456,4 +494,5 @@ SECTION_MODELS: dict[str, type[ConfigSection]] = {
     'mapping': MappingConfig,
     'playlists': PlaylistsConfig,
     'fill_actor': FillActorConfig,
+    'merge': MergeConfig,
 }
