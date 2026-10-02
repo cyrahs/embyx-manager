@@ -123,7 +123,7 @@ describe('app shell', () => {
     window.history.pushState({}, '', '/')
   })
 
-  it('orders the primary navigation as dashboard, fill actor, subscriptions, playlists, then settings', async () => {
+  it('orders the primary navigation as dashboard, fill actor, subscriptions, playlists, merge, then settings', async () => {
     render(<App />)
 
     const navigation = await screen.findByRole('navigation', { name: '页面导航' })
@@ -132,6 +132,7 @@ describe('app shell', () => {
       '补全演员',
       '订阅',
       '列表',
+      '分盘合并',
       '设置',
     ])
   })

@@ -21,6 +21,7 @@ const EXACT_TEXT: Record<string, string> = {
   'address and api_key are required': '需要填写地址和 API Key',
   'no fill directory: set playlists.task_dir_path or an RSS category labelled Rank': '在设置里填「补全离线目录」，或给一个 RSS 分类起名 Rank',
   'filling is not available': '这个部署没有接入补全',
+  'mapping.dst_dir and archive.dst_dir must be configured': '需要先配置映射的目标目录和归档的目标目录',
   'CloudDrive task directory is not configured': '尚未配置 CloudDrive 任务目录',
   'at least one RSS category must be configured': '需要至少配置一个 RSS 分类',
   'at least one RSS category with an offline directory must be configured': '需要至少配置一个带离线目录的 RSS 分类',
