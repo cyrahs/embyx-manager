@@ -12,6 +12,7 @@ import type {
   JobProgress,
   JobState,
   ManualSubmission,
+  MergeTitleList,
   MoveResult,
   MoveState,
   PipelineId,
@@ -908,4 +909,14 @@ export async function fillPlaylist(key: string): Promise<PlaylistFill> {
     throw new ApiError(0, 'invalid_response', '补全响应无效。')
   }
   return body as unknown as PlaylistFill
+}
+
+// ---------- merge ----------
+
+export async function listMergeTitles(signal?: AbortSignal): Promise<MergeTitleList> {
+  const body = await request('/api/merge/titles', { signal })
+  if (!isRecord(body) || !Array.isArray(body.items) || !Array.isArray(body.routes)) {
+    throw new ApiError(0, 'invalid_response', '分盘列表响应无效。')
+  }
+  return body as unknown as MergeTitleList
 }

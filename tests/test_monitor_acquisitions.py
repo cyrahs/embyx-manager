@@ -634,3 +634,12 @@ async def test_a_release_date_can_be_filled_in_once_but_never_overwritten() -> N
     record = await ledger.get('ABC-123')
     assert record is not None
     assert record.release_date == date(2026, 10, 2)
+
+
+async def test_task_dirs_for_returns_only_rows_that_recorded_a_directory() -> None:
+    ledger = make_ledger()
+    await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW, task_dir_path='/115/embyx_in/clt')
+    await ledger.discover('DEF-456', source=rss_source('Rank'), now=NOW)
+
+    assert await ledger.task_dirs_for(['ABC-123', 'DEF-456', 'GHI-789']) == {'ABC-123': '/115/embyx_in/clt'}
+    assert await ledger.task_dirs_for([]) == {}

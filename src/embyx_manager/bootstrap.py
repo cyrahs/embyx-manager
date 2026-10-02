@@ -47,6 +47,7 @@ from embyx_manager.fill_actor.jobs import FillActorJobManager
 from embyx_manager.fill_actor.postgres_repository import PostgresFillActorRepository
 from embyx_manager.fill_actor.service import FillActorPaths, FillActorRuntime, FillActorService
 from embyx_manager.locking import PostgresAdvisoryLock
+from embyx_manager.merge.api import MergeCatalog, create_merge_router
 from embyx_manager.monitor.acquisitions import AcquisitionRepository
 from embyx_manager.monitor.api import AcquisitionApi, SubscriptionsApi, create_monitor_router
 from embyx_manager.monitor.archive import ArchivePipeline
@@ -537,6 +538,13 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
             task_dir=lambda: resolve_fill_dir(store.get(PlaylistsConfig), store.get(RssConfig)),
         ),
     )
+    merge_router = create_merge_router(
+        MergeCatalog(
+            archive=lambda: store.get(ArchiveConfig),
+            mapping=lambda: store.get(MappingConfig),
+            task_dirs_for=ledger.task_dirs_for,
+        ),
+    )
     monitor_router = create_monitor_router(
         scheduler,
         pipeline_runs,
@@ -584,7 +592,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
     frontend_dist = Path(__file__).resolve().parent / 'static'
     return create_app(
         app_ready=repository.health_check,
-        routers=(fill_actor_router, config_router, monitor_router, playlists_router),
+        routers=(fill_actor_router, config_router, monitor_router, playlists_router, merge_router),
         feature_health={'fill_actor': fill_actor_health(service=service, repository=repository)},
         exception_handlers={FillActorError: handle_fill_actor_error},
         # The runtime comes up first and goes down last; features stack on top of it.

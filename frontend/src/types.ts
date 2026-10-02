@@ -349,3 +349,28 @@ export interface PlaylistMissing {
   name: string
   items: PlaylistMissingEntry[]
 }
+
+export type MergeTitleProblem = 'unreadable_strm' | 'outside_library' | 'scattered_parts'
+export type MergeSourceBasis = 'library' | 'ledger'
+
+export interface MergeTitle {
+  avid: string
+  directory: string
+  part_count: number
+  parts: number[]
+  missing: number[]
+  library_dir: string | null
+  brand: string | null
+  problem: MergeTitleProblem | null
+  source: string | null
+  source_basis: MergeSourceBasis | null
+  stackable: boolean
+  mergeable: boolean
+}
+
+export interface MergeTitleList {
+  items: MergeTitle[]
+  routes: string[]
+  scanned_at: string | null
+  reason: string | null
+}

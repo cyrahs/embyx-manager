@@ -331,6 +331,18 @@ class AcquisitionRepository:
         )
         return {row['avid']: AcquisitionState(row['state']) for row in rows}
 
+    async def task_dirs_for(self, avids: Sequence[str]) -> dict[str, str]:
+        """The offline directory each listed AVID was fetched into, for the rows that recorded one."""
+        if not avids:
+            return {}
+        pool = await self._database.get_pool()
+        rows = await pool.fetch(
+            'SELECT avid, task_dir_path FROM archive_acquisitions '
+            'WHERE avid = ANY($1::text[]) AND task_dir_path IS NOT NULL',
+            list(avids),
+        )
+        return {row['avid']: row['task_dir_path'] for row in rows}
+
     async def set_release_date(self, avid: str, release_date: date) -> bool:
         """Fill in a release date the row was recorded without; never overwrites."""
         pool = await self._database.get_pool()

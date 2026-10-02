@@ -6,6 +6,7 @@ import { LoginDialog, LoginScreen, SignOutButton } from './components/Login'
 import { useAuthGate } from './lib/apiToken'
 import DashboardPage from './pages/DashboardPage'
 import FillActorPage from './pages/FillActorPage'
+import MergePage from './pages/MergePage'
 import PlaylistsPage from './pages/PlaylistsPage'
 import SettingsPage from './pages/SettingsPage'
 import SubscriptionsPage from './pages/SubscriptionsPage'
@@ -21,6 +22,7 @@ const NAV_ITEMS = [
   { to: '/fill-actor', label: '补全演员' },
   { to: '/subscriptions', label: '订阅' },
   { to: '/playlists', label: '列表' },
+  { to: '/merge', label: '分盘合并' },
   { to: '/settings', label: '设置' },
 ] as const
 
@@ -141,6 +143,7 @@ export default function App() {
           <Route path="fill-actor" element={<FillActorPage />} />
           <Route path="subscriptions" element={<SubscriptionsPage />} />
           <Route path="playlists" element={<PlaylistsPage />} />
+          <Route path="merge" element={<MergePage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to={HOME_PATH} replace />} />
         </Route>
