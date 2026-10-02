@@ -80,6 +80,37 @@ class CloudDriveClient:
         )
         return self.stub.MoveFile(request, metadata=self._metadata(), timeout=MOVE_TIMEOUT_SECONDS)
 
+    def copy_file(
+        self,
+        source_paths: list[str],
+        dest_path: str,
+        conflict_policy: int = 0,
+    ) -> clouddrive_pb2.FileOperationResult:
+        """Queue a copy task; CloudDrive runs it in the background. conflict_policy as for move_file."""
+        request = clouddrive_pb2.CopyFileRequest(
+            theFilePaths=source_paths,
+            destPath=dest_path,
+            conflictPolicy=conflict_policy,
+        )
+        return self.stub.CopyFile(request, metadata=self._metadata(), timeout=GRPC_TIMEOUT_SECONDS)
+
+    def get_copy_tasks(self) -> list[clouddrive_pb2.CopyTask]:
+        result = self.stub.GetCopyTasks(empty_pb2.Empty(), metadata=self._metadata(), timeout=GRPC_TIMEOUT_SECONDS)
+        return list(result.copyTasks)
+
+    def restart_copy_task(self, source_path: str, dest_path: str) -> None:
+        request = clouddrive_pb2.CopyTaskRequest(sourcePath=source_path, destPath=dest_path)
+        self.stub.RestartCopyTask(request, metadata=self._metadata(), timeout=GRPC_TIMEOUT_SECONDS)
+
+    def cancel_copy_task(self, source_path: str, dest_path: str) -> None:
+        request = clouddrive_pb2.CopyTaskRequest(sourcePath=source_path, destPath=dest_path)
+        self.stub.CancelCopyTask(request, metadata=self._metadata(), timeout=GRPC_TIMEOUT_SECONDS)
+
+    def delete_files(self, paths: list[str]) -> clouddrive_pb2.FileOperationResult:
+        """Delete into the cloud's recycle bin, not permanently."""
+        request = clouddrive_pb2.MultiFileRequest(path=paths)
+        return self.stub.DeleteFiles(request, metadata=self._metadata(), timeout=MOVE_TIMEOUT_SECONDS)
+
     def add_offline_file(
         self,
         urls: str | list[str],

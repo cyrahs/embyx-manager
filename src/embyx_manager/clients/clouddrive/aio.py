@@ -18,6 +18,18 @@ from embyx_manager.clients.clouddrive.client import CloudDriveClient
 
 CloudFile = dict[str, object]
 OfflineTask = dict[str, object]
+CopyTask = dict[str, object]
+
+
+class CopyStatus(StrEnum):
+    """CloudDrive's copy-task status, by proto enum name."""
+
+    PENDING = 'Pending'
+    SCANNING = 'Scanning'
+    SCANNED = 'Scanned'
+    COMPLETED = 'Completed'
+    FAILED = 'Failed'
+    UNKNOWN = 'Unknown'
 
 
 class OfflineStatus(StrEnum):
@@ -33,6 +45,7 @@ class OfflineStatus(StrEnum):
 _ASCII_CONTROL_LIMIT = 32
 _ASCII_DELETE = 127
 MOVE_CONFLICT_SKIP = 2
+COPY_CONFLICT_OVERWRITE = 0
 
 
 def validate_api_path(value: str, *, allow_root: bool) -> str:
@@ -98,6 +111,23 @@ def _offline_file_to_dict(file: Any) -> OfflineTask:
         'add_time': int(file.add_time),
         'progress': float(file.percendDone),
         'peers': int(file.peers),
+    }
+
+
+def _copy_task_to_dict(task: Any) -> CopyTask:
+    try:
+        status = CopyStatus(clouddrive_pb2.CopyTask.TaskStatus.Name(task.status))
+    except ValueError:
+        status = CopyStatus.UNKNOWN
+    return {
+        'source_path': str(task.sourcePath),
+        'dest_path': str(task.destPath),
+        'status': status,
+        'total_bytes': int(task.totalBytes),
+        'uploaded_bytes': int(task.uploadedBytes),
+        'failed_files': int(task.failedFiles),
+        'paused': bool(task.paused),
+        'errors': tuple(str(error.message) for error in task.errors),
     }
 
 
@@ -229,3 +259,27 @@ class AsyncCloudDrive:
             directory,
             delete_files=delete_files,
         )
+
+    async def copy_file(self, source_api_path: str, destination_api_dir: str) -> dict[str, object]:
+        """Queue a background copy of one file, replacing a same-named file at the destination."""
+        source = validate_api_path(source_api_path, allow_root=False)
+        destination = validate_api_path(destination_api_dir, allow_root=True)
+        result = await _run_sync_complete(self._client.copy_file, [source], destination, COPY_CONFLICT_OVERWRITE)
+        return {'success': bool(result.success), 'error_message': str(result.errorMessage)}
+
+    async def copy_tasks(self) -> tuple[CopyTask, ...]:
+        """Every copy task CloudDrive remembers, finished ones included."""
+        tasks = await _run_sync_complete(self._client.get_copy_tasks)
+        return tuple(_copy_task_to_dict(task) for task in tasks)
+
+    async def restart_copy_task(self, source_path: str, dest_path: str) -> None:
+        await _run_sync_complete(self._client.restart_copy_task, source_path, dest_path)
+
+    async def cancel_copy_task(self, source_path: str, dest_path: str) -> None:
+        await _run_sync_complete(self._client.cancel_copy_task, source_path, dest_path)
+
+    async def delete_files(self, api_paths: list[str]) -> dict[str, object]:
+        """Delete files into the cloud's recycle bin."""
+        paths = [validate_api_path(path, allow_root=False) for path in api_paths]
+        result = await _run_sync_complete(self._client.delete_files, paths)
+        return {'success': bool(result.success), 'error_message': str(result.errorMessage)}

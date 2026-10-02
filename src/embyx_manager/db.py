@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 
 import asyncpg
 
-CURRENT_SCHEMA_VERSION = 16
+CURRENT_SCHEMA_VERSION = 17
 
 # Advisory-lock key space for embyx-manager; low word selects the resource.
 ADVISORY_NAMESPACE = 0x454D4258  # 'EMBX'
@@ -581,5 +581,45 @@ _MIGRATIONS[16] = (
     """
     ALTER TABLE pipeline_runs ADD CONSTRAINT pipeline_runs_pipeline_check
     CHECK (pipeline IN ('rss', 'archive', 'mapping', 'playlists'))
+    """,
+)
+
+# Multi-part titles merged into one file by the merge tab. A row walks from
+# queued through the merge Job, the CloudDrive upload and its check, to the
+# swap in the library; failed_state remembers where a failure happened so a
+# retry resumes there. One title has at most one unfinished row.
+_MIGRATIONS[17] = (
+    """
+    CREATE TABLE merge_tasks (
+        id BIGSERIAL PRIMARY KEY,
+        avid TEXT NOT NULL,
+        source TEXT NOT NULL,
+        library_dir TEXT NOT NULL,
+        brand TEXT NOT NULL,
+        parts_json TEXT NOT NULL,
+        merged_name TEXT NOT NULL,
+        state TEXT NOT NULL CHECK (state IN (
+            'queued', 'merging', 'uploading', 'verifying', 'replacing', 'archiving',
+            'done', 'failed', 'cancelled'
+        )),
+        failed_state TEXT,
+        job_name TEXT,
+        phase TEXT,
+        progress DOUBLE PRECISION,
+        merged_bytes BIGINT,
+        merged_sha1 TEXT,
+        uploaded_bytes BIGINT,
+        upload_attempts INTEGER NOT NULL DEFAULT 0,
+        error TEXT,
+        notice TEXT,
+        created_at TIMESTAMPTZ NOT NULL,
+        updated_at TIMESTAMPTZ NOT NULL,
+        state_changed_at TIMESTAMPTZ NOT NULL,
+        finished_at TIMESTAMPTZ
+    )
+    """,
+    """
+    CREATE UNIQUE INDEX merge_tasks_one_open_per_avid ON merge_tasks (avid)
+    WHERE state NOT IN ('done', 'cancelled')
     """,
 )

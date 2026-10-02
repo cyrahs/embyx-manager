@@ -262,6 +262,19 @@ const SECTION_SPECS: SectionSpec[] = [
     ],
   },
   {
+    section: 'merge',
+    title: '分盘合并',
+    description:
+      '「分盘合并」页用到的目录。默认值和集群里的合并 Job 一致（downloads 卷挂在 /downloads），一般不用改。',
+    fields: [
+      { key: 'work_dir', label: '合并输出目录（本地）', kind: 'text', hint: '合并 Job 写文件的位置，embyx-manager 也挂载着它。' },
+      { key: 'cloud_work_dir', label: '合并输出目录（CloudDrive 路径）', kind: 'text', hint: '同一个目录在 CloudDrive 里的路径，上传从这里复制。' },
+      { key: 'cloud_staging_dir', label: '115 中转目录', kind: 'text', hint: '上传到这里并校验 SHA-1 后，才删除原分盘、移进 embyx_in。' },
+      { key: 'cloud_mount_prefix', label: 'CloudDrive 挂载前缀', kind: 'text', hint: 'strm 指向的挂载点，去掉它就是 CloudDrive 路径。' },
+      { key: 'free_space_reserve_gib', label: '合并时预留空间（GiB）', kind: 'number' },
+    ],
+  },
+  {
     section: 'avid',
     title: '番号解析规则',
     description: '影响所有流水线的番号识别。',

@@ -10,6 +10,7 @@ import uvicorn
 from embyx_manager.bootstrap import build_app
 from embyx_manager.config import ConfigStore
 from embyx_manager.db import Database
+from embyx_manager.merge import worker
 from embyx_manager.settings import Settings
 
 
@@ -104,8 +105,20 @@ def main() -> None:
         default=None,
         help='PostgreSQL DSN (defaults to EMBYX_MANAGER_DATABASE_URL)',
     )
+    worker_parser = subparsers.add_parser(
+        'merge-worker',
+        help="merge one title's parts into a single file (run by the merge tab's Kubernetes Job)",
+    )
+    worker_parser.add_argument('--output', required=True, help='the merged file to write')
+    worker_parser.add_argument('--status', required=True, help='the JSON status file the app polls')
+    worker_parser.add_argument('--reserve-gib', type=float, default=20.0, help='space to leave free on the volume')
+    worker_parser.add_argument('parts', nargs='+', help='the parts, in order')
     args = parser.parse_args()
 
+    if args.command == 'merge-worker':
+        raise SystemExit(
+            worker.run(args.parts, output=args.output, status_path=args.status, reserve_gib=args.reserve_gib)
+        )
     if args.command == 'import-config':
         database_url = args.database_url or os.environ.get('EMBYX_MANAGER_DATABASE_URL')
         if not database_url:

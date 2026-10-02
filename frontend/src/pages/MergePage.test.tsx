@@ -49,8 +49,32 @@ function renderPage() {
   )
 }
 
+const TASK = {
+  id: 4,
+  avid: 'OLD-001',
+  source: 'rank',
+  library_dir: 'rank',
+  part_count: 12,
+  state: 'uploading',
+  failed_state: null,
+  phase: null,
+  progress: null,
+  merged_bytes: 4 * 1024 ** 3,
+  uploaded_bytes: 1024 ** 3,
+  upload_attempts: 1,
+  error: null,
+  notice: 'waiting for 115 to report the SHA-1',
+  created_at: '2026-10-02T20:00:00Z',
+  updated_at: '2026-10-02T20:00:00Z',
+  finished_at: null,
+  cancellable: true,
+  retryable: false,
+}
+
 describe('merge page', () => {
   let titlesBody: unknown
+  let tasksBody: { items: unknown[]; unavailable: string | null }
+  let fetchMock: ReturnType<typeof vi.fn>
 
   beforeEach(() => {
     titlesBody = {
@@ -59,17 +83,27 @@ describe('merge page', () => {
       scanned_at: '2026-10-02T20:00:00Z',
       reason: null,
     }
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockImplementation((input) => {
-        if (String(input) === '/api/merge/titles') return jsonResponse(titlesBody)
-        return jsonResponse({ error: { code: 'not_found' } }, 404)
-      }),
-    )
+    tasksBody = { items: [], unavailable: null }
+    fetchMock = vi.fn().mockImplementation((input, init?: RequestInit) => {
+      const url = String(input)
+      if (url === '/api/merge/titles') return jsonResponse(titlesBody)
+      if (url === '/api/merge/tasks' && init?.method === 'POST') {
+        const body = JSON.parse(String(init.body)) as { avid: string; source?: string }
+        const created = { ...TASK, id: 9, avid: body.avid, source: body.source ?? 'vr', state: 'queued', notice: null }
+        tasksBody = { ...tasksBody, items: [created, ...tasksBody.items] }
+        return jsonResponse(created, 201)
+      }
+      if (url === '/api/merge/tasks') return jsonResponse(tasksBody)
+      if (url === '/api/merge/tasks/4/cancel') return jsonResponse({ ...TASK, state: 'cancelled', cancellable: false })
+      return jsonResponse({ error: { code: 'not_found' } }, 404)
+    })
+    vi.stubGlobal('fetch', fetchMock)
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
   })
 
   afterEach(() => {
     vi.unstubAllGlobals()
+    vi.restoreAllMocks()
   })
 
   it('lists titles with ten or more parts and folds the rest', async () => {
@@ -97,5 +131,57 @@ describe('merge page', () => {
 
     expect(await screen.findByText('需要先配置映射的目标目录和归档的目标目录')).toBeInTheDocument()
     expect(screen.queryByRole('region', { name: /10 盘及以上/ })).not.toBeInTheDocument()
+  })
+
+  it('queues a merge after confirmation and shows it as a task', async () => {
+    renderPage()
+
+    const many = await screen.findByRole('region', { name: '10 盘及以上 · 1' })
+    await userEvent.click(within(many).getByRole('button', { name: '合并' }))
+
+    expect(window.confirm).toHaveBeenCalledWith(expect.stringContaining('删除原分盘'))
+    const post = fetchMock.mock.calls.find(([, init]) => init?.method === 'POST')
+    expect(post?.[0]).toBe('/api/merge/tasks')
+    expect(JSON.parse(String(post?.[1]?.body))).toEqual({ avid: 'SQTEVR-009' })
+    const tasks = await screen.findByRole('region', { name: '合并任务' })
+    expect(within(tasks).getByText('SQTEVR-009')).toBeInTheDocument()
+    expect(within(tasks).getByText('排队中')).toBeInTheDocument()
+    expect(within(many).getByText('排队中')).toBeInTheDocument()
+  })
+
+  it('asks for a source when the title has none', async () => {
+    titlesBody = { ...(titlesBody as object), items: [{ ...BIG, source: null, source_basis: null }] }
+    renderPage()
+
+    const many = await screen.findByRole('region', { name: '10 盘及以上 · 1' })
+    const merge = within(many).getByRole('button', { name: '合并' })
+    expect(merge).toBeDisabled()
+    await userEvent.selectOptions(within(many).getByRole('combobox', { name: 'SQTEVR-009 的来源资源库' }), 'clt')
+    await userEvent.click(merge)
+
+    const post = fetchMock.mock.calls.find(([, init]) => init?.method === 'POST')
+    expect(JSON.parse(String(post?.[1]?.body))).toEqual({ avid: 'SQTEVR-009', source: 'clt' })
+  })
+
+  it('shows task progress and cancels a task', async () => {
+    tasksBody = { items: [TASK], unavailable: null }
+    renderPage()
+
+    const tasks = await screen.findByRole('region', { name: '合并任务' })
+    expect(within(tasks).getByText('上传中')).toBeInTheDocument()
+    expect(within(tasks).getByText('1.0 GiB / 4.0 GiB')).toBeInTheDocument()
+    expect(within(tasks).getByText('等 115 算出 SHA-1')).toBeInTheDocument()
+
+    await userEvent.click(within(tasks).getByRole('button', { name: '取消' }))
+    expect(fetchMock).toHaveBeenCalledWith('/api/merge/tasks/4/cancel', expect.objectContaining({ method: 'POST' }))
+  })
+
+  it('disables merging when the deployment cannot run it', async () => {
+    tasksBody = { items: [], unavailable: 'the merge Job template is not mounted (EMBYX_MANAGER_MERGE_JOB_TEMPLATE)' }
+    renderPage()
+
+    expect(await screen.findByText('这个部署没有挂载合并 Job 的模板')).toBeInTheDocument()
+    const many = await screen.findByRole('region', { name: '10 盘及以上 · 1' })
+    expect(within(many).getByRole('button', { name: '合并' })).toBeDisabled()
   })
 })

@@ -29,6 +29,7 @@ from embyx_manager.config import (
     EmbyConfig,
     FillActorConfig,
     MappingConfig,
+    MergeConfig,
     PlaylistsConfig,
     RssConfig,
 )
@@ -47,7 +48,10 @@ from embyx_manager.fill_actor.jobs import FillActorJobManager
 from embyx_manager.fill_actor.postgres_repository import PostgresFillActorRepository
 from embyx_manager.fill_actor.service import FillActorPaths, FillActorRuntime, FillActorService
 from embyx_manager.locking import PostgresAdvisoryLock
-from embyx_manager.merge.api import MergeCatalog, create_merge_router
+from embyx_manager.merge.api import MergeCatalog, MergeTasksApi, create_merge_router
+from embyx_manager.merge.kube import KubeJobs
+from embyx_manager.merge.service import MergeService
+from embyx_manager.merge.tasks import MergeTaskRepository
 from embyx_manager.monitor.acquisitions import AcquisitionRepository
 from embyx_manager.monitor.api import AcquisitionApi, SubscriptionsApi, create_monitor_router
 from embyx_manager.monitor.archive import ArchivePipeline
@@ -538,12 +542,32 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
             task_dir=lambda: resolve_fill_dir(store.get(PlaylistsConfig), store.get(RssConfig)),
         ),
     )
+
+    async def _trigger_after_merge(pipeline: PipelineName) -> None:
+        """A merged title is staged or filed: archive or remap it now rather than on the next schedule."""
+        try:
+            await scheduler.trigger(pipeline)
+        except (PipelineBusyError, PipelineNotConfiguredError) as exc:
+            LOGGER.info('not starting a %s run after a merge step: %s', pipeline.value, exc)
+
+    merge_tasks = MergeTaskRepository(database)
+    merge_service = MergeService(
+        repository=merge_tasks,
+        cloud=cloud_handle.current,
+        kube=KubeJobs.from_environment(),
+        merge_config=lambda: store.get(MergeConfig),
+        archive_config=lambda: store.get(ArchiveConfig),
+        clouddrive_config=lambda: store.get(CloudDriveConfig),
+        trigger=_trigger_after_merge,
+    )
     merge_router = create_merge_router(
         MergeCatalog(
             archive=lambda: store.get(ArchiveConfig),
             mapping=lambda: store.get(MappingConfig),
             task_dirs_for=ledger.task_dirs_for,
         ),
+        tasks=MergeTasksApi(repository=merge_tasks, service=merge_service),
+        mutation_auth=mutation_auth,
     )
     monitor_router = create_monitor_router(
         scheduler,
@@ -567,10 +591,12 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         """Config store, scheduler and shared clients: everything the features sit on."""
         await store.load()
         await scheduler.start()
+        await merge_service.start()
         try:
             yield
         finally:
             try:
+                await merge_service.aclose()
                 await scheduler.aclose()
             finally:
                 await _close_clients()

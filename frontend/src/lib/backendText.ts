@@ -48,6 +48,19 @@ const EXACT_TEXT: Record<string, string> = {
   'connection timed out': '连接超时',
   'address and api_token are required': '需要先填写服务地址和 API Token',
   'url and api_key are required': '需要先填写 API 地址和 API Key',
+  // Merge readiness and task notices (merge/service.py).
+  'the merge Job template is not mounted (EMBYX_MANAGER_MERGE_JOB_TEMPLATE)': '这个部署没有挂载合并 Job 的模板',
+  'archive.src_dir and archive.dst_dir must be configured': '需要先配置归档的源目录和目标目录',
+  'merge directories must be configured': '需要先在设置里配置合并用的目录',
+  'archive.src_dir must lie under merge.cloud_mount_prefix': '归档源目录必须在合并设置的 CloudDrive 挂载前缀之下',
+  'the merged file was lost before the upload finished; merging again': '上传完成前合并文件丢失了，正在重新合并',
+  'CloudDrive has paused the upload': 'CloudDrive 暂停了这个上传',
+  'waiting for CloudDrive to list the uploaded file': '等 CloudDrive 列出已上传的文件',
+  'waiting for 115 to report the SHA-1': '等 115 算出 SHA-1',
+  'waiting for the archive run to file it': '等归档流水线把它入库',
+  'the merge Job disappeared before it finished': '合并 Job 在完成前消失了',
+  'the merge Job failed': '合并 Job 失败',
+  '115 never reported a SHA-1 for the uploaded file': '115 一直没有给出上传文件的 SHA-1',
 }
 
 const TEXT_PATTERNS: Array<[RegExp, (match: RegExpMatchArray) => string]> = [
@@ -62,6 +75,14 @@ const TEXT_PATTERNS: Array<[RegExp, (match: RegExpMatchArray) => string]> = [
   [/^authentication failed \(HTTP (\d+)\); check the API key$/, (m) => `认证失败（HTTP ${m[1]}），请检查 API Key`],
   [/^unexpected response: HTTP (\d+)$/, (m) => `响应异常（HTTP ${m[1]}）`],
   [/^connection failed: (.+)$/, (m) => `连接失败：${m[1]}`],
+  [/^the merge Job failed: (.+)$/s, (m) => `合并 Job 失败：${m[1]}`],
+  [/^not enough space in (\S+): (.+)$/, (m) => `${m[1]} 空间不足：${m[2]}`],
+  [/^(\S+) carries different streams than (\S+); a stream copy would break$/, (m) => `${m[1]} 的音视频流和 ${m[2]} 不一致，无法无损合并`],
+  [/^uploaded SHA-1 (\S+) differs from the merged file \((\S+)\)$/, (m) => `上传后的 SHA-1 ${m[1]} 与合并文件（${m[2]}）不一致`],
+  [/^uploaded size (\d+) differs from the merged file \((\d+)\)$/, (m) => `上传后的大小 ${m[1]} 与合并文件（${m[2]}）不一致`],
+  [/^upload failed (\d+) times: (.+)$/, (m) => `上传失败了 ${m[1]} 次：${m[2]}`],
+  [/^the archive has not filed (.+); check the archive run log$/, (m) => `归档一直没有处理 ${m[1]}，请查看归档运行日志`],
+  [/^(\d+) original parts are still listed: (.+)$/, (m) => `还有 ${m[1]} 个原分盘没删掉：${m[2]}`],
 ]
 
 export function localizeBackendText(text: string): string {

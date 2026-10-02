@@ -19,6 +19,10 @@ RUN uv build --wheel && uv venv /opt/embyx-manager \
 
 # ---- runtime ----
 FROM python:3.13-slim
+# The merge tab's Job runs this image too, and concatenates parts with ffmpeg.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
 RUN useradd --create-home --uid 1000 embyx
 COPY --from=backend /opt/embyx-manager /opt/embyx-manager
 ENV PATH="/opt/embyx-manager/bin:$PATH" \

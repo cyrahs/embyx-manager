@@ -6,6 +6,7 @@ from embyx_manager.config.models import (
     EmbyConfig,
     FillActorConfig,
     MappingConfig,
+    MergeConfig,
     PlaylistsConfig,
     RssConfig,
 )
@@ -21,6 +22,7 @@ __all__ = [
     'EmbyConfig',
     'FillActorConfig',
     'MappingConfig',
+    'MergeConfig',
     'PlaylistsConfig',
     'RssConfig',
 ]
