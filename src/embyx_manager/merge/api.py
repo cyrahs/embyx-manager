@@ -43,6 +43,33 @@ class MergeCatalog:
     task_dirs_for: Callable[[Sequence[str]], Awaitable[dict[str, str]]]
 
 
+class TitleScanCache:
+    """The last full scan of the mapping tree.
+
+    Walking every strm over the network share takes the better part of a
+    minute, so the page reads this copy until someone asks for a fresh one,
+    and queueing a task re-reads only that title's directory.
+    """
+
+    def __init__(self) -> None:
+        self._lock = asyncio.Lock()
+        self._key: tuple[str, str] | None = None
+        self._titles: list[MultipartTitle] = []
+        self._scanned_at: datetime | None = None
+
+    async def titles(self, root: Path, library_root: str, *, refresh: bool) -> tuple[list[MultipartTitle], datetime]:
+        requested_at = datetime.now(UTC)
+        key = (str(root), library_root)
+        async with self._lock:
+            # A refresh that waited on another one already has a scan newer than itself.
+            scanned_at = self._scanned_at
+            if scanned_at is None or self._key != key or (refresh and scanned_at < requested_at):
+                self._titles = await asyncio.to_thread(scan_multipart, root, library_root=library_root)
+                self._key = key
+                scanned_at = self._scanned_at = datetime.now(UTC)
+            return self._titles, scanned_at
+
+
 class TitleView(BaseModel):
     avid: str
     directory: str
@@ -147,40 +174,68 @@ def create_merge_router(
     mutation_auth: Any = None,
 ) -> APIRouter:
     router = APIRouter(prefix='/api/merge')
+    cache = TitleScanCache()
 
     @router.get('/titles')
-    async def list_titles() -> TitlesView:
-        archive, titles = await _scan(catalog)
-        if titles is None:
+    async def list_titles(refresh: bool = False) -> TitlesView:  # noqa: FBT001, FBT002 - a query flag
+        archive, scanned = await _scan(catalog, cache, refresh=refresh)
+        if scanned is None:
             return TitlesView(
                 items=[],
                 routes=list(route_sources(archive)),
                 scanned_at=None,
                 reason='mapping.dst_dir and archive.dst_dir must be configured',
             )
+        titles, scanned_at = scanned
         task_dirs = await catalog.task_dirs_for([title.avid for title in titles])
         return TitlesView(
             items=[_view(archive, title, task_dirs.get(title.avid)) for title in titles],
             routes=list(route_sources(archive)),
-            scanned_at=datetime.now(UTC),
+            scanned_at=scanned_at,
         )
 
     if tasks is not None:
-        _add_task_routes(router, catalog, tasks, [Depends(mutation_auth)] if mutation_auth is not None else [])
+        dependencies = [Depends(mutation_auth)] if mutation_auth is not None else []
+        _add_task_routes(router, catalog, cache, tasks, dependencies)
     return router
 
 
-async def _scan(catalog: MergeCatalog) -> tuple[ArchiveConfig, list[MultipartTitle] | None]:
+async def _scan(
+    catalog: MergeCatalog, cache: TitleScanCache, *, refresh: bool
+) -> tuple[ArchiveConfig, tuple[list[MultipartTitle], datetime] | None]:
     """The archive config and every multi-part title; None when the directories are not configured."""
     archive = catalog.archive()
     mapping = catalog.mapping()
     if not mapping.dst_dir or not archive.dst_dir:
         return archive, None
-    titles = await asyncio.to_thread(scan_multipart, Path(mapping.dst_dir), library_root=archive.dst_dir)
-    return archive, titles
+    return archive, await cache.titles(Path(mapping.dst_dir), archive.dst_dir, refresh=refresh)
 
 
-def _add_task_routes(router: APIRouter, catalog: MergeCatalog, tasks: MergeTasksApi, dependencies: list[Any]) -> None:
+async def _current_title(catalog: MergeCatalog, cache: TitleScanCache, avid: str) -> MultipartTitle | None:
+    """The title as its directory holds it now, found through the last scan."""
+    wanted = avid.strip().upper()
+    for refresh in (False, True):
+        _archive, scanned = await _scan(catalog, cache, refresh=refresh)
+        if scanned is None:
+            return None
+        found = next((title for title in scanned[0] if title.avid.upper() == wanted), None)
+        if found is not None:
+            break
+    else:
+        return None
+    root = Path(catalog.mapping().dst_dir)
+    archive = catalog.archive()
+    rescanned = await asyncio.to_thread(scan_multipart, root / found.directory, library_root=archive.dst_dir)
+    return next((title for title in rescanned if title.avid.upper() == wanted), None)
+
+
+def _add_task_routes(
+    router: APIRouter,
+    catalog: MergeCatalog,
+    cache: TitleScanCache,
+    tasks: MergeTasksApi,
+    dependencies: list[Any],
+) -> None:
     @router.get('/tasks')
     async def list_tasks() -> TasksView:
         return TasksView(
@@ -192,8 +247,8 @@ def _add_task_routes(router: APIRouter, catalog: MergeCatalog, tasks: MergeTasks
     async def create_task(request: MergeRequest) -> TaskView:
         if tasks.service.unavailable() is not None:
             raise ApiError(409, 'merge_unavailable')
-        archive, titles = await _scan(catalog)
-        task = await _enqueue(catalog, tasks.repository, archive, titles or [], request)
+        title = await _current_title(catalog, cache, request.avid)
+        task = await _enqueue(catalog, tasks.repository, catalog.archive(), title, request)
         tasks.service.wake()
         return TaskView.from_task(task)
 
@@ -234,12 +289,10 @@ async def _enqueue(
     catalog: MergeCatalog,
     repository: MergeTaskRepository,
     archive: ArchiveConfig,
-    titles: list[MultipartTitle],
+    title: MultipartTitle | None,
     request: MergeRequest,
 ) -> MergeTask:
     """Queue one scanned title, after checking it can be merged and re-enter somewhere."""
-    wanted = request.avid.strip().upper()
-    title = next((title for title in titles if title.avid.upper() == wanted), None)
     if title is None:
         raise ApiError(404, 'merge_title_not_found')
     if not title.complete or title.library_dir is None or title.brand is None:
