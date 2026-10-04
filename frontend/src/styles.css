@@ -664,6 +664,7 @@ main {
 }
 .route-empty { margin: 0; color: var(--text-3); font-size: 12.5px; }
 .merge-source-pick { display: inline-flex; align-items: center; gap: 8px; }
+.merge-confirm { display: inline-flex; align-items: center; gap: 8px; }
 .route-add { padding-left: 0; }
 .chips {
   display: flex;

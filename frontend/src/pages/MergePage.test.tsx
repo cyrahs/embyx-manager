@@ -98,7 +98,6 @@ describe('merge page', () => {
       return jsonResponse({ error: { code: 'not_found' } }, 404)
     })
     vi.stubGlobal('fetch', fetchMock)
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
   })
 
   afterEach(() => {
@@ -138,8 +137,11 @@ describe('merge page', () => {
 
     const many = await screen.findByRole('region', { name: '10 盘及以上 · 1' })
     await userEvent.click(within(many).getByRole('button', { name: '合并' }))
+    expect(fetchMock.mock.calls.some(([, init]) => init?.method === 'POST')).toBe(false)
+    await userEvent.click(within(many).getByRole('button', { name: '算了' }))
+    await userEvent.click(within(many).getByRole('button', { name: '合并' }))
+    await userEvent.click(within(many).getByRole('button', { name: '确认合并 20 盘（会删原盘）' }))
 
-    expect(window.confirm).toHaveBeenCalledWith(expect.stringContaining('删除原分盘'))
     const post = fetchMock.mock.calls.find(([, init]) => init?.method === 'POST')
     expect(post?.[0]).toBe('/api/merge/tasks')
     expect(JSON.parse(String(post?.[1]?.body))).toEqual({ avid: 'SQTEVR-009' })
@@ -158,6 +160,7 @@ describe('merge page', () => {
     expect(merge).toBeDisabled()
     await userEvent.selectOptions(within(many).getByRole('combobox', { name: 'SQTEVR-009 的来源资源库' }), 'clt')
     await userEvent.click(merge)
+    await userEvent.click(within(many).getByRole('button', { name: /确认合并/ }))
 
     const post = fetchMock.mock.calls.find(([, init]) => init?.method === 'POST')
     expect(JSON.parse(String(post?.[1]?.body))).toEqual({ avid: 'SQTEVR-009', source: 'clt' })
@@ -173,6 +176,8 @@ describe('merge page', () => {
     expect(within(tasks).getByText('等 115 算出 SHA-1')).toBeInTheDocument()
 
     await userEvent.click(within(tasks).getByRole('button', { name: '取消' }))
+    expect(fetchMock).not.toHaveBeenCalledWith('/api/merge/tasks/4/cancel', expect.anything())
+    await userEvent.click(within(tasks).getByRole('button', { name: '确认取消' }))
     expect(fetchMock).toHaveBeenCalledWith('/api/merge/tasks/4/cancel', expect.objectContaining({ method: 'POST' }))
   })
 
