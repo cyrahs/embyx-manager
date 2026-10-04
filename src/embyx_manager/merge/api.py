@@ -1,6 +1,7 @@
 """Merge endpoints: the multi-part titles the library holds, and the tasks merging them."""
 
 import asyncio
+import logging
 from collections.abc import Awaitable, Callable, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -29,6 +30,8 @@ from embyx_manager.merge.tasks import (
     MergeTaskRepository,
 )
 from embyx_manager.merge.worker import MUXERS
+
+LOGGER = logging.getLogger(__name__)
 
 #: Which HTTP status each refused cancel or retry answers with; the rest are 409.
 _ACTION_STATUS = {'merge_task_not_found': 404}
@@ -172,9 +175,10 @@ def create_merge_router(
     *,
     tasks: MergeTasksApi | None = None,
     mutation_auth: Any = None,
+    cache: TitleScanCache | None = None,
 ) -> APIRouter:
     router = APIRouter(prefix='/api/merge')
-    cache = TitleScanCache()
+    cache = cache or TitleScanCache()
 
     @router.get('/titles')
     async def list_titles(refresh: bool = False) -> TitlesView:  # noqa: FBT001, FBT002 - a query flag
@@ -209,6 +213,14 @@ async def _scan(
     if not mapping.dst_dir or not archive.dst_dir:
         return archive, None
     return archive, await cache.titles(Path(mapping.dst_dir), archive.dst_dir, refresh=refresh)
+
+
+async def warm_title_cache(catalog: MergeCatalog, cache: TitleScanCache) -> None:
+    """Scan once at startup so the first visit after a deploy does not wait on the walk."""
+    try:
+        await _scan(catalog, cache, refresh=False)
+    except Exception:
+        LOGGER.exception('could not scan the mapping tree for multi-part titles')
 
 
 async def _current_title(catalog: MergeCatalog, cache: TitleScanCache, avid: str) -> MultipartTitle | None:

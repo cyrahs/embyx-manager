@@ -48,7 +48,13 @@ from embyx_manager.fill_actor.jobs import FillActorJobManager
 from embyx_manager.fill_actor.postgres_repository import PostgresFillActorRepository
 from embyx_manager.fill_actor.service import FillActorPaths, FillActorRuntime, FillActorService
 from embyx_manager.locking import PostgresAdvisoryLock
-from embyx_manager.merge.api import MergeCatalog, MergeTasksApi, create_merge_router
+from embyx_manager.merge.api import (
+    MergeCatalog,
+    MergeTasksApi,
+    TitleScanCache,
+    create_merge_router,
+    warm_title_cache,
+)
 from embyx_manager.merge.kube import KubeJobs
 from embyx_manager.merge.service import MergeService
 from embyx_manager.merge.tasks import MergeTaskRepository
@@ -560,14 +566,17 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         clouddrive_config=lambda: store.get(CloudDriveConfig),
         trigger=_trigger_after_merge,
     )
+    merge_catalog = MergeCatalog(
+        archive=lambda: store.get(ArchiveConfig),
+        mapping=lambda: store.get(MappingConfig),
+        task_dirs_for=ledger.task_dirs_for,
+    )
+    merge_titles = TitleScanCache()
     merge_router = create_merge_router(
-        MergeCatalog(
-            archive=lambda: store.get(ArchiveConfig),
-            mapping=lambda: store.get(MappingConfig),
-            task_dirs_for=ledger.task_dirs_for,
-        ),
+        merge_catalog,
         tasks=MergeTasksApi(repository=merge_tasks, service=merge_service),
         mutation_auth=mutation_auth,
+        cache=merge_titles,
     )
     monitor_router = create_monitor_router(
         scheduler,
@@ -592,9 +601,11 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         await store.load()
         await scheduler.start()
         await merge_service.start()
+        warm_merge_titles = asyncio.create_task(warm_title_cache(merge_catalog, merge_titles))
         try:
             yield
         finally:
+            warm_merge_titles.cancel()
             try:
                 await merge_service.aclose()
                 await scheduler.aclose()

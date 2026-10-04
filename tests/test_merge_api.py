@@ -1,15 +1,17 @@
 """Merge task endpoints over a fake repository and service."""
 
+import asyncio
 from datetime import UTC, datetime
 from pathlib import Path
 
+import pytest
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.testclient import TestClient
 
 from embyx_manager.config.models import MappingConfig
 from embyx_manager.errors import ApiError
-from embyx_manager.merge.api import MergeCatalog, MergeTasksApi, create_merge_router
+from embyx_manager.merge.api import MergeCatalog, MergeTasksApi, TitleScanCache, create_merge_router, warm_title_cache
 from embyx_manager.merge.service import MergeActionError
 from embyx_manager.merge.tasks import MergeState, MergeTask, MergeTaskConflictError
 from tests.test_merge_detect import ARCHIVE, parts, strm
@@ -94,6 +96,7 @@ def make_client(
     repository: FakeRepository,
     service: FakeService,
     task_dirs: dict[str, str] | None = None,
+    cache: TitleScanCache | None = None,
 ) -> TestClient:
     async def task_dirs_for(avids) -> dict[str, str]:
         return {avid: path for avid, path in (task_dirs or {}).items() if avid in avids}
@@ -113,6 +116,7 @@ def make_client(
             ),
             tasks=MergeTasksApi(repository=repository, service=service),  # type: ignore[arg-type]
             mutation_auth=allow,
+            cache=cache,
         ),
     )
     return TestClient(app)
@@ -254,3 +258,36 @@ def test_create_refuses_a_title_whose_parts_left_since_the_scan(tmp_path: Path) 
 
     missing = client.post('/api/merge/tasks', json={'avid': 'SQTEVR-009'})
     assert (missing.status_code, missing.json()) == (404, {'error': {'code': 'merge_title_not_found'}})
+
+
+def test_a_warmed_cache_answers_the_first_visit(tmp_path: Path) -> None:
+    parts(tmp_path, 'type/vr/SQTEVR/SQTEVR-009', 'SQTEVR-009', 12, 'type/vr')
+    catalog = MergeCatalog(
+        archive=lambda: ARCHIVE,
+        mapping=lambda: MappingConfig(src_dir='/remote', dst_dir=str(tmp_path)),
+        task_dirs_for=_no_task_dirs,
+    )
+    cache = TitleScanCache()
+    asyncio.run(warm_title_cache(catalog, cache))
+    parts(tmp_path, 'rank/ABP/ABP-123', 'ABP-123', 3, 'rank')
+
+    client = make_client(tmp_path, FakeRepository(), FakeService(), cache=cache)
+
+    assert [item['avid'] for item in client.get('/api/merge/titles').json()['items']] == ['SQTEVR-009']
+
+
+def test_warming_logs_instead_of_raising(caplog: pytest.LogCaptureFixture) -> None:
+    def broken() -> MappingConfig:
+        msg = 'config store not loaded'
+        raise RuntimeError(msg)
+
+    catalog = MergeCatalog(archive=lambda: ARCHIVE, mapping=broken, task_dirs_for=_no_task_dirs)
+
+    asyncio.run(warm_title_cache(catalog, TitleScanCache()))
+
+    assert 'could not scan the mapping tree' in caplog.text
+
+
+async def _no_task_dirs(avids) -> dict[str, str]:
+    del avids
+    return {}
