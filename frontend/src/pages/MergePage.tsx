@@ -317,12 +317,13 @@ export default function MergePage() {
   const [open, setOpen] = useState<Record<string, boolean>>({})
   const [armed, setArmed] = useState<string | null>(null)
 
-  const load = useCallback(async (signal?: AbortSignal) => {
+  const load = useCallback(async (signal?: AbortSignal, refresh = false) => {
     setLoading(true)
     try {
-      const [titles, taskList] = await Promise.all([listMergeTitles(signal), listMergeTasks(signal)])
+      // Tasks answer at once; a fresh scan of the library can take a minute.
+      const taskList = listMergeTasks(signal).then(setTasks)
+      const [titles] = await Promise.all([listMergeTitles(signal, refresh), taskList])
       setPage(titles)
-      setTasks(taskList)
       setError(null)
     } catch (failure) {
       if (failure instanceof DOMException && failure.name === 'AbortError') return
@@ -355,7 +356,7 @@ export default function MergePage() {
             (task) => task.state === 'done' && previous?.items.find((old) => old.id === task.id)?.state !== 'done',
           )
           setTasks(next)
-          if (finished) void listMergeTitles().then(setPage).catch(() => undefined)
+          if (finished) void listMergeTitles(undefined, true).then(setPage).catch(() => undefined)
         })
         .catch(() => undefined)
     }, POLL_MS)
@@ -403,7 +404,7 @@ export default function MergePage() {
       <section className="panel settings-panel" aria-labelledby="merge-title">
         <div className="panel-heading">
           <h2 id="merge-title">分盘合并</h2>
-          <button className="button primary" type="button" disabled={loading} onClick={() => void load()}>
+          <button className="button primary" type="button" disabled={loading} onClick={() => void load(undefined, true)}>
             {loading ? <Spinner /> : null}
             重新扫描
           </button>

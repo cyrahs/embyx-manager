@@ -86,7 +86,7 @@ describe('merge page', () => {
     tasksBody = { items: [], unavailable: null }
     fetchMock = vi.fn().mockImplementation((input, init?: RequestInit) => {
       const url = String(input)
-      if (url === '/api/merge/titles') return jsonResponse(titlesBody)
+      if (url === '/api/merge/titles' || url === '/api/merge/titles?refresh=true') return jsonResponse(titlesBody)
       if (url === '/api/merge/tasks' && init?.method === 'POST') {
         const body = JSON.parse(String(init.body)) as { avid: string; source?: string }
         const created = { ...TASK, id: 9, avid: body.avid, source: body.source ?? 'vr', state: 'queued', notice: null }
@@ -121,6 +121,16 @@ describe('merge page', () => {
     await userEvent.click(screen.getByRole('button', { name: /缺盘或异常 · 1/ }))
     expect(screen.getByText('缺 cd1、cd7')).toBeInTheDocument()
     expect(screen.getByText('未确定')).toBeInTheDocument()
+  })
+
+  it('reads the last scan on open and walks the library again on 重新扫描', async () => {
+    renderPage()
+
+    await screen.findByRole('region', { name: '10 盘及以上 · 1' })
+    expect(fetchMock).toHaveBeenCalledWith('/api/merge/titles', expect.anything())
+    expect(fetchMock).not.toHaveBeenCalledWith('/api/merge/titles?refresh=true', expect.anything())
+    await userEvent.click(screen.getByRole('button', { name: '重新扫描' }))
+    expect(fetchMock).toHaveBeenCalledWith('/api/merge/titles?refresh=true', expect.anything())
   })
 
   it('explains why nothing can be scanned yet', async () => {

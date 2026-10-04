@@ -213,3 +213,44 @@ def test_a_task_that_failed_while_replacing_offers_retry_only(tmp_path: Path) ->
         False,
         True,
     )
+
+
+def test_titles_are_scanned_once_until_a_refresh_is_asked_for(tmp_path: Path) -> None:
+    parts(tmp_path, 'type/vr/SQTEVR/SQTEVR-009', 'SQTEVR-009', 12, 'type/vr')
+    client = make_client(tmp_path, FakeRepository(), FakeService())
+
+    first = client.get('/api/merge/titles').json()
+    parts(tmp_path, 'rank/ABP/ABP-123', 'ABP-123', 3, 'rank')
+    cached = client.get('/api/merge/titles').json()
+    refreshed = client.get('/api/merge/titles', params={'refresh': 'true'}).json()
+
+    assert [item['avid'] for item in cached['items']] == ['SQTEVR-009']
+    assert cached['scanned_at'] == first['scanned_at']
+    assert [item['avid'] for item in refreshed['items']] == ['SQTEVR-009', 'ABP-123']
+    assert refreshed['scanned_at'] > first['scanned_at']
+
+
+def test_create_reads_the_title_directory_as_it_is_now(tmp_path: Path) -> None:
+    parts(tmp_path, 'type/vr/SQTEVR/SQTEVR-009', 'SQTEVR-009', 12, 'type/vr')
+    repository = FakeRepository()
+    client = make_client(tmp_path, repository, FakeService())
+    client.get('/api/merge/titles')
+
+    parts(tmp_path, 'type/vr/SQTEVR/SQTEVR-009', 'SQTEVR-009', 13, 'type/vr')
+    parts(tmp_path, 'rank/ABP/ABP-123', 'ABP-123', 3, 'rank')
+
+    assert client.post('/api/merge/tasks', json={'avid': 'SQTEVR-009'}).json()['part_count'] == 13
+    assert client.post('/api/merge/tasks', json={'avid': 'ABP-123'}).status_code == 201
+    assert [task.avid for task in repository.tasks] == ['SQTEVR-009', 'ABP-123']
+
+
+def test_create_refuses_a_title_whose_parts_left_since_the_scan(tmp_path: Path) -> None:
+    parts(tmp_path, 'type/vr/SQTEVR/SQTEVR-009', 'SQTEVR-009', 12, 'type/vr')
+    client = make_client(tmp_path, FakeRepository(), FakeService())
+    client.get('/api/merge/titles')
+
+    for strm_file in (tmp_path / 'type/vr/SQTEVR/SQTEVR-009').glob('*.strm'):
+        strm_file.unlink()
+
+    missing = client.post('/api/merge/tasks', json={'avid': 'SQTEVR-009'})
+    assert (missing.status_code, missing.json()) == (404, {'error': {'code': 'merge_title_not_found'}})
