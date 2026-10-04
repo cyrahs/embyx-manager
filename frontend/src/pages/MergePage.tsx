@@ -107,8 +107,38 @@ interface MergeControls {
   routes: string[]
   openTasks: Map<string, MergeTask>
   busy: string | null
+  /** The action key waiting for its second, confirming click. */
+  armed: string | null
+  onArm: (key: string | null) => void
   onMerge: (title: MergeTitle, source: string | null) => void
 }
+
+function ArmedConfirm({
+  label,
+  hint,
+  disabled,
+  onConfirm,
+  onDisarm,
+}: {
+  label: string
+  hint: string
+  disabled: boolean
+  onConfirm: () => void
+  onDisarm: () => void
+}) {
+  return (
+    <span className="merge-confirm" title={hint}>
+      <button className="text-button" type="button" disabled={disabled} onClick={onConfirm}>
+        {label}
+      </button>
+      <button className="text-button" type="button" onClick={onDisarm}>
+        算了
+      </button>
+    </span>
+  )
+}
+
+const MERGE_HINT = '合并后的文件经 /115/upload 校验后放进来源资源库的 embyx_in 重新归档；校验通过后原分盘进 115 回收站。'
 
 function MergeAction({ title, controls }: { title: MergeTitle; controls: MergeControls }) {
   const [source, setSource] = useState('')
@@ -116,10 +146,28 @@ function MergeAction({ title, controls }: { title: MergeTitle; controls: MergeCo
   if (task) return <span className="acq-muted">{STATE_LABELS[task.state]}</span>
   if (!title.mergeable) return <span className="acq-muted">—</span>
   const disabled = controls.blocked || controls.busy !== null
+  const key = `merge-${title.avid}`
+  if (controls.busy === title.avid) {
+    return (
+      <span className="acq-muted">
+        <Spinner /> 提交中
+      </span>
+    )
+  }
+  if (controls.armed === key) {
+    return (
+      <ArmedConfirm
+        label={`确认合并 ${title.part_count} 盘（会删原盘）`}
+        hint={MERGE_HINT}
+        disabled={disabled}
+        onConfirm={() => controls.onMerge(title, source || null)}
+        onDisarm={() => controls.onArm(null)}
+      />
+    )
+  }
   if (title.source) {
     return (
-      <button className="text-button" type="button" disabled={disabled} onClick={() => controls.onMerge(title, null)}>
-        {controls.busy === title.avid ? <Spinner /> : null}
+      <button className="text-button" type="button" disabled={disabled} onClick={() => controls.onArm(key)}>
         合并
       </button>
     )
@@ -138,7 +186,7 @@ function MergeAction({ title, controls }: { title: MergeTitle; controls: MergeCo
         className="text-button"
         type="button"
         disabled={disabled || !source}
-        onClick={() => controls.onMerge(title, source)}
+        onClick={() => controls.onArm(key)}
       >
         合并
       </button>
@@ -185,11 +233,15 @@ function TitleTable({ items, controls }: { items: MergeTitle[]; controls: MergeC
 function TaskTable({
   tasks,
   busy,
+  armed,
+  onArm,
   onCancel,
   onRetry,
 }: {
   tasks: MergeTask[]
   busy: string | null
+  armed: string | null
+  onArm: (key: string | null) => void
   onCancel: (task: MergeTask) => void
   onRetry: (task: MergeTask) => void
 }) {
@@ -226,11 +278,25 @@ function TaskTable({
                       重试
                     </button>
                   )}
-                  {task.cancellable && (
-                    <button className="text-button" type="button" disabled={busy !== null} onClick={() => onCancel(task)}>
-                      {task.state === 'failed' ? '移除' : '取消'}
-                    </button>
-                  )}
+                  {task.cancellable &&
+                    (armed === `task-${task.id}` ? (
+                      <ArmedConfirm
+                        label={`确认${task.state === 'failed' ? '移除' : '取消'}`}
+                        hint="已经合并或上传的中间文件会被删掉，原分盘不受影响。"
+                        disabled={busy !== null}
+                        onConfirm={() => onCancel(task)}
+                        onDisarm={() => onArm(null)}
+                      />
+                    ) : (
+                      <button
+                        className="text-button"
+                        type="button"
+                        disabled={busy !== null}
+                        onClick={() => onArm(`task-${task.id}`)}
+                      >
+                        {task.state === 'failed' ? '移除' : '取消'}
+                      </button>
+                    ))}
                 </td>
               </tr>
             )
@@ -249,6 +315,7 @@ export default function MergePage() {
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState<string | null>(null)
   const [open, setOpen] = useState<Record<string, boolean>>({})
+  const [armed, setArmed] = useState<string | null>(null)
 
   const load = useCallback(async (signal?: AbortSignal) => {
     setLoading(true)
@@ -310,12 +377,7 @@ export default function MergePage() {
 
   const onMerge = useCallback(
     (title: MergeTitle, source: string | null) => {
-      const route = source ?? title.source
-      const confirmed = window.confirm(
-        `合并 ${title.avid} 的 ${title.part_count} 个分盘，经 /115/upload 校验后放进 ${route} 的 embyx_in 重新归档。` +
-          '\n上传校验通过后会删除原分盘（进 115 回收站）。确定吗？',
-      )
-      if (!confirmed) return
+      setArmed(null)
       void act(title.avid, () => createMergeTask(title.avid, source))
     },
     [act],
@@ -331,6 +393,8 @@ export default function MergePage() {
     routes: page?.routes ?? [],
     openTasks,
     busy,
+    armed,
+    onArm: setArmed,
     onMerge,
   }
 
@@ -368,9 +432,10 @@ export default function MergePage() {
             <TaskTable
               tasks={tasks.items}
               busy={busy}
+              armed={armed}
+              onArm={setArmed}
               onCancel={(task) => {
-                const verb = task.state === 'failed' ? '移除' : '取消'
-                if (!window.confirm(`${verb} ${task.avid} 的合并任务？已经合并或上传的中间文件会被删掉，原分盘不受影响。`)) return
+                setArmed(null)
                 void act(`task-${task.id}`, () => cancelMergeTask(task.id))
               }}
               onRetry={(task) => void act(`task-${task.id}`, () => retryMergeTask(task.id))}
