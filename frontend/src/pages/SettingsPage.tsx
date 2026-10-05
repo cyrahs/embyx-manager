@@ -263,9 +263,9 @@ const SECTION_SPECS: SectionSpec[] = [
   },
   {
     section: 'merge',
-    title: '分盘合并',
+    title: '合并',
     description:
-      '「分盘合并」页用到的目录。默认值和集群里的合并 Job 一致（downloads 卷挂在 /downloads），一般不用改。',
+      '「合并」页用到的目录。默认值和集群里的合并 Job 一致（downloads 卷挂在 /downloads），一般不用改。',
     fields: [
       { key: 'work_dir', label: '合并输出目录（本地）', kind: 'text', hint: '合并 Job 写文件的位置，embyx-manager 也挂载着它。' },
       { key: 'cloud_work_dir', label: '合并输出目录（CloudDrive 路径）', kind: 'text', hint: '同一个目录在 CloudDrive 里的路径，上传从这里复制。' },

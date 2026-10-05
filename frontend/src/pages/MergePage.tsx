@@ -129,7 +129,7 @@ function AutoLine({ auto }: { auto: MergeAutoStatus }) {
   if (auto.state === 'off') {
     return (
       <p className="settings-hint">
-        自动合并已关闭，可以在 <Link to="/settings">设置</Link> 的「分盘合并」里打开。
+        自动合并已关闭，可以在 <Link to="/settings">设置</Link> 的「合并」里打开。
       </p>
     )
   }
@@ -450,7 +450,7 @@ export default function MergePage() {
     <main>
       <section className="panel settings-panel" aria-labelledby="merge-title">
         <div className="panel-heading">
-          <h2 id="merge-title">分盘合并</h2>
+          <h2 id="merge-title">合并</h2>
           <button className="button primary" type="button" disabled={loading} onClick={() => void load(undefined, true)}>
             {loading ? <Spinner /> : null}
             重新扫描
