@@ -8,12 +8,17 @@ structured run reporting.
 
 import errno
 import filecmp
+import re
 import shutil
+from collections.abc import Iterable
 from pathlib import Path
 
 from embyx_manager.config.models import MappingConfig
 from embyx_manager.core.avid import AvidParser
 from embyx_manager.monitor.reports import RunContext
+
+#: A part's own metadata, e.g. ``ABC-123-cd4.nfo`` or ``ABC-123-cd4-poster.jpg``.
+PART_SIDECAR_RE = re.compile(r'^(?P<stem>.+-cd\d+)[.-]', re.IGNORECASE)
 
 
 class MappingPipeline:
@@ -109,6 +114,7 @@ class MappingPipeline:
         dst.unlink()
         ctx.add('files_deleted')
         ctx.info('deleted %s', _display(dst, self.dst_dir))
+        self._delete_sidecars(dst.parent, {dst.stem}, ctx)
         self._delete_empty_dirs_for_path(dst.parent, ctx)
 
     # -- internals ----------------------------------------------------------
@@ -119,15 +125,60 @@ class MappingPipeline:
             self.update_one(src, ctx)
 
     def _delete_strays(self, ctx: RunContext) -> None:
-        """Delete xx/yy/zz/zz.strm in dst whose xx/yy/zz.strm no longer exists."""
+        """Delete xx/yy/zz/zz.strm in dst whose xx/yy/zz.strm no longer exists, with its metadata.
+
+        Every title directory also loses the metadata of parts whose strm is
+        gone, which an earlier run may have left behind.
+        """
+        deleted: dict[Path, set[str]] = {}
         for dst in self.dst_dir.glob('**/*.strm'):
             ctx.check_cancelled()
             src_rel_dir = dst.relative_to(self.dst_dir).parent.parent
             src = self.src_dir / src_rel_dir / dst.name
+            stems = deleted.setdefault(dst.parent, set())
             if not src.exists():
                 dst.unlink()
+                stems.add(dst.stem)
                 ctx.add('files_deleted')
                 ctx.info('deleted %s', dst.relative_to(self.dst_dir))
+        for directory, stems in deleted.items():
+            ctx.check_cancelled()
+            self._delete_sidecars(directory, stems, ctx, orphaned_parts=True)
+
+    def _delete_sidecars(
+        self,
+        directory: Path,
+        stems: Iterable[str],
+        ctx: RunContext,
+        *,
+        orphaned_parts: bool = False,
+    ) -> None:
+        """Delete the metadata Emby wrote beside strms that are gone.
+
+        A file belongs to the strm whose name, plus ``.`` or ``-``, starts it;
+        the longest such name wins, so ``ABC-123-cd1-poster.jpg`` stays with a
+        live ``ABC-123-cd1.strm`` even when ``ABC-123.strm`` goes. Files no strm
+        claims (``poster.jpg``, ``fanart.jpg``) stay. With ``orphaned_parts``,
+        part metadata whose ``-cdN`` strm no longer exists goes too.
+        """
+        try:
+            entries = list(directory.iterdir())
+        except FileNotFoundError:
+            return
+        live = {entry.stem for entry in entries if entry.suffix.lower() == '.strm'}
+        gone = set(stems) - live
+        for entry in entries:
+            if entry.suffix.lower() == '.strm' or not entry.is_file():
+                continue
+            owner = _owner(entry.name, live | gone)
+            part = PART_SIDECAR_RE.match(entry.name) if orphaned_parts and live else None
+            if part is not None and part['stem'] not in live and len(part['stem']) > len(owner or ''):
+                owner = part['stem']
+            if owner is None or owner in live:
+                continue
+            entry.unlink()
+            ctx.add('sidecars_deleted')
+            ctx.info('deleted %s', _display(entry, self.dst_dir))
 
     def _delete_empty_dirs(self, ctx: RunContext) -> None:
         # Intentional cleanup: directories without descendant .strm files are removed
@@ -184,6 +235,12 @@ class MappingPipeline:
             ctx.add('dirs_deleted')
             ctx.info('deleted empty directory: %s', current.relative_to(self.dst_dir))
             current = current.parent
+
+
+def _owner(name: str, stems: Iterable[str]) -> str | None:
+    """The longest strm name that, followed by ``.`` or ``-``, starts ``name``."""
+    owners = [stem for stem in stems if name.startswith((f'{stem}.', f'{stem}-'))]
+    return max(owners, key=len, default=None)
 
 
 def _relative_to(src: Path, src_dir: Path) -> Path | None:
