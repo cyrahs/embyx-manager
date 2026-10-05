@@ -22,7 +22,7 @@ const NAV_ITEMS = [
   { to: '/fill-actor', label: '补全演员' },
   { to: '/subscriptions', label: '订阅' },
   { to: '/playlists', label: '列表' },
-  { to: '/merge', label: '分盘合并' },
+  { to: '/merge', label: '合并' },
   { to: '/settings', label: '设置' },
 ] as const
 
