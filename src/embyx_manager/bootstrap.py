@@ -55,6 +55,7 @@ from embyx_manager.merge.api import (
     create_merge_router,
     warm_title_cache,
 )
+from embyx_manager.merge.auto import AutoMerger
 from embyx_manager.merge.kube import KubeJobs
 from embyx_manager.merge.service import MergeService
 from embyx_manager.merge.tasks import MergeTaskRepository
@@ -572,9 +573,17 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         task_dirs_for=ledger.task_dirs_for,
     )
     merge_titles = TitleScanCache()
+    auto_merger = AutoMerger(
+        repository=merge_tasks,
+        catalog=merge_catalog,
+        cache=merge_titles,
+        service=merge_service,
+        merge_config=lambda: store.get(MergeConfig),
+        cloud=cloud_handle.current,
+    )
     merge_router = create_merge_router(
         merge_catalog,
-        tasks=MergeTasksApi(repository=merge_tasks, service=merge_service),
+        tasks=MergeTasksApi(repository=merge_tasks, service=merge_service, auto_status=auto_merger.status),
         mutation_auth=mutation_auth,
         cache=merge_titles,
     )
@@ -602,11 +611,13 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         await scheduler.start()
         await merge_service.start()
         warm_merge_titles = asyncio.create_task(warm_title_cache(merge_catalog, merge_titles))
+        await auto_merger.start()
         try:
             yield
         finally:
             warm_merge_titles.cancel()
             try:
+                await auto_merger.aclose()
                 await merge_service.aclose()
                 await scheduler.aclose()
             finally:

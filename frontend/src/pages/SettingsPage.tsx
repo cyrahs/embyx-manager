@@ -272,6 +272,18 @@ const SECTION_SPECS: SectionSpec[] = [
       { key: 'cloud_staging_dir', label: '115 中转目录', kind: 'text', hint: '上传到这里并校验 SHA-1 后，才删除原分盘、移进 embyx_in。' },
       { key: 'cloud_mount_prefix', label: 'CloudDrive 挂载前缀', kind: 'text', hint: 'strm 指向的挂载点，去掉它就是 CloudDrive 路径。' },
       { key: 'free_space_reserve_gib', label: '合并时预留空间（GiB）', kind: 'number' },
+      {
+        key: 'auto_enabled',
+        label: '自动合并',
+        kind: 'boolean',
+        hint: '一次一部：上一部上传、校验并归档完才排下一部。分盘总大小超过 downloads 剩余空间减预留的作品会跳过，空间腾出后再看。',
+      },
+      {
+        key: 'auto_include_stackable',
+        label: '自动合并也处理 9 盘及以下',
+        kind: 'boolean',
+        hint: '关闭时只自动合并 10 盘及以上（Emby 堆叠不了的）。',
+      },
     ],
   },
   {

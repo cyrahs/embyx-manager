@@ -408,7 +408,25 @@ export interface MergeTask {
   retryable: boolean
 }
 
+export type MergeAutoState = 'off' | 'unavailable' | 'busy' | 'paused' | 'idle'
+
+export interface MergeAutoSkipped {
+  avid: string
+  size: number | null
+  reason: string
+}
+
+export interface MergeAutoStatus {
+  state: MergeAutoState
+  /** What a merge may take on the work volume now: free space minus the reserve. */
+  room: number | null
+  skipped: MergeAutoSkipped[]
+  skipped_count: number
+  checked_at: string | null
+}
+
 export interface MergeTaskList {
   items: MergeTask[]
   unavailable: string | null
+  auto?: MergeAutoStatus | null
 }

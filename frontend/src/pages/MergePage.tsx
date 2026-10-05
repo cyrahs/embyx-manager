@@ -16,7 +16,16 @@ import { Notice } from '../components/Feedback'
 import { ChevronIcon, Spinner } from '../components/Icons'
 import { localizeBackendText } from '../lib/backendText'
 import { formatTime } from '../lib/subscriptions'
-import type { MergeState, MergeTask, MergeTaskList, MergeTitle, MergeTitleList, MergeTitleProblem } from '../types'
+import type {
+  MergeAutoState,
+  MergeAutoStatus,
+  MergeState,
+  MergeTask,
+  MergeTaskList,
+  MergeTitle,
+  MergeTitleList,
+  MergeTitleProblem,
+} from '../types'
 
 /** Emby stacks a single digit only. */
 const MAX_STACKED_PARTS = 9
@@ -99,6 +108,43 @@ function groupTitles(items: MergeTitle[]): Group[] {
     { id: 'few', title: `9 盘及以下 · ${few.length}`, hint: 'Emby 能堆叠成一个条目，也可以合并。', items: few, collapsible: true },
     { id: 'broken', title: `缺盘或异常 · ${broken.length}`, hint: '不能合并，需要先补齐或修正。', items: broken, collapsible: true },
   ]
+}
+
+const AUTO_LABELS: Record<MergeAutoState, string> = {
+  off: '已关闭',
+  unavailable: '暂时不能运行',
+  busy: '等当前任务归档后再排下一部',
+  paused: '已暂停：有失败的任务，重试或移除后继续',
+  idle: '没有放得下的作品，稍后再看',
+}
+
+const SKIP_REASONS: Record<string, string> = {
+  too_big: '放不下',
+  parts_missing: '分盘不全',
+  size_unknown: '读不到大小',
+  merge_source_required: '要先选来源',
+}
+
+function AutoLine({ auto }: { auto: MergeAutoStatus }) {
+  if (auto.state === 'off') {
+    return (
+      <p className="settings-hint">
+        自动合并已关闭，可以在 <Link to="/settings">设置</Link> 的「分盘合并」里打开。
+      </p>
+    )
+  }
+  const room = auto.room === null ? '' : `，downloads 可用 ${formatBytes(auto.room)}（已扣预留）`
+  const shown = auto.skipped
+    .slice(0, 5)
+    .map((item) => `${item.avid}（${SKIP_REASONS[item.reason] ?? item.reason}${item.size ? ` ${formatBytes(item.size)}` : ''}）`)
+  const more = auto.skipped_count > shown.length ? ` 等 ${auto.skipped_count} 部` : ''
+  return (
+    <p className="settings-hint">
+      自动合并：{AUTO_LABELS[auto.state]}
+      {room}
+      {shown.length > 0 && `。跳过 ${shown.join('、')}${more}`}
+    </p>
+  )
 }
 
 interface MergeControls {
@@ -344,7 +390,8 @@ export default function MergePage() {
     tasksRef.current = tasks
   }, [tasks])
 
-  const moving = tasks?.items.some((task) => MOVING.has(task.state)) ?? false
+  // Automatic merging queues the next title by itself once the last one is filed.
+  const moving = (tasks?.items.some((task) => MOVING.has(task.state)) ?? false) || tasks?.auto?.state === 'busy'
   useEffect(() => {
     if (!moving) return
     const timer = window.setInterval(() => {
@@ -420,6 +467,7 @@ export default function MergePage() {
             action={<Link className="text-button" to="/settings">前往设置</Link>}
           />
         )}
+        {tasks?.auto && <AutoLine auto={tasks.auto} />}
         {tasks?.unavailable && (
           <Notice tone="warning" title="暂时不能合并" body={localizeBackendText(tasks.unavailable)} />
         )}
