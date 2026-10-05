@@ -224,3 +224,64 @@ def test_incremental_delete_stops_at_dir_that_is_not_empty_on_disk(tmp_path: Pat
     assert ctx.stats['files_deleted'] == 1
     assert 'dirs_deleted' not in ctx.stats
     assert ctx.errors == ()
+
+
+def touch(directory: Path, *names: str) -> None:
+    directory.mkdir(parents=True, exist_ok=True)
+    for name in names:
+        (directory / name).write_text('x', encoding='utf-8')
+
+
+def test_full_sync_deletes_metadata_of_parts_merged_into_one_file(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    write_strm(pipeline.src_dir / 'clt' / 'SQTEVR' / 'SQTEVR-009.strm')
+    title = pipeline.dst_dir / 'clt' / 'SQTEVR' / 'SQTEVR-009'
+    touch(title, 'SQTEVR-009.nfo', 'SQTEVR-009-mediainfo.json', 'poster.jpg', 'fanart.jpg')
+    touch(title, 'SQTEVR-009-cd1.nfo', 'SQTEVR-009-cd1-poster.jpg', 'SQTEVR-009-cd10-landscape.jpg')
+
+    ctx = make_ctx()
+    pipeline.run_full(ctx)
+
+    assert sorted(path.name for path in title.iterdir()) == [
+        'SQTEVR-009-mediainfo.json',
+        'SQTEVR-009.nfo',
+        'SQTEVR-009.strm',
+        'fanart.jpg',
+        'poster.jpg',
+    ]
+    assert ctx.stats['sidecars_deleted'] == 3
+
+
+def test_full_sync_keeps_metadata_a_live_strm_claims(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    write_strm(pipeline.src_dir / 'ABC-123-cd1-4K.strm')
+    write_strm(pipeline.src_dir / 'ABC-123-cd2.strm')
+    title = pipeline.dst_dir / 'ABC-123'
+    touch(title, 'ABC-123-cd1-4K.nfo', 'ABC-123-cd2-poster.jpg', 'ABC-123-cd3.nfo')
+
+    pipeline.run_full(make_ctx())
+
+    assert (title / 'ABC-123-cd1-4K.nfo').exists()
+    assert (title / 'ABC-123-cd2-poster.jpg').exists()
+    assert not (title / 'ABC-123-cd3.nfo').exists()
+
+
+def test_incremental_delete_takes_the_strms_own_metadata_only(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    base = write_strm(pipeline.src_dir / 'ABC-123.strm')
+    part = write_strm(pipeline.src_dir / 'ABC-123-cd1.strm')
+    write_strm(pipeline.src_dir / 'ABC-123-cd2.strm')
+    pipeline.run_full(make_ctx())
+    title = pipeline.dst_dir / 'ABC-123'
+    touch(title, 'ABC-123.nfo', 'ABC-123-poster.jpg', 'ABC-123-cd1.nfo', 'ABC-123-cd1-poster.jpg')
+    touch(title, 'ABC-123-cd2-poster.jpg', 'fanart.jpg')
+
+    part.unlink()
+    pipeline.run_incremental(make_ctx(), changed=set(), deleted={part})
+    assert not (title / 'ABC-123-cd1.nfo').exists()
+    assert not (title / 'ABC-123-cd1-poster.jpg').exists()
+    assert (title / 'ABC-123.nfo').exists()
+
+    base.unlink()
+    pipeline.run_incremental(make_ctx(), changed=set(), deleted={base})
+    assert sorted(path.name for path in title.iterdir()) == ['ABC-123-cd2-poster.jpg', 'ABC-123-cd2.strm', 'fanart.jpg']
