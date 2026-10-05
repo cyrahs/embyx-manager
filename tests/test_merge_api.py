@@ -1,6 +1,7 @@
 """Merge task endpoints over a fake repository and service."""
 
 import asyncio
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -11,7 +12,16 @@ from fastapi.testclient import TestClient
 
 from embyx_manager.config.models import MappingConfig
 from embyx_manager.errors import ApiError
-from embyx_manager.merge.api import MergeCatalog, MergeTasksApi, TitleScanCache, create_merge_router, warm_title_cache
+from embyx_manager.merge.api import (
+    AutoState,
+    AutoStatus,
+    MergeCatalog,
+    MergeTasksApi,
+    SkippedTitle,
+    TitleScanCache,
+    create_merge_router,
+    warm_title_cache,
+)
 from embyx_manager.merge.service import MergeActionError
 from embyx_manager.merge.tasks import MergeState, MergeTask, MergeTaskConflictError
 from tests.test_merge_detect import ARCHIVE, parts, strm
@@ -97,6 +107,7 @@ def make_client(
     service: FakeService,
     task_dirs: dict[str, str] | None = None,
     cache: TitleScanCache | None = None,
+    auto_status: Callable[[], AutoStatus] | None = None,
 ) -> TestClient:
     async def task_dirs_for(avids) -> dict[str, str]:
         return {avid: path for avid, path in (task_dirs or {}).items() if avid in avids}
@@ -114,7 +125,7 @@ def make_client(
                 mapping=lambda: MappingConfig(src_dir='/remote', dst_dir=str(tmp_path)),
                 task_dirs_for=task_dirs_for,
             ),
-            tasks=MergeTasksApi(repository=repository, service=service),  # type: ignore[arg-type]
+            tasks=MergeTasksApi(repository=repository, service=service, auto_status=auto_status),  # type: ignore[arg-type]
             mutation_auth=allow,
             cache=cache,
         ),
@@ -191,6 +202,7 @@ def test_create_is_refused_while_merging_is_unavailable(tmp_path: Path) -> None:
     assert client.get('/api/merge/tasks').json() == {
         'items': [],
         'unavailable': 'the merge Job template is not mounted',
+        'auto': None,
     }
 
 
@@ -291,3 +303,19 @@ def test_warming_logs_instead_of_raising(caplog: pytest.LogCaptureFixture) -> No
 async def _no_task_dirs(avids) -> dict[str, str]:
     del avids
     return {}
+
+
+def test_task_listing_reports_automatic_merging(tmp_path: Path) -> None:
+    status = AutoStatus(
+        state=AutoState.IDLE,
+        room=10,
+        skipped=[SkippedTitle(avid='SQTEVR-009', size=20, reason='too_big')],
+        skipped_count=1,
+        checked_at=NOW,
+    )
+    client = make_client(tmp_path, FakeRepository(), FakeService(), auto_status=lambda: status)
+
+    auto = client.get('/api/merge/tasks').json()['auto']
+
+    assert auto['state'] == 'idle'
+    assert auto['skipped'] == [{'avid': 'SQTEVR-009', 'size': 20, 'reason': 'too_big'}]

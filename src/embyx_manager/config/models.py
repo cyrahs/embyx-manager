@@ -466,6 +466,10 @@ class MergeConfig(ConfigSection):
     cloud_mount_prefix: str = '/mnt/cd2'
     #: Space a merge leaves free on the work volume beyond the merged file.
     free_space_reserve_gib: int = 20
+    #: Queue titles by themselves, one at a time: the next starts once the last is filed.
+    auto_enabled: bool = False
+    #: Let automatic merging take titles Emby already stacks (cd1-cd9) as well.
+    auto_include_stackable: bool = False
 
     @field_validator('work_dir', 'cloud_work_dir', 'cloud_staging_dir', 'cloud_mount_prefix')
     @classmethod

@@ -156,6 +156,18 @@ class MergeTaskRepository:
         )
         return tuple(_from_row(row) for row in rows)
 
+    async def cancelled_avids(self) -> frozenset[str]:
+        """Titles someone cancelled or removed a task for; automatic merging leaves them be."""
+        pool = await self._database.get_pool()
+        rows = await pool.fetch("SELECT DISTINCT avid FROM merge_tasks WHERE state = 'cancelled'")
+        return frozenset(str(row['avid']) for row in rows)
+
+    async def last_done_at(self) -> datetime | None:
+        """When the latest task finished merging its title into the library."""
+        pool = await self._database.get_pool()
+        value = await pool.fetchval("SELECT max(finished_at) FROM merge_tasks WHERE state = 'done'")
+        return value if isinstance(value, datetime) else None
+
     async def update(self, task_id: int, **fields: Any) -> MergeTask | None:
         """Change fields without moving the task to another state."""
         return await self._write(task_id, None, None, fields)

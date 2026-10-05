@@ -5,6 +5,7 @@ import logging
 from collections.abc import Awaitable, Callable, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from enum import StrEnum
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -99,12 +100,46 @@ class TitlesView(BaseModel):
     reason: str | None = None
 
 
+class AutoState(StrEnum):
+    OFF = 'off'
+    #: Merging cannot run in this deployment, or the library is not configured.
+    UNAVAILABLE = 'unavailable'
+    #: A task is under way; the next title waits for it to be filed.
+    BUSY = 'busy'
+    #: A task failed; nothing more is queued until it is retried or removed.
+    PAUSED = 'paused'
+    #: Nothing left that fits; the next round looks again.
+    IDLE = 'idle'
+
+
+class SkippedTitle(BaseModel):
+    avid: str
+    #: The parts' total size, when it could be read.
+    size: int | None
+    #: ``too_big``, ``parts_missing``, ``size_unknown`` or the enqueue refusal's error code.
+    reason: str
+
+
+class AutoStatus(BaseModel):
+    """Where automatic merging stands (``merge.auto``)."""
+
+    state: AutoState
+    #: What a merge may take on the work volume right now: free space minus the reserve.
+    room: int | None = None
+    #: The first titles skipped in the last round; ``skipped_count`` counts them all.
+    skipped: list[SkippedTitle] = Field(default_factory=list)
+    skipped_count: int = 0
+    checked_at: datetime | None = None
+
+
 @dataclass(frozen=True)
 class MergeTasksApi:
     """What the task endpoints need; they are mounted only when this is supplied."""
 
     repository: MergeTaskRepository
     service: MergeService
+    #: Where automatic merging stands; None where it is not wired in.
+    auto_status: Callable[[], AutoStatus] | None = None
 
 
 class TaskView(BaseModel):
@@ -160,6 +195,7 @@ class TasksView(BaseModel):
     items: list[TaskView]
     #: Why merging cannot run in this deployment, when it cannot.
     unavailable: str | None
+    auto: AutoStatus | None = None
 
 
 class MergeRequest(BaseModel):
@@ -223,7 +259,7 @@ async def warm_title_cache(catalog: MergeCatalog, cache: TitleScanCache) -> None
         LOGGER.exception('could not scan the mapping tree for multi-part titles')
 
 
-async def _current_title(catalog: MergeCatalog, cache: TitleScanCache, avid: str) -> MultipartTitle | None:
+async def current_title(catalog: MergeCatalog, cache: TitleScanCache, avid: str) -> MultipartTitle | None:
     """The title as its directory holds it now, found through the last scan."""
     wanted = avid.strip().upper()
     for refresh in (False, True):
@@ -253,14 +289,15 @@ def _add_task_routes(
         return TasksView(
             items=[TaskView.from_task(task) for task in await tasks.repository.listing()],
             unavailable=tasks.service.unavailable(),
+            auto=tasks.auto_status() if tasks.auto_status is not None else None,
         )
 
     @router.post('/tasks', status_code=201, dependencies=dependencies)
     async def create_task(request: MergeRequest) -> TaskView:
         if tasks.service.unavailable() is not None:
             raise ApiError(409, 'merge_unavailable')
-        title = await _current_title(catalog, cache, request.avid)
-        task = await _enqueue(catalog, tasks.repository, catalog.archive(), title, request)
+        title = await current_title(catalog, cache, request.avid)
+        task = await enqueue(catalog, tasks.repository, catalog.archive(), title, request)
         tasks.service.wake()
         return TaskView.from_task(task)
 
@@ -297,7 +334,7 @@ def _view(archive: ArchiveConfig, title: MultipartTitle, ledger_task_dir: str | 
     )
 
 
-async def _enqueue(
+async def enqueue(
     catalog: MergeCatalog,
     repository: MergeTaskRepository,
     archive: ArchiveConfig,

@@ -73,7 +73,7 @@ const TASK = {
 
 describe('merge page', () => {
   let titlesBody: unknown
-  let tasksBody: { items: unknown[]; unavailable: string | null }
+  let tasksBody: { items: unknown[]; unavailable: string | null; auto?: unknown }
   let fetchMock: ReturnType<typeof vi.fn>
 
   beforeEach(() => {
@@ -189,6 +189,27 @@ describe('merge page', () => {
     expect(fetchMock).not.toHaveBeenCalledWith('/api/merge/tasks/4/cancel', expect.anything())
     await userEvent.click(within(tasks).getByRole('button', { name: '确认取消' }))
     expect(fetchMock).toHaveBeenCalledWith('/api/merge/tasks/4/cancel', expect.objectContaining({ method: 'POST' }))
+  })
+
+  it('says what automatic merging is doing and what it skipped', async () => {
+    tasksBody = {
+      items: [],
+      unavailable: null,
+      auto: {
+        state: 'idle',
+        room: 30 * 1024 ** 3,
+        skipped: [{ avid: 'VRKM-1497', size: 85 * 1024 ** 3, reason: 'too_big' }],
+        skipped_count: 1,
+        checked_at: '2026-10-05T19:00:00Z',
+      },
+    }
+    renderPage()
+
+    expect(
+      await screen.findByText(
+        '自动合并：没有放得下的作品，稍后再看，downloads 可用 30.0 GiB（已扣预留）。跳过 VRKM-1497（放不下 85.0 GiB）',
+      ),
+    ).toBeInTheDocument()
   })
 
   it('disables merging when the deployment cannot run it', async () => {

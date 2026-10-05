@@ -498,3 +498,15 @@ async def test_archiving_gives_up_after_the_archive_never_files_the_title(harnes
 
     task = await harness.state(task)
     assert (task.state, task.failed_state) == (MergeState.FAILED, MergeState.ARCHIVING)
+
+
+async def test_the_repository_remembers_removed_titles_and_the_last_filed_one(harness: Harness) -> None:
+    removed = await harness.create()
+    assert await harness.repository.last_done_at() is None
+    await harness.service.cancel(removed.id)
+    filed = await harness.create()
+    finished_at = datetime(2026, 10, 5, 19, 0, tzinfo=UTC)
+    await harness.repository.transition(filed.id, MergeState.QUEUED, MergeState.DONE, finished_at=finished_at)
+
+    assert await harness.repository.cancelled_avids() == frozenset({'SQTEVR-009'})
+    assert await harness.repository.last_done_at() == finished_at
