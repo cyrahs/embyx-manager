@@ -284,6 +284,12 @@ const SECTION_SPECS: SectionSpec[] = [
         kind: 'boolean',
         hint: '关闭时只自动合并 10 盘及以上（Emby 堆叠不了的）。',
       },
+      {
+        key: 'auto_pause_on_failure',
+        label: '自动合并遇到失败就暂停',
+        kind: 'boolean',
+        hint: '关闭时失败的作品留在任务列表里等重试或移除，自动合并跳过它继续下一部。',
+      },
     ],
   },
   {

@@ -470,6 +470,8 @@ class MergeConfig(ConfigSection):
     auto_enabled: bool = False
     #: Let automatic merging take titles Emby already stacks (cd1-cd9) as well.
     auto_include_stackable: bool = False
+    #: Stop automatic merging when a task fails, instead of skipping that title and going on.
+    auto_pause_on_failure: bool = False
 
     @field_validator('work_dir', 'cloud_work_dir', 'cloud_staging_dir', 'cloud_mount_prefix')
     @classmethod
