@@ -127,6 +127,9 @@ class MappingPipeline:
     def _delete_strays(self, ctx: RunContext) -> None:
         """Delete xx/yy/zz/zz.strm in dst whose xx/yy/zz.strm no longer exists, with its metadata.
 
+        A strm left in a title directory the ID no longer maps to (the ID rules
+        changed, e.g. ABC-0123 became ABC-123) goes too once its copy exists in
+        the directory it maps to now; otherwise Emby lists the title twice.
         Every title directory also loses the metadata of parts whose strm is
         gone, which an earlier run may have left behind.
         """
@@ -136,7 +139,7 @@ class MappingPipeline:
             src_rel_dir = dst.relative_to(self.dst_dir).parent.parent
             src = self.src_dir / src_rel_dir / dst.name
             stems = deleted.setdefault(dst.parent, set())
-            if not src.exists():
+            if not src.exists() or self._moved(src, dst):
                 dst.unlink()
                 stems.add(dst.stem)
                 ctx.add('files_deleted')
@@ -144,6 +147,11 @@ class MappingPipeline:
         for directory, stems in deleted.items():
             ctx.check_cancelled()
             self._delete_sidecars(directory, stems, ctx, orphaned_parts=True)
+
+    def _moved(self, src: Path, dst: Path) -> bool:
+        """Whether ``src`` now maps to another directory and its strm is already there."""
+        mapped = self.map_strm_path(src)
+        return mapped is not None and mapped != dst and mapped.is_file()
 
     def _delete_sidecars(
         self,

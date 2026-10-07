@@ -285,3 +285,30 @@ def test_incremental_delete_takes_the_strms_own_metadata_only(tmp_path: Path) ->
     base.unlink()
     pipeline.run_incremental(make_ctx(), changed=set(), deleted={base})
     assert sorted(path.name for path in title.iterdir()) == ['ABC-123-cd2-poster.jpg', 'ABC-123-cd2.strm', 'fanart.jpg']
+
+
+def test_full_sync_moves_a_title_out_of_a_directory_its_id_no_longer_maps_to(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    write_strm(pipeline.src_dir / 'vr' / 'VRKM' / 'VRKM-01468-cd1.strm')
+    write_strm(pipeline.src_dir / 'vr' / 'VRKM' / 'VRKM-01468-cd2.strm')
+    old = pipeline.dst_dir / 'vr' / 'VRKM' / 'VRKM-01468'
+    touch(old, 'VRKM-01468-cd1.strm', 'VRKM-01468-cd2.strm', 'VRKM-01468-cd1.nfo', 'VRKM-01468-cd1-poster.jpg')
+
+    ctx = make_ctx()
+    pipeline.run_full(ctx)
+
+    assert not old.exists()
+    current = pipeline.dst_dir / 'vr' / 'VRKM' / 'VRKM-1468'
+    assert sorted(path.name for path in current.iterdir()) == ['VRKM-01468-cd1.strm', 'VRKM-01468-cd2.strm']
+    assert ctx.stats['files_deleted'] == 2
+
+
+def test_full_sync_keeps_a_strm_whose_id_no_longer_reads(tmp_path: Path) -> None:
+    pipeline = make_pipeline(tmp_path)
+    write_strm(pipeline.src_dir / 'misc' / 'holiday.strm')
+    kept = pipeline.dst_dir / 'misc' / 'HOLIDAY' / 'holiday.strm'
+    touch(kept.parent, kept.name)
+
+    pipeline.run_full(make_ctx())
+
+    assert kept.exists()
