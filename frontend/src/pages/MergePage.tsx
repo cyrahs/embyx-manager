@@ -123,6 +123,7 @@ const SKIP_REASONS: Record<string, string> = {
   parts_missing: '分盘不全',
   size_unknown: '读不到大小',
   merge_source_required: '要先选来源',
+  failed: '合并失败，等重试或移除',
 }
 
 function AutoLine({ auto }: { auto: MergeAutoStatus }) {

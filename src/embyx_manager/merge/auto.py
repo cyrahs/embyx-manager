@@ -3,8 +3,10 @@
 With ``merge.auto_enabled`` on, the next title is queued only while no task
 is open, so each title is merged, uploaded, checked and filed before the next
 one starts and merged files never pile up waiting for CloudDrive. A failed
-task pauses this until someone retries or removes it; a title whose task was
-removed or cancelled is never picked again.
+task is left for someone to retry or remove and its title is skipped, so the
+next title goes; with ``merge.auto_pause_on_failure`` on, a failure pauses
+this instead. A title whose task was removed or cancelled is never picked
+again.
 
 A title is queued only when its parts fit on the work volume with the
 reserve to spare. One that does not is skipped for now and looked at again
@@ -34,7 +36,7 @@ from embyx_manager.merge.api import (
 )
 from embyx_manager.merge.detect import MAX_STACKED_PARTS, MultipartTitle
 from embyx_manager.merge.service import MergeService, api_path
-from embyx_manager.merge.tasks import MergeState, MergeTaskRepository
+from embyx_manager.merge.tasks import MergeState, MergeTask, MergeTaskRepository
 
 LOGGER = logging.getLogger(__name__)
 
@@ -103,7 +105,8 @@ class AutoMerger:
     async def step(self) -> None:
         """Queue the next title that fits, when nothing else is under way."""
         config = self._merge_config()
-        blocked = await self._blocked(config)
+        open_tasks = await self._repository.open_tasks()
+        blocked = self._blocked(config, open_tasks)
         if blocked is not None:
             self._status = AutoStatus(state=blocked)
             return
@@ -116,23 +119,29 @@ class AutoMerger:
             self._refused, self._refused_scan = {}, scanned_at
         room = self._free_space(Path(config.work_dir)) - config.free_space_reserve_gib * GIB
         cancelled = await self._repository.cancelled_avids()
+        failed = {task.avid for task in open_tasks if task.state == MergeState.FAILED}
         skipped: list[SkippedTitle] = []
         for title in titles:
-            if _eligible(title, config, cancelled) and await self._try_queue(title, config, room, skipped):
+            if not _eligible(title, config, cancelled):
+                continue
+            if title.avid in failed:
+                skipped.append(SkippedTitle(avid=title.avid, size=None, reason='failed'))
+                continue
+            if await self._try_queue(title, config, room, skipped):
                 self._status = self._report(AutoState.BUSY, room, skipped)
                 return
         self._status = self._report(AutoState.IDLE, room, skipped)
 
-    async def _blocked(self, config: MergeConfig) -> AutoState | None:
+    def _blocked(self, config: MergeConfig, open_tasks: tuple[MergeTask, ...]) -> AutoState | None:
         """Why no title may be queued now, or None when one may."""
         if not config.auto_enabled:
             return AutoState.OFF
         if self._service.unavailable() is not None:
             return AutoState.UNAVAILABLE
-        open_tasks = await self._repository.open_tasks()
-        if any(task.state == MergeState.FAILED for task in open_tasks):
+        failed = [task for task in open_tasks if task.state == MergeState.FAILED]
+        if failed and config.auto_pause_on_failure:
             return AutoState.PAUSED
-        return AutoState.BUSY if open_tasks else None
+        return AutoState.BUSY if len(open_tasks) > len(failed) else None
 
     async def _try_queue(
         self, title: MultipartTitle, config: MergeConfig, room: int, skipped: list[SkippedTitle]

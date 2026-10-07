@@ -120,11 +120,6 @@ def test_waits_for_the_open_task_to_be_filed(tmp_path: Path) -> None:
     assert len(repository.tasks) == 1
     assert merger.status().state == AutoState.BUSY
 
-    repository.tasks[0] = task(1, 'SQTEVR-009', MergeState.FAILED, failed_state=MergeState.UPLOADING)
-    asyncio.run(merger.step())
-    assert len(repository.tasks) == 1
-    assert merger.status().state == AutoState.PAUSED
-
     # Filed: its parts left the library, and the next title goes.
     for strm_file in (tmp_path / 'type/vr/SQTEVR/SQTEVR-009').glob('*.strm'):
         strm_file.unlink()
@@ -198,3 +193,30 @@ def test_does_nothing_while_switched_off(tmp_path: Path) -> None:
 
     assert repository.tasks == []
     assert merger.status().state == AutoState.OFF
+
+
+def test_skips_a_failed_title_and_takes_the_next(tmp_path: Path) -> None:
+    parts(tmp_path, 'type/vr/VRKM/VRKM-01468', 'VRKM-01468', 40, 'type/vr')
+    parts(tmp_path, 'type/vr/VRKM/VRKM-385', 'VRKM-385', 12, 'type/vr')
+    repository = FakeRepository()
+    repository.tasks.append(task(1, 'VRKM-01468', MergeState.FAILED, failed_state=MergeState.MERGING))
+    merger, _ = make_merger(tmp_path, repository)
+
+    asyncio.run(merger.step())
+
+    assert [item.avid for item in repository.tasks] == ['VRKM-01468', 'VRKM-385']
+    status = merger.status()
+    assert status.state == AutoState.BUSY
+    assert [(item.avid, item.reason) for item in status.skipped] == [('VRKM-01468', 'failed')]
+
+
+def test_pauses_on_a_failed_task_when_asked(tmp_path: Path) -> None:
+    parts(tmp_path, 'type/vr/VRKM/VRKM-385', 'VRKM-385', 12, 'type/vr')
+    repository = FakeRepository()
+    repository.tasks.append(task(1, 'SQTEVR-009', MergeState.FAILED, failed_state=MergeState.UPLOADING))
+    merger, _ = make_merger(tmp_path, repository, auto_pause_on_failure=True)
+
+    asyncio.run(merger.step())
+
+    assert len(repository.tasks) == 1
+    assert merger.status().state == AutoState.PAUSED
