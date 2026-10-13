@@ -162,6 +162,12 @@ class MergeTaskRepository:
         rows = await pool.fetch("SELECT DISTINCT avid FROM merge_tasks WHERE state = 'cancelled'")
         return frozenset(str(row['avid']) for row in rows)
 
+    async def merged_avids(self) -> frozenset[str]:
+        """Titles a task already merged; their parts may linger in the scan until mapping catches up."""
+        pool = await self._database.get_pool()
+        rows = await pool.fetch("SELECT DISTINCT avid FROM merge_tasks WHERE state = 'done'")
+        return frozenset(str(row['avid']) for row in rows)
+
     async def last_done_at(self) -> datetime | None:
         """When the latest task finished merging its title into the library."""
         pool = await self._database.get_pool()

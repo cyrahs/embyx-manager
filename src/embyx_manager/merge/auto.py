@@ -6,7 +6,9 @@ one starts and merged files never pile up waiting for CloudDrive. A failed
 task is left for someone to retry or remove and its title is skipped, so the
 next title goes; with ``merge.auto_pause_on_failure`` on, a failure pauses
 this instead. A title whose task was removed or cancelled is never picked
-again.
+again, and neither is one a task already merged: right after it is filed the
+mapping tree can still hold its old ``-cdN`` strm files, and its parts can
+still be read from CloudDrive's cache, so it would be merged a second time.
 
 A title is queued only when its parts fit on the work volume with the
 reserve to spare. One that does not is skipped for now and looked at again
@@ -118,11 +120,11 @@ class AutoMerger:
         if scanned_at != self._refused_scan:
             self._refused, self._refused_scan = {}, scanned_at
         room = self._free_space(Path(config.work_dir)) - config.free_space_reserve_gib * GIB
-        cancelled = await self._repository.cancelled_avids()
+        settled = await self._repository.cancelled_avids() | await self._repository.merged_avids()
         failed = {task.avid for task in open_tasks if task.state == MergeState.FAILED}
         skipped: list[SkippedTitle] = []
         for title in titles:
-            if not _eligible(title, config, cancelled):
+            if not _eligible(title, config, settled):
                 continue
             if title.avid in failed:
                 skipped.append(SkippedTitle(avid=title.avid, size=None, reason='failed'))
@@ -153,6 +155,11 @@ class AutoMerger:
         size, reason = await self._size(title, config)
         if size is None or size > room:
             skipped.append(SkippedTitle(avid=title.avid, size=size, reason=reason or 'too_big'))
+            return False
+        reason = await self._unlisted(title, config)
+        if reason is not None:
+            self._sizes.pop(tuple(part.target for part in title.parts), None)
+            skipped.append(SkippedTitle(avid=title.avid, size=None, reason=reason))
             return False
         try:
             task = await enqueue(
@@ -217,8 +224,25 @@ class AutoMerger:
         self._sizes[targets] = total
         return total, None
 
+    async def _unlisted(self, title: MultipartTitle, config: MergeConfig) -> str | None:
+        """Why CloudDrive, asked afresh, does not list every part, or None when it does.
 
-def _eligible(title: MultipartTitle, config: MergeConfig, cancelled: frozenset[str]) -> bool:
-    if not title.complete or title.avid in cancelled:
+        Sizes come from a cache, but parts leave once a title is merged.
+        """
+        cloud = self._cloud()
+        if cloud is None:
+            return 'size_unknown'
+        targets = [PurePosixPath(part.target) for part in title.parts]
+        try:
+            listing = await cloud.list_directory(api_path(str(targets[0].parent), config.cloud_mount_prefix))
+        except Exception:
+            LOGGER.exception('could not list %s for automatic merging', targets[0].parent)
+            return 'size_unknown'
+        names = {str(entry['name']) for entry in listing if not entry['is_directory']}
+        return None if all(target.name in names for target in targets) else 'parts_missing'
+
+
+def _eligible(title: MultipartTitle, config: MergeConfig, settled: frozenset[str]) -> bool:
+    if not title.complete or title.avid in settled:
         return False
     return config.auto_include_stackable or title.part_count > MAX_STACKED_PARTS
