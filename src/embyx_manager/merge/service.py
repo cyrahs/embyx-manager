@@ -4,18 +4,25 @@ Each task walks one path, one step per poll, and every step can be repeated
 after a restart without harm:
 
 1. **queued → merging**: start the title's merge Job, one Job at a time.
+   A title the library already holds whole, next to its parts, is refused:
+   the archive would never file the merged copy.
 2. **merging → uploading**: the Job wrote the merged file and its SHA-1 to the
    work volume, which CloudDrive also serves.
 3. **uploading → verifying**: CloudDrive copied it into a staging folder of its
    own under the 115 staging directory. A copy that failed is restarted; a
    merged file that went missing before the copy finished is merged again.
 4. **verifying → replacing**: the staged file has the merged file's size and
-   SHA-1.
+   SHA-1, and the library still holds no whole copy of the title (one may
+   have been filed during the upload, e.g. by a merge of the same title
+   under another spelling of its ID).
 5. **replacing → archiving**: the original parts are deleted (into 115's
    recycle bin), the merged file moves into ``{intake}/{source}/{AVID}/`` and
    the local copy is removed. The parts have to leave first: the archive
    refuses a title the library already holds.
 6. **archiving → done**: the archive pipeline filed the folder away.
+   Should a whole copy reach the library anyway, the archive leaves the
+   folder alone and the task fails; removing it then deletes the merged
+   copy, which the library no longer needs.
 
 A step that cannot go on fails the task and records which state it failed in,
 so a retry resumes there. A passing problem (CloudDrive unreachable, 115 not
@@ -32,6 +39,7 @@ from pathlib import Path, PurePosixPath
 
 from embyx_manager.clients.clouddrive.aio import AsyncCloudDrive, CopyStatus
 from embyx_manager.config.models import ArchiveConfig, CloudDriveConfig, MergeConfig
+from embyx_manager.merge.detect import whole_copies
 from embyx_manager.merge.kube import KubeError, KubeJobs, job_name, job_outcome
 from embyx_manager.merge.tasks import (
     CANCELLABLE_STATES,
@@ -243,6 +251,7 @@ class MergeService:
 
     async def _start_merge(self, task: MergeTask, paths: MergePaths) -> None:
         kube = self._require_kube()
+        await self._refuse_whole_copy(task, paths)
         name = job_name(task.id, task.avid)
         paths.status.unlink(missing_ok=True)
         args = [
@@ -414,7 +423,29 @@ class MergeService:
         if sha1 != task.merged_sha1:
             msg = f'uploaded SHA-1 {sha1} differs from the merged file ({task.merged_sha1})'
             raise MergeFailedError(msg)
+        # The last look before the parts are deleted.
+        await self._refuse_whole_copy(task, paths)
         await self._repository.transition(task.id, MergeState.VERIFYING, MergeState.REPLACING, notice=None)
+
+    async def _refuse_whole_copy(self, task: MergeTask, paths: MergePaths) -> None:
+        whole = await self._whole_copy(task, paths)
+        if whole is not None:
+            msg = (
+                f'the library already holds {whole}, a whole copy of {task.avid}; '
+                'merging its parts would only duplicate it'
+            )
+            raise MergeFailedError(msg)
+
+    async def _whole_copy(self, task: MergeTask, paths: MergePaths) -> str | None:
+        """A video beside the parts that holds the whole title, by name; None when there is none."""
+        cloud = self._require_cloud()
+        directory = str(PurePosixPath(paths.part_api_paths[0]).parent)
+        try:
+            entries = await cloud.list_directory(directory)
+        except FileNotFoundError:
+            return None
+        names = [str(entry['name']) for entry in entries if not entry['is_directory']]
+        return next(iter(whole_copies(task.avid, names)), None)
 
     # -- replacing / archiving -------------------------------------------------
 
@@ -481,6 +512,13 @@ class MergeService:
             return
         now = datetime.now(UTC)
         if now - task.state_changed_at > ARCHIVE_WAIT:
+            whole = await self._whole_copy(task, paths)
+            if whole is not None:
+                msg = (
+                    f'the library already holds {whole}, so the archive leaves {paths.target_dir} alone; '
+                    'remove the task to delete the merged copy'
+                )
+                raise MergeFailedError(msg)
             msg = f'the archive has not filed {paths.target_dir}; check the archive run log'
             raise MergeFailedError(msg)
         if now - task.updated_at > ARCHIVE_NUDGE_INTERVAL:
@@ -498,11 +536,13 @@ class MergeService:
             if task.state not in CANCELLABLE_STATES:
                 msg = 'merge_task_not_cancellable'
                 raise MergeActionError(msg)
-            if task.state == MergeState.FAILED and task.failed_state in {MergeState.REPLACING, MergeState.ARCHIVING}:
+            if task.state == MergeState.FAILED and task.failed_state == MergeState.REPLACING:
                 # The originals may already be gone; the merged file must not be dropped.
                 msg = 'merge_task_not_cancellable'
                 raise MergeActionError(msg)
             paths = merge_paths(task, self._merge_config(), self._archive_config())
+            if task.state == MergeState.FAILED and task.failed_state == MergeState.ARCHIVING:
+                await self._discard_duplicate(task, paths)
             if task.job_name and self._kube is not None:
                 with suppress(KubeError):
                     await self._kube.delete_job(task.job_name)
@@ -527,6 +567,35 @@ class MergeService:
                 msg = 'merge_task_changed'
                 raise MergeActionError(msg)
             return cancelled
+
+    async def _discard_duplicate(self, task: MergeTask, paths: MergePaths) -> None:
+        """Delete a merged copy the archive refused because the library holds the title whole.
+
+        The parts are gone by now, so the merged file may be dropped only when
+        that whole copy is there to take its place.
+        """
+        cloud = self._cloud()
+        try:
+            whole = None if cloud is None else await self._whole_copy(task, paths)
+        except Exception as exc:
+            LOGGER.exception('could not look for a whole copy of %s', task.avid)
+            msg = 'merge_discard_failed'
+            raise MergeActionError(msg) from exc
+        if cloud is None or whole is None:
+            msg = 'merge_task_not_cancellable'
+            raise MergeActionError(msg)
+        try:
+            await cloud.delete_files([paths.target_dir])
+            intake = await cloud.list_directory(paths.intake_dir)
+        except FileNotFoundError:
+            intake = ()
+        except Exception as exc:
+            LOGGER.exception('could not delete the merged copy of %s', task.avid)
+            msg = 'merge_discard_failed'
+            raise MergeActionError(msg) from exc
+        if any(entry['full_path'] == paths.target_dir for entry in intake):
+            msg = 'merge_discard_failed'
+            raise MergeActionError(msg)
 
     async def retry(self, task_id: int) -> MergeTask:
         async with self._tick_lock:

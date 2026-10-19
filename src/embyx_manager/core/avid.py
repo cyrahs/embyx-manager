@@ -160,7 +160,7 @@ def _match_odd_numbering(norm: str) -> str:
     return ''
 
 
-def _normalize_number(avid: str) -> str:
+def normalize_number(avid: str) -> str:
     """Spell the number the way the catalogs do: an integer, zero-padded to three digits.
 
     Sources disagree on padding — JavBus writes HTTM-0066 and TBW-19 where AVBase
@@ -203,7 +203,7 @@ class AvidParser:
         for exception in self._config.id_exceptions:
             if exception in upper:
                 return exception
-        return _normalize_number(self.get_id(title).upper())
+        return normalize_number(self.get_id(title).upper())
 
     def get_id(self, filepath_str: str) -> str:  # noqa: C901, PLR0911, PLR0912
         """从给定的文件路径中提取番号(DVD ID)"""

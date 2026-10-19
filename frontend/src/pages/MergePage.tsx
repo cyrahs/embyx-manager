@@ -35,6 +35,7 @@ const PROBLEM_LABELS: Record<MergeTitleProblem, string> = {
   unreadable_strm: 'strm 无法读取',
   outside_library: '文件不在库目录下',
   scattered_parts: '分盘不在同一目录',
+  whole_copy: '库里已有完整文件',
 }
 
 const STATE_LABELS: Record<MergeState, string> = {
@@ -106,7 +107,7 @@ function groupTitles(items: MergeTitle[]): Group[] {
   return [
     { id: 'many', title: `10 盘及以上 · ${many.length}`, hint: 'Emby 会把 cd10 起的每一盘显示成单独条目。', items: many, collapsible: false },
     { id: 'few', title: `9 盘及以下 · ${few.length}`, hint: 'Emby 能堆叠成一个条目，也可以合并。', items: few, collapsible: true },
-    { id: 'broken', title: `缺盘或异常 · ${broken.length}`, hint: '不能合并，需要先补齐或修正。', items: broken, collapsible: true },
+    { id: 'broken', title: `缺盘或异常 · ${broken.length}`, hint: '不能合并：缺盘、有异常，或库里已经有完整文件。', items: broken, collapsible: true },
   ]
 }
 
@@ -121,6 +122,7 @@ const AUTO_LABELS: Record<MergeAutoState, string> = {
 const SKIP_REASONS: Record<string, string> = {
   too_big: '放不下',
   parts_missing: '分盘不全',
+  whole_copy: '库里已有完整文件',
   size_unknown: '读不到大小',
   merge_source_required: '要先选来源',
   failed: '合并失败，等重试或移除',
@@ -329,7 +331,11 @@ function TaskTable({
                     (armed === `task-${task.id}` ? (
                       <ArmedConfirm
                         label={`确认${task.state === 'failed' ? '移除' : '取消'}`}
-                        hint="已经合并或上传的中间文件会被删掉，原分盘不受影响。"
+                        hint={
+                          task.failed_state === 'archiving'
+                            ? '库里已有完整文件时，embyx_in 里多余的合并文件会删进 115 回收站。'
+                            : '已经合并或上传的中间文件会被删掉，原分盘不受影响。'
+                        }
                         disabled={busy !== null}
                         onConfirm={() => onCancel(task)}
                         onDisarm={() => onArm(null)}

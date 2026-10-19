@@ -55,6 +55,8 @@ class FakeCloud:
         self.listed: list[str] = []
         #: Parts deleted from 115 whose strm files are still in the mapping tree.
         self.gone: set[str] = set()
+        #: Files in 115 the mapping tree does not show yet, by directory.
+        self.extra: dict[str, set[str]] = {}
 
     async def list_directory(self, api_dir: str, *, force_refresh: bool = True) -> tuple[dict, ...]:
         del force_refresh
@@ -64,11 +66,8 @@ class FakeCloud:
             for path in self.root.glob('**/*.strm')
             if str(PurePosixPath(path.read_text(encoding='utf-8').strip()).parent) == f'/mnt/cd2{api_dir}'
         }
-        return tuple(
-            {'name': PurePosixPath(name).name, 'size': PART, 'is_directory': False}
-            for name in names
-            if PurePosixPath(name).name not in self.gone
-        )
+        listed = {PurePosixPath(name).name for name in names} | self.extra.get(api_dir, set())
+        return tuple({'name': name, 'size': PART, 'is_directory': False} for name in listed if name not in self.gone)
 
 
 async def no_task_dirs(avids) -> dict[str, str]:
@@ -260,3 +259,17 @@ def test_skips_a_title_whose_parts_left_115_since_they_were_sized(tmp_path: Path
 
     assert repository.tasks == []
     assert [(item.avid, item.reason) for item in merger.status().skipped] == [('SQTEVR-009', 'parts_missing')]
+
+
+def test_skips_a_title_the_library_already_holds_whole(tmp_path: Path) -> None:
+    parts(tmp_path, 'type/vr/SAVR/SAVR-1135', 'SAVR-1135', 14, 'type/vr')
+    parts(tmp_path, 'type/vr/VRKM/VRKM-385', 'VRKM-385', 12, 'type/vr')
+    repository = FakeRepository()
+    merger, _, cloud = make_merger(tmp_path, repository)
+    # Filed by a merge of the same title under its padded ID; mapping has not caught up.
+    cloud.extra['/115/embyx/type/vr/SAVR'] = {'SAVR-01135.mp4'}
+
+    asyncio.run(merger.step())
+
+    assert [item.avid for item in repository.tasks] == ['VRKM-385']
+    assert [(item.avid, item.reason) for item in merger.status().skipped] == [('SAVR-1135', 'whole_copy')]

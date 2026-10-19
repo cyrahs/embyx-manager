@@ -383,6 +383,100 @@ async def test_a_task_that_failed_after_the_originals_went_cannot_be_dismissed(h
     assert (await harness.service.retry(task.id)).state == MergeState.REPLACING
 
 
+WHOLE = '/115/embyx/type/vr/SQTEVR/SQTEVR-0009.mp4'
+
+
+async def test_a_title_the_library_holds_whole_is_not_merged(harness: Harness) -> None:
+    harness.cloud.add_file(WHOLE, 900)
+    task = await harness.create()
+
+    await harness.service.tick()
+
+    task = await harness.state(task)
+    assert (task.state, task.failed_state) == (MergeState.FAILED, MergeState.QUEUED)
+    assert task.error == (
+        'the library already holds SQTEVR-0009.mp4, a whole copy of SQTEVR-009; '
+        'merging its parts would only duplicate it'
+    )
+    assert harness.kube.created == []
+    assert (await harness.service.cancel(task.id)).state == MergeState.CANCELLED
+
+
+async def test_a_whole_copy_filed_during_the_upload_keeps_the_parts(harness: Harness) -> None:
+    task = await harness.create()
+    await harness.service.tick()
+    harness.finish_merge(await harness.state(task))
+    for _ in range(2):
+        await harness.service.tick()
+    harness.complete_copy(task)
+    await harness.service.tick()
+    harness.cloud.add_file(WHOLE, 900)
+
+    await harness.service.tick()
+
+    task = await harness.state(task)
+    assert (task.state, task.failed_state) == (MergeState.FAILED, MergeState.VERIFYING)
+    assert all(api_path(part, '/mnt/cd2') in harness.cloud.files for part in PARTS)
+    assert (await harness.service.cancel(task.id)).state == MergeState.CANCELLED
+    assert harness.staging(task) in harness.cloud.deleted
+
+
+async def archiving_too_long(harness: Harness) -> MergeTask:
+    """A task whose merged file has sat unfiled in the intake route past the wait."""
+    task = await harness.create()
+    for state in (
+        MergeState.MERGING,
+        MergeState.UPLOADING,
+        MergeState.VERIFYING,
+        MergeState.REPLACING,
+        MergeState.ARCHIVING,
+    ):
+        task = await harness.repository.transition(task.id, task.state, state)  # type: ignore[assignment]
+    for part in PARTS:
+        harness.cloud.files.pop(api_path(part, '/mnt/cd2'))
+    harness.cloud.directories.add('/115/embyx_in/vr')
+    harness.cloud.directories.add('/115/embyx_in/vr/SQTEVR-009')
+    harness.cloud.add_file('/115/embyx_in/vr/SQTEVR-009/SQTEVR-009.mp4', 300, SHA1)
+    pool = await harness.repository._database.get_pool()  # noqa: SLF001
+    await pool.execute(
+        'UPDATE merge_tasks SET state_changed_at = $2, updated_at = $2 WHERE id = $1',
+        task.id,
+        datetime.now(UTC) - timedelta(hours=3),
+    )
+    return task
+
+
+async def test_a_merged_copy_the_archive_refuses_for_a_whole_copy_can_be_removed(harness: Harness) -> None:
+    task = await archiving_too_long(harness)
+    harness.cloud.add_file(WHOLE, 900)
+
+    await harness.service.tick()
+
+    task = await harness.state(task)
+    assert (task.state, task.failed_state) == (MergeState.FAILED, MergeState.ARCHIVING)
+    assert task.error == (
+        'the library already holds SQTEVR-0009.mp4, so the archive leaves /115/embyx_in/vr/SQTEVR-009 alone; '
+        'remove the task to delete the merged copy'
+    )
+    cancelled = await harness.service.cancel(task.id)
+    assert cancelled.state == MergeState.CANCELLED
+    assert harness.cloud.deleted == ['/115/embyx_in/vr/SQTEVR-009']
+    assert WHOLE in harness.cloud.files
+
+
+async def test_the_only_merged_copy_cannot_be_removed(harness: Harness) -> None:
+    task = await archiving_too_long(harness)
+
+    await harness.service.tick()
+
+    task = await harness.state(task)
+    assert task.error == 'the archive has not filed /115/embyx_in/vr/SQTEVR-009; check the archive run log'
+    with pytest.raises(MergeActionError, match='merge_task_not_cancellable'):
+        await harness.service.cancel(task.id)
+    assert harness.cloud.deleted == []
+    assert (await harness.service.retry(task.id)).state == MergeState.ARCHIVING
+
+
 async def test_unavailable_without_a_job_template(harness: Harness) -> None:
     service = MergeService(
         repository=harness.repository,

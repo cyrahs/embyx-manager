@@ -82,6 +82,14 @@ const TEXT_PATTERNS: Array<[RegExp, (match: RegExpMatchArray) => string]> = [
   [/^uploaded size (\d+) differs from the merged file \((\d+)\)$/, (m) => `上传后的大小 ${m[1]} 与合并文件（${m[2]}）不一致`],
   [/^upload failed (\d+) times: (.+)$/, (m) => `上传失败了 ${m[1]} 次：${m[2]}`],
   [/^the archive has not filed (.+); check the archive run log$/, (m) => `归档一直没有处理 ${m[1]}，请查看归档运行日志`],
+  [
+    /^the library already holds (.+), a whole copy of (\S+); merging its parts would only duplicate it$/,
+    (m) => `库里已经有完整的 ${m[1]}，合并 ${m[2]} 的分盘只会多一份重复文件`,
+  ],
+  [
+    /^the library already holds (.+), so the archive leaves (\S+) alone; remove the task to delete the merged copy$/,
+    (m) => `库里已经有完整的 ${m[1]}，归档不会收 ${m[2]}；点「移除」把多余的合并文件删进 115 回收站`,
+  ],
   [/^(\d+) original parts are still listed: (.+)$/, (m) => `还有 ${m[1]} 个原分盘没删掉：${m[2]}`],
 ]
 
