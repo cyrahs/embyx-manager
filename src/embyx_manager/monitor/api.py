@@ -18,6 +18,7 @@ from embyx_manager.monitor.acquisitions import (
     AttemptState,
     MagnetAttemptRecord,
     MagnetCandidate,
+    MagnetInUseError,
 )
 from embyx_manager.monitor.manual import (
     DirectoryListing,
@@ -446,11 +447,14 @@ def create_monitor_router(  # noqa: C901, PLR0915 - route registration
         if submit_magnet is None:
             raise ApiError(422, 'clouddrive_not_configured')
         now = datetime.now(UTC)
-        attempt = (
-            await ledger.claim_attempt(avid, attempt_no, now=now)
-            if attempt_no is not None
-            else await ledger.claim_next_pending(avid, now=now)
-        )
+        try:
+            attempt = (
+                await ledger.claim_attempt(avid, attempt_no, now=now)
+                if attempt_no is not None
+                else await ledger.claim_next_pending(avid, now=now)
+            )
+        except MagnetInUseError as exc:
+            raise ApiError(409, 'magnet_in_use') from exc
         if attempt is None:
             raise ApiError(409, 'no_magnet_left')
         if not await submit_magnet(avid, attempt.magnet):

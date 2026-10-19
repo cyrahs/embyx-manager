@@ -287,6 +287,7 @@ const CODE_MESSAGES: Record<string, string> = {
   acquisition_changed: '该番号状态已发生变化，请刷新后重试。',
   clouddrive_not_configured: '尚未配置 CloudDrive，无法提交离线任务。',
   no_magnet_left: '没有可用的候选磁力了。',
+  magnet_in_use: '这条磁力正在被另一个番号下载，等它结束后再试。',
   offline_task_rejected: 'CloudDrive 拒绝了这个离线任务。',
   already_archived: '该番号已入库，无需再操作。',
   unusable_magnet: '磁力链接无效，请检查后重试。',

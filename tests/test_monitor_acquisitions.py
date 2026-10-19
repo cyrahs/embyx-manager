@@ -1,7 +1,6 @@
 import asyncio
 from datetime import UTC, date, datetime, timedelta
 
-import asyncpg
 import pytest
 
 from embyx_manager.db import _MIGRATIONS
@@ -12,6 +11,7 @@ from embyx_manager.monitor.acquisitions import (
     AttemptState,
     IllegalTransitionError,
     MagnetCandidate,
+    MagnetInUseError,
     rss_source,
 )
 from tests.conftest import make_database, postgres_test_dsn
@@ -314,8 +314,41 @@ async def test_a_hash_cannot_be_live_for_two_attempts_at_once() -> None:
     await ledger.add_attempts('DEF-456', [candidate('shared')], now=NOW)
 
     assert await ledger.claim_next_pending('ABC-123', now=NOW) is not None
-    with pytest.raises(asyncpg.UniqueViolationError):
-        await ledger.claim_next_pending('DEF-456', now=NOW)
+    # The claim passes the shared magnet over instead of failing, and the
+    # attempt stays pending for later.
+    assert await ledger.claim_next_pending('DEF-456', now=NOW) is None
+    assert [attempt.state for attempt in await ledger.attempts_for('DEF-456')] == [AttemptState.PENDING]
+    with pytest.raises(MagnetInUseError):
+        await ledger.claim_attempt('DEF-456', 1, now=NOW)
+
+
+async def test_a_claim_skips_a_shared_hash_and_takes_the_next_magnet() -> None:
+    ledger = make_ledger()
+    await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW)
+    await ledger.discover('DEF-456', source=rss_source('Actor'), now=NOW)
+    await ledger.add_attempts('ABC-123', [candidate('shared')], now=NOW)
+    await ledger.add_attempts('DEF-456', [candidate('shared'), candidate('own')], now=NOW)
+    await ledger.claim_next_pending('ABC-123', now=NOW)
+
+    claimed = await ledger.claim_next_pending('DEF-456', now=NOW)
+
+    assert claimed is not None
+    assert claimed.info_hash == 'OWN'
+
+
+async def test_a_shared_hash_is_free_again_once_its_attempt_concludes() -> None:
+    ledger = make_ledger()
+    await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW)
+    await ledger.discover('DEF-456', source=rss_source('Actor'), now=NOW)
+    await ledger.add_attempts('ABC-123', [candidate('shared')], now=NOW)
+    await ledger.add_attempts('DEF-456', [candidate('shared')], now=NOW)
+    await ledger.claim_next_pending('ABC-123', now=NOW)
+    await ledger.transition_attempt('ABC-123', 1, expected=AttemptState.SUBMITTED, target=AttemptState.ERROR, now=NOW)
+
+    claimed = await ledger.claim_next_pending('DEF-456', now=NOW)
+
+    assert claimed is not None
+    assert claimed.info_hash == 'SHARED'
 
 
 async def test_in_flight_attempts_exclude_concluded_ones() -> None:

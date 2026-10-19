@@ -10,6 +10,7 @@ from embyx_manager.monitor.acquisitions import (
     AcquisitionState,
     AttemptState,
     MagnetCandidate,
+    MagnetInUseError,
 )
 from embyx_manager.monitor.api import AcquisitionApi, SubscriptionsApi, create_monitor_router
 from embyx_manager.monitor.manual import (
@@ -369,6 +370,26 @@ async def test_a_magnet_already_tried_is_not_queued_twice() -> None:
 
     assert response.status_code == 409
     assert response.json()['error']['code'] == 'magnet_already_tried'
+    assert submitted == []
+
+
+async def test_a_magnet_live_for_another_avid_is_a_conflict() -> None:
+    ledger = await seed_ledger(ABC_123=AcquisitionState.NEEDS_ATTENTION)
+
+    async def in_use(avid: str, attempt_no: int, *, now: datetime) -> None:
+        del now
+        raise MagnetInUseError(avid, attempt_no)
+
+    ledger.claim_attempt = in_use  # type: ignore[method-assign]
+    client, submitted = make_ledger_client(ledger)
+
+    response = client.post(
+        '/api/monitor/acquisitions/ABC-123/magnet',
+        json={'magnet': f'magnet:?xt=urn:btih:{HASH_B}'},
+    )
+
+    assert response.status_code == 409
+    assert response.json()['error']['code'] == 'magnet_in_use'
     assert submitted == []
 
 
