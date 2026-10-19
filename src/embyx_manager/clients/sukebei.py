@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import re
 
 import httpx
 import humanfriendly
@@ -14,6 +15,23 @@ log = logging.getLogger('embyx-manager.sukebei')
 _NOTICE_LEVEL = 25
 # Prefer the largest trusted result unless an untrusted one is materially larger.
 TRUSTED_SIZE_TOLERANCE = 0.8
+_LABEL_NUMBER_RE = re.compile(r'([A-Z0-9]+)-(\d+)')
+
+
+def _title_pattern(keyword: str) -> re.Pattern[str] | None:
+    """A pattern for result titles that really are this AVID.
+
+    Sukebei matches the query as a prefix, so a search for NHDTC-180 also lists
+    NHDTC-18006. The number must therefore end where the title's number ends;
+    the separator and zero padding may differ (nhdtc00180, NHDTC_180). Ids that
+    are not plain label-number (heydouga), and FC2 ones, whose titles carry a PPV
+    between label and number, are not filtered.
+    """
+    match = _LABEL_NUMBER_RE.fullmatch(keyword.upper())
+    if match is None or match.group(1) == 'FC2':
+        return None
+    label, number = match.group(1), int(match.group(2))
+    return re.compile(rf'(?<![A-Z]){re.escape(label)}[-_ ]?0*{number}(?!\d)', re.IGNORECASE)
 
 
 class SukebeiClient:
@@ -76,8 +94,12 @@ class SukebeiClient:
             return None
         if not result:
             return None
+        pattern = _title_pattern(keyword)
         parsed_result = []
         for item in result:
+            if pattern is not None and not pattern.search(item.get('name') or ''):
+                log.info('Skipping result %s: not %s', item.get('name'), keyword)
+                continue
             try:
                 item['size_int'] = humanfriendly.parse_size(item['size'])
             except humanfriendly.InvalidSize:

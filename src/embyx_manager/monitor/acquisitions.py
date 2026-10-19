@@ -86,6 +86,8 @@ DUE_STATES = RETRYABLE_STATES | {AcquisitionState.DISCOVERED}
 IN_FLIGHT_ATTEMPT_STATES = frozenset({AttemptState.SUBMITTED, AttemptState.DOWNLOADING})
 #: Attempt states an offline task can still be acted on in; a hash is unique across these.
 LIVE_ATTEMPT_STATES = IN_FLIGHT_ATTEMPT_STATES | {AttemptState.FINISHED, AttemptState.ARCHIVING}
+#: How often a claim that lost a race for a shared hash is re-run before giving up.
+_CLAIM_RETRIES = 3
 
 _ACQUISITION_EDGES: dict[AcquisitionState, frozenset[AcquisitionState]] = {
     AcquisitionState.DISCOVERED: frozenset(
@@ -177,6 +179,13 @@ class IllegalTransitionError(RuntimeError):
     def __init__(self, source: StrEnum, target: StrEnum) -> None:
         kind = type(source).__name__.removesuffix('State').lower()
         super().__init__(f'{kind}: {source.value} -> {target.value} is not a legal transition')
+
+
+class MagnetInUseError(RuntimeError):
+    """The chosen magnet is already live on another attempt, so it cannot be submitted now."""
+
+    def __init__(self, avid: str, attempt_no: int) -> None:
+        super().__init__(f'{avid} attempt {attempt_no}: the magnet is already live on another attempt')
 
 
 @dataclass(frozen=True)
@@ -518,38 +527,62 @@ class AcquisitionRepository:
         The claim happens before the CloudDrive call, so a crash mid-submit leaves
         the attempt submitted and the tracker reconciles it against the task list
         rather than double-submitting it.
+
+        A pending attempt whose hash is live on another attempt is passed over:
+        the same torrent can be a candidate for two AVIDs (a search for NHDTC-180
+        also finds NHDTC-18006), and only one attempt per hash may be live. It
+        stays pending, so it can still be tried once the other one concludes.
         """
         pool = await self._database.get_pool()
-        row = await pool.fetchrow(
-            """
-            UPDATE archive_magnet_attempts SET state = 'submitted', submitted_at = $2, updated_at = $2
-            WHERE avid = $1 AND state = 'pending' AND attempt_no = (
-                SELECT attempt_no FROM archive_magnet_attempts
-                WHERE avid = $1 AND state = 'pending'
-                ORDER BY attempt_no
-                LIMIT 1
-                FOR UPDATE SKIP LOCKED
-            )
-            RETURNING *
-            """,
-            avid,
-            now,
-        )
-        return _attempt_from_row(row) if row is not None else None
+        for _ in range(_CLAIM_RETRIES):
+            try:
+                row = await pool.fetchrow(
+                    """
+                    UPDATE archive_magnet_attempts SET state = 'submitted', submitted_at = $2, updated_at = $2
+                    WHERE avid = $1 AND state = 'pending' AND attempt_no = (
+                        SELECT attempt_no FROM archive_magnet_attempts AS attempt
+                        WHERE avid = $1 AND state = 'pending'
+                          AND NOT EXISTS (
+                              SELECT 1 FROM archive_magnet_attempts AS live
+                              WHERE live.info_hash = attempt.info_hash AND live.state = ANY($3::text[])
+                          )
+                        ORDER BY attempt_no
+                        LIMIT 1
+                        FOR UPDATE SKIP LOCKED
+                    )
+                    RETURNING *
+                    """,
+                    avid,
+                    now,
+                    sorted(state.value for state in LIVE_ATTEMPT_STATES),
+                )
+            except asyncpg.UniqueViolationError:
+                # Another AVID took the same hash live between our check and our
+                # write; the next pass sees it and passes this attempt over.
+                continue
+            return _attempt_from_row(row) if row is not None else None
+        return None
 
     async def claim_attempt(self, avid: str, attempt_no: int, *, now: datetime) -> MagnetAttemptRecord | None:
-        """Take one specific pending attempt, for a magnet an operator chose."""
+        """Take one specific pending attempt, for a magnet an operator chose.
+
+        Raises :class:`MagnetInUseError` when the magnet is live on another
+        attempt; the attempt stays pending.
+        """
         pool = await self._database.get_pool()
-        row = await pool.fetchrow(
-            """
-            UPDATE archive_magnet_attempts SET state = 'submitted', submitted_at = $3, updated_at = $3
-            WHERE avid = $1 AND attempt_no = $2 AND state = 'pending'
-            RETURNING *
-            """,
-            avid,
-            attempt_no,
-            now,
-        )
+        try:
+            row = await pool.fetchrow(
+                """
+                UPDATE archive_magnet_attempts SET state = 'submitted', submitted_at = $3, updated_at = $3
+                WHERE avid = $1 AND attempt_no = $2 AND state = 'pending'
+                RETURNING *
+                """,
+                avid,
+                attempt_no,
+                now,
+            )
+        except asyncpg.UniqueViolationError as exc:
+            raise MagnetInUseError(avid, attempt_no) from exc
         return _attempt_from_row(row) if row is not None else None
 
     async def transition_attempt(  # noqa: PLR0913 - mirrors the acquisition CAS
