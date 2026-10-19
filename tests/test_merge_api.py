@@ -231,6 +231,16 @@ def test_a_task_that_failed_while_replacing_offers_retry_only(tmp_path: Path) ->
     )
 
 
+def test_a_task_that_failed_while_archiving_may_be_removed(tmp_path: Path) -> None:
+    repository = FakeRepository()
+    repository.tasks.append(task(1, 'AVOPVR-117', MergeState.FAILED, failed_state=MergeState.ARCHIVING, error='x'))
+    client = make_client(tmp_path, repository, FakeService())
+
+    (item,) = client.get('/api/merge/tasks').json()['items']
+
+    assert (item['cancellable'], item['retryable']) == (True, True)
+
+
 def test_titles_are_scanned_once_until_a_refresh_is_asked_for(tmp_path: Path) -> None:
     parts(tmp_path, 'type/vr/SQTEVR/SQTEVR-009', 'SQTEVR-009', 12, 'type/vr')
     client = make_client(tmp_path, FakeRepository(), FakeService())

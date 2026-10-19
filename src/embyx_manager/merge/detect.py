@@ -7,6 +7,11 @@ part's file on the CloudDrive mount, so the scan never touches 115 itself.
 Emby stacks parts cd1 through cd9 into one item and shows every later part as
 an item of its own. Both kinds can be merged; the page only lists them apart.
 
+A title whose directory also holds a whole copy (``{AVID}.strm`` next to the
+parts) is not mergeable: the archive refuses a title the library already
+holds, so the merged file would be stranded in the intake route with its parts
+already deleted.
+
 Merging re-enters a title through the archive flow, so it needs the intake
 route (``clt``, ``rank``, ``vr``, ...) whose destination holds the title today.
 The library directory names it whenever exactly one route feeds that
@@ -15,14 +20,19 @@ directory; otherwise the acquisition ledger's offline directory is asked.
 
 import os
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path, PurePosixPath
 
 from embyx_manager.config.models import ArchiveConfig
+from embyx_manager.core.avid import normalize_number
+from embyx_manager.core.media import VIDEO_SUFFIXES
 
 #: ``ABC-123-cd4.strm``: the stem before ``-cd`` is the title, the number its part.
 CD_STRM_RE = re.compile(r'^(?P<stem>.+)-cd(?P<index>\d+)\.strm$', re.IGNORECASE)
+#: A part's ``-cdN`` at the end of a file stem.
+CD_SUFFIX_RE = re.compile(r'-cd\d+$', re.IGNORECASE)
 #: Emby stacks a single digit only; ``cd10`` onwards each become their own item.
 MAX_STACKED_PARTS = 9
 #: A strm is one short line; anything larger is not one.
@@ -43,6 +53,8 @@ class TitleProblem(StrEnum):
     OUTSIDE_LIBRARY = 'outside_library'
     #: The parts are spread over more than one brand directory.
     SCATTERED_PARTS = 'scattered_parts'
+    #: The library already holds the whole title next to its parts.
+    WHOLE_COPY = 'whole_copy'
 
 
 @dataclass(frozen=True)
@@ -87,26 +99,64 @@ class SourceRoute:
     basis: SourceBasis | None
 
 
+def is_whole_copy(stem: str, avid: str) -> bool:
+    """Whether a file stem names all of ``avid`` rather than one ``-cdN`` part.
+
+    The archive files a title under its ID with the number padded to three
+    digits, so ``VRKM-1429`` is a whole copy of ``VRKM-01429``.
+    """
+    if CD_SUFFIX_RE.search(stem):
+        return False
+    return normalize_number(stem.strip().upper()) == normalize_number(avid.strip().upper())
+
+
+def whole_copies(avid: str, names: Iterable[str]) -> tuple[str, ...]:
+    """The video file names among ``names`` that hold the whole of ``avid``."""
+    found = []
+    for name in names:
+        path = PurePosixPath(name)
+        if path.suffix.lower() in VIDEO_SUFFIXES and is_whole_copy(path.stem, avid):
+            found.append(name)
+    return tuple(found)
+
+
 def scan_multipart(root: Path, *, library_root: str) -> list[MultipartTitle]:
     """Every title under ``root`` with at least two ``-cdN`` parts, most parts first."""
     groups: dict[tuple[str, str], list[tuple[int, Path]]] = {}
+    #: Each directory's strm stems that are not a part, to spot a whole copy.
+    singles: dict[str, list[str]] = {}
     for dirpath, _dirnames, filenames in os.walk(root):
         for name in filenames:
             match = CD_STRM_RE.match(name)
             if match is None:
+                if name.lower().endswith('.strm'):
+                    singles.setdefault(dirpath, []).append(name[: -len('.strm')])
                 continue
             key = (dirpath, match['stem'].upper())
             groups.setdefault(key, []).append((int(match['index']), Path(dirpath) / name))
     titles = [
-        _title(root, stem, sorted(entries), library_root=PurePosixPath(library_root))
-        for (_dirpath, stem), entries in groups.items()
+        _title(
+            root,
+            stem,
+            sorted(entries),
+            library_root=PurePosixPath(library_root),
+            whole=any(is_whole_copy(single, stem) for single in singles.get(dirpath, ())),
+        )
+        for (dirpath, stem), entries in groups.items()
         if len(entries) > 1
     ]
     titles.sort(key=lambda title: (-title.part_count, title.avid))
     return titles
 
 
-def _title(root: Path, stem: str, entries: list[tuple[int, Path]], *, library_root: PurePosixPath) -> MultipartTitle:
+def _title(
+    root: Path,
+    stem: str,
+    entries: list[tuple[int, Path]],
+    *,
+    library_root: PurePosixPath,
+    whole: bool = False,
+) -> MultipartTitle:
     directory = entries[0][1].parent
     indexes = {index for index, _path in entries}
     missing = tuple(index for index in range(1, max(indexes) + 1) if index not in indexes)
@@ -136,6 +186,8 @@ def _title(root: Path, stem: str, entries: list[tuple[int, Path]], *, library_ro
                 else:
                     library_dir = str(relative.parent)
                     brand = relative.name
+    if problem is None and whole:
+        problem = TitleProblem.WHOLE_COPY
     return MultipartTitle(
         avid=stem,
         directory=str(directory.relative_to(root)),

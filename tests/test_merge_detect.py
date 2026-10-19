@@ -14,6 +14,7 @@ from embyx_manager.merge.detect import (
     scan_multipart,
     source_for_library_dir,
     source_for_task_dir,
+    whole_copies,
 )
 
 LIBRARY = '/mnt/cd2/115/embyx'
@@ -57,6 +58,25 @@ def test_scan_groups_parts_by_title_and_orders_by_part_count(tmp_path: Path) -> 
     assert not big.stackable
     assert big.complete
     assert small.stackable
+
+
+def test_scan_flags_a_title_the_library_also_holds_whole(tmp_path: Path) -> None:
+    parts(tmp_path, 'type/vr/VRKM/VRKM-1429', 'VRKM-01429', 9, 'type/vr')
+    strm(tmp_path, 'type/vr/VRKM/VRKM-1429', 'VRKM-1429.strm', f'{LIBRARY}/type/vr/VRKM/VRKM-1429.mp4')
+    parts(tmp_path, 'type/vr/VRKM/VRKM-1430', 'VRKM-1430', 9, 'type/vr')
+    strm(tmp_path, 'type/vr/VRKM/VRKM-1430', 'VRKM-1430-5.strm', f'{LIBRARY}/type/vr/VRKM/VRKM-1430-5.mp4')
+
+    problems = {title.avid: title.problem for title in scan_multipart(tmp_path, library_root=LIBRARY)}
+
+    assert problems == {'VRKM-01429': TitleProblem.WHOLE_COPY, 'VRKM-1430': None}
+
+
+def test_whole_copies_match_the_id_however_it_is_padded() -> None:
+    names = ['AVOPVR-117-cd1.mp4', 'AVOPVR-117.mp4', 'AVOPVR-117.nfo', 'AVOPVR-1170.mp4', 'avopvr-0117.mkv']
+
+    assert whole_copies('AVOPVR-117', names) == ('AVOPVR-117.mp4', 'avopvr-0117.mkv')
+    assert whole_copies('SAVR-01135', ['SAVR-1135.mp4', 'SAVR-1135-cd2.mp4']) == ('SAVR-1135.mp4',)
+    assert whole_copies('SAVR-01135', ['SAVR-01135-cd1.mp4']) == ()
 
 
 def test_scan_reports_missing_parts(tmp_path: Path) -> None:

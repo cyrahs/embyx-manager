@@ -318,7 +318,8 @@ const CODE_MESSAGES: Record<string, string> = {
   merge_source_unknown: '所选的来源资源库不在归档路由里。',
   merge_task_exists: '这部作品已经有一个未完成的合并任务。',
   merge_task_not_found: '找不到这个合并任务。',
-  merge_task_not_cancellable: '这个任务已经删除了原分盘，不能再取消，只能重试。',
+  merge_task_not_cancellable: '原分盘已经删了，合并出的文件是这部作品唯一的一份，不能移除，只能重试。',
+  merge_discard_failed: '没能删掉 embyx_in 里多余的合并文件，请稍后再试。',
   merge_task_not_failed: '只有失败的任务可以重试。',
   merge_task_changed: '任务状态刚刚变化了，请刷新后重试。',
 }

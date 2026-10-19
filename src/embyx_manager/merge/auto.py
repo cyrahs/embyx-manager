@@ -10,6 +10,9 @@ again, and neither is one a task already merged: right after it is filed the
 mapping tree can still hold its old ``-cdN`` strm files, and its parts can
 still be read from CloudDrive's cache, so it would be merged a second time.
 
+A title the library already holds whole, beside its parts, is never queued:
+the archive would refuse the merged copy once the parts were gone.
+
 A title is queued only when its parts fit on the work volume with the
 reserve to spare. One that does not is skipped for now and looked at again
 on the next round, once uploads have freed the space.
@@ -36,7 +39,7 @@ from embyx_manager.merge.api import (
     current_title,
     enqueue,
 )
-from embyx_manager.merge.detect import MAX_STACKED_PARTS, MultipartTitle
+from embyx_manager.merge.detect import MAX_STACKED_PARTS, MultipartTitle, whole_copies
 from embyx_manager.merge.service import MergeService, api_path
 from embyx_manager.merge.tasks import MergeState, MergeTask, MergeTaskRepository
 
@@ -48,6 +51,8 @@ RESCAN_INTERVAL = timedelta(hours=24)
 #: How many skipped titles the status names; the rest are only counted.
 SKIPPED_SHOWN = 20
 GIB = 1 << 30
+#: The skip reason of a title the library already holds whole.
+WHOLE_COPY = 'whole_copy'
 
 
 def free_bytes(path: Path) -> int:
@@ -159,7 +164,10 @@ class AutoMerger:
         reason = await self._unlisted(title, config)
         if reason is not None:
             self._sizes.pop(tuple(part.target for part in title.parts), None)
-            skipped.append(SkippedTitle(avid=title.avid, size=None, reason=reason))
+            refused = SkippedTitle(avid=title.avid, size=None, reason=reason)
+            if reason == WHOLE_COPY:
+                self._refused[title.avid] = refused
+            skipped.append(refused)
             return False
         try:
             task = await enqueue(
@@ -225,9 +233,10 @@ class AutoMerger:
         return total, None
 
     async def _unlisted(self, title: MultipartTitle, config: MergeConfig) -> str | None:
-        """Why CloudDrive, asked afresh, does not list every part, or None when it does.
+        """Why CloudDrive, asked afresh, does not list every part alone, or None when it does.
 
-        Sizes come from a cache, but parts leave once a title is merged.
+        Sizes come from a cache, but parts leave once a title is merged, and
+        the mapping tree may not show yet a whole copy filed since the scan.
         """
         cloud = self._cloud()
         if cloud is None:
@@ -239,7 +248,9 @@ class AutoMerger:
             LOGGER.exception('could not list %s for automatic merging', targets[0].parent)
             return 'size_unknown'
         names = {str(entry['name']) for entry in listing if not entry['is_directory']}
-        return None if all(target.name in names for target in targets) else 'parts_missing'
+        if not all(target.name in names for target in targets):
+            return 'parts_missing'
+        return WHOLE_COPY if whole_copies(title.avid, names) else None
 
 
 def _eligible(title: MultipartTitle, config: MergeConfig, settled: frozenset[str]) -> bool:

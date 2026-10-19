@@ -350,7 +350,7 @@ export interface PlaylistMissing {
   items: PlaylistMissingEntry[]
 }
 
-export type MergeTitleProblem = 'unreadable_strm' | 'outside_library' | 'scattered_parts'
+export type MergeTitleProblem = 'unreadable_strm' | 'outside_library' | 'scattered_parts' | 'whole_copy'
 export type MergeSourceBasis = 'library' | 'ledger'
 
 export interface MergeTitle {

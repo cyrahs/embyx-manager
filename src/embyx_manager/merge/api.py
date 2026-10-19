@@ -165,8 +165,10 @@ class TaskView(BaseModel):
 
     @classmethod
     def from_task(cls, task: MergeTask) -> 'TaskView':
+        # A task failed while archiving may be removed only once the library
+        # holds the title whole; the cancel itself checks that.
         cancellable = task.state in CANCELLABLE_STATES and not (
-            task.state == MergeState.FAILED and task.failed_state in {MergeState.REPLACING, MergeState.ARCHIVING}
+            task.state == MergeState.FAILED and task.failed_state == MergeState.REPLACING
         )
         return cls(
             id=task.id,
