@@ -306,6 +306,30 @@ async def test_concluded_attempts_drop_out_of_the_hash_lookup() -> None:
     assert (await ledger.attempts_for('ABC-123'))[0].info_hash == 'ABC123HASH0'
 
 
+async def test_archived_hashes_are_those_no_live_attempt_holds() -> None:
+    ledger = make_ledger()
+    await start_downloading(ledger, 'ABC-123')
+    await start_downloading(ledger, 'DEF-456')
+    await start_downloading(ledger, 'GHI-789')
+    for avid, hash_ in (('ABC-123', 'ABC123HASH0'), ('GHI-789', 'GHI789HASH0')):
+        for expected, target in (
+            (AttemptState.SUBMITTED, AttemptState.FINISHED),
+            (AttemptState.FINISHED, AttemptState.ARCHIVING),
+            (AttemptState.ARCHIVING, AttemptState.ARCHIVED),
+        ):
+            await ledger.transition_attempt(avid, 1, expected=expected, target=target, now=NOW)
+        assert (await ledger.attempts_for(avid))[0].info_hash == hash_
+    # Another code's attempt on the archived magnet is live: its task is not history yet.
+    await ledger.discover('JKL-000', source=rss_source('Actor'), now=NOW)
+    await ledger.add_attempts('JKL-000', [candidate('GHI789hash0')], now=NOW)
+    assert await ledger.claim_next_pending('JKL-000', now=NOW) is not None
+
+    archived = await ledger.archived_info_hashes(['ABC123HASH0', 'DEF456HASH0', 'GHI789HASH0', 'MISSING', ''])
+
+    assert archived == {'ABC123HASH0'}
+    assert await ledger.archived_info_hashes([]) == frozenset()
+
+
 async def test_a_hash_cannot_be_live_for_two_attempts_at_once() -> None:
     ledger = make_ledger()
     await ledger.discover('ABC-123', source=rss_source('Actor'), now=NOW)

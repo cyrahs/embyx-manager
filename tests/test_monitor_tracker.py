@@ -1,4 +1,5 @@
 import logging
+from dataclasses import replace
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from unittest.mock import AsyncMock
@@ -8,6 +9,7 @@ import pytest
 from embyx_manager.clients.clouddrive.aio import OfflineStatus
 from embyx_manager.config.models import ArchiveConfig
 from embyx_manager.core.avid import AvidParser
+from embyx_manager.monitor import tracker as tracker_module
 from embyx_manager.monitor.acquisitions import (
     AcquisitionState,
     AttemptState,
@@ -17,6 +19,8 @@ from embyx_manager.monitor.archive import ArchivePipeline
 from embyx_manager.monitor.reports import RunContext
 from embyx_manager.monitor.tracker import AcquisitionTracker, TrackerSettings
 from tests.test_monitor_rss import HASH_A, HASH_B, FakeLedger, now_stub
+
+HASH_C = 'C' * 40
 
 TASK_DIR = '/115/task'
 
@@ -133,9 +137,10 @@ async def test_finished_download_is_archived_and_the_avid_closed(tmp_path: Path)
     # task directory goes first: a persistent cache (115) never re-reads it on
     # its own, so the new folder does not resolve until its parent is refreshed.
     assert cloud.refreshed == [TASK_DIR, f'{TASK_DIR}/ABC-123 release']
-    # The task record stays: it feeds CloudDrive's duplicate detection, and the
-    # downloaded folder is already archived away.
-    assert cloud.removed == []
+    # The task record goes, its files kept: they are already in the library, and
+    # every record left behind slows CloudDrive's listing down.
+    assert cloud.removed == [(HASH_A, TASK_DIR, False)]
+    assert ctx.stats['archived_tasks_cleared'] == 1
 
 
 async def test_finished_download_uses_expected_avid_when_file_has_single_zero_padding(tmp_path: Path) -> None:
@@ -508,3 +513,56 @@ async def test_no_configured_directory_does_not_conclude_the_downloads_in_flight
     assert cloud.listed == []
     assert ledger.attempt_states('ABC-123') == [AttemptState.SUBMITTED]
     assert any('no offline directory' in line for line in ctx.log_tail)
+
+
+async def test_only_finished_tasks_the_ledger_archived_are_cleared(tmp_path: Path) -> None:
+    """A task added by hand, or one not archived yet, stays listed."""
+    tracker, ledger, cloud, _ = build(
+        tmp_path,
+        [
+            offline_task('archived earlier', HASH_A, OfflineStatus.FINISHED),
+            offline_task('someone elses', HASH_B, OfflineStatus.FINISHED),
+            offline_task('not on the mount yet', HASH_C, OfflineStatus.FINISHED),
+        ],
+    )
+    await seed(ledger, 'ABC-123', [HASH_A])
+    ledger.attempts['ABC-123'][0] = replace(ledger.attempts['ABC-123'][0], state=AttemptState.ARCHIVED)
+    ledger.states['ABC-123'] = AcquisitionState.ARCHIVED
+    await seed(ledger, 'DEF-456', [HASH_C])
+
+    ctx = make_ctx()
+    await tracker.poll(ctx)
+
+    assert cloud.removed == [(HASH_A, TASK_DIR, False)]
+    assert ledger.attempt_states('DEF-456') == [AttemptState.FINISHED]  # waits for the mount
+
+
+async def test_archived_tasks_are_cleared_in_batches_and_a_failure_is_shrugged_off(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(tracker_module, 'CLEAR_BATCH', 2)
+    hashes = [f'{index:040X}' for index in range(5)]
+    tracker, ledger, cloud, _ = build(
+        tmp_path,
+        [offline_task(f'done {index}', info_hash, OfflineStatus.FINISHED) for index, info_hash in enumerate(hashes)],
+    )
+    for index, info_hash in enumerate(hashes):
+        avid = f'ABC-{index:03d}'
+        await seed(ledger, avid, [info_hash])
+        ledger.attempts[avid][0] = replace(ledger.attempts[avid][0], state=AttemptState.ARCHIVED)
+    calls: list[list[str]] = []
+
+    async def remove(info_hashes: list[str], path: str, *, delete_files: bool) -> None:
+        del path, delete_files
+        calls.append(info_hashes)
+        if len(calls) == 2:
+            msg = 'CloudDrive is busy'
+            raise RuntimeError(msg)
+
+    cloud.remove_offline_files = remove  # type: ignore[method-assign]
+    ctx = make_ctx()
+    await tracker.poll(ctx)
+
+    assert calls == [hashes[0:2], hashes[2:4], hashes[4:5]]
+    assert ctx.stats['archived_tasks_cleared'] == 3

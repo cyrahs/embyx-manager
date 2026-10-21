@@ -200,6 +200,17 @@ class FakeLedger:
             if attempt.info_hash in wanted and attempt.state in live
         }
 
+    async def archived_info_hashes(self, info_hashes) -> frozenset[str]:
+        wanted = {h for h in info_hashes if h}
+        attempts = [attempt for rows in self.attempts.values() for attempt in rows if attempt.info_hash in wanted]
+        live = {AttemptState.SUBMITTED, AttemptState.DOWNLOADING, AttemptState.FINISHED, AttemptState.ARCHIVING}
+        held = {attempt.info_hash for attempt in attempts if attempt.state in live}
+        return frozenset(
+            attempt.info_hash
+            for attempt in attempts
+            if attempt.state is AttemptState.ARCHIVED and attempt.info_hash not in held
+        )
+
     async def in_flight_attempts(self) -> tuple[MagnetAttemptRecord, ...]:
         return tuple(
             attempt
