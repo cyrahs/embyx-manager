@@ -668,6 +668,32 @@ class AcquisitionRepository:
         )
         return {row['info_hash']: _attempt_from_row(row) for row in rows}
 
+    async def archived_info_hashes(self, info_hashes: Iterable[str]) -> frozenset[str]:
+        """The hashes among these whose attempt was archived and that no live attempt holds.
+
+        Their offline tasks are history only: the ledger has the outcome, the
+        downloaded folder is already in the library, and clearing the record
+        keeps CloudDrive's task listing short.
+        """
+        hashes = sorted({info_hash for info_hash in info_hashes if info_hash})
+        if not hashes:
+            return frozenset()
+        pool = await self._database.get_pool()
+        rows = await pool.fetch(
+            """
+            SELECT DISTINCT archived.info_hash FROM archive_magnet_attempts AS archived
+            WHERE archived.info_hash = ANY($1::text[]) AND archived.state = $2
+              AND NOT EXISTS (
+                SELECT 1 FROM archive_magnet_attempts AS live
+                WHERE live.info_hash = archived.info_hash AND live.state = ANY($3::text[])
+              )
+            """,
+            hashes,
+            AttemptState.ARCHIVED.value,
+            sorted(state.value for state in LIVE_ATTEMPT_STATES),
+        )
+        return frozenset(row['info_hash'] for row in rows)
+
     async def in_flight_attempts(self) -> tuple[MagnetAttemptRecord, ...]:
         """Attempts CloudDrive should still be working on, oldest update first."""
         pool = await self._database.get_pool()

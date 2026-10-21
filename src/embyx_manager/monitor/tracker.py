@@ -15,10 +15,12 @@ archive the folder.
 
 Abandoning an attempt also removes its offline task at CloudDrive, downloaded
 data included: left in place, a stalled task can finish long after a sibling
-magnet was archived and hand the fallback scan a duplicate folder. Tasks that
-archived successfully are left alone; their records keep CloudDrive's own
-duplicate detection working when the same magnet comes round again, and their
-folders are already gone.
+magnet was archived and hand the fallback scan a duplicate folder. A task whose
+attempt archived is cleared too, its files kept (they are already in the
+library): CloudDrive answers every listing by paging through the cloud's whole
+offline history, so records left behind made each pass slower until listings
+outran the gRPC deadline. The ledger, not CloudDrive's duplicate check, is what
+stops an archived AVID from being fetched again.
 """
 
 import asyncio
@@ -43,6 +45,9 @@ from embyx_manager.monitor.release_dates import ReleaseDateLookup, ensure_releas
 from embyx_manager.monitor.reports import RunContext
 
 LOGGER = logging.getLogger('embyx-manager.tracker')
+
+#: How many archived tasks one RemoveOfflineFiles call clears.
+CLEAR_BATCH = 100
 
 #: ``submit_magnet(avid, magnet)`` adds one offline task; True when accepted.
 SubmitMagnet = Callable[[str, str], Awaitable[bool]]
@@ -149,6 +154,33 @@ class AcquisitionTracker:
             await self._advance(attempt, task, task_dir, ctx)
 
         await self._sweep_lost(set(by_hash), ctx)
+        await self._clear_archived(by_hash, ctx)
+
+    async def _clear_archived(self, by_hash: dict[str, tuple[OfflineTask, str]], ctx: RunContext) -> None:
+        """Drop the finished tasks whose attempt archived, keeping their files.
+
+        Only tasks the ledger archived are touched: one added by hand at
+        CloudDrive, or still waiting to be archived, stays listed. Best-effort,
+        like any other cleanup: the next pass tries again.
+        """
+        finished = {
+            info_hash: task_dir
+            for info_hash, (task, task_dir) in by_hash.items()
+            if task['status'] is OfflineStatus.FINISHED
+        }
+        archived = await self._ledger.archived_info_hashes(finished)
+        by_dir: dict[str, list[str]] = {}
+        for info_hash in sorted(archived):
+            by_dir.setdefault(finished[info_hash], []).append(info_hash)
+        for task_dir, hashes in by_dir.items():
+            for start in range(0, len(hashes), CLEAR_BATCH):
+                batch = hashes[start : start + CLEAR_BATCH]
+                try:
+                    await self._cloud.remove_offline_files(batch, task_dir, delete_files=False)
+                except Exception:  # noqa: BLE001
+                    ctx.exception('failed to clear %d archived offline tasks under %s', len(batch), task_dir)
+                else:
+                    ctx.add('archived_tasks_cleared', len(batch))
 
     # -- one attempt ---------------------------------------------------------
 
