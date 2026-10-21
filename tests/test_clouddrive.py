@@ -84,7 +84,9 @@ def test_remove_offline_files_sends_hashes_path_and_delete_flag(monkeypatch: pyt
     client.remove_offline_files(['HASHA', 'HASHB'], '/media/tasks', delete_files=True)
 
     request = stub.RemoveOfflineFiles.call_args.args[0]
-    assert list(request.infoHashes) == ['HASHA', 'HASHB']
+    # Lowered: CloudDrive lists them that way, matches case-sensitively, and
+    # reports success for an upper-case hash it silently ignores.
+    assert list(request.infoHashes) == ['hasha', 'hashb']
     assert request.path == '/media/tasks'
     assert request.deleteFiles is True
 
