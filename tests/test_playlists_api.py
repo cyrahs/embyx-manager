@@ -1,5 +1,8 @@
 """Playlist endpoints over an in-memory repository and ledger."""
 
+import asyncio
+import time
+
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.testclient import TestClient
@@ -120,22 +123,41 @@ def test_patch_flips_only_the_flag() -> None:
 
 
 class FakeManual:
-    def __init__(self, outcomes: dict[str, ManualOutcome] | None = None, error: Exception | None = None) -> None:
+    def __init__(
+        self,
+        outcomes: dict[str, ManualOutcome] | None = None,
+        error: Exception | None = None,
+        refuse: Exception | None = None,
+        gate: asyncio.Event | None = None,
+    ) -> None:
         self.outcomes = outcomes or {}
+        #: Raised by the batch itself, after the target was accepted.
         self.error = error
+        #: Raised by the up-front target check.
+        self.refuse = refuse
+        #: When set, the batch reports its first entry and then waits on it.
+        self.gate = gate
         self.calls: list[dict] = []
 
-    async def submit(self, inputs, *, task_dir_path, source, limit) -> ManualSubmission:
-        self.calls.append({'inputs': list(inputs), 'task_dir_path': task_dir_path, 'source': source, 'limit': limit})
-        if self.error is not None:
-            raise self.error
-        return ManualSubmission(
-            task_dir_path=task_dir_path,
-            entries=tuple(
-                ManualEntry(text=avid, avid=avid, outcome=self.outcomes.get(avid, ManualOutcome.SUBMITTED))
-                for avid in inputs
-            ),
+    async def check_target(self, task_dir_path: str) -> str:
+        if self.refuse is not None:
+            raise self.refuse
+        return task_dir_path
+
+    async def submit(self, inputs, *, task_dir_path, source, limit, queue, on_entry) -> ManualSubmission:
+        self.calls.append(
+            {'inputs': list(inputs), 'task_dir_path': task_dir_path, 'source': source, 'limit': limit, 'queue': queue},
         )
+        entries = []
+        for index, avid in enumerate(inputs):
+            if index == 1 and self.gate is not None:
+                await self.gate.wait()
+            if self.error is not None:
+                raise self.error
+            entry = ManualEntry(text=avid, avid=avid, outcome=self.outcomes.get(avid, ManualOutcome.QUEUED))
+            entries.append(entry)
+            on_entry(entry)
+        return ManualSubmission(task_dir_path=task_dir_path, entries=tuple(entries))
 
 
 def make_fill_client(repository: FakeRepository, manual: FakeManual, task_dir: str | None = '/115/embyx_in/rank'):
@@ -151,6 +173,17 @@ def make_fill_client(repository: FakeRepository, manual: FakeManual, task_dir: s
     )
     app.include_router(create_playlists_router(repository, mutation_auth=allow, fill=fill))  # type: ignore[arg-type]
     return TestClient(app)
+
+
+def finished_fill(client: TestClient, key: str) -> dict:
+    """The fill's view once its background task has ended."""
+    for _ in range(200):
+        body = client.get(f'/api/playlists/{key}/fill').json()
+        if body['state'] != 'running':
+            return body
+        time.sleep(0.01)
+    msg = 'the fill never finished'
+    raise AssertionError(msg)
 
 
 def test_resolve_fill_dir_prefers_the_section_then_the_ranking_category() -> None:
@@ -181,11 +214,16 @@ def test_list_reports_where_a_fill_would_go() -> None:
     assert (unmounted['fill_task_dir'], unmounted['fill_reason']) == (None, 'filling is not available')
 
 
-def test_fill_hands_the_whole_gap_to_the_shared_intake_under_the_playlist_source() -> None:
+def test_fill_queues_the_whole_gap_in_the_background_under_the_playlist_source() -> None:
     repository = FakeRepository([synced('k7', ['A-001', 'B-002', 'C-003', 'D-004'], ['B-002'])])
-    manual = FakeManual({'C-003': ManualOutcome.ALREADY_TRACKED, 'D-004': ManualOutcome.NO_MAGNET})
+    manual = FakeManual({'C-003': ManualOutcome.ALREADY_TRACKED, 'D-004': ManualOutcome.ALREADY_IN_LIBRARY})
 
-    body = make_fill_client(repository, manual).post('/api/playlists/k7/fill').json()
+    with make_fill_client(repository, manual) as client:
+        started = client.post('/api/playlists/k7/fill')
+        assert started.status_code == 202
+        assert started.json()['total'] == 3
+        body = finished_fill(client, 'k7')
+        listed = client.get('/api/playlists').json()['fills']
 
     assert manual.calls == [
         {
@@ -193,15 +231,53 @@ def test_fill_hands_the_whole_gap_to_the_shared_intake_under_the_playlist_source
             'task_dir_path': '/115/embyx_in/rank',
             'source': 'playlist:k7',
             'limit': None,
+            'queue': True,
         },
     ]
+    assert body['state'] == 'done'
     assert body['task_dir_path'] == '/115/embyx_in/rank'
+    assert (body['done'], body['total']) == (3, 3)
     assert [(item['avid'], item['outcome']) for item in body['items']] == [
-        ('A-001', 'submitted'),
+        ('A-001', 'queued'),
         ('C-003', 'already_tracked'),
-        ('D-004', 'no_magnet'),
+        ('D-004', 'already_in_library'),
     ]
-    assert body['counts'] == {'submitted': 1, 'already_tracked': 1, 'no_magnet': 1}
+    assert body['counts'] == {'queued': 1, 'already_tracked': 1, 'already_in_library': 1}
+    assert body['finished_at'] is not None
+    assert listed == [body]
+
+
+def test_a_running_fill_reports_progress_and_is_not_started_twice() -> None:
+    repository = FakeRepository([synced('k7', ['A-001', 'B-002', 'C-003'], [])])
+    gate = asyncio.Event()
+    manual = FakeManual(gate=gate)
+
+    with make_fill_client(repository, manual) as client:
+        client.post('/api/playlists/k7/fill')
+        for _ in range(200):
+            progress = client.get('/api/playlists/k7/fill').json()
+            if progress['done']:
+                break
+            time.sleep(0.01)
+        again = client.post('/api/playlists/k7/fill').json()
+        client.portal.call(gate.set)  # type: ignore[union-attr]
+        body = finished_fill(client, 'k7')
+
+    assert (progress['state'], progress['done'], progress['total']) == ('running', 1, 3)
+    assert progress['finished_at'] is None
+    assert again['state'] == 'running'
+    assert len(manual.calls) == 1
+    assert (body['state'], body['done']) == ('done', 3)
+
+
+def test_a_fill_that_breaks_midway_keeps_what_it_queued() -> None:
+    repository = FakeRepository([synced('k7', ['A-001'], [])])
+
+    with make_fill_client(repository, FakeManual(error=RuntimeError('boom'))) as client:
+        client.post('/api/playlists/k7/fill')
+        body = finished_fill(client, 'k7')
+
+    assert (body['state'], body['error']) == ('failed', 'fill_failed')
 
 
 def test_fill_refusals() -> None:
@@ -209,9 +285,10 @@ def test_fill_refusals() -> None:
 
     assert make_fill_client(repository, FakeManual(), task_dir=None).post('/api/playlists/k7/fill').status_code == 422
     assert make_fill_client(repository, FakeManual()).post('/api/playlists/nope/fill').status_code == 404
-    unrouted = make_fill_client(repository, FakeManual(error=DirectoryNotRoutedError())).post('/api/playlists/k7/fill')
+    unrouted = make_fill_client(repository, FakeManual(refuse=DirectoryNotRoutedError())).post('/api/playlists/k7/fill')
     assert unrouted.status_code == 422
     assert unrouted.json()['error']['code'] == 'directory_not_routed'
+    assert make_fill_client(repository, FakeManual()).get('/api/playlists/k7/fill').status_code == 404
     # Without the fill dependency the route does not exist at all.
     assert make_client(repository).post('/api/playlists/k7/fill').status_code in {404, 405}
 
@@ -220,8 +297,11 @@ def test_fill_of_a_complete_list_submits_nothing() -> None:
     repository = FakeRepository([synced('k7', ['A-001'], ['A-001'])])
     manual = FakeManual()
 
-    body = make_fill_client(repository, manual).post('/api/playlists/k7/fill').json()
+    with make_fill_client(repository, manual) as client:
+        client.post('/api/playlists/k7/fill')
+        body = finished_fill(client, 'k7')
 
     assert manual.calls[0]['inputs'] == []
     assert body['items'] == []
     assert body['counts'] == {}
+    assert body['state'] == 'done'

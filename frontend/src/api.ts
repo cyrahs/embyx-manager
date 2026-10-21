@@ -310,6 +310,8 @@ const CODE_MESSAGES: Record<string, string> = {
   url_not_editable: '演员订阅的地址由 talent id 决定，不能修改。',
   unknown_playlist: '找不到这个列表。',
   fill_directory_unavailable: '还没有可用的补全目录：在设置里填「补全离线目录」，或给 RSS 分类起名 Rank。',
+  fill_failed: '补全中途出错，请稍后重试；已排队的番号不受影响。',
+  no_fill: '这个列表还没有补全过。',
   merge_unavailable: '这个部署暂时不能合并，请看页面上的原因。',
   merge_title_not_found: '重新扫描后找不到这部作品，请刷新列表。',
   merge_title_incomplete: '这部作品缺盘或有异常，不能合并。',
@@ -322,6 +324,11 @@ const CODE_MESSAGES: Record<string, string> = {
   merge_discard_failed: '没能删掉 embyx_in 里多余的合并文件，请稍后再试。',
   merge_task_not_failed: '只有失败的任务可以重试。',
   merge_task_changed: '任务状态刚刚变化了，请刷新后重试。',
+}
+
+/** The operator-facing message for an error code a response carried in its body. */
+export function errorCodeMessage(code: string): string {
+  return CODE_MESSAGES[code] ?? code
 }
 
 /** `undefined` uses the signed-in token; `null` deliberately sends none. */
@@ -918,9 +925,19 @@ export async function updatePlaylist(key: string, changes: { enabled: boolean })
   return body as unknown as Playlist
 }
 
+/** Starts a list's fill in the background, or reports the one already running. */
 export async function fillPlaylist(key: string): Promise<PlaylistFill> {
   const body = await request(`/api/playlists/${encodeURIComponent(key)}/fill`, { method: 'POST' })
-  if (!isRecord(body) || !Array.isArray(body.items) || !isRecord(body.counts)) {
+  return asPlaylistFill(body)
+}
+
+export async function getPlaylistFill(key: string, signal?: AbortSignal): Promise<PlaylistFill> {
+  const body = await request(`/api/playlists/${encodeURIComponent(key)}/fill`, { cache: 'no-store', signal })
+  return asPlaylistFill(body)
+}
+
+function asPlaylistFill(body: unknown): PlaylistFill {
+  if (!isRecord(body) || !Array.isArray(body.items) || !isRecord(body.counts) || typeof body.state !== 'string') {
     throw new ApiError(0, 'invalid_response', '补全响应无效。')
   }
   return body as unknown as PlaylistFill

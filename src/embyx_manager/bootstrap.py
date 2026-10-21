@@ -539,6 +539,8 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         ),
         parser_factory=avid_handle.current,
         configured_dirs=lambda: _offline_task_dirs(store),
+        # A playlist fill only queues: wake the tracker so the first resolves start now.
+        on_queued=scheduler.notify_submission,
     )
     playlists_router = create_playlists_router(
         playlists,

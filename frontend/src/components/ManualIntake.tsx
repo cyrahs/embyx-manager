@@ -11,6 +11,7 @@ const OUTCOME_LABELS: Record<ManualOutcome, string> = {
   already_in_library: '库中已有',
   no_magnet: '未找到磁力',
   submit_failed: '提交失败',
+  queued: '已排队',
   unreadable: '无法识别番号',
 }
 
@@ -30,6 +31,7 @@ const OUTCOME_ORDER: ManualOutcome[] = [
   'no_magnet',
   'already_tracked',
   'already_in_library',
+  'queued',
   'submitted',
 ]
 

@@ -53,7 +53,10 @@ Three peer features; `/` redirects to the dashboard and no feature owns the app 
   sync), the missing column expands into the titles in ranking order with their
   download-tracking state, **补全** queues every title a list lacks through the shared
   acquisition intake (into the playlists section's directory, else the RSS category named
-  Rank), and **立即同步** runs the pipeline now.
+  Rank), and **立即同步** runs the pipeline now. A fill runs in the background, with its
+  progress under the list's name: it skips titles the library already holds and records the
+  rest in the ledger, and the tracker's background pass resolves their magnets and submits
+  them, so a long list never outlasts Cloudflare's 120-second proxy timeout.
 - **Merge** (`/merge`, 分盘合并): every library title stored as `-cdN` parts, with ten or
   more parts first (Emby stacks cd1–cd9 only). **合并** queues a title: a Kubernetes Job
   concatenates the parts losslessly (`ffmpeg -c copy`) onto the downloads volume, CloudDrive
