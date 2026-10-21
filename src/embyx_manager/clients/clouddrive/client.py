@@ -147,9 +147,14 @@ class CloudDriveClient:
         *,
         delete_files: bool,
     ) -> clouddrive_pb2.FileOperationResult:
-        """Drop offline tasks by info hash; the path names the cloud they live in."""
+        """Drop offline tasks by info hash; the path names the cloud they live in.
+
+        CloudDrive matches the hashes case-sensitively against the lower-case
+        ones it lists, and answers success for a hash that matches nothing, so
+        the upper-case form the ledger keys on is lowered here.
+        """
         request = clouddrive_pb2.RemoveOfflineFilesRequest(
-            infoHashes=info_hashes,
+            infoHashes=[info_hash.lower() for info_hash in info_hashes],
             path=path,
             deleteFiles=delete_files,
         )
