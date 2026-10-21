@@ -14,6 +14,11 @@ GRPC_TIMEOUT_SECONDS = 30.0
 #: the move in an unknown state that then has to be observed to a conclusion.
 MOVE_TIMEOUT_SECONDS = 300.0
 
+#: Listing offline tasks also gets its own budget: CloudDrive pages through the
+#: cloud's whole offline history to answer it, and with about two thousand tasks
+#: on 115 one listing already takes close to the general timeout.
+LIST_OFFLINE_TIMEOUT_SECONDS = 120.0
+
 #: How soon CloudDrive re-checks the destination folder after an offline task is
 #: added. Zero disables the check, and with a persistent directory cache (115)
 #: nothing else ever expires the folder listing, so the finished download would
@@ -130,7 +135,9 @@ class CloudDriveClient:
     def list_offline_files_by_path(self, path: str) -> list[clouddrive_pb2.OfflineFile]:
         """Every offline task under path, whatever its status."""
         request = clouddrive_pb2.FileRequest(path=path)
-        result = self.stub.ListOfflineFilesByPath(request, metadata=self._metadata(), timeout=GRPC_TIMEOUT_SECONDS)
+        result = self.stub.ListOfflineFilesByPath(
+            request, metadata=self._metadata(), timeout=LIST_OFFLINE_TIMEOUT_SECONDS
+        )
         return list(result.offlineFiles)
 
     def remove_offline_files(

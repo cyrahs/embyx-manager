@@ -471,16 +471,20 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
             submit_magnet=submit_magnet,
             release_date_lookup=release_dates,
         )
-        await tracker.poll(ctx)
-        # The resolver leg of the tracker pass (plan §Step 6 item 7): parked
-        # acquisitions whose cooldown expired get a fresh resolve-and-submit,
-        # without waiting for an input source to sight the AVID again. Records
-        # without a pinned directory fall back to the first polled one, the
-        # same choice submit_magnet makes for them.
-        intake = intake_factory()
-        if intake is not None:
-            dirs = _offline_task_dirs(store)
-            await intake.retry_due(ctx=ctx, fallback_task_dir=dirs[0] if dirs else None)
+        try:
+            await tracker.poll(ctx)
+        finally:
+            # The resolver leg of the tracker pass (plan §Step 6 item 7): parked
+            # acquisitions whose cooldown expired get a fresh resolve-and-submit,
+            # without waiting for an input source to sight the AVID again. Records
+            # without a pinned directory fall back to the first polled one, the
+            # same choice submit_magnet makes for them. It needs nothing from the
+            # listings, so a CloudDrive listing that failed does not hold up the
+            # queued titles; the pass still reports that failure.
+            intake = intake_factory()
+            if intake is not None:
+                dirs = _offline_task_dirs(store)
+                await intake.retry_due(ctx=ctx, fallback_task_dir=dirs[0] if dirs else None)
 
     def mapping_ready() -> str | None:
         if not store.get(MappingConfig).configured:
