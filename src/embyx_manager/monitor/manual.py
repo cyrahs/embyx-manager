@@ -53,6 +53,8 @@ class ManualOutcome(StrEnum):
     ALREADY_IN_LIBRARY = 'already_in_library'
     NO_MAGNET = 'no_magnet'
     SUBMIT_FAILED = 'submit_failed'
+    #: Recorded for the tracker's background pass, which resolves and submits it.
+    QUEUED = 'queued'
     #: No AVID could be read from the line at all.
     UNREADABLE = 'unreadable'
 
@@ -142,6 +144,8 @@ class ManualIntakeSource:
     parser_factory: Callable[[], AvidParser]
     #: The input sources' own offline directories, marked as such when browsing.
     configured_dirs: Callable[[], tuple[str, ...]]
+    #: Wakes the tracker once a queued batch has rows for its background pass.
+    on_queued: Callable[[], None] | None = None
     logger: logging.Logger = field(default=LOGGER)
 
     # -- picking a directory ---------------------------------------------------
@@ -195,22 +199,61 @@ class ManualIntakeSource:
 
     # -- submitting ------------------------------------------------------------
 
-    async def submit(
+    async def check_target(self, task_dir_path: str) -> str:
+        """The normalized directory a batch would go to, or the ManualIntakeError refusing it.
+
+        A caller that runs the batch in the background asks here first, so a
+        batch that cannot be attempted is refused while the operator is still
+        waiting for an answer.
+        """
+        task_dir, _intake, _archiver = await self._prepare(task_dir_path)
+        return task_dir
+
+    async def submit(  # noqa: PLR0913 - each caller sets a different subset
         self,
         inputs: Sequence[str],
         *,
         task_dir_path: str,
         source: str = AcquisitionSource.MANUAL,
         limit: int | None = MAX_MANUAL_INPUTS,
+        queue: bool = False,
+        on_entry: Callable[[ManualEntry], None] | None = None,
     ) -> ManualSubmission:
         """Run every input line through the shared intake; report each one's fate.
 
         Other callers with a ready-made list (a playlist's gap) pass their own
         ``source`` label and lift the ``limit``, which guards pasted input only.
+        ``queue`` records each AVID for the tracker's background pass instead of
+        resolving magnets inline, which costs seconds per AVID at two external
+        sites; a long list is only practical that way. ``on_entry`` hears each
+        line's outcome as it lands, for a caller reporting progress.
         """
         lines = [line.strip() for line in inputs if line.strip()]
         if limit is not None and len(lines) > limit:
             raise TooManyInputsError
+        task_dir, intake, archiver = await self._prepare(task_dir_path)
+
+        parser = self.parser_factory()
+        ctx = RunContext(logger=self.logger)
+        entries: list[ManualEntry] = []
+        for line in lines:
+            avid = parser.get_avid(line)
+            if not avid:
+                ctx.warning('Failed to read an avid from %s', line)
+                entry = ManualEntry(text=line, avid=None, outcome=ManualOutcome.UNREADABLE)
+            else:
+                entry = await self._submit_one(
+                    line, avid, task_dir=task_dir, archiver=archiver, intake=intake, ctx=ctx, source=source, queue=queue
+                )
+            entries.append(entry)
+            if on_entry is not None:
+                on_entry(entry)
+        ctx.info('%s submission: %d lines into %s', source, len(lines), task_dir)
+        if self.on_queued is not None and any(entry.outcome is ManualOutcome.QUEUED for entry in entries):
+            self.on_queued()
+        return ManualSubmission(task_dir_path=task_dir, entries=tuple(entries))
+
+    async def _prepare(self, task_dir_path: str) -> tuple[str, AcquisitionIntake, ArchivePipeline]:
         intake = self.intake_factory()
         cloud = self.cloud_factory()
         if intake is None or cloud is None:
@@ -223,23 +266,7 @@ class ManualIntakeSource:
             await cloud.list_directory(task_dir)
         except FileNotFoundError as exc:
             raise DirectoryNotFoundError from exc
-
-        parser = self.parser_factory()
-        ctx = RunContext(logger=self.logger)
-        entries: list[ManualEntry] = []
-        for line in lines:
-            avid = parser.get_avid(line)
-            if not avid:
-                ctx.warning('Failed to read an avid from %s', line)
-                entries.append(ManualEntry(text=line, avid=None, outcome=ManualOutcome.UNREADABLE))
-                continue
-            entries.append(
-                await self._submit_one(
-                    line, avid, task_dir=task_dir, archiver=archiver, intake=intake, ctx=ctx, source=source
-                ),
-            )
-        ctx.info('%s submission: %d lines into %s', source, len(lines), task_dir)
-        return ManualSubmission(task_dir_path=task_dir, entries=tuple(entries))
+        return task_dir, intake, archiver
 
     async def _submit_one(  # noqa: PLR0913 - one call site, all of it per-line state
         self,
@@ -251,6 +278,7 @@ class ManualIntakeSource:
         intake: AcquisitionIntake,
         ctx: RunContext,
         source: str,
+        queue: bool,
     ) -> ManualEntry:
         held = await self._library_holdings(avid, task_dir, archiver, ctx)
         if held:
@@ -264,12 +292,8 @@ class ManualIntakeSource:
                 outcome=ManualOutcome.ALREADY_IN_LIBRARY,
                 archived_paths=held,
             )
-        outcome = await intake.enqueue(
-            avid,
-            source=source,
-            task_dir_path=task_dir,
-            ctx=ctx,
-        )
+        enqueue = intake.queue if queue else intake.enqueue
+        outcome = await enqueue(avid, source=source, task_dir_path=task_dir, ctx=ctx)
         return ManualEntry(text=line, avid=avid, outcome=_OUTCOMES[outcome])
 
     async def _library_holdings(
@@ -297,6 +321,7 @@ _OUTCOMES: dict[IntakeOutcome, ManualOutcome] = {
     IntakeOutcome.ALREADY_TRACKED: ManualOutcome.ALREADY_TRACKED,
     IntakeOutcome.NO_MAGNET: ManualOutcome.NO_MAGNET,
     IntakeOutcome.SUBMIT_FAILED: ManualOutcome.SUBMIT_FAILED,
+    IntakeOutcome.QUEUED: ManualOutcome.QUEUED,
 }
 
 

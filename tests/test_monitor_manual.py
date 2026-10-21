@@ -72,6 +72,7 @@ def make_source(
     magnet: str | None = MAGNET_A,
     configured_dirs: tuple[str, ...] = (INBOX,),
     with_cloud: bool = True,
+    on_queued=None,
 ) -> tuple[ManualIntakeSource, SimpleNamespace]:
     deps = SimpleNamespace()
     deps.ledger = ledger or FakeLedger()
@@ -90,6 +91,7 @@ def make_source(
         archiver_factory=lambda: make_archiver(tmp_path),
         parser_factory=AvidParser,
         configured_dirs=lambda: configured_dirs,
+        on_queued=on_queued,
         logger=logging.getLogger('test-manual'),
     )
     return source, deps
@@ -303,3 +305,59 @@ async def test_submit_takes_another_sources_label_and_lifts_the_cap(tmp_path: Pa
     assert {entry.outcome for entry in submission.entries} == {ManualOutcome.SUBMITTED}
     assert deps.ledger.sources['PL-001'] == 'playlist:k7'
     assert all(dst == RANK_DIR for _, dst in deps.cloud.submitted)
+
+
+async def test_a_queued_batch_only_records_and_wakes_the_tracker_once(tmp_path: Path) -> None:
+    """A long list is recorded for the background pass instead of resolved inline."""
+    held = tmp_path / 'library' / 'embyx' / 'rank' / 'ABC' / 'ABC-123.mp4'
+    held.parent.mkdir(parents=True)
+    held.write_bytes(b'0')
+    wakes: list[None] = []
+    source, deps = make_source(tmp_path, on_queued=lambda: wakes.append(None))
+    heard: list[tuple[str | None, ManualOutcome]] = []
+
+    submission = await source.submit(
+        ['ABC-123', 'PL-001', 'PL-002', '???'],
+        task_dir_path=RANK_DIR,
+        source='playlist:k7',
+        limit=None,
+        queue=True,
+        on_entry=lambda entry: heard.append((entry.avid, entry.outcome)),
+    )
+
+    assert heard == [
+        ('ABC-123', ManualOutcome.ALREADY_IN_LIBRARY),
+        ('PL-001', ManualOutcome.QUEUED),
+        ('PL-002', ManualOutcome.QUEUED),
+        (None, ManualOutcome.UNREADABLE),
+    ]
+    assert [entry.outcome for entry in submission.entries] == [outcome for _, outcome in heard]
+    assert deps.ledger.states == {'PL-001': AcquisitionState.DISCOVERED, 'PL-002': AcquisitionState.DISCOVERED}
+    assert deps.ledger.next_action_at['PL-001'] is not None  # due for the next tracker pass
+    assert deps.ledger.task_dirs['PL-001'] == RANK_DIR
+    deps.intake._sukebei.get_magnet.assert_not_awaited()  # noqa: SLF001 - no lookup ran inline
+    assert deps.cloud.submitted == []
+    assert len(wakes) == 1
+
+
+async def test_an_inline_batch_does_not_wake_the_tracker(tmp_path: Path) -> None:
+    wakes: list[None] = []
+    source, _ = make_source(tmp_path, magnet=None, on_queued=lambda: wakes.append(None))
+
+    await source.submit(['ABC-123'], task_dir_path=INBOX)
+
+    assert wakes == []
+
+
+async def test_check_target_refuses_what_submit_would(tmp_path: Path) -> None:
+    source, _ = make_source(tmp_path)
+
+    assert await source.check_target(f'{RANK_DIR}/') == RANK_DIR
+    with pytest.raises(DirectoryNotRoutedError):
+        await source.check_target(UNROUTED_DIR)
+    unmade, _ = make_source(tmp_path, cloud=FakeCloud({INBOX: ()}))
+    with pytest.raises(DirectoryNotFoundError):
+        await unmade.check_target(RANK_DIR)
+    offline, _ = make_source(tmp_path, with_cloud=False)
+    with pytest.raises(CloudUnavailableError):
+        await offline.check_target(INBOX)

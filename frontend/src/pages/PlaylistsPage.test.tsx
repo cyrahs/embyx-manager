@@ -38,6 +38,19 @@ const AWARD = {
   last_error: null,
 }
 
+const FILL = {
+  key: 'k7',
+  task_dir_path: '/115/embyx_in/rank',
+  state: 'running',
+  done: 0,
+  total: 2,
+  items: [],
+  counts: {},
+  error: null,
+  started_at: '2026-09-20T12:00:00Z',
+  finished_at: null,
+}
+
 const STATUS = [
   {
     pipeline: 'playlists',
@@ -95,15 +108,20 @@ describe('playlists page', () => {
         }
         if (url === '/api/monitor/playlists/trigger' && method === 'POST') return jsonResponse({ run_id: 'r1' }, 202)
         if (url === '/api/playlists/k7/fill' && method === 'POST') {
-          return jsonResponse({
-            key: 'k7',
-            task_dir_path: '/115/embyx_in/rank',
-            items: [
-              { avid: 'IPX-811', outcome: 'already_tracked' },
-              { avid: 'SMBD-115', outcome: 'submitted' },
-            ],
-            counts: { submitted: 1, already_tracked: 1 },
-          })
+          return jsonResponse(
+            {
+              ...FILL,
+              state: 'done',
+              done: 2,
+              items: [
+                { avid: 'IPX-811', outcome: 'already_tracked' },
+                { avid: 'SMBD-115', outcome: 'queued' },
+              ],
+              counts: { queued: 1, already_tracked: 1 },
+              finished_at: '2026-09-20T12:00:05Z',
+            },
+            202,
+          )
         }
         return jsonResponse({ error: { code: 'unknown' } }, 404)
       }),
@@ -241,11 +259,84 @@ describe('playlists page', () => {
     await user.click(within(row).getByRole('button', { name: '补全' }))
     await user.click(within(row).getByRole('button', { name: '确认补全 30 部' }))
 
-    expect(await within(row).findByText('补全：已提交 1 · 已在跟踪 1')).toBeInTheDocument()
+    expect(await within(row).findByText('补全：已排队 1 · 已在跟踪 1')).toBeInTheDocument()
     const fill = vi.mocked(fetch).mock.calls.find(([url, init]) => String(url).endsWith('/fill') && init?.method === 'POST')
     expect(fill?.[0]).toBe('/api/playlists/k7/fill')
     expect(within(row).getByRole('button', { name: '补全' })).toBeInTheDocument()
     // Nothing was expanded, so the missing detail was not fetched.
     expect(vi.mocked(fetch).mock.calls.some(([url]) => String(url).endsWith('/missing'))).toBe(false)
   })
+
+  it('polls a background fill until it ends, then reloads the open missing list', async () => {
+    const user = userEvent.setup()
+    let fillPolls = 0
+    let missingCalls = 0
+    const base = vi.mocked(fetch).getMockImplementation()!
+    vi.mocked(fetch).mockImplementation((input, init?: RequestInit) => {
+      const url = String(input)
+      const method = init?.method ?? 'GET'
+      if (url === '/api/playlists/k7/fill' && method === 'POST') return jsonResponse(FILL, 202)
+      if (url === '/api/playlists/k7/fill') {
+        fillPolls += 1
+        if (fillPolls === 1) {
+          return jsonResponse({ ...FILL, done: 1, items: [{ avid: 'IPX-811', outcome: 'queued' }], counts: { queued: 1 } })
+        }
+        return jsonResponse({
+          ...FILL,
+          state: 'done',
+          done: 2,
+          items: [
+            { avid: 'IPX-811', outcome: 'queued' },
+            { avid: 'SMBD-115', outcome: 'already_in_library' },
+          ],
+          counts: { queued: 1, already_in_library: 1 },
+          finished_at: '2026-09-20T12:00:05Z',
+        })
+      }
+      if (url === '/api/playlists/k7/missing') missingCalls += 1
+      return base(input, init)
+    })
+    renderPage()
+
+    const row = (await screen.findByText('JavDB 有码 TOP250')).closest('tr')!
+    await user.click(row)
+    await screen.findByRole('cell', { name: 'IPX-811' })
+    await user.click(within(row).getByRole('button', { name: '补全' }))
+    await user.click(within(row).getByRole('button', { name: '确认补全 30 部' }))
+
+    expect(await within(row).findByText('补全：进行中 0/2')).toBeInTheDocument()
+    expect(within(row).getByRole('button', { name: '补全中…' })).toBeDisabled()
+    // Other actions stay usable while the fill runs.
+    expect(within(row).getByRole('button', { name: '停用' })).toBeEnabled()
+    expect(await within(row).findByText('补全：进行中 1/2 · 已排队 1', {}, { timeout: 4000 })).toBeInTheDocument()
+    expect(await within(row).findByText('补全：已排队 1 · 库内已有 1', {}, { timeout: 4000 })).toBeInTheDocument()
+    expect(within(row).getByRole('button', { name: '补全' })).toBeEnabled()
+    await waitFor(() => expect(missingCalls).toBe(2))
+    expect(fillPolls).toBe(2)
+  }, 10000)
+
+  it('picks a running fill back up after a reload', async () => {
+    const base = vi.mocked(fetch).getMockImplementation()!
+    vi.mocked(fetch).mockImplementation((input, init?: RequestInit) => {
+      const url = String(input)
+      if (url === '/api/playlists' && (init?.method ?? 'GET') === 'GET') {
+        return jsonResponse({
+          items: [TOP],
+          source: null,
+          fill_task_dir: '/115/embyx_in/rank',
+          fill_reason: null,
+          fills: [{ ...FILL, done: 1 }],
+        })
+      }
+      if (url === '/api/playlists/k7/fill') return jsonResponse({ ...FILL, state: 'failed', done: 1, error: 'fill_failed' })
+      return base(input, init)
+    })
+    renderPage()
+
+    const row = (await screen.findByText('JavDB 有码 TOP250')).closest('tr')!
+    expect(within(row).getByText('补全：进行中 1/2')).toBeInTheDocument()
+    expect(
+      await within(row).findByText('补全：中途失败：补全中途出错，请稍后重试；已排队的番号不受影响。', {}, { timeout: 4000 }),
+    ).toBeInTheDocument()
+  }, 10000)
 })

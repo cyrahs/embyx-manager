@@ -4,16 +4,19 @@
  * awards by edition. A list can be enabled or disabled here; the playlist itself
  * follows on the next sync (a disabled list's playlist is removed). The missing
  * column expands into the titles the library does not hold, in ranking order,
- * with the ledger's state for those already being acquired.
+ * with the ledger's state for those already being acquired. A fill runs in the
+ * background on the server; the page polls its progress under the list's name.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useOutletContext } from 'react-router-dom'
 
 import {
   ApiError,
+  errorCodeMessage,
   fillPlaylist,
   getMonitorStatus,
+  getPlaylistFill,
   getPlaylistMissing,
   isUnauthorized,
   listPlaylists,
@@ -29,7 +32,7 @@ import { formatTime } from '../lib/subscriptions'
 import type { AcquisitionState, ManualOutcome, PipelineStatus, Playlist, PlaylistFill, PlaylistMissing } from '../types'
 
 const KIND_AWARDS = 4
-/** How often the page asks whether a running sync has finished. */
+/** How often the page asks whether a running sync or fill has finished. */
 export const SYNC_POLL_MS = 2000
 const FIRST_YEAR_KIND = 2008
 
@@ -45,6 +48,7 @@ const TRACKED_LABELS: Record<AcquisitionState, string> = {
 
 const FILL_OUTCOME_LABELS: Record<ManualOutcome, string> = {
   submitted: '已提交',
+  queued: '已排队',
   already_tracked: '已在跟踪',
   already_in_library: '库内已有',
   no_magnet: '暂无磁力',
@@ -52,11 +56,15 @@ const FILL_OUTCOME_LABELS: Record<ManualOutcome, string> = {
   unreadable: '无法识别',
 }
 
-/** "已提交 12 · 暂无磁力 3": the outcomes a fill ended in, in the order they matter. */
+/** "已排队 12 · 库内已有 3": the outcomes a fill ended in, in the order they matter. */
 function fillSummary(fill: PlaylistFill): string {
   const parts = (Object.keys(FILL_OUTCOME_LABELS) as ManualOutcome[])
     .filter((outcome) => (fill.counts[outcome] ?? 0) > 0)
     .map((outcome) => `${FILL_OUTCOME_LABELS[outcome]} ${fill.counts[outcome]}`)
+  if (fill.state === 'running') return [`进行中 ${fill.done}/${fill.total}`, ...parts].join(' · ')
+  if (fill.state === 'failed') {
+    return [`中途失败：${errorCodeMessage(fill.error ?? 'fill_failed')}`, ...parts].join(' · ')
+  }
   return parts.length ? parts.join(' · ') : '没有需要提交的番号'
 }
 
@@ -111,6 +119,9 @@ export default function PlaylistsPage() {
   const [busy, setBusy] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [missing, setMissing] = useState<Record<string, PlaylistMissing>>({})
+  // Read when a background fill ends, after the render that started polling it.
+  const expandedRef = useRef(expanded)
+  expandedRef.current = expanded
 
   const load = useCallback(async (signal?: AbortSignal) => {
     try {
@@ -118,6 +129,11 @@ export default function PlaylistsPage() {
       setItems(page.items)
       setSourceName(page.source?.database_name ?? null)
       setFillDir({ path: page.fill_task_dir, reason: page.fill_reason })
+      // A fill started before a reload is still running on the server: pick its progress back up.
+      if (page.fills?.length) {
+        const known = page.fills
+        setFills((current) => ({ ...current, ...Object.fromEntries(known.map((entry) => [entry.key, entry])) }))
+      }
       setPipeline(statuses.find((status) => status.pipeline === 'playlists') ?? null)
       setError(null)
     } catch (failure) {
@@ -157,6 +173,54 @@ export default function PlaylistsPage() {
     }
   }, [runningRunId, load])
 
+  // The ledger states under a list are stale once its fill has queued titles.
+  const refreshMissing = useCallback(async (key: string) => {
+    setMissing((current) => {
+      const next = { ...current }
+      delete next[key]
+      return next
+    })
+    if (expandedRef.current !== key) return
+    try {
+      const detail = await getPlaylistMissing(key)
+      setMissing((current) => ({ ...current, [key]: detail }))
+    } catch {
+      // Collapsing and expanding the row loads it again.
+    }
+  }, [])
+
+  // A fill runs in the background: poll each running one until it ends.
+  const runningFills = useMemo(
+    () =>
+      Object.values(fills)
+        .filter((entry) => entry.state === 'running')
+        .map((entry) => entry.key)
+        .sort(),
+    [fills],
+  )
+  const runningFillKeys = runningFills.join('\n')
+  useEffect(() => {
+    if (!runningFillKeys) return
+    const keys = runningFillKeys.split('\n')
+    const controller = new AbortController()
+    const timer = window.setInterval(() => {
+      for (const key of keys) {
+        void getPlaylistFill(key, controller.signal)
+          .then((current) => {
+            setFills((all) => ({ ...all, [key]: current }))
+            if (current.state !== 'running') void refreshMissing(key)
+          })
+          .catch(() => {
+            // A failed poll is retried on the next tick.
+          })
+      }
+    }, SYNC_POLL_MS)
+    return () => {
+      window.clearInterval(timer)
+      controller.abort()
+    }
+  }, [runningFillKeys, refreshMissing])
+
   async function run(id: string, action: () => Promise<void>, fallback: string) {
     setBusy(id)
     try {
@@ -181,16 +245,7 @@ export default function PlaylistsPage() {
       const result = await fillPlaylist(item.key)
       setFills((current) => ({ ...current, [item.key]: result }))
       setArmedFill(null)
-      // The gap is now partly in flight: the ledger states under the row are stale.
-      setMissing((current) => {
-        const next = { ...current }
-        delete next[item.key]
-        return next
-      })
-      if (expanded === item.key) {
-        const detail = await getPlaylistMissing(item.key)
-        setMissing((current) => ({ ...current, [item.key]: detail }))
-      }
+      if (result.state !== 'running') await refreshMissing(item.key)
     }, '补全失败。')
 
   const syncNow = () =>
@@ -377,14 +432,20 @@ export default function PlaylistsPage() {
                                 <button
                                   type="button"
                                   className="text-button"
-                                  disabled={busy !== null || item.missing === 0 || !fillDir.path}
+                                  disabled={
+                                    busy !== null ||
+                                    item.missing === 0 ||
+                                    !fillDir.path ||
+                                    fills[item.key]?.state === 'running'
+                                  }
                                   title={!fillDir.path ? '还没有可用的补全目录' : undefined}
                                   onClick={(event) => {
                                     event.stopPropagation()
                                     setArmedFill(item.key)
                                   }}
                                 >
-                                  补全
+                                  {fills[item.key]?.state === 'running' ? <Spinner /> : null}
+                                  {fills[item.key]?.state === 'running' ? '补全中…' : '补全'}
                                 </button>
                               )}
                             </div>

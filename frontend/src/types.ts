@@ -237,6 +237,7 @@ export type ManualOutcome =
   | 'already_in_library'
   | 'no_magnet'
   | 'submit_failed'
+  | 'queued'
   | 'unreadable'
 
 export interface ManualEntry {
@@ -328,13 +329,24 @@ export interface PlaylistList {
   source: PlaylistSource | null
   fill_task_dir: string | null
   fill_reason: string | null
+  /** Each list's latest fill since the server started, running ones included. */
+  fills?: PlaylistFill[]
 }
 
+/** A fill runs in the background; the page polls it while `state` is 'running'. */
 export interface PlaylistFill {
   key: string
   task_dir_path: string
+  state: 'running' | 'done' | 'failed'
+  /** How many of the gap's `total` codes the fill has handled so far. */
+  done: number
+  total: number
   items: { avid: string; outcome: ManualOutcome }[]
   counts: Partial<Record<ManualOutcome, number>>
+  /** The error code a failed fill stopped on. */
+  error: string | null
+  started_at: string
+  finished_at: string | null
 }
 
 export interface PlaylistMissingEntry {
