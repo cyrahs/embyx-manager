@@ -30,6 +30,14 @@ Three peer features; `/` redirects to the dashboard and no feature owns the app 
   to the last one used. Only a directory with an archive route can be picked — the tracker
   locates a finished download through the route tables — and the tracker polls whatever
   directory the ledger still has work in, so a picked one need not be a source's own.
+  **换版** replaces a title the library already holds (the file is the wrong video, or a
+  poor cut): it shows the library files that will go, then hands the title back to the
+  tracker with a pasted magnet or a fresh resolve. Hashes already tried for it are never
+  retried. The old copy stays until the new download is known to be fileable as that
+  AVID; only then is it deleted through the CloudDrive API (into 115's recycle bin, via
+  the merge section's `cloud_mount_prefix`) and the new copy filed in its place. A
+  replacement with no magnet parks like any other acquisition and leaves the old copy
+  alone. Archived rows carry the same action.
 - **Fill Actor** (`/fill-actor`): scan an actor's catalog against the local library —
   AVBase's (any alias, with release dates) joined with JavBus's (delisted and pre-rename
   titles) — starting from actor names, JavBus star ids, or an AVID (single actors continue

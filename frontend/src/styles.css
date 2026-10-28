@@ -415,6 +415,7 @@ main {
 
 /* ---------- manual intake ---------- */
 .manual-open { min-height: 30px; margin-right: auto; padding: 0 11px; font-size: 12px; }
+.replace-open { min-height: 30px; padding: 0 11px; font-size: 12px; }
 .manual-dialog { width: min(560px, 100%); max-height: 86vh; overflow-y: auto; }
 .manual-input {
   width: 100%;
@@ -473,6 +474,13 @@ main {
 .manual-results { margin-top: 12px; border: 1px solid var(--line); border-radius: 8px; }
 .manual-result-id { flex: 0 0 auto; color: var(--text); font: 500 12.5px var(--font-mono); }
 .manual-result-detail { flex: 1; min-width: 0; font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* 换版 dialog: the copy that goes, then the optional magnet. */
+.replace-plan { margin-top: 12px; }
+.replace-plan p { margin: 6px 0; }
+.replace-plan .manual-results { margin-top: 4px; }
+.replace-plan code, .replace-plan li code { font: 400 12.5px var(--font-mono); word-break: break-all; }
+.replace-done { margin: 12px 0 0; font-size: 13px; color: var(--text-2); }
+.acq-replacing { display: block; margin-top: 2px; font-size: 11.5px; color: var(--accent); }
 
 /* ---------- responsive ---------- */
 @media (max-width: 860px) {

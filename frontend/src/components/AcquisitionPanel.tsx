@@ -13,6 +13,7 @@ import { localizeBackendText } from '../lib/backendText'
 import { Notice } from './Feedback'
 import { ChevronIcon, Spinner } from './Icons'
 import { ManualIntakeDialog } from './ManualIntake'
+import { ReplaceDialog } from './ReplaceDialog'
 import type {
   Acquisition,
   AcquisitionDetail,
@@ -140,15 +141,18 @@ function AcquisitionRow({
   expanded,
   onOpen,
   onAct,
+  onReplace,
 }: {
   item: Acquisition
   busy: boolean
   expanded: boolean
   onOpen: (avid: string) => void
   onAct: (avid: string, action: AcquisitionAction) => void
+  onReplace: (avid: string) => void
 }) {
   const closed = item.state === 'archived' || item.state === 'ignored'
   const hint = waitHint(item)
+  const replacing = item.replacing ?? []
   return (
     <tr
       tabIndex={0}
@@ -174,7 +178,12 @@ function AcquisitionRow({
       </td>
       <td className="acq-muted">{sourceLabel(item.source)}</td>
       <td className="acq-muted">
-        {item.note ? localizeBackendText(item.note) : '—'}
+        {item.note ? localizeBackendText(item.note) : replacing.length > 0 ? '' : '—'}
+        {replacing.length > 0 && (
+          <small className="acq-replacing" title={replacing.join('\n')}>
+            换版中：新版本入库后删除 {replacing.length} 个旧文件
+          </small>
+        )}
         {hint && <small className="acq-wait">{hint}</small>}
       </td>
       <td className="acq-muted">{formatTime(item.updated_at)}</td>
@@ -183,6 +192,11 @@ function AcquisitionRow({
           {item.state === 'needs_attention' && (
             <button type="button" className="text-button" disabled={busy} onClick={() => onAct(item.avid, 'resume')}>
               已处理，继续
+            </button>
+          )}
+          {item.state === 'archived' && (
+            <button type="button" className="text-button" disabled={busy} onClick={() => onReplace(item.avid)}>
+              换版
             </button>
           )}
           {!closed && (
@@ -265,6 +279,11 @@ function DetailRow({
           {detail.archived_paths.length > 0 && (
             <p className="acq-muted">已入库：{detail.archived_paths.join('、')}</p>
           )}
+          {(detail.replacing ?? []).length > 0 && (
+            <p className="acq-muted">
+              换版中，新版本入库前会先删除：{(detail.replacing ?? []).join('、')}
+            </p>
+          )}
           {detail.state !== 'archived' && detail.state !== 'ignored' && (
             <div className="acq-magnet">
               <input
@@ -305,6 +324,8 @@ export function AcquisitionPanel({ onUnauthorized }: { onUnauthorized: () => voi
   const [error, setError] = useState<string | null>(null)
   const [magnet, setMagnet] = useState('')
   const [manualOpen, setManualOpen] = useState(false)
+  // null: closed; '': opened from the heading; an AVID: opened from its row.
+  const [replaceFor, setReplaceFor] = useState<string | null>(null)
   const [tick, setTick] = useState(0)
 
   // Kept in a ref so the polling effect never restarts because a parent
@@ -407,6 +428,9 @@ export function AcquisitionPanel({ onUnauthorized }: { onUnauthorized: () => voi
     <section className="panel dashboard-panel" aria-labelledby="acquisitions-title">
       <div className="panel-heading">
         <h2 id="acquisitions-title">下载追踪</h2>
+        <button type="button" className="button secondary replace-open" onClick={() => setReplaceFor('')}>
+          换版
+        </button>
         <button type="button" className="button secondary manual-open" onClick={() => setManualOpen(true)}>
           手动添加
         </button>
@@ -486,6 +510,7 @@ export function AcquisitionPanel({ onUnauthorized }: { onUnauthorized: () => voi
                     expanded={detail?.avid === item.avid}
                     onOpen={(avid) => void openDetail(avid)}
                     onAct={(avid, action) => void act(avid, action)}
+                    onReplace={setReplaceFor}
                   />
                   {detail?.avid === item.avid && (
                     <DetailRow
@@ -501,6 +526,15 @@ export function AcquisitionPanel({ onUnauthorized }: { onUnauthorized: () => voi
             </tbody>
           </table>
         </div>
+      )}
+
+      {replaceFor !== null && (
+        <ReplaceDialog
+          initialAvid={replaceFor || undefined}
+          onClose={() => setReplaceFor(null)}
+          onStarted={reload}
+          onUnauthorized={() => onUnauthorizedRef.current()}
+        />
       )}
 
       {manualOpen && (

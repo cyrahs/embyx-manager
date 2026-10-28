@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 
 import asyncpg
 
-CURRENT_SCHEMA_VERSION = 17
+CURRENT_SCHEMA_VERSION = 18
 
 # Advisory-lock key space for embyx-manager; low word selects the resource.
 ADVISORY_NAMESPACE = 0x454D4258  # 'EMBX'
@@ -622,4 +622,14 @@ _MIGRATIONS[17] = (
     CREATE UNIQUE INDEX merge_tasks_one_open_per_avid ON merge_tasks (avid)
     WHERE state NOT IN ('done', 'cancelled')
     """,
+)
+
+# A title the library holds can be fetched again to replace the copy it holds
+# (换版): the row goes back to discovered with the library paths of the copy
+# being replaced, which the tracker deletes just before it files the new one.
+# replace_after_attempt is the highest attempt number at that moment, so the
+# attempt cap counts only the replacement's own downloads.
+_MIGRATIONS[18] = (
+    'ALTER TABLE archive_acquisitions ADD COLUMN replace_paths_json TEXT',
+    'ALTER TABLE archive_acquisitions ADD COLUMN replace_after_attempt INTEGER',
 )

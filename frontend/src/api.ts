@@ -25,6 +25,8 @@ import type {
   PlaylistMissing,
   PlanEnvelope,
   PlanJob,
+  ReplacePlan,
+  ReplaceResult,
   RunDetail,
   RunSummary,
   Subscription,
@@ -296,6 +298,10 @@ const CODE_MESSAGES: Record<string, string> = {
   directory_not_found: 'CloudDrive 上找不到这个目录。',
   directory_not_routed: '该目录没有对应的归档路由，下载完成后无法入库；请先在设置里为它添加一条归档路由。',
   too_many_inputs: '一次提交的番号太多了，请分批添加。',
+  unreadable_avid: '无法从输入中识别番号。',
+  not_in_library: '库里没有这个番号，不需要换版；直接用「手动添加」下载即可。',
+  acquisition_active: '这个番号正在下载或待处理，等它结束后再换版。',
+  no_task_dir: '没有可用的离线目录：需要至少一个带归档路由的订阅分类或补全目录。',
   unknown_config_section: '未知的配置分区。',
   config_version_conflict: '配置已被其他会话修改，请刷新后重试。',
   invalid_config_values: '配置项校验未通过，请检查填写内容。',
@@ -777,6 +783,28 @@ export async function addAcquisitionMagnet(avid: string, magnet: string): Promis
     body: JSON.stringify({ magnet }),
   })
   return body as unknown as Acquisition
+}
+
+// ---------- replacing a title the library holds (换版) ----------
+
+export async function planReplacement(avid: string, signal?: AbortSignal): Promise<ReplacePlan> {
+  const params = new URLSearchParams({ avid })
+  const body = await request(`/api/monitor/replace?${params.toString()}`, { signal })
+  if (!isRecord(body) || typeof body.avid !== 'string' || !Array.isArray(body.holdings)) {
+    throw new ApiError(0, 'invalid_response', '换版预览响应无效。')
+  }
+  return body as unknown as ReplacePlan
+}
+
+export async function startReplacement(avid: string, magnet: string | null): Promise<ReplaceResult> {
+  const body = await request('/api/monitor/replace', {
+    method: 'POST',
+    body: JSON.stringify({ avid, magnet }),
+  })
+  if (!isRecord(body) || typeof body.outcome !== 'string') {
+    throw new ApiError(0, 'invalid_response', '换版响应无效。')
+  }
+  return body as unknown as ReplaceResult
 }
 
 // ---------- the manual input source ----------

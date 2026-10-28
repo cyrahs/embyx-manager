@@ -566,3 +566,194 @@ async def test_archived_tasks_are_cleared_in_batches_and_a_failure_is_shrugged_o
 
     assert calls == [hashes[0:2], hashes[2:4], hashes[4:5]]
     assert ctx.stats['archived_tasks_cleared'] == 3
+
+
+# -- replacements (换版) --------------------------------------------------------
+
+
+class MountedCloud(FakeCloud):
+    """A CloudDrive whose API tree is the test's tmp_path, as the mount shows it."""
+
+    def __init__(self, tasks: list[dict], root: Path, *, deletes: bool = True) -> None:
+        super().__init__(tasks)
+        self.root = root
+        self.deletes = deletes
+        self.deleted: list[str] = []
+
+    async def list_directory(self, path: str) -> tuple[dict, ...]:  # type: ignore[override]
+        self.refreshed.append(path)
+        local = self.root / path.lstrip('/')
+        if not local.is_dir():
+            return ()
+        return tuple(
+            {'name': child.name, 'full_path': f'{path.rstrip("/")}/{child.name}', 'is_directory': child.is_dir()}
+            for child in sorted(local.iterdir())
+        )
+
+    async def delete_files(self, api_paths: list[str]) -> dict[str, object]:
+        self.deleted.extend(api_paths)
+        if self.deletes:
+            for path in api_paths:
+                (self.root / path.lstrip('/')).unlink()
+        return {'success': True, 'error_message': ''}
+
+
+def build_replacing(
+    tmp_path: Path,
+    tasks: list[dict],
+    *,
+    deletes: bool = True,
+    mount_prefix: str | None = None,
+) -> tuple[AcquisitionTracker, FakeLedger, MountedCloud, list[tuple[str, str]]]:
+    tracker, ledger, _, submitted = build(tmp_path, tasks)
+    cloud = MountedCloud(tasks, tmp_path, deletes=deletes)
+    tracker._cloud = cloud  # type: ignore[assignment]  # noqa: SLF001 - swap in the mounted fake
+    tracker._settings = replace(  # noqa: SLF001
+        tracker._settings,  # noqa: SLF001
+        library_mount_prefix=str(tmp_path) if mount_prefix is None else mount_prefix,
+    )
+    return tracker, ledger, cloud, submitted
+
+
+async def seed_replacement(ledger: FakeLedger, avid: str, old_paths: tuple[str, ...], hashes: list[str]) -> None:
+    """An archived title whose first download (HASH_C) produced the copy being replaced."""
+    await seed(ledger, avid, [HASH_C])
+    ledger.attempts[avid][0] = replace(ledger.attempts[avid][0], state=AttemptState.ARCHIVED)
+    ledger.states[avid] = AcquisitionState.ARCHIVED
+    await ledger.begin_replacement(
+        avid, source='manual', task_dir_path=TASK_DIR, replace_paths=old_paths, now=now_stub()
+    )
+    await ledger.add_attempts(
+        avid,
+        [MagnetCandidate(magnet=f'magnet:?xt=urn:btih:{h}', info_hash=h, source='sukebei') for h in hashes],
+        now=now_stub(),
+    )
+    await ledger.claim_next_pending(avid, now=now_stub())
+    ledger.states[avid] = AcquisitionState.DOWNLOADING
+
+
+async def test_a_replacement_deletes_the_old_copy_before_filing_the_new_one(tmp_path: Path) -> None:
+    tracker, ledger, cloud, _ = build_replacing(
+        tmp_path, [offline_task('ABC-123 proper', HASH_A, OfflineStatus.FINISHED)]
+    )
+    old = tmp_path / 'library' / 'sorted' / 'ABC' / 'ABC-123.mp4'
+    write_video(old, size=3)
+    await seed_replacement(ledger, 'ABC-123', ('sorted/ABC/ABC-123.mp4',), [HASH_A])
+    write_video(tmp_path / 'task' / 'downloads' / 'ABC-123 proper' / 'ABC-123.mp4', size=20)
+
+    ctx = make_ctx()
+    await tracker.poll(ctx)
+
+    assert cloud.deleted == ['/library/sorted/ABC/ABC-123.mp4']
+    assert old.read_bytes() == b'x' * 20
+    assert ledger.states['ABC-123'] is AcquisitionState.ARCHIVED
+    assert ledger.attempt_states('ABC-123') == [AttemptState.ARCHIVED, AttemptState.ARCHIVED]
+    # The replacement is over once the new copy is in.
+    assert ledger.replace_paths.get('ABC-123') is None
+    assert ctx.stats['replaced_copies_deleted'] == 1
+
+
+async def test_a_replacement_into_parts_drops_the_single_old_file(tmp_path: Path) -> None:
+    tracker, ledger, _, _ = build_replacing(tmp_path, [offline_task('ABC-123 parts', HASH_A, OfflineStatus.FINISHED)])
+    old = tmp_path / 'library' / 'sorted' / 'ABC' / 'ABC-123.mp4'
+    write_video(old)
+    await seed_replacement(ledger, 'ABC-123', ('sorted/ABC/ABC-123.mp4',), [HASH_A])
+    folder = tmp_path / 'task' / 'downloads' / 'ABC-123 parts'
+    write_video(folder / 'ABC-123-1.mp4')
+    write_video(folder / 'ABC-123-2.mp4')
+
+    await tracker.poll(make_ctx())
+
+    assert not old.exists()
+    assert sorted(path.name for path in old.parent.iterdir()) == ['ABC-123-cd1.mp4', 'ABC-123-cd2.mp4']
+    assert ledger.states['ABC-123'] is AcquisitionState.ARCHIVED
+
+
+async def test_a_replacement_whose_download_is_the_wrong_title_keeps_the_old_copy(tmp_path: Path) -> None:
+    tracker, ledger, cloud, _ = build_replacing(
+        tmp_path, [offline_task('ABC-123 again', HASH_A, OfflineStatus.FINISHED)]
+    )
+    old = tmp_path / 'library' / 'sorted' / 'ABC' / 'ABC-123.mp4'
+    write_video(old)
+    await seed_replacement(ledger, 'ABC-123', ('sorted/ABC/ABC-123.mp4',), [HASH_A])
+    write_video(tmp_path / 'task' / 'downloads' / 'ABC-123 again' / 'XYZ-999.mp4')
+
+    await tracker.poll(make_ctx())
+
+    assert cloud.deleted == []
+    assert old.exists()
+    assert ledger.states['ABC-123'] is AcquisitionState.NEEDS_ATTENTION
+    assert ledger.replace_paths['ABC-123'] == ('sorted/ABC/ABC-123.mp4',)
+
+
+async def test_a_replacement_waits_while_the_mount_still_shows_the_old_copy(tmp_path: Path) -> None:
+    tracker, ledger, cloud, _ = build_replacing(
+        tmp_path, [offline_task('ABC-123 proper', HASH_A, OfflineStatus.FINISHED)], deletes=False
+    )
+    old = tmp_path / 'library' / 'sorted' / 'ABC' / 'ABC-123.mp4'
+    write_video(old, size=3)
+    await seed_replacement(ledger, 'ABC-123', ('sorted/ABC/ABC-123.mp4',), [HASH_A])
+    folder = tmp_path / 'task' / 'downloads' / 'ABC-123 proper'
+    write_video(folder / 'ABC-123.mp4', size=20)
+
+    await tracker.poll(make_ctx())
+
+    # Released for the next poll, nothing filed over the old copy.
+    assert cloud.deleted == ['/library/sorted/ABC/ABC-123.mp4']
+    assert old.read_bytes() == b'xxx'
+    assert (folder / 'ABC-123.mp4').exists()
+    assert ledger.states['ABC-123'] is AcquisitionState.DOWNLOADING
+    assert ledger.attempt_states('ABC-123')[-1] is AttemptState.FINISHED
+
+    # The mount catches up; the next pass files it.
+    old.unlink()
+    await tracker.poll(make_ctx())
+    assert old.read_bytes() == b'x' * 20
+    assert ledger.states['ABC-123'] is AcquisitionState.ARCHIVED
+
+
+async def test_a_replacement_never_deletes_a_recorded_path_that_is_not_the_title(tmp_path: Path) -> None:
+    tracker, ledger, cloud, _ = build_replacing(
+        tmp_path, [offline_task('ABC-123 proper', HASH_A, OfflineStatus.FINISHED)]
+    )
+    other = tmp_path / 'library' / 'sorted' / 'ABC' / 'ABC-1234.mp4'
+    write_video(other)
+    await seed_replacement(ledger, 'ABC-123', ('sorted/ABC/ABC-1234.mp4', '../task/x.mp4'), [HASH_A])
+    write_video(tmp_path / 'task' / 'downloads' / 'ABC-123 proper' / 'ABC-123.mp4')
+
+    await tracker.poll(make_ctx())
+
+    assert cloud.deleted == []
+    assert other.exists()
+    assert ledger.states['ABC-123'] is AcquisitionState.ARCHIVED
+
+
+async def test_a_replacement_without_a_mount_prefix_is_parked(tmp_path: Path) -> None:
+    tracker, ledger, cloud, _ = build_replacing(
+        tmp_path, [offline_task('ABC-123 proper', HASH_A, OfflineStatus.FINISHED)], mount_prefix=''
+    )
+    old = tmp_path / 'library' / 'sorted' / 'ABC' / 'ABC-123.mp4'
+    write_video(old)
+    await seed_replacement(ledger, 'ABC-123', ('sorted/ABC/ABC-123.mp4',), [HASH_A])
+    write_video(tmp_path / 'task' / 'downloads' / 'ABC-123 proper' / 'ABC-123.mp4')
+
+    await tracker.poll(make_ctx())
+
+    assert cloud.deleted == []
+    assert old.exists()
+    assert ledger.states['ABC-123'] is AcquisitionState.NEEDS_ATTENTION
+
+
+async def test_a_replacement_counts_only_its_own_attempts_against_the_cap(tmp_path: Path) -> None:
+    tracker, ledger, _, submitted = build_replacing(
+        tmp_path, [offline_task('ABC-123 bad', HASH_A, OfflineStatus.ERROR)]
+    )
+    tracker._settings = replace(tracker._settings, max_attempts=2)  # noqa: SLF001
+    await seed_replacement(ledger, 'ABC-123', ('sorted/ABC/ABC-123.mp4',), [HASH_A, HASH_B])
+
+    await tracker.poll(make_ctx())
+
+    # The archived download before the replacement is the old copy's history:
+    # with it counted, this first failure would already exhaust a cap of two.
+    assert ledger.states['ABC-123'] is AcquisitionState.DOWNLOADING
+    assert submitted == [('ABC-123', f'magnet:?xt=urn:btih:{HASH_B}')]

@@ -71,6 +71,7 @@ from embyx_manager.monitor.playlists import PlaylistRepository
 from embyx_manager.monitor.playlists_api import PlaylistFillApi, create_playlists_router, resolve_fill_dir
 from embyx_manager.monitor.reconcile import ReconcileScanner
 from embyx_manager.monitor.release_dates import ReleaseDateFinder
+from embyx_manager.monitor.replace import ReplacementSource
 from embyx_manager.monitor.reports import PipelineName, RunContext
 from embyx_manager.monitor.rss import CreditedWork, RssPipeline
 from embyx_manager.monitor.runs import PipelineRunRepository
@@ -467,6 +468,9 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
             settings=TrackerSettings.from_config(
                 archive_config,
                 task_dir_paths=await _polled_task_dirs(store, ledger),
+                # The library sits on the same CloudDrive mount the merge tab
+                # strips to reach API paths; a replacement deletes through it.
+                library_mount_prefix=store.get(MergeConfig).cloud_mount_prefix,
             ),
             submit_magnet=submit_magnet,
             release_date_lookup=release_dates,
@@ -602,6 +606,17 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
             submit_magnet=submit_magnet,
             tracker_ready=tracker_ready,
             manual=manual_source,
+            replacement=ReplacementSource(
+                ledger=ledger,
+                intake_factory=intake_factory,
+                archiver_factory=lambda: ArchivePipeline(
+                    config=store.get(ArchiveConfig),
+                    avid_parser=avid_handle.current(),
+                ),
+                parser_factory=avid_handle.current,
+                configured_dirs=lambda: _offline_task_dirs(store),
+                submit_magnet=submit_magnet,
+            ),
         ),
         subscriptions=SubscriptionsApi(
             repository=subscriptions,
