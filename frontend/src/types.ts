@@ -190,6 +190,8 @@ export interface Acquisition {
   release_date: string | null
   created_at: string
   updated_at: string
+  /** Library paths of the copy being replaced (换版), deleted once the new copy is filed. */
+  replacing?: string[]
 }
 
 export interface MagnetAttempt {
@@ -210,6 +212,26 @@ export interface AcquisitionDetail extends Acquisition {
 export interface AcquisitionPage {
   items: Acquisition[]
   counts: Partial<Record<AcquisitionState, number>>
+}
+
+// ---------- replacing a title the library holds (换版) ----------
+
+export interface ReplacePlan {
+  avid: string
+  /** Library paths of the copy that is deleted once the new one is filed. */
+  holdings: string[]
+  state: AcquisitionState | null
+  task_dir_path: string | null
+  /** An error code saying why it cannot start, or null. */
+  blocked: string | null
+}
+
+export type ReplaceOutcome = 'submitted' | 'no_magnet' | 'submit_failed'
+
+export interface ReplaceResult {
+  plan: ReplacePlan
+  outcome: ReplaceOutcome
+  acquisition: Acquisition
 }
 
 // ---------- the manual input source ----------

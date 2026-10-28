@@ -56,6 +56,8 @@ class FakeLedger:
         self.task_dirs: dict[str, str | None] = {}
         self.archived_paths: dict[str, tuple[str, ...]] = {}
         self.release_dates: dict[str, date | None] = {}
+        self.replace_paths: dict[str, tuple[str, ...]] = {}
+        self.replace_after: dict[str, int] = {}
 
     async def discover(
         self,
@@ -115,7 +117,36 @@ class FakeLedger:
             updated_at=now_stub(),
             task_dir_path=self.task_dirs.get(avid),
             release_date=self.release_dates.get(avid),
+            replace_paths=self.replace_paths.get(avid, ()),
+            replace_after_attempt=self.replace_after.get(avid),
         )
+
+    async def begin_replacement(
+        self,
+        avid: str,
+        *,
+        source: str,
+        task_dir_path: str,
+        replace_paths: Sequence[str],
+        now: datetime,
+    ) -> AcquisitionRecord | None:
+        del now
+        replaceable = {
+            AcquisitionState.ARCHIVED,
+            AcquisitionState.IGNORED,
+            AcquisitionState.RESOLVE_FAILED,
+            AcquisitionState.EXHAUSTED,
+        }
+        if avid in self.states and self.states[avid] not in replaceable:
+            return None
+        self.sources.setdefault(avid, source)
+        self.states[avid] = AcquisitionState.DISCOVERED
+        self.notes[avid] = None
+        self.next_action_at[avid] = None
+        self.task_dirs[avid] = task_dir_path
+        self.replace_paths[avid] = tuple(replace_paths)
+        self.replace_after[avid] = max((attempt.attempt_no for attempt in self.attempts.get(avid, [])), default=0)
+        return await self.get(avid)
 
     async def transition(
         self,
@@ -134,6 +165,9 @@ class FakeLedger:
         self.states[avid] = target
         self.notes[avid] = note
         self.next_action_at[avid] = next_action_at
+        if target is AcquisitionState.ARCHIVED:
+            self.replace_paths.pop(avid, None)
+            self.replace_after.pop(avid, None)
         if archived_paths is not None:
             self.archived_paths[avid] = tuple(archived_paths)  # type: ignore[arg-type]
         return True

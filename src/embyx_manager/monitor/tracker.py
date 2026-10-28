@@ -21,6 +21,12 @@ library): CloudDrive answers every listing by paging through the cloud's whole
 offline history, so records left behind made each pass slower until listings
 outran the gRPC deadline. The ledger, not CloudDrive's duplicate check, is what
 stops an archived AVID from being fetched again.
+
+A replacement (换版) is an acquisition of a title the library already holds.
+Its download is filed like any other, except that once the folder is known to
+be fileable the copy being replaced is deleted first (into the cloud's recycle
+bin, through the CloudDrive API): the library keeps one copy per AVID, and the
+old one would otherwise make the archive refuse the new one.
 """
 
 import asyncio
@@ -28,7 +34,7 @@ import logging
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from embyx_manager.clients.clouddrive import AsyncCloudDrive
 from embyx_manager.clients.clouddrive.aio import OfflineStatus, OfflineTask
@@ -83,9 +89,19 @@ class TrackerSettings:
     #: then its absence from the task list means nothing: a magnet submitted during
     #: this very poll cannot appear in the listing this poll already read.
     submit_grace_seconds: int = 300
+    #: Where the CloudDrive mount the library lives on is mounted locally;
+    #: stripping it from a library path gives the API path a replacement
+    #: deletes the replaced copy through. Empty leaves replacements parked.
+    library_mount_prefix: str = ''
 
     @classmethod
-    def from_config(cls, config: ArchiveConfig, *, task_dir_paths: tuple[str, ...]) -> 'TrackerSettings':
+    def from_config(
+        cls,
+        config: ArchiveConfig,
+        *,
+        task_dir_paths: tuple[str, ...],
+        library_mount_prefix: str = '',
+    ) -> 'TrackerSettings':
         src_dir = Path(config.src_dir)
         routes = tuple(
             TrackerRoute(root=src_dir / source, dst=dst, priority=priority)
@@ -97,6 +113,7 @@ class TrackerSettings:
             routes=routes,
             stall_timeout_hours=config.stall_timeout_hours,
             max_attempts=config.max_attempts,
+            library_mount_prefix=library_mount_prefix,
         )
 
 
@@ -273,19 +290,107 @@ class AcquisitionTracker:
             ctx.warning('finished task %s is not under any archive route yet', task['name'])
             return
         folder, route = located
-        result = await asyncio.to_thread(
-            self._archiver.archive_folder,
-            folder,
-            route.dst,
-            ctx,
-            priority=route.priority,
-            expected_avid=attempt.avid,
-        )
+        result = await self._file(attempt, folder, route, ctx)
         await self._settle(attempt, result, ctx)
         if result.outcome is Outcome.JUNK:
             # The archiver only reported the folder; the task and its files are
             # still at CloudDrive and nothing will come back for them.
             await self._remove_task(str(task['info_hash']), task_dir, ctx)
+
+    async def _file(
+        self,
+        attempt: MagnetAttemptRecord,
+        folder: Path,
+        route: TrackerRoute,
+        ctx: RunContext,
+    ) -> ArchiveResult:
+        """Archive a claimed download, clearing the copy it replaces out of the way first."""
+        record = await self._ledger.get(attempt.avid)
+        replacing = record.replace_paths if record is not None else ()
+        if not replacing:
+            return await asyncio.to_thread(
+                self._archiver.archive_folder,
+                folder,
+                route.dst,
+                ctx,
+                priority=route.priority,
+                expected_avid=attempt.avid,
+            )
+        # The old copy goes only once the new download is known to be fileable:
+        # a folder that turns out to be junk or the wrong title leaves it alone.
+        selection = await asyncio.to_thread(self._archiver.inspect_folder, folder, ctx, expected_avid=attempt.avid)
+        if isinstance(selection, ArchiveResult):
+            return selection
+        try:
+            problem = await self._remove_replaced(attempt.avid, replacing, ctx)
+        except Exception as exc:  # noqa: BLE001 - the claim must still be released
+            ctx.exception('%s: failed to delete the replaced copy', attempt.avid)
+            return ArchiveResult(Outcome.FAILED, avid=attempt.avid, reason=str(exc))
+        if problem is not None:
+            return problem
+        return await asyncio.to_thread(
+            self._archiver.file_selection,
+            folder,
+            selection,
+            route.dst,
+            ctx,
+            priority=route.priority,
+        )
+
+    async def _remove_replaced(self, avid: str, replacing: tuple[str, ...], ctx: RunContext) -> ArchiveResult | None:
+        """Delete the copy a replacement replaces; None once the library no longer shows it.
+
+        Deletion goes through the CloudDrive API so the files land in the
+        cloud's recycle bin. A file already gone counts as deleted, which makes
+        a retry after a half-finished pass safe. Until the mount stops showing
+        the old files the new ones could collide with them, so that wait is
+        reported as a passing failure and the next poll looks again.
+        """
+        prefix = self._settings.library_mount_prefix
+        if not prefix:
+            return ArchiveResult(
+                Outcome.NEEDS_ATTENTION,
+                avid=avid,
+                reason='a replacement needs merge.cloud_mount_prefix to delete the old copy',
+            )
+        present = await asyncio.to_thread(self._archiver.replaced_copies, avid, replacing)
+        if not present:
+            return None
+        api_paths: list[str] = []
+        for path in present:
+            api = _api_path(path, prefix)
+            if api is None:
+                return ArchiveResult(
+                    Outcome.NEEDS_ATTENTION,
+                    avid=avid,
+                    reason=f'{path} is outside the CloudDrive mount {prefix}',
+                )
+            api_paths.append(api)
+        listed = await self._cloud_listed(api_paths)
+        if listed:
+            ctx.info('%s: deleting the replaced copy %s', avid, ', '.join(listed))
+            await self._cloud.delete_files(listed)
+            ctx.add('replaced_copies_deleted', len(listed))
+        # Re-reading each directory is what makes the mount drop the deleted files.
+        await self._cloud_listed(api_paths)
+        if await asyncio.to_thread(self._archiver.replaced_copies, avid, replacing):
+            return ArchiveResult(
+                Outcome.FAILED,
+                avid=avid,
+                reason='the replaced copy is still on the mount; filing on the next poll',
+            )
+        return None
+
+    async def _cloud_listed(self, api_paths: list[str]) -> list[str]:
+        """Which of these files CloudDrive lists, from one fresh listing per directory."""
+        listed: set[str] = set()
+        for directory in sorted({str(PurePosixPath(path).parent) for path in api_paths}):
+            try:
+                entries = await self._cloud.list_directory(directory)
+            except FileNotFoundError:
+                continue
+            listed.update(str(entry['full_path']) for entry in entries if not entry['is_directory'])
+        return [path for path in api_paths if path in listed]
 
     async def _settle(self, attempt: MagnetAttemptRecord, result: ArchiveResult, ctx: RunContext) -> None:
         now = datetime.now(UTC)
@@ -392,8 +497,12 @@ class AcquisitionTracker:
             return
         attempts = await self._ledger.attempts_for(avid)
         # The cap counts magnets actually submitted, not candidates collected, so
-        # a long candidate list still stops after max_attempts real downloads.
-        tried = sum(1 for attempt in attempts if attempt.state is not AttemptState.PENDING)
+        # a long candidate list still stops after max_attempts real downloads. A
+        # replacement counts only its own: the history before it is the old copy's.
+        floor = record.replace_after_attempt or 0
+        tried = sum(
+            1 for attempt in attempts if attempt.state is not AttemptState.PENDING and attempt.attempt_no > floor
+        )
         if tried >= self._settings.max_attempts:
             await self._exhaust(avid, ctx)
             return
@@ -518,14 +627,7 @@ class AcquisitionTracker:
             now=now,
         ):
             return
-        result = await asyncio.to_thread(
-            self._archiver.archive_folder,
-            folder,
-            route.dst,
-            ctx,
-            priority=route.priority,
-            expected_avid=attempt.avid,
-        )
+        result = await self._file(attempt, folder, route, ctx)
         await self._settle(attempt, result, ctx)
 
     async def _refresh_mount(self, task: OfflineTask, task_dir: str, ctx: RunContext) -> None:
@@ -547,3 +649,12 @@ class AcquisitionTracker:
             ctx.warning('finished task %s is not on the mount yet', task['name'])
         except Exception:  # noqa: BLE001
             ctx.exception('failed to refresh %s', path)
+
+
+def _api_path(path: Path, mount_prefix: str) -> str | None:
+    """The CloudDrive API path of a file seen through the mount; None outside it."""
+    try:
+        relative = PurePosixPath(path).relative_to(mount_prefix)
+    except ValueError:
+        return None
+    return str(PurePosixPath('/') / relative)

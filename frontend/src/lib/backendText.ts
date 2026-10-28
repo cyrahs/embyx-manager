@@ -38,6 +38,9 @@ const EXACT_TEXT: Record<string, string> = {
   'no avid could be read': '无法从文件夹识别番号',
   'several unrelated videos in one folder': '同一文件夹中有多部无关视频',
   'no video above the size threshold': '没有超过大小阈值的视频',
+  'a replacement needs merge.cloud_mount_prefix to delete the old copy':
+    '换版需要合并设置里的 CloudDrive 挂载前缀才能删除旧版本',
+  'the replaced copy is still on the mount; filing on the next poll': '旧版本还在挂载里，下次轮询再入库',
   // Magnet attempt errors (tracker.py).
   'CloudDrive reported the download failed': 'CloudDrive 报告下载失败',
   'CloudDrive no longer lists this task': 'CloudDrive 中已找不到该任务',
@@ -69,6 +72,7 @@ const TEXT_PATTERNS: Array<[RegExp, (match: RegExpMatchArray) => string]> = [
   [/^category (.+) is not configured$/, (m) => `分类「${m[1]}」未配置`],
   [/^no progress for (\d+)d at (\d+)%$/, (m) => `已 ${m[1]} 天无进度（停在 ${m[2]}%）`],
   [/^expected (\S+) but found (\S+)$/, (m) => `预期番号 ${m[1]}，实际识别为 ${m[2]}`],
+  [/^(.+) is outside the CloudDrive mount (.+)$/, (m) => `${m[1]} 不在 CloudDrive 挂载 ${m[2]} 之下`],
   [/^multiple avids in one folder: (.+)$/, (m) => `同一文件夹中有多个番号：${m[1]}`],
   [/^connected; task directory (.+) is accessible$/, (m) => `服务连接正常，任务目录 ${m[1]} 可访问`],
   [/^task directory not found: (.+)$/, (m) => `找不到任务目录：${m[1]}`],

@@ -76,6 +76,17 @@ class AttemptState(StrEnum):
 
 #: States in which the tracker owns the AVID and nothing else may touch its folder.
 ACTIVE_STATES = frozenset({AcquisitionState.DISCOVERED, AcquisitionState.DOWNLOADING})
+#: States a title the library holds can be fetched again from, to replace the
+#: copy it holds (换版). An active row is the tracker's, and a parked one has a
+#: folder waiting on an operator.
+REPLACEABLE_STATES = frozenset(
+    {
+        AcquisitionState.ARCHIVED,
+        AcquisitionState.IGNORED,
+        AcquisitionState.RESOLVE_FAILED,
+        AcquisitionState.EXHAUSTED,
+    }
+)
 #: States a retry timer can lift.
 RETRYABLE_STATES = frozenset({AcquisitionState.RESOLVE_FAILED, AcquisitionState.EXHAUSTED})
 #: States the background resolve pass picks up when their ``next_action_at``
@@ -212,6 +223,12 @@ class AcquisitionRecord:
     task_dir_path: str | None = None
     #: The earliest release date a source knew; anchors the resolve schedule.
     release_date: date | None = None
+    #: Library paths of the copy this acquisition replaces, deleted just before
+    #: the new download is filed; () when it is an ordinary acquisition.
+    replace_paths: tuple[str, ...] = ()
+    #: The highest attempt number when the replacement began: only later
+    #: attempts count against the attempt cap.
+    replace_after_attempt: int | None = None
 
 
 @dataclass(frozen=True)
@@ -362,6 +379,65 @@ class AcquisitionRepository:
         )
         return _row_count(status) == 1
 
+    async def begin_replacement(
+        self,
+        avid: str,
+        *,
+        source: str,
+        task_dir_path: str,
+        replace_paths: Sequence[str],
+        now: datetime,
+    ) -> AcquisitionRecord | None:
+        """Hand a title the library already holds back to the tracker for a new copy.
+
+        The row returns to ``discovered`` carrying the library paths of the copy
+        it replaces; the tracker deletes those just before it files the new
+        download, so the title never leaves the library while the replacement
+        is still being fetched. A title with no row yet gets one. Attempts
+        already on the row stay: their hashes are never tried again, which is
+        what keeps the wrong copy from coming back.
+
+        None when the row is not in a :data:`REPLACEABLE_STATES` state.
+        """
+        pool = await self._database.get_pool()
+        paths_json = json.dumps(list(replace_paths))
+        async with pool.acquire() as connection, connection.transaction():
+            row = await connection.fetchrow('SELECT state FROM archive_acquisitions WHERE avid = $1 FOR UPDATE', avid)
+            if row is None:
+                await connection.execute(
+                    """
+                    INSERT INTO archive_acquisitions (
+                        avid, state, source, task_dir_path, replace_paths_json, replace_after_attempt,
+                        created_at, updated_at
+                    )
+                    VALUES ($1, 'discovered', $2, $3, $4, 0, $5, $5)
+                    """,
+                    avid,
+                    str(source),
+                    task_dir_path,
+                    paths_json,
+                    now,
+                )
+            elif AcquisitionState(row['state']) in REPLACEABLE_STATES:
+                await connection.execute(
+                    """
+                    UPDATE archive_acquisitions
+                    SET state = 'discovered', note = NULL, next_action_at = NULL, task_dir_path = $2,
+                        replace_paths_json = $3, updated_at = $4,
+                        replace_after_attempt = (
+                            SELECT COALESCE(MAX(attempt_no), 0) FROM archive_magnet_attempts WHERE avid = $1
+                        )
+                    WHERE avid = $1
+                    """,
+                    avid,
+                    task_dir_path,
+                    paths_json,
+                    now,
+                )
+            else:
+                return None
+        return await self.get(avid)
+
     # -- acquisition transitions -------------------------------------------
 
     async def transition(  # noqa: PLR0913 - one CAS entry point for every ledger move
@@ -379,6 +455,7 @@ class AcquisitionRepository:
 
         ``note``/``next_action_at``/``archived_paths`` are written together with
         the state, so a row is never observed in the new state without them.
+        Reaching ``archived`` concludes a replacement as well: the new copy is in.
         """
         if target not in _ACQUISITION_EDGES[expected]:
             raise IllegalTransitionError(expected, target)
@@ -387,7 +464,9 @@ class AcquisitionRepository:
             """
             UPDATE archive_acquisitions
             SET state = $3, note = $4, next_action_at = $5,
-                archived_paths_json = COALESCE($6, archived_paths_json), updated_at = $7
+                archived_paths_json = COALESCE($6, archived_paths_json), updated_at = $7,
+                replace_paths_json = CASE WHEN $3 = 'archived' THEN NULL ELSE replace_paths_json END,
+                replace_after_attempt = CASE WHEN $3 = 'archived' THEN NULL ELSE replace_after_attempt END
             WHERE avid = $1 AND state = $2
             """,
             avid,
@@ -765,6 +844,8 @@ def _acquisition_from_row(row: asyncpg.Record) -> AcquisitionRecord:
         updated_at=row['updated_at'],
         task_dir_path=row['task_dir_path'],
         release_date=row['release_date'],
+        replace_paths=tuple(json.loads(row['replace_paths_json'])) if row['replace_paths_json'] else (),
+        replace_after_attempt=row['replace_after_attempt'],
     )
 
 

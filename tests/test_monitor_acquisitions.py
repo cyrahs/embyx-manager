@@ -700,3 +700,98 @@ async def test_task_dirs_for_returns_only_rows_that_recorded_a_directory() -> No
 
     assert await ledger.task_dirs_for(['ABC-123', 'DEF-456', 'GHI-789']) == {'ABC-123': '/115/embyx_in/clt'}
     assert await ledger.task_dirs_for([]) == {}
+
+
+# -- replacements (换版) --------------------------------------------------------
+
+
+async def archive_first_attempt(ledger: AcquisitionRepository, avid: str) -> None:
+    await start_downloading(ledger, avid)
+    for target in (AttemptState.FINISHED, AttemptState.ARCHIVING, AttemptState.ARCHIVED):
+        expected = {
+            AttemptState.FINISHED: AttemptState.SUBMITTED,
+            AttemptState.ARCHIVING: AttemptState.FINISHED,
+            AttemptState.ARCHIVED: AttemptState.ARCHIVING,
+        }[target]
+        assert await ledger.transition_attempt(avid, 1, expected=expected, target=target, now=NOW)
+    await ledger.transition(
+        avid,
+        expected=AcquisitionState.DOWNLOADING,
+        target=AcquisitionState.ARCHIVED,
+        now=NOW,
+        archived_paths=('sorted/ABC/ABC-123.mp4',),
+    )
+
+
+async def test_begin_replacement_reopens_an_archived_title_and_keeps_its_history() -> None:
+    ledger = make_ledger()
+    await archive_first_attempt(ledger, 'ABC-123')
+
+    record = await ledger.begin_replacement(
+        'ABC-123',
+        source=AcquisitionSource.MANUAL,
+        task_dir_path='/115/rank',
+        replace_paths=('sorted/ABC/ABC-123.mp4',),
+        now=NOW + timedelta(days=1),
+    )
+
+    assert record is not None
+    assert record.state is AcquisitionState.DISCOVERED
+    assert record.replace_paths == ('sorted/ABC/ABC-123.mp4',)
+    assert record.replace_after_attempt == 2  # both earlier candidates are history
+    assert record.task_dir_path == '/115/rank'
+    assert record.source == 'rss:Actor'  # ownership stays
+    # The hash that produced the old copy is never tried again.
+    assert await ledger.add_attempts('ABC-123', [candidate('ABC123hash0')], now=NOW) == 0
+
+    # Filing the new copy concludes the replacement.
+    await ledger.add_attempts('ABC-123', [candidate('fresh')], now=NOW)
+    await ledger.claim_next_pending('ABC-123', now=NOW)
+    await ledger.transition(
+        'ABC-123', expected=AcquisitionState.DISCOVERED, target=AcquisitionState.DOWNLOADING, now=NOW
+    )
+    await ledger.transition(
+        'ABC-123',
+        expected=AcquisitionState.DOWNLOADING,
+        target=AcquisitionState.ARCHIVED,
+        now=NOW,
+        archived_paths=('sorted/ABC/ABC-123.mp4',),
+    )
+    done = await ledger.get('ABC-123')
+    assert done is not None
+    assert done.replace_paths == ()
+    assert done.replace_after_attempt is None
+
+
+async def test_begin_replacement_creates_a_row_for_a_title_the_ledger_never_saw() -> None:
+    ledger = make_ledger()
+
+    record = await ledger.begin_replacement(
+        'OLD-001',
+        source=AcquisitionSource.MANUAL,
+        task_dir_path='/115/in',
+        replace_paths=('sorted/OLD/OLD-001-cd1.mp4', 'sorted/OLD/OLD-001-cd2.mp4'),
+        now=NOW,
+    )
+
+    assert record is not None
+    assert record.state is AcquisitionState.DISCOVERED
+    assert record.source == 'manual'
+    assert record.replace_paths == ('sorted/OLD/OLD-001-cd1.mp4', 'sorted/OLD/OLD-001-cd2.mp4')
+    assert record.replace_after_attempt == 0
+
+
+async def test_begin_replacement_refuses_a_title_the_tracker_is_working_on() -> None:
+    ledger = make_ledger()
+    await start_downloading(ledger, 'ABC-123')
+
+    assert (
+        await ledger.begin_replacement(
+            'ABC-123', source=AcquisitionSource.MANUAL, task_dir_path='/115/in', replace_paths=('x',), now=NOW
+        )
+        is None
+    )
+    record = await ledger.get('ABC-123')
+    assert record is not None
+    assert record.state is AcquisitionState.DOWNLOADING
+    assert record.replace_paths == ()

@@ -23,6 +23,7 @@ from embyx_manager.monitor.manual import (
     ManualSubmission,
     OfflineDirectory,
 )
+from embyx_manager.monitor.replace import ReplaceError, ReplaceOutcome, ReplacePlan, ReplaceResult
 from embyx_manager.monitor.reports import PipelineName, RunState, RunTrigger
 from embyx_manager.monitor.runs import PipelineRunRecord
 from embyx_manager.monitor.scheduler import (
@@ -558,6 +559,99 @@ def test_manual_routes_are_absent_without_the_source() -> None:
 
     assert client.get('/api/monitor/manual/directories').status_code == 404
     assert client.post('/api/monitor/manual', json={'inputs': [], 'task_dir_path': '/x'}).status_code == 404
+
+
+# -- replacements (换版) ------------------------------------------------------
+
+
+class FakeReplacement:
+    def __init__(self, ledger: FakeLedger, error: ReplaceError | None = None) -> None:
+        self.ledger = ledger
+        self.error = error
+        self.started: list[tuple[str, str | None]] = []
+
+    def _plan(self) -> ReplacePlan:
+        return ReplacePlan(
+            avid='IPZ-661',
+            holdings=('embyx/rank/IPZ/IPZ-661.mp4',),
+            state=AcquisitionState.ARCHIVED,
+            task_dir_path='/115/embyx_in/rank',
+            blocked=None,
+        )
+
+    async def plan(self, text: str) -> ReplacePlan:
+        del text
+        if self.error is not None:
+            raise self.error
+        return self._plan()
+
+    async def start(self, text: str, *, magnet: str | None = None) -> ReplaceResult:
+        if self.error is not None:
+            raise self.error
+        self.started.append((text, magnet))
+        record = await self.ledger.begin_replacement(
+            'IPZ-661',
+            source='manual',
+            task_dir_path='/115/embyx_in/rank',
+            replace_paths=('embyx/rank/IPZ/IPZ-661.mp4',),
+            now=now_stub(),
+        )
+        assert record is not None
+        return ReplaceResult(plan=self._plan(), outcome=ReplaceOutcome.SUBMITTED, record=record)
+
+
+def make_replace_client(replacement: FakeReplacement) -> TestClient:
+    app = FastAPI()
+    app.include_router(
+        create_monitor_router(
+            FakeScheduler(),  # type: ignore[arg-type]
+            FakeRuns([]),  # type: ignore[arg-type]
+            mutation_auth=_noop_auth,
+            acquisitions=AcquisitionApi(ledger=replacement.ledger, replacement=replacement),  # type: ignore[arg-type]
+        ),
+    )
+
+    @app.exception_handler(ApiError)
+    async def handle(_request, exc):
+        return JSONResponse({'error': {'code': exc.code}}, status_code=exc.status_code)
+
+    return TestClient(app)
+
+
+def test_a_replacement_is_previewed_then_started() -> None:
+    replacement = FakeReplacement(FakeLedger(known={'IPZ-661': AcquisitionState.ARCHIVED}))
+    client = make_replace_client(replacement)
+
+    plan = client.get('/api/monitor/replace', params={'avid': 'ipz-661'}).json()
+    assert plan == {
+        'avid': 'IPZ-661',
+        'holdings': ['embyx/rank/IPZ/IPZ-661.mp4'],
+        'state': 'archived',
+        'task_dir_path': '/115/embyx_in/rank',
+        'blocked': None,
+    }
+
+    body = client.post('/api/monitor/replace', json={'avid': 'ipz-661', 'magnet': 'magnet:?xt=urn:btih:x'}).json()
+    assert replacement.started == [('ipz-661', 'magnet:?xt=urn:btih:x')]
+    assert body['outcome'] == 'submitted'
+    assert body['acquisition']['state'] == 'discovered'
+    assert body['acquisition']['replacing'] == ['embyx/rank/IPZ/IPZ-661.mp4']
+
+
+def test_a_refused_replacement_answers_with_its_reason() -> None:
+    client = make_replace_client(FakeReplacement(FakeLedger(), ReplaceError('not_in_library')))
+    response = client.post('/api/monitor/replace', json={'avid': 'XYZ-001'})
+    assert response.status_code == 404
+    assert response.json()['error']['code'] == 'not_in_library'
+
+    client = make_replace_client(FakeReplacement(FakeLedger(), ReplaceError('acquisition_active')))
+    assert client.get('/api/monitor/replace', params={'avid': 'XYZ-001'}).status_code == 409
+
+
+def test_replacement_routes_are_absent_without_the_source() -> None:
+    client, _ = make_ledger_client(FakeLedger())
+
+    assert client.get('/api/monitor/replace', params={'avid': 'x'}).status_code == 404
 
 
 NOW = now_stub()

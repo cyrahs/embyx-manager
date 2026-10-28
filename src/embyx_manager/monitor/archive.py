@@ -327,17 +327,37 @@ class ArchivePipeline:
         ``expected_avid`` is the AVID the caller already knows this download to
         be: anything else found is reported rather than filed under a guess.
         """
+        selection = self.inspect_folder(folder, ctx, expected_avid=expected_avid)
+        if isinstance(selection, ArchiveResult):
+            return selection
+        return self.file_selection(folder, selection, dst_subdir, ctx, priority=priority)
+
+    def inspect_folder(self, folder: Path, ctx: RunContext, *, expected_avid: str = '') -> _VideoSet | ArchiveResult:
+        """The first half of :meth:`archive_folder`: which video to file, or why not.
+
+        Nothing outside the folder is touched, so a caller with work to do
+        between deciding and filing (a replacement deleting the copy it
+        replaces) learns first whether the folder can be filed at all.
+        """
         try:
-            selection = self._select_videos(folder, ctx, expected_avid=expected_avid)
+            return self._select_videos(folder, ctx, expected_avid=expected_avid)
         except RunCancelledError:
             raise
         except Exception as exc:  # noqa: BLE001
             ctx.exception('failed to inspect %s', _display(folder, self.src_dir))
             ctx.add('items_failed')
             return ArchiveResult(Outcome.FAILED, reason=str(exc))
-        if isinstance(selection, ArchiveResult):
-            return selection
 
+    def file_selection(
+        self,
+        folder: Path,
+        selection: _VideoSet,
+        dst_subdir: str,
+        ctx: RunContext,
+        *,
+        priority: bool = False,
+    ) -> ArchiveResult:
+        """The second half of :meth:`archive_folder`: move the video in, delete the folder."""
         try:
             archived = self._move_into_library(selection, dst_subdir, ctx, priority=priority)
         except RunCancelledError:
@@ -356,6 +376,24 @@ class ArchivePipeline:
         self._discard(folder, ctx)
         ctx.add('videos_archived', len(archived))
         return ArchiveResult(Outcome.ARCHIVED, avid=selection.avid, archived_paths=archived)
+
+    def replaced_copies(self, avid: str, library_paths: tuple[str, ...]) -> tuple[Path, ...]:
+        """The files of a copy being replaced that are still in the library.
+
+        ``library_paths`` were recorded relative to the library when the
+        replacement began. Only a path that still names one of this AVID's
+        videos inside the library is returned, so a stale or tampered record
+        can never point the deletion at anything else.
+        """
+        found: list[Path] = []
+        for relative in library_paths:
+            parts = PurePosixPath(relative)
+            if parts.is_absolute() or '..' in parts.parts:
+                continue
+            path = self.dst_dir / parts
+            if path not in found and path in self._matching_archived(avid, path.parent):
+                found.append(path)
+        return tuple(found)
 
     # -- selection -----------------------------------------------------------
 

@@ -26,6 +26,7 @@ from embyx_manager.monitor.manual import (
     ManualIntakeError,
     ManualIntakeSource,
 )
+from embyx_manager.monitor.replace import ReplaceError, ReplacementSource, ReplacePlan
 from embyx_manager.monitor.reports import PipelineName
 from embyx_manager.monitor.runs import PipelineRunRecord, PipelineRunRepository
 from embyx_manager.monitor.scheduler import (
@@ -133,6 +134,8 @@ class AcquisitionView(BaseModel):
     release_date: date | None
     created_at: datetime
     updated_at: datetime
+    #: Library paths of the copy being replaced (换版); empty for an ordinary row.
+    replacing: tuple[str, ...] = ()
 
     @classmethod
     def from_record(cls, record: AcquisitionRecord) -> 'AcquisitionView':
@@ -146,6 +149,7 @@ class AcquisitionView(BaseModel):
             release_date=record.release_date,
             created_at=record.created_at,
             updated_at=record.updated_at,
+            replacing=record.replace_paths,
         )
 
 
@@ -219,6 +223,39 @@ class ManualSubmitRequest(BaseModel):
     task_dir_path: str
 
 
+class ReplacePlanView(BaseModel):
+    avid: str
+    holdings: tuple[str, ...]
+    state: str | None
+    task_dir_path: str | None
+    blocked: str | None
+
+    @classmethod
+    def from_plan(cls, plan: ReplacePlan) -> 'ReplacePlanView':
+        return cls(
+            avid=plan.avid,
+            holdings=plan.holdings,
+            state=plan.state.value if plan.state is not None else None,
+            task_dir_path=plan.task_dir_path,
+            blocked=plan.blocked,
+        )
+
+
+class ReplaceRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
+    #: The title to replace: an AVID, or any name one can be read from.
+    avid: str
+    #: A magnet to fetch the new copy from; empty asks the resolvers.
+    magnet: str | None = None
+
+
+class ReplaceResultView(BaseModel):
+    plan: ReplacePlanView
+    outcome: str
+    acquisition: AcquisitionView
+
+
 class ManualEntryView(BaseModel):
     text: str
     avid: str | None
@@ -260,6 +297,8 @@ class AcquisitionApi:
     tracker_ready: Callable[[], str | None] | None = None
     #: The manual input source; its routes are mounted only when it is supplied.
     manual: ManualIntakeSource | None = None
+    #: Replacing a title the library holds (换版); mounted only when supplied.
+    replacement: ReplacementSource | None = None
 
 
 class SubscriptionView(BaseModel):
@@ -348,6 +387,14 @@ class SubscriptionsApi:
 
 #: Which HTTP status each refused manual submission answers with.
 _MANUAL_STATUS = {'directory_not_found': 404}
+#: Which HTTP status each refused replacement answers with; the rest are 409.
+_REPLACE_STATUS = {
+    'unreadable_avid': 422,
+    'unusable_magnet': 400,
+    'not_in_library': 404,
+    'no_task_dir': 422,
+    'clouddrive_not_configured': 422,
+}
 
 
 def create_monitor_router(  # noqa: C901, PLR0915 - route registration
@@ -569,6 +616,31 @@ def create_monitor_router(  # noqa: C901, PLR0915 - route registration
             return ManualSubmitView(
                 task_dir_path=submission.task_dir_path,
                 items=[ManualEntryView.from_entry(entry) for entry in submission.entries],
+            )
+
+    replacement = acquisitions.replacement
+    if replacement is not None:
+
+        @router.get('/replace', dependencies=[Depends(mutation_auth)])
+        async def plan_replacement(avid: str) -> ReplacePlanView:
+            """What replacing a title would delete and where the new copy would come from."""
+            try:
+                plan = await replacement.plan(avid)
+            except ReplaceError as exc:
+                raise ApiError(_REPLACE_STATUS.get(exc.code, 409), exc.code) from exc
+            return ReplacePlanView.from_plan(plan)
+
+        @router.post('/replace', dependencies=[Depends(mutation_auth)])
+        async def start_replacement(request: ReplaceRequest) -> ReplaceResultView:
+            """Fetch another copy of a title; the old one is deleted once the new one is filed."""
+            try:
+                result = await replacement.start(request.avid, magnet=request.magnet)
+            except ReplaceError as exc:
+                raise ApiError(_REPLACE_STATUS.get(exc.code, 409), exc.code) from exc
+            return ReplaceResultView(
+                plan=ReplacePlanView.from_plan(result.plan),
+                outcome=result.outcome.value,
+                acquisition=AcquisitionView.from_record(result.record),
             )
 
     @router.get('/tracker')
