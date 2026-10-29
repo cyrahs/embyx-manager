@@ -111,7 +111,8 @@ class FakeKube:
     async def create_job(self, *, name: str, args: list[str], task_id: int) -> None:
         del task_id
         self.created.append((name, list(args)))
-        self.jobs[name] = {'status': {}}
+        # As the API answers 409 for a name in use, an existing Job is kept.
+        self.jobs.setdefault(name, {'status': {}})
 
     async def get_job(self, name: str) -> dict[str, Any] | None:
         return self.jobs.get(name)
@@ -269,6 +270,24 @@ async def test_a_failed_job_fails_the_task_with_its_log(harness: Harness) -> Non
     task = await harness.state(task)
     assert (task.state, task.failed_state) == (MergeState.FAILED, MergeState.MERGING)
     assert task.error == 'the merge Job failed: ffmpeg: boom'
+
+
+async def test_a_retried_merge_starts_a_fresh_job_under_the_same_name(harness: Harness) -> None:
+    task = await harness.create()
+    await harness.service.tick()
+    task = await harness.state(task)
+    name = task.job_name or ''
+    harness.kube.jobs[name]['status'] = {'conditions': [{'type': 'Failed', 'status': 'True'}]}
+    await harness.service.tick()
+
+    await harness.service.retry(task.id)
+    await harness.service.tick()
+    await harness.service.tick()
+
+    task = await harness.state(task)
+    assert task.state == MergeState.MERGING
+    assert harness.kube.deleted == [name]
+    assert harness.kube.jobs[name] == {'status': {}}
 
 
 async def test_a_job_past_its_deadline_fails_the_task_with_the_reason(harness: Harness) -> None:

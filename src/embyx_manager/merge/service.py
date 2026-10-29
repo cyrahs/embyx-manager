@@ -617,6 +617,11 @@ class MergeService:
             }.get(task.failed_state or MergeState.QUEUED, MergeState.QUEUED)
             fields: dict[str, object] = {'failed_state': None, 'error': None, 'notice': None}
             if resume == MergeState.QUEUED:
+                # The failed Job outlives the task by its TTL and holds the name
+                # the new one is started under, which would count as started.
+                if task.job_name and self._kube is not None:
+                    with suppress(KubeError):
+                        await self._kube.delete_job(task.job_name)
                 fields.update(job_name=None, phase=None, progress=None)
             if resume == MergeState.UPLOADING:
                 fields.update(upload_attempts=0)
