@@ -40,7 +40,7 @@ from pathlib import Path, PurePosixPath
 from embyx_manager.clients.clouddrive.aio import AsyncCloudDrive, CopyStatus
 from embyx_manager.config.models import ArchiveConfig, CloudDriveConfig, MergeConfig
 from embyx_manager.merge.detect import whole_copies
-from embyx_manager.merge.kube import KubeError, KubeJobs, job_name, job_outcome
+from embyx_manager.merge.kube import KubeError, KubeJobs, job_failure, job_name, job_outcome
 from embyx_manager.merge.tasks import (
     CANCELLABLE_STATES,
     MergeState,
@@ -311,7 +311,8 @@ class MergeService:
             tail = ''
             with suppress(KubeError):
                 tail = await kube.log_tail(task.job_name or '')
-            raise MergeFailedError('the merge Job failed' + (f': {tail}' if tail else ''))
+            details = [detail for detail in (job_failure(job), tail) if detail]
+            raise MergeFailedError('the merge Job failed' + (f': {" | ".join(details)}' if details else ''))
         await self._repository.update(
             task.id,
             phase=status.get('phase') or task.phase,

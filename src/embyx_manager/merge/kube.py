@@ -66,6 +66,14 @@ def job_outcome(job: dict[str, Any]) -> str:
     return 'running'
 
 
+def job_failure(job: dict[str, Any]) -> str:
+    """Why Kubernetes failed the Job, e.g. its deadline passing; '' when it does not say."""
+    for condition in (job.get('status') or {}).get('conditions') or ():
+        if condition.get('type') == 'Failed' and condition.get('status') == 'True':
+            return str(condition.get('message') or condition.get('reason') or '')
+    return ''
+
+
 class KubeJobs:
     def __init__(  # noqa: PLR0913
         self,

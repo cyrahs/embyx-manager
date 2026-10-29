@@ -271,6 +271,27 @@ async def test_a_failed_job_fails_the_task_with_its_log(harness: Harness) -> Non
     assert task.error == 'the merge Job failed: ffmpeg: boom'
 
 
+async def test_a_job_past_its_deadline_fails_the_task_with_the_reason(harness: Harness) -> None:
+    task = await harness.create()
+    await harness.service.tick()
+    task = await harness.state(task)
+    harness.kube.jobs[task.job_name or '']['status'] = {
+        'conditions': [
+            {
+                'type': 'Failed',
+                'status': 'True',
+                'reason': 'DeadlineExceeded',
+                'message': 'Job was active longer than specified deadline',
+            }
+        ]
+    }
+
+    await harness.service.tick()
+
+    task = await harness.state(task)
+    assert task.error == 'the merge Job failed: Job was active longer than specified deadline | ffmpeg: boom'
+
+
 async def test_a_merged_file_lost_before_the_upload_finished_is_merged_again(harness: Harness) -> None:
     task = await harness.create()
     await harness.service.tick()
