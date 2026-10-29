@@ -19,8 +19,11 @@ import json
 import os
 import shutil
 import subprocess
+import sys
+import threading
 import time
-from collections.abc import Callable, Sequence
+from collections import deque
+from collections.abc import Callable, Iterable, Sequence
 from contextlib import suppress
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -47,6 +50,8 @@ HASH_CHUNK_BYTES = 8 * 1024 * 1024
 GIB = 1024**3
 #: ffmpeg's stderr is kept to this many trailing lines for the failure report.
 STDERR_TAIL_LINES = 20
+#: ffmpeg is stopped once neither its output nor its position has moved for this long.
+STALL_SECONDS = 15 * 60
 
 
 class MergeWorkerError(Exception):
@@ -179,30 +184,100 @@ def _check_parts(parts: Sequence[Path], output: Path) -> int:
     return total
 
 
+def _keep_tail(stream: Iterable[str], tail: deque[str]) -> None:
+    """Read ``stream`` to its end, keeping only its last lines.
+
+    ffmpeg's stderr has to be read while it runs: a part with a damaged stretch
+    can make the demuxer log an error every few bytes, and once the pipe's
+    64 KiB fill up ffmpeg stops mid-write while the worker waits on stdout.
+    """
+    for line in stream:
+        if line.strip():
+            tail.append(line.rstrip())
+
+
+class _StallWatch:
+    """Kills the process once ``advanced`` has not been called for ``stall_seconds``."""
+
+    def __init__(
+        self,
+        process: subprocess.Popen[str],
+        stall_seconds: float,
+        *,
+        clock: Callable[[], float] = time.monotonic,
+    ) -> None:
+        self._process = process
+        self._stall_seconds = stall_seconds
+        self._clock = clock
+        self._last = clock()
+        self._done = threading.Event()
+        self.fired = False
+        self._thread = threading.Thread(target=self._watch, name='ffmpeg-stall-watch', daemon=True)
+        self._thread.start()
+
+    def advanced(self) -> None:
+        self._last = self._clock()
+
+    def stop(self) -> None:
+        self._done.set()
+        self._thread.join()
+
+    def _watch(self) -> None:
+        interval = min(max(self._stall_seconds / 10, 0.05), 30.0)
+        while not self._done.wait(interval):
+            if self._clock() - self._last > self._stall_seconds:
+                self.fired = True
+                self._process.kill()
+                return
+
+
 def _run_ffmpeg(
     command: list[str],
     *,
     duration: float,
     status: StatusFile,
+    stall_seconds: float = STALL_SECONDS,
 ) -> None:
+    tail: deque[str] = deque(maxlen=STDERR_TAIL_LINES)
     with subprocess.Popen(  # noqa: S603 - fixed binary, argument list
         command,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
+        errors='replace',
     ) as process:
         assert process.stdout is not None  # noqa: S101 - set by stdout=PIPE
         assert process.stderr is not None  # noqa: S101 - set by stderr=PIPE
-        for line in process.stdout:
-            key, _, value = line.strip().partition('=')
-            if key == 'out_time_us' and value.isdigit() and duration > 0:
-                status.update(force=False, progress=min(int(value) / 1_000_000 / duration, 1.0))
-            elif key == 'total_size' and value.isdigit():
-                status.update(force=False, written_bytes=int(value))
-        stderr = process.stderr.read()
-        returncode = process.wait()
+        reader = threading.Thread(target=_keep_tail, args=(process.stderr, tail), name='ffmpeg-stderr', daemon=True)
+        reader.start()
+        watch = _StallWatch(process, stall_seconds)
+        # ffmpeg keeps printing progress blocks while stuck, so only a change counts as progress.
+        position: tuple[str, str] = ('', '')
+        try:
+            for line in process.stdout:
+                key, _, value = line.strip().partition('=')
+                if key == 'out_time_us' and value.isdigit():
+                    if value != position[0]:
+                        position = (value, position[1])
+                        watch.advanced()
+                    if duration > 0:
+                        status.update(force=False, progress=min(int(value) / 1_000_000 / duration, 1.0))
+                elif key == 'total_size' and value.isdigit():
+                    if value != position[1]:
+                        position = (position[0], value)
+                        watch.advanced()
+                    status.update(force=False, written_bytes=int(value))
+            returncode = process.wait()
+        finally:
+            watch.stop()
+            if process.poll() is None:
+                process.kill()
+        reader.join()
+    if watch.fired:
+        span = f'{stall_seconds / 60:.0f} minutes' if stall_seconds >= 60 else f'{stall_seconds:.0f} seconds'  # noqa: PLR2004
+        msg = f'ffmpeg made no progress for {span} and was stopped'
+        raise MergeWorkerError(msg + (': ' + ' | '.join(tail) if tail else ''))
     if returncode != 0:
-        tail = stderr.strip().splitlines()[-STDERR_TAIL_LINES:]
         raise MergeWorkerError('ffmpeg failed: ' + (' | '.join(tail) if tail else f'exit {returncode}'))
 
 
@@ -299,6 +374,8 @@ def run(argv_parts: Sequence[str], *, output: str, status_path: str, reserve_gib
     except (MergeWorkerError, OSError) as exc:
         partial_path(output_path).unlink(missing_ok=True)
         status.update(state='failed', error=str(exc))
+        # Also in the Job's log, for a look at a failed Job without the status file.
+        print(f'merge failed: {exc}', file=sys.stderr)  # noqa: T201
         return 1
     status.update(state='done', phase='done', progress=1.0, **result)
     return 0
