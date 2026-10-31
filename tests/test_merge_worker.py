@@ -15,7 +15,8 @@ from embyx_manager.merge.worker import MergeWorkerError, StatusFile, concat_list
 needs_ffmpeg = pytest.mark.skipif(shutil.which('ffmpeg') is None, reason='ffmpeg is not installed')
 
 
-def make_part(path: Path, *, size: str = '160x120', seconds: int = 2) -> Path:
+def make_part(path: Path, *, size: str = '160x120', seconds: int = 2, audio_first: bool = False) -> Path:
+    order = ['-map', '1:a', '-map', '0:v'] if audio_first else []
     subprocess.run(  # noqa: S603 - fixed arguments
         [  # noqa: S607 - ffmpeg from PATH, as the image provides it
             'ffmpeg',
@@ -38,11 +39,22 @@ def make_part(path: Path, *, size: str = '160x120', seconds: int = 2) -> Path:
             '-c:a',
             'aac',
             '-shortest',
+            *order,
             str(path),
         ],
         check=True,
     )
     return path
+
+
+def stream_types(path: Path) -> list[str]:
+    completed = subprocess.run(  # noqa: S603 - fixed arguments
+        ['ffprobe', '-v', 'error', '-show_entries', 'stream=codec_type', '-of', 'csv=p=0', str(path)],  # noqa: S607
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return completed.stdout.split()
 
 
 @pytest.fixture
@@ -91,6 +103,42 @@ def test_merge_refuses_parts_with_different_streams(tmp_path: Path, parts: list[
     assert status['state'] == 'failed'
     assert 'ABC-123-cd4.mp4 carries different streams' in status['error']
     assert not (tmp_path / 'ABC-123.mp4').exists()
+
+
+@needs_ffmpeg
+@pytest.mark.parametrize('suffix', ['.mp4', '.mkv'])
+def test_merge_puts_parts_with_the_streams_in_another_order_video_first(tmp_path: Path, suffix: str) -> None:
+    library = tmp_path / 'library'
+    library.mkdir()
+    parts = [make_part(library / f'ABC-123-cd{index}{suffix}', audio_first=index in {1, 3}) for index in range(1, 4)]
+    assert stream_types(parts[0]) == ['audio', 'video']
+    out = tmp_path / 'upload'
+    out.mkdir()
+    status = StatusFile(out / 'status.json')
+
+    result = worker.merge(parts, out / f'ABC-123{suffix}', status, reserve_bytes=0, workdir=tmp_path)
+
+    assert result['duration'] == pytest.approx(6.0, abs=0.5)
+    assert stream_types(out / f'ABC-123{suffix}') == ['video', 'audio']
+    assert sorted(path.name for path in out.iterdir()) == [f'ABC-123{suffix}', 'status.json']
+
+
+@needs_ffmpeg
+def test_merge_refuses_an_mp4_whose_index_would_outgrow_the_memory_limit(tmp_path: Path, parts: list[Path]) -> None:
+    status = StatusFile(tmp_path / 'status.json')
+
+    with pytest.raises(MergeWorkerError, match=r'hold [\d,]+ packets, whose mp4 index needs about'):
+        worker.merge(parts, tmp_path / 'ABC-123.mp4', status, reserve_bytes=0, workdir=tmp_path, memory_limit=1 << 20)
+    assert not partial_path(tmp_path / 'ABC-123.mp4').exists()
+
+
+def test_memory_limit_reads_the_cgroup(tmp_path: Path) -> None:
+    limit = tmp_path / 'memory.max'
+    limit.write_text('3221225472\n')
+    assert worker.memory_limit(limit) == 3 * 1024**3
+    limit.write_text('max\n')
+    assert worker.memory_limit(limit) is None
+    assert worker.memory_limit(tmp_path / 'missing') is None
 
 
 @needs_ffmpeg

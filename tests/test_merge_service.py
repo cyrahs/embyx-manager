@@ -272,6 +272,23 @@ async def test_a_failed_job_fails_the_task_with_its_log(harness: Harness) -> Non
     assert task.error == 'the merge Job failed: ffmpeg: boom'
 
 
+async def test_a_killed_job_leaves_no_half_written_merge_behind(harness: Harness) -> None:
+    task = await harness.create()
+    await harness.service.tick()
+    task = await harness.state(task)
+    # An OOM kill gives the worker no chance to remove these itself.
+    partial = harness.work / '.SQTEVR-009.mp4.part'
+    partial.write_bytes(b'x')
+    (harness.work / '.SQTEVR-009.mp4.parts').mkdir()
+    (harness.work / '.SQTEVR-009.mp4.parts' / 'SQTEVR-009-cd1.mp4').write_bytes(b'x')
+    harness.kube.jobs[task.job_name or '']['status'] = {'conditions': [{'type': 'Failed', 'status': 'True'}]}
+
+    await harness.service.tick()
+
+    assert (await harness.state(task)).state == MergeState.FAILED
+    assert sorted(path.name for path in harness.work.iterdir()) == []
+
+
 async def test_a_retried_merge_starts_a_fresh_job_under_the_same_name(harness: Harness) -> None:
     task = await harness.create()
     await harness.service.tick()
