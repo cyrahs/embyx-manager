@@ -31,6 +31,7 @@ yet reporting a hash) is shown as a notice while the step is retried.
 
 import asyncio
 import logging
+import shutil
 from collections.abc import Awaitable, Callable
 from contextlib import suppress
 from dataclasses import dataclass
@@ -47,7 +48,7 @@ from embyx_manager.merge.tasks import (
     MergeTask,
     MergeTaskRepository,
 )
-from embyx_manager.merge.worker import partial_path, read_status
+from embyx_manager.merge.worker import partial_path, read_status, staging_dir
 from embyx_manager.monitor.reports import PipelineName
 
 LOGGER = logging.getLogger(__name__)
@@ -308,6 +309,9 @@ class MergeService:
             msg = 'the merge Job disappeared before it finished'
             raise MergeFailedError(msg)
         if job_outcome(job) == 'failed':
+            # Killed (out of memory, past its deadline) before it could clean up after itself.
+            partial_path(paths.output).unlink(missing_ok=True)
+            shutil.rmtree(staging_dir(paths.output), ignore_errors=True)
             tail = ''
             with suppress(KubeError):
                 tail = await kube.log_tail(task.job_name or '')
@@ -557,6 +561,7 @@ class MergeService:
                     await cloud.delete_files([paths.staging_dir])
             for path in (paths.output, partial_path(paths.output), paths.status):
                 path.unlink(missing_ok=True)
+            shutil.rmtree(staging_dir(paths.output), ignore_errors=True)
             cancelled = await self._repository.transition(
                 task.id,
                 task.state,

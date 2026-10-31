@@ -54,6 +54,7 @@ const PHASE_LABELS: Record<string, string> = {
   starting: '启动 Job',
   checking: '检查空间',
   probing: '读取分盘信息',
+  reordering: '调整音视频流顺序',
   merging: '合并',
   verifying: '核对时长',
   hashing: '计算 SHA-1',

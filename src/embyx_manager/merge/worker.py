@@ -9,7 +9,12 @@ secrets.
 
 The parts are checked before anything is written: they must exist, fit on the
 volume with a reserve to spare, and carry the same streams, since ``-c copy``
-cannot reconcile different codecs or resolutions. The result is checked after:
+cannot reconcile different codecs or resolutions. Parts that carry the same
+streams in a different order are first remuxed, video first, into a staging
+directory next to the output, as the concat demuxer pairs streams by index. An
+MP4 output's index stays in memory until ffmpeg ends, so a title with more
+packets than the Job's memory limit can index is refused up front rather than
+killed hours in. The result is checked after:
 its duration must match the parts' sum. Only then is it renamed into place, so
 the app never sees a half-written file under the final name.
 """
@@ -52,6 +57,14 @@ GIB = 1024**3
 STDERR_TAIL_LINES = 20
 #: ffmpeg is stopped once neither its output nor its position has moved for this long.
 STALL_SECONDS = 15 * 60
+#: The muxers that hold an entry per packet in memory until they write the index at the end.
+INDEXED_MUXERS = frozenset({'mp4', 'mov'})
+#: Memory per packet held by those muxers (ffmpeg 6.1 measured ~70 bytes, growth included),
+#: and ffmpeg's and the worker's own baseline.
+INDEX_BYTES_PER_PACKET = 80
+INDEX_BASELINE_BYTES = 192 * 1024**2
+#: The Job container's memory limit under cgroup v2: a byte count, or ``max``.
+CGROUP_MEMORY_MAX = Path('/sys/fs/cgroup/memory.max')
 
 
 class MergeWorkerError(Exception):
@@ -61,12 +74,39 @@ class MergeWorkerError(Exception):
 @dataclass(frozen=True)
 class Probe:
     duration: float
+    #: The video and audio streams' properties, in the file's order.
     signature: tuple[tuple[object, ...], ...]
+    #: Every stream's type in index order, which the concat demuxer pairs streams by.
+    layout: tuple[str, ...] = ()
+    #: Video and audio packets, when the container counts them (MP4 does, Matroska does not).
+    packets: int | None = None
+
+    def by_kind(self) -> tuple[tuple[object, ...], ...]:
+        """The signature with video before audio, which a remux with ``-map 0:v -map 0:a`` yields."""
+        return tuple(sorted(self.signature, key=lambda stream: stream[0] != 'video'))
+
+    def in_order(self) -> bool:
+        """Whether the file holds nothing but its video streams followed by its audio streams."""
+        return self.layout == tuple(stream[0] for stream in self.by_kind())
 
 
 def partial_path(output: Path) -> Path:
     """Where the merge is written until it has been checked."""
     return output.with_name(f'.{output.name}.part')
+
+
+def staging_dir(output: Path) -> Path:
+    """Where parts remuxed into stream order are kept while the merge runs."""
+    return output.with_name(f'.{output.name}.parts')
+
+
+def memory_limit(path: Path = CGROUP_MEMORY_MAX) -> int | None:
+    """The container's memory limit in bytes, or None when it has none or it cannot be read."""
+    try:
+        value = path.read_text(encoding='utf-8').strip()
+    except OSError:
+        return None
+    return int(value) if value.isdigit() else None
 
 
 class StatusFile:
@@ -116,15 +156,19 @@ def probe(path: Path, *, ffprobe: str = 'ffprobe') -> Probe:
     except (ValueError, KeyError, TypeError) as exc:
         msg = f'ffprobe reports no duration for {path.name}'
         raise MergeWorkerError(msg) from exc
-    streams = [
-        tuple(stream.get(key) for key in SIGNATURE_KEYS)
-        for stream in info.get('streams', [])
-        if stream.get('codec_type') in {'video', 'audio'}
-    ]
+    every = info.get('streams', [])
+    media = [stream for stream in every if stream.get('codec_type') in {'video', 'audio'}]
+    streams = [tuple(stream.get(key) for key in SIGNATURE_KEYS) for stream in media]
     if not any(stream[0] == 'video' for stream in streams):
         msg = f'{path.name} has no video stream'
         raise MergeWorkerError(msg)
-    return Probe(duration=duration, signature=tuple(streams))
+    counts = [str(stream.get('nb_frames', '')) for stream in media]
+    return Probe(
+        duration=duration,
+        signature=tuple(streams),
+        layout=tuple(str(stream.get('codec_type')) for stream in every),
+        packets=sum(map(int, counts)) if all(count.isdigit() for count in counts) else None,
+    )
 
 
 def concat_list(parts: Sequence[Path]) -> str:
@@ -182,6 +226,19 @@ def _check_parts(parts: Sequence[Path], output: Path) -> int:
             msg = f'cannot read {part}: {exc.strerror or exc}'
             raise MergeWorkerError(msg) from exc
     return total
+
+
+def _check_memory(probes: Sequence[Probe], muxer: str, limit: int | None) -> None:
+    if muxer not in INDEXED_MUXERS or limit is None or any(result.packets is None for result in probes):
+        return
+    packets = sum(result.packets or 0 for result in probes)
+    needed = packets * INDEX_BYTES_PER_PACKET + INDEX_BASELINE_BYTES
+    if needed > limit:
+        msg = (
+            f'the parts hold {packets:,} packets, whose {muxer} index needs about {needed / GIB:.1f} GiB '
+            f'of memory, more than the Job is allowed ({limit / GIB:.1f} GiB)'
+        )
+        raise MergeWorkerError(msg)
 
 
 def _keep_tail(stream: Iterable[str], tail: deque[str]) -> None:
@@ -290,27 +347,96 @@ def merge(  # noqa: PLR0913
     workdir: Path,
     ffmpeg: str = 'ffmpeg',
     ffprobe: str = 'ffprobe',
+    memory_limit: int | None = None,
 ) -> dict[str, Any]:
     """Merge ``parts`` into ``output``; returns the final status fields."""
     status.update(phase='checking', progress=0.0)
     total_bytes = _check_parts(parts, output)
     _check_space(output, total_bytes, reserve_bytes)
     status.update(total_bytes=total_bytes)
+    muxer = MUXERS[output.suffix.lower()]
 
     status.update(phase='probing')
     probes = []
     for index, part in enumerate(parts, start=1):
         probes.append(probe(part, ffprobe=ffprobe))
         status.update(force=False, progress=index / len(parts))
-    first = probes[0].signature
+    first = probes[0]
     for part, result in zip(parts, probes, strict=True):
-        if result.signature != first:
+        if result.by_kind() != first.by_kind():
             msg = f'{part.name} carries different streams than {parts[0].name}; a stream copy would break'
             raise MergeWorkerError(msg)
+    _check_memory(probes, muxer, memory_limit)
     expected = sum(result.duration for result in probes)
 
-    status.update(phase='merging', progress=0.0, duration=expected)
+    # Same streams in another order: put every part that strays video first.
+    stray = []
+    if any(result.layout != first.layout for result in probes):
+        stray = [index for index, result in enumerate(probes) if not result.in_order()]
+        _check_space(output, total_bytes + sum(parts[index].stat().st_size for index in stray), reserve_bytes)
+    staging = staging_dir(output)
     target = partial_path(output)
+    inputs = list(parts)
+    try:
+        for index in stray:
+            status.update(phase='reordering', progress=0.0)
+            staging.mkdir(exist_ok=True)
+            inputs[index] = staging / parts[index].name
+            _run_ffmpeg(
+                [
+                    ffmpeg,
+                    '-hide_banner',
+                    '-nostdin',
+                    '-loglevel',
+                    'error',
+                    '-y',
+                    '-i',
+                    str(parts[index]),
+                    '-map',
+                    '0:v',
+                    '-map',
+                    '0:a?',
+                    '-c',
+                    'copy',
+                    '-f',
+                    muxer,
+                    '-progress',
+                    'pipe:1',
+                    '-nostats',
+                    str(inputs[index]),
+                ],
+                duration=probes[index].duration,
+                status=status,
+            )
+        _concat(inputs, target, muxer, expected, status, workdir=workdir, ffmpeg=ffmpeg)
+    finally:
+        shutil.rmtree(staging, ignore_errors=True)
+
+    status.update(phase='verifying', progress=1.0)
+    merged = probe(target, ffprobe=ffprobe)
+    tolerance = max(DURATION_TOLERANCE_SECONDS, expected * DURATION_TOLERANCE_SHARE)
+    if abs(merged.duration - expected) > tolerance:
+        msg = f'merged duration {merged.duration:.1f}s does not match the parts ({expected:.1f}s)'
+        raise MergeWorkerError(msg)
+
+    size = target.stat().st_size
+    status.update(phase='hashing', progress=0.0, size=size)
+    digest = sha1_of(target, on_progress=lambda done: status.update(force=False, progress=done / size if size else 1.0))
+    target.replace(output)
+    return {'size': size, 'sha1': digest, 'duration': merged.duration}
+
+
+def _concat(  # noqa: PLR0913
+    parts: Sequence[Path],
+    target: Path,
+    muxer: str,
+    expected: float,
+    status: StatusFile,
+    *,
+    workdir: Path,
+    ffmpeg: str,
+) -> None:
+    status.update(phase='merging', progress=0.0, duration=expected)
     script = workdir / 'concat.txt'
     script.write_text(concat_list(parts), encoding='utf-8')
     _run_ffmpeg(
@@ -334,7 +460,7 @@ def merge(  # noqa: PLR0913
             '-c',
             'copy',
             '-f',
-            MUXERS[output.suffix.lower()],
+            muxer,
             '-progress',
             'pipe:1',
             '-nostats',
@@ -343,19 +469,6 @@ def merge(  # noqa: PLR0913
         duration=expected,
         status=status,
     )
-
-    status.update(phase='verifying', progress=1.0)
-    merged = probe(target, ffprobe=ffprobe)
-    tolerance = max(DURATION_TOLERANCE_SECONDS, expected * DURATION_TOLERANCE_SHARE)
-    if abs(merged.duration - expected) > tolerance:
-        msg = f'merged duration {merged.duration:.1f}s does not match the parts ({expected:.1f}s)'
-        raise MergeWorkerError(msg)
-
-    size = target.stat().st_size
-    status.update(phase='hashing', progress=0.0, size=size)
-    digest = sha1_of(target, on_progress=lambda done: status.update(force=False, progress=done / size if size else 1.0))
-    target.replace(output)
-    return {'size': size, 'sha1': digest, 'duration': merged.duration}
 
 
 def run(argv_parts: Sequence[str], *, output: str, status_path: str, reserve_gib: float) -> int:
@@ -370,6 +483,7 @@ def run(argv_parts: Sequence[str], *, output: str, status_path: str, reserve_gib
             status,
             reserve_bytes=int(reserve_gib * GIB),
             workdir=workdir,
+            memory_limit=memory_limit(),
         )
     except (MergeWorkerError, OSError) as exc:
         partial_path(output_path).unlink(missing_ok=True)
