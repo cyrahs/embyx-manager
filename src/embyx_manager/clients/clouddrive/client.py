@@ -103,6 +103,12 @@ class CloudDriveClient:
         result = self.stub.GetCopyTasks(empty_pb2.Empty(), metadata=self._metadata(), timeout=GRPC_TIMEOUT_SECONDS)
         return list(result.copyTasks)
 
+    def get_upload_files(self, name_filter: str) -> list[clouddrive_pb2.UploadFileInfo]:
+        """Files in CloudDrive's upload queue whose name contains ``name_filter``."""
+        request = clouddrive_pb2.GetUploadFileListRequest(getAll=True, filter=name_filter)
+        result = self.stub.GetUploadFileList(request, metadata=self._metadata(), timeout=GRPC_TIMEOUT_SECONDS)
+        return list(result.uploadFiles)
+
     def restart_copy_task(self, source_path: str, dest_path: str) -> None:
         request = clouddrive_pb2.CopyTaskRequest(sourcePath=source_path, destPath=dest_path)
         self.stub.RestartCopyTask(request, metadata=self._metadata(), timeout=GRPC_TIMEOUT_SECONDS)

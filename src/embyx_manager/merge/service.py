@@ -377,6 +377,10 @@ class MergeService:
             await cloud.restart_copy_task(str(copy['source_path']), paths.staging_dir)
             await self._repository.update(task.id, upload_attempts=task.upload_attempts + 1, notice=errors)
             return
+        fatal = await cloud.upload_fatal_error(paths.staged_file)
+        if fatal is not None:
+            msg = f'CloudDrive gave up uploading {task.merged_name}: {fatal}'
+            raise MergeFailedError(msg)
         await self._repository.update(
             task.id,
             uploaded_bytes=int(copy['uploaded_bytes']),
