@@ -400,6 +400,29 @@ async def test_an_upload_clouddrive_gave_up_on_fails_the_task(harness: Harness) 
     assert task.error == 'CloudDrive gave up uploading SQTEVR-009.mp4: code: 10025, message: 单文件不能大于115GB'
 
 
+async def test_an_upload_lost_to_a_network_error_is_restarted_then_given_up_on(harness: Harness) -> None:
+    task = await harness.create()
+    await harness.service.tick()
+    harness.finish_merge(await harness.state(task))
+    await harness.service.tick()
+    await harness.service.tick()
+    harness.cloud.copies[0].update(status=CopyStatus.SCANNED)
+    harness.cloud.fatal[f'{harness.staging(task)}/SQTEVR-009.mp4'] = 'Reqwest error error sending request'
+
+    await harness.service.tick()
+    await harness.service.tick()
+
+    # Restarted once, then left alone while CloudDrive queues it again.
+    assert harness.cloud.restarted == [('/downloads/upload/SQTEVR-009.mp4', harness.staging(task))]
+    task = await harness.state(task)
+    assert (task.state, task.notice) == (MergeState.UPLOADING, 'Reqwest error error sending request')
+
+    await harness.repository.update(task.id, upload_attempts=5)
+    await harness.service.tick()
+    task = await harness.state(task)
+    assert (task.state, task.failed_state) == (MergeState.FAILED, MergeState.UPLOADING)
+
+
 async def test_a_sha1_mismatch_fails_before_any_original_is_touched(harness: Harness) -> None:
     task = await harness.create()
     await harness.service.tick()
