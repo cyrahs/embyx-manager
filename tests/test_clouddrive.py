@@ -349,3 +349,24 @@ async def test_offline_task_hash_matches_the_hash_parsed_from_our_magnet() -> No
     tasks = await cloud.list_offline_files('/media/tasks')
 
     assert tasks[0]['info_hash'] == extract_info_hash(task.url)
+
+
+async def test_upload_fatal_error_reads_the_upload_queue_for_the_exact_path() -> None:
+    def info(dest: str, status: str, error: str = '') -> clouddrive_pb2.UploadFileInfo:
+        return clouddrive_pb2.UploadFileInfo(destPath=dest, status=status, errorMessage=error)
+
+    get_upload_files = Mock(
+        return_value=[
+            info('/115/upload/merge-9/ABC-001.mp4', 'FatalError', 'elsewhere'),
+            info('/115/upload/merge-1/ABC-001.mp4', 'FatalError', 'code: 10025, message: 单文件不能大于115GB'),
+        ]
+    )
+    cloud = _async_wrapper(SimpleNamespace(get_upload_files=get_upload_files))
+
+    assert await cloud.upload_fatal_error('/115/upload/merge-1/ABC-001.mp4') == (
+        'code: 10025, message: 单文件不能大于115GB'
+    )
+    get_upload_files.assert_called_with('ABC-001.mp4')
+
+    get_upload_files.return_value = [info('/115/upload/merge-1/ABC-001.mp4', 'Transfer')]
+    assert await cloud.upload_fatal_error('/115/upload/merge-1/ABC-001.mp4') is None

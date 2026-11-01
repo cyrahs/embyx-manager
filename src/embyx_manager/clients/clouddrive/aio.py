@@ -272,6 +272,22 @@ class AsyncCloudDrive:
         tasks = await _run_sync_complete(self._client.get_copy_tasks)
         return tuple(_copy_task_to_dict(task) for task in tasks)
 
+    async def upload_fatal_error(self, dest_path: str) -> str | None:
+        """Why CloudDrive gave up uploading ``dest_path`` for good, or None while it has not.
+
+        A copy task stays "Scanned" when its upload hits a fatal error (115
+        refusing a file over its size limit, say); only the upload queue says so.
+        """
+        files = await _run_sync_complete(self._client.get_upload_files, posixpath.basename(dest_path))
+        return next(
+            (
+                str(file.errorMessage) or 'fatal upload error'
+                for file in files
+                if file.destPath == dest_path and file.status == 'FatalError'
+            ),
+            None,
+        )
+
     async def restart_copy_task(self, source_path: str, dest_path: str) -> None:
         await _run_sync_complete(self._client.restart_copy_task, source_path, dest_path)
 

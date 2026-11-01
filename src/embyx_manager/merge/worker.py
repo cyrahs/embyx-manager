@@ -57,6 +57,8 @@ GIB = 1024**3
 STDERR_TAIL_LINES = 20
 #: ffmpeg is stopped once neither its output nor its position has moved for this long.
 STALL_SECONDS = 15 * 60
+#: The largest single file 115 accepts ("单文件不能大于115GB"); a bigger merge could never be uploaded.
+MAX_UPLOAD_BYTES = 115 * 10**9
 #: The muxers that hold an entry per packet in memory until they write the index at the end.
 INDEXED_MUXERS = frozenset({'mp4', 'mov'})
 #: Memory per packet held by those muxers (ffmpeg 6.1 measured ~70 bytes, growth included),
@@ -225,6 +227,12 @@ def _check_parts(parts: Sequence[Path], output: Path) -> int:
         except OSError as exc:
             msg = f'cannot read {part}: {exc.strerror or exc}'
             raise MergeWorkerError(msg) from exc
+    if total > MAX_UPLOAD_BYTES:
+        msg = (
+            f'the parts add up to {total / 10**9:.1f} GB, more than the {MAX_UPLOAD_BYTES // 10**9} GB '
+            '115 accepts in one file'
+        )
+        raise MergeWorkerError(msg)
     return total
 
 

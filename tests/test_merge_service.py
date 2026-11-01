@@ -36,6 +36,7 @@ class FakeCloud:
         self.copies: list[dict[str, object]] = []
         self.restarted: list[tuple[str, str]] = []
         self.deleted: list[str] = []
+        self.fatal: dict[str, str] = {}
 
     def add_file(self, path: str, size: int, sha1: str = '') -> None:
         self.files[path] = {'size': size, 'hashes': {'2': sha1} if sha1 else {}}
@@ -56,6 +57,9 @@ class FakeCloud:
             },
         )
         return {'success': True, 'error_message': ''}
+
+    async def upload_fatal_error(self, path: str) -> str | None:
+        return self.fatal.get(path)
 
     async def restart_copy_task(self, source: str, destination: str) -> None:
         self.restarted.append((source, destination))
@@ -377,6 +381,23 @@ async def test_a_failed_copy_is_restarted_then_given_up_on(harness: Harness) -> 
     await harness.service.tick()
     task = await harness.state(task)
     assert (task.state, task.failed_state) == (MergeState.FAILED, MergeState.UPLOADING)
+
+
+async def test_an_upload_clouddrive_gave_up_on_fails_the_task(harness: Harness) -> None:
+    task = await harness.create()
+    await harness.service.tick()
+    harness.finish_merge(await harness.state(task))
+    await harness.service.tick()
+    await harness.service.tick()
+    # The copy task itself still reads "Scanned"; only the upload queue knows.
+    harness.cloud.copies[0].update(status=CopyStatus.SCANNED)
+    harness.cloud.fatal[f'{harness.staging(task)}/SQTEVR-009.mp4'] = 'code: 10025, message: 单文件不能大于115GB'
+
+    await harness.service.tick()
+
+    task = await harness.state(task)
+    assert (task.state, task.failed_state) == (MergeState.FAILED, MergeState.UPLOADING)
+    assert task.error == 'CloudDrive gave up uploading SQTEVR-009.mp4: code: 10025, message: 单文件不能大于115GB'
 
 
 async def test_a_sha1_mismatch_fails_before_any_original_is_touched(harness: Harness) -> None:

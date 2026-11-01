@@ -132,6 +132,17 @@ def test_merge_refuses_an_mp4_whose_index_would_outgrow_the_memory_limit(tmp_pat
     assert not partial_path(tmp_path / 'ABC-123.mp4').exists()
 
 
+@needs_ffmpeg
+def test_merge_refuses_parts_bigger_than_115_accepts(
+    tmp_path: Path, parts: list[Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(worker, 'MAX_UPLOAD_BYTES', 1000)
+    status = StatusFile(tmp_path / 'status.json')
+
+    with pytest.raises(MergeWorkerError, match='GB 115 accepts in one file'):
+        worker.merge(parts, tmp_path / 'ABC-123.mp4', status, reserve_bytes=0, workdir=tmp_path)
+
+
 def test_memory_limit_reads_the_cgroup(tmp_path: Path) -> None:
     limit = tmp_path / 'memory.max'
     limit.write_text('3221225472\n')
