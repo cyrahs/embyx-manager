@@ -64,6 +64,8 @@ STAGED_FILE_WAIT = timedelta(minutes=10)
 ARCHIVE_NUDGE_INTERVAL = timedelta(minutes=5)
 #: How long a copy CloudDrive accepted may take to show up among its copy tasks.
 COPY_LISTING_GRACE = timedelta(minutes=2)
+#: CloudDrive's words for an upload 115 will never take, however often it is retried.
+PERMANENT_UPLOAD_ERRORS = ('code: 10025', '单文件不能大于')
 #: After this long without the archive filing the title, the task fails for a look.
 ARCHIVE_WAIT = timedelta(hours=2)
 SHA1_HASH_KEY = '2'
@@ -377,15 +379,30 @@ class MergeService:
             await cloud.restart_copy_task(str(copy['source_path']), paths.staging_dir)
             await self._repository.update(task.id, upload_attempts=task.upload_attempts + 1, notice=errors)
             return
+        if not await self._handled_fatal_upload(task, paths, cloud, str(copy['source_path'])):
+            await self._repository.update(
+                task.id,
+                uploaded_bytes=int(copy['uploaded_bytes']),
+                notice='CloudDrive has paused the upload' if copy['paused'] else None,
+            )
+
+    async def _handled_fatal_upload(
+        self, task: MergeTask, paths: MergePaths, cloud: AsyncCloudDrive, source_path: str
+    ) -> bool:
+        """Deal with an upload CloudDrive gave up on; False while it has not."""
         fatal = await cloud.upload_fatal_error(paths.staged_file)
-        if fatal is not None:
+        if fatal is None:
+            return False
+        permanent = any(marker in fatal for marker in PERMANENT_UPLOAD_ERRORS)
+        if permanent or task.upload_attempts >= MAX_UPLOAD_ATTEMPTS:
             msg = f'CloudDrive gave up uploading {task.merged_name}: {fatal}'
             raise MergeFailedError(msg)
-        await self._repository.update(
-            task.id,
-            uploaded_bytes=int(copy['uploaded_bytes']),
-            notice='CloudDrive has paused the upload' if copy['paused'] else None,
-        )
+        # A network error ends an upload the same way; restart it, then give
+        # CloudDrive a moment to queue it again before judging it anew.
+        if task.notice != fatal or datetime.now(UTC) - task.updated_at >= COPY_LISTING_GRACE:
+            await cloud.restart_copy_task(source_path, paths.staging_dir)
+            await self._repository.update(task.id, upload_attempts=task.upload_attempts + 1, notice=fatal)
+        return True
 
     @staticmethod
     async def _copy_task(cloud: AsyncCloudDrive, paths: MergePaths) -> dict[str, object] | None:
