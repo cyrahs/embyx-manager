@@ -73,6 +73,14 @@ class MergeWorkerError(Exception):
     """A reason the merge cannot go on, worded for the operator."""
 
 
+class MergeRefusedError(MergeWorkerError):
+    """The parts can never be merged by a stream copy, however often the Job runs.
+
+    The check did its job, so the Job still ends cleanly: the status file tells
+    the app the merge is off, and only a crash or a broken run fails the Job.
+    """
+
+
 @dataclass(frozen=True)
 class Probe:
     duration: float
@@ -163,7 +171,7 @@ def probe(path: Path, *, ffprobe: str = 'ffprobe') -> Probe:
     streams = [tuple(stream.get(key) for key in SIGNATURE_KEYS) for stream in media]
     if not any(stream[0] == 'video' for stream in streams):
         msg = f'{path.name} has no video stream'
-        raise MergeWorkerError(msg)
+        raise MergeRefusedError(msg)
     counts = [str(stream.get('nb_frames', '')) for stream in media]
     return Probe(
         duration=duration,
@@ -212,14 +220,14 @@ def _check_space(output: Path, needed: int, reserve_bytes: int) -> None:
 def _check_parts(parts: Sequence[Path], output: Path) -> int:
     if len(parts) < 2:  # noqa: PLR2004 - one part is not a merge
         msg = 'a merge needs at least two parts'
-        raise MergeWorkerError(msg)
+        raise MergeRefusedError(msg)
     suffixes = {part.suffix.lower() for part in parts}
     if suffixes != {output.suffix.lower()}:
         msg = f'parts and output must share one container, got {sorted(suffixes)}'
-        raise MergeWorkerError(msg)
+        raise MergeRefusedError(msg)
     if output.suffix.lower() not in MUXERS:
         msg = f'cannot write a {output.suffix} container'
-        raise MergeWorkerError(msg)
+        raise MergeRefusedError(msg)
     total = 0
     for part in parts:
         try:
@@ -232,7 +240,7 @@ def _check_parts(parts: Sequence[Path], output: Path) -> int:
             f'the parts add up to {total / 10**9:.1f} GB, more than the {MAX_UPLOAD_BYTES // 10**9} GB '
             '115 accepts in one file'
         )
-        raise MergeWorkerError(msg)
+        raise MergeRefusedError(msg)
     return total
 
 
@@ -246,7 +254,7 @@ def _check_memory(probes: Sequence[Probe], muxer: str, limit: int | None) -> Non
             f'the parts hold {packets:,} packets, whose {muxer} index needs about {needed / GIB:.1f} GiB '
             f'of memory, more than the Job is allowed ({limit / GIB:.1f} GiB)'
         )
-        raise MergeWorkerError(msg)
+        raise MergeRefusedError(msg)
 
 
 def _keep_tail(stream: Iterable[str], tail: deque[str]) -> None:
@@ -373,7 +381,7 @@ def merge(  # noqa: PLR0913
     for part, result in zip(parts, probes, strict=True):
         if result.by_kind() != first.by_kind():
             msg = f'{part.name} carries different streams than {parts[0].name}; a stream copy would break'
-            raise MergeWorkerError(msg)
+            raise MergeRefusedError(msg)
     _check_memory(probes, muxer, memory_limit)
     expected = sum(result.duration for result in probes)
 
@@ -480,7 +488,12 @@ def _concat(  # noqa: PLR0913
 
 
 def run(argv_parts: Sequence[str], *, output: str, status_path: str, reserve_gib: float) -> int:
-    """The ``merge-worker`` subcommand: exit 0 once the merged file is in place."""
+    """The ``merge-worker`` subcommand.
+
+    Exits 0 once the merged file is in place, and also when the parts were
+    refused as unmergeable: the status file then says ``failed`` with
+    ``refused`` set, which is a finished answer rather than a broken Job.
+    """
     status = StatusFile(Path(status_path))
     output_path = Path(output)
     workdir = Path(os.environ.get('TMPDIR', '/tmp'))  # noqa: S108 - the Job mounts an emptyDir there
@@ -493,6 +506,11 @@ def run(argv_parts: Sequence[str], *, output: str, status_path: str, reserve_gib
             workdir=workdir,
             memory_limit=memory_limit(),
         )
+    except MergeRefusedError as exc:
+        partial_path(output_path).unlink(missing_ok=True)
+        status.update(state='failed', refused=True, error=str(exc))
+        print(f'merge refused: {exc}', file=sys.stderr)  # noqa: T201
+        return 0
     except (MergeWorkerError, OSError) as exc:
         partial_path(output_path).unlink(missing_ok=True)
         status.update(state='failed', error=str(exc))

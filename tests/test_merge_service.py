@@ -276,6 +276,35 @@ async def test_a_failed_job_fails_the_task_with_its_log(harness: Harness) -> Non
     assert task.error == 'the merge Job failed: ffmpeg: boom'
 
 
+async def test_a_refused_merge_fails_the_task_though_its_job_completed(harness: Harness) -> None:
+    task = await harness.create()
+    await harness.service.tick()
+    task = await harness.state(task)
+    status = harness.work / '.merge' / f'{task.id}.json'
+    status.parent.mkdir(exist_ok=True)
+    status.write_text(json.dumps({'state': 'failed', 'refused': True, 'error': 'cd2 carries different streams'}))
+    harness.kube.jobs[task.job_name or '']['status'] = {'conditions': [{'type': 'Complete', 'status': 'True'}]}
+
+    await harness.service.tick()
+
+    task = await harness.state(task)
+    assert (task.state, task.failed_state) == (MergeState.FAILED, MergeState.MERGING)
+    assert task.error == 'cd2 carries different streams'
+
+
+async def test_a_job_that_completed_without_a_report_fails_the_task(harness: Harness) -> None:
+    task = await harness.create()
+    await harness.service.tick()
+    task = await harness.state(task)
+    harness.kube.jobs[task.job_name or '']['status'] = {'conditions': [{'type': 'Complete', 'status': 'True'}]}
+
+    await harness.service.tick()
+
+    task = await harness.state(task)
+    assert (task.state, task.failed_state) == (MergeState.FAILED, MergeState.MERGING)
+    assert task.error == 'the merge Job ended without reporting a result'
+
+
 async def test_a_killed_job_leaves_no_half_written_merge_behind(harness: Harness) -> None:
     task = await harness.create()
     await harness.service.tick()

@@ -319,6 +319,13 @@ class MergeService:
                 tail = await kube.log_tail(task.job_name or '')
             details = [detail for detail in (job_failure(job), tail) if detail]
             raise MergeFailedError('the merge Job failed' + (f': {" | ".join(details)}' if details else ''))
+        if job_outcome(job) == 'succeeded':
+            # A refusal ends the Job cleanly too, but the worker reports before
+            # it exits; a report written since the read above waits for the next tick.
+            if (read_status(paths.status) or {}).get('state') in {'done', 'failed'}:
+                return
+            msg = 'the merge Job ended without reporting a result'
+            raise MergeFailedError(msg)
         await self._repository.update(
             task.id,
             phase=status.get('phase') or task.phase,

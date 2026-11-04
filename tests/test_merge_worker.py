@@ -10,7 +10,14 @@ from pathlib import Path
 import pytest
 
 from embyx_manager.merge import worker
-from embyx_manager.merge.worker import MergeWorkerError, StatusFile, concat_list, partial_path, read_status
+from embyx_manager.merge.worker import (
+    MergeRefusedError,
+    MergeWorkerError,
+    StatusFile,
+    concat_list,
+    partial_path,
+    read_status,
+)
 
 needs_ffmpeg = pytest.mark.skipif(shutil.which('ffmpeg') is None, reason='ffmpeg is not installed')
 
@@ -97,10 +104,12 @@ def test_merge_refuses_parts_with_different_streams(tmp_path: Path, parts: list[
         reserve_gib=0,
     )
 
-    assert code == 1
+    # A refusal is the check's answer, not a broken Job: it ends cleanly.
+    assert code == 0
     status = read_status(status_path)
     assert status is not None
     assert status['state'] == 'failed'
+    assert status['refused'] is True
     assert 'ABC-123-cd4.mp4 carries different streams' in status['error']
     assert not (tmp_path / 'ABC-123.mp4').exists()
 
@@ -127,7 +136,7 @@ def test_merge_puts_parts_with_the_streams_in_another_order_video_first(tmp_path
 def test_merge_refuses_an_mp4_whose_index_would_outgrow_the_memory_limit(tmp_path: Path, parts: list[Path]) -> None:
     status = StatusFile(tmp_path / 'status.json')
 
-    with pytest.raises(MergeWorkerError, match=r'hold [\d,]+ packets, whose mp4 index needs about'):
+    with pytest.raises(MergeRefusedError, match=r'hold [\d,]+ packets, whose mp4 index needs about'):
         worker.merge(parts, tmp_path / 'ABC-123.mp4', status, reserve_bytes=0, workdir=tmp_path, memory_limit=1 << 20)
     assert not partial_path(tmp_path / 'ABC-123.mp4').exists()
 
@@ -139,7 +148,7 @@ def test_merge_refuses_parts_bigger_than_115_accepts(
     monkeypatch.setattr(worker, 'MAX_UPLOAD_BYTES', 1000)
     status = StatusFile(tmp_path / 'status.json')
 
-    with pytest.raises(MergeWorkerError, match='GB 115 accepts in one file'):
+    with pytest.raises(MergeRefusedError, match='GB 115 accepts in one file'):
         worker.merge(parts, tmp_path / 'ABC-123.mp4', status, reserve_bytes=0, workdir=tmp_path)
 
 
@@ -161,10 +170,25 @@ def test_merge_refuses_to_start_without_room_for_the_reserve(tmp_path: Path, par
 
 
 @needs_ffmpeg
+def test_a_merge_short_of_space_fails_the_job(tmp_path: Path, parts: list[Path]) -> None:
+    status_path = tmp_path / 'status.json'
+
+    code = worker.run(
+        list(map(str, parts)), output=str(tmp_path / 'ABC-123.mp4'), status_path=str(status_path), reserve_gib=1 << 30
+    )
+
+    # Room can be made, so this is a failure to retry rather than a refusal.
+    assert code == 1
+    status = read_status(status_path)
+    assert status is not None
+    assert (status['state'], status.get('refused')) == ('failed', None)
+
+
+@needs_ffmpeg
 def test_merge_keeps_the_parts_container_and_refuses_a_mix(tmp_path: Path, parts: list[Path]) -> None:
     status = StatusFile(tmp_path / 'status.json')
 
-    with pytest.raises(MergeWorkerError, match='share one container'):
+    with pytest.raises(MergeRefusedError, match='share one container'):
         worker.merge(parts, tmp_path / 'ABC-123.mkv', status, reserve_bytes=0, workdir=tmp_path)
 
 
