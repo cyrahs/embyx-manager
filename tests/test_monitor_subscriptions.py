@@ -121,3 +121,25 @@ async def test_talent_subscriptions_derive_their_feed_url_and_are_unique_per_tal
     assert created.seed_pending is True
     with pytest.raises(SubscriptionExistsError):
         await repository.add_talent(talent_id=5022, name='x', aliases=(), category='Rank', now=NOW)
+
+
+async def test_relinking_a_talent_moves_its_id_and_keeps_the_cursor() -> None:
+    repository = make_repository()
+    created = await repository.add_talent(talent_id=46505, name='小花のん', aliases=(), category='Actor', now=NOW)
+    await repository.record_poll(created.id, now=NOW, cursor=['k1'], error='404')
+    other = await repository.add_talent(talent_id=5022, name='河北彩花', aliases=(), category='Actor', now=NOW)
+    rss = await repository.add_rss(url='https://rsshub.test/a', category='Actor', now=NOW)
+
+    relinked = await repository.relink_talent(
+        created.id, talent_id=71334, aliases=('別名',), now=NOW + timedelta(hours=1)
+    )
+
+    assert relinked is not None
+    assert relinked.talent_id == 71334
+    assert relinked.feed_url == 'https://www.avbase.net/talents/71334/feed'
+    assert relinked.aliases == ('別名',)
+    assert relinked.cursor == ('k1',)
+    assert relinked.updated_at == NOW + timedelta(hours=1)
+    with pytest.raises(SubscriptionExistsError):
+        await repository.relink_talent(created.id, talent_id=other.talent_id or 0, aliases=(), now=NOW)
+    assert await repository.relink_talent(rss.id, talent_id=1, aliases=(), now=NOW) is None

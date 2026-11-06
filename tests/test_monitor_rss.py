@@ -7,8 +7,10 @@ from unittest.mock import AsyncMock
 from xml.sax.saxutils import escape
 
 import grpc
+import httpx
 import pytest
 
+from embyx_manager.clients.avbase import AvbaseTalent
 from embyx_manager.config.models import ArchiveConfig, RssCategory, RssConfig
 from embyx_manager.core.avid import AvidParser
 from embyx_manager.monitor.acquisitions import (
@@ -470,6 +472,24 @@ class FakeSubscriptions:
         self.records[subscription_id] = record
         return record
 
+    async def relink_talent(
+        self,
+        subscription_id: int,
+        *,
+        talent_id: int,
+        aliases: Sequence[str],
+        now: datetime,
+    ) -> SubscriptionRecord | None:
+        record = self.records.get(subscription_id)
+        if record is None or record.kind is not SubscriptionKind.AVBASE_TALENT:
+            return None
+        if any(other.talent_id == talent_id for other in self.records.values() if other.id != subscription_id):
+            what = f'talent {talent_id}'
+            raise SubscriptionExistsError(what)
+        record = dataclasses.replace(record, talent_id=talent_id, aliases=tuple(aliases), updated_at=now)
+        self.records[subscription_id] = record
+        return record
+
     async def delete(self, subscription_id: int) -> bool:
         return self.records.pop(subscription_id, None) is not None
 
@@ -524,6 +544,7 @@ def make_pipeline(
     fetch_side_effect: object | None = None,
     archive_config: ArchiveConfig | None = None,
     cast_lookup: object | None = None,
+    talent_lookup: object | None = None,
 ) -> tuple[RssPipeline, SimpleNamespace]:
     deps = SimpleNamespace()
     deps.cast_lookup = cast_lookup
@@ -578,6 +599,7 @@ def make_pipeline(
         # everything through without touching the filesystem.
         archiver=ArchivePipeline(config=archive_config or ArchiveConfig(), avid_parser=AvidParser()),
         cast_lookup=cast_lookup,
+        talent_lookup=talent_lookup,
     )
     return pipeline, deps
 
@@ -1267,3 +1289,148 @@ async def test_a_feed_that_cannot_be_parsed_is_reported_on_the_subscription() ->
     assert record.last_error is not None
     assert record.last_error.startswith('FeedParseError')
     assert record.cursor == ()
+
+
+def avbase_feed(talent_id: int) -> str:
+    return f'https://www.avbase.net/talents/{talent_id}/feed'
+
+
+def not_found(url: str) -> httpx.HTTPStatusError:
+    request = httpx.Request('GET', url)
+    return httpx.HTTPStatusError('404 Not Found', request=request, response=httpx.Response(404, request=request))
+
+
+def moved_talent_pipeline(
+    *,
+    listed: AvbaseTalent | Exception | None,
+    subscriptions: FakeSubscriptions | None = None,
+    live: dict[int, list[dict]] | None = None,
+) -> tuple[RssPipeline, SimpleNamespace]:
+    """One talent subscription (#1, talent 46505) whose feed is gone; ``live`` lists the feeds that still answer."""
+    feeds = {avbase_feed(talent_id): feed_xml(items) for talent_id, items in (live or {}).items()}
+
+    async def fetch(url: str) -> bytes:
+        if url not in feeds:
+            raise not_found(url)
+        return feeds[url]
+
+    async def lookup(_name: str) -> AvbaseTalent | None:
+        if isinstance(listed, Exception):
+            raise listed
+        return listed
+
+    subscriptions = subscriptions or FakeSubscriptions(
+        [
+            make_subscription(
+                1,
+                name='小花のん',
+                talent_id=46505,
+                aliases=('こはなのん',),
+                cursor=('https://www.avbase.net/works/OLD-001',),
+            ),
+        ],
+    )
+    pipeline, deps = make_pipeline(
+        subscriptions=subscriptions,
+        fetch_side_effect=fetch,
+        talent_lookup=AsyncMock(side_effect=lookup),
+    )
+    return pipeline, deps
+
+
+async def test_a_talent_whose_feed_is_gone_follows_avbase_to_its_new_id() -> None:
+    pipeline, deps = moved_talent_pipeline(
+        listed=AvbaseTalent(talent_id=71334, name='小花のん', aliases=(), total_works=993),
+        live={
+            71334: [
+                make_item('https://www.avbase.net/works/OLD-001', 'OLD-001'),
+                make_item('https://www.avbase.net/works/NEW-002', 'NEW-002'),
+            ],
+        },
+    )
+
+    ctx = make_ctx()
+    await pipeline.run(ctx)
+
+    record = deps.subscriptions.records[1]
+    assert record.talent_id == 71334
+    assert record.feed_url == avbase_feed(71334)
+    # Re-created talents can come back without aliases; the known ones are kept.
+    assert record.aliases == ('こはなのん',)
+    assert record.last_error is None
+    # Items are keyed by work URL, so the cursor carries over and only the new work is read.
+    assert record.cursor == ('https://www.avbase.net/works/OLD-001', 'https://www.avbase.net/works/NEW-002')
+    assert ctx.stats['subscriptions_relinked'] == 1
+    assert ctx.stats['new_items'] == 1
+    assert 'NEW-002' in deps.ledger.states
+    assert 'OLD-001' not in deps.ledger.states
+
+
+async def test_a_relinked_talent_takes_the_new_aliases_when_avbase_lists_them() -> None:
+    pipeline, deps = moved_talent_pipeline(
+        listed=AvbaseTalent(talent_id=71334, name='小花のん', aliases=('別名',), total_works=993),
+        live={71334: []},
+    )
+
+    await pipeline.run(make_ctx())
+
+    assert deps.subscriptions.records[1].aliases == ('別名',)
+
+
+@pytest.mark.parametrize(
+    'listed',
+    [
+        None,
+        AvbaseTalent(talent_id=46505, name='小花のん', aliases=(), total_works=1),
+        AvbaseTalent(talent_id=99999, name='別人', aliases=('他人',), total_works=1),
+        RuntimeError('AVBase is down'),
+    ],
+    ids=['not-listed', 'same-id', 'someone-else', 'catalog-down'],
+)
+async def test_a_gone_feed_stays_failed_when_avbase_offers_no_new_id(listed: object) -> None:
+    pipeline, deps = moved_talent_pipeline(listed=listed, live={99999: []})
+
+    ctx = make_ctx()
+    await pipeline.run(ctx)
+
+    record = deps.subscriptions.records[1]
+    assert record.talent_id == 46505
+    assert record.last_error is not None
+    assert '404' in record.last_error
+    assert ctx.stats['subscriptions_failed'] == 1
+    assert 'subscriptions_relinked' not in ctx.stats
+
+
+async def test_a_new_id_another_subscription_follows_is_reported_not_taken() -> None:
+    subscriptions = FakeSubscriptions(
+        [
+            make_subscription(1, name='小花のん', talent_id=46505),
+            make_subscription(2, name='小花のん', talent_id=71334),
+        ],
+    )
+    pipeline, deps = moved_talent_pipeline(
+        listed=AvbaseTalent(talent_id=71334, name='小花のん', aliases=(), total_works=993),
+        subscriptions=subscriptions,
+        live={71334: []},
+    )
+
+    await pipeline.run(make_ctx())
+
+    record = deps.subscriptions.records[1]
+    assert record.talent_id == 46505
+    assert record.last_error is not None
+    assert 'already follows' in record.last_error
+    assert deps.subscriptions.records[2].last_error is None
+
+
+async def test_a_gone_rss_feed_is_not_looked_up_as_a_talent() -> None:
+    lookup = AsyncMock(return_value=None)
+    pipeline, deps = make_pipeline(
+        fetch_side_effect=not_found(feed_url('Actor')),
+        talent_lookup=lookup,
+    )
+
+    await pipeline.run(make_ctx())
+
+    lookup.assert_not_awaited()
+    assert '404' in (deps.subscriptions.records[1].last_error or '')

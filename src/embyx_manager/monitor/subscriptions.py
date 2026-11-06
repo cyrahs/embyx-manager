@@ -201,6 +201,39 @@ class SubscriptionRepository:
             raise SubscriptionExistsError(url or '') from exc
         return _from_row(row) if row is not None else None
 
+    async def relink_talent(
+        self,
+        subscription_id: int,
+        *,
+        talent_id: int,
+        aliases: Sequence[str],
+        now: datetime,
+    ) -> SubscriptionRecord | None:
+        """Point a talent subscription at the id AVBase now lists the talent under.
+
+        AVBase sometimes re-creates a talent under a new id, and the feed of the
+        old one then answers 404. The cursor stays: feed items are keyed by the
+        work URL, which does not change with the talent.
+        """
+        pool = await self._database.get_pool()
+        try:
+            row = await pool.fetchrow(
+                """
+                UPDATE feed_subscriptions
+                SET talent_id = $2, aliases_json = $3, updated_at = $4
+                WHERE id = $1 AND kind = 'avbase_talent'
+                RETURNING *
+                """,
+                subscription_id,
+                talent_id,
+                json.dumps(list(aliases)),
+                now,
+            )
+        except asyncpg.UniqueViolationError as exc:
+            what = f'talent {talent_id}'
+            raise SubscriptionExistsError(what) from exc
+        return _from_row(row) if row is not None else None
+
     async def delete(self, subscription_id: int) -> bool:
         pool = await self._database.get_pool()
         status = await pool.execute('DELETE FROM feed_subscriptions WHERE id = $1', subscription_id)

@@ -35,6 +35,9 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
 
+import httpx
+
+from embyx_manager.clients.avbase import AvbaseTalent
 from embyx_manager.clients.clouddrive import AsyncCloudDrive
 from embyx_manager.clients.javbus import JavBusClient
 from embyx_manager.clients.rss_magnet import get_magnet_from_html
@@ -51,7 +54,13 @@ from embyx_manager.monitor.archive import ArchivePipeline
 from embyx_manager.monitor.feeds import FeedItem, avid_candidate_from_link, parse_feed
 from embyx_manager.monitor.intake import AcquisitionIntake
 from embyx_manager.monitor.reports import RunCancelledError, RunContext
-from embyx_manager.monitor.subscriptions import SubscriptionRecord, SubscriptionRepository, trim_cursor
+from embyx_manager.monitor.subscriptions import (
+    SubscriptionExistsError,
+    SubscriptionKind,
+    SubscriptionRecord,
+    SubscriptionRepository,
+    trim_cursor,
+)
 
 #: States discovery hands back for a fresh look; a library hit settles them.
 RECHECKABLE_STATES = frozenset(
@@ -72,6 +81,15 @@ class CreditedWork:
 
 #: ``lookup(avid)`` answers the catalog's credits for the work, or None when it is not listed.
 CastLookup = Callable[[str], Awaitable[CreditedWork | None]]
+
+#: ``lookup(name)`` answers the talent the catalog lists under that name (or alias), or None.
+TalentLookup = Callable[[str], Awaitable[AvbaseTalent | None]]
+
+_HTTP_NOT_FOUND = 404
+
+
+class TalentMovedError(RuntimeError):
+    """The talent's feed is gone and the id AVBase lists it under now cannot be taken over."""
 
 
 @dataclass(frozen=True)
@@ -101,12 +119,17 @@ class RssPipeline:
         archiver: ArchivePipeline,
         on_submitted: Callable[[], None] | None = None,
         cast_lookup: CastLookup | None = None,
+        talent_lookup: TalentLookup | None = None,
     ) -> None:
         """``fetch(url)`` returns a feed body; ``on_submitted()`` fires per magnet at CloudDrive.
 
         ``cast_lookup(avid)`` asks the catalog who is credited on a work, so a
         lower category can file a subscribed talent's work under the talent's
         category; without it, only sightings decide.
+
+        ``talent_lookup(name)`` finds a talent by name. AVBase now and then
+        re-creates a talent under a new id, and the old id's feed answers 404;
+        with a lookup, such a subscription follows the talent to the new id.
         """
         self._config = config
         self._avid = avid_parser
@@ -115,6 +138,7 @@ class RssPipeline:
         self._ledger = ledger
         self._archiver = archiver
         self._cast_lookup = cast_lookup
+        self._talent_lookup = talent_lookup
         #: Category label per subscribed talent id, from the enabled talent subscriptions of this run.
         self._talent_categories: dict[int, str] = {}
         #: Catalog answers for this run: the same work is often on more than one chart.
@@ -175,7 +199,8 @@ class RssPipeline:
         category: RssCategory,
         subscription: SubscriptionRecord,
     ) -> None:
-        feed = parse_feed(await self._fetch(subscription.feed_url))
+        subscription, body = await self._fetch_feed(ctx, subscription)
+        feed = parse_feed(body)
         ctx.add('subscriptions_polled')
         if subscription.seed_pending:
             # The backlog was covered elsewhere: remember what the feed holds
@@ -202,6 +227,69 @@ class RssPipeline:
             cursor=trim_cursor([*subscription.cursor, *(item.key for item in fresh)]),
             error=None,
         )
+
+    async def _fetch_feed(
+        self,
+        ctx: RunContext,
+        subscription: SubscriptionRecord,
+    ) -> tuple[SubscriptionRecord, bytes]:
+        """The feed body, and the subscription it was read for (relinked if the talent moved)."""
+        try:
+            return subscription, await self._fetch(subscription.feed_url)
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code != _HTTP_NOT_FOUND:
+                raise
+            relinked = await self._relink_talent(ctx, subscription)
+            if relinked is None:
+                raise
+        return relinked, await self._fetch(relinked.feed_url)
+
+    async def _relink_talent(self, ctx: RunContext, subscription: SubscriptionRecord) -> SubscriptionRecord | None:
+        """Follow a talent whose feed is gone to the id AVBase lists the name under now; None to keep the 404."""
+        talent = await self._moved_talent(ctx, subscription)
+        if talent is None:
+            return None
+        old_id = subscription.talent_id
+        name = subscription.name
+        try:
+            relinked = await self._subscriptions.relink_talent(
+                subscription.id,
+                talent_id=talent.talent_id,
+                # A freshly re-created talent can come back without its aliases;
+                # the ones already known are better than none.
+                aliases=talent.aliases or subscription.aliases,
+                now=datetime.now(UTC),
+            )
+        except SubscriptionExistsError as exc:
+            msg = f'AVBase now lists {name} as talent {talent.talent_id}, which another subscription already follows'
+            raise TalentMovedError(msg) from exc
+        if relinked is None:
+            return None
+        ctx.info('AVBase moved %s from talent %d to %d; the subscription follows', name, old_id, talent.talent_id)
+        ctx.add('subscriptions_relinked')
+        category = self._talent_categories.pop(old_id, None)
+        if category is not None:
+            self._talent_categories.setdefault(talent.talent_id, category)
+        return relinked
+
+    async def _moved_talent(self, ctx: RunContext, subscription: SubscriptionRecord) -> AvbaseTalent | None:
+        """The talent AVBase lists the subscription's name under, if that is a different id of the same talent."""
+        name = subscription.name
+        if subscription.kind is not SubscriptionKind.AVBASE_TALENT or not name or self._talent_lookup is None:
+            return None
+        try:
+            talent = await self._talent_lookup(name)
+        except Exception:  # noqa: BLE001 - the catalog being down leaves the 404 to report; the next run asks again
+            ctx.warning('AVBase could not be asked where %s moved', subscription.display_name)
+            return None
+        if talent is None or talent.talent_id == subscription.talent_id:
+            return None
+        if name.casefold() not in {listed.casefold() for listed in talent.names}:
+            # A name search that lands on someone not credited under this name is
+            # not the same talent; leave the subscription for a person to look at.
+            ctx.warning('AVBase answered %s with %s (talent %d); not relinking', name, talent.name, talent.talent_id)
+            return None
+        return talent
 
     async def _ingest(self, ctx: RunContext, category: RssCategory, items: list[FeedItem]) -> None:
         source = rss_source(category.label)
