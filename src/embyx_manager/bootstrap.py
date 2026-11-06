@@ -338,6 +338,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
             # Resolved when the run executes, well after the scheduler exists.
             on_submitted=scheduler.notify_submission,
             cast_lookup=credited_cast,
+            talent_lookup=avbase.talent,
         )
         await pipeline.run(ctx)
 

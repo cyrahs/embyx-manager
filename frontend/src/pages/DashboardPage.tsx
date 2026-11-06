@@ -53,6 +53,7 @@ const STAT_LABELS: Record<string, string> = {
   subscriptions_polled: '订阅拉取',
   subscriptions_failed: '订阅拉取失败',
   subscriptions_seeded: '订阅初始化',
+  subscriptions_relinked: '演员 ID 更新',
   unique_avids: '番号',
   categories_failed: '分类拉取失败',
   skipped_known: '已跟踪跳过',
