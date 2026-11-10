@@ -191,6 +191,73 @@ describe('merge page', () => {
     expect(fetchMock).toHaveBeenCalledWith('/api/merge/tasks/4/cancel', expect.objectContaining({ method: 'POST' }))
   })
 
+  it('opens the task list on running work and filters by state', async () => {
+    const failed = {
+      ...TASK,
+      id: 3,
+      avid: 'PPB-004',
+      state: 'failed',
+      failed_state: 'merging',
+      error: 'PPB-004-cd2.wmv carries different streams than PPB-004-cd1.wmv; a stream copy would break',
+      notice: null,
+      retryable: true,
+    }
+    const done = { ...TASK, id: 2, avid: 'DONE-001', state: 'done', notice: null, cancellable: false }
+    tasksBody = { items: [failed, TASK, done], unavailable: null }
+    renderPage()
+
+    const tasks = await screen.findByRole('region', { name: '合并任务' })
+    expect(within(tasks).getByRole('button', { name: '进行中 1' })).toHaveAttribute('aria-pressed', 'true')
+    expect(within(tasks).getByText('OLD-001')).toBeInTheDocument()
+    expect(within(tasks).queryByText('PPB-004')).not.toBeInTheDocument()
+
+    await userEvent.click(within(tasks).getByRole('button', { name: '失败 1' }))
+    expect(within(tasks).getByText('PPB-004')).toBeInTheDocument()
+    expect(within(tasks).queryByText('OLD-001')).not.toBeInTheDocument()
+    // A long explanation wraps in its own column, so the actions stay in view.
+    expect(within(tasks).getByText(/PPB-004-cd2\.wmv/).closest('td')).toHaveClass('cell-text')
+    expect(within(tasks).getByRole('button', { name: '重试' }).closest('td')).toHaveClass('cell-actions')
+
+    await userEvent.click(within(tasks).getByRole('button', { name: '已完成 1' }))
+    expect(within(tasks).getByText('DONE-001')).toBeInTheDocument()
+
+    // Everything, running work first, then failures, then finished.
+    await userEvent.click(within(tasks).getByRole('button', { name: '全部 3' }))
+    const order = within(tasks)
+      .getAllByRole('row')
+      .slice(1)
+      .map((row) => within(row).getAllByRole('cell')[0].textContent)
+    expect(order).toEqual(['OLD-001', 'PPB-004', 'DONE-001'])
+  })
+
+  it('falls back to failures, then everything, when nothing is running', async () => {
+    tasksBody = { items: [{ ...TASK, state: 'done', notice: null, cancellable: false }], unavailable: null }
+    renderPage()
+
+    const tasks = await screen.findByRole('region', { name: '合并任务' })
+    expect(within(tasks).getByRole('button', { name: '全部 1' })).toHaveAttribute('aria-pressed', 'true')
+    await userEvent.click(within(tasks).getByRole('button', { name: '进行中 0' }))
+    expect(within(tasks).getByText('没有进行中的任务。')).toBeInTheDocument()
+    await userEvent.click(within(tasks).getByRole('button', { name: '查看全部' }))
+    expect(within(tasks).getByText('OLD-001')).toBeInTheDocument()
+  })
+
+  it('searches the titles and opens the folded groups that match', async () => {
+    renderPage()
+
+    await screen.findByRole('region', { name: '10 盘及以上 · 1' })
+    expect(screen.queryByText('ABP-123')).not.toBeInTheDocument()
+
+    await userEvent.type(screen.getByRole('searchbox', { name: '筛选分盘作品' }), 'abp')
+    expect(screen.getByRole('region', { name: '10 盘及以上 · 匹配 0 / 1' })).toHaveTextContent('没有匹配的作品。')
+    expect(within(screen.getByRole('region', { name: '9 盘及以下 · 匹配 1 / 1' })).getByText('ABP-123')).toBeInTheDocument()
+    expect(screen.queryByText('SQTEVR-009')).not.toBeInTheDocument()
+
+    await userEvent.clear(screen.getByRole('searchbox', { name: '筛选分盘作品' }))
+    expect(screen.getByText('SQTEVR-009')).toBeInTheDocument()
+    expect(screen.queryByText('ABP-123')).not.toBeInTheDocument()
+  })
+
   it('says what automatic merging is doing and what it skipped', async () => {
     tasksBody = {
       items: [],

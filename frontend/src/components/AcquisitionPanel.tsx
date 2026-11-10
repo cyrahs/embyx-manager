@@ -171,13 +171,15 @@ function AcquisitionRow({
           {item.avid}
         </span>
       </td>
-      <td>
+      <td data-label="状态">
         <span className={`run-state ${STATE_TONES[item.state] ?? ''}`}>
           {STATE_LABELS[item.state]}
         </span>
       </td>
-      <td className="acq-muted">{sourceLabel(item.source)}</td>
-      <td className="acq-muted">
+      <td data-label="来源" className="acq-muted">
+        {sourceLabel(item.source)}
+      </td>
+      <td data-label="说明" className="cell-text acq-muted">
         {item.note ? localizeBackendText(item.note) : replacing.length > 0 ? '' : '—'}
         {replacing.length > 0 && (
           <small className="acq-replacing" title={replacing.join('\n')}>
@@ -186,8 +188,10 @@ function AcquisitionRow({
         )}
         {hint && <small className="acq-wait">{hint}</small>}
       </td>
-      <td className="acq-muted">{formatTime(item.updated_at)}</td>
-      <td onClick={(event) => event.stopPropagation()}>
+      <td data-label="更新时间" className="acq-muted">
+        {formatTime(item.updated_at)}
+      </td>
+      <td data-label="操作" className="cell-actions" onClick={(event) => event.stopPropagation()}>
         <div className="acq-actions">
           {item.state === 'needs_attention' && (
             <button type="button" className="text-button" disabled={busy} onClick={() => onAct(item.avid, 'resume')}>
@@ -225,17 +229,21 @@ function AttemptRow({ attempt }: { attempt: MagnetAttempt }) {
   return (
     <tr>
       <td>#{attempt.attempt_no}</td>
-      <td>{MAGNET_SOURCE_LABELS[attempt.magnet_source] ?? attempt.magnet_source}</td>
-      <td>
+      <td data-label="来源">{MAGNET_SOURCE_LABELS[attempt.magnet_source] ?? attempt.magnet_source}</td>
+      <td data-label="状态">
         <span className={`run-state ${ATTEMPT_TONES[attempt.state] ?? ''}`}>
           {ATTEMPT_LABELS[attempt.state] ?? attempt.state}
         </span>
       </td>
-      <td>
+      <td data-label="进度">
         {completed ? <span className="acq-muted">—</span> : <ProgressBar value={attempt.progress} />}
       </td>
-      <td className="acq-muted">{attempt.error ? localizeBackendText(attempt.error) : '—'}</td>
-      <td className="acq-muted">{formatTime(attempt.updated_at)}</td>
+      <td data-label="错误" className="cell-text acq-muted">
+        {attempt.error ? localizeBackendText(attempt.error) : '—'}
+      </td>
+      <td data-label="更新" className="acq-muted">
+        {formatTime(attempt.updated_at)}
+      </td>
     </tr>
   )
 }
@@ -258,7 +266,7 @@ function DetailRow({
       <td colSpan={6}>
         <div className="acq-detail">
           <div className="run-table-wrap">
-            <table className="run-table">
+            <table className="run-table stack">
               <thead>
                 <tr>
                   <th>尝试</th>
@@ -489,8 +497,8 @@ export function AcquisitionPanel({ onUnauthorized }: { onUnauthorized: () => voi
           )}
         </p>
       ) : (
-        <div className="run-table-wrap">
-          <table className="run-table">
+        <div className="run-table-wrap capped">
+          <table className="run-table stack">
             <thead>
               <tr>
                 <th>番号</th>

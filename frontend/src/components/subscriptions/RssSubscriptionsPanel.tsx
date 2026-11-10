@@ -72,8 +72,8 @@ export function RssSubscriptionsPanel({
       {items.length === 0 ? (
         <p className="route-empty">还没有榜单订阅。</p>
       ) : (
-        <div className="run-table-wrap">
-          <table className="run-table">
+        <div className="run-table-wrap capped">
+          <table className="run-table stack">
             <thead>
               <tr>
                 <th>订阅</th>
@@ -85,7 +85,7 @@ export function RssSubscriptionsPanel({
             <tbody>
               {items.map((item) => (
                 <tr key={item.id}>
-                  <td className="subscription-url">
+                  <td className="cell-text subscription-url">
                     <strong>
                       {item.name}
                       <CategoryTag item={item} panelCategory={category} />

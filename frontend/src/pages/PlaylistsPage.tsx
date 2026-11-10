@@ -32,6 +32,7 @@ import { formatTime } from '../lib/subscriptions'
 import type { AcquisitionState, ManualOutcome, PipelineStatus, Playlist, PlaylistFill, PlaylistMissing } from '../types'
 
 const KIND_AWARDS = 4
+const GROUPS_STORAGE_KEY = 'embyx-manager-playlists-groups'
 /** How often the page asks whether a running sync or fill has finished. */
 export const SYNC_POLL_MS = 2000
 const FIRST_YEAR_KIND = 2008
@@ -93,6 +94,30 @@ function groupPlaylists(items: Playlist[]): Group[] {
   return groups
 }
 
+/** Groups the operator folded or opened by hand; the rest follow defaultOpen. */
+function readGroupState(): Record<string, boolean> {
+  try {
+    const raw = window.localStorage.getItem(GROUPS_STORAGE_KEY)
+    const parsed: unknown = raw ? JSON.parse(raw) : {}
+    return parsed && typeof parsed === 'object' ? (parsed as Record<string, boolean>) : {}
+  } catch {
+    return {}
+  }
+}
+
+function writeGroupState(state: Record<string, boolean>) {
+  try {
+    window.localStorage.setItem(GROUPS_STORAGE_KEY, JSON.stringify(state))
+  } catch {
+    // Remembering the fold is a convenience only.
+  }
+}
+
+/** A group with nothing enabled holds nothing to watch, so it starts folded. */
+function defaultOpen(group: Group): boolean {
+  return group.items.some((item) => item.enabled)
+}
+
 function stateLabel(item: Playlist): string {
   if (!item.enabled) return '停用'
   if (item.last_error) return '同步出错'
@@ -119,6 +144,9 @@ export default function PlaylistsPage() {
   const [busy, setBusy] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [missing, setMissing] = useState<Record<string, PlaylistMissing>>({})
+  const [groupState, setGroupState] = useState<Record<string, boolean>>(readGroupState)
+  // Fixed at the first load, so disabling a group's last list does not fold the group under the cursor.
+  const [groupDefaults, setGroupDefaults] = useState<Record<string, boolean> | null>(null)
   // Read when a background fill ends, after the render that started polling it.
   const expandedRef = useRef(expanded)
   expandedRef.current = expanded
@@ -127,6 +155,9 @@ export default function PlaylistsPage() {
     try {
       const [page, statuses] = await Promise.all([listPlaylists(signal), getMonitorStatus(signal)])
       setItems(page.items)
+      setGroupDefaults(
+        (current) => current ?? Object.fromEntries(groupPlaylists(page.items).map((group) => [group.id, defaultOpen(group)])),
+      )
       setSourceName(page.source?.database_name ?? null)
       setFillDir({ path: page.fill_task_dir, reason: page.fill_reason })
       // A fill started before a reload is still running on the server: pick its progress back up.
@@ -270,6 +301,13 @@ export default function PlaylistsPage() {
   }
 
   const groups = useMemo(() => groupPlaylists(items), [items])
+  const toggleGroup = (group: Group, open: boolean) => {
+    setGroupState((current) => {
+      const next = { ...current, [group.id]: !open }
+      writeGroupState(next)
+      return next
+    })
+  }
   const lastSync = useMemo(
     () => items.reduce<string | null>((latest, item) => (item.last_synced_at && (!latest || item.last_synced_at > latest) ? item.last_synced_at : latest), null),
     [items],
@@ -333,169 +371,197 @@ export default function PlaylistsPage() {
         ) : items.length === 0 ? (
           <p className="route-empty">还没有列表：配置好 Emby 后点「立即同步」拉取榜单。</p>
         ) : (
-          groups.map((group) => (
-            <section key={group.id} className="playlist-group" aria-labelledby={`playlist-group-${group.id}`}>
-              <h3 id={`playlist-group-${group.id}`} className="playlist-group-title">
-                {group.title}
-              </h3>
-              <div className="run-table-wrap">
-                <table className="run-table">
-                  <thead>
-                    <tr>
-                      <th className="row-chevron" aria-label="展开" />
-                      <th>榜单</th>
-                      <th>条目</th>
-                      <th>已有</th>
-                      <th>缺失</th>
-                      <th>状态</th>
-                      <th>上次同步</th>
-                      <th>操作</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {group.items.map((item) => {
-                      const open = expanded === item.key
-                      const detail = missing[item.key]
-                      return [
-                        <tr
-                          key={item.key}
-                          aria-expanded={open}
-                          tabIndex={0}
-                          onClick={() => void expand(item)}
-                          onKeyDown={(event) => {
-                            if (event.key === 'Enter' || event.key === ' ') {
-                              event.preventDefault()
-                              void expand(item)
-                            }
-                          }}
-                        >
-                          <td className="row-chevron">
-                            <ChevronIcon expanded={open} />
-                          </td>
-                          <td className="subscription-url">
-                            <strong>{item.name}</strong>
-                            {fills[item.key] && (
-                              <span className="acq-muted playlist-fill-summary">补全：{fillSummary(fills[item.key])}</span>
-                            )}
-                          </td>
-                          <td>{item.total}</td>
-                          <td>{item.present}</td>
-                          <td>{item.missing}</td>
-                          <td>
-                            <span className={`run-state ${stateTone(item)}`}>{stateLabel(item)}</span>
-                            {item.last_error && (
-                              <small className="subscription-error">{localizeBackendText(item.last_error)}</small>
-                            )}
-                          </td>
-                          <td className="acq-muted">{formatTime(item.last_synced_at)}</td>
-                          <td>
-                            <div className="acq-actions">
-                              <button
-                                type="button"
-                                className="text-button"
-                                disabled={busy !== null}
-                                onClick={(event) => {
-                                  event.stopPropagation()
-                                  void toggle(item)
-                                }}
-                              >
-                                {busy === `toggle-${item.key}` ? <Spinner /> : null}
-                                {item.enabled ? '停用' : '启用'}
-                              </button>
-                              {armedFill === item.key ? (
-                                <>
-                                  <button
-                                    type="button"
-                                    className="text-button"
-                                    disabled={busy !== null}
-                                    onClick={(event) => {
-                                      event.stopPropagation()
-                                      void fill(item)
-                                    }}
-                                  >
-                                    {busy === `fill-${item.key}` ? <Spinner /> : null}
-                                    确认补全 {item.missing} 部
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="text-button"
-                                    disabled={busy !== null}
-                                    onClick={(event) => {
-                                      event.stopPropagation()
-                                      setArmedFill(null)
-                                    }}
-                                  >
-                                    取消
-                                  </button>
-                                </>
-                              ) : (
-                                <button
-                                  type="button"
-                                  className="text-button"
-                                  disabled={
-                                    busy !== null ||
-                                    item.missing === 0 ||
-                                    !fillDir.path ||
-                                    fills[item.key]?.state === 'running'
-                                  }
-                                  title={!fillDir.path ? '还没有可用的补全目录' : undefined}
-                                  onClick={(event) => {
-                                    event.stopPropagation()
-                                    setArmedFill(item.key)
-                                  }}
-                                >
-                                  {fills[item.key]?.state === 'running' ? <Spinner /> : null}
-                                  {fills[item.key]?.state === 'running' ? '补全中…' : '补全'}
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>,
-                        open && (
-                          <tr key={`${item.key}-detail`} className="acq-detail-row">
-                            <td colSpan={8}>
-                              <div className="acq-detail">
-                                {!detail ? (
-                                  <p className="dashboard-loading">
-                                    <Spinner /> 正在加载缺失清单…
-                                  </p>
-                                ) : detail.items.length === 0 ? (
-                                  <p className="route-empty">这张榜的影片库里都有。</p>
-                                ) : (
-                                  <table className="run-table">
-                                    <thead>
-                                      <tr>
-                                        <th>名次</th>
-                                        <th>番号</th>
-                                        <th>标题</th>
-                                        <th>下载追踪</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {detail.items.map((entry) => (
-                                        <tr key={entry.avid}>
-                                          <td className="acq-muted">{entry.rank}</td>
-                                          <td>{entry.avid}</td>
-                                          <td className="playlist-title">{entry.title}</td>
-                                          <td className="acq-muted">
-                                            {entry.tracked ? TRACKED_LABELS[entry.tracked] ?? entry.tracked : '—'}
-                                          </td>
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
+          groups.map((group) => {
+            const groupOpen = groupState[group.id] ?? groupDefaults?.[group.id] ?? defaultOpen(group)
+            const enabled = group.items.filter((item) => item.enabled).length
+            const gap = group.items.reduce((sum, item) => sum + item.missing, 0)
+            return (
+              <section key={group.id} className="playlist-group" aria-labelledby={`playlist-group-${group.id}`}>
+                <div className="group-heading">
+                  <h3 className="playlist-group-title">
+                    <button
+                      type="button"
+                      className="text-button group-toggle"
+                      aria-expanded={groupOpen}
+                      onClick={() => toggleGroup(group, groupOpen)}
+                    >
+                      <ChevronIcon expanded={groupOpen} />
+                      <span id={`playlist-group-${group.id}`}>{group.title}</span>
+                    </button>
+                  </h3>
+                  <span className="group-meta">
+                    启用 {enabled}/{group.items.length} · 缺失 {gap}
+                  </span>
+                </div>
+                {groupOpen && (
+                  <div className="run-table-wrap">
+                    <table className="run-table stack">
+                      <thead>
+                        <tr>
+                          <th className="row-chevron" aria-label="展开" />
+                          <th>榜单</th>
+                          <th>条目</th>
+                          <th>已有</th>
+                          <th>缺失</th>
+                          <th>状态</th>
+                          <th>上次同步</th>
+                          <th>操作</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {group.items.map((item) => {
+                          const open = expanded === item.key
+                          const detail = missing[item.key]
+                          return [
+                            <tr
+                              key={item.key}
+                              aria-expanded={open}
+                              tabIndex={0}
+                              onClick={() => void expand(item)}
+                              onKeyDown={(event) => {
+                                if (event.key === 'Enter' || event.key === ' ') {
+                                  event.preventDefault()
+                                  void expand(item)
+                                }
+                              }}
+                            >
+                              <td className="row-chevron">
+                                <ChevronIcon expanded={open} />
+                              </td>
+                              <td className="cell-text subscription-url">
+                                <strong>{item.name}</strong>
+                                {fills[item.key] && (
+                                  <span className="acq-muted playlist-fill-summary">补全：{fillSummary(fills[item.key])}</span>
                                 )}
-                              </div>
-                            </td>
-                          </tr>
-                        ),
-                      ]
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          ))
+                              </td>
+                              <td data-label="条目">{item.total}</td>
+                              <td data-label="已有">{item.present}</td>
+                              <td data-label="缺失">{item.missing}</td>
+                              <td data-label="状态">
+                                <span className={`run-state ${stateTone(item)}`}>{stateLabel(item)}</span>
+                                {item.last_error && (
+                                  <small className="subscription-error">{localizeBackendText(item.last_error)}</small>
+                                )}
+                              </td>
+                              <td data-label="上次同步" className="acq-muted">
+                                {formatTime(item.last_synced_at)}
+                              </td>
+                              <td data-label="操作" className="cell-actions">
+                                <div className="acq-actions">
+                                  <button
+                                    type="button"
+                                    className="text-button"
+                                    disabled={busy !== null}
+                                    onClick={(event) => {
+                                      event.stopPropagation()
+                                      void toggle(item)
+                                    }}
+                                  >
+                                    {busy === `toggle-${item.key}` ? <Spinner /> : null}
+                                    {item.enabled ? '停用' : '启用'}
+                                  </button>
+                                  {armedFill === item.key ? (
+                                    <>
+                                      <button
+                                        type="button"
+                                        className="text-button"
+                                        disabled={busy !== null}
+                                        onClick={(event) => {
+                                          event.stopPropagation()
+                                          void fill(item)
+                                        }}
+                                      >
+                                        {busy === `fill-${item.key}` ? <Spinner /> : null}
+                                        确认补全 {item.missing} 部
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="text-button"
+                                        disabled={busy !== null}
+                                        onClick={(event) => {
+                                          event.stopPropagation()
+                                          setArmedFill(null)
+                                        }}
+                                      >
+                                        取消
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      className="text-button"
+                                      disabled={
+                                        busy !== null ||
+                                        item.missing === 0 ||
+                                        !fillDir.path ||
+                                        fills[item.key]?.state === 'running'
+                                      }
+                                      title={!fillDir.path ? '还没有可用的补全目录' : undefined}
+                                      onClick={(event) => {
+                                        event.stopPropagation()
+                                        setArmedFill(item.key)
+                                      }}
+                                    >
+                                      {fills[item.key]?.state === 'running' ? <Spinner /> : null}
+                                      {fills[item.key]?.state === 'running' ? '补全中…' : '补全'}
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>,
+                            open && (
+                              <tr key={`${item.key}-detail`} className="acq-detail-row">
+                                <td colSpan={8}>
+                                  <div className="acq-detail">
+                                    {!detail ? (
+                                      <p className="dashboard-loading">
+                                        <Spinner /> 正在加载缺失清单…
+                                      </p>
+                                    ) : detail.items.length === 0 ? (
+                                      <p className="route-empty">这张榜的影片库里都有。</p>
+                                    ) : (
+                                      <div className="run-table-wrap capped">
+                                        <table className="run-table stack">
+                                          <thead>
+                                            <tr>
+                                              <th>名次</th>
+                                              <th>番号</th>
+                                              <th>标题</th>
+                                              <th>下载追踪</th>
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+                                            {detail.items.map((entry) => (
+                                              <tr key={entry.avid}>
+                                                <td data-label="名次" className="acq-muted">
+                                                  {entry.rank}
+                                                </td>
+                                                <td data-label="番号">{entry.avid}</td>
+                                                <td data-label="标题" className="cell-text playlist-title">
+                                                  {entry.title}
+                                                </td>
+                                                <td data-label="下载追踪" className="acq-muted">
+                                                  {entry.tracked ? TRACKED_LABELS[entry.tracked] ?? entry.tracked : '—'}
+                                                </td>
+                                              </tr>
+                                            ))}
+                                          </tbody>
+                                        </table>
+                                      </div>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            ),
+                          ]
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </section>
+            )
+          })
         )}
       </section>
     </main>

@@ -6,7 +6,7 @@ import type { Subscription } from '../../types'
 
 export function StateCell({ item }: { item: Subscription }) {
   return (
-    <td>
+    <td data-label="状态">
       <span className={`run-state ${stateTone(item)}`}>{stateLabel(item)}</span>
       {item.last_error && <small className="subscription-error">{localizeBackendText(item.last_error)}</small>}
     </td>
@@ -14,7 +14,11 @@ export function StateCell({ item }: { item: Subscription }) {
 }
 
 export function PolledCell({ item }: { item: Subscription }) {
-  return <td className="acq-muted">{formatTime(item.last_polled_at)}</td>
+  return (
+    <td data-label="上次拉取" className="acq-muted">
+      {formatTime(item.last_polled_at)}
+    </td>
+  )
 }
 
 /** Where new rows of this panel file, and a tag for rows that were filed elsewhere. */
@@ -44,7 +48,7 @@ interface RowActionsProps {
 
 export function RowActions({ item, busy, pendingDelete, onToggle, onDelete, onArmDelete, children }: RowActionsProps) {
   return (
-    <td>
+    <td data-label="操作" className="cell-actions">
       <div className="acq-actions">
         <button type="button" className="text-button" disabled={busy} onClick={onToggle}>
           {item.enabled ? '停用' : '启用'}
