@@ -179,6 +179,15 @@ class Harness:
         status.parent.mkdir(exist_ok=True)
         status.write_text(json.dumps({'state': 'done', 'size': size, 'sha1': SHA1.lower()}))
 
+    async def age(self, task: MergeTask, by: timedelta) -> None:
+        """Date the task's last update ``by`` earlier than now."""
+        pool = await self.repository._database.get_pool()  # noqa: SLF001
+        await pool.execute(
+            'UPDATE merge_tasks SET updated_at = $2 WHERE id = $1',
+            task.id,
+            datetime.now(UTC) - by,
+        )
+
     def staging(self, task: MergeTask) -> str:
         return f'/115/upload/merge-{task.id}'
 
@@ -402,9 +411,17 @@ async def test_a_failed_copy_is_restarted_then_given_up_on(harness: Harness) -> 
     await harness.service.tick()
     harness.cloud.copies[0].update(status=CopyStatus.FAILED, errors=('115 refused',))
 
+    # The first failure rests five minutes before the copy is restarted.
+    await harness.service.tick()
+    await harness.service.tick()
+    assert harness.cloud.restarted == []
+    assert (await harness.state(task)).notice == 'upload attempt 2 of 5 starts in 5 min: 115 refused'
+
+    await harness.age(task, timedelta(minutes=5))
     await harness.service.tick()
     assert harness.cloud.restarted == [('/downloads/upload/SQTEVR-009.mp4', harness.staging(task))]
-    assert (await harness.state(task)).notice == '115 refused'
+    task = await harness.state(task)
+    assert (task.upload_attempts, task.notice) == (2, '115 refused')
 
     await harness.repository.update(task.id, upload_attempts=5)
     await harness.service.tick()
@@ -441,10 +458,42 @@ async def test_an_upload_lost_to_a_network_error_is_restarted_then_given_up_on(h
     await harness.service.tick()
     await harness.service.tick()
 
+    # Each failure rests longer before the next attempt: 5 min, 15 min, 1 h, 3 h.
+    assert harness.cloud.restarted == []
+    task = await harness.state(task)
+    assert (task.state, task.notice) == (
+        MergeState.UPLOADING,
+        'upload attempt 2 of 5 starts in 5 min: Reqwest error error sending request',
+    )
+    await harness.age(task, timedelta(minutes=4))
+    await harness.service.tick()
+    assert harness.cloud.restarted == []
+
+    await harness.age(task, timedelta(minutes=5))
+    await harness.service.tick()
+    await harness.service.tick()
     # Restarted once, then left alone while CloudDrive queues it again.
     assert harness.cloud.restarted == [('/downloads/upload/SQTEVR-009.mp4', harness.staging(task))]
     task = await harness.state(task)
-    assert (task.state, task.notice) == (MergeState.UPLOADING, 'Reqwest error error sending request')
+    assert (task.upload_attempts, task.notice) == (2, 'Reqwest error error sending request')
+
+    # Still failing once CloudDrive had its moment: the next attempt rests 15 minutes.
+    await harness.age(task, timedelta(minutes=2))
+    await harness.service.tick()
+    task = await harness.state(task)
+    assert task.notice == 'upload attempt 3 of 5 starts in 15 min: Reqwest error error sending request'
+    await harness.age(task, timedelta(minutes=14))
+    await harness.service.tick()
+    assert len(harness.cloud.restarted) == 1
+    await harness.age(task, timedelta(minutes=15))
+    await harness.service.tick()
+    assert len(harness.cloud.restarted) == 2
+
+    await harness.repository.update(task.id, upload_attempts=4, notice=None)
+    await harness.service.tick()
+    assert (await harness.state(task)).notice == (
+        'upload attempt 5 of 5 starts in 3 h: Reqwest error error sending request'
+    )
 
     await harness.repository.update(task.id, upload_attempts=5)
     await harness.service.tick()

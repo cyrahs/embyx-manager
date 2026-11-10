@@ -66,10 +66,31 @@ ARCHIVE_NUDGE_INTERVAL = timedelta(minutes=5)
 COPY_LISTING_GRACE = timedelta(minutes=2)
 #: CloudDrive's words for an upload 115 will never take, however often it is retried.
 PERMANENT_UPLOAD_ERRORS = ('code: 10025', '单文件不能大于')
+#: How long an upload that ended in error rests before its next attempt, by the
+#: attempts made so far: a network outage outlasts a few quick retries.
+UPLOAD_RETRY_DELAYS = (
+    timedelta(minutes=5),
+    timedelta(minutes=15),
+    timedelta(hours=1),
+    timedelta(hours=3),
+)
 #: After this long without the archive filing the title, the task fails for a look.
 ARCHIVE_WAIT = timedelta(hours=2)
 SHA1_HASH_KEY = '2'
 NO_JOB_TEMPLATE = 'the merge Job template is not mounted (EMBYX_MANAGER_MERGE_JOB_TEMPLATE)'
+
+
+def upload_retry_delay(attempts: int) -> timedelta:
+    """The rest before the next upload attempt; none after a retry the operator asked for."""
+    if attempts <= 0:
+        return timedelta(0)
+    return UPLOAD_RETRY_DELAYS[min(attempts, len(UPLOAD_RETRY_DELAYS)) - 1]
+
+
+def retry_notice(attempts: int, delay: timedelta, error: str) -> str:
+    minutes = int(delay.total_seconds()) // 60
+    wait = f'{minutes // 60} h' if minutes % 60 == 0 else f'{minutes} min'
+    return f'upload attempt {attempts + 1} of {MAX_UPLOAD_ATTEMPTS} starts in {wait}: {error}'
 
 
 class MergeFailedError(Exception):
@@ -383,8 +404,7 @@ class MergeService:
             if task.upload_attempts >= MAX_UPLOAD_ATTEMPTS:
                 msg = f'upload failed {task.upload_attempts} times: {errors}'
                 raise MergeFailedError(msg)
-            await cloud.restart_copy_task(str(copy['source_path']), paths.staging_dir)
-            await self._repository.update(task.id, upload_attempts=task.upload_attempts + 1, notice=errors)
+            await self._restart_upload_in_time(task, paths, cloud, str(copy['source_path']), errors)
             return
         if not await self._handled_fatal_upload(task, paths, cloud, str(copy['source_path'])):
             await self._repository.update(
@@ -404,12 +424,32 @@ class MergeService:
         if permanent or task.upload_attempts >= MAX_UPLOAD_ATTEMPTS:
             msg = f'CloudDrive gave up uploading {task.merged_name}: {fatal}'
             raise MergeFailedError(msg)
-        # A network error ends an upload the same way; restart it, then give
-        # CloudDrive a moment to queue it again before judging it anew.
-        if task.notice != fatal or datetime.now(UTC) - task.updated_at >= COPY_LISTING_GRACE:
-            await cloud.restart_copy_task(source_path, paths.staging_dir)
-            await self._repository.update(task.id, upload_attempts=task.upload_attempts + 1, notice=fatal)
+        # A network error ends an upload the same way; restart it once its rest is over.
+        await self._restart_upload_in_time(task, paths, cloud, source_path, fatal)
         return True
+
+    async def _restart_upload_in_time(
+        self, task: MergeTask, paths: MergePaths, cloud: AsyncCloudDrive, source_path: str, error: str
+    ) -> None:
+        """Restart an upload that ended in ``error`` after the rest its attempt count calls for.
+
+        The task's notice says which step it is at: ``error`` itself right after a
+        restart, while CloudDrive queues the upload again, and a retry notice while
+        it rests; ``updated_at`` dates either.
+        """
+        elapsed = datetime.now(UTC) - task.updated_at
+        if task.notice == error and elapsed < COPY_LISTING_GRACE:
+            return
+        delay = upload_retry_delay(task.upload_attempts)
+        if delay:
+            waiting = retry_notice(task.upload_attempts, delay, error)
+            if task.notice != waiting:
+                await self._repository.update(task.id, notice=waiting)
+                return
+            if elapsed < delay:
+                return
+        await cloud.restart_copy_task(source_path, paths.staging_dir)
+        await self._repository.update(task.id, upload_attempts=task.upload_attempts + 1, notice=error)
 
     @staticmethod
     async def _copy_task(cloud: AsyncCloudDrive, paths: MergePaths) -> dict[str, object] | None:
