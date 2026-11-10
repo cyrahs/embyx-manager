@@ -96,8 +96,8 @@ export function TalentSubscriptionsPanel({
       ) : visible.length === 0 ? (
         <p className="route-empty">没有匹配的演员。</p>
       ) : (
-        <div className="run-table-wrap">
-          <table className="run-table">
+        <div className="run-table-wrap capped">
+          <table className="run-table stack">
             <thead>
               <tr>
                 <th>演员</th>
@@ -111,7 +111,7 @@ export function TalentSubscriptionsPanel({
                 const page = talentPageUrl(item)
                 return (
                   <tr key={item.id}>
-                    <td className="subscription-url">
+                    <td className="cell-text subscription-url">
                       <strong>
                         {item.name ?? `talent ${item.talent_id}`}
                         <CategoryTag item={item} panelCategory={category} />

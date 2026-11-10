@@ -144,9 +144,42 @@ describe('playlists page', () => {
     expect(names).toEqual(['JavDB 2025 TOP250', 'JavDB 2024 TOP250'])
 
     expect(screen.getByText(/数据源 jinjier\.sqlite3 · 20260112/)).toHaveTextContent('启用 3/4 张 · 缺失 141 部 · 补全目录 /115/embyx_in/rank')
-    const awardRow = within(screen.getByRole('region', { name: '第四届JAV金鸡儿奖' })).getAllByRole('row')[1]
+    const awards = screen.getByRole('region', { name: '第四届JAV金鸡儿奖' })
+    // Nothing in the group is enabled, so it opens folded.
+    expect(within(awards).queryByRole('table')).not.toBeInTheDocument()
+    expect(within(awards).getByText('启用 0/1 · 缺失 1')).toBeInTheDocument()
+    await userEvent.click(within(awards).getByRole('button', { name: '第四届JAV金鸡儿奖' }))
+    const awardRow = within(awards).getAllByRole('row')[1]
     expect(within(awardRow).getByText('停用')).toHaveClass('run-state')
     expect(within(awardRow).getByRole('button', { name: '启用' })).toBeInTheDocument()
+  })
+
+  it('folds a group by hand and remembers it across visits', async () => {
+    const user = userEvent.setup()
+    const { unmount } = renderPage()
+
+    const charts = await screen.findByRole('region', { name: '总榜' })
+    expect(within(charts).getByText('JavDB 有码 TOP250')).toBeInTheDocument()
+    expect(within(charts).getByText('启用 1/1 · 缺失 30')).toBeInTheDocument()
+    await user.click(within(charts).getByRole('button', { name: '总榜' }))
+    expect(within(charts).queryByText('JavDB 有码 TOP250')).not.toBeInTheDocument()
+    expect(within(charts).getByRole('button', { name: '总榜' })).toHaveAttribute('aria-expanded', 'false')
+    unmount()
+
+    renderPage()
+    const again = await screen.findByRole('region', { name: '总榜' })
+    expect(within(again).queryByText('JavDB 有码 TOP250')).not.toBeInTheDocument()
+    expect(within(screen.getByRole('region', { name: 'JavDB 年度榜' })).getByText('JavDB 2025 TOP250')).toBeInTheDocument()
+  })
+
+  it('keeps a long missing list in its own scrolling box', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    await user.click((await screen.findByText('JavDB 有码 TOP250')).closest('tr')!)
+    const detail = await screen.findByRole('cell', { name: 'IPX-811' })
+    expect(detail.closest('.run-table-wrap')).toHaveClass('capped')
+    expect(screen.getByRole('cell', { name: '嗑藥做愛住同房NTR姦' })).toHaveClass('cell-text')
   })
 
   it('expands a list into its missing titles with the ledger state', async () => {
@@ -248,7 +281,8 @@ describe('playlists page', () => {
     renderPage()
 
     const row = (await screen.findByText('JavDB 有码 TOP250')).closest('tr')!
-    const awardRow = (await screen.findByText('第四届JAV金鸡儿奖 最佳故事片 获奖')).closest('tr')!
+    await user.click(screen.getByRole('button', { name: '第四届JAV金鸡儿奖' }))
+    const awardRow = screen.getByText('第四届JAV金鸡儿奖 最佳故事片 获奖').closest('tr')!
     expect(within(awardRow).getByRole('button', { name: '补全' })).toBeEnabled()
 
     await user.click(within(row).getByRole('button', { name: '补全' }))

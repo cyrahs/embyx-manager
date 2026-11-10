@@ -361,7 +361,7 @@ export default function DashboardPage() {
           <p className="results-empty">还没有运行记录。</p>
         ) : (
           <div className="run-table-wrap">
-            <table className="run-table">
+            <table className="run-table stack">
               <thead>
                 <tr>
                   <th>流水线</th>
@@ -387,14 +387,14 @@ export default function DashboardPage() {
                     }}
                   >
                     <td>{PIPELINE_LABELS[run.pipeline]}</td>
-                    <td>{TRIGGER_LABELS[run.trigger] ?? run.trigger}</td>
-                    <td>
+                    <td data-label="触发">{TRIGGER_LABELS[run.trigger] ?? run.trigger}</td>
+                    <td data-label="状态">
                       <span className={`run-state ${run.state}`}>{STATE_LABELS[run.state] ?? run.state}</span>
                       {run.error_count > 0 && <span className="run-errors">{run.error_count} 错误</span>}
                     </td>
-                    <td>{formatTime(run.started_at)}</td>
-                    <td>{formatDuration(run)}</td>
-                    <td className="run-stats-cell">
+                    <td data-label="开始时间">{formatTime(run.started_at)}</td>
+                    <td data-label="耗时">{formatDuration(run)}</td>
+                    <td data-label="结果" className="run-stats-cell">
                       {statChips(run.stats)
                         .slice(0, 4)
                         .map(([label, value]) => `${label} ${value}`)

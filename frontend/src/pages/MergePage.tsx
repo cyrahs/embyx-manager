@@ -65,6 +65,45 @@ const FINISHED: ReadonlySet<MergeState> = new Set(['done', 'cancelled'])
 /** States the loop is still working through, which the page keeps polling for. */
 const MOVING: ReadonlySet<MergeState> = new Set(['queued', 'merging', 'uploading', 'verifying', 'replacing', 'archiving'])
 
+type TaskFilter = 'moving' | 'failed' | 'finished' | 'all'
+
+const TASK_FILTERS: { id: TaskFilter; label: string; empty: string }[] = [
+  { id: 'moving', label: '进行中', empty: '没有进行中的任务。' },
+  { id: 'failed', label: '失败', empty: '没有失败的任务。' },
+  { id: 'finished', label: '已完成', empty: '没有已完成的任务。' },
+  { id: 'all', label: '全部', empty: '还没有任务。' },
+]
+
+function taskBucket(task: MergeTask): Exclude<TaskFilter, 'all'> {
+  if (MOVING.has(task.state)) return 'moving'
+  if (task.state === 'failed') return 'failed'
+  return 'finished'
+}
+
+/** Opens on what needs watching: running work first, then failures, else everything. */
+function defaultTaskFilter(tasks: MergeTask[]): TaskFilter {
+  if (tasks.some((task) => taskBucket(task) === 'moving')) return 'moving'
+  if (tasks.some((task) => taskBucket(task) === 'failed')) return 'failed'
+  return 'all'
+}
+
+const BUCKET_ORDER: Record<Exclude<TaskFilter, 'all'>, number> = { moving: 0, failed: 1, finished: 2 }
+
+function filterTasks(tasks: MergeTask[], filter: TaskFilter): MergeTask[] {
+  if (filter !== 'all') return tasks.filter((task) => taskBucket(task) === filter)
+  // A stable sort keeps the server's order inside each bucket.
+  return [...tasks].sort((a, b) => BUCKET_ORDER[taskBucket(a)] - BUCKET_ORDER[taskBucket(b)])
+}
+
+function matchesTitle(title: MergeTitle, query: string): boolean {
+  if (!query) return true
+  const haystack = [title.avid, title.library_dir, title.brand, title.source, title.directory]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+  return haystack.includes(query)
+}
+
 function formatBytes(bytes: number | null): string {
   if (bytes === null) return '—'
   if (bytes >= 1024 ** 3) return `${(bytes / 1024 ** 3).toFixed(1)} GiB`
@@ -102,14 +141,20 @@ interface Group {
   collapsible: boolean
 }
 
-function groupTitles(items: MergeTitle[]): Group[] {
+/** With a search, each group names how many of its titles match. */
+function groupTitles(items: MergeTitle[], query: string): Group[] {
+  const count = (list: MergeTitle[]) => {
+    if (!query) return `${list.length}`
+    return `匹配 ${list.filter((item) => matchesTitle(item, query)).length} / ${list.length}`
+  }
+  const keep = (list: MergeTitle[]) => (query ? list.filter((item) => matchesTitle(item, query)) : list)
   const many = items.filter((item) => item.mergeable && item.part_count > MAX_STACKED_PARTS)
   const few = items.filter((item) => item.mergeable && item.part_count <= MAX_STACKED_PARTS)
   const broken = items.filter((item) => !item.mergeable)
   return [
-    { id: 'many', title: `10 盘及以上 · ${many.length}`, hint: 'Emby 会把 cd10 起的每一盘显示成单独条目。', items: many, collapsible: false },
-    { id: 'few', title: `9 盘及以下 · ${few.length}`, hint: 'Emby 能堆叠成一个条目，也可以合并。', items: few, collapsible: true },
-    { id: 'broken', title: `缺盘或异常 · ${broken.length}`, hint: '不能合并：缺盘、有异常，或库里已经有完整文件。', items: broken, collapsible: true },
+    { id: 'many', title: `10 盘及以上 · ${count(many)}`, hint: 'Emby 会把 cd10 起的每一盘显示成单独条目。', items: keep(many), collapsible: false },
+    { id: 'few', title: `9 盘及以下 · ${count(few)}`, hint: 'Emby 能堆叠成一个条目，也可以合并。', items: keep(few), collapsible: true },
+    { id: 'broken', title: `缺盘或异常 · ${count(broken)}`, hint: '不能合并：缺盘、有异常，或库里已经有完整文件。', items: keep(broken), collapsible: true },
   ]
 }
 
@@ -245,11 +290,11 @@ function MergeAction({ title, controls }: { title: MergeTitle; controls: MergeCo
   )
 }
 
-function TitleTable({ items, controls }: { items: MergeTitle[]; controls: MergeControls }) {
-  if (items.length === 0) return <p className="route-empty">没有作品。</p>
+function TitleTable({ items, controls, filtered }: { items: MergeTitle[]; controls: MergeControls; filtered: boolean }) {
+  if (items.length === 0) return <p className="route-empty">{filtered ? '没有匹配的作品。' : '没有作品。'}</p>
   return (
-    <div className="run-table-wrap">
-      <table className="run-table">
+    <div className="run-table-wrap capped">
+      <table className="run-table stack">
         <thead>
           <tr>
             <th>番号</th>
@@ -266,12 +311,20 @@ function TitleTable({ items, controls }: { items: MergeTitle[]; controls: MergeC
               <td>
                 <strong>{item.avid}</strong>
               </td>
-              <td>{item.part_count}</td>
-              <td className="acq-muted">{item.library_dir ? `${item.library_dir}/${item.brand ?? ''}` : '—'}</td>
-              <td className={item.source ? undefined : 'acq-muted'}>{sourceLabel(item)}</td>
-              <td className="acq-muted">{problemLabel(item) || '—'}</td>
-              <td>
-                <MergeAction title={item} controls={controls} />
+              <td data-label="盘数">{item.part_count}</td>
+              <td data-label="库目录" className="acq-muted">
+                {item.library_dir ? `${item.library_dir}/${item.brand ?? ''}` : '—'}
+              </td>
+              <td data-label="来源资源库" className={item.source ? undefined : 'acq-muted'}>
+                {sourceLabel(item)}
+              </td>
+              <td data-label="备注" className="cell-text acq-muted">
+                {problemLabel(item) || '—'}
+              </td>
+              <td data-label="操作" className="cell-actions">
+                <div className="acq-actions">
+                  <MergeAction title={item} controls={controls} />
+                </div>
               </td>
             </tr>
           ))}
@@ -297,8 +350,8 @@ function TaskTable({
   onRetry: (task: MergeTask) => void
 }) {
   return (
-    <div className="run-table-wrap">
-      <table className="run-table">
+    <div className="run-table-wrap capped">
+      <table className="run-table stack">
         <thead>
           <tr>
             <th>番号</th>
@@ -318,40 +371,46 @@ function TaskTable({
                 <td>
                   <strong>{task.avid}</strong>
                 </td>
-                <td>{task.part_count}</td>
-                <td>{task.source}</td>
-                <td>{STATE_LABELS[task.state]}</td>
-                <td className="acq-muted">{taskProgress(task) || '—'}</td>
-                <td className={task.error ? undefined : 'acq-muted'}>{message ? localizeBackendText(message) : '—'}</td>
-                <td>
-                  {task.retryable && (
-                    <button className="text-button" type="button" disabled={busy !== null} onClick={() => onRetry(task)}>
-                      重试
-                    </button>
-                  )}
-                  {task.cancellable &&
-                    (armed === `task-${task.id}` ? (
-                      <ArmedConfirm
-                        label={`确认${task.state === 'failed' ? '移除' : '取消'}`}
-                        hint={
-                          task.failed_state === 'archiving'
-                            ? '库里已有完整文件时，embyx_in 里多余的合并文件会删进 115 回收站。'
-                            : '已经合并或上传的中间文件会被删掉，原分盘不受影响。'
-                        }
-                        disabled={busy !== null}
-                        onConfirm={() => onCancel(task)}
-                        onDisarm={() => onArm(null)}
-                      />
-                    ) : (
-                      <button
-                        className="text-button"
-                        type="button"
-                        disabled={busy !== null}
-                        onClick={() => onArm(`task-${task.id}`)}
-                      >
-                        {task.state === 'failed' ? '移除' : '取消'}
+                <td data-label="盘数">{task.part_count}</td>
+                <td data-label="来源">{task.source}</td>
+                <td data-label="状态">{STATE_LABELS[task.state]}</td>
+                <td data-label="进度" className="acq-muted">
+                  {taskProgress(task) || '—'}
+                </td>
+                <td data-label="说明" className={task.error ? 'cell-text' : 'cell-text acq-muted'}>
+                  {message ? localizeBackendText(message) : '—'}
+                </td>
+                <td data-label="操作" className="cell-actions">
+                  <div className="acq-actions">
+                    {task.retryable && (
+                      <button className="text-button" type="button" disabled={busy !== null} onClick={() => onRetry(task)}>
+                        重试
                       </button>
-                    ))}
+                    )}
+                    {task.cancellable &&
+                      (armed === `task-${task.id}` ? (
+                        <ArmedConfirm
+                          label={`确认${task.state === 'failed' ? '移除' : '取消'}`}
+                          hint={
+                            task.failed_state === 'archiving'
+                              ? '库里已有完整文件时，embyx_in 里多余的合并文件会删进 115 回收站。'
+                              : '已经合并或上传的中间文件会被删掉，原分盘不受影响。'
+                          }
+                          disabled={busy !== null}
+                          onConfirm={() => onCancel(task)}
+                          onDisarm={() => onArm(null)}
+                        />
+                      ) : (
+                        <button
+                          className="text-button"
+                          type="button"
+                          disabled={busy !== null}
+                          onClick={() => onArm(`task-${task.id}`)}
+                        >
+                          {task.state === 'failed' ? '移除' : '取消'}
+                        </button>
+                      ))}
+                  </div>
                 </td>
               </tr>
             )
@@ -371,12 +430,18 @@ export default function MergePage() {
   const [busy, setBusy] = useState<string | null>(null)
   const [open, setOpen] = useState<Record<string, boolean>>({})
   const [armed, setArmed] = useState<string | null>(null)
+  // null until the first task list arrives, which picks the opening view; after that only a click changes it.
+  const [taskFilter, setTaskFilter] = useState<TaskFilter | null>(null)
+  const [query, setQuery] = useState('')
 
   const load = useCallback(async (signal?: AbortSignal, refresh = false) => {
     setLoading(true)
     try {
       // Tasks answer at once; a fresh scan of the library can take a minute.
-      const taskList = listMergeTasks(signal).then(setTasks)
+      const taskList = listMergeTasks(signal).then((next) => {
+        setTasks(next)
+        setTaskFilter((current) => current ?? defaultTaskFilter(next.items))
+      })
       const [titles] = await Promise.all([listMergeTitles(signal, refresh), taskList])
       setPage(titles)
       setError(null)
@@ -440,7 +505,18 @@ export default function MergePage() {
     [act],
   )
 
-  const groups = useMemo(() => groupTitles(page?.items ?? []), [page])
+  const needle = query.trim().toLowerCase()
+  const groups = useMemo(() => groupTitles(page?.items ?? [], needle), [page, needle])
+  const activeFilter = taskFilter ?? 'all'
+  const taskCounts = useMemo(() => {
+    const counts: Record<TaskFilter, number> = { moving: 0, failed: 0, finished: 0, all: 0 }
+    for (const task of tasks?.items ?? []) {
+      counts[taskBucket(task)] += 1
+      counts.all += 1
+    }
+    return counts
+  }, [tasks])
+  const shownTasks = useMemo(() => filterTasks(tasks?.items ?? [], activeFilter), [tasks, activeFilter])
   const openTasks = useMemo(
     () => new Map((tasks?.items ?? []).filter((task) => !FINISHED.has(task.state)).map((task) => [task.avid, task])),
     [tasks],
@@ -484,26 +560,63 @@ export default function MergePage() {
         {actionError && <Notice tone="error" title="操作失败" body={actionError} />}
         {tasks && tasks.items.length > 0 && (
           <section className="playlist-group" aria-labelledby="merge-tasks">
-            <h3 id="merge-tasks" className="playlist-group-title">
-              合并任务
-            </h3>
-            <TaskTable
-              tasks={tasks.items}
-              busy={busy}
-              armed={armed}
-              onArm={setArmed}
-              onCancel={(task) => {
-                setArmed(null)
-                void act(`task-${task.id}`, () => cancelMergeTask(task.id))
-              }}
-              onRetry={(task) => void act(`task-${task.id}`, () => retryMergeTask(task.id))}
-            />
+            <div className="group-heading">
+              <h3 id="merge-tasks" className="playlist-group-title">
+                合并任务
+              </h3>
+              <div className="run-filter" role="group" aria-label="筛选合并任务">
+                {TASK_FILTERS.map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    className={`text-button${activeFilter === option.id ? ' active' : ''}`}
+                    aria-pressed={activeFilter === option.id}
+                    onClick={() => setTaskFilter(option.id)}
+                  >
+                    {option.label} {taskCounts[option.id]}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {shownTasks.length === 0 ? (
+              <p className="route-empty">
+                {TASK_FILTERS.find((option) => option.id === activeFilter)?.empty}
+                <button type="button" className="text-button" onClick={() => setTaskFilter('all')}>
+                  查看全部
+                </button>
+              </p>
+            ) : (
+              <TaskTable
+                tasks={shownTasks}
+                busy={busy}
+                armed={armed}
+                onArm={setArmed}
+                onCancel={(task) => {
+                  setArmed(null)
+                  void act(`task-${task.id}`, () => cancelMergeTask(task.id))
+                }}
+                onRetry={(task) => void act(`task-${task.id}`, () => retryMergeTask(task.id))}
+              />
+            )}
           </section>
         )}
         {page && !page.reason && (
           <p className="acq-meta">
             扫描时间 {formatTime(page.scanned_at)} · 共 {page.items.length} 部分盘作品 · 资源库 {page.routes.join(' / ') || '—'}
           </p>
+        )}
+        {page && !page.reason && page.items.length > 0 && (
+          <div className="table-filter">
+            <input
+              type="search"
+              aria-label="筛选分盘作品"
+              placeholder="按番号、库目录或来源筛选"
+              autoComplete="off"
+              spellCheck={false}
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+            />
+          </div>
         )}
         {!page && loading ? (
           <p className="dashboard-loading">
@@ -513,7 +626,8 @@ export default function MergePage() {
           page &&
           !page.reason &&
           groups.map((group) => {
-            const expanded = !group.collapsible || open[group.id]
+            // A search opens every group, so a match is never hidden behind a fold.
+            const expanded = !group.collapsible || open[group.id] || Boolean(needle)
             return (
               <section key={group.id} className="playlist-group" aria-labelledby={`merge-group-${group.id}`}>
                 <h3 id={`merge-group-${group.id}`} className="playlist-group-title">
@@ -531,7 +645,7 @@ export default function MergePage() {
                   )}
                 </h3>
                 <p className="settings-hint">{group.hint}</p>
-                {expanded && <TitleTable items={group.items} controls={controls} />}
+                {expanded && <TitleTable items={group.items} controls={controls} filtered={Boolean(needle)} />}
               </section>
             )
           })

@@ -572,7 +572,9 @@ main {
 .dock-actions .text-button:hover:not(:disabled) { color: var(--text); background: var(--surface-3); }
 .run-table-wrap { overflow-x: auto; }
 .run-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.run-table th { padding: 8px 12px; color: var(--text-2); font-size: 11px; font-weight: 600; text-align: left; text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.run-table th { padding: 8px 12px; color: var(--text-2); font-size: 11px; font-weight: 600; text-align: left; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+/* Sticky header: a collapsed border would scroll away with the rows, so the rule is a shadow. */
+.run-table thead th { position: sticky; top: 0; z-index: 1; background: var(--surface); box-shadow: inset 0 -1px 0 var(--line); }
 .run-table td { padding: 10px 12px; color: var(--text); border-bottom: 1px solid var(--line); white-space: nowrap; }
 .run-table tbody tr { cursor: pointer; }
 .run-table tbody tr:hover { background: var(--surface-2); }
@@ -672,7 +674,7 @@ main {
 }
 .route-empty { margin: 0; color: var(--text-3); font-size: 12.5px; }
 .merge-source-pick { display: inline-flex; align-items: center; gap: 8px; }
-.merge-confirm { display: inline-flex; align-items: center; gap: 8px; }
+.merge-confirm { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; }
 .route-add { padding-left: 0; }
 .chips {
   display: flex;
@@ -795,15 +797,15 @@ main {
 .subtab:hover { color: var(--text); background: var(--surface-3); }
 .subtab[aria-selected='true'] { color: var(--accent); background: rgba(214, 255, 75, .1); }
 .subtab-count { margin-left: 6px; font: 500 12px var(--font-mono); color: var(--text-3); }
-.visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); border: 0; }
 .subscription-url strong { display: block; }
 .subscription-url span { display: block; word-break: break-all; font-size: 12px; }
 .subscription-error { display: block; margin-top: 2px; font-size: 12px; color: var(--text-2); }
 
 /* Actor subscriptions (fill-actor results). */
 .actor-subscription-list { list-style: none; margin: 0; padding: 0; }
-.actor-subscription-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid var(--border, rgba(127, 127, 127, 0.2)); }
-.actor-subscription-name { display: flex; flex-direction: column; gap: 2px; }
+.actor-subscription-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line); }
+.actor-subscription-row > .button, .actor-subscription-row > .run-state { flex: none; }
+.actor-subscription-name { display: flex; flex-direction: column; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
 .actor-subscription-name small { font-size: 12px; }
 .subscription-edit { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .subscription-edit input[type='text'] { flex: 1 1 200px; min-width: 0; }
@@ -814,3 +816,62 @@ main {
 .playlist-group-title { margin: 0 0 8px; color: var(--text-2); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
 .run-table td.playlist-title { white-space: normal; max-width: 520px; color: var(--text-2); font-size: 12.5px; }
 .playlist-fill-summary { display: block; margin-top: 2px; font-size: 12px; }
+
+/* ---------- tables: wrapping text, pinned actions, capped height ---------- */
+/* Short columns stay on one line; a column of free text wraps instead of pushing the actions off. */
+.run-table td.cell-text { white-space: normal; overflow-wrap: anywhere; min-width: 180px; line-height: 1.5; }
+/* Shrinks to its buttons, so the actions sit at the right edge of the table, not past it. */
+.run-table td.cell-actions { width: 1%; }
+.run-table td .acq-detail { white-space: normal; }
+.acq-detail > p { overflow-wrap: anywhere; }
+.subscription-error { white-space: normal; max-width: 280px; overflow-wrap: anywhere; }
+/* Long lists scroll inside their own box: the header stays in view, the rest of the page stays close. */
+.run-table-wrap.capped { max-height: min(64vh, 600px); overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; }
+.run-table-wrap.capped .run-table tbody tr:last-child > td { border-bottom: 0; }
+.playlist-group + .acq-meta { margin-top: 14px; }
+
+.group-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap; margin: 0 0 8px; }
+.group-heading .playlist-group-title { margin: 0; }
+.group-heading .run-filter { margin-left: auto; }
+.group-toggle { margin-left: -8px; padding: 4px 8px; text-transform: none; letter-spacing: 0; color: var(--text-2); font-size: 12.5px; }
+.group-toggle .chevron { width: 14px; height: 14px; }
+.group-meta { color: var(--text-3); font-size: 12px; }
+.table-filter { margin: 4px 0 2px; }
+.table-filter input[type='search'], .table-filter input[type='text'] {
+  width: min(100%, 320px);
+  min-height: 32px;
+  padding: 0 12px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  font-size: 13px;
+}
+.table-filter input:focus { outline: none; border-color: var(--accent); }
+.table-filter input::placeholder { color: var(--text-3); }
+
+/* Fill actor: a group of hundreds of titles scrolls inside itself. */
+.video-list { max-height: min(64vh, 600px); overflow-y: auto; }
+
+@media (max-width: 720px) {
+  /* The topbar takes two rows: brand and status, then every page link in view. */
+  :root { --topbar-h: 92px; }
+  .topbar { flex-wrap: wrap; align-content: center; row-gap: 6px; padding-top: 6px; padding-bottom: 6px; }
+  .topbar-nav { order: 3; flex: 1 0 100%; margin: 0; justify-content: space-between; }
+  .nav-link { padding: 6px 8px; }
+
+  /* Tables become one card per row; each cell names its column. */
+  .run-table.stack > thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .run-table.stack, .run-table.stack > tbody, .run-table.stack > tbody > tr, .run-table.stack > tbody > tr > td { display: block; width: 100%; }
+  .run-table.stack > tbody > tr { position: relative; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  .run-table.stack > tbody > tr:last-child { border-bottom: 0; }
+  .run-table.stack > tbody > tr > td { position: relative; min-width: 0; min-height: 22px; padding: 3px 0 3px 84px; border: 0; white-space: normal; overflow-wrap: anywhere; }
+  .run-table.stack > tbody > tr > td[data-label]::before { content: attr(data-label); position: absolute; left: 0; top: 3px; width: 76px; color: var(--text-3); font-size: 12px; }
+  .run-table.stack > tbody > tr > td:not([data-label]) { padding-left: 0; }
+  .run-table.stack > tbody > tr > td.row-chevron { position: absolute; top: 10px; right: 12px; width: auto; min-height: 0; padding: 0; }
+  .run-table.stack > tbody > tr > td.cell-actions { width: 100%; }
+  .run-table.stack > tbody > tr.acq-detail-row { padding-top: 0; }
+  .run-table.stack > tbody > tr.acq-detail-row > td { padding: 0; }
+  .run-table.stack .acq-actions { flex-wrap: wrap; margin-left: -8px; }
+  .run-table.stack > tbody > tr > td.run-stats-cell { max-width: none; }
+}
