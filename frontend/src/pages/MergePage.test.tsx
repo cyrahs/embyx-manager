@@ -111,6 +111,8 @@ describe('merge page', () => {
     const many = await screen.findByRole('region', { name: '10 盘及以上 · 1' })
     expect(within(many).getByText('SQTEVR-009')).toBeInTheDocument()
     expect(within(many).getByText('type/vr/SQTEVR')).toBeInTheDocument()
+    // The library holds the odd whole filename as an AVID; its cell wraps instead of widening the table.
+    expect(within(many).getByText('SQTEVR-009').closest('td')).toHaveClass('cell-id')
     expect(within(many).getByText('vr')).toBeInTheDocument()
     expect(screen.queryByText('ABP-123')).not.toBeInTheDocument()
 
@@ -217,6 +219,8 @@ describe('merge page', () => {
     // A long explanation wraps in its own column, so the actions stay in view.
     expect(within(tasks).getByText(/PPB-004-cd2\.wmv/).closest('td')).toHaveClass('cell-text')
     expect(within(tasks).getByRole('button', { name: '重试' }).closest('td')).toHaveClass('cell-actions')
+    // Merge rows keep the accent text buttons, not the muted ones download tracking uses.
+    expect(within(tasks).getByRole('button', { name: '重试' }).closest('.acq-actions')).toBeNull()
 
     await userEvent.click(within(tasks).getByRole('button', { name: '已完成 1' }))
     expect(within(tasks).getByText('DONE-001')).toBeInTheDocument()

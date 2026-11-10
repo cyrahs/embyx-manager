@@ -536,7 +536,9 @@ export default function PlaylistsPage() {
                                                 <td data-label="名次" className="acq-muted">
                                                   {entry.rank}
                                                 </td>
-                                                <td data-label="番号">{entry.avid}</td>
+                                                <td data-label="番号" className="cell-id">
+                                                  {entry.avid}
+                                                </td>
                                                 <td data-label="标题" className="cell-text playlist-title">
                                                   {entry.title}
                                                 </td>

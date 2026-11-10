@@ -308,21 +308,21 @@ function TitleTable({ items, controls, filtered }: { items: MergeTitle[]; contro
         <tbody>
           {items.map((item) => (
             <tr key={`${item.directory}/${item.avid}`}>
-              <td>
+              <td className="cell-id">
                 <strong>{item.avid}</strong>
               </td>
               <td data-label="盘数">{item.part_count}</td>
-              <td data-label="库目录" className="acq-muted">
+              <td data-label="库目录" className="cell-wrap acq-muted">
                 {item.library_dir ? `${item.library_dir}/${item.brand ?? ''}` : '—'}
               </td>
-              <td data-label="来源资源库" className={item.source ? undefined : 'acq-muted'}>
+              <td data-label="来源资源库" className={item.source ? 'cell-wrap' : 'cell-wrap acq-muted'}>
                 {sourceLabel(item)}
               </td>
               <td data-label="备注" className="cell-text acq-muted">
                 {problemLabel(item) || '—'}
               </td>
               <td data-label="操作" className="cell-actions">
-                <div className="acq-actions">
+                <div className="merge-actions">
                   <MergeAction title={item} controls={controls} />
                 </div>
               </td>
@@ -368,11 +368,13 @@ function TaskTable({
             const message = task.error ?? task.notice
             return (
               <tr key={task.id}>
-                <td>
+                <td className="cell-id">
                   <strong>{task.avid}</strong>
                 </td>
                 <td data-label="盘数">{task.part_count}</td>
-                <td data-label="来源">{task.source}</td>
+                <td data-label="来源" className="cell-wrap">
+                  {task.source}
+                </td>
                 <td data-label="状态">{STATE_LABELS[task.state]}</td>
                 <td data-label="进度" className="acq-muted">
                   {taskProgress(task) || '—'}
@@ -381,7 +383,7 @@ function TaskTable({
                   {message ? localizeBackendText(message) : '—'}
                 </td>
                 <td data-label="操作" className="cell-actions">
-                  <div className="acq-actions">
+                  <div className="merge-actions">
                     {task.retryable && (
                       <button className="text-button" type="button" disabled={busy !== null} onClick={() => onRetry(task)}>
                         重试

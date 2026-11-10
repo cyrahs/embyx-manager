@@ -360,7 +360,7 @@ export default function DashboardPage() {
         {runs.length === 0 ? (
           <p className="results-empty">还没有运行记录。</p>
         ) : (
-          <div className="run-table-wrap">
+          <div className="run-table-wrap capped">
             <table className="run-table stack">
               <thead>
                 <tr>
