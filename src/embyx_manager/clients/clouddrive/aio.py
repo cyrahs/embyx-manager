@@ -10,6 +10,7 @@ import asyncio
 import posixpath
 from collections.abc import Callable
 from contextlib import suppress
+from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any
 
@@ -30,6 +31,23 @@ class CopyStatus(StrEnum):
     COMPLETED = 'Completed'
     FAILED = 'Failed'
     UNKNOWN = 'Unknown'
+
+
+@dataclass(frozen=True)
+class UploadState:
+    """One file in CloudDrive's upload queue."""
+
+    #: ``Transfer``, ``FatalError`` and the like, as CloudDrive words it.
+    status: str
+    transferred: int
+    error: str = ''
+
+    @property
+    def fatal(self) -> str | None:
+        """Why CloudDrive gave up on the file for good, or None while it has not."""
+        if self.status != 'FatalError':
+            return None
+        return self.error or 'fatal upload error'
 
 
 class OfflineStatus(StrEnum):
@@ -272,20 +290,21 @@ class AsyncCloudDrive:
         tasks = await _run_sync_complete(self._client.get_copy_tasks)
         return tuple(_copy_task_to_dict(task) for task in tasks)
 
-    async def upload_fatal_error(self, dest_path: str) -> str | None:
-        """Why CloudDrive gave up uploading ``dest_path`` for good, or None while it has not.
+    async def upload_state(self, dest_path: str) -> UploadState | None:
+        """``dest_path``'s entry in CloudDrive's upload queue, or None when it has none.
 
-        A copy task stays "Scanned" when its upload hits a fatal error (115
-        refusing a file over its size limit, say); only the upload queue says so.
+        A copy task stays "Scanned" with nothing uploaded while CloudDrive
+        uploads its file, and when the upload hits a fatal error (115 refusing
+        a file over its size limit, say); only the upload queue tells either.
         """
         files = await _run_sync_complete(self._client.get_upload_files, posixpath.basename(dest_path))
-        return next(
-            (
-                str(file.errorMessage) or 'fatal upload error'
-                for file in files
-                if file.destPath == dest_path and file.status == 'FatalError'
-            ),
-            None,
+        entry = next((file for file in files if file.destPath == dest_path), None)
+        if entry is None:
+            return None
+        return UploadState(
+            status=str(entry.status),
+            transferred=int(entry.transferedBytes),
+            error=str(entry.errorMessage),
         )
 
     async def restart_copy_task(self, source_path: str, dest_path: str) -> None:

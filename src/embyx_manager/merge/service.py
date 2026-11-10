@@ -406,27 +406,33 @@ class MergeService:
                 raise MergeFailedError(msg)
             await self._restart_upload_in_time(task, paths, cloud, str(copy['source_path']), errors)
             return
-        if not await self._handled_fatal_upload(task, paths, cloud, str(copy['source_path'])):
-            await self._repository.update(
-                task.id,
-                uploaded_bytes=int(copy['uploaded_bytes']),
-                notice='CloudDrive has paused the upload' if copy['paused'] else None,
-            )
+        await self._follow_upload(task, paths, cloud, copy)
 
-    async def _handled_fatal_upload(
-        self, task: MergeTask, paths: MergePaths, cloud: AsyncCloudDrive, source_path: str
-    ) -> bool:
-        """Deal with an upload CloudDrive gave up on; False while it has not."""
-        fatal = await cloud.upload_fatal_error(paths.staged_file)
-        if fatal is None:
-            return False
+    async def _follow_upload(
+        self, task: MergeTask, paths: MergePaths, cloud: AsyncCloudDrive, copy: dict[str, object]
+    ) -> None:
+        """Record how far a running upload got, or deal with CloudDrive giving up on it."""
+        upload = await cloud.upload_state(paths.staged_file)
+        if upload is not None and upload.fatal is not None:
+            await self._handle_fatal_upload(task, paths, cloud, str(copy['source_path']), upload.fatal)
+            return
+        # The copy task counts nothing until the whole file is up; the upload queue counts as it goes.
+        await self._repository.update(
+            task.id,
+            uploaded_bytes=max(int(str(copy['uploaded_bytes'])), upload.transferred if upload is not None else 0),
+            notice='CloudDrive has paused the upload' if copy['paused'] else None,
+        )
+
+    async def _handle_fatal_upload(
+        self, task: MergeTask, paths: MergePaths, cloud: AsyncCloudDrive, source_path: str, fatal: str
+    ) -> None:
+        """Deal with an upload CloudDrive gave up on."""
         permanent = any(marker in fatal for marker in PERMANENT_UPLOAD_ERRORS)
         if permanent or task.upload_attempts >= MAX_UPLOAD_ATTEMPTS:
             msg = f'CloudDrive gave up uploading {task.merged_name}: {fatal}'
             raise MergeFailedError(msg)
         # A network error ends an upload the same way; restart it once its rest is over.
         await self._restart_upload_in_time(task, paths, cloud, source_path, fatal)
-        return True
 
     async def _restart_upload_in_time(
         self, task: MergeTask, paths: MergePaths, cloud: AsyncCloudDrive, source_path: str, error: str
