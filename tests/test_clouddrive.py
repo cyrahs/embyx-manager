@@ -7,7 +7,7 @@ import pytest
 
 from embyx_manager.clients.clouddrive import AsyncCloudDrive, clouddrive_pb2
 from embyx_manager.clients.clouddrive import client as client_module
-from embyx_manager.clients.clouddrive.aio import OfflineStatus
+from embyx_manager.clients.clouddrive.aio import OfflineStatus, UploadState
 from embyx_manager.clients.clouddrive.client import (
     GRPC_TIMEOUT_SECONDS,
     LIST_OFFLINE_TIMEOUT_SECONDS,
@@ -351,9 +351,9 @@ async def test_offline_task_hash_matches_the_hash_parsed_from_our_magnet() -> No
     assert tasks[0]['info_hash'] == extract_info_hash(task.url)
 
 
-async def test_upload_fatal_error_reads_the_upload_queue_for_the_exact_path() -> None:
-    def info(dest: str, status: str, error: str = '') -> clouddrive_pb2.UploadFileInfo:
-        return clouddrive_pb2.UploadFileInfo(destPath=dest, status=status, errorMessage=error)
+async def test_upload_state_reads_the_upload_queue_for_the_exact_path() -> None:
+    def info(dest: str, status: str, error: str = '', sent: int = 0) -> clouddrive_pb2.UploadFileInfo:
+        return clouddrive_pb2.UploadFileInfo(destPath=dest, status=status, errorMessage=error, transferedBytes=sent)
 
     get_upload_files = Mock(
         return_value=[
@@ -363,10 +363,15 @@ async def test_upload_fatal_error_reads_the_upload_queue_for_the_exact_path() ->
     )
     cloud = _async_wrapper(SimpleNamespace(get_upload_files=get_upload_files))
 
-    assert await cloud.upload_fatal_error('/115/upload/merge-1/ABC-001.mp4') == (
-        'code: 10025, message: 单文件不能大于115GB'
-    )
+    state = await cloud.upload_state('/115/upload/merge-1/ABC-001.mp4')
+    assert state is not None
+    assert state.fatal == 'code: 10025, message: 单文件不能大于115GB'
     get_upload_files.assert_called_with('ABC-001.mp4')
 
-    get_upload_files.return_value = [info('/115/upload/merge-1/ABC-001.mp4', 'Transfer')]
-    assert await cloud.upload_fatal_error('/115/upload/merge-1/ABC-001.mp4') is None
+    get_upload_files.return_value = [info('/115/upload/merge-1/ABC-001.mp4', 'Transfer', sent=15_888_023_552)]
+    state = await cloud.upload_state('/115/upload/merge-1/ABC-001.mp4')
+    assert state == UploadState(status='Transfer', transferred=15_888_023_552)
+    assert state.fatal is None
+
+    get_upload_files.return_value = []
+    assert await cloud.upload_state('/115/upload/merge-1/ABC-001.mp4') is None

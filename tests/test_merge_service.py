@@ -8,7 +8,7 @@ from typing import Any
 import httpx
 import pytest
 
-from embyx_manager.clients.clouddrive.aio import CopyStatus
+from embyx_manager.clients.clouddrive.aio import CopyStatus, UploadState
 from embyx_manager.config.models import ArchiveConfig, CloudDriveConfig, MergeConfig
 from embyx_manager.merge.kube import KubeJobs, build_job, job_name, job_outcome
 from embyx_manager.merge.service import MergeActionError, MergeService, api_path
@@ -37,6 +37,8 @@ class FakeCloud:
         self.restarted: list[tuple[str, str]] = []
         self.deleted: list[str] = []
         self.fatal: dict[str, str] = {}
+        #: Bytes the upload queue reports sent, by destination path.
+        self.sent: dict[str, int] = {}
 
     def add_file(self, path: str, size: int, sha1: str = '') -> None:
         self.files[path] = {'size': size, 'hashes': {'2': sha1} if sha1 else {}}
@@ -58,8 +60,12 @@ class FakeCloud:
         )
         return {'success': True, 'error_message': ''}
 
-    async def upload_fatal_error(self, path: str) -> str | None:
-        return self.fatal.get(path)
+    async def upload_state(self, path: str) -> UploadState | None:
+        if path in self.fatal:
+            return UploadState(status='FatalError', transferred=0, error=self.fatal[path])
+        if path in self.sent:
+            return UploadState(status='Transfer', transferred=self.sent[path])
+        return None
 
     async def restart_copy_task(self, source: str, destination: str) -> None:
         self.restarted.append((source, destination))
@@ -401,6 +407,24 @@ async def test_a_copy_cloud_drive_stopped_listing_is_not_uploaded_again(harness:
     await harness.service.tick()
     assert (await harness.state(task)).state == MergeState.VERIFYING
     assert len(harness.cloud.copies) == 0
+
+
+async def test_upload_progress_comes_from_the_upload_queue_while_the_copy_task_counts_nothing(
+    harness: Harness,
+) -> None:
+    task = await harness.create()
+    await harness.service.tick()
+    harness.finish_merge(await harness.state(task))
+    await harness.service.tick()
+    await harness.service.tick()
+    # CloudDrive keeps the copy task at "Scanned" with 0 bytes until the file is up.
+    harness.cloud.copies[0].update(status=CopyStatus.SCANNED)
+    harness.cloud.sent[f'{harness.staging(task)}/SQTEVR-009.mp4'] = 240
+
+    await harness.service.tick()
+
+    task = await harness.state(task)
+    assert (task.state, task.uploaded_bytes, task.notice) == (MergeState.UPLOADING, 240, None)
 
 
 async def test_a_failed_copy_is_restarted_then_given_up_on(harness: Harness) -> None:
