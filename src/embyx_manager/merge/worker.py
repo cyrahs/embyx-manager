@@ -1,4 +1,4 @@
-"""The merge Job's body: concatenate one title's parts into a single file, losslessly.
+"""The merge Job's body: concatenate one title's parts into a single file.
 
 Runs as ``embyx-manager merge-worker`` inside a Kubernetes Job of its own, so a
 long merge neither starves the web app nor dies with it. It reads the parts
@@ -14,9 +14,15 @@ streams in a different order are first remuxed, video first, into a staging
 directory next to the output, as the concat demuxer pairs streams by index. An
 MP4 output's index stays in memory until ffmpeg ends, so a title with more
 packets than the Job's memory limit can index is refused up front rather than
-killed hours in. The result is checked after:
-its duration must match the parts' sum. Only then is it renamed into place, so
-the app never sees a half-written file under the final name.
+killed hours in.
+
+A merge is a lossless stream copy unless the parts add up to more than 115
+accepts in one file: then the video is re-encoded to HEVC at a bitrate worked
+out from the duration, so the result fits, while audio is still copied. Only
+MP4, MOV and Matroska outputs are re-encoded; other containers are refused as
+before. The result is checked after: its duration must match the parts' sum,
+and a re-encode must have come in under the limit. Only then is it renamed into
+place, so the app never sees a half-written file under the final name.
 """
 
 import hashlib
@@ -59,6 +65,21 @@ STDERR_TAIL_LINES = 20
 STALL_SECONDS = 15 * 60
 #: The largest single file 115 accepts ("单文件不能大于115GB"); a bigger merge could never be uploaded.
 MAX_UPLOAD_BYTES = 115 * 10**9
+#: What a re-encode aims for: this share of 115's limit, leaving room for the
+#: container and for the encoder overshooting its average bitrate.
+TRANSCODE_BUDGET_SHARE = 0.9
+#: And no more than this share of the parts' own video bitrate: HEVC needs roughly
+#: half of H.264's for the same picture, so a re-encode never inflates a title.
+TRANSCODE_SOURCE_SHARE = 0.6
+#: Assumed for an audio stream whose container does not state its bitrate.
+FALLBACK_AUDIO_BITS = 320_000
+#: The muxers a re-encoded HEVC stream may go into, with the tag players expect there.
+TRANSCODE_MUXERS = {'mp4': 'hvc1', 'mov': 'hvc1', 'matroska': None}
+#: libx265's speed preset and thread pool; the Job's CPU limit should match the pool.
+TRANSCODE_PRESET = 'faster'
+TRANSCODE_THREADS = 4
+#: libx265's own memory at 1080p with that pool, on top of the muxer's index.
+TRANSCODE_MEMORY_BYTES = 1024**3
 #: The muxers that hold an entry per packet in memory until they write the index at the end.
 INDEXED_MUXERS = frozenset({'mp4', 'mov'})
 #: Memory per packet held by those muxers (ffmpeg 6.1 measured ~70 bytes, growth included),
@@ -90,6 +111,8 @@ class Probe:
     layout: tuple[str, ...] = ()
     #: Video and audio packets, when the container counts them (MP4 does, Matroska does not).
     packets: int | None = None
+    #: The audio streams' bitrate in bits per second, as the container states it or assumed.
+    audio_bits: int = 0
 
     def by_kind(self) -> tuple[tuple[object, ...], ...]:
         """The signature with video before audio, which a remux with ``-map 0:v -map 0:a`` yields."""
@@ -173,11 +196,13 @@ def probe(path: Path, *, ffprobe: str = 'ffprobe') -> Probe:
         msg = f'{path.name} has no video stream'
         raise MergeRefusedError(msg)
     counts = [str(stream.get('nb_frames', '')) for stream in media]
+    audio_rates = [str(stream.get('bit_rate', '')) for stream in media if stream.get('codec_type') == 'audio']
     return Probe(
         duration=duration,
         signature=tuple(streams),
         layout=tuple(str(stream.get('codec_type')) for stream in every),
         packets=sum(map(int, counts)) if all(count.isdigit() for count in counts) else None,
+        audio_bits=sum(int(rate) if rate.isdigit() else FALLBACK_AUDIO_BITS for rate in audio_rates),
     )
 
 
@@ -235,20 +260,37 @@ def _check_parts(parts: Sequence[Path], output: Path) -> int:
         except OSError as exc:
             msg = f'cannot read {part}: {exc.strerror or exc}'
             raise MergeWorkerError(msg) from exc
-    if total > MAX_UPLOAD_BYTES:
+    if total > MAX_UPLOAD_BYTES and MUXERS[output.suffix.lower()] not in TRANSCODE_MUXERS:
         msg = (
             f'the parts add up to {total / 10**9:.1f} GB, more than the {MAX_UPLOAD_BYTES // 10**9} GB '
-            '115 accepts in one file'
+            f'115 accepts in one file, and a {output.suffix} merge cannot be re-encoded to fit'
         )
         raise MergeRefusedError(msg)
     return total
 
 
-def _check_memory(probes: Sequence[Probe], muxer: str, limit: int | None) -> None:
+def transcode_bitrate(total_bytes: int, duration: float, audio_bits: int) -> int:
+    """The video bitrate, in bits per second, that brings a re-encode under 115's limit.
+
+    The lower of what the budget leaves after the copied audio and a share of
+    the parts' own video bitrate.
+    """
+    budget = MAX_UPLOAD_BYTES * TRANSCODE_BUDGET_SHARE * 8 / duration - audio_bits
+    source = max(total_bytes * 8 / duration - audio_bits, 0) * TRANSCODE_SOURCE_SHARE
+    bits = int(min(budget, source))
+    if bits <= 0:
+        msg = f'the audio alone leaves no room for video under {MAX_UPLOAD_BYTES // 10**9} GB'
+        raise MergeRefusedError(msg)
+    return bits
+
+
+def _check_memory(probes: Sequence[Probe], muxer: str, limit: int | None, *, transcode: bool = False) -> None:
     if muxer not in INDEXED_MUXERS or limit is None or any(result.packets is None for result in probes):
         return
     packets = sum(result.packets or 0 for result in probes)
     needed = packets * INDEX_BYTES_PER_PACKET + INDEX_BASELINE_BYTES
+    if transcode:
+        needed += TRANSCODE_MEMORY_BYTES
     if needed > limit:
         msg = (
             f'the parts hold {packets:,} packets, whose {muxer} index needs about {needed / GIB:.1f} GiB '
@@ -368,7 +410,9 @@ def merge(  # noqa: PLR0913
     """Merge ``parts`` into ``output``; returns the final status fields."""
     status.update(phase='checking', progress=0.0)
     total_bytes = _check_parts(parts, output)
-    _check_space(output, total_bytes, reserve_bytes)
+    transcode = total_bytes > MAX_UPLOAD_BYTES
+    # A re-encode writes at most 115's limit, not the parts' size.
+    _check_space(output, MAX_UPLOAD_BYTES if transcode else total_bytes, reserve_bytes)
     status.update(total_bytes=total_bytes)
     muxer = MUXERS[output.suffix.lower()]
 
@@ -382,14 +426,16 @@ def merge(  # noqa: PLR0913
         if result.by_kind() != first.by_kind():
             msg = f'{part.name} carries different streams than {parts[0].name}; a stream copy would break'
             raise MergeRefusedError(msg)
-    _check_memory(probes, muxer, memory_limit)
+    _check_memory(probes, muxer, memory_limit, transcode=transcode)
     expected = sum(result.duration for result in probes)
+    video_bits = transcode_bitrate(total_bytes, expected, first.audio_bits) if transcode else None
 
     # Same streams in another order: put every part that strays video first.
     stray = []
     if any(result.layout != first.layout for result in probes):
         stray = [index for index, result in enumerate(probes) if not result.in_order()]
-        _check_space(output, total_bytes + sum(parts[index].stat().st_size for index in stray), reserve_bytes)
+        written = MAX_UPLOAD_BYTES if transcode else total_bytes
+        _check_space(output, written + sum(parts[index].stat().st_size for index in stray), reserve_bytes)
     staging = staging_dir(output)
     target = partial_path(output)
     inputs = list(parts)
@@ -424,7 +470,7 @@ def merge(  # noqa: PLR0913
                 duration=probes[index].duration,
                 status=status,
             )
-        _concat(inputs, target, muxer, expected, status, workdir=workdir, ffmpeg=ffmpeg)
+        _concat(inputs, target, muxer, expected, status, workdir=workdir, ffmpeg=ffmpeg, video_bits=video_bits)
     finally:
         shutil.rmtree(staging, ignore_errors=True)
 
@@ -436,6 +482,12 @@ def merge(  # noqa: PLR0913
         raise MergeWorkerError(msg)
 
     size = target.stat().st_size
+    if size > MAX_UPLOAD_BYTES:
+        msg = (
+            f'the re-encoded file came to {size / 10**9:.1f} GB, still more than the '
+            f'{MAX_UPLOAD_BYTES // 10**9} GB 115 accepts in one file'
+        )
+        raise MergeRefusedError(msg)
     status.update(phase='hashing', progress=0.0, size=size)
     digest = sha1_of(target, on_progress=lambda done: status.update(force=False, progress=done / size if size else 1.0))
     target.replace(output)
@@ -451,8 +503,28 @@ def _concat(  # noqa: PLR0913
     *,
     workdir: Path,
     ffmpeg: str,
+    video_bits: int | None = None,
 ) -> None:
-    status.update(phase='merging', progress=0.0, duration=expected)
+    """Concatenate ``parts`` by stream copy, or re-encode the video to HEVC at ``video_bits``."""
+    if video_bits is None:
+        status.update(phase='merging', progress=0.0, duration=expected)
+        codecs = ['-c', 'copy']
+    else:
+        status.update(phase='transcoding', progress=0.0, duration=expected, video_bitrate=video_bits)
+        codecs = [
+            '-c:v',
+            'libx265',
+            '-preset',
+            TRANSCODE_PRESET,
+            '-b:v',
+            str(video_bits),
+            '-x265-params',
+            f'pools={TRANSCODE_THREADS}:log-level=error',
+            '-c:a',
+            'copy',
+        ]
+        if tag := TRANSCODE_MUXERS[muxer]:
+            codecs += ['-tag:v', tag]
     script = workdir / 'concat.txt'
     script.write_text(concat_list(parts), encoding='utf-8')
     _run_ffmpeg(
@@ -473,8 +545,7 @@ def _concat(  # noqa: PLR0913
             '0:v',
             '-map',
             '0:a?',
-            '-c',
-            'copy',
+            *codecs,
             '-f',
             muxer,
             '-progress',
