@@ -165,7 +165,7 @@ function AcquisitionRow({
         onOpen(item.avid)
       }}
     >
-      <td>
+      <td className="cell-id">
         <span className="acq-avid">
           <ChevronIcon expanded={expanded} />
           {item.avid}

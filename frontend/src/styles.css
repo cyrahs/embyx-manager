@@ -674,7 +674,9 @@ main {
 }
 .route-empty { margin: 0; color: var(--text-3); font-size: 12.5px; }
 .merge-source-pick { display: inline-flex; align-items: center; gap: 8px; }
-.merge-confirm { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; }
+/* Merge rows keep the accent text buttons; only the layout is shared with .acq-actions. */
+.merge-actions { display: flex; align-items: center; gap: 4px; }
+.merge-confirm { display: inline-flex; align-items: center; gap: 4px 8px; }
 .route-add { padding-left: 0; }
 .chips {
   display: flex;
@@ -820,6 +822,12 @@ main {
 /* ---------- tables: wrapping text, pinned actions, capped height ---------- */
 /* Short columns stay on one line; a column of free text wraps instead of pushing the actions off. */
 .run-table td.cell-text { white-space: normal; overflow-wrap: anywhere; min-width: 180px; line-height: 1.5; }
+/* IDs and paths are short as a rule, but the library holds the odd whole filename as an AVID: wrap those too. */
+.run-table td.cell-id, .run-table td.cell-wrap { white-space: normal; overflow-wrap: anywhere; }
+/* Wide enough that an ordinary AVID never splits at its hyphen. */
+.run-table td.cell-id { min-width: 128px; }
+.run-table td.cell-id > strong { display: inline-block; max-width: 18em; }
+.run-table td.cell-id > .acq-avid { max-width: 18em; }
 /* Shrinks to its buttons, so the actions sit at the right edge of the table, not past it. */
 .run-table td.cell-actions { width: 1%; }
 .run-table td .acq-detail { white-space: normal; }
@@ -859,7 +867,10 @@ main {
   .topbar { flex-wrap: wrap; align-content: center; row-gap: 6px; padding-top: 6px; padding-bottom: 6px; }
   .topbar-nav { order: 3; flex: 1 0 100%; margin: 0; justify-content: space-between; }
   .nav-link { padding: 6px 8px; }
+}
 
+/* Below this the wider tables (seven or eight columns) no longer fit a panel. */
+@media (max-width: 960px) {
   /* Tables become one card per row; each cell names its column. */
   .run-table.stack > thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .run-table.stack, .run-table.stack > tbody, .run-table.stack > tbody > tr, .run-table.stack > tbody > tr > td { display: block; width: 100%; }
@@ -872,6 +883,7 @@ main {
   .run-table.stack > tbody > tr > td.cell-actions { width: 100%; }
   .run-table.stack > tbody > tr.acq-detail-row { padding-top: 0; }
   .run-table.stack > tbody > tr.acq-detail-row > td { padding: 0; }
-  .run-table.stack .acq-actions { flex-wrap: wrap; margin-left: -8px; }
+  .run-table.stack .acq-actions, .run-table.stack .merge-actions { flex-wrap: wrap; margin-left: -8px; }
+  .run-table.stack .merge-confirm { flex-wrap: wrap; }
   .run-table.stack > tbody > tr > td.run-stats-cell { max-width: none; }
 }
