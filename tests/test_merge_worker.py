@@ -142,12 +142,12 @@ def test_merge_refuses_an_mp4_whose_index_would_outgrow_the_memory_limit(tmp_pat
 
 
 @needs_ffmpeg
-def test_merge_re_encodes_parts_bigger_than_115_accepts_to_hevc(
+def test_merge_re_encodes_parts_bigger_than_115_accepts_to_av1(
     tmp_path: Path, parts: list[Path], monkeypatch: pytest.MonkeyPatch
 ) -> None:
     total = sum(part.stat().st_size for part in parts)
     monkeypatch.setattr(worker, 'MAX_UPLOAD_BYTES', total - 1)
-    monkeypatch.setattr(worker, 'TRANSCODE_PRESET', 'ultrafast')
+    monkeypatch.setattr(worker, 'TRANSCODE_PRESET', '12')
     status = StatusFile(tmp_path / 'status.json')
 
     result = worker.merge(parts, tmp_path / 'ABC-123.mp4', status, reserve_bytes=0, workdir=tmp_path)
@@ -170,7 +170,7 @@ def test_merge_re_encodes_parts_bigger_than_115_accepts_to_hevc(
         text=True,
         check=True,
     )
-    assert completed.stdout.split() == ['hevc,hvc1', 'aac,mp4a']
+    assert completed.stdout.split() == ['av1,av01', 'aac,mp4a']
     written = read_status(tmp_path / 'status.json')
     assert written is not None
     # The status keeps the bitrate the transcoding phase chose.
@@ -178,15 +178,19 @@ def test_merge_re_encodes_parts_bigger_than_115_accepts_to_hevc(
 
 
 @needs_ffmpeg
+@pytest.mark.parametrize('suffix', ['.avi', '.mov'])
 def test_merge_refuses_parts_bigger_than_115_accepts_in_a_container_it_cannot_re_encode(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, suffix: str
 ) -> None:
-    parts = [make_part(tmp_path / f'ABC-123-cd{index}.avi') for index in range(1, 3)]
+    # MOV cannot carry AV1, so it is refused like AVI.
+    parts = [make_part(tmp_path / f'ABC-123-cd{index}{suffix}') for index in range(1, 3)]
     monkeypatch.setattr(worker, 'MAX_UPLOAD_BYTES', 1000)
     status = StatusFile(tmp_path / 'status.json')
 
-    with pytest.raises(MergeRefusedError, match=r'115 accepts in one file, and a \.avi merge cannot be re-encoded'):
-        worker.merge(parts, tmp_path / 'ABC-123.avi', status, reserve_bytes=0, workdir=tmp_path)
+    with pytest.raises(
+        MergeRefusedError, match=rf'115 accepts in one file, and a \{suffix} merge cannot be re-encoded'
+    ):
+        worker.merge(parts, tmp_path / f'ABC-123{suffix}', status, reserve_bytes=0, workdir=tmp_path)
 
 
 @needs_ffmpeg
@@ -195,7 +199,7 @@ def test_merge_refuses_a_re_encode_that_still_comes_out_too_big(
 ) -> None:
     total = sum(part.stat().st_size for part in parts)
     monkeypatch.setattr(worker, 'MAX_UPLOAD_BYTES', total - 1)
-    monkeypatch.setattr(worker, 'TRANSCODE_PRESET', 'ultrafast')
+    monkeypatch.setattr(worker, 'TRANSCODE_PRESET', '12')
     # A budget the encoder cannot hold to: the size check after the encode has the last word.
     monkeypatch.setattr(worker, 'transcode_bitrate', lambda *_args: 50_000_000)
     status = StatusFile(tmp_path / 'status.json')
@@ -207,14 +211,26 @@ def test_merge_refuses_a_re_encode_that_still_comes_out_too_big(
 
 def test_transcode_bitrate_fits_the_budget_or_a_share_of_the_source() -> None:
     hours = 48 * 3600.0
-    # IDBD-905: 130 GB over 48 h, 256 kb/s AAC: the source share (0.6 x 5.76 Mb/s) is lower.
+    # IDBD-905: 130 GB over 48 h, 256 kb/s AAC: the source share (0.4 x 5.76 Mb/s) is lower.
     bits = worker.transcode_bitrate(129_600_000_000, hours, 256_000)
-    assert bits == pytest.approx(0.6 * (129_600_000_000 * 8 / hours - 256_000), rel=1e-6)
+    assert bits == pytest.approx(0.4 * (129_600_000_000 * 8 / hours - 256_000), rel=1e-6)
     # A source far above the budget gets the budget, audio included, under 115 GB.
     bits = worker.transcode_bitrate(400_000_000_000, hours, 256_000)
     assert (bits + 256_000) * hours / 8 == pytest.approx(worker.MAX_UPLOAD_BYTES * worker.TRANSCODE_BUDGET_SHARE)
     with pytest.raises(MergeRefusedError, match='audio alone'):
         worker.transcode_bitrate(400_000_000_000, hours, 10**9)
+
+
+def test_transcode_memory_scales_with_the_frame_and_keeps_a_floor() -> None:
+    def video(width: object, height: object) -> worker.Probe:
+        return worker.Probe(duration=1.0, signature=(('video', 'h264', width, height, None, None),))
+
+    # UNVRSP-003's 4096x2048 VR frames are the reference.
+    assert worker.transcode_memory(video(4096, 2048)) == worker.TRANSCODE_MEMORY_BYTES
+    assert worker.transcode_memory(video(1920, 1080)) == worker.TRANSCODE_MEMORY_FLOOR_BYTES
+    assert worker.transcode_memory(video(8192, 4096)) == 4 * worker.TRANSCODE_MEMORY_BYTES
+    # No size to go by: assume the reference.
+    assert worker.transcode_memory(video(None, None)) == worker.TRANSCODE_MEMORY_BYTES
 
 
 def test_memory_limit_reads_the_cgroup(tmp_path: Path) -> None:
