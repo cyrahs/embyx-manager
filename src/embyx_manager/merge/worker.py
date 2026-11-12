@@ -17,10 +17,10 @@ packets than the Job's memory limit can index is refused up front rather than
 killed hours in.
 
 A merge is a lossless stream copy unless the parts add up to more than 115
-accepts in one file: then the video is re-encoded to HEVC at a bitrate worked
-out from the duration, so the result fits, while audio is still copied. Only
-MP4, MOV and Matroska outputs are re-encoded; other containers are refused as
-before. The result is checked after: its duration must match the parts' sum,
+accepts in one file: then the video is re-encoded to AV1 (SVT-AV1) at a
+bitrate worked out from the duration, so the result fits, while audio is still
+copied. Only MP4 and Matroska outputs are re-encoded, as MOV cannot carry AV1;
+other containers are refused as before. The result is checked after: its duration must match the parts' sum,
 and a re-encode must have come in under the limit. Only then is it renamed into
 place, so the app never sees a half-written file under the final name.
 """
@@ -68,18 +68,27 @@ MAX_UPLOAD_BYTES = 115 * 10**9
 #: What a re-encode aims for: this share of 115's limit, leaving room for the
 #: container and for the encoder overshooting its average bitrate.
 TRANSCODE_BUDGET_SHARE = 0.9
-#: And no more than this share of the parts' own video bitrate: HEVC needs roughly
-#: half of H.264's for the same picture, so a re-encode never inflates a title.
-TRANSCODE_SOURCE_SHARE = 0.6
+#: And no more than this share of the parts' own video bitrate. Measured on a 4K60
+#: VR clip (UNVRSP-003, 12 Mb/s H.264): SVT-AV1 preset 8 at 40% scored VMAF 93.2,
+#: as x265 "faster" did at 60% (93.5), so a re-encode keeps the picture and the
+#: file comes out about a third smaller than an HEVC one would.
+TRANSCODE_SOURCE_SHARE = 0.4
 #: Assumed for an audio stream whose container does not state its bitrate.
 FALLBACK_AUDIO_BITS = 320_000
-#: The muxers a re-encoded HEVC stream may go into, with the tag players expect there.
-TRANSCODE_MUXERS = {'mp4': 'hvc1', 'mov': 'hvc1', 'matroska': None}
-#: libx265's speed preset and thread pool; the Job's CPU limit should match the pool.
-TRANSCODE_PRESET = 'faster'
+#: The muxers a re-encoded AV1 stream may go into (MOV cannot carry AV1).
+TRANSCODE_MUXERS = frozenset({'mp4', 'matroska'})
+#: SVT-AV1's speed preset and level of parallelism; the Job's CPU limit should match.
+#: Preset 8 encoded that clip a little faster than x265 "faster" on the same cores.
+TRANSCODE_PRESET = '8'
 TRANSCODE_THREADS = 4
-#: libx265's own memory at 1080p with that pool, on top of the muxer's index.
-TRANSCODE_MEMORY_BYTES = 1024**3
+#: SVT-AV1's lookahead: its default holds over 2.3 GiB of 4K frames, more than the
+#: Job's limit once the MP4 index is added; without it the encoder needs ~1.9 GiB.
+TRANSCODE_LOOKAHEAD = 0
+#: SVT-AV1's and the decoder's memory for a frame of TRANSCODE_REFERENCE_PIXELS,
+#: on top of the muxer's index; scaled by frame size, never below the floor.
+TRANSCODE_MEMORY_BYTES = 2 * 1024**3
+TRANSCODE_REFERENCE_PIXELS = 4096 * 2048
+TRANSCODE_MEMORY_FLOOR_BYTES = 512 * 1024**2
 #: The muxers that hold an entry per packet in memory until they write the index at the end.
 INDEXED_MUXERS = frozenset({'mp4', 'mov'})
 #: Memory per packet held by those muxers (ffmpeg 6.1 measured ~70 bytes, growth included),
@@ -284,13 +293,25 @@ def transcode_bitrate(total_bytes: int, duration: float, audio_bits: int) -> int
     return bits
 
 
+def transcode_memory(result: Probe) -> int:
+    """The encoder's and decoder's memory, in bytes, for a re-encode of ``result``'s video."""
+    pixels = 0
+    for stream in result.signature:
+        width, height = stream[2], stream[3]
+        if stream[0] == 'video' and isinstance(width, int) and isinstance(height, int):
+            pixels = max(pixels, width * height)
+    if not pixels:
+        return TRANSCODE_MEMORY_BYTES
+    return max(TRANSCODE_MEMORY_FLOOR_BYTES, TRANSCODE_MEMORY_BYTES * pixels // TRANSCODE_REFERENCE_PIXELS)
+
+
 def _check_memory(probes: Sequence[Probe], muxer: str, limit: int | None, *, transcode: bool = False) -> None:
     if muxer not in INDEXED_MUXERS or limit is None or any(result.packets is None for result in probes):
         return
     packets = sum(result.packets or 0 for result in probes)
     needed = packets * INDEX_BYTES_PER_PACKET + INDEX_BASELINE_BYTES
     if transcode:
-        needed += TRANSCODE_MEMORY_BYTES
+        needed += transcode_memory(probes[0])
     if needed > limit:
         msg = (
             f'the parts hold {packets:,} packets, whose {muxer} index needs about {needed / GIB:.1f} GiB '
@@ -505,7 +526,7 @@ def _concat(  # noqa: PLR0913
     ffmpeg: str,
     video_bits: int | None = None,
 ) -> None:
-    """Concatenate ``parts`` by stream copy, or re-encode the video to HEVC at ``video_bits``."""
+    """Concatenate ``parts`` by stream copy, or re-encode the video to AV1 at ``video_bits``."""
     if video_bits is None:
         status.update(phase='merging', progress=0.0, duration=expected)
         codecs = ['-c', 'copy']
@@ -513,18 +534,16 @@ def _concat(  # noqa: PLR0913
         status.update(phase='transcoding', progress=0.0, duration=expected, video_bitrate=video_bits)
         codecs = [
             '-c:v',
-            'libx265',
+            'libsvtav1',
             '-preset',
             TRANSCODE_PRESET,
             '-b:v',
             str(video_bits),
-            '-x265-params',
-            f'pools={TRANSCODE_THREADS}:log-level=error',
+            '-svtav1-params',
+            f'lp={TRANSCODE_THREADS}:lookahead={TRANSCODE_LOOKAHEAD}',
             '-c:a',
             'copy',
         ]
-        if tag := TRANSCODE_MUXERS[muxer]:
-            codecs += ['-tag:v', tag]
     script = workdir / 'concat.txt'
     script.write_text(concat_list(parts), encoding='utf-8')
     _run_ffmpeg(
