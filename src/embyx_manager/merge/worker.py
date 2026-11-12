@@ -69,20 +69,23 @@ MAX_UPLOAD_BYTES = 115 * 10**9
 #: container and for the encoder overshooting its average bitrate.
 TRANSCODE_BUDGET_SHARE = 0.9
 #: And no more than this share of the parts' own video bitrate. Measured on a 4K60
-#: VR clip (UNVRSP-003, 12 Mb/s H.264): SVT-AV1 preset 8 at 40% scored VMAF 93.2,
-#: as x265 "faster" did at 60% (93.5), so a re-encode keeps the picture and the
-#: file comes out about a third smaller than an HEVC one would.
+#: VR clip (UNVRSP-003, 12 Mb/s H.264): the image's SVT-AV1 with the settings below
+#: scored VMAF 93.1 (min 89) at 40%, as x265 "faster" did at 60% (93.5), so a
+#: re-encode keeps the picture and the file comes out about a third smaller than an
+#: HEVC one would.
 TRANSCODE_SOURCE_SHARE = 0.4
 #: Assumed for an audio stream whose container does not state its bitrate.
 FALLBACK_AUDIO_BITS = 320_000
 #: The muxers a re-encoded AV1 stream may go into (MOV cannot carry AV1).
 TRANSCODE_MUXERS = frozenset({'mp4', 'matroska'})
-#: SVT-AV1's speed preset and level of parallelism; the Job's CPU limit should match.
-#: Preset 8 encoded that clip a little faster than x265 "faster" on the same cores.
+#: SVT-AV1's speed preset and level of parallelism. The image's SVT-AV1 (2.3) buffers
+#: more 4K frames per level: on that clip lp=2 peaked at 1.8 GiB and ran at 12 fps
+#: (x265 "faster" managed 9.5 on three cores), lp=3 passed 2.3 GiB and lp=4 2.6 GiB,
+#: too much for the Job's 3 GiB once the MP4 index is added.
 TRANSCODE_PRESET = '8'
-TRANSCODE_THREADS = 4
-#: SVT-AV1's lookahead: its default holds over 2.3 GiB of 4K frames, more than the
-#: Job's limit once the MP4 index is added; without it the encoder needs ~1.9 GiB.
+TRANSCODE_THREADS = 2
+#: SVT-AV1's lookahead. 2.3 raises 0 to the least the preset allows (25 frames at
+#: preset 8); its default is longer and took lp=2 past 2.6 GiB.
 TRANSCODE_LOOKAHEAD = 0
 #: SVT-AV1's and the decoder's memory for a frame of TRANSCODE_REFERENCE_PIXELS,
 #: on top of the muxer's index; scaled by frame size, never below the floor.
