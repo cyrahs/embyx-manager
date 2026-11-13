@@ -748,17 +748,20 @@ impl CloudDriveFileSrv for FakeCloudDrive {
                     }
                     let target = join(&request.dest_path, basename(source));
                     if state.exists(&target) {
-                        // An unset policy reads as its default, Overwrite (0), as in Python.
-                        match request.conflict_policy() {
-                            ConflictPolicy::Skip => continue,
-                            ConflictPolicy::Overwrite => state.remove(&target),
-                            ConflictPolicy::Rename => {
-                                return Err(Abort {
-                                    code: "UNIMPLEMENTED",
-                                    details: "the fake only overwrites or skips on a conflict".to_owned(),
-                                });
-                            }
+                        // The number as sent: unset reads as Overwrite (0), and anything but
+                        // Skip or Overwrite (Rename, or a number the enum lacks) is refused,
+                        // as in Python.
+                        let policy = request.conflict_policy.unwrap_or(ConflictPolicy::Overwrite as i32);
+                        if policy == ConflictPolicy::Skip as i32 {
+                            continue;
                         }
+                        if policy != ConflictPolicy::Overwrite as i32 {
+                            return Err(Abort {
+                                code: "UNIMPLEMENTED",
+                                details: "the fake only overwrites or skips on a conflict".to_owned(),
+                            });
+                        }
+                        state.remove(&target);
                     }
                     state.relocate(source, &target);
                     moved.push(target);

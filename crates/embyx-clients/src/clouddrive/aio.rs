@@ -10,14 +10,22 @@
 //! ([`AsyncCloudDrive::complete`]): dropping the caller leaves the task running to its end,
 //! and [`AsyncCloudDrive::close`] waits for every such task before it returns, which is what
 //! shutdown and a configuration swap must await (contract 6; DIVERGENCES.md D41).
+//!
+//! Python's cancelled caller itself only finishes once the RPC has (a fill-actor execution
+//! that is cancelled and then gathered releases its lease after the move ended). A dropped
+//! Rust future finishes at once, so code that cancels work around a mutation and then acts
+//! on the outcome runs that work on [`AsyncCloudDrive::scoped`] and awaits
+//! [`AsyncCloudDrive::settle`] after cancelling: it returns once every call started in the
+//! scope has its answer, without closing the client.
 
 use std::collections::BTreeMap;
 use std::future::Future;
 use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 
 use embyx_core::posixpath;
 use embyx_core::pyjson::{Dict, Value};
+use tokio::sync::Notify;
 use tokio_util::task::TaskTracker;
 
 use super::client::{CONFLICT_OVERWRITE, CONFLICT_SKIP, ClientOptions, CloudDriveClient, CloudDriveError};
@@ -408,6 +416,33 @@ pub struct AsyncCloudDrive {
     client: CloudDriveClient,
     in_flight: TaskTracker,
     closed: Arc<AtomicBool>,
+    /// The calls of one [`Self::scoped`] handle and its clones.
+    scope: Option<Arc<Scope>>,
+}
+
+/// Calls running in one scope, and a wake-up for [`AsyncCloudDrive::settle`].
+#[derive(Debug, Default)]
+struct Scope {
+    running: AtomicUsize,
+    idle: Notify,
+}
+
+/// One call counted in its scope until the call's task ends.
+struct ScopeEntry(Arc<Scope>);
+
+impl ScopeEntry {
+    fn enter(scope: &Arc<Scope>) -> Self {
+        scope.running.fetch_add(1, Ordering::SeqCst);
+        Self(Arc::clone(scope))
+    }
+}
+
+impl Drop for ScopeEntry {
+    fn drop(&mut self) {
+        if self.0.running.fetch_sub(1, Ordering::SeqCst) == 1 {
+            self.0.idle.notify_waiters();
+        }
+    }
 }
 
 impl AsyncCloudDrive {
@@ -416,6 +451,33 @@ impl AsyncCloudDrive {
             client,
             in_flight: TaskTracker::new(),
             closed: Arc::new(AtomicBool::new(false)),
+            scope: None,
+        }
+    }
+
+    /// A handle on the same client whose calls (and those of its clones) [`Self::settle`]
+    /// can wait for. [`Self::close`] still covers them.
+    #[must_use]
+    pub fn scoped(&self) -> Self {
+        Self {
+            scope: Some(Arc::new(Scope::default())),
+            ..self.clone()
+        }
+    }
+
+    /// Wait until no call started through this scoped handle is running, also those whose
+    /// caller was dropped: what Python's cancelled caller waits for before it re-raises the
+    /// cancellation. Returns at once on a handle that is not scoped.
+    pub async fn settle(&self) {
+        let Some(scope) = &self.scope else {
+            return;
+        };
+        loop {
+            let idle = scope.idle.notified();
+            if scope.running.load(Ordering::SeqCst) == 0 {
+                return;
+            }
+            idle.await;
         }
     }
 
@@ -448,10 +510,21 @@ impl AsyncCloudDrive {
         T: Send + 'static,
         F: Future<Output = Result<T, CloudDriveError>> + Send + 'static,
     {
+        // Counted before the closed check, so a `close()` that runs between the check and the
+        // spawn cannot see an empty tracker and return while this call is still admitted.
+        let admitted = self.in_flight.token();
+        let entry = self.scope.as_ref().map(ScopeEntry::enter);
         if self.closed.load(Ordering::SeqCst) {
             return Err(CloudDriveError::Closed(CLOSED_CHANNEL));
         }
-        match self.in_flight.spawn(call).await {
+        let call = async move {
+            let _counted = entry;
+            call.await
+        };
+        let task = self.in_flight.spawn(call);
+        // The task holds its own place in the tracker now.
+        drop(admitted);
+        match task.await {
             Ok(result) => result,
             Err(error) if error.is_panic() => std::panic::resume_unwind(error.into_panic()),
             // Only a runtime shutting down cancels the task, and then this caller is

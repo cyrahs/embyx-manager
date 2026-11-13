@@ -564,6 +564,29 @@ async fn template_errors_are_python_errors_not_kube_errors() {
     assert!(!error.is_kube());
 }
 
+#[tokio::test]
+async fn a_template_with_nan_is_refused_before_the_request() {
+    // httpx refuses `json=` with NaN or infinity (`allow_nan=False`); only the pod lookup is
+    // scripted, so a POST would fail as a `KubeError` instead.
+    for (literal, shown) in [("NaN", "nan"), ("Infinity", "inf"), ("-Infinity", "-inf")] {
+        let mounted = Mounted::new(&minimal_template());
+        let template = format!(
+            r#"{{"metadata": {{"annotations": {{"x": [1, {literal}]}}}}, "spec": {{"template": {{"spec": {{"containers": [{{}}]}}}}}}}}"#
+        );
+        std::fs::write(mounted.path("job.json"), template).expect("template");
+        let web = scripted(vec![Reply::json(200, &pod("i", "i@sha256:1"))]).await;
+        let kube = KubeJobs::new(&mounted.options(&web)).expect("client");
+        let error = kube.create_job("j", &[], 1).await.expect_err(literal);
+        assert_eq!(
+            (error.class_name(), error.to_string()),
+            (
+                "ValueError",
+                format!("Out of range float values are not JSON compliant: {shown}")
+            )
+        );
+    }
+}
+
 // ---------- from_environment ----------
 
 fn environment(pairs: &[(&str, &str)]) -> impl Fn(&str) -> Option<String> {

@@ -444,6 +444,89 @@
     },
     {
       "template": {
+        "spec": "x"
+      },
+      "error": {
+        "type": "TypeError",
+        "message": "string indices must be integers, not 'str'"
+      }
+    },
+    {
+      "template": {
+        "spec": {
+          "template": {
+            "spec": "x"
+          }
+        }
+      },
+      "error": {
+        "type": "TypeError",
+        "message": "string indices must be integers, not 'str'"
+      }
+    },
+    {
+      "template": {
+        "spec": {
+          "template": {
+            "spec": {
+              "containers": [
+                {},
+                "x"
+              ]
+            }
+          }
+        }
+      },
+      "value": {
+        "spec": {
+          "template": {
+            "spec": {
+              "containers": [
+                {
+                  "image": "ghcr.io/cyrahs/embyx-manager@sha256:1",
+                  "args": [
+                    "--output",
+                    "o",
+                    "中文"
+                  ]
+                },
+                "x"
+              ]
+            },
+            "metadata": {
+              "labels": {
+                "embyx-manager/merge-task": "1"
+              }
+            }
+          }
+        },
+        "metadata": {
+          "name": "embyx-merge-1-abc",
+          "labels": {
+            "embyx-manager/merge-task": "1"
+          }
+        }
+      }
+    },
+    {
+      "template": {
+        "spec": {
+          "template": {
+            "spec": {
+              "containers": [
+                "x"
+              ]
+            }
+          }
+        }
+      },
+      "error": {
+        "type": "TypeError",
+        "message": "'str' object does not support item assignment"
+      }
+    },
+    {
+      "template": {
         "spec": {
           "template": {
             "metadata": 5,

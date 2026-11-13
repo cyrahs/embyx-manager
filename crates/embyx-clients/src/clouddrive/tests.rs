@@ -975,6 +975,87 @@ async fn every_path_taking_call_validates_before_sending() {
 // py: tests/test_clouddrive.py::test_cancelled_cloud_move_waits_for_sync_call_before_returning
 #[tokio::test]
 async fn cancelled_cloud_move_waits_for_sync_call_before_returning() {
+    // Python's cancelled caller only finishes once the RPC has, and the channel stays open.
+    // A dropped Rust future finishes at once, so the work that is cancelled runs on a scoped
+    // handle and whoever cancelled it awaits `settle()`: that is what must not return early.
+    let (served, recorder) = fake(
+        r#"{"directories": ["/cloud/library/source-b/ABC", "/cloud/library/move-in/ABC"],
+            "errors": [{"method": "MoveFile", "code": "INTERNAL", "details": "late gRPC failure"}]}"#,
+    )
+    .await;
+    let hold = served.fake.hold("MoveFile");
+    let cloud = AsyncCloudDrive::connect(&options(&served.address()));
+    let scope = cloud.scoped();
+    let caller = scope.clone();
+    let task = tokio::spawn(async move {
+        caller
+            .move_file("/cloud/library/source-b/ABC/ABC-001.mp4", "/cloud/library/move-in/ABC")
+            .await
+    });
+    tokio::time::timeout(Duration::from_secs(5), hold.arrived())
+        .await
+        .expect("the move reached the server");
+
+    task.abort();
+    assert!(task.await.expect_err("aborted").is_cancelled());
+    let settled = tokio::spawn({
+        let scope = scope.clone();
+        async move { scope.settle().await }
+    });
+    tokio::time::sleep(Duration::from_millis(50)).await;
+    assert!(!settled.is_finished(), "settle() returned while the move was in flight");
+    assert!(calls_of(&recorder, "MoveFile").is_empty());
+    // `close.assert_not_called()`: the client is still open and takes other calls.
+    assert_eq!(cloud.in_flight(), 1);
+    assert!(cloud.check().await.is_ok());
+
+    hold.release();
+    tokio::time::timeout(Duration::from_secs(5), settled)
+        .await
+        .expect("settle() returns once the move is done")
+        .expect("settle");
+    assert_eq!(cloud.in_flight(), 0);
+    // The server saw the whole call and answered it: the late failure, swallowed.
+    let calls = calls_of(&recorder, "MoveFile");
+    assert_eq!(calls.len(), 1);
+    assert_eq!(
+        calls[0].get("error").and_then(|error| error.get("details")),
+        Some(&Value::from("late gRPC failure"))
+    );
+    cloud.close().await;
+}
+
+#[tokio::test]
+async fn settle_waits_only_for_its_own_scope() {
+    let (served, _) = fake(r#"{"directories": ["/in", "/out"], "files": [{"path": "/in/a"}]}"#).await;
+    let hold = served.fake.hold("MoveFile");
+    let cloud = AsyncCloudDrive::connect(&options(&served.address()));
+    let (busy, quiet) = (cloud.scoped(), cloud.scoped());
+    let caller = busy.clone();
+    let task = tokio::spawn(async move { caller.move_file("/in/a", "/out").await });
+    hold.arrived().await;
+    // Another scope and an unscoped handle settle at once; the busy scope does not.
+    tokio::time::timeout(Duration::from_secs(1), quiet.settle())
+        .await
+        .expect("quiet scope");
+    tokio::time::timeout(Duration::from_secs(1), cloud.settle())
+        .await
+        .expect("no scope");
+    assert!(
+        tokio::time::timeout(Duration::from_millis(50), busy.settle())
+            .await
+            .is_err()
+    );
+    hold.release();
+    tokio::time::timeout(Duration::from_secs(5), busy.settle())
+        .await
+        .expect("busy scope");
+    task.await.expect("task").expect("move");
+    cloud.close().await;
+}
+
+#[tokio::test]
+async fn close_waits_for_a_move_whose_caller_is_gone() {
     let (served, recorder) = fake(
         r#"{"directories": ["/cloud/library/source-b/ABC", "/cloud/library/move-in/ABC"],
             "errors": [{"method": "MoveFile", "code": "INTERNAL", "details": "late gRPC failure"}]}"#,
@@ -992,7 +1073,7 @@ async fn cancelled_cloud_move_waits_for_sync_call_before_returning() {
         .await
         .expect("the move reached the server");
 
-    // The caller goes away while the RPC is on the server.
+    // The caller goes away while the RPC is on the server; shutdown must still wait.
     task.abort();
     assert!(task.await.expect_err("aborted").is_cancelled());
     assert_eq!(cloud.in_flight(), 1);
@@ -1010,22 +1091,40 @@ async fn cancelled_cloud_move_waits_for_sync_call_before_returning() {
         .expect("close() returns once the move is done")
         .expect("close");
     assert_eq!(cloud.in_flight(), 0);
-    // The server saw the whole call and answered it: the late failure, swallowed.
-    let calls = calls_of(&recorder, "MoveFile");
-    assert_eq!(calls.len(), 1);
-    assert_eq!(
-        calls[0].get("error").and_then(|error| error.get("details")),
-        Some(&Value::from("late gRPC failure"))
-    );
+    assert_eq!(calls_of(&recorder, "MoveFile").len(), 1);
     // A closed wrapper refuses new calls, as a closed grpcio channel does.
     let error = cloud.list_directory("/", true).await.expect_err("closed");
     assert_eq!(error.class_name(), "ValueError");
     assert_eq!(error.to_string(), "Cannot invoke RPC on closed channel!");
 }
 
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn a_call_admitted_while_closing_is_waited_for_or_refused() {
+    // close() racing new calls: every call either is refused or finishes before close()
+    // returns; none is sent after it.
+    for _ in 0..50 {
+        let (served, recorder) = fake(r#"{"directories": ["/in"]}"#).await;
+        let cloud = AsyncCloudDrive::connect(&options(&served.address()));
+        let callers: Vec<_> = (0..8)
+            .map(|_| {
+                let cloud = cloud.clone();
+                tokio::spawn(async move { cloud.list_directory("/in", true).await.is_ok() })
+            })
+            .collect();
+        cloud.close().await;
+        let seen_at_close = calls_of(&recorder, "GetSubFiles").len();
+        let mut answered = 0;
+        for caller in callers {
+            answered += usize::from(caller.await.expect("caller"));
+        }
+        assert_eq!(seen_at_close, answered, "a call ran after close() returned");
+        assert_eq!(calls_of(&recorder, "GetSubFiles").len(), answered);
+    }
+}
+
 #[tokio::test]
 async fn a_dropped_plain_tonic_call_is_abandoned_which_is_why_the_wrapper_exists() {
-    // The control for the test above: without the wrapper, dropping the caller resets the
+    // The control for the tests above: without the wrapper, dropping the caller resets the
     // stream and the server never finishes the move. The wrapper's test is only meaningful
     // because this one shows the difference.
     let (served, recorder) = fake(r#"{"directories": ["/in", "/out"], "files": [{"path": "/in/a"}]}"#).await;

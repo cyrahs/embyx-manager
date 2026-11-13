@@ -169,7 +169,21 @@ fn get_key<'a>(value: &'a mut Value, key: &str) -> Result<&'a mut Value, KubeJob
             "TypeError",
             "list indices must be integers or slices, not str",
         )),
+        Value::Str(_) => Err(KubeJobsError::other(
+            "TypeError",
+            "string indices must be integers, not 'str'",
+        )),
         other => Err(KubeJobsError::not_subscriptable(other)),
+    }
+}
+
+/// The first NaN or infinity in encoding order, which `json.dumps(allow_nan=False)` refuses.
+fn first_non_finite(value: &Value) -> Option<f64> {
+    match value {
+        Value::Float(number) if !number.is_finite() => Some(*number),
+        Value::List(items) => items.iter().find_map(first_non_finite),
+        Value::Dict(dict) => dict.iter().find_map(|(_, item)| first_non_finite(item)),
+        _ => None,
     }
 }
 
@@ -554,6 +568,16 @@ impl KubeJobs {
         }
         let mut request = Request::new(method, url).header("Authorization", format!("Bearer {}", py_strip(&token)));
         if let Some(json) = json {
+            // httpx encodes `json=` with `allow_nan=False`: refused before anything is sent.
+            if let Some(number) = first_non_finite(json) {
+                return Err(KubeJobsError::other(
+                    "ValueError",
+                    format!(
+                        "Out of range float values are not JSON compliant: {}",
+                        pyjson::float_repr(number)
+                    ),
+                ));
+            }
             let body = pyjson::dumps(json, &DumpOptions::compact())
                 .map_err(|error| KubeJobsError::other("ValueError", error.to_string()))?;
             request = request.header("Content-Type", "application/json");
