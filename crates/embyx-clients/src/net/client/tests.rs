@@ -289,7 +289,7 @@ async fn requests_go_out_in_httpx_header_order_and_case() {
     assert_eq!(
         seen[0],
         format!(
-            "GET / HTTP/1.1\r\nHost: {address}\r\nAccept-Encoding: gzip, deflate, br\r\nConnection: keep-alive\r\n\
+            "GET / HTTP/1.1\r\nHost: {address}\r\nAccept-Encoding: gzip, deflate\r\nConnection: keep-alive\r\n\
              Referer: https://hanime1.me/\r\nUser-Agent: {ua}\r\n\
              Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\r\n\
              Accept-Language: zh-CN,zh;q=0.9,en;q=0.8\r\nCookie: user_lang=zh-CHS\r\n\r\n"
@@ -298,7 +298,7 @@ async fn requests_go_out_in_httpx_header_order_and_case() {
     assert_eq!(
         seen[1],
         format!(
-            "POST /p HTTP/1.1\r\nHost: {address}\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate, br\r\n\
+            "POST /p HTTP/1.1\r\nHost: {address}\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\n\
              Connection: keep-alive\r\nUser-Agent: python-httpx/0.28.1\r\nContent-Length: 6\r\n\r\n"
         )
     );
@@ -325,7 +325,7 @@ async fn a_redirect_to_another_origin_rewrites_host_in_place() {
     )
     .await
     .expect("response");
-    let defaults = "Accept: */*\r\nAccept-Encoding: gzip, deflate, br\r\nConnection: keep-alive\r\nUser-Agent: python-httpx/0.28.1\r\n";
+    let defaults = "Accept: */*\r\nAccept-Encoding: gzip, deflate\r\nConnection: keep-alive\r\nUser-Agent: python-httpx/0.28.1\r\n";
     assert_eq!(
         start_seen.lock().expect("lock")[0],
         format!(
@@ -353,7 +353,7 @@ async fn a_host_the_caller_sets_goes_first() {
         .expect("response");
     assert_eq!(
         seen.lock().expect("lock")[0],
-        "GET / HTTP/1.1\r\nHost: example.test\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate, br\r\nConnection: keep-alive\r\n\
+        "GET / HTTP/1.1\r\nHost: example.test\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\nConnection: keep-alive\r\n\
          User-Agent: python-httpx/0.28.1\r\nX-A: 1\r\n\r\n"
     );
 }

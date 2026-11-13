@@ -1,0 +1,204 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "clients",
+  "cases": [
+    {
+      "kind": "feed",
+      "body_latin1": "<?xml version=\"1.0\"?><rss version=\"2.0\" xmlns:content=\"http://purl.org/rss/1.0/modules/content/\"><channel><title>  JavBus \n - x </title><item><title>A</title><link> https://x/A </link><guid>g1</guid><description>d</description><content:encoded> <![CDATA[<p>c</p>]]> </content:encoded></item><item><title>B</title><link>https://x/B</link></item><item><title>  </title></item><item><guid>  </guid><title>T<!-- c -->U</title><description><![CDATA[x]]>y</description></item></channel></rss>",
+      "title": "JavBus - x",
+      "items": [
+        [
+          "g1",
+          "A",
+          "https://x/A",
+          "<p>c</p>"
+        ],
+        [
+          "https://x/B",
+          "B",
+          "https://x/B",
+          ""
+        ],
+        [
+          "TU",
+          "TU",
+          null,
+          "xy"
+        ]
+      ]
+    },
+    {
+      "kind": "feed",
+      "body_latin1": "<feed xmlns=\"http://www.w3.org/2005/Atom\"><title>f</title><entry><title>A</title><link rel=\"enclosure\" href=\"https://x/enc\"/><link href=\"\"/><link rel=\"alternate\" href=\" https://x/A \"/><content>c</content><summary>s</summary></entry><entry><id>i2</id><summary>s</summary></entry><entry><title>no key</title><link rel=\"self\" href=\"https://x/self\"/></entry></feed>",
+      "title": "f",
+      "items": [
+        [
+          "https://x/A",
+          "A",
+          "https://x/A",
+          "c"
+        ],
+        [
+          "i2",
+          "",
+          null,
+          "s"
+        ],
+        [
+          "no key",
+          "no key",
+          null,
+          ""
+        ]
+      ]
+    },
+    {
+      "kind": "feed",
+      "body_latin1": "ï»¿<rss><channel><item><title>bom</title></item></channel></rss>",
+      "title": null,
+      "items": [
+        [
+          "bom",
+          "bom",
+          null,
+          ""
+        ]
+      ]
+    },
+    {
+      "kind": "feed",
+      "body_latin1": "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><rss><channel><title>café</title></channel></rss>",
+      "title": "café",
+      "items": []
+    },
+    {
+      "kind": "feed",
+      "body_latin1": "ÿþ<\u0000r\u0000s\u0000s\u0000>\u0000<\u0000c\u0000h\u0000a\u0000n\u0000n\u0000e\u0000l\u0000>\u0000<\u0000t\u0000i\u0000t\u0000l\u0000e\u0000>\u0000ü\u0000<\u0000/\u0000t\u0000i\u0000t\u0000l\u0000e\u0000>\u0000<\u0000/\u0000c\u0000h\u0000a\u0000n\u0000n\u0000e\u0000l\u0000>\u0000<\u0000/\u0000r\u0000s\u0000s\u0000>\u0000",
+      "title": "ü",
+      "items": []
+    },
+    {
+      "kind": "feed",
+      "body_latin1": "<rss version=\"2.0\"/>",
+      "error": "FeedParseError",
+      "message": "RSS document has no channel"
+    },
+    {
+      "kind": "feed",
+      "body_latin1": "<rss><item/></rss>",
+      "error": "FeedParseError",
+      "message": "RSS document has no channel"
+    },
+    {
+      "kind": "feed",
+      "body_latin1": "<RSS><channel/></RSS>",
+      "error": "FeedParseError",
+      "message": "unsupported feed root element 'RSS'"
+    },
+    {
+      "kind": "feed",
+      "body_latin1": "<html><body>not a feed</body></html>",
+      "error": "FeedParseError",
+      "message": "unsupported feed root element 'html'"
+    },
+    {
+      "kind": "feed",
+      "body_latin1": "definitely not xml",
+      "error": "FeedParseError",
+      "message": "not well-formed XML: syntax error: line 1, column 0"
+    },
+    {
+      "kind": "feed",
+      "body_latin1": "",
+      "error": "FeedParseError",
+      "message": "not well-formed XML: no element found: line 1, column 0"
+    },
+    {
+      "kind": "feed",
+      "body_latin1": "<?xml version=\"1.0\"?><!DOCTYPE x [<!ENTITY e \"x\">]><rss version=\"2.0\"><channel/></rss>",
+      "error": "FeedParseError",
+      "message": "not well-formed XML: DTDForbidden(name='x', system_id=None, public_id=None)"
+    },
+    {
+      "kind": "feed",
+      "body_latin1": "<rss><channel><title>&amp; &lt; &#x41;</title></channel></rss>",
+      "title": "& < A",
+      "items": []
+    },
+    {
+      "kind": "feed",
+      "body_latin1": "<rss><channel><title>a</title></channel></rss><extra/>",
+      "error": "FeedParseError",
+      "message": "not well-formed XML: junk after document element: line 1, column 46"
+    },
+    {
+      "kind": "feed",
+      "body_latin1": "<rss><channel><title>ÿ</title></channel></rss>",
+      "error": "FeedParseError",
+      "message": "not well-formed XML: not well-formed (invalid token): line 1, column 21"
+    },
+    {
+      "kind": "link",
+      "link": "https://www.avbase.net/works/MIZD-555",
+      "candidate": "MIZD-555"
+    },
+    {
+      "kind": "link",
+      "link": "https://www.avbase.net/works/moodyz:MIZD-555",
+      "candidate": "MIZD-555"
+    },
+    {
+      "kind": "link",
+      "link": "https://www.avbase.net/works/sodcreate%3A3DSVR-2013/",
+      "candidate": "3DSVR-2013"
+    },
+    {
+      "kind": "link",
+      "link": "https://www.javlibrary.com/cn/?v=javli6",
+      "candidate": "cn"
+    },
+    {
+      "kind": "link",
+      "link": null,
+      "candidate": ""
+    },
+    {
+      "kind": "link",
+      "link": "",
+      "candidate": ""
+    },
+    {
+      "kind": "link",
+      "link": "MIZD-555",
+      "candidate": "MIZD-555"
+    },
+    {
+      "kind": "link",
+      "link": "/works/a:b:c ",
+      "candidate": "c"
+    },
+    {
+      "kind": "link",
+      "link": "https://x/works/%20A-1%20",
+      "candidate": "A-1"
+    },
+    {
+      "kind": "link",
+      "link": "https://x/",
+      "candidate": ""
+    },
+    {
+      "kind": "link",
+      "link": "https://x",
+      "candidate": ""
+    },
+    {
+      "kind": "link",
+      "link": "http://[::1/works/x",
+      "error": "ValueError",
+      "message": "Invalid IPv6 URL"
+    }
+  ]
+}

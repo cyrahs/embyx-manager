@@ -28,7 +28,7 @@ tests = [
 
 [WP2]
 title = "HTTP clients and parsers"
-status = "pending"
+status = "done"
 tests = [
   "tests/test_javbus.py",
   "tests/test_magnet_sources.py",

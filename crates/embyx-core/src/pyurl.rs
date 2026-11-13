@@ -260,7 +260,7 @@ fn split_params(path: &str) -> (&str, &str) {
 }
 
 /// `urlparse(url, scheme)`: [`urlsplit`] plus the params of schemes that use them.
-fn urlparse(url: &str, default_scheme: &str) -> Result<(SplitResult, String), UrlError> {
+pub fn urlparse(url: &str, default_scheme: &str) -> Result<(SplitResult, String), UrlError> {
     let mut split = urlsplit(url, default_scheme)?;
     let mut params = String::new();
     if USES_PARAMS.contains(&split.scheme.as_str()) && split.path.contains(';') {

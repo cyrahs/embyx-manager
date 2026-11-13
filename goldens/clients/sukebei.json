@@ -1,0 +1,301 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "clients",
+  "cases": [
+    {
+      "kind": "parse",
+      "html": "<!DOCTYPE html>\n<html><head><title>Sukebei</title></head><body>\n<table class=\"table torrent-list\"><thead><tr><th>Category</th><th>Name</th></tr></thead>\n<tbody>\n<tr class=\"success\">\n<td><a href=\"/?c=2_2\" title=\"Real Life - Videos\"><img src=\"/static/img/icons/sukebei/2_2.png\" alt=\"Real Life - Videos\"></a></td>\n<td colspan=\"2\"><a href=\"/view/4000001#comments\" class=\"comments\" title=\"3 comments\"><i class=\"fa fa-comments-o\"></i>3</a>\n<a href=\"/view/4000001\" title=\"ABC-123 FHD\">ABC-123 FHD</a></td>\n<td class=\"text-center\"><a href=\"/download/4000001.torrent\"><i class=\"fa fa-fw fa-download\"></i></a>\n<a href=\"magnet:?xt=urn:btih:aaa&amp;dn=ABC-123+FHD&amp;tr=http%3A%2F%2Fsukebei.tracker.wf%3A8888%2Fannounce\"><i class=\"fa fa-fw fa-magnet\"></i></a></td>\n<td class=\"text-center\">2.1 GiB</td>\n<td class=\"text-center\" data-timestamp=\"1700000000\">2023-11-14 22:13</td>\n<td class=\"text-center\">10</td><td class=\"text-center\">2</td><td class=\"text-center\">100</td>\n</tr>\n<tr class=\"default\">\n<td><a href=\"/?c=2_2\" title=\"Real Life - Videos\"><img src=\"/x.png\"></a></td>\n<td colspan=\"2\"><a href=\"/view/4000002\" title=\"[HD] abc00123\">[HD] abc00123</a></td>\n<td class=\"text-center\"><a href=\"/download/4000002.torrent\"><i class=\"fa fa-fw fa-download\"></i></a>\n<a href=\"magnet:?xt=urn:btih:bbb&amp;dn=abc00123\"><i class=\"fa fa-fw fa-magnet\"></i></a></td>\n<td class=\"text-center\">4.0 GiB</td>\n<td class=\"text-center\" data-timestamp=\"1700000001\">2023-11-14 22:14</td>\n<td class=\"text-center\">5</td><td class=\"text-center\">1</td><td class=\"text-center\">50</td>\n</tr>\n<tr class=\"danger\">\n<td><a href=\"/?c=2_1\" title=\"Real Life - Photobooks\"><img src=\"/y.png\"></a></td>\n<td colspan=\"2\"><a href=\"/view/4000003\">ABC-1234 other</a></td>\n<td class=\"text-center\"><a href=\"/download/4000003.torrent\"></a><a href=\"magnet:?xt=urn:btih:ccc\"></a></td>\n<td class=\"text-center\">9 GiB</td><td class=\"text-center\">2023-11-15 00:00</td>\n<td class=\"text-center\">0</td><td class=\"text-center\">0</td><td class=\"text-center\">1</td>\n</tr>\n<tr><td>2_9</td></tr>\n</tbody></table></body></html>\n",
+      "rows": [
+        {
+          "id": "4000001",
+          "category": "Real Life - Videos",
+          "url": "https://sukebei.nyaa.si/view/4000001",
+          "name": "ABC-123 FHD",
+          "download_url": "https://sukebei.nyaa.si/download/4000001.torrent",
+          "magnet": "magnet:?xt=urn:btih:aaa&dn=ABC-123+FHD&tr=http%3A%2F%2Fsukebei.tracker.wf%3A8888%2Fannounce",
+          "size": "2.1 GiB",
+          "date": "2023-11-14 22:13",
+          "seeders": "10",
+          "leechers": "2",
+          "completed_downloads": "100",
+          "type": "trusted"
+        },
+        {
+          "id": "4000002",
+          "category": "Real Life - Videos",
+          "url": "https://sukebei.nyaa.si/view/4000002",
+          "name": "[HD] abc00123",
+          "download_url": "https://sukebei.nyaa.si/download/4000002.torrent",
+          "magnet": "magnet:?xt=urn:btih:bbb&dn=abc00123",
+          "size": "4.0 GiB",
+          "date": "2023-11-14 22:14",
+          "seeders": "5",
+          "leechers": "1",
+          "completed_downloads": "50",
+          "type": "default"
+        },
+        {
+          "id": "4000003",
+          "category": "Real Life - Photobooks & Pictures",
+          "url": "https://sukebei.nyaa.si/view/4000003",
+          "name": "ABC-1234 other",
+          "download_url": "https://sukebei.nyaa.si/download/4000003.torrent",
+          "magnet": "magnet:?xt=urn:btih:ccc",
+          "size": "9 GiB",
+          "date": "2023-11-15 00:00",
+          "seeders": "0",
+          "leechers": "0",
+          "completed_downloads": "1",
+          "type": "remake"
+        }
+      ]
+    },
+    {
+      "kind": "parse",
+      "html": "",
+      "error": "AttributeError",
+      "message": "'NoneType' object has no attribute 'xpath'"
+    },
+    {
+      "kind": "parse",
+      "html": "<table><tbody><tr><td>short</td></tr></tbody></table>",
+      "error": "IndexError",
+      "message": "list index out of range"
+    },
+    {
+      "kind": "parse",
+      "html": "<table><tbody><tr><td>2_2</td></tr></tbody></table>",
+      "rows": []
+    },
+    {
+      "kind": "parse",
+      "html": "<table><tbody><tr><td><a>no href</a></td></tr></tbody></table>",
+      "error": "AttributeError",
+      "message": "'NoneType' object has no attribute 'split'"
+    },
+    {
+      "kind": "parse",
+      "html": "<table><tr><td>?c=2_2</td></tr></table>",
+      "rows": []
+    },
+    {
+      "kind": "choose",
+      "keyword": "ABC-123",
+      "results": [
+        {
+          "size": "unknown",
+          "magnet": "magnet:?xt=urn:btih:bad&dn=bad",
+          "type": "trusted",
+          "name": "ABC-123 bad"
+        },
+        {
+          "size": "2 GiB",
+          "magnet": "magnet:?xt=urn:btih:good&dn=good",
+          "type": "regular",
+          "name": "ABC-123 good"
+        }
+      ],
+      "magnet": "magnet:?xt=urn:btih:good&dn=ABC-123"
+    },
+    {
+      "kind": "choose",
+      "keyword": "ABC-123",
+      "results": [
+        {
+          "size": "10 GiB",
+          "magnet": "magnet:?xt=urn:btih:big&dn=big",
+          "type": "regular",
+          "name": "ABC-123 big"
+        },
+        {
+          "size": "9 GiB",
+          "magnet": "magnet:?xt=urn:btih:trusted&dn=trusted",
+          "type": "trusted",
+          "name": "ABC-123 t"
+        }
+      ],
+      "magnet": "magnet:?xt=urn:btih:trusted&dn=ABC-123"
+    },
+    {
+      "kind": "choose",
+      "keyword": "ABC-123",
+      "results": [
+        {
+          "size": "10 GiB",
+          "magnet": "magnet:?xt=urn:btih:big&dn=big",
+          "type": "regular",
+          "name": "ABC-123 big"
+        },
+        {
+          "size": "1 GiB",
+          "magnet": "magnet:?xt=urn:btih:trusted&dn=trusted",
+          "type": "trusted",
+          "name": "ABC-123 t"
+        }
+      ],
+      "magnet": "magnet:?xt=urn:btih:big&dn=ABC-123"
+    },
+    {
+      "kind": "choose",
+      "keyword": "ABC-123",
+      "results": [
+        {
+          "size": "10 GiB",
+          "magnet": "magnet:?xt=urn:btih:big&dn=big",
+          "type": "regular",
+          "name": "ABC-123 big"
+        },
+        {
+          "size": "8 GiB",
+          "magnet": "magnet:?xt=urn:btih:trusted&dn=trusted",
+          "type": "trusted",
+          "name": "ABC-123 t"
+        }
+      ],
+      "magnet": "magnet:?xt=urn:btih:trusted&dn=ABC-123"
+    },
+    {
+      "kind": "choose",
+      "keyword": "NHDTC-180",
+      "results": [
+        {
+          "size": "9 GiB",
+          "magnet": "magnet:?xt=urn:btih:other&dn=other",
+          "type": "trusted",
+          "name": "NHDTC-18006 FHD"
+        },
+        {
+          "size": "3 GiB",
+          "magnet": "magnet:?xt=urn:btih:right&dn=right",
+          "type": "regular",
+          "name": "[HD] nhdtc00180"
+        }
+      ],
+      "magnet": "magnet:?xt=urn:btih:right&dn=NHDTC-180"
+    },
+    {
+      "kind": "choose",
+      "keyword": "NHDTC-180",
+      "results": [
+        {
+          "size": "9 GiB",
+          "magnet": "magnet:?xt=urn:btih:other&dn=other",
+          "type": "trusted",
+          "name": "NHDTC-18006"
+        }
+      ],
+      "magnet": null
+    },
+    {
+      "kind": "choose",
+      "keyword": "FC2-1234567",
+      "results": [
+        {
+          "size": "1 GiB",
+          "magnet": "magnet:?xt=urn:btih:fc2&dn=fc2",
+          "type": "regular",
+          "name": "FC2-PPV-1234567"
+        }
+      ],
+      "magnet": "magnet:?xt=urn:btih:fc2&dn=FC2-1234567"
+    },
+    {
+      "kind": "choose",
+      "keyword": "heydouga-4030-123",
+      "results": [
+        {
+          "size": "1 GiB",
+          "magnet": "magnet:?xt=urn:btih:h&dn=h",
+          "type": "default",
+          "name": "anything"
+        }
+      ],
+      "magnet": "magnet:?xt=urn:btih:h&dn=heydouga-4030-123"
+    },
+    {
+      "kind": "choose",
+      "keyword": "abc-0123",
+      "results": [
+        {
+          "size": "1 GiB",
+          "magnet": "magnet:?xt=urn:btih:a&dn=a",
+          "type": "default",
+          "name": "xABC-123"
+        },
+        {
+          "size": "2 GiB",
+          "magnet": "magnet:?xt=urn:btih:b&dn=b",
+          "type": "default",
+          "name": "ABC 123 x"
+        },
+        {
+          "size": "3 GiB",
+          "magnet": "magnet:?xt=urn:btih:c&dn=c",
+          "type": "default",
+          "name": "ABC_0123"
+        }
+      ],
+      "magnet": "magnet:?xt=urn:btih:c&dn=abc-0123"
+    },
+    {
+      "kind": "choose",
+      "keyword": "ABC-123",
+      "results": [
+        {
+          "size": "2 GiB",
+          "magnet": "magnet:?xt=urn:btih:first&dn=first",
+          "type": "default",
+          "name": "ABC-123"
+        },
+        {
+          "size": "2 GiB",
+          "magnet": "magnet:?xt=urn:btih:second&dn=second",
+          "type": "default",
+          "name": "ABC-123"
+        }
+      ],
+      "magnet": "magnet:?xt=urn:btih:first&dn=ABC-123"
+    },
+    {
+      "kind": "choose",
+      "keyword": "ABC-123",
+      "results": [
+        {
+          "size": "1 GiB",
+          "magnet": "magnet:?xt=urn:btih:x&dn=x",
+          "type": "default",
+          "name": "ABC-123"
+        },
+        {
+          "size": "²",
+          "magnet": "magnet:?xt=urn:btih:y&dn=y",
+          "type": "default",
+          "name": "ABC-123"
+        }
+      ],
+      "error": "ValueError",
+      "message": "invalid literal for int() with base 10: '²'"
+    },
+    {
+      "kind": "choose",
+      "keyword": "ABC-123",
+      "results": [
+        {
+          "size": "1 GiB",
+          "magnet": "magnet:?xt=urn:btih:x&dn=x",
+          "type": "default",
+          "name": null
+        }
+      ],
+      "magnet": null
+    },
+    {
+      "kind": "choose",
+      "keyword": "ABC-123",
+      "results": [],
+      "magnet": null
+    }
+  ]
+}

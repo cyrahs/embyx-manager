@@ -346,6 +346,28 @@ pub fn py_int(text: &str) -> Result<i128, String> {
     Ok(if negative { -total } else { total })
 }
 
+/// `str.casefold()` as far as comparing with lower-case ASCII words goes: lower-casing, plus
+/// the characters whose case folding (not their lower case) is made of ASCII letters (the
+/// whole list, from Python 3.13's tables).
+pub fn casefold(text: &str) -> String {
+    let mut folded = String::with_capacity(text.len());
+    for ch in text.chars() {
+        match ch {
+            '\u{df}' | '\u{1e9e}' => folded.push_str("ss"),
+            '\u{17f}' => folded.push('s'),
+            '\u{212a}' => folded.push('k'),
+            '\u{fb00}' => folded.push_str("ff"),
+            '\u{fb01}' => folded.push_str("fi"),
+            '\u{fb02}' => folded.push_str("fl"),
+            '\u{fb03}' => folded.push_str("ffi"),
+            '\u{fb04}' => folded.push_str("ffl"),
+            '\u{fb05}' | '\u{fb06}' => folded.push_str("st"),
+            other => folded.extend(other.to_lowercase()),
+        }
+    }
+    folded
+}
+
 #[cfg(test)]
 mod tests {
     use super::{

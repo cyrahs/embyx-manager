@@ -131,7 +131,7 @@ fn boolean(env: &impl Environment, name: &str) -> Result<bool, SettingsError> {
     let Some(raw) = env.get(name) else {
         return Ok(false);
     };
-    let folded = casefold(&raw);
+    let folded = crate::pytext::casefold(&raw);
     if ["1", "true", "yes", "on"].contains(&folded.as_str()) {
         return Ok(true);
     }
@@ -141,31 +141,9 @@ fn boolean(env: &impl Environment, name: &str) -> Result<bool, SettingsError> {
     Err(SettingsError(format!("{name} must be a boolean")))
 }
 
-/// `str.casefold()` as far as comparing with lower-case ASCII words goes: lower-casing, plus
-/// the characters whose case folding (not their lower case) is made of ASCII letters (the
-/// whole list, from Python 3.13's tables).
-fn casefold(text: &str) -> String {
-    let mut folded = String::with_capacity(text.len());
-    for ch in text.chars() {
-        match ch {
-            '\u{df}' | '\u{1e9e}' => folded.push_str("ss"),
-            '\u{17f}' => folded.push('s'),
-            '\u{212a}' => folded.push('k'),
-            '\u{fb00}' => folded.push_str("ff"),
-            '\u{fb01}' => folded.push_str("fi"),
-            '\u{fb02}' => folded.push_str("fl"),
-            '\u{fb03}' => folded.push_str("ffi"),
-            '\u{fb04}' => folded.push_str("ffl"),
-            '\u{fb05}' | '\u{fb06}' => folded.push_str("st"),
-            other => folded.extend(other.to_lowercase()),
-        }
-    }
-    folded
-}
-
 /// `_is_loopback_host`: `localhost` (case-folded) or `ipaddress.ip_address(host).is_loopback`.
 fn is_loopback_host(host: &str) -> bool {
-    if casefold(host) == "localhost" {
+    if crate::pytext::casefold(host) == "localhost" {
         return true;
     }
     if let Ok(address) = host.parse::<Ipv4Addr>() {

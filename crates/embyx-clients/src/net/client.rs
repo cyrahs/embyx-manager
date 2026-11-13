@@ -16,6 +16,8 @@ use std::fmt;
 use std::sync::Arc;
 use std::time::Duration;
 
+use tokio::sync::{OwnedSemaphorePermit, Semaphore};
+
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use reqwest::{Method, StatusCode};
 use url::Url;
@@ -44,6 +46,12 @@ pub struct ClientOptions {
     pub proxy: Option<String>,
     /// `limits=httpx.Limits(max_keepalive_connections=...)`.
     pub max_keepalive_connections: usize,
+    /// `limits=httpx.Limits(max_connections=...)`: at most this many requests hold a
+    /// connection at once (until their response is read or dropped); a request that waits
+    /// longer than `timeout` for one fails with `PoolTimeout`. `None` is httpx's default of 100.
+    pub max_connections: Option<usize>,
+    /// `max_redirects=`: hops followed before `TooManyRedirects`.
+    pub max_redirects: usize,
     /// `trust_env=`: `false` ignores the environment's proxy variables, as httpx then does.
     /// A `proxy` set here is used either way.
     pub trust_env: bool,
@@ -62,6 +70,8 @@ impl Default for ClientOptions {
             follow_redirects: false,
             proxy: None,
             max_keepalive_connections: 20,
+            max_connections: None,
+            max_redirects: MAX_REDIRECTS,
             trust_env: true,
             roots: Vec::new(),
         }
@@ -81,6 +91,8 @@ impl fmt::Debug for ClientOptions {
             .field("follow_redirects", &self.follow_redirects)
             .field("proxy", &self.proxy.as_ref().map(|_| "<redacted>"))
             .field("max_keepalive_connections", &self.max_keepalive_connections)
+            .field("max_connections", &self.max_connections)
+            .field("max_redirects", &self.max_redirects)
             .field("trust_env", &self.trust_env)
             .field("roots", &self.roots.len())
             .finish()
@@ -247,6 +259,8 @@ pub struct Response {
     inner: Inner,
     url: Url,
     history: Vec<Redirect>,
+    /// The pool slot this response holds until it is read or dropped (`max_connections`).
+    _permit: Option<OwnedSemaphorePermit>,
 }
 
 impl Response {
@@ -310,6 +324,11 @@ impl Response {
     /// The whole (decoded) body.
     pub async fn bytes(self) -> Result<bytes::Bytes, TransportError> {
         self.inner.bytes(&self.url).await
+    }
+
+    /// `response.is_error`: a 4xx or 5xx status.
+    pub fn is_error(&self) -> bool {
+        (400..600).contains(&self.status())
     }
 }
 
@@ -386,6 +405,9 @@ pub struct HttpClient {
     /// `client.headers`, in httpx's order ([`Headers`]).
     headers: Headers,
     follow_redirects: bool,
+    max_redirects: usize,
+    /// `max_connections` slots, and how long a request waits for one (httpx's pool timeout).
+    pool: Option<(Arc<Semaphore>, Duration)>,
 }
 
 impl fmt::Debug for HttpClient {
@@ -442,6 +464,10 @@ impl HttpClient {
             client: builder.build().map_err(BuildError::Client)?,
             headers,
             follow_redirects: options.follow_redirects,
+            max_redirects: options.max_redirects,
+            pool: options
+                .max_connections
+                .map(|slots| (Arc::new(Semaphore::new(slots.max(1))), options.timeout)),
         })
     }
 
@@ -473,8 +499,17 @@ impl HttpClient {
         headers.prepend(reqwest::header::HOST, host);
         let mut body = request.body.clone();
         let mut history: Vec<Redirect> = Vec::new();
+        let permit = match &self.pool {
+            None => None,
+            Some((slots, wait)) => Some(
+                tokio::time::timeout(*wait, Arc::clone(slots).acquire_owned())
+                    .await
+                    .map_err(|_| TransportError::new(ErrorClass::PoolTimeout, &url, ""))?
+                    .map_err(|_| TransportError::new(ErrorClass::PoolTimeout, &url, ""))?,
+            ),
+        };
         loop {
-            if history.len() > MAX_REDIRECTS {
+            if history.len() > self.max_redirects {
                 return Err(TransportError::new(
                     ErrorClass::TooManyRedirects,
                     &url,
@@ -502,6 +537,7 @@ impl HttpClient {
                     inner: response,
                     url,
                     history,
+                    _permit: permit,
                 });
             }
             let next_url = redirect_url(&url, &header_text(response.headers(), "location").unwrap_or_default())?;
@@ -598,8 +634,9 @@ fn redirect_headers(
     Ok(())
 }
 
-/// httpx's `Accept-Encoding` with `brotli` installed (`uv.lock`) and no `zstandard`.
-const HTTPX_ACCEPT_ENCODING: &str = "gzip, deflate, br";
+/// httpx's `Accept-Encoding` without `brotli` or `zstandard`, as the baseline's environment has it
+/// (`uv.lock`; fav's had `brotli`, so its copy sent `br` too). DIVERGENCES.md D25.
+const HTTPX_ACCEPT_ENCODING: &str = "gzip, deflate";
 
 /// `httpx.Headers`: names in the order httpx writes them on the wire.
 ///

@@ -258,7 +258,7 @@ feed. Where the TLS fingerprint matters the probe runs from the production netwo
 | --- | --- | --- | --- | --- | --- |
 | WP0 | 0 foundation | done (#81); live fingerprint proof done (follow-up PR) | Workspace at the root, `rust.yml` (checks only, with the caching fav ended up with), docs (`PLAN`, `CONVENTIONS`, `DIVERGENCES`, `PARITY`, `API-COVERAGE`), `BASELINE`, golden generator, parity script, scenario runner skeleton, helpers copied from fav, API-coverage probes (impersonating client, tonic from the descriptor, HTML parser, cron, notify, Windows build of an empty worker crate) | new | |
 | WP1 | 1 core | done (#83) | Env settings, database layer and the 19 migrations, advisory locks, config models and store, AVID parser, magnet, media, errors | 2,300 | WP0 |
-| WP2 | 2 clients | pending | HTTP factory, JavBus, sukebei, feeds, feed magnets, AVBase on the impersonating client, jinjier, Emby | 1,450 | WP1 |
+| WP2 | 2 clients | done (PR pending) | HTTP factory, JavBus, sukebei, feeds, feed magnets, AVBase on the impersonating client, jinjier, Emby | 1,450 | WP1 |
 | WP3 | 2 clients | done (#84) | CloudDrive over tonic with the cancel-safe wrapper and a fake server; Kubernetes Jobs client | 700 | WP1 |
 | WP4 | 2 API | pending | axum shell: auth, health, size limit, SPA hosting, config API with the two connection tests, OpenAPI check, page smoke. Checkpoint A (note only) | 900 | WP2, WP3 |
 | WP5 | 3 monitor | pending | Ledger, runs, reports, cadence, release dates, intake, subscriptions | 2,000 | WP2, WP3 |
@@ -382,6 +382,12 @@ or says why one stays.
 - `examples/fetch_probe.rs`, `tools/probes/tls_fingerprint.py`, `live_fingerprint.py` and `live_probe_pod.sh`
   exist for the AVBase and JavBus client decision; WP2 reruns the comparison against its configured clients,
   WP16 removes them if nothing else needs them.
+- WP2 left these for later packages: `examples/fetch_probe.rs` gained the configured clients (`avbase`,
+  `javbus`) and `wreq-tuned` now takes its emulation from `avbase::session::chrome_emulation`, so the probe
+  and the application cannot drift apart. `rusqlite` is pinned to 0.39 because sqlx's `libsqlite3-sys` 0.37
+  claims the same `links = "sqlite3"`; move both together. `kube.rs` (WP3) words its UTF-8 error for an invalid
+  start byte only, while `embyx_clients::http::utf8_error_message` (WP2) covers every case Python words; WP16
+  can point kube at it. `pytext::casefold` moved there from `settings` for the clients to share.
 - `embyx_core::config::lax` (WP1) emulates pydantic's lax mode for the field types the nine sections use (`str`,
   `bool`, `int` as `i64`, `float`, tuples of `str`, `dict[str, str]`, `dict[str, tuple[str, ...]]`, a nested
   model list) with pydantic's error `type`, `loc` and `msg`. WP4 (request bodies) and WP10/WP12 (fill-actor

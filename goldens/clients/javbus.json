@@ -1,0 +1,205 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "clients",
+  "cases": [
+    {
+      "kind": "actor_page",
+      "html": "<html><a class=\"movie-box\" href=\"https://www.javbus.com/abc-001/\"></a><a class=\"movie-box\" href=\"/ABC-002?x=1\"></a><a class=\"movie-box\" href=\"/abc-001\"></a><a class=\"movie-box\"></a><a class=\"movie-box\" href=\" \"></a><a href=\"/star/ACTOR-1/2\">2</a><a href=\"/star/ACTOR-1/3/\">3</a><a href=\"/star/ACTOR-1/0\">0</a><a href=\"/star/ACTOR-1/04\">4</a><a href=\"/star/ACTOR-12/5\">x</a><a href=\"https://elsewhere.test/star/ACTOR-1/9\">9</a><a href=\"https://www.javbus.com/star/ACTOR-1/7\">7</a><a href=\"//www.javbus.com/star/ACTOR-1/8\">8</a><a href=\"/star/ACTOR-1/1٢\">12</a></html>",
+      "ids": [
+        "ABC-001",
+        "ABC-002"
+      ],
+      "pages": [
+        2,
+        3,
+        7,
+        8,
+        12
+      ]
+    },
+    {
+      "kind": "actor_page",
+      "html": "<div><A class=\"movie-box\" HREF=\"/up-1\"></A><a class=\"movie-box\" href=\"/down-1\">x</a></div>",
+      "ids": [
+        "DOWN-1"
+      ],
+      "pages": []
+    },
+    {
+      "kind": "actor_page",
+      "html": "<html></html>",
+      "ids": [],
+      "pages": []
+    },
+    {
+      "kind": "actor_page",
+      "html": "   ",
+      "ids": [],
+      "pages": []
+    },
+    {
+      "kind": "actor_page",
+      "html": "<a class=\"movie-box featured\" href=\"https://www.javbus.com/VID-001/\"></a><a class=\"movie-box\" href=\"https://www.javbus.com/VID-002\"></a> <!-- dup -->",
+      "ids": [
+        "VID-001",
+        "VID-002"
+      ],
+      "pages": []
+    },
+    {
+      "kind": "actor_page",
+      "html": "<p><a href=\"http://[::1/star/ACTOR-1/2\">bad</a></p>",
+      "error": "ValueError",
+      "message": "Invalid IPv6 URL"
+    },
+    {
+      "kind": "magnets",
+      "video_id": "TEST-001",
+      "html": "<html><tr><td width=\"70%\"><a href=\"magnet:?xt=urn:btih:DE439FCA97A0365B47D9B087010115A94CAD6853&dn=r1\">release1</a></td><td><a href=\"magnet:?xt=urn:btih:de439fca\">2.02GB</a></td><td>2025-01-01</td></tr><tr><td><a href=\"magnet:?xt=urn:btih:a1b2&dn=r2\">r2</a> <a class=\"btn\">高清</a> <a class=\"btn\"> 字幕 </a><a class=\"btn\">  </a></td><td> 1.5GB </td></tr><tr><td><a href=\"magnet:?xt=urn:btih:DE439FCA97A0365B47D9B087010115A94CAD6853\">dup</a></td><td>9GB</td></tr><tr><td><a href=\"magnet:?xt=urn:sha1:x\">no btih</a></td><td>1GB</td></tr><tr><td><a href=\"https://x/\">no magnet</a></td><td>1GB</td></tr><tr><td>one cell</td></tr><tr><td><a href=\"magnet:?xt=urn:btih:ccc\">c</a></td><td>huge</td></tr><a href=\"http://other-link.com\">Other</a></html>",
+      "magnets": [
+        {
+          "magnet": "magnet:?xt=urn:btih:a1b2&dn=TEST-001",
+          "size": "1.5GB",
+          "size_int": 1500000000,
+          "tags": [
+            "高清",
+            "字幕"
+          ],
+          "score": 9841500000000
+        },
+        {
+          "magnet": "magnet:?xt=urn:btih:de439fca97a0365b47d9b087010115a94cad6853&dn=TEST-001",
+          "size": "2.02GB",
+          "size_int": 2020000000,
+          "tags": [],
+          "score": 2020000000
+        },
+        {
+          "magnet": "magnet:?xt=urn:btih:ccc&dn=TEST-001",
+          "size": "huge",
+          "size_int": 0,
+          "tags": [],
+          "score": 0
+        }
+      ]
+    },
+    {
+      "kind": "magnets",
+      "video_id": "TEST-002",
+      "html": "<table><tbody><tr><td><a href=\"magnet:?xt=urn:btih:111\">a</a><a>tag</a></td><td>1 GiB</td></tr><tr><td><a href=\"magnet:?xt=urn:btih:222\">b</a></td><td>1 GiB</td></tr></tbody></table>",
+      "magnets": [
+        {
+          "magnet": "magnet:?xt=urn:btih:111&dn=TEST-002",
+          "size": "1 GiB",
+          "size_int": 1073741824,
+          "tags": [
+            "tag"
+          ],
+          "score": 274877906944
+        },
+        {
+          "magnet": "magnet:?xt=urn:btih:222&dn=TEST-002",
+          "size": "1 GiB",
+          "size_int": 1073741824,
+          "tags": [],
+          "score": 1073741824
+        }
+      ]
+    },
+    {
+      "kind": "magnets",
+      "video_id": "TEST-003",
+      "html": "<tr><td><a href=\"magnet:?xt=urn:btih:333\">a</a></td><td>²</td></tr>",
+      "error": "ValueError",
+      "message": "invalid literal for int() with base 10: '²'"
+    },
+    {
+      "kind": "magnets",
+      "video_id": "TEST-004",
+      "html": "",
+      "magnets": []
+    },
+    {
+      "kind": "magnets",
+      "video_id": "TEST-005",
+      "html": "</a>",
+      "error": "ParserError",
+      "message": "Document is empty"
+    },
+    {
+      "kind": "video_actors",
+      "html": "<html><a href=\"/star/a123\"></a><a href=\"https://www.javbus.com/star/B456/\"><img alt=\"演员乙\"></a><a class=\"avatar-box\" href=\"/star/A123\"><span>演员甲</span></a><a href=\"/star/A123\">重复演员</a><a href=\"/genre/7\">其他链接</a></html>",
+      "actors": [
+        [
+          "a123",
+          "演员甲"
+        ],
+        [
+          "B456",
+          "演员乙"
+        ]
+      ]
+    },
+    {
+      "kind": "video_actors",
+      "html": "<div><a href=\"/star/x1\" title=\" 名 前 \"></a><a href=\"/star/x2\" aria-label=\"X2\"><img title=\"Title\" alt=\"Alt\"></a><a href=\"/star/x3\"><img alt=\"x3\"></a><a href=\"/star/%E5%90%8D\"></a><a href=\"/star/bad%20id\">b</a><a href=\"/star/yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\">long</a><a href=\"/star/x4/extra\">no</a><a href=\"/star/x5?a=1\">q</a></div>",
+      "actors": [
+        [
+          "x1",
+          "名 前"
+        ],
+        [
+          "x2",
+          "Title"
+        ],
+        [
+          "x3",
+          "x3"
+        ],
+        [
+          "x5",
+          "q"
+        ]
+      ]
+    },
+    {
+      "kind": "video_actors",
+      "html": "<a href=\"/star/K\">k</a><a href=\"/star/k\"></a>",
+      "actors": [
+        [
+          "K",
+          "K"
+        ]
+      ]
+    },
+    {
+      "kind": "search_stars",
+      "html": "<div id=\"waterfall\"><a class=\"avatar-box text-center\" href=\"https://www.javbus.com/star/sl1\"><span class=\"pb10\">河北彩花</span></a><a class=\"avatar-box\" href=\"https://www.javbus.com/star/new1\"><span class=\"pb10\">  河北\n彩伽 </span></a><a href=\"https://www.javbus.com/star/sl1\">dup</a><a href=\"https://www.javbus.com/genre/1\">not a star</a><a href=\"/star/SL1\">case</a><a href=\"/star/plain\"> Plain   Name </a><a href=\"/star/empty\"></a></div>",
+      "actors": [
+        [
+          "sl1",
+          "河北彩花"
+        ],
+        [
+          "new1",
+          "河北 彩伽"
+        ],
+        [
+          "plain",
+          "Plain Name"
+        ],
+        [
+          "empty",
+          "empty"
+        ]
+      ]
+    },
+    {
+      "kind": "search_stars",
+      "html": "<html></html>",
+      "actors": []
+    }
+  ]
+}

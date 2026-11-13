@@ -21,14 +21,22 @@ test-support = ["dep:rcgen", "dep:prost-reflect", "dep:tokio-stream", "embyx-cor
 base64.workspace = true
 bytes.workspace = true
 chrono.workspace = true
+ego-tree.workspace = true
 embyx-core.workspace = true
-futures-util.workspace = true
+encoding_rs.workspace = true
+fancy-regex.workspace = true
+futures-util = { workspace = true, features = ["std"] }
+html5ever.workspace = true
 http.workspace = true
 http-body-util.workspace = true
 hyper.workspace = true
 prost = { workspace = true, optional = true }
 prost-reflect = { workspace = true, optional = true }
 prost-types = { workspace = true, optional = true }
+regex.workspace = true
+roxmltree.workspace = true
+rusqlite.workspace = true
+scraper.workspace = true
 rcgen = { workspace = true, optional = true }
 reqwest = { workspace = true, features = [
     "rustls-no-provider",
@@ -53,6 +61,10 @@ tokio = { workspace = true, features = ["fs", "io-util", "time", "rt", "macros",
 tokio-rustls.workspace = true
 tonic = { workspace = true, optional = true }
 tokio-util = { workspace = true, optional = true }
+tracing.workspace = true
+wreq.workspace = true
+wreq-util.workspace = true
+zip.workspace = true
 tokio-stream = { version = "0.1", features = ["net"], optional = true }
 tonic-prost = { workspace = true, optional = true }
 url.workspace = true
@@ -71,10 +83,7 @@ embyx-clients = { path = ".", features = ["test-support"] }
 embyx-core = { workspace = true, features = ["test-support"] }
 hex.workspace = true
 rcgen.workspace = true
-scraper.workspace = true
 sqlx.workspace = true
 prost-reflect.workspace = true
 tokio = { workspace = true, features = ["macros", "rt", "net", "rt-multi-thread"] }
 tokio-stream = { version = "0.1", features = ["net"] }
-wreq.workspace = true
-wreq-util.workspace = true
