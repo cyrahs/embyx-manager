@@ -1,0 +1,65 @@
+# The config store over stored rows (one valid, one that no longer validates, one retired
+# section) and a sequence of updates: merges, kept secrets, coercion, version checks,
+# refusals. The rows show the bytes each build stores.
+description = "config: load stored sections, then update, conflict and refuse"
+operation = "config.store"
+volatile = ["rows.app_config.updated_at"]
+
+[[args.updates]]
+section = "clouddrive"
+values = { address = "cd.internal:19798", api_token = "secret-token", secure = "false" }
+
+[[args.updates]]
+section = "clouddrive"
+values = { address = "cd2.internal:19798", api_token = "" }
+expected_version = 1
+
+[[args.updates]]
+section = "clouddrive"
+values = { address = "cd3.internal:19798" }
+expected_version = 1
+
+[[args.updates]]
+section = "emby"
+values = { address = "http://Emby.internal:8096//", api_key = "k" }
+
+[[args.updates]]
+section = "rss"
+values = { categories = [{ label = " Rank ", task_dir_path = "/115/rank/" }, { label = "演员", task_dir_path = "/115/embyx_in" }], interval_seconds = "900" }
+
+[[args.updates]]
+section = "archive"
+values = { scan_cron = " 30  3 * * 1 ", mapping = { " intake/ " = "./sorted" }, brand_mapping = { special = [" abc ", "ABC", "def"] }, min_size_mb = 12.0 }
+
+[[args.updates]]
+section = "mapping"
+values = { debounce_seconds = 0.00001, src_dir = "/mnt/strm/" }
+
+[[args.updates]]
+section = "fill_actor"
+values = { actor_root = "relative/actors", apply_enabled = true }
+
+[[args.updates]]
+section = "playlists"
+values = { interval_seconds = 0, unknown = 1 }
+
+[[args.updates]]
+section = "merge"
+values = { free_space_reserve_gib = "20", auto_enabled = "yes" }
+
+[[args.updates]]
+section = "avid"
+values = { id_exceptions = ["WEIRD-SPECIAL"], ignored_id_patterns = ["1080P"] }
+
+[[args.updates]]
+section = "nope"
+values = {}
+
+[database]
+schema = "app"
+sql = [
+    """INSERT INTO app_config (section, value_json, version, updated_at) VALUES
+    ('mapping', '{"enabled": true, "src_dir": "/strm", "dst_dir": "/library", "debounce_seconds": 2, "full_sync_interval_seconds": 3600}', 4, '2026-05-01T00:00:00+00:00'),
+    ('playlists', '{"enabled": true, "interval_seconds": "soon"}', 2, '2026-05-02T00:00:00+00:00'),
+    ('legacy', '{"x": 1}', 1, '2026-05-03T00:00:00+00:00')""",
+]

@@ -15,12 +15,16 @@ workspace = true
 test-support = ["embyx-core/test-support"]
 
 [dependencies]
+chrono.workspace = true
 embyx-core.workspace = true
+rustix.workspace = true
 serde_json.workspace = true
 sqlx.workspace = true
-tokio = { workspace = true, features = ["time"] }
+thiserror.workspace = true
+tokio = { workspace = true, features = ["fs", "rt", "sync", "time"] }
+tracing.workspace = true
 
 [dev-dependencies]
-chrono.workspace = true
+tempfile.workspace = true
 embyx-core = { workspace = true, features = ["test-support"] }
 tokio = { workspace = true, features = ["macros", "rt", "rt-multi-thread", "time"] }

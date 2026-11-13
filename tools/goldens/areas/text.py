@@ -4,7 +4,8 @@
 ASCII separators U+001C..U+001F that Unicode's White_Space does not; `str.isdigit()` and
 `str.isdecimal()` accept every Unicode digit, not only ASCII ones (AVID and number parsing
 from WP1 on); `str.isalnum()` decides whether a domain-shaped token is followed by more of the
-title (`core/avid.py`) and `str.isprintable()` what `repr()` escapes. These goldens are the full code-point scan of Python 3.13 (Unicode 15.1).
+title (`core/avid.py`) and `str.isprintable()` what `repr()` escapes. These goldens are the
+full code-point scan of Python 3.13 (Unicode 15.1).
 
 Copied from fav's golden generator (`tools/goldens/areas/text.py` at the commit named in
 docs/CONVENTIONS.md), as the goldens of the helpers copied with it.

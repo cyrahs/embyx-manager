@@ -78,6 +78,15 @@ ENVIRONMENTS: list[dict[str, str]] = [
     {'TLS_TERMINATED': ''},
     {'TLS_TERMINATED': ' true'},
     {'TLS_TERMINATED': 'İ'},
+    # `casefold()` turns these ligatures and sharp s into ASCII letters.
+    {'TLS_TERMINATED': 'o\ufb00'},
+    {'TLS_TERMINATED': 'O\ufb00'},
+    {'TLS_TERMINATED': 'Ye\u017f'},
+    {'HOST': 'localho\ufb06'},
+    {'HOST': 'LOCALHO\ufb05'},
+    {'HOST': 'localho\u00df'},
+    # Beyond u64, which Python takes and the port refuses (DIVERGENCES.md D13).
+    {'PORT': '99999999999999999999'},
     {'API_TOKEN': ''},
     {'API_TOKEN': TOKEN},
     {'TRANSCODE_PORT': '8001', 'TRANSCODE_TOKEN': 'worker-token'},

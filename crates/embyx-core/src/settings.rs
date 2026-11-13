@@ -132,16 +132,25 @@ fn boolean(env: &impl Environment, name: &str) -> Result<bool, SettingsError> {
 }
 
 /// `str.casefold()` as far as comparing with lower-case ASCII words goes: lower-casing, plus
-/// the two characters whose case folding (not their lower case) is an ASCII letter.
+/// the characters whose case folding (not their lower case) is made of ASCII letters (the
+/// whole list, from Python 3.13's tables).
 fn casefold(text: &str) -> String {
-    text.chars()
-        .flat_map(char::to_lowercase)
-        .map(|ch| match ch {
-            '\u{17f}' => 's',
-            '\u{212a}' => 'k',
-            other => other,
-        })
-        .collect()
+    let mut folded = String::with_capacity(text.len());
+    for ch in text.chars() {
+        match ch {
+            '\u{df}' | '\u{1e9e}' => folded.push_str("ss"),
+            '\u{17f}' => folded.push('s'),
+            '\u{212a}' => folded.push('k'),
+            '\u{fb00}' => folded.push_str("ff"),
+            '\u{fb01}' => folded.push_str("fi"),
+            '\u{fb02}' => folded.push_str("fl"),
+            '\u{fb03}' => folded.push_str("ffi"),
+            '\u{fb04}' => folded.push_str("ffl"),
+            '\u{fb05}' | '\u{fb06}' => folded.push_str("st"),
+            other => folded.extend(other.to_lowercase()),
+        }
+    }
+    folded
 }
 
 /// `_is_loopback_host`: `localhost` (case-folded) or `ipaddress.ip_address(host).is_loopback`.
@@ -284,8 +293,14 @@ mod tests {
                 assert_eq!(error_text.0, golden::string(golden::get(error, "message")), "{env:?}");
                 continue;
             }
-            let settings = result.unwrap_or_else(|error| panic!("{env:?}: {error}"));
             let expected = golden::get(case, "settings");
+            // D13: Python takes integers of any size; the port refuses those beyond u64.
+            if golden::int(golden::get(expected, "port")) > i128::from(u64::MAX) {
+                let error = result.expect_err("beyond u64");
+                assert!(error.0.starts_with("integer out of range: "), "{error}");
+                continue;
+            }
+            let settings = result.unwrap_or_else(|error| panic!("{env:?}: {error}"));
             let want = Settings {
                 database_url: golden::string(golden::get(expected, "database_url")),
                 api_token: optional_string(golden::get(expected, "api_token")),

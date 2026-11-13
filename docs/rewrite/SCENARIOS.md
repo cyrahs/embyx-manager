@@ -10,7 +10,9 @@ Both builds run the same scenario; their transcripts must be byte-identical.
   (seed and dump rows), `embyx_clients::clouddrive::fake` (the CloudDrive fake). A Rust test per
   scenario runs the ported operation and calls `scenario::assert_transcript`.
 - Proven end to end in WP0 by `harness/trivial`
-  (`crates/embyx-clients/tests/scenario_harness.rs`).
+  (`crates/embyx-clients/tests/scenario_harness.rs`). WP1 adds the database-only scenarios `db/*` and
+  `config/store` (`crates/embyx-db/src/scenario/tests.rs`), which seed no fake and use
+  `embyx_db::scenario::unseeded_fakes` for the fakes' part of the transcript.
 
 ```
 uv run python tools/scenarios/runner.py                  # rewrite every transcript

@@ -375,6 +375,15 @@ or says why one stays.
 - `examples/fetch_probe.rs`, `tools/probes/tls_fingerprint.py`, `live_fingerprint.py` and `live_probe_pod.sh`
   exist for the AVBase and JavBus client decision; WP2 reruns the comparison against its configured clients,
   WP16 removes them if nothing else needs them.
+- `embyx_core::config::lax` (WP1) emulates pydantic's lax mode for the field types the nine sections use (`str`,
+  `bool`, `int` as `i64`, `float`, tuples of `str`, `dict[str, str]`, `dict[str, tuple[str, ...]]`, a nested
+  model list) with pydantic's error `type`, `loc` and `msg`. WP4 (request bodies) and WP10/WP12 (fill-actor
+  models) extend it there rather than writing a second one; a new type gets its own golden cases.
+- `embyx_core::cron` (WP1) is cronsim's parser only (what `archive.scan_cron` validation needs); WP9 computes
+  fire times with croner (API-COVERAGE) and should check both agree on what they accept.
+- The config snapshot refresh loop and the store's wiring into the app are WP4's / WP9's (`bootstrap.py`);
+  `embyx_db::config_store::ConfigStore` offers `load`, `refresh`, `get::<Section>()`, `get_with_version`,
+  `sections` and `update`.
 
 ## Experiment log
 
