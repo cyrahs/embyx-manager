@@ -562,6 +562,201 @@
     {
       "section": "rss",
       "values": {
+        "enabled": 2.5
+      },
+      "errors": [
+        {
+          "type": "bool_type",
+          "loc": [
+            "enabled"
+          ],
+          "msg": "Input should be a valid boolean"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "values": {
+        "enabled": 9.2e+18
+      },
+      "errors": [
+        {
+          "type": "bool_parsing",
+          "loc": [
+            "enabled"
+          ],
+          "msg": "Input should be a valid boolean, unable to interpret input"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "values": {
+        "enabled": 9.3e+18
+      },
+      "errors": [
+        {
+          "type": "bool_type",
+          "loc": [
+            "enabled"
+          ],
+          "msg": "Input should be a valid boolean"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "values": {
+        "enabled": 1e+19
+      },
+      "errors": [
+        {
+          "type": "bool_type",
+          "loc": [
+            "enabled"
+          ],
+          "msg": "Input should be a valid boolean"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "values": {
+        "enabled": 1e+20
+      },
+      "errors": [
+        {
+          "type": "bool_type",
+          "loc": [
+            "enabled"
+          ],
+          "msg": "Input should be a valid boolean"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "values": {
+        "enabled": -1e+20
+      },
+      "errors": [
+        {
+          "type": "bool_type",
+          "loc": [
+            "enabled"
+          ],
+          "msg": "Input should be a valid boolean"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "values": {
+        "enabled": 1e+300
+      },
+      "errors": [
+        {
+          "type": "bool_type",
+          "loc": [
+            "enabled"
+          ],
+          "msg": "Input should be a valid boolean"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "values": {
+        "enabled": 2147483648
+      },
+      "errors": [
+        {
+          "type": "bool_parsing",
+          "loc": [
+            "enabled"
+          ],
+          "msg": "Input should be a valid boolean, unable to interpret input"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "values": {
+        "enabled": 9223372036854775807
+      },
+      "errors": [
+        {
+          "type": "bool_parsing",
+          "loc": [
+            "enabled"
+          ],
+          "msg": "Input should be a valid boolean, unable to interpret input"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "values": {
+        "enabled": 9223372036854775808
+      },
+      "errors": [
+        {
+          "type": "bool_type",
+          "loc": [
+            "enabled"
+          ],
+          "msg": "Input should be a valid boolean"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "values": {
+        "enabled": -9223372036854775808
+      },
+      "errors": [
+        {
+          "type": "bool_parsing",
+          "loc": [
+            "enabled"
+          ],
+          "msg": "Input should be a valid boolean, unable to interpret input"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "values": {
+        "enabled": -9223372036854775809
+      },
+      "errors": [
+        {
+          "type": "bool_type",
+          "loc": [
+            "enabled"
+          ],
+          "msg": "Input should be a valid boolean"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "values": {
+        "enabled": 18446744073709551616
+      },
+      "errors": [
+        {
+          "type": "bool_type",
+          "loc": [
+            "enabled"
+          ],
+          "msg": "Input should be a valid boolean"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "values": {
         "interval_seconds": 0
       },
       "errors": [
@@ -5324,6 +5519,85 @@
             "categories",
             0,
             "extra"
+          ],
+          "msg": "Extra inputs are not permitted"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "values": {
+        "zz": 1,
+        "categories": [
+          {
+            "extra": 1,
+            "task_dir_path": 1
+          }
+        ],
+        "enabled": "x"
+      },
+      "errors": [
+        {
+          "type": "bool_parsing",
+          "loc": [
+            "enabled"
+          ],
+          "msg": "Input should be a valid boolean, unable to interpret input"
+        },
+        {
+          "type": "missing",
+          "loc": [
+            "categories",
+            0,
+            "label"
+          ],
+          "msg": "Field required"
+        },
+        {
+          "type": "string_type",
+          "loc": [
+            "categories",
+            0,
+            "task_dir_path"
+          ],
+          "msg": "Input should be a valid string"
+        },
+        {
+          "type": "extra_forbidden",
+          "loc": [
+            "categories",
+            0,
+            "extra"
+          ],
+          "msg": "Extra inputs are not permitted"
+        },
+        {
+          "type": "extra_forbidden",
+          "loc": [
+            "zz"
+          ],
+          "msg": "Extra inputs are not permitted"
+        }
+      ]
+    },
+    {
+      "section": "clouddrive",
+      "values": {
+        "bogus": 1,
+        "address": 1
+      },
+      "errors": [
+        {
+          "type": "string_type",
+          "loc": [
+            "address"
+          ],
+          "msg": "Input should be a valid string"
+        },
+        {
+          "type": "extra_forbidden",
+          "loc": [
+            "bogus"
           ],
           "msg": "Extra inputs are not permitted"
         }

@@ -319,13 +319,14 @@ pub fn py_repr(text: &str) -> String {
     out
 }
 
-/// Python `int(text)` (base 10): surrounding whitespace dropped, an optional sign, decimal
+/// Python `int(text)` (base 10): surrounding whitespace dropped (`str.isspace()` except the
+/// separators U+001C to U+001F, which `int` does not skip), an optional sign, decimal
 /// digits of any script with single underscores between them. The error is Python's
 /// `ValueError` text. Values beyond `i128` are refused with a message of this port's
 /// (Python's ints are unbounded; nothing embyx-manager reads comes close).
 pub fn py_int(text: &str) -> Result<i128, String> {
     let invalid = || format!("invalid literal for int() with base 10: {}", py_repr(text));
-    let stripped = py_strip(text);
+    let stripped = text.trim_matches(|ch| is_py_space(ch) && !('\u{1c}'..='\u{1f}').contains(&ch));
     let (negative, digits) = match stripped.as_bytes().first() {
         Some(b'-') => (true, &stripped[1..]),
         Some(b'+') => (false, &stripped[1..]),
@@ -432,7 +433,12 @@ mod tests {
         assert_eq!(py_int("-0"), Ok(0));
         assert_eq!(py_int("1_000"), Ok(1000));
         assert_eq!(py_int("\u{661}\u{662}"), Ok(12));
-        assert_eq!(py_int("\u{3000}12\u{1c}"), Ok(12));
+        assert_eq!(py_int("\u{3000}12\u{85}"), Ok(12));
+        assert_eq!(
+            py_int("12\u{1c}"),
+            Err("invalid literal for int() with base 10: '12\\x1c'".to_owned())
+        );
+        assert!(py_int("\u{1f}5").is_err());
         for bad in ["", " ", "x", "7.0", "1__0", "_1", "1_", "+-1", "\u{b2}", "0x10", "1 0"] {
             assert_eq!(
                 py_int(bad),

@@ -36,68 +36,11 @@ const TAG_ALTERNATIVES: &str = concat!(
 );
 
 fn fancy(pattern: &str, ignore_case: bool) -> fancy_regex::Regex {
-    pyre::compile_fancy(&python_ignore_case(pattern, ignore_case), ignore_case, false)
+    pyre::compile_fancy(&pyre::python_ignore_case(pattern, ignore_case), ignore_case, false)
 }
 
 fn plain(pattern: &str, ignore_case: bool) -> regex::Regex {
-    pyre::compile(&python_ignore_case(pattern, ignore_case), ignore_case, false)
-}
-
-/// Python's case-insensitive matching lower-cases the subject (`İ` U+0130 becomes `i`) and
-/// adds the characters that share an upper case (`ı` U+0131 for `i`), so both match `i`,
-/// `I`, `[a-z]` and `[A-Z]`; the Rust engines' simple case folding has neither. This
-/// rewrites the fixed patterns of this module (no group names or escapes containing an
-/// `i`) to list them: a literal `i`/`I` becomes a class, and a class holding `i`, `I` or
-/// an `a-z`/`A-Z` range gains both. (`ſ` and the Kelvin sign fold in both engines.)
-fn python_ignore_case(pattern: &str, ignore_case: bool) -> String {
-    const EXTRA: &str = "\u{130}\u{131}";
-    if !ignore_case {
-        return pattern.to_owned();
-    }
-    let mut out = String::with_capacity(pattern.len() + 16);
-    let mut class = String::new();
-    let mut in_class = false;
-    let mut chars = pattern.chars().peekable();
-    while let Some(ch) = chars.next() {
-        let sink = if in_class { &mut class } else { &mut out };
-        match ch {
-            '\\' => {
-                sink.push(ch);
-                if let Some(next) = chars.next() {
-                    sink.push(next);
-                }
-            }
-            '[' if !in_class => {
-                in_class = true;
-                class.clear();
-                class.push('[');
-                // A `]` first in the class (after an optional `^`) is a literal.
-                if chars.peek() == Some(&'^') {
-                    class.push(chars.next().unwrap_or('^'));
-                }
-                if chars.peek() == Some(&']') {
-                    class.push(chars.next().unwrap_or(']'));
-                }
-            }
-            ']' if in_class => {
-                in_class = false;
-                let body = &class[1..];
-                if body.contains('i') || body.contains('I') || body.contains("a-z") || body.contains("A-Z") {
-                    class.push_str(EXTRA);
-                }
-                class.push(']');
-                out.push_str(&class);
-            }
-            'i' | 'I' if !in_class => {
-                out.push('[');
-                out.push(ch);
-                out.push_str(EXTRA);
-                out.push(']');
-            }
-            _ => sink.push(ch),
-        }
-    }
-    out
+    pyre::compile(&pyre::python_ignore_case(pattern, ignore_case), ignore_case, false)
 }
 
 static DOMAIN_RE: LazyLock<regex::Regex> = LazyLock::new(|| plain(r"\w{3,10}\.(COM|NET|APP|XYZ)", true));
@@ -316,11 +259,19 @@ pub fn normalize_number(avid: &str) -> String {
     if NON_CID_BRANDS.contains(&brand) {
         return avid.to_owned();
     }
-    // `int(...)` reads any script's decimal digits; `:03d` writes ASCII.
-    let Some(number) = pytext::py_int_decimal(&captures[2]) else {
+    // `int(...)` reads any script's decimal digits; `:03d` writes ASCII. Done on the
+    // digits, so a number of any length is padded as Python's unbounded int is
+    // (DIVERGENCES.md D20 for the 4300-digit limit).
+    let Some(digits) = captures[2]
+        .chars()
+        .map(|ch| pytext::py_decimal_value(ch).and_then(|digit| char::from_digit(digit, 10)))
+        .collect::<Option<String>>()
+    else {
         return avid.to_owned();
     };
-    format!("{brand}-{number:03}")
+    let significant = digits.trim_start_matches('0');
+    let number = if significant.is_empty() { "0" } else { significant };
+    format!("{brand}-{number:0>3}")
 }
 
 /// Deployment-tunable ID parsing rules (`AvidConfig`).

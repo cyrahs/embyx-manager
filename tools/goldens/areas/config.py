@@ -107,6 +107,19 @@ BOOLS: list[Any] = [
     [],
     {},
     'İ',
+    2.5,
+    9.2e18,
+    9.3e18,
+    1e19,
+    1e20,
+    -1e20,
+    1e300,
+    2**31,
+    2**63 - 1,
+    2**63,
+    -(2**63),
+    -(2**63) - 1,
+    2**64,
 ]
 INTS: list[Any] = [
     0,
@@ -375,6 +388,8 @@ def _section_cases() -> list[tuple[str, dict[str, Any]]]:
     add(('rss', {'categories': [{'label': 'Rank'}]}))
     add(('rss', {'categories': [{}]}))
     add(('rss', {'categories': [{'task_dir_path': '/x', 'extra': 1}]}))
+    add(('rss', {'zz': 1, 'categories': [{'extra': 1, 'task_dir_path': 1}], 'enabled': 'x'}))
+    add(('clouddrive', {'bogus': 1, 'address': 1}))
     add(
         (
             'rss',
@@ -666,6 +681,18 @@ def _stored_texts() -> list[tuple[str, str]]:
         ('clouddrive', '{"address": "clouddrive:19798", "secure": true, "api_token": "x", "task_dir_path": "/x"}'),
         ('clouddrive', '{"secure": "true"}'),
         ('clouddrive', '{"secure": "yes"}'),
+        ('clouddrive', '{"address": 1, "bogus": 1}'),
+        ('clouddrive', '{"bogus": 1, "address": 1, "secure": "x", "more": 2}'),
+        ('clouddrive', '{"secure": 2}'),
+        ('clouddrive', '{"secure": 999999999999999999}'),
+        ('clouddrive', '{"secure": 1000000000000000000}'),
+        ('clouddrive', '{"secure": -999999999999999999}'),
+        ('clouddrive', '{"secure": -1000000000000000000}'),
+        ('clouddrive', '{"secure": 9223372036854775807}'),
+        ('clouddrive', '{"secure": 1e20}'),
+        ('clouddrive', '{"secure": 9.2e18}'),
+        ('clouddrive', '{"secure": 2.5}'),
+        ('rss', '{"categories": [{"task_dir_path": 1, "extra": 1}], "zz": 1, "enabled": "x"}'),
         ('archive', '{"brand_mapping": {"x": ["a"]}, "mapping": {"a/": "b/"}, "tracker_interval_seconds": 1800}'),
         ('archive', '{"scan_cron": "0  4 * * *"}'),
         ('archive', '{"mapping": {"a": "b"}, "priority_mapping": {"a": "c"}}'),

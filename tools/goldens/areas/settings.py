@@ -87,6 +87,12 @@ ENVIRONMENTS: list[dict[str, str]] = [
     {'HOST': 'localho\u00df'},
     # Beyond u64, which Python takes and the port refuses (DIVERGENCES.md D13).
     {'PORT': '99999999999999999999'},
+    {'PORT': '-' + '9' * 40},
+    {'PORT': '-99999999999999999999'},
+    {'PORT': '\x1c5'},
+    {'PORT': '5\x1f'},
+    {'PORT': '\u30005\x85'},
+    {'PORT': ' -5 '},
     {'API_TOKEN': ''},
     {'API_TOKEN': TOKEN},
     {'TRANSCODE_PORT': '8001', 'TRANSCODE_TOKEN': 'worker-token'},

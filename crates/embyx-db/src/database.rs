@@ -11,6 +11,7 @@ use std::str::FromStr as _;
 use std::sync::Arc;
 
 use chrono::Utc;
+use embyx_core::pytext::py_repr;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use sqlx::{AssertSqlSafe, PgPool};
 
@@ -65,9 +66,41 @@ impl fmt::Debug for Database {
     }
 }
 
+/// `urllib.parse.urlparse(url).scheme`: the lower-cased text before the first `:` when it
+/// is a letter followed by letters, digits, `+`, `-` or `.`; empty otherwise.
+fn url_scheme(url: &str) -> String {
+    let url: String = url
+        .trim_start_matches(|ch: char| ch <= ' ')
+        .chars()
+        .filter(|ch| !matches!(ch, '\t' | '\r' | '\n'))
+        .collect();
+    let Some((scheme, _)) = url.split_once(':') else {
+        return String::new();
+    };
+    let mut chars = scheme.chars();
+    let valid = chars.next().is_some_and(|ch| ch.is_ascii_alphabetic())
+        && chars.all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, '+' | '-' | '.'));
+    if valid {
+        scheme.to_ascii_lowercase()
+    } else {
+        String::new()
+    }
+}
+
 impl Database {
     /// `Database(dsn)`, with Python's pool sizes (1 to 10).
+    ///
+    /// The scheme is checked first, as asyncpg does (`urlparse(dsn).scheme`): sqlx parses
+    /// any scheme as PostgreSQL, and a URL without one would leave its password in the
+    /// database name.
     pub fn new(dsn: &str) -> Result<Self, DatabaseError> {
+        let scheme = url_scheme(dsn);
+        if scheme != "postgresql" && scheme != "postgres" {
+            return Err(DatabaseError::InvalidUrl(format!(
+                "invalid DSN: scheme is expected to be either \"postgresql\" or \"postgres\", got {}",
+                py_repr(&scheme)
+            )));
+        }
         let options = PgConnectOptions::from_str(dsn).map_err(|error| DatabaseError::InvalidUrl(error.to_string()))?;
         Ok(Self::from_options(options))
     }

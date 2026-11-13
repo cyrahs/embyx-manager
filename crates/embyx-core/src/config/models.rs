@@ -115,7 +115,8 @@ fn string(v: &mut Validator<'_>, name: &str, value: &Value) -> Result<String, Re
 }
 
 fn boolean(v: &mut Validator<'_>, name: &str, value: &Value) -> Result<bool, Recorded> {
-    v.scalar_at(&at(name), value, lax_bool)
+    let mode = v.mode();
+    v.scalar_at(&at(name), value, |raw| lax_bool(raw, mode))
 }
 
 fn integer(v: &mut Validator<'_>, name: &str, value: &Value) -> Result<i64, Recorded> {

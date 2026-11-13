@@ -123,29 +123,44 @@ pub fn lax_str(value: &Value) -> Result<String, Refusal> {
 
 /// `bool`: booleans, 0 and 1 (as integers or integral floats), and the words pydantic
 /// knows, in any ASCII case.
-pub fn lax_bool(value: &Value) -> Result<bool, Refusal> {
+///
+/// Other numbers are `bool_parsing` while pydantic-core holds them as a 64-bit integer
+/// and `bool_type` beyond: in Python mode an int outside `i64` or a float outside its
+/// range; in JSON mode also an integer literal of 19 digits or more, which the JSON
+/// parser keeps as a big integer. A float with a fraction is `bool_type` as well.
+pub fn lax_bool(value: &Value, mode: Mode) -> Result<bool, Refusal> {
+    const I64_BOUND: f64 = 9_223_372_036_854_775_808.0;
+    const JSON_BIG_INT: i128 = 1_000_000_000_000_000_000;
+    let parsing = || Err(Refusal::new("bool_parsing", BOOL_PARSING));
+    let wrong_type = || Err(Refusal::new("bool_type", BOOL_TYPE));
     match value {
         Value::Bool(flag) => Ok(*flag),
         Value::Int(0) => Ok(false),
         Value::Int(1) => Ok(true),
-        Value::Int(_) => Err(Refusal::new("bool_parsing", BOOL_PARSING)),
+        Value::Int(number) => {
+            let big = match mode {
+                Mode::Python => i64::try_from(*number).is_err(),
+                Mode::Json => number.unsigned_abs() >= JSON_BIG_INT.unsigned_abs(),
+            };
+            if big { wrong_type() } else { parsing() }
+        }
         // Exact comparisons: pydantic accepts only the floats equal to 0 and 1.
         #[allow(clippy::float_cmp)]
-        Value::Float(number) if number.is_finite() && number.fract() == 0.0 => {
+        Value::Float(number) if number.fract() == 0.0 && (-I64_BOUND..I64_BOUND).contains(number) => {
             if *number == 0.0 {
                 Ok(false)
             } else if *number == 1.0 {
                 Ok(true)
             } else {
-                Err(Refusal::new("bool_parsing", BOOL_PARSING))
+                parsing()
             }
         }
         Value::Str(text) => match text.to_ascii_lowercase().as_str() {
             "0" | "off" | "f" | "false" | "n" | "no" => Ok(false),
             "1" | "on" | "t" | "true" | "y" | "yes" => Ok(true),
-            _ => Err(Refusal::new("bool_parsing", BOOL_PARSING)),
+            _ => parsing(),
         },
-        _ => Err(Refusal::new("bool_type", BOOL_TYPE)),
+        _ => wrong_type(),
     }
 }
 
@@ -427,7 +442,7 @@ impl<'a> Validator<'a> {
         &mut self,
         loc: &[Value],
         value: &Value,
-        convert: fn(&Value) -> Result<T, Refusal>,
+        convert: impl FnOnce(&Value) -> Result<T, Refusal>,
     ) -> Result<T, Recorded> {
         convert(value).map_err(|refusal| self.push(loc, refusal))
     }
@@ -438,23 +453,31 @@ impl<'a> Validator<'a> {
     }
 
     /// `extra='forbid'`: every key that is not a field, in input order; then the result.
+    /// `model_validate` reports them after the field errors, `model_validate_json` before
+    /// (it meets them while reading the object, ahead of validating the fields).
     pub fn finish(mut self) -> Result<(), Vec<ErrorDetail>> {
+        let mut extras = Vec::new();
         for (key, _) in self.input.iter() {
             let known = matches!(key, Key::Str(name) if self.fields.contains(&name.as_str()));
             if !known {
-                let loc = self.loc(&[key_to_value(key)]);
-                self.errors.push(ErrorDetail {
+                extras.push(ErrorDetail {
                     kind: "extra_forbidden",
-                    loc,
+                    loc: self.loc(&[key_to_value(key)]),
                     msg: "Extra inputs are not permitted".to_owned(),
                 });
             }
         }
-        if self.errors.is_empty() {
-            Ok(())
-        } else {
-            Err(self.errors)
-        }
+        let errors = match self.mode {
+            Mode::Python => {
+                self.errors.append(&mut extras);
+                self.errors
+            }
+            Mode::Json => {
+                extras.append(&mut self.errors);
+                extras
+            }
+        };
+        if errors.is_empty() { Ok(()) } else { Err(errors) }
     }
 }
 

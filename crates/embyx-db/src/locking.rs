@@ -10,8 +10,9 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
 use rustix::fs::{FlockOperation, flock};
-use sqlx::Postgres;
 use sqlx::pool::PoolConnection;
+use sqlx::postgres::PgConnectOptions;
+use sqlx::{Connection as _, PgConnection, Postgres};
 
 use crate::database::{ADVISORY_NAMESPACE, Database, DatabaseError, MUTATION_LOCK_KEY};
 
@@ -155,9 +156,12 @@ impl Drop for AdvisoryLockGuard {
 type Wait = tokio::task::JoinHandle<(PoolConnection<Postgres>, Result<(), sqlx::Error>)>;
 
 /// Cancels a still-running wait when the acquiring future is dropped.
+///
+/// The cancel goes over a connection of its own, as asyncpg's cancel request does: waiters
+/// may hold every pooled connection, and a cancel queued behind them would never run.
 struct PendingWait {
     wait: Option<Wait>,
-    pool: sqlx::PgPool,
+    options: Arc<PgConnectOptions>,
     pid: i32,
     abandoned: Arc<AtomicBool>,
 }
@@ -173,13 +177,16 @@ impl Drop for PendingWait {
             wait.abort();
             return;
         };
-        let pool = self.pool.clone();
+        let options = Arc::clone(&self.options);
         let pid = self.pid;
         runtime.spawn(async move {
-            let _ = sqlx::query("SELECT pg_cancel_backend($1)")
-                .bind(pid)
-                .execute(&pool)
-                .await;
+            if let Ok(mut cancel) = PgConnection::connect_with(&options).await {
+                let _ = sqlx::query("SELECT pg_cancel_backend($1)")
+                    .bind(pid)
+                    .execute(&mut cancel)
+                    .await;
+                let _ = cancel.close().await;
+            }
             if let Ok((mut connection, _)) = wait.await {
                 // Granted or cancelled, this session never goes back to the pool.
                 connection.close_on_drop();
@@ -222,7 +229,7 @@ impl PostgresAdvisoryLock {
         });
         let mut pending = PendingWait {
             wait: Some(wait),
-            pool,
+            options: pool.connect_options(),
             pid,
             abandoned,
         };

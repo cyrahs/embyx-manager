@@ -181,3 +181,31 @@ async fn unknown_sections_are_refused() {
     assert_eq!(store.sections().len(), 9);
     test.drop_database().await;
 }
+
+#[tokio::test]
+async fn a_version_past_int4_is_refused_not_wrapped() {
+    let test = TestDatabase::create().await;
+    let store = ConfigStore::new(test.database());
+    store.load().await.expect("load");
+    store
+        .update("mapping", &values(&[("src_dir", "/a")]), None)
+        .await
+        .expect("update");
+    sqlx::query("UPDATE app_config SET version = 2147483647 WHERE section = 'mapping'")
+        .execute(test.pool())
+        .await
+        .expect("set version");
+    store.refresh().await.expect("refresh");
+    let error = store
+        .update("mapping", &values(&[("src_dir", "/b")]), None)
+        .await
+        .expect_err("past int4");
+    assert!(matches!(error, ConfigUpdateError::Database(_)), "{error}");
+    let version: i32 = sqlx::query_scalar("SELECT version FROM app_config WHERE section = 'mapping'")
+        .fetch_one(test.pool())
+        .await
+        .expect("version");
+    assert_eq!(version, i32::MAX);
+    assert_eq!(store.get::<MappingConfig>().src_dir, "/a");
+    test.drop_database().await;
+}

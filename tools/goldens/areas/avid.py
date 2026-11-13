@@ -346,6 +346,9 @@ def _normalize_number() -> list[dict[str, Any]]:
         'S2M-01',
         'GETCHU-01',
         'KIND-007',
+        'ABC-0' + '9' * 40,
+        'ABC-' + '0' * 50,
+        'ABC-' + '0' * 45 + '12',
     ]
     return [{'avid': value, 'normalized': normalize_number(value)} for value in values]
 

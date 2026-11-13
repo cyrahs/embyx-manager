@@ -133,6 +133,30 @@
       "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A892"
     },
     {
+      "magnet": "magnet:?xt=urn:btih:YEX6DQDLXISUVHOJ6UM3GNNKPQJWPKEı",
+      "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A888"
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:YEX6DQDLXISUVHOJ6UM3GNNKPQJWPKEİ",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:C12FE1C06BBA254A9DC9F519B335AA7C1367A88Aı",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:C12FE1C06BBA254A9DC9F519B335AA7C1367A88Aİ",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:bİth:C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:bıth:C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+      "info_hash": null
+    },
+    {
       "magnet": "magnet:?xt=urn:btih:",
       "info_hash": null
     },

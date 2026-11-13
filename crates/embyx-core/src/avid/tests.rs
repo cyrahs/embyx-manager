@@ -449,7 +449,7 @@ fn get_avid_normalizes_the_number_to_three_digits() {
 
 #[test]
 fn ignore_case_rewrite_adds_the_dotted_and_dotless_i() {
-    use super::python_ignore_case;
+    use crate::pyre::python_ignore_case;
     assert_eq!(python_ignore_case("(IBW)[-_]", true), "([I\u{130}\u{131}]BW)[-_]");
     assert_eq!(python_ignore_case(r"[^a-z\d]", true), "[^a-z\\d\u{130}\u{131}]");
     assert_eq!(python_ignore_case(r"[pi]\d*fps", true), "[pi\u{130}\u{131}]\\d*fps");

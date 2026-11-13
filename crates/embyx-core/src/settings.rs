@@ -8,7 +8,7 @@
 use std::fmt;
 use std::net::{Ipv4Addr, Ipv6Addr};
 
-use crate::pytext::{py_int, py_repr};
+use crate::pytext::{py_int, py_repr, py_strip};
 
 /// `EMBYX_MANAGER_DATABASE_URL`'s default.
 pub const DEFAULT_DATABASE_URL: &str = "postgresql://localhost/embyx_manager";
@@ -88,7 +88,7 @@ pub trait Environment {
 }
 
 /// The process environment. A value that is not UTF-8 is read lossily (Python decodes it
-/// with `surrogateescape`; none of these variables is ever anything but ASCII).
+/// with `surrogateescape`; none of these variables is ever anything but ASCII; DIVERGENCES.md D19).
 #[derive(Debug, Clone, Copy, Default)]
 pub struct ProcessEnvironment;
 
@@ -104,16 +104,26 @@ impl<F: Fn(&str) -> Option<String>> Environment for F {
     }
 }
 
+const OUT_OF_RANGE: &str = "integer out of range: ";
+
 /// `_positive_int`: `int(raw)` when set, else the default; below 1 is refused.
 fn positive_int(env: &impl Environment, name: &str, default: u64) -> Result<u64, SettingsError> {
+    let not_positive = || SettingsError(format!("{name} must be positive"));
     let value = match env.get(name) {
-        Some(raw) => py_int(&raw).map_err(SettingsError)?,
+        Some(raw) => match py_int(&raw) {
+            Ok(value) => value,
+            // Beyond `i128` but negative: Python reads it and refuses it as not positive.
+            Err(message) if message.starts_with(OUT_OF_RANGE) && py_strip(&raw).starts_with('-') => {
+                return Err(not_positive());
+            }
+            Err(message) => return Err(SettingsError(message)),
+        },
         None => i128::from(default),
     };
     if value < 1 {
-        return Err(SettingsError(format!("{name} must be positive")));
+        return Err(not_positive());
     }
-    u64::try_from(value).map_err(|_| SettingsError(format!("integer out of range: {}", py_repr(&value.to_string()))))
+    u64::try_from(value).map_err(|_| SettingsError(format!("{OUT_OF_RANGE}{}", py_repr(&value.to_string()))))
 }
 
 /// `_boolean`: unset is false; `1 true yes on` / `0 false no off`, case-folded.

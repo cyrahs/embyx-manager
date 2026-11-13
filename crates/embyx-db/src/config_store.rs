@@ -223,7 +223,8 @@ impl ConfigStore {
             merged.insert(key.clone(), value.clone());
         }
         let updated = AnySection::validate(name, &Value::Dict(merged), Mode::Python).expect("registered")?;
-        let new_version = current_version + 1;
+        // Python's int does not wrap: past `i32::MAX` the int4 column refuses the value.
+        let new_version = i64::from(current_version) + 1;
         sqlx::query(
             "
                     INSERT INTO app_config (section, value_json, version, updated_at)
@@ -243,7 +244,7 @@ impl ConfigStore {
         transaction.commit().await?;
         let entry = Versioned {
             section: updated,
-            version: new_version,
+            version: i32::try_from(new_version).expect("the int4 column took it"),
         };
         self.write()[index] = entry.clone();
         Ok(entry)

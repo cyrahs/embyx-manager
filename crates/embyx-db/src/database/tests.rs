@@ -101,3 +101,30 @@ fn an_unparseable_url_is_refused() {
     assert!(matches!(error, DatabaseError::InvalidUrl(_)), "{error}");
     assert!(!error.to_string().contains("hunter2"), "{error}");
 }
+
+#[test]
+fn only_postgresql_schemes_are_accepted() {
+    for dsn in [
+        "postgresql://h/d",
+        "postgres://h/d",
+        "POSTGRES://h/d",
+        " postgresql:///d",
+    ] {
+        Database::new(dsn).unwrap_or_else(|error| panic!("{dsn}: {error}"));
+    }
+    for (dsn, scheme) in [
+        ("mysql://u:hunter2@h/db", "'mysql'"),
+        ("embyx:hunter2@h", "'embyx'"),
+        ("hunter2@h/db", "''"),
+        ("", "''"),
+    ] {
+        let error = Database::new(dsn).expect_err("refused");
+        assert_eq!(
+            error.to_string(),
+            format!(
+                "invalid database URL: invalid DSN: scheme is expected to be either \"postgresql\" or \"postgres\", got {scheme}"
+            )
+        );
+        assert!(!error.to_string().contains("hunter2"), "{error}");
+    }
+}

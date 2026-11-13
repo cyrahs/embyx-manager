@@ -153,3 +153,54 @@ async fn an_unreleased_advisory_guard_frees_the_lock_when_dropped() {
     database.close().await;
     test.drop_database().await;
 }
+
+/// Ungranted advisory lock requests in this database (waiting sessions).
+async fn advisory_waiters(database: &TestDatabase) -> i64 {
+    let mut connection = database.options().connect().await.expect("connect");
+    let count: i64 = sqlx::query_scalar(
+        "SELECT count(*) FROM pg_locks WHERE locktype = 'advisory' AND NOT granted \
+         AND database = (SELECT oid FROM pg_database WHERE datname = current_database())",
+    )
+    .fetch_one(&mut connection)
+    .await
+    .expect("pg_locks");
+    connection.close().await.expect("close");
+    count
+}
+
+#[tokio::test]
+async fn a_dropped_wait_is_cancelled_when_the_pool_is_full() {
+    let test = TestDatabase::create().await;
+    let database = crate::database::Database::with_pool_sizes(test.options().clone(), 1, 2);
+    let lock = PostgresAdvisoryLock::new(database.clone());
+    let holder = lock.acquire().await.expect("lock");
+    let contender = lock.clone();
+    let waiter = tokio::spawn(async move {
+        let _guard = contender.acquire().await;
+        panic!("cancelled waiter acquired the lock");
+    });
+    tokio::time::sleep(Duration::from_millis(200)).await;
+    assert_eq!(advisory_waiters(&test).await, 1, "the contender must be waiting");
+    // Both pooled connections are taken now; the cancel must not need one.
+    waiter.abort();
+    assert!(waiter.await.expect_err("cancelled").is_cancelled());
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(5);
+    while advisory_waiters(&test).await != 0 {
+        assert!(
+            tokio::time::Instant::now() < deadline,
+            "the abandoned wait was not cancelled"
+        );
+        tokio::time::sleep(Duration::from_millis(20)).await;
+    }
+    // The waiter's connection is given up, so the holder can use the pool again.
+    let pool = database.get_pool().await.expect("pool");
+    let connection = tokio::time::timeout(Duration::from_secs(5), pool.acquire())
+        .await
+        .expect("a pooled connection in time")
+        .expect("connection");
+    drop(connection);
+    holder.release().await.expect("release");
+    assert!(lock_is_free(&test).await);
+    database.close().await;
+    test.drop_database().await;
+}

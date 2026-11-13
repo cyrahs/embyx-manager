@@ -9,8 +9,10 @@ use std::sync::LazyLock;
 
 use crate::pyre;
 
-/// `_BTIH_RE = re.compile(r'urn:btih:([A-Za-z0-9]+)', re.IGNORECASE)`.
-static BTIH_RE: LazyLock<regex::Regex> = LazyLock::new(|| pyre::compile(r"urn:btih:([A-Za-z0-9]+)", true, false));
+/// `_BTIH_RE = re.compile(r'urn:btih:([A-Za-z0-9]+)', re.IGNORECASE)`, with Python's
+/// case-insensitive `İ`/`ı` (DIVERGENCES.md D15).
+static BTIH_RE: LazyLock<regex::Regex> =
+    LazyLock::new(|| pyre::compile(&pyre::python_ignore_case(r"urn:btih:([A-Za-z0-9]+)", true), true, false));
 const HEX_LENGTH: usize = 40;
 const BASE32_LENGTH: usize = 32;
 

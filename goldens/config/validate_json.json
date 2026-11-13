@@ -368,6 +368,224 @@
       "dump_json": "{\"address\":\"\",\"api_token\":\"\",\"secure\":true}"
     },
     {
+      "section": "clouddrive",
+      "text": "{\"address\": 1, \"bogus\": 1}",
+      "errors": [
+        {
+          "type": "extra_forbidden",
+          "loc": [
+            "bogus"
+          ],
+          "msg": "Extra inputs are not permitted"
+        },
+        {
+          "type": "string_type",
+          "loc": [
+            "address"
+          ],
+          "msg": "Input should be a valid string"
+        }
+      ]
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"bogus\": 1, \"address\": 1, \"secure\": \"x\", \"more\": 2}",
+      "errors": [
+        {
+          "type": "extra_forbidden",
+          "loc": [
+            "bogus"
+          ],
+          "msg": "Extra inputs are not permitted"
+        },
+        {
+          "type": "extra_forbidden",
+          "loc": [
+            "more"
+          ],
+          "msg": "Extra inputs are not permitted"
+        },
+        {
+          "type": "string_type",
+          "loc": [
+            "address"
+          ],
+          "msg": "Input should be a valid string"
+        },
+        {
+          "type": "bool_parsing",
+          "loc": [
+            "secure"
+          ],
+          "msg": "Input should be a valid boolean, unable to interpret input"
+        }
+      ]
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"secure\": 2}",
+      "errors": [
+        {
+          "type": "bool_parsing",
+          "loc": [
+            "secure"
+          ],
+          "msg": "Input should be a valid boolean, unable to interpret input"
+        }
+      ]
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"secure\": 999999999999999999}",
+      "errors": [
+        {
+          "type": "bool_parsing",
+          "loc": [
+            "secure"
+          ],
+          "msg": "Input should be a valid boolean, unable to interpret input"
+        }
+      ]
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"secure\": 1000000000000000000}",
+      "errors": [
+        {
+          "type": "bool_type",
+          "loc": [
+            "secure"
+          ],
+          "msg": "Input should be a valid boolean"
+        }
+      ]
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"secure\": -999999999999999999}",
+      "errors": [
+        {
+          "type": "bool_parsing",
+          "loc": [
+            "secure"
+          ],
+          "msg": "Input should be a valid boolean, unable to interpret input"
+        }
+      ]
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"secure\": -1000000000000000000}",
+      "errors": [
+        {
+          "type": "bool_type",
+          "loc": [
+            "secure"
+          ],
+          "msg": "Input should be a valid boolean"
+        }
+      ]
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"secure\": 9223372036854775807}",
+      "errors": [
+        {
+          "type": "bool_type",
+          "loc": [
+            "secure"
+          ],
+          "msg": "Input should be a valid boolean"
+        }
+      ]
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"secure\": 1e20}",
+      "errors": [
+        {
+          "type": "bool_type",
+          "loc": [
+            "secure"
+          ],
+          "msg": "Input should be a valid boolean"
+        }
+      ]
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"secure\": 9.2e18}",
+      "errors": [
+        {
+          "type": "bool_parsing",
+          "loc": [
+            "secure"
+          ],
+          "msg": "Input should be a valid boolean, unable to interpret input"
+        }
+      ]
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"secure\": 2.5}",
+      "errors": [
+        {
+          "type": "bool_type",
+          "loc": [
+            "secure"
+          ],
+          "msg": "Input should be a valid boolean"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "text": "{\"categories\": [{\"task_dir_path\": 1, \"extra\": 1}], \"zz\": 1, \"enabled\": \"x\"}",
+      "errors": [
+        {
+          "type": "extra_forbidden",
+          "loc": [
+            "zz"
+          ],
+          "msg": "Extra inputs are not permitted"
+        },
+        {
+          "type": "bool_parsing",
+          "loc": [
+            "enabled"
+          ],
+          "msg": "Input should be a valid boolean, unable to interpret input"
+        },
+        {
+          "type": "extra_forbidden",
+          "loc": [
+            "categories",
+            0,
+            "extra"
+          ],
+          "msg": "Extra inputs are not permitted"
+        },
+        {
+          "type": "missing",
+          "loc": [
+            "categories",
+            0,
+            "label"
+          ],
+          "msg": "Field required"
+        },
+        {
+          "type": "string_type",
+          "loc": [
+            "categories",
+            0,
+            "task_dir_path"
+          ],
+          "msg": "Input should be a valid string"
+        }
+      ]
+    },
+    {
       "section": "archive",
       "text": "{\"brand_mapping\": {\"x\": [\"a\"]}, \"mapping\": {\"a/\": \"b/\"}, \"tracker_interval_seconds\": 1800}",
       "dump_json": "{\"enabled\":false,\"scan_cron\":\"0 4 * * *\",\"src_dir\":\"\",\"dst_dir\":\"\",\"mapping\":{\"a\":\"b\"},\"priority_mapping\":{},\"min_size_mb\":0,\"brand_mapping\":{\"x\":[\"A\"]},\"tracker_interval_seconds\":1800,\"stall_timeout_hours\":24,\"max_attempts\":5}"
