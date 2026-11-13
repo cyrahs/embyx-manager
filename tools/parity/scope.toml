@@ -148,7 +148,7 @@ tests = [
 
 [WP13]
 title = "Merge worker"
-status = "pending"
+status = "done"
 tests = [
   "tests/test_merge_detect.py",
   "tests/test_merge_worker.py",
@@ -163,6 +163,9 @@ tests = [
   "tests/test_merge_auto.py",
   "tests/test_merge_transcode.py",
   "tests/test_merge_api.py",
+  # These two call the merge API's titles endpoint (merge/api.py), which arrives here.
+  "tests/test_merge_detect.py::test_titles_endpoint_lists_titles_with_their_sources",
+  "tests/test_merge_detect.py::test_titles_endpoint_explains_missing_configuration",
 ]
 
 [WP15]

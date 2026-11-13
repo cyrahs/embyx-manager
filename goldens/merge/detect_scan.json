@@ -1,0 +1,4163 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "merge_detect",
+  "cases": [
+    {
+      "tree": "plain",
+      "files": {
+        "a/T-001/T-001-cd1.strm": "/mnt/cd2/115/embyx/rank/T/T-001-cd1.mp4\n",
+        "a/T-001/T-001-cd2.strm": "/mnt/cd2/115/embyx/rank/T/T-001-cd2.mp4\n",
+        "a/T-001/T-001-cd3.strm": "/mnt/cd2/115/embyx/rank/T/T-001-cd3.mp4\n"
+      },
+      "library_root": "/mnt/cd2/115/embyx",
+      "titles": [
+        {
+          "avid": "T-001",
+          "directory": "a/T-001",
+          "parts": [
+            [
+              1,
+              "a/T-001/T-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/T/T-001-cd1.mp4"
+            ],
+            [
+              2,
+              "a/T-001/T-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/T/T-001-cd2.mp4"
+            ],
+            [
+              3,
+              "a/T-001/T-001-cd3.strm",
+              "/mnt/cd2/115/embyx/rank/T/T-001-cd3.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "T",
+          "problem": null,
+          "part_count": 3,
+          "stackable": true,
+          "complete": true
+        }
+      ]
+    },
+    {
+      "tree": "plain",
+      "files": {
+        "a/T-001/T-001-cd1.strm": "/mnt/cd2/115/embyx/rank/T/T-001-cd1.mp4\n",
+        "a/T-001/T-001-cd2.strm": "/mnt/cd2/115/embyx/rank/T/T-001-cd2.mp4\n",
+        "a/T-001/T-001-cd3.strm": "/mnt/cd2/115/embyx/rank/T/T-001-cd3.mp4\n"
+      },
+      "library_root": "/mnt/cd2/115/embyx/",
+      "titles": [
+        {
+          "avid": "T-001",
+          "directory": "a/T-001",
+          "parts": [
+            [
+              1,
+              "a/T-001/T-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/T/T-001-cd1.mp4"
+            ],
+            [
+              2,
+              "a/T-001/T-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/T/T-001-cd2.mp4"
+            ],
+            [
+              3,
+              "a/T-001/T-001-cd3.strm",
+              "/mnt/cd2/115/embyx/rank/T/T-001-cd3.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "T",
+          "problem": null,
+          "part_count": 3,
+          "stackable": true,
+          "complete": true
+        }
+      ]
+    },
+    {
+      "tree": "plain",
+      "files": {
+        "a/T-001/T-001-cd1.strm": "/mnt/cd2/115/embyx/rank/T/T-001-cd1.mp4\n",
+        "a/T-001/T-001-cd2.strm": "/mnt/cd2/115/embyx/rank/T/T-001-cd2.mp4\n",
+        "a/T-001/T-001-cd3.strm": "/mnt/cd2/115/embyx/rank/T/T-001-cd3.mp4\n"
+      },
+      "library_root": "/mnt/cd2/115/embyx/rank",
+      "titles": [
+        {
+          "avid": "T-001",
+          "directory": "a/T-001",
+          "parts": [
+            [
+              1,
+              "a/T-001/T-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/T/T-001-cd1.mp4"
+            ],
+            [
+              2,
+              "a/T-001/T-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/T/T-001-cd2.mp4"
+            ],
+            [
+              3,
+              "a/T-001/T-001-cd3.strm",
+              "/mnt/cd2/115/embyx/rank/T/T-001-cd3.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 3,
+          "stackable": true,
+          "complete": false
+        }
+      ]
+    },
+    {
+      "tree": "plain",
+      "files": {
+        "a/T-001/T-001-cd1.strm": "/mnt/cd2/115/embyx/rank/T/T-001-cd1.mp4\n",
+        "a/T-001/T-001-cd2.strm": "/mnt/cd2/115/embyx/rank/T/T-001-cd2.mp4\n",
+        "a/T-001/T-001-cd3.strm": "/mnt/cd2/115/embyx/rank/T/T-001-cd3.mp4\n"
+      },
+      "library_root": "mnt/cd2/115/embyx",
+      "titles": [
+        {
+          "avid": "T-001",
+          "directory": "a/T-001",
+          "parts": [
+            [
+              1,
+              "a/T-001/T-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/T/T-001-cd1.mp4"
+            ],
+            [
+              2,
+              "a/T-001/T-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/T/T-001-cd2.mp4"
+            ],
+            [
+              3,
+              "a/T-001/T-001-cd3.strm",
+              "/mnt/cd2/115/embyx/rank/T/T-001-cd3.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 3,
+          "stackable": true,
+          "complete": false
+        }
+      ]
+    },
+    {
+      "tree": "plain",
+      "files": {
+        "a/T-001/T-001-cd1.strm": "/mnt/cd2/115/embyx/rank/T/T-001-cd1.mp4\n",
+        "a/T-001/T-001-cd2.strm": "/mnt/cd2/115/embyx/rank/T/T-001-cd2.mp4\n",
+        "a/T-001/T-001-cd3.strm": "/mnt/cd2/115/embyx/rank/T/T-001-cd3.mp4\n"
+      },
+      "library_root": "/",
+      "titles": [
+        {
+          "avid": "T-001",
+          "directory": "a/T-001",
+          "parts": [
+            [
+              1,
+              "a/T-001/T-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/T/T-001-cd1.mp4"
+            ],
+            [
+              2,
+              "a/T-001/T-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/T/T-001-cd2.mp4"
+            ],
+            [
+              3,
+              "a/T-001/T-001-cd3.strm",
+              "/mnt/cd2/115/embyx/rank/T/T-001-cd3.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "mnt/cd2/115/embyx/rank",
+          "brand": "T",
+          "problem": null,
+          "part_count": 3,
+          "stackable": true,
+          "complete": true
+        }
+      ]
+    },
+    {
+      "tree": "strm_shapes",
+      "files": {
+        "b/CR-001/CR-001-cd1.strm": "/mnt/cd2/115/embyx/rank/CR/CR-001-cd1.mp4\r\n",
+        "b/CR-001/CR-001-cd2.strm": "  \n/mnt/cd2/115/embyx/rank/CR/CR-001-cd2.mp4  \n\n",
+        "c/BOM-001/BOM-001-cd1.strm": "﻿/mnt/cd2/115/embyx/rank/BOM/BOM-001-cd1.mp4\n",
+        "c/BOM-001/BOM-001-cd2.strm": "/mnt/cd2/115/embyx/rank/BOM/BOM-001-cd2.mp4\n",
+        "d/TWO-001/TWO-001-cd1.strm": "/mnt/cd2/115/embyx/rank/TWO/a.mp4\n/mnt/cd2/115/embyx/rank/TWO/b.mp4\n",
+        "d/TWO-001/TWO-001-cd2.strm": "/mnt/cd2/115/embyx/rank/TWO/TWO-001-cd2.mp4\n",
+        "e/EMP-001/EMP-001-cd1.strm": "",
+        "e/EMP-001/EMP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/EMP/EMP-001-cd2.mp4\n",
+        "f/BIG-001/BIG-001-cd1.strm": "/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "f/BIG-001/BIG-001-cd2.strm": "/mnt/cd2/115/embyx/rank/BIG/BIG-001-cd2.mp4\n",
+        "g/REL-001/REL-001-cd1.strm": "rank/REL/REL-001-cd1.mp4\n",
+        "g/REL-001/REL-001-cd2.strm": "rank/REL/REL-001-cd2.mp4\n",
+        "h/BIN-001/BIN-001-cd1.strm": [
+          47,
+          255,
+          254,
+          10
+        ],
+        "h/BIN-001/BIN-001-cd2.strm": "/mnt/cd2/115/embyx/rank/BIN/BIN-001-cd2.mp4\n",
+        "i/SEP-001/SEP-001-cd1.strm": "/mnt/cd2/115/embyx/rank/SEP/SEP-001-cd1.mp4 more\n",
+        "i/SEP-001/SEP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/SEP/SEP-001-cd2.mp4\n"
+      },
+      "library_root": "/mnt/cd2/115/embyx",
+      "titles": [
+        {
+          "avid": "BIG-001",
+          "directory": "f/BIG-001",
+          "parts": [
+            [
+              1,
+              "f/BIG-001/BIG-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "f/BIG-001/BIG-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/BIG/BIG-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "BIN-001",
+          "directory": "h/BIN-001",
+          "parts": [
+            [
+              1,
+              "h/BIN-001/BIN-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "h/BIN-001/BIN-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/BIN/BIN-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "BOM-001",
+          "directory": "c/BOM-001",
+          "parts": [
+            [
+              1,
+              "c/BOM-001/BOM-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "c/BOM-001/BOM-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/BOM/BOM-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "CR-001",
+          "directory": "b/CR-001",
+          "parts": [
+            [
+              1,
+              "b/CR-001/CR-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/CR/CR-001-cd1.mp4"
+            ],
+            [
+              2,
+              "b/CR-001/CR-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/CR/CR-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "CR",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "EMP-001",
+          "directory": "e/EMP-001",
+          "parts": [
+            [
+              1,
+              "e/EMP-001/EMP-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "e/EMP-001/EMP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/EMP/EMP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "REL-001",
+          "directory": "g/REL-001",
+          "parts": [
+            [
+              1,
+              "g/REL-001/REL-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "g/REL-001/REL-001-cd2.strm",
+              ""
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "SEP-001",
+          "directory": "i/SEP-001",
+          "parts": [
+            [
+              1,
+              "i/SEP-001/SEP-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "i/SEP-001/SEP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/SEP/SEP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "TWO-001",
+          "directory": "d/TWO-001",
+          "parts": [
+            [
+              1,
+              "d/TWO-001/TWO-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "d/TWO-001/TWO-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/TWO/TWO-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        }
+      ]
+    },
+    {
+      "tree": "strm_shapes",
+      "files": {
+        "b/CR-001/CR-001-cd1.strm": "/mnt/cd2/115/embyx/rank/CR/CR-001-cd1.mp4\r\n",
+        "b/CR-001/CR-001-cd2.strm": "  \n/mnt/cd2/115/embyx/rank/CR/CR-001-cd2.mp4  \n\n",
+        "c/BOM-001/BOM-001-cd1.strm": "﻿/mnt/cd2/115/embyx/rank/BOM/BOM-001-cd1.mp4\n",
+        "c/BOM-001/BOM-001-cd2.strm": "/mnt/cd2/115/embyx/rank/BOM/BOM-001-cd2.mp4\n",
+        "d/TWO-001/TWO-001-cd1.strm": "/mnt/cd2/115/embyx/rank/TWO/a.mp4\n/mnt/cd2/115/embyx/rank/TWO/b.mp4\n",
+        "d/TWO-001/TWO-001-cd2.strm": "/mnt/cd2/115/embyx/rank/TWO/TWO-001-cd2.mp4\n",
+        "e/EMP-001/EMP-001-cd1.strm": "",
+        "e/EMP-001/EMP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/EMP/EMP-001-cd2.mp4\n",
+        "f/BIG-001/BIG-001-cd1.strm": "/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "f/BIG-001/BIG-001-cd2.strm": "/mnt/cd2/115/embyx/rank/BIG/BIG-001-cd2.mp4\n",
+        "g/REL-001/REL-001-cd1.strm": "rank/REL/REL-001-cd1.mp4\n",
+        "g/REL-001/REL-001-cd2.strm": "rank/REL/REL-001-cd2.mp4\n",
+        "h/BIN-001/BIN-001-cd1.strm": [
+          47,
+          255,
+          254,
+          10
+        ],
+        "h/BIN-001/BIN-001-cd2.strm": "/mnt/cd2/115/embyx/rank/BIN/BIN-001-cd2.mp4\n",
+        "i/SEP-001/SEP-001-cd1.strm": "/mnt/cd2/115/embyx/rank/SEP/SEP-001-cd1.mp4 more\n",
+        "i/SEP-001/SEP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/SEP/SEP-001-cd2.mp4\n"
+      },
+      "library_root": "/mnt/cd2/115/embyx/",
+      "titles": [
+        {
+          "avid": "BIG-001",
+          "directory": "f/BIG-001",
+          "parts": [
+            [
+              1,
+              "f/BIG-001/BIG-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "f/BIG-001/BIG-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/BIG/BIG-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "BIN-001",
+          "directory": "h/BIN-001",
+          "parts": [
+            [
+              1,
+              "h/BIN-001/BIN-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "h/BIN-001/BIN-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/BIN/BIN-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "BOM-001",
+          "directory": "c/BOM-001",
+          "parts": [
+            [
+              1,
+              "c/BOM-001/BOM-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "c/BOM-001/BOM-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/BOM/BOM-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "CR-001",
+          "directory": "b/CR-001",
+          "parts": [
+            [
+              1,
+              "b/CR-001/CR-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/CR/CR-001-cd1.mp4"
+            ],
+            [
+              2,
+              "b/CR-001/CR-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/CR/CR-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "CR",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "EMP-001",
+          "directory": "e/EMP-001",
+          "parts": [
+            [
+              1,
+              "e/EMP-001/EMP-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "e/EMP-001/EMP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/EMP/EMP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "REL-001",
+          "directory": "g/REL-001",
+          "parts": [
+            [
+              1,
+              "g/REL-001/REL-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "g/REL-001/REL-001-cd2.strm",
+              ""
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "SEP-001",
+          "directory": "i/SEP-001",
+          "parts": [
+            [
+              1,
+              "i/SEP-001/SEP-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "i/SEP-001/SEP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/SEP/SEP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "TWO-001",
+          "directory": "d/TWO-001",
+          "parts": [
+            [
+              1,
+              "d/TWO-001/TWO-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "d/TWO-001/TWO-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/TWO/TWO-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        }
+      ]
+    },
+    {
+      "tree": "strm_shapes",
+      "files": {
+        "b/CR-001/CR-001-cd1.strm": "/mnt/cd2/115/embyx/rank/CR/CR-001-cd1.mp4\r\n",
+        "b/CR-001/CR-001-cd2.strm": "  \n/mnt/cd2/115/embyx/rank/CR/CR-001-cd2.mp4  \n\n",
+        "c/BOM-001/BOM-001-cd1.strm": "﻿/mnt/cd2/115/embyx/rank/BOM/BOM-001-cd1.mp4\n",
+        "c/BOM-001/BOM-001-cd2.strm": "/mnt/cd2/115/embyx/rank/BOM/BOM-001-cd2.mp4\n",
+        "d/TWO-001/TWO-001-cd1.strm": "/mnt/cd2/115/embyx/rank/TWO/a.mp4\n/mnt/cd2/115/embyx/rank/TWO/b.mp4\n",
+        "d/TWO-001/TWO-001-cd2.strm": "/mnt/cd2/115/embyx/rank/TWO/TWO-001-cd2.mp4\n",
+        "e/EMP-001/EMP-001-cd1.strm": "",
+        "e/EMP-001/EMP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/EMP/EMP-001-cd2.mp4\n",
+        "f/BIG-001/BIG-001-cd1.strm": "/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "f/BIG-001/BIG-001-cd2.strm": "/mnt/cd2/115/embyx/rank/BIG/BIG-001-cd2.mp4\n",
+        "g/REL-001/REL-001-cd1.strm": "rank/REL/REL-001-cd1.mp4\n",
+        "g/REL-001/REL-001-cd2.strm": "rank/REL/REL-001-cd2.mp4\n",
+        "h/BIN-001/BIN-001-cd1.strm": [
+          47,
+          255,
+          254,
+          10
+        ],
+        "h/BIN-001/BIN-001-cd2.strm": "/mnt/cd2/115/embyx/rank/BIN/BIN-001-cd2.mp4\n",
+        "i/SEP-001/SEP-001-cd1.strm": "/mnt/cd2/115/embyx/rank/SEP/SEP-001-cd1.mp4 more\n",
+        "i/SEP-001/SEP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/SEP/SEP-001-cd2.mp4\n"
+      },
+      "library_root": "/mnt/cd2/115/embyx/rank",
+      "titles": [
+        {
+          "avid": "BIG-001",
+          "directory": "f/BIG-001",
+          "parts": [
+            [
+              1,
+              "f/BIG-001/BIG-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "f/BIG-001/BIG-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/BIG/BIG-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "BIN-001",
+          "directory": "h/BIN-001",
+          "parts": [
+            [
+              1,
+              "h/BIN-001/BIN-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "h/BIN-001/BIN-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/BIN/BIN-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "BOM-001",
+          "directory": "c/BOM-001",
+          "parts": [
+            [
+              1,
+              "c/BOM-001/BOM-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "c/BOM-001/BOM-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/BOM/BOM-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "CR-001",
+          "directory": "b/CR-001",
+          "parts": [
+            [
+              1,
+              "b/CR-001/CR-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/CR/CR-001-cd1.mp4"
+            ],
+            [
+              2,
+              "b/CR-001/CR-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/CR/CR-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "EMP-001",
+          "directory": "e/EMP-001",
+          "parts": [
+            [
+              1,
+              "e/EMP-001/EMP-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "e/EMP-001/EMP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/EMP/EMP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "REL-001",
+          "directory": "g/REL-001",
+          "parts": [
+            [
+              1,
+              "g/REL-001/REL-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "g/REL-001/REL-001-cd2.strm",
+              ""
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "SEP-001",
+          "directory": "i/SEP-001",
+          "parts": [
+            [
+              1,
+              "i/SEP-001/SEP-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "i/SEP-001/SEP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/SEP/SEP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "TWO-001",
+          "directory": "d/TWO-001",
+          "parts": [
+            [
+              1,
+              "d/TWO-001/TWO-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "d/TWO-001/TWO-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/TWO/TWO-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        }
+      ]
+    },
+    {
+      "tree": "strm_shapes",
+      "files": {
+        "b/CR-001/CR-001-cd1.strm": "/mnt/cd2/115/embyx/rank/CR/CR-001-cd1.mp4\r\n",
+        "b/CR-001/CR-001-cd2.strm": "  \n/mnt/cd2/115/embyx/rank/CR/CR-001-cd2.mp4  \n\n",
+        "c/BOM-001/BOM-001-cd1.strm": "﻿/mnt/cd2/115/embyx/rank/BOM/BOM-001-cd1.mp4\n",
+        "c/BOM-001/BOM-001-cd2.strm": "/mnt/cd2/115/embyx/rank/BOM/BOM-001-cd2.mp4\n",
+        "d/TWO-001/TWO-001-cd1.strm": "/mnt/cd2/115/embyx/rank/TWO/a.mp4\n/mnt/cd2/115/embyx/rank/TWO/b.mp4\n",
+        "d/TWO-001/TWO-001-cd2.strm": "/mnt/cd2/115/embyx/rank/TWO/TWO-001-cd2.mp4\n",
+        "e/EMP-001/EMP-001-cd1.strm": "",
+        "e/EMP-001/EMP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/EMP/EMP-001-cd2.mp4\n",
+        "f/BIG-001/BIG-001-cd1.strm": "/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "f/BIG-001/BIG-001-cd2.strm": "/mnt/cd2/115/embyx/rank/BIG/BIG-001-cd2.mp4\n",
+        "g/REL-001/REL-001-cd1.strm": "rank/REL/REL-001-cd1.mp4\n",
+        "g/REL-001/REL-001-cd2.strm": "rank/REL/REL-001-cd2.mp4\n",
+        "h/BIN-001/BIN-001-cd1.strm": [
+          47,
+          255,
+          254,
+          10
+        ],
+        "h/BIN-001/BIN-001-cd2.strm": "/mnt/cd2/115/embyx/rank/BIN/BIN-001-cd2.mp4\n",
+        "i/SEP-001/SEP-001-cd1.strm": "/mnt/cd2/115/embyx/rank/SEP/SEP-001-cd1.mp4 more\n",
+        "i/SEP-001/SEP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/SEP/SEP-001-cd2.mp4\n"
+      },
+      "library_root": "mnt/cd2/115/embyx",
+      "titles": [
+        {
+          "avid": "BIG-001",
+          "directory": "f/BIG-001",
+          "parts": [
+            [
+              1,
+              "f/BIG-001/BIG-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "f/BIG-001/BIG-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/BIG/BIG-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "BIN-001",
+          "directory": "h/BIN-001",
+          "parts": [
+            [
+              1,
+              "h/BIN-001/BIN-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "h/BIN-001/BIN-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/BIN/BIN-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "BOM-001",
+          "directory": "c/BOM-001",
+          "parts": [
+            [
+              1,
+              "c/BOM-001/BOM-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "c/BOM-001/BOM-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/BOM/BOM-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "CR-001",
+          "directory": "b/CR-001",
+          "parts": [
+            [
+              1,
+              "b/CR-001/CR-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/CR/CR-001-cd1.mp4"
+            ],
+            [
+              2,
+              "b/CR-001/CR-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/CR/CR-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "EMP-001",
+          "directory": "e/EMP-001",
+          "parts": [
+            [
+              1,
+              "e/EMP-001/EMP-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "e/EMP-001/EMP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/EMP/EMP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "REL-001",
+          "directory": "g/REL-001",
+          "parts": [
+            [
+              1,
+              "g/REL-001/REL-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "g/REL-001/REL-001-cd2.strm",
+              ""
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "SEP-001",
+          "directory": "i/SEP-001",
+          "parts": [
+            [
+              1,
+              "i/SEP-001/SEP-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "i/SEP-001/SEP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/SEP/SEP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "TWO-001",
+          "directory": "d/TWO-001",
+          "parts": [
+            [
+              1,
+              "d/TWO-001/TWO-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "d/TWO-001/TWO-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/TWO/TWO-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        }
+      ]
+    },
+    {
+      "tree": "strm_shapes",
+      "files": {
+        "b/CR-001/CR-001-cd1.strm": "/mnt/cd2/115/embyx/rank/CR/CR-001-cd1.mp4\r\n",
+        "b/CR-001/CR-001-cd2.strm": "  \n/mnt/cd2/115/embyx/rank/CR/CR-001-cd2.mp4  \n\n",
+        "c/BOM-001/BOM-001-cd1.strm": "﻿/mnt/cd2/115/embyx/rank/BOM/BOM-001-cd1.mp4\n",
+        "c/BOM-001/BOM-001-cd2.strm": "/mnt/cd2/115/embyx/rank/BOM/BOM-001-cd2.mp4\n",
+        "d/TWO-001/TWO-001-cd1.strm": "/mnt/cd2/115/embyx/rank/TWO/a.mp4\n/mnt/cd2/115/embyx/rank/TWO/b.mp4\n",
+        "d/TWO-001/TWO-001-cd2.strm": "/mnt/cd2/115/embyx/rank/TWO/TWO-001-cd2.mp4\n",
+        "e/EMP-001/EMP-001-cd1.strm": "",
+        "e/EMP-001/EMP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/EMP/EMP-001-cd2.mp4\n",
+        "f/BIG-001/BIG-001-cd1.strm": "/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "f/BIG-001/BIG-001-cd2.strm": "/mnt/cd2/115/embyx/rank/BIG/BIG-001-cd2.mp4\n",
+        "g/REL-001/REL-001-cd1.strm": "rank/REL/REL-001-cd1.mp4\n",
+        "g/REL-001/REL-001-cd2.strm": "rank/REL/REL-001-cd2.mp4\n",
+        "h/BIN-001/BIN-001-cd1.strm": [
+          47,
+          255,
+          254,
+          10
+        ],
+        "h/BIN-001/BIN-001-cd2.strm": "/mnt/cd2/115/embyx/rank/BIN/BIN-001-cd2.mp4\n",
+        "i/SEP-001/SEP-001-cd1.strm": "/mnt/cd2/115/embyx/rank/SEP/SEP-001-cd1.mp4 more\n",
+        "i/SEP-001/SEP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/SEP/SEP-001-cd2.mp4\n"
+      },
+      "library_root": "/",
+      "titles": [
+        {
+          "avid": "BIG-001",
+          "directory": "f/BIG-001",
+          "parts": [
+            [
+              1,
+              "f/BIG-001/BIG-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "f/BIG-001/BIG-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/BIG/BIG-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "BIN-001",
+          "directory": "h/BIN-001",
+          "parts": [
+            [
+              1,
+              "h/BIN-001/BIN-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "h/BIN-001/BIN-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/BIN/BIN-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "BOM-001",
+          "directory": "c/BOM-001",
+          "parts": [
+            [
+              1,
+              "c/BOM-001/BOM-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "c/BOM-001/BOM-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/BOM/BOM-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "CR-001",
+          "directory": "b/CR-001",
+          "parts": [
+            [
+              1,
+              "b/CR-001/CR-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/CR/CR-001-cd1.mp4"
+            ],
+            [
+              2,
+              "b/CR-001/CR-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/CR/CR-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "mnt/cd2/115/embyx/rank",
+          "brand": "CR",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "EMP-001",
+          "directory": "e/EMP-001",
+          "parts": [
+            [
+              1,
+              "e/EMP-001/EMP-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "e/EMP-001/EMP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/EMP/EMP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "REL-001",
+          "directory": "g/REL-001",
+          "parts": [
+            [
+              1,
+              "g/REL-001/REL-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "g/REL-001/REL-001-cd2.strm",
+              ""
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "SEP-001",
+          "directory": "i/SEP-001",
+          "parts": [
+            [
+              1,
+              "i/SEP-001/SEP-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "i/SEP-001/SEP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/SEP/SEP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "TWO-001",
+          "directory": "d/TWO-001",
+          "parts": [
+            [
+              1,
+              "d/TWO-001/TWO-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "d/TWO-001/TWO-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/TWO/TWO-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        }
+      ]
+    },
+    {
+      "tree": "target_paths",
+      "files": {
+        "a/DOT-001/DOT-001-cd1.strm": "/mnt/cd2/115/embyx//rank/./DOT/DOT-001-cd1.mp4\n",
+        "a/DOT-001/DOT-001-cd2.strm": "/mnt/cd2/115/embyx/rank/DOT/DOT-001-cd2.mp4\n",
+        "b/UP-001/UP-001-cd1.strm": "/mnt/cd2/115/embyx/rank/../rank/UP/UP-001-cd1.mp4\n",
+        "b/UP-001/UP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/../rank/UP/UP-001-cd2.mp4\n",
+        "c/ROOT-001/ROOT-001-cd1.strm": "/mnt/cd2/115/embyx/ROOT-001-cd1.mp4\n",
+        "c/ROOT-001/ROOT-001-cd2.strm": "/mnt/cd2/115/embyx/ROOT-001-cd2.mp4\n",
+        "d/ONE-001/ONE-001-cd1.strm": "/mnt/cd2/115/embyx/brand/ONE-001-cd1.mp4\n",
+        "d/ONE-001/ONE-001-cd2.strm": "/mnt/cd2/115/embyx/brand/ONE-001-cd2.mp4\n",
+        "e/DEEP-001/DEEP-001-cd1.strm": "/mnt/cd2/115/embyx/type/vr/sub/DEEP/DEEP-001-cd1.mp4\n",
+        "e/DEEP-001/DEEP-001-cd2.strm": "/mnt/cd2/115/embyx/type/vr/sub/DEEP/DEEP-001-cd2.mp4\n",
+        "f/SLASH-001/SLASH-001-cd1.strm": "//mnt/cd2/115/embyx/rank/SLASH/SLASH-001-cd1.mp4\n",
+        "f/SLASH-001/SLASH-001-cd2.strm": "//mnt/cd2/115/embyx/rank/SLASH/SLASH-001-cd2.mp4\n",
+        "g/PRE-001/PRE-001-cd1.strm": "/mnt/cd2/115/embyxx/rank/PRE/PRE-001-cd1.mp4\n",
+        "g/PRE-001/PRE-001-cd2.strm": "/mnt/cd2/115/embyxx/rank/PRE/PRE-001-cd2.mp4\n"
+      },
+      "library_root": "/mnt/cd2/115/embyx",
+      "titles": [
+        {
+          "avid": "DEEP-001",
+          "directory": "e/DEEP-001",
+          "parts": [
+            [
+              1,
+              "e/DEEP-001/DEEP-001-cd1.strm",
+              "/mnt/cd2/115/embyx/type/vr/sub/DEEP/DEEP-001-cd1.mp4"
+            ],
+            [
+              2,
+              "e/DEEP-001/DEEP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/type/vr/sub/DEEP/DEEP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "type/vr/sub",
+          "brand": "DEEP",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "DOT-001",
+          "directory": "a/DOT-001",
+          "parts": [
+            [
+              1,
+              "a/DOT-001/DOT-001-cd1.strm",
+              "/mnt/cd2/115/embyx//rank/./DOT/DOT-001-cd1.mp4"
+            ],
+            [
+              2,
+              "a/DOT-001/DOT-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/DOT/DOT-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "DOT",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "ONE-001",
+          "directory": "d/ONE-001",
+          "parts": [
+            [
+              1,
+              "d/ONE-001/ONE-001-cd1.strm",
+              "/mnt/cd2/115/embyx/brand/ONE-001-cd1.mp4"
+            ],
+            [
+              2,
+              "d/ONE-001/ONE-001-cd2.strm",
+              "/mnt/cd2/115/embyx/brand/ONE-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "PRE-001",
+          "directory": "g/PRE-001",
+          "parts": [
+            [
+              1,
+              "g/PRE-001/PRE-001-cd1.strm",
+              "/mnt/cd2/115/embyxx/rank/PRE/PRE-001-cd1.mp4"
+            ],
+            [
+              2,
+              "g/PRE-001/PRE-001-cd2.strm",
+              "/mnt/cd2/115/embyxx/rank/PRE/PRE-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "ROOT-001",
+          "directory": "c/ROOT-001",
+          "parts": [
+            [
+              1,
+              "c/ROOT-001/ROOT-001-cd1.strm",
+              "/mnt/cd2/115/embyx/ROOT-001-cd1.mp4"
+            ],
+            [
+              2,
+              "c/ROOT-001/ROOT-001-cd2.strm",
+              "/mnt/cd2/115/embyx/ROOT-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "SLASH-001",
+          "directory": "f/SLASH-001",
+          "parts": [
+            [
+              1,
+              "f/SLASH-001/SLASH-001-cd1.strm",
+              "//mnt/cd2/115/embyx/rank/SLASH/SLASH-001-cd1.mp4"
+            ],
+            [
+              2,
+              "f/SLASH-001/SLASH-001-cd2.strm",
+              "//mnt/cd2/115/embyx/rank/SLASH/SLASH-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "UP-001",
+          "directory": "b/UP-001",
+          "parts": [
+            [
+              1,
+              "b/UP-001/UP-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/../rank/UP/UP-001-cd1.mp4"
+            ],
+            [
+              2,
+              "b/UP-001/UP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/../rank/UP/UP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank/../rank",
+          "brand": "UP",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        }
+      ]
+    },
+    {
+      "tree": "target_paths",
+      "files": {
+        "a/DOT-001/DOT-001-cd1.strm": "/mnt/cd2/115/embyx//rank/./DOT/DOT-001-cd1.mp4\n",
+        "a/DOT-001/DOT-001-cd2.strm": "/mnt/cd2/115/embyx/rank/DOT/DOT-001-cd2.mp4\n",
+        "b/UP-001/UP-001-cd1.strm": "/mnt/cd2/115/embyx/rank/../rank/UP/UP-001-cd1.mp4\n",
+        "b/UP-001/UP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/../rank/UP/UP-001-cd2.mp4\n",
+        "c/ROOT-001/ROOT-001-cd1.strm": "/mnt/cd2/115/embyx/ROOT-001-cd1.mp4\n",
+        "c/ROOT-001/ROOT-001-cd2.strm": "/mnt/cd2/115/embyx/ROOT-001-cd2.mp4\n",
+        "d/ONE-001/ONE-001-cd1.strm": "/mnt/cd2/115/embyx/brand/ONE-001-cd1.mp4\n",
+        "d/ONE-001/ONE-001-cd2.strm": "/mnt/cd2/115/embyx/brand/ONE-001-cd2.mp4\n",
+        "e/DEEP-001/DEEP-001-cd1.strm": "/mnt/cd2/115/embyx/type/vr/sub/DEEP/DEEP-001-cd1.mp4\n",
+        "e/DEEP-001/DEEP-001-cd2.strm": "/mnt/cd2/115/embyx/type/vr/sub/DEEP/DEEP-001-cd2.mp4\n",
+        "f/SLASH-001/SLASH-001-cd1.strm": "//mnt/cd2/115/embyx/rank/SLASH/SLASH-001-cd1.mp4\n",
+        "f/SLASH-001/SLASH-001-cd2.strm": "//mnt/cd2/115/embyx/rank/SLASH/SLASH-001-cd2.mp4\n",
+        "g/PRE-001/PRE-001-cd1.strm": "/mnt/cd2/115/embyxx/rank/PRE/PRE-001-cd1.mp4\n",
+        "g/PRE-001/PRE-001-cd2.strm": "/mnt/cd2/115/embyxx/rank/PRE/PRE-001-cd2.mp4\n"
+      },
+      "library_root": "/mnt/cd2/115/embyx/",
+      "titles": [
+        {
+          "avid": "DEEP-001",
+          "directory": "e/DEEP-001",
+          "parts": [
+            [
+              1,
+              "e/DEEP-001/DEEP-001-cd1.strm",
+              "/mnt/cd2/115/embyx/type/vr/sub/DEEP/DEEP-001-cd1.mp4"
+            ],
+            [
+              2,
+              "e/DEEP-001/DEEP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/type/vr/sub/DEEP/DEEP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "type/vr/sub",
+          "brand": "DEEP",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "DOT-001",
+          "directory": "a/DOT-001",
+          "parts": [
+            [
+              1,
+              "a/DOT-001/DOT-001-cd1.strm",
+              "/mnt/cd2/115/embyx//rank/./DOT/DOT-001-cd1.mp4"
+            ],
+            [
+              2,
+              "a/DOT-001/DOT-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/DOT/DOT-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "DOT",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "ONE-001",
+          "directory": "d/ONE-001",
+          "parts": [
+            [
+              1,
+              "d/ONE-001/ONE-001-cd1.strm",
+              "/mnt/cd2/115/embyx/brand/ONE-001-cd1.mp4"
+            ],
+            [
+              2,
+              "d/ONE-001/ONE-001-cd2.strm",
+              "/mnt/cd2/115/embyx/brand/ONE-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "PRE-001",
+          "directory": "g/PRE-001",
+          "parts": [
+            [
+              1,
+              "g/PRE-001/PRE-001-cd1.strm",
+              "/mnt/cd2/115/embyxx/rank/PRE/PRE-001-cd1.mp4"
+            ],
+            [
+              2,
+              "g/PRE-001/PRE-001-cd2.strm",
+              "/mnt/cd2/115/embyxx/rank/PRE/PRE-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "ROOT-001",
+          "directory": "c/ROOT-001",
+          "parts": [
+            [
+              1,
+              "c/ROOT-001/ROOT-001-cd1.strm",
+              "/mnt/cd2/115/embyx/ROOT-001-cd1.mp4"
+            ],
+            [
+              2,
+              "c/ROOT-001/ROOT-001-cd2.strm",
+              "/mnt/cd2/115/embyx/ROOT-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "SLASH-001",
+          "directory": "f/SLASH-001",
+          "parts": [
+            [
+              1,
+              "f/SLASH-001/SLASH-001-cd1.strm",
+              "//mnt/cd2/115/embyx/rank/SLASH/SLASH-001-cd1.mp4"
+            ],
+            [
+              2,
+              "f/SLASH-001/SLASH-001-cd2.strm",
+              "//mnt/cd2/115/embyx/rank/SLASH/SLASH-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "UP-001",
+          "directory": "b/UP-001",
+          "parts": [
+            [
+              1,
+              "b/UP-001/UP-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/../rank/UP/UP-001-cd1.mp4"
+            ],
+            [
+              2,
+              "b/UP-001/UP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/../rank/UP/UP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank/../rank",
+          "brand": "UP",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        }
+      ]
+    },
+    {
+      "tree": "target_paths",
+      "files": {
+        "a/DOT-001/DOT-001-cd1.strm": "/mnt/cd2/115/embyx//rank/./DOT/DOT-001-cd1.mp4\n",
+        "a/DOT-001/DOT-001-cd2.strm": "/mnt/cd2/115/embyx/rank/DOT/DOT-001-cd2.mp4\n",
+        "b/UP-001/UP-001-cd1.strm": "/mnt/cd2/115/embyx/rank/../rank/UP/UP-001-cd1.mp4\n",
+        "b/UP-001/UP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/../rank/UP/UP-001-cd2.mp4\n",
+        "c/ROOT-001/ROOT-001-cd1.strm": "/mnt/cd2/115/embyx/ROOT-001-cd1.mp4\n",
+        "c/ROOT-001/ROOT-001-cd2.strm": "/mnt/cd2/115/embyx/ROOT-001-cd2.mp4\n",
+        "d/ONE-001/ONE-001-cd1.strm": "/mnt/cd2/115/embyx/brand/ONE-001-cd1.mp4\n",
+        "d/ONE-001/ONE-001-cd2.strm": "/mnt/cd2/115/embyx/brand/ONE-001-cd2.mp4\n",
+        "e/DEEP-001/DEEP-001-cd1.strm": "/mnt/cd2/115/embyx/type/vr/sub/DEEP/DEEP-001-cd1.mp4\n",
+        "e/DEEP-001/DEEP-001-cd2.strm": "/mnt/cd2/115/embyx/type/vr/sub/DEEP/DEEP-001-cd2.mp4\n",
+        "f/SLASH-001/SLASH-001-cd1.strm": "//mnt/cd2/115/embyx/rank/SLASH/SLASH-001-cd1.mp4\n",
+        "f/SLASH-001/SLASH-001-cd2.strm": "//mnt/cd2/115/embyx/rank/SLASH/SLASH-001-cd2.mp4\n",
+        "g/PRE-001/PRE-001-cd1.strm": "/mnt/cd2/115/embyxx/rank/PRE/PRE-001-cd1.mp4\n",
+        "g/PRE-001/PRE-001-cd2.strm": "/mnt/cd2/115/embyxx/rank/PRE/PRE-001-cd2.mp4\n"
+      },
+      "library_root": "/mnt/cd2/115/embyx/rank",
+      "titles": [
+        {
+          "avid": "DEEP-001",
+          "directory": "e/DEEP-001",
+          "parts": [
+            [
+              1,
+              "e/DEEP-001/DEEP-001-cd1.strm",
+              "/mnt/cd2/115/embyx/type/vr/sub/DEEP/DEEP-001-cd1.mp4"
+            ],
+            [
+              2,
+              "e/DEEP-001/DEEP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/type/vr/sub/DEEP/DEEP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "DOT-001",
+          "directory": "a/DOT-001",
+          "parts": [
+            [
+              1,
+              "a/DOT-001/DOT-001-cd1.strm",
+              "/mnt/cd2/115/embyx//rank/./DOT/DOT-001-cd1.mp4"
+            ],
+            [
+              2,
+              "a/DOT-001/DOT-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/DOT/DOT-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "ONE-001",
+          "directory": "d/ONE-001",
+          "parts": [
+            [
+              1,
+              "d/ONE-001/ONE-001-cd1.strm",
+              "/mnt/cd2/115/embyx/brand/ONE-001-cd1.mp4"
+            ],
+            [
+              2,
+              "d/ONE-001/ONE-001-cd2.strm",
+              "/mnt/cd2/115/embyx/brand/ONE-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "PRE-001",
+          "directory": "g/PRE-001",
+          "parts": [
+            [
+              1,
+              "g/PRE-001/PRE-001-cd1.strm",
+              "/mnt/cd2/115/embyxx/rank/PRE/PRE-001-cd1.mp4"
+            ],
+            [
+              2,
+              "g/PRE-001/PRE-001-cd2.strm",
+              "/mnt/cd2/115/embyxx/rank/PRE/PRE-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "ROOT-001",
+          "directory": "c/ROOT-001",
+          "parts": [
+            [
+              1,
+              "c/ROOT-001/ROOT-001-cd1.strm",
+              "/mnt/cd2/115/embyx/ROOT-001-cd1.mp4"
+            ],
+            [
+              2,
+              "c/ROOT-001/ROOT-001-cd2.strm",
+              "/mnt/cd2/115/embyx/ROOT-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "SLASH-001",
+          "directory": "f/SLASH-001",
+          "parts": [
+            [
+              1,
+              "f/SLASH-001/SLASH-001-cd1.strm",
+              "//mnt/cd2/115/embyx/rank/SLASH/SLASH-001-cd1.mp4"
+            ],
+            [
+              2,
+              "f/SLASH-001/SLASH-001-cd2.strm",
+              "//mnt/cd2/115/embyx/rank/SLASH/SLASH-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "UP-001",
+          "directory": "b/UP-001",
+          "parts": [
+            [
+              1,
+              "b/UP-001/UP-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/../rank/UP/UP-001-cd1.mp4"
+            ],
+            [
+              2,
+              "b/UP-001/UP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/../rank/UP/UP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "../rank",
+          "brand": "UP",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        }
+      ]
+    },
+    {
+      "tree": "target_paths",
+      "files": {
+        "a/DOT-001/DOT-001-cd1.strm": "/mnt/cd2/115/embyx//rank/./DOT/DOT-001-cd1.mp4\n",
+        "a/DOT-001/DOT-001-cd2.strm": "/mnt/cd2/115/embyx/rank/DOT/DOT-001-cd2.mp4\n",
+        "b/UP-001/UP-001-cd1.strm": "/mnt/cd2/115/embyx/rank/../rank/UP/UP-001-cd1.mp4\n",
+        "b/UP-001/UP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/../rank/UP/UP-001-cd2.mp4\n",
+        "c/ROOT-001/ROOT-001-cd1.strm": "/mnt/cd2/115/embyx/ROOT-001-cd1.mp4\n",
+        "c/ROOT-001/ROOT-001-cd2.strm": "/mnt/cd2/115/embyx/ROOT-001-cd2.mp4\n",
+        "d/ONE-001/ONE-001-cd1.strm": "/mnt/cd2/115/embyx/brand/ONE-001-cd1.mp4\n",
+        "d/ONE-001/ONE-001-cd2.strm": "/mnt/cd2/115/embyx/brand/ONE-001-cd2.mp4\n",
+        "e/DEEP-001/DEEP-001-cd1.strm": "/mnt/cd2/115/embyx/type/vr/sub/DEEP/DEEP-001-cd1.mp4\n",
+        "e/DEEP-001/DEEP-001-cd2.strm": "/mnt/cd2/115/embyx/type/vr/sub/DEEP/DEEP-001-cd2.mp4\n",
+        "f/SLASH-001/SLASH-001-cd1.strm": "//mnt/cd2/115/embyx/rank/SLASH/SLASH-001-cd1.mp4\n",
+        "f/SLASH-001/SLASH-001-cd2.strm": "//mnt/cd2/115/embyx/rank/SLASH/SLASH-001-cd2.mp4\n",
+        "g/PRE-001/PRE-001-cd1.strm": "/mnt/cd2/115/embyxx/rank/PRE/PRE-001-cd1.mp4\n",
+        "g/PRE-001/PRE-001-cd2.strm": "/mnt/cd2/115/embyxx/rank/PRE/PRE-001-cd2.mp4\n"
+      },
+      "library_root": "mnt/cd2/115/embyx",
+      "titles": [
+        {
+          "avid": "DEEP-001",
+          "directory": "e/DEEP-001",
+          "parts": [
+            [
+              1,
+              "e/DEEP-001/DEEP-001-cd1.strm",
+              "/mnt/cd2/115/embyx/type/vr/sub/DEEP/DEEP-001-cd1.mp4"
+            ],
+            [
+              2,
+              "e/DEEP-001/DEEP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/type/vr/sub/DEEP/DEEP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "DOT-001",
+          "directory": "a/DOT-001",
+          "parts": [
+            [
+              1,
+              "a/DOT-001/DOT-001-cd1.strm",
+              "/mnt/cd2/115/embyx//rank/./DOT/DOT-001-cd1.mp4"
+            ],
+            [
+              2,
+              "a/DOT-001/DOT-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/DOT/DOT-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "ONE-001",
+          "directory": "d/ONE-001",
+          "parts": [
+            [
+              1,
+              "d/ONE-001/ONE-001-cd1.strm",
+              "/mnt/cd2/115/embyx/brand/ONE-001-cd1.mp4"
+            ],
+            [
+              2,
+              "d/ONE-001/ONE-001-cd2.strm",
+              "/mnt/cd2/115/embyx/brand/ONE-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "PRE-001",
+          "directory": "g/PRE-001",
+          "parts": [
+            [
+              1,
+              "g/PRE-001/PRE-001-cd1.strm",
+              "/mnt/cd2/115/embyxx/rank/PRE/PRE-001-cd1.mp4"
+            ],
+            [
+              2,
+              "g/PRE-001/PRE-001-cd2.strm",
+              "/mnt/cd2/115/embyxx/rank/PRE/PRE-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "ROOT-001",
+          "directory": "c/ROOT-001",
+          "parts": [
+            [
+              1,
+              "c/ROOT-001/ROOT-001-cd1.strm",
+              "/mnt/cd2/115/embyx/ROOT-001-cd1.mp4"
+            ],
+            [
+              2,
+              "c/ROOT-001/ROOT-001-cd2.strm",
+              "/mnt/cd2/115/embyx/ROOT-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "SLASH-001",
+          "directory": "f/SLASH-001",
+          "parts": [
+            [
+              1,
+              "f/SLASH-001/SLASH-001-cd1.strm",
+              "//mnt/cd2/115/embyx/rank/SLASH/SLASH-001-cd1.mp4"
+            ],
+            [
+              2,
+              "f/SLASH-001/SLASH-001-cd2.strm",
+              "//mnt/cd2/115/embyx/rank/SLASH/SLASH-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "UP-001",
+          "directory": "b/UP-001",
+          "parts": [
+            [
+              1,
+              "b/UP-001/UP-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/../rank/UP/UP-001-cd1.mp4"
+            ],
+            [
+              2,
+              "b/UP-001/UP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/../rank/UP/UP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        }
+      ]
+    },
+    {
+      "tree": "target_paths",
+      "files": {
+        "a/DOT-001/DOT-001-cd1.strm": "/mnt/cd2/115/embyx//rank/./DOT/DOT-001-cd1.mp4\n",
+        "a/DOT-001/DOT-001-cd2.strm": "/mnt/cd2/115/embyx/rank/DOT/DOT-001-cd2.mp4\n",
+        "b/UP-001/UP-001-cd1.strm": "/mnt/cd2/115/embyx/rank/../rank/UP/UP-001-cd1.mp4\n",
+        "b/UP-001/UP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/../rank/UP/UP-001-cd2.mp4\n",
+        "c/ROOT-001/ROOT-001-cd1.strm": "/mnt/cd2/115/embyx/ROOT-001-cd1.mp4\n",
+        "c/ROOT-001/ROOT-001-cd2.strm": "/mnt/cd2/115/embyx/ROOT-001-cd2.mp4\n",
+        "d/ONE-001/ONE-001-cd1.strm": "/mnt/cd2/115/embyx/brand/ONE-001-cd1.mp4\n",
+        "d/ONE-001/ONE-001-cd2.strm": "/mnt/cd2/115/embyx/brand/ONE-001-cd2.mp4\n",
+        "e/DEEP-001/DEEP-001-cd1.strm": "/mnt/cd2/115/embyx/type/vr/sub/DEEP/DEEP-001-cd1.mp4\n",
+        "e/DEEP-001/DEEP-001-cd2.strm": "/mnt/cd2/115/embyx/type/vr/sub/DEEP/DEEP-001-cd2.mp4\n",
+        "f/SLASH-001/SLASH-001-cd1.strm": "//mnt/cd2/115/embyx/rank/SLASH/SLASH-001-cd1.mp4\n",
+        "f/SLASH-001/SLASH-001-cd2.strm": "//mnt/cd2/115/embyx/rank/SLASH/SLASH-001-cd2.mp4\n",
+        "g/PRE-001/PRE-001-cd1.strm": "/mnt/cd2/115/embyxx/rank/PRE/PRE-001-cd1.mp4\n",
+        "g/PRE-001/PRE-001-cd2.strm": "/mnt/cd2/115/embyxx/rank/PRE/PRE-001-cd2.mp4\n"
+      },
+      "library_root": "/",
+      "titles": [
+        {
+          "avid": "DEEP-001",
+          "directory": "e/DEEP-001",
+          "parts": [
+            [
+              1,
+              "e/DEEP-001/DEEP-001-cd1.strm",
+              "/mnt/cd2/115/embyx/type/vr/sub/DEEP/DEEP-001-cd1.mp4"
+            ],
+            [
+              2,
+              "e/DEEP-001/DEEP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/type/vr/sub/DEEP/DEEP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "mnt/cd2/115/embyx/type/vr/sub",
+          "brand": "DEEP",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "DOT-001",
+          "directory": "a/DOT-001",
+          "parts": [
+            [
+              1,
+              "a/DOT-001/DOT-001-cd1.strm",
+              "/mnt/cd2/115/embyx//rank/./DOT/DOT-001-cd1.mp4"
+            ],
+            [
+              2,
+              "a/DOT-001/DOT-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/DOT/DOT-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "mnt/cd2/115/embyx/rank",
+          "brand": "DOT",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "ONE-001",
+          "directory": "d/ONE-001",
+          "parts": [
+            [
+              1,
+              "d/ONE-001/ONE-001-cd1.strm",
+              "/mnt/cd2/115/embyx/brand/ONE-001-cd1.mp4"
+            ],
+            [
+              2,
+              "d/ONE-001/ONE-001-cd2.strm",
+              "/mnt/cd2/115/embyx/brand/ONE-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "mnt/cd2/115/embyx",
+          "brand": "brand",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "PRE-001",
+          "directory": "g/PRE-001",
+          "parts": [
+            [
+              1,
+              "g/PRE-001/PRE-001-cd1.strm",
+              "/mnt/cd2/115/embyxx/rank/PRE/PRE-001-cd1.mp4"
+            ],
+            [
+              2,
+              "g/PRE-001/PRE-001-cd2.strm",
+              "/mnt/cd2/115/embyxx/rank/PRE/PRE-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "mnt/cd2/115/embyxx/rank",
+          "brand": "PRE",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "ROOT-001",
+          "directory": "c/ROOT-001",
+          "parts": [
+            [
+              1,
+              "c/ROOT-001/ROOT-001-cd1.strm",
+              "/mnt/cd2/115/embyx/ROOT-001-cd1.mp4"
+            ],
+            [
+              2,
+              "c/ROOT-001/ROOT-001-cd2.strm",
+              "/mnt/cd2/115/embyx/ROOT-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "mnt/cd2/115",
+          "brand": "embyx",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "SLASH-001",
+          "directory": "f/SLASH-001",
+          "parts": [
+            [
+              1,
+              "f/SLASH-001/SLASH-001-cd1.strm",
+              "//mnt/cd2/115/embyx/rank/SLASH/SLASH-001-cd1.mp4"
+            ],
+            [
+              2,
+              "f/SLASH-001/SLASH-001-cd2.strm",
+              "//mnt/cd2/115/embyx/rank/SLASH/SLASH-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "UP-001",
+          "directory": "b/UP-001",
+          "parts": [
+            [
+              1,
+              "b/UP-001/UP-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/../rank/UP/UP-001-cd1.mp4"
+            ],
+            [
+              2,
+              "b/UP-001/UP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/../rank/UP/UP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "mnt/cd2/115/embyx/rank/../rank",
+          "brand": "UP",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        }
+      ]
+    },
+    {
+      "tree": "names",
+      "files": {
+        "a/UP-001/up-001-CD1.STRM": "/mnt/cd2/115/embyx/rank/UP/up-001-cd1.mp4\n",
+        "a/UP-001/UP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/UP/UP-001-cd2.mp4\n",
+        "b/AR-001/AR-001-cd١.strm": "/mnt/cd2/115/embyx/rank/AR/AR-001-cd1.mp4\n",
+        "b/AR-001/AR-001-cd02.strm": "/mnt/cd2/115/embyx/rank/AR/AR-001-cd2.mp4\n",
+        "c/DUP-001/DUP-001-cd1.strm": "/mnt/cd2/115/embyx/rank/DUP/DUP-001-cd1.mp4\n",
+        "c/DUP-001/DUP-001-cd01.strm": "/mnt/cd2/115/embyx/rank/DUP/DUP-001-cd01.mp4\n",
+        "d/GAP-001/GAP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/GAP/GAP-001-cd2.mp4\n",
+        "d/GAP-001/GAP-001-cd4.strm": "/mnt/cd2/115/embyx/rank/GAP/GAP-001-cd4.mp4\n",
+        "e/ZERO-001/ZERO-001-cd0.strm": "/mnt/cd2/115/embyx/rank/ZERO/ZERO-001-cd0.mp4\n",
+        "e/ZERO-001/ZERO-001-cd1.strm": "/mnt/cd2/115/embyx/rank/ZERO/ZERO-001-cd1.mp4\n",
+        "f/X-cd1.strm": "/mnt/cd2/115/embyx/rank/X/X-cd1.mp4\n",
+        "f/X-cd2.strm": "/mnt/cd2/115/embyx/rank/X/X-cd2.mp4\n",
+        "g/NOT-001/NOT-001-cd.strm": "/mnt/cd2/115/embyx/rank/NOT/NOT-001-cd.mp4\n",
+        "g/NOT-001/NOT-001-cd1.strm.bak": "/mnt/cd2/115/embyx/rank/NOT/NOT-001-cd1.mp4\n",
+        "g/NOT-001/NOT-001-cd1.strm": "/mnt/cd2/115/embyx/rank/NOT/NOT-001-cd1.mp4\n",
+        "h/ONE-001/ONE-001-cd7.strm": "/mnt/cd2/115/embyx/rank/ONE/ONE-001-cd7.mp4\n",
+        "i/MANY-001/MANY-001-cd1.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd1.mp4\n",
+        "i/MANY-001/MANY-001-cd2.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd2.mp4\n",
+        "i/MANY-001/MANY-001-cd3.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd3.mp4\n",
+        "i/MANY-001/MANY-001-cd4.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd4.mp4\n",
+        "i/MANY-001/MANY-001-cd5.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd5.mp4\n",
+        "i/MANY-001/MANY-001-cd6.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd6.mp4\n",
+        "i/MANY-001/MANY-001-cd7.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd7.mp4\n",
+        "i/MANY-001/MANY-001-cd8.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd8.mp4\n",
+        "i/MANY-001/MANY-001-cd9.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd9.mp4\n",
+        "i/MANY-001/MANY-001-cd10.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd10.mp4\n",
+        "i/MANY-001/MANY-001-cd11.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd11.mp4\n"
+      },
+      "library_root": "/mnt/cd2/115/embyx",
+      "titles": [
+        {
+          "avid": "MANY-001",
+          "directory": "i/MANY-001",
+          "parts": [
+            [
+              1,
+              "i/MANY-001/MANY-001-cd1.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd1.mp4"
+            ],
+            [
+              2,
+              "i/MANY-001/MANY-001-cd2.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd2.mp4"
+            ],
+            [
+              3,
+              "i/MANY-001/MANY-001-cd3.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd3.mp4"
+            ],
+            [
+              4,
+              "i/MANY-001/MANY-001-cd4.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd4.mp4"
+            ],
+            [
+              5,
+              "i/MANY-001/MANY-001-cd5.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd5.mp4"
+            ],
+            [
+              6,
+              "i/MANY-001/MANY-001-cd6.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd6.mp4"
+            ],
+            [
+              7,
+              "i/MANY-001/MANY-001-cd7.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd7.mp4"
+            ],
+            [
+              8,
+              "i/MANY-001/MANY-001-cd8.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd8.mp4"
+            ],
+            [
+              9,
+              "i/MANY-001/MANY-001-cd9.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd9.mp4"
+            ],
+            [
+              10,
+              "i/MANY-001/MANY-001-cd10.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd10.mp4"
+            ],
+            [
+              11,
+              "i/MANY-001/MANY-001-cd11.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd11.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "type/vr",
+          "brand": "MANY",
+          "problem": null,
+          "part_count": 11,
+          "stackable": false,
+          "complete": true
+        },
+        {
+          "avid": "AR-001",
+          "directory": "b/AR-001",
+          "parts": [
+            [
+              1,
+              "b/AR-001/AR-001-cd١.strm",
+              "/mnt/cd2/115/embyx/rank/AR/AR-001-cd1.mp4"
+            ],
+            [
+              2,
+              "b/AR-001/AR-001-cd02.strm",
+              "/mnt/cd2/115/embyx/rank/AR/AR-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "AR",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "DUP-001",
+          "directory": "c/DUP-001",
+          "parts": [
+            [
+              1,
+              "c/DUP-001/DUP-001-cd01.strm",
+              "/mnt/cd2/115/embyx/rank/DUP/DUP-001-cd01.mp4"
+            ],
+            [
+              1,
+              "c/DUP-001/DUP-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/DUP/DUP-001-cd1.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "DUP",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "GAP-001",
+          "directory": "d/GAP-001",
+          "parts": [
+            [
+              2,
+              "d/GAP-001/GAP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/GAP/GAP-001-cd2.mp4"
+            ],
+            [
+              4,
+              "d/GAP-001/GAP-001-cd4.strm",
+              "/mnt/cd2/115/embyx/rank/GAP/GAP-001-cd4.mp4"
+            ]
+          ],
+          "missing": [
+            1,
+            3
+          ],
+          "library_dir": "rank",
+          "brand": "GAP",
+          "problem": null,
+          "part_count": 2,
+          "stackable": false,
+          "complete": false
+        },
+        {
+          "avid": "UP-001",
+          "directory": "a/UP-001",
+          "parts": [
+            [
+              1,
+              "a/UP-001/up-001-CD1.STRM",
+              "/mnt/cd2/115/embyx/rank/UP/up-001-cd1.mp4"
+            ],
+            [
+              2,
+              "a/UP-001/UP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/UP/UP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "UP",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "X",
+          "directory": "f",
+          "parts": [
+            [
+              1,
+              "f/X-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/X/X-cd1.mp4"
+            ],
+            [
+              2,
+              "f/X-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/X/X-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "X",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "ZERO-001",
+          "directory": "e/ZERO-001",
+          "parts": [
+            [
+              0,
+              "e/ZERO-001/ZERO-001-cd0.strm",
+              "/mnt/cd2/115/embyx/rank/ZERO/ZERO-001-cd0.mp4"
+            ],
+            [
+              1,
+              "e/ZERO-001/ZERO-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/ZERO/ZERO-001-cd1.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "ZERO",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        }
+      ]
+    },
+    {
+      "tree": "names",
+      "files": {
+        "a/UP-001/up-001-CD1.STRM": "/mnt/cd2/115/embyx/rank/UP/up-001-cd1.mp4\n",
+        "a/UP-001/UP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/UP/UP-001-cd2.mp4\n",
+        "b/AR-001/AR-001-cd١.strm": "/mnt/cd2/115/embyx/rank/AR/AR-001-cd1.mp4\n",
+        "b/AR-001/AR-001-cd02.strm": "/mnt/cd2/115/embyx/rank/AR/AR-001-cd2.mp4\n",
+        "c/DUP-001/DUP-001-cd1.strm": "/mnt/cd2/115/embyx/rank/DUP/DUP-001-cd1.mp4\n",
+        "c/DUP-001/DUP-001-cd01.strm": "/mnt/cd2/115/embyx/rank/DUP/DUP-001-cd01.mp4\n",
+        "d/GAP-001/GAP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/GAP/GAP-001-cd2.mp4\n",
+        "d/GAP-001/GAP-001-cd4.strm": "/mnt/cd2/115/embyx/rank/GAP/GAP-001-cd4.mp4\n",
+        "e/ZERO-001/ZERO-001-cd0.strm": "/mnt/cd2/115/embyx/rank/ZERO/ZERO-001-cd0.mp4\n",
+        "e/ZERO-001/ZERO-001-cd1.strm": "/mnt/cd2/115/embyx/rank/ZERO/ZERO-001-cd1.mp4\n",
+        "f/X-cd1.strm": "/mnt/cd2/115/embyx/rank/X/X-cd1.mp4\n",
+        "f/X-cd2.strm": "/mnt/cd2/115/embyx/rank/X/X-cd2.mp4\n",
+        "g/NOT-001/NOT-001-cd.strm": "/mnt/cd2/115/embyx/rank/NOT/NOT-001-cd.mp4\n",
+        "g/NOT-001/NOT-001-cd1.strm.bak": "/mnt/cd2/115/embyx/rank/NOT/NOT-001-cd1.mp4\n",
+        "g/NOT-001/NOT-001-cd1.strm": "/mnt/cd2/115/embyx/rank/NOT/NOT-001-cd1.mp4\n",
+        "h/ONE-001/ONE-001-cd7.strm": "/mnt/cd2/115/embyx/rank/ONE/ONE-001-cd7.mp4\n",
+        "i/MANY-001/MANY-001-cd1.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd1.mp4\n",
+        "i/MANY-001/MANY-001-cd2.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd2.mp4\n",
+        "i/MANY-001/MANY-001-cd3.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd3.mp4\n",
+        "i/MANY-001/MANY-001-cd4.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd4.mp4\n",
+        "i/MANY-001/MANY-001-cd5.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd5.mp4\n",
+        "i/MANY-001/MANY-001-cd6.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd6.mp4\n",
+        "i/MANY-001/MANY-001-cd7.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd7.mp4\n",
+        "i/MANY-001/MANY-001-cd8.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd8.mp4\n",
+        "i/MANY-001/MANY-001-cd9.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd9.mp4\n",
+        "i/MANY-001/MANY-001-cd10.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd10.mp4\n",
+        "i/MANY-001/MANY-001-cd11.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd11.mp4\n"
+      },
+      "library_root": "/mnt/cd2/115/embyx/",
+      "titles": [
+        {
+          "avid": "MANY-001",
+          "directory": "i/MANY-001",
+          "parts": [
+            [
+              1,
+              "i/MANY-001/MANY-001-cd1.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd1.mp4"
+            ],
+            [
+              2,
+              "i/MANY-001/MANY-001-cd2.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd2.mp4"
+            ],
+            [
+              3,
+              "i/MANY-001/MANY-001-cd3.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd3.mp4"
+            ],
+            [
+              4,
+              "i/MANY-001/MANY-001-cd4.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd4.mp4"
+            ],
+            [
+              5,
+              "i/MANY-001/MANY-001-cd5.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd5.mp4"
+            ],
+            [
+              6,
+              "i/MANY-001/MANY-001-cd6.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd6.mp4"
+            ],
+            [
+              7,
+              "i/MANY-001/MANY-001-cd7.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd7.mp4"
+            ],
+            [
+              8,
+              "i/MANY-001/MANY-001-cd8.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd8.mp4"
+            ],
+            [
+              9,
+              "i/MANY-001/MANY-001-cd9.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd9.mp4"
+            ],
+            [
+              10,
+              "i/MANY-001/MANY-001-cd10.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd10.mp4"
+            ],
+            [
+              11,
+              "i/MANY-001/MANY-001-cd11.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd11.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "type/vr",
+          "brand": "MANY",
+          "problem": null,
+          "part_count": 11,
+          "stackable": false,
+          "complete": true
+        },
+        {
+          "avid": "AR-001",
+          "directory": "b/AR-001",
+          "parts": [
+            [
+              1,
+              "b/AR-001/AR-001-cd١.strm",
+              "/mnt/cd2/115/embyx/rank/AR/AR-001-cd1.mp4"
+            ],
+            [
+              2,
+              "b/AR-001/AR-001-cd02.strm",
+              "/mnt/cd2/115/embyx/rank/AR/AR-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "AR",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "DUP-001",
+          "directory": "c/DUP-001",
+          "parts": [
+            [
+              1,
+              "c/DUP-001/DUP-001-cd01.strm",
+              "/mnt/cd2/115/embyx/rank/DUP/DUP-001-cd01.mp4"
+            ],
+            [
+              1,
+              "c/DUP-001/DUP-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/DUP/DUP-001-cd1.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "DUP",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "GAP-001",
+          "directory": "d/GAP-001",
+          "parts": [
+            [
+              2,
+              "d/GAP-001/GAP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/GAP/GAP-001-cd2.mp4"
+            ],
+            [
+              4,
+              "d/GAP-001/GAP-001-cd4.strm",
+              "/mnt/cd2/115/embyx/rank/GAP/GAP-001-cd4.mp4"
+            ]
+          ],
+          "missing": [
+            1,
+            3
+          ],
+          "library_dir": "rank",
+          "brand": "GAP",
+          "problem": null,
+          "part_count": 2,
+          "stackable": false,
+          "complete": false
+        },
+        {
+          "avid": "UP-001",
+          "directory": "a/UP-001",
+          "parts": [
+            [
+              1,
+              "a/UP-001/up-001-CD1.STRM",
+              "/mnt/cd2/115/embyx/rank/UP/up-001-cd1.mp4"
+            ],
+            [
+              2,
+              "a/UP-001/UP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/UP/UP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "UP",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "X",
+          "directory": "f",
+          "parts": [
+            [
+              1,
+              "f/X-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/X/X-cd1.mp4"
+            ],
+            [
+              2,
+              "f/X-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/X/X-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "X",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "ZERO-001",
+          "directory": "e/ZERO-001",
+          "parts": [
+            [
+              0,
+              "e/ZERO-001/ZERO-001-cd0.strm",
+              "/mnt/cd2/115/embyx/rank/ZERO/ZERO-001-cd0.mp4"
+            ],
+            [
+              1,
+              "e/ZERO-001/ZERO-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/ZERO/ZERO-001-cd1.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "ZERO",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        }
+      ]
+    },
+    {
+      "tree": "names",
+      "files": {
+        "a/UP-001/up-001-CD1.STRM": "/mnt/cd2/115/embyx/rank/UP/up-001-cd1.mp4\n",
+        "a/UP-001/UP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/UP/UP-001-cd2.mp4\n",
+        "b/AR-001/AR-001-cd١.strm": "/mnt/cd2/115/embyx/rank/AR/AR-001-cd1.mp4\n",
+        "b/AR-001/AR-001-cd02.strm": "/mnt/cd2/115/embyx/rank/AR/AR-001-cd2.mp4\n",
+        "c/DUP-001/DUP-001-cd1.strm": "/mnt/cd2/115/embyx/rank/DUP/DUP-001-cd1.mp4\n",
+        "c/DUP-001/DUP-001-cd01.strm": "/mnt/cd2/115/embyx/rank/DUP/DUP-001-cd01.mp4\n",
+        "d/GAP-001/GAP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/GAP/GAP-001-cd2.mp4\n",
+        "d/GAP-001/GAP-001-cd4.strm": "/mnt/cd2/115/embyx/rank/GAP/GAP-001-cd4.mp4\n",
+        "e/ZERO-001/ZERO-001-cd0.strm": "/mnt/cd2/115/embyx/rank/ZERO/ZERO-001-cd0.mp4\n",
+        "e/ZERO-001/ZERO-001-cd1.strm": "/mnt/cd2/115/embyx/rank/ZERO/ZERO-001-cd1.mp4\n",
+        "f/X-cd1.strm": "/mnt/cd2/115/embyx/rank/X/X-cd1.mp4\n",
+        "f/X-cd2.strm": "/mnt/cd2/115/embyx/rank/X/X-cd2.mp4\n",
+        "g/NOT-001/NOT-001-cd.strm": "/mnt/cd2/115/embyx/rank/NOT/NOT-001-cd.mp4\n",
+        "g/NOT-001/NOT-001-cd1.strm.bak": "/mnt/cd2/115/embyx/rank/NOT/NOT-001-cd1.mp4\n",
+        "g/NOT-001/NOT-001-cd1.strm": "/mnt/cd2/115/embyx/rank/NOT/NOT-001-cd1.mp4\n",
+        "h/ONE-001/ONE-001-cd7.strm": "/mnt/cd2/115/embyx/rank/ONE/ONE-001-cd7.mp4\n",
+        "i/MANY-001/MANY-001-cd1.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd1.mp4\n",
+        "i/MANY-001/MANY-001-cd2.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd2.mp4\n",
+        "i/MANY-001/MANY-001-cd3.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd3.mp4\n",
+        "i/MANY-001/MANY-001-cd4.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd4.mp4\n",
+        "i/MANY-001/MANY-001-cd5.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd5.mp4\n",
+        "i/MANY-001/MANY-001-cd6.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd6.mp4\n",
+        "i/MANY-001/MANY-001-cd7.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd7.mp4\n",
+        "i/MANY-001/MANY-001-cd8.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd8.mp4\n",
+        "i/MANY-001/MANY-001-cd9.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd9.mp4\n",
+        "i/MANY-001/MANY-001-cd10.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd10.mp4\n",
+        "i/MANY-001/MANY-001-cd11.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd11.mp4\n"
+      },
+      "library_root": "/mnt/cd2/115/embyx/rank",
+      "titles": [
+        {
+          "avid": "MANY-001",
+          "directory": "i/MANY-001",
+          "parts": [
+            [
+              1,
+              "i/MANY-001/MANY-001-cd1.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd1.mp4"
+            ],
+            [
+              2,
+              "i/MANY-001/MANY-001-cd2.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd2.mp4"
+            ],
+            [
+              3,
+              "i/MANY-001/MANY-001-cd3.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd3.mp4"
+            ],
+            [
+              4,
+              "i/MANY-001/MANY-001-cd4.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd4.mp4"
+            ],
+            [
+              5,
+              "i/MANY-001/MANY-001-cd5.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd5.mp4"
+            ],
+            [
+              6,
+              "i/MANY-001/MANY-001-cd6.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd6.mp4"
+            ],
+            [
+              7,
+              "i/MANY-001/MANY-001-cd7.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd7.mp4"
+            ],
+            [
+              8,
+              "i/MANY-001/MANY-001-cd8.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd8.mp4"
+            ],
+            [
+              9,
+              "i/MANY-001/MANY-001-cd9.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd9.mp4"
+            ],
+            [
+              10,
+              "i/MANY-001/MANY-001-cd10.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd10.mp4"
+            ],
+            [
+              11,
+              "i/MANY-001/MANY-001-cd11.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd11.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 11,
+          "stackable": false,
+          "complete": false
+        },
+        {
+          "avid": "AR-001",
+          "directory": "b/AR-001",
+          "parts": [
+            [
+              1,
+              "b/AR-001/AR-001-cd١.strm",
+              "/mnt/cd2/115/embyx/rank/AR/AR-001-cd1.mp4"
+            ],
+            [
+              2,
+              "b/AR-001/AR-001-cd02.strm",
+              "/mnt/cd2/115/embyx/rank/AR/AR-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "DUP-001",
+          "directory": "c/DUP-001",
+          "parts": [
+            [
+              1,
+              "c/DUP-001/DUP-001-cd01.strm",
+              "/mnt/cd2/115/embyx/rank/DUP/DUP-001-cd01.mp4"
+            ],
+            [
+              1,
+              "c/DUP-001/DUP-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/DUP/DUP-001-cd1.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "GAP-001",
+          "directory": "d/GAP-001",
+          "parts": [
+            [
+              2,
+              "d/GAP-001/GAP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/GAP/GAP-001-cd2.mp4"
+            ],
+            [
+              4,
+              "d/GAP-001/GAP-001-cd4.strm",
+              "/mnt/cd2/115/embyx/rank/GAP/GAP-001-cd4.mp4"
+            ]
+          ],
+          "missing": [
+            1,
+            3
+          ],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": false,
+          "complete": false
+        },
+        {
+          "avid": "UP-001",
+          "directory": "a/UP-001",
+          "parts": [
+            [
+              1,
+              "a/UP-001/up-001-CD1.STRM",
+              "/mnt/cd2/115/embyx/rank/UP/up-001-cd1.mp4"
+            ],
+            [
+              2,
+              "a/UP-001/UP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/UP/UP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "X",
+          "directory": "f",
+          "parts": [
+            [
+              1,
+              "f/X-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/X/X-cd1.mp4"
+            ],
+            [
+              2,
+              "f/X-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/X/X-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "ZERO-001",
+          "directory": "e/ZERO-001",
+          "parts": [
+            [
+              0,
+              "e/ZERO-001/ZERO-001-cd0.strm",
+              "/mnt/cd2/115/embyx/rank/ZERO/ZERO-001-cd0.mp4"
+            ],
+            [
+              1,
+              "e/ZERO-001/ZERO-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/ZERO/ZERO-001-cd1.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        }
+      ]
+    },
+    {
+      "tree": "names",
+      "files": {
+        "a/UP-001/up-001-CD1.STRM": "/mnt/cd2/115/embyx/rank/UP/up-001-cd1.mp4\n",
+        "a/UP-001/UP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/UP/UP-001-cd2.mp4\n",
+        "b/AR-001/AR-001-cd١.strm": "/mnt/cd2/115/embyx/rank/AR/AR-001-cd1.mp4\n",
+        "b/AR-001/AR-001-cd02.strm": "/mnt/cd2/115/embyx/rank/AR/AR-001-cd2.mp4\n",
+        "c/DUP-001/DUP-001-cd1.strm": "/mnt/cd2/115/embyx/rank/DUP/DUP-001-cd1.mp4\n",
+        "c/DUP-001/DUP-001-cd01.strm": "/mnt/cd2/115/embyx/rank/DUP/DUP-001-cd01.mp4\n",
+        "d/GAP-001/GAP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/GAP/GAP-001-cd2.mp4\n",
+        "d/GAP-001/GAP-001-cd4.strm": "/mnt/cd2/115/embyx/rank/GAP/GAP-001-cd4.mp4\n",
+        "e/ZERO-001/ZERO-001-cd0.strm": "/mnt/cd2/115/embyx/rank/ZERO/ZERO-001-cd0.mp4\n",
+        "e/ZERO-001/ZERO-001-cd1.strm": "/mnt/cd2/115/embyx/rank/ZERO/ZERO-001-cd1.mp4\n",
+        "f/X-cd1.strm": "/mnt/cd2/115/embyx/rank/X/X-cd1.mp4\n",
+        "f/X-cd2.strm": "/mnt/cd2/115/embyx/rank/X/X-cd2.mp4\n",
+        "g/NOT-001/NOT-001-cd.strm": "/mnt/cd2/115/embyx/rank/NOT/NOT-001-cd.mp4\n",
+        "g/NOT-001/NOT-001-cd1.strm.bak": "/mnt/cd2/115/embyx/rank/NOT/NOT-001-cd1.mp4\n",
+        "g/NOT-001/NOT-001-cd1.strm": "/mnt/cd2/115/embyx/rank/NOT/NOT-001-cd1.mp4\n",
+        "h/ONE-001/ONE-001-cd7.strm": "/mnt/cd2/115/embyx/rank/ONE/ONE-001-cd7.mp4\n",
+        "i/MANY-001/MANY-001-cd1.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd1.mp4\n",
+        "i/MANY-001/MANY-001-cd2.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd2.mp4\n",
+        "i/MANY-001/MANY-001-cd3.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd3.mp4\n",
+        "i/MANY-001/MANY-001-cd4.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd4.mp4\n",
+        "i/MANY-001/MANY-001-cd5.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd5.mp4\n",
+        "i/MANY-001/MANY-001-cd6.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd6.mp4\n",
+        "i/MANY-001/MANY-001-cd7.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd7.mp4\n",
+        "i/MANY-001/MANY-001-cd8.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd8.mp4\n",
+        "i/MANY-001/MANY-001-cd9.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd9.mp4\n",
+        "i/MANY-001/MANY-001-cd10.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd10.mp4\n",
+        "i/MANY-001/MANY-001-cd11.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd11.mp4\n"
+      },
+      "library_root": "mnt/cd2/115/embyx",
+      "titles": [
+        {
+          "avid": "MANY-001",
+          "directory": "i/MANY-001",
+          "parts": [
+            [
+              1,
+              "i/MANY-001/MANY-001-cd1.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd1.mp4"
+            ],
+            [
+              2,
+              "i/MANY-001/MANY-001-cd2.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd2.mp4"
+            ],
+            [
+              3,
+              "i/MANY-001/MANY-001-cd3.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd3.mp4"
+            ],
+            [
+              4,
+              "i/MANY-001/MANY-001-cd4.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd4.mp4"
+            ],
+            [
+              5,
+              "i/MANY-001/MANY-001-cd5.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd5.mp4"
+            ],
+            [
+              6,
+              "i/MANY-001/MANY-001-cd6.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd6.mp4"
+            ],
+            [
+              7,
+              "i/MANY-001/MANY-001-cd7.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd7.mp4"
+            ],
+            [
+              8,
+              "i/MANY-001/MANY-001-cd8.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd8.mp4"
+            ],
+            [
+              9,
+              "i/MANY-001/MANY-001-cd9.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd9.mp4"
+            ],
+            [
+              10,
+              "i/MANY-001/MANY-001-cd10.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd10.mp4"
+            ],
+            [
+              11,
+              "i/MANY-001/MANY-001-cd11.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd11.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 11,
+          "stackable": false,
+          "complete": false
+        },
+        {
+          "avid": "AR-001",
+          "directory": "b/AR-001",
+          "parts": [
+            [
+              1,
+              "b/AR-001/AR-001-cd١.strm",
+              "/mnt/cd2/115/embyx/rank/AR/AR-001-cd1.mp4"
+            ],
+            [
+              2,
+              "b/AR-001/AR-001-cd02.strm",
+              "/mnt/cd2/115/embyx/rank/AR/AR-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "DUP-001",
+          "directory": "c/DUP-001",
+          "parts": [
+            [
+              1,
+              "c/DUP-001/DUP-001-cd01.strm",
+              "/mnt/cd2/115/embyx/rank/DUP/DUP-001-cd01.mp4"
+            ],
+            [
+              1,
+              "c/DUP-001/DUP-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/DUP/DUP-001-cd1.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "GAP-001",
+          "directory": "d/GAP-001",
+          "parts": [
+            [
+              2,
+              "d/GAP-001/GAP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/GAP/GAP-001-cd2.mp4"
+            ],
+            [
+              4,
+              "d/GAP-001/GAP-001-cd4.strm",
+              "/mnt/cd2/115/embyx/rank/GAP/GAP-001-cd4.mp4"
+            ]
+          ],
+          "missing": [
+            1,
+            3
+          ],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": false,
+          "complete": false
+        },
+        {
+          "avid": "UP-001",
+          "directory": "a/UP-001",
+          "parts": [
+            [
+              1,
+              "a/UP-001/up-001-CD1.STRM",
+              "/mnt/cd2/115/embyx/rank/UP/up-001-cd1.mp4"
+            ],
+            [
+              2,
+              "a/UP-001/UP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/UP/UP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "X",
+          "directory": "f",
+          "parts": [
+            [
+              1,
+              "f/X-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/X/X-cd1.mp4"
+            ],
+            [
+              2,
+              "f/X-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/X/X-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "ZERO-001",
+          "directory": "e/ZERO-001",
+          "parts": [
+            [
+              0,
+              "e/ZERO-001/ZERO-001-cd0.strm",
+              "/mnt/cd2/115/embyx/rank/ZERO/ZERO-001-cd0.mp4"
+            ],
+            [
+              1,
+              "e/ZERO-001/ZERO-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/ZERO/ZERO-001-cd1.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        }
+      ]
+    },
+    {
+      "tree": "names",
+      "files": {
+        "a/UP-001/up-001-CD1.STRM": "/mnt/cd2/115/embyx/rank/UP/up-001-cd1.mp4\n",
+        "a/UP-001/UP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/UP/UP-001-cd2.mp4\n",
+        "b/AR-001/AR-001-cd١.strm": "/mnt/cd2/115/embyx/rank/AR/AR-001-cd1.mp4\n",
+        "b/AR-001/AR-001-cd02.strm": "/mnt/cd2/115/embyx/rank/AR/AR-001-cd2.mp4\n",
+        "c/DUP-001/DUP-001-cd1.strm": "/mnt/cd2/115/embyx/rank/DUP/DUP-001-cd1.mp4\n",
+        "c/DUP-001/DUP-001-cd01.strm": "/mnt/cd2/115/embyx/rank/DUP/DUP-001-cd01.mp4\n",
+        "d/GAP-001/GAP-001-cd2.strm": "/mnt/cd2/115/embyx/rank/GAP/GAP-001-cd2.mp4\n",
+        "d/GAP-001/GAP-001-cd4.strm": "/mnt/cd2/115/embyx/rank/GAP/GAP-001-cd4.mp4\n",
+        "e/ZERO-001/ZERO-001-cd0.strm": "/mnt/cd2/115/embyx/rank/ZERO/ZERO-001-cd0.mp4\n",
+        "e/ZERO-001/ZERO-001-cd1.strm": "/mnt/cd2/115/embyx/rank/ZERO/ZERO-001-cd1.mp4\n",
+        "f/X-cd1.strm": "/mnt/cd2/115/embyx/rank/X/X-cd1.mp4\n",
+        "f/X-cd2.strm": "/mnt/cd2/115/embyx/rank/X/X-cd2.mp4\n",
+        "g/NOT-001/NOT-001-cd.strm": "/mnt/cd2/115/embyx/rank/NOT/NOT-001-cd.mp4\n",
+        "g/NOT-001/NOT-001-cd1.strm.bak": "/mnt/cd2/115/embyx/rank/NOT/NOT-001-cd1.mp4\n",
+        "g/NOT-001/NOT-001-cd1.strm": "/mnt/cd2/115/embyx/rank/NOT/NOT-001-cd1.mp4\n",
+        "h/ONE-001/ONE-001-cd7.strm": "/mnt/cd2/115/embyx/rank/ONE/ONE-001-cd7.mp4\n",
+        "i/MANY-001/MANY-001-cd1.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd1.mp4\n",
+        "i/MANY-001/MANY-001-cd2.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd2.mp4\n",
+        "i/MANY-001/MANY-001-cd3.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd3.mp4\n",
+        "i/MANY-001/MANY-001-cd4.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd4.mp4\n",
+        "i/MANY-001/MANY-001-cd5.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd5.mp4\n",
+        "i/MANY-001/MANY-001-cd6.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd6.mp4\n",
+        "i/MANY-001/MANY-001-cd7.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd7.mp4\n",
+        "i/MANY-001/MANY-001-cd8.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd8.mp4\n",
+        "i/MANY-001/MANY-001-cd9.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd9.mp4\n",
+        "i/MANY-001/MANY-001-cd10.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd10.mp4\n",
+        "i/MANY-001/MANY-001-cd11.strm": "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd11.mp4\n"
+      },
+      "library_root": "/",
+      "titles": [
+        {
+          "avid": "MANY-001",
+          "directory": "i/MANY-001",
+          "parts": [
+            [
+              1,
+              "i/MANY-001/MANY-001-cd1.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd1.mp4"
+            ],
+            [
+              2,
+              "i/MANY-001/MANY-001-cd2.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd2.mp4"
+            ],
+            [
+              3,
+              "i/MANY-001/MANY-001-cd3.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd3.mp4"
+            ],
+            [
+              4,
+              "i/MANY-001/MANY-001-cd4.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd4.mp4"
+            ],
+            [
+              5,
+              "i/MANY-001/MANY-001-cd5.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd5.mp4"
+            ],
+            [
+              6,
+              "i/MANY-001/MANY-001-cd6.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd6.mp4"
+            ],
+            [
+              7,
+              "i/MANY-001/MANY-001-cd7.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd7.mp4"
+            ],
+            [
+              8,
+              "i/MANY-001/MANY-001-cd8.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd8.mp4"
+            ],
+            [
+              9,
+              "i/MANY-001/MANY-001-cd9.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd9.mp4"
+            ],
+            [
+              10,
+              "i/MANY-001/MANY-001-cd10.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd10.mp4"
+            ],
+            [
+              11,
+              "i/MANY-001/MANY-001-cd11.strm",
+              "/mnt/cd2/115/embyx/type/vr/MANY/MANY-001-cd11.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "mnt/cd2/115/embyx/type/vr",
+          "brand": "MANY",
+          "problem": null,
+          "part_count": 11,
+          "stackable": false,
+          "complete": true
+        },
+        {
+          "avid": "AR-001",
+          "directory": "b/AR-001",
+          "parts": [
+            [
+              1,
+              "b/AR-001/AR-001-cd١.strm",
+              "/mnt/cd2/115/embyx/rank/AR/AR-001-cd1.mp4"
+            ],
+            [
+              2,
+              "b/AR-001/AR-001-cd02.strm",
+              "/mnt/cd2/115/embyx/rank/AR/AR-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "mnt/cd2/115/embyx/rank",
+          "brand": "AR",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "DUP-001",
+          "directory": "c/DUP-001",
+          "parts": [
+            [
+              1,
+              "c/DUP-001/DUP-001-cd01.strm",
+              "/mnt/cd2/115/embyx/rank/DUP/DUP-001-cd01.mp4"
+            ],
+            [
+              1,
+              "c/DUP-001/DUP-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/DUP/DUP-001-cd1.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "mnt/cd2/115/embyx/rank",
+          "brand": "DUP",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "GAP-001",
+          "directory": "d/GAP-001",
+          "parts": [
+            [
+              2,
+              "d/GAP-001/GAP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/GAP/GAP-001-cd2.mp4"
+            ],
+            [
+              4,
+              "d/GAP-001/GAP-001-cd4.strm",
+              "/mnt/cd2/115/embyx/rank/GAP/GAP-001-cd4.mp4"
+            ]
+          ],
+          "missing": [
+            1,
+            3
+          ],
+          "library_dir": "mnt/cd2/115/embyx/rank",
+          "brand": "GAP",
+          "problem": null,
+          "part_count": 2,
+          "stackable": false,
+          "complete": false
+        },
+        {
+          "avid": "UP-001",
+          "directory": "a/UP-001",
+          "parts": [
+            [
+              1,
+              "a/UP-001/up-001-CD1.STRM",
+              "/mnt/cd2/115/embyx/rank/UP/up-001-cd1.mp4"
+            ],
+            [
+              2,
+              "a/UP-001/UP-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/UP/UP-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "mnt/cd2/115/embyx/rank",
+          "brand": "UP",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "X",
+          "directory": "f",
+          "parts": [
+            [
+              1,
+              "f/X-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/X/X-cd1.mp4"
+            ],
+            [
+              2,
+              "f/X-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/X/X-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "mnt/cd2/115/embyx/rank",
+          "brand": "X",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "ZERO-001",
+          "directory": "e/ZERO-001",
+          "parts": [
+            [
+              0,
+              "e/ZERO-001/ZERO-001-cd0.strm",
+              "/mnt/cd2/115/embyx/rank/ZERO/ZERO-001-cd0.mp4"
+            ],
+            [
+              1,
+              "e/ZERO-001/ZERO-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/ZERO/ZERO-001-cd1.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "mnt/cd2/115/embyx/rank",
+          "brand": "ZERO",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        }
+      ]
+    },
+    {
+      "tree": "whole_copies",
+      "files": {
+        "a/W-0123/W-0123-cd1.strm": "/mnt/cd2/115/embyx/rank/W/W-0123-cd1.mp4\n",
+        "a/W-0123/W-0123-cd2.strm": "/mnt/cd2/115/embyx/rank/W/W-0123-cd2.mp4\n",
+        "a/W-0123/w-123.STRM": "/mnt/cd2/115/embyx/rank/W/w-123.mp4\n",
+        "b/V-001/V-001-cd1.strm": "/mnt/cd2/115/embyx/rank/V/V-001-cd1.mp4\n",
+        "b/V-001/V-001-cd2.strm": "/mnt/cd2/115/embyx/rank/V/V-001-cd2.mp4\n",
+        "b/V-001/V-001-CD9.strm.txt": "x",
+        "b/V-001/V-001.nfo": "x",
+        "c/S-001/S-001-cd1.strm": "broken",
+        "c/S-001/S-001-cd2.strm": "/mnt/cd2/115/embyx/rank/S/S-001-cd2.mp4\n",
+        "c/S-001/ S-001 .strm": "/mnt/cd2/115/embyx/rank/S/S-001.mp4\n"
+      },
+      "library_root": "/mnt/cd2/115/embyx",
+      "titles": [
+        {
+          "avid": "S-001",
+          "directory": "c/S-001",
+          "parts": [
+            [
+              1,
+              "c/S-001/S-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "c/S-001/S-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/S/S-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "V-001",
+          "directory": "b/V-001",
+          "parts": [
+            [
+              1,
+              "b/V-001/V-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/V/V-001-cd1.mp4"
+            ],
+            [
+              2,
+              "b/V-001/V-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/V/V-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "V",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "W-0123",
+          "directory": "a/W-0123",
+          "parts": [
+            [
+              1,
+              "a/W-0123/W-0123-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/W/W-0123-cd1.mp4"
+            ],
+            [
+              2,
+              "a/W-0123/W-0123-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/W/W-0123-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "W",
+          "problem": "whole_copy",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        }
+      ]
+    },
+    {
+      "tree": "whole_copies",
+      "files": {
+        "a/W-0123/W-0123-cd1.strm": "/mnt/cd2/115/embyx/rank/W/W-0123-cd1.mp4\n",
+        "a/W-0123/W-0123-cd2.strm": "/mnt/cd2/115/embyx/rank/W/W-0123-cd2.mp4\n",
+        "a/W-0123/w-123.STRM": "/mnt/cd2/115/embyx/rank/W/w-123.mp4\n",
+        "b/V-001/V-001-cd1.strm": "/mnt/cd2/115/embyx/rank/V/V-001-cd1.mp4\n",
+        "b/V-001/V-001-cd2.strm": "/mnt/cd2/115/embyx/rank/V/V-001-cd2.mp4\n",
+        "b/V-001/V-001-CD9.strm.txt": "x",
+        "b/V-001/V-001.nfo": "x",
+        "c/S-001/S-001-cd1.strm": "broken",
+        "c/S-001/S-001-cd2.strm": "/mnt/cd2/115/embyx/rank/S/S-001-cd2.mp4\n",
+        "c/S-001/ S-001 .strm": "/mnt/cd2/115/embyx/rank/S/S-001.mp4\n"
+      },
+      "library_root": "/mnt/cd2/115/embyx/",
+      "titles": [
+        {
+          "avid": "S-001",
+          "directory": "c/S-001",
+          "parts": [
+            [
+              1,
+              "c/S-001/S-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "c/S-001/S-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/S/S-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "V-001",
+          "directory": "b/V-001",
+          "parts": [
+            [
+              1,
+              "b/V-001/V-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/V/V-001-cd1.mp4"
+            ],
+            [
+              2,
+              "b/V-001/V-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/V/V-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "V",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "W-0123",
+          "directory": "a/W-0123",
+          "parts": [
+            [
+              1,
+              "a/W-0123/W-0123-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/W/W-0123-cd1.mp4"
+            ],
+            [
+              2,
+              "a/W-0123/W-0123-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/W/W-0123-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "W",
+          "problem": "whole_copy",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        }
+      ]
+    },
+    {
+      "tree": "whole_copies",
+      "files": {
+        "a/W-0123/W-0123-cd1.strm": "/mnt/cd2/115/embyx/rank/W/W-0123-cd1.mp4\n",
+        "a/W-0123/W-0123-cd2.strm": "/mnt/cd2/115/embyx/rank/W/W-0123-cd2.mp4\n",
+        "a/W-0123/w-123.STRM": "/mnt/cd2/115/embyx/rank/W/w-123.mp4\n",
+        "b/V-001/V-001-cd1.strm": "/mnt/cd2/115/embyx/rank/V/V-001-cd1.mp4\n",
+        "b/V-001/V-001-cd2.strm": "/mnt/cd2/115/embyx/rank/V/V-001-cd2.mp4\n",
+        "b/V-001/V-001-CD9.strm.txt": "x",
+        "b/V-001/V-001.nfo": "x",
+        "c/S-001/S-001-cd1.strm": "broken",
+        "c/S-001/S-001-cd2.strm": "/mnt/cd2/115/embyx/rank/S/S-001-cd2.mp4\n",
+        "c/S-001/ S-001 .strm": "/mnt/cd2/115/embyx/rank/S/S-001.mp4\n"
+      },
+      "library_root": "/mnt/cd2/115/embyx/rank",
+      "titles": [
+        {
+          "avid": "S-001",
+          "directory": "c/S-001",
+          "parts": [
+            [
+              1,
+              "c/S-001/S-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "c/S-001/S-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/S/S-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "V-001",
+          "directory": "b/V-001",
+          "parts": [
+            [
+              1,
+              "b/V-001/V-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/V/V-001-cd1.mp4"
+            ],
+            [
+              2,
+              "b/V-001/V-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/V/V-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "W-0123",
+          "directory": "a/W-0123",
+          "parts": [
+            [
+              1,
+              "a/W-0123/W-0123-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/W/W-0123-cd1.mp4"
+            ],
+            [
+              2,
+              "a/W-0123/W-0123-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/W/W-0123-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        }
+      ]
+    },
+    {
+      "tree": "whole_copies",
+      "files": {
+        "a/W-0123/W-0123-cd1.strm": "/mnt/cd2/115/embyx/rank/W/W-0123-cd1.mp4\n",
+        "a/W-0123/W-0123-cd2.strm": "/mnt/cd2/115/embyx/rank/W/W-0123-cd2.mp4\n",
+        "a/W-0123/w-123.STRM": "/mnt/cd2/115/embyx/rank/W/w-123.mp4\n",
+        "b/V-001/V-001-cd1.strm": "/mnt/cd2/115/embyx/rank/V/V-001-cd1.mp4\n",
+        "b/V-001/V-001-cd2.strm": "/mnt/cd2/115/embyx/rank/V/V-001-cd2.mp4\n",
+        "b/V-001/V-001-CD9.strm.txt": "x",
+        "b/V-001/V-001.nfo": "x",
+        "c/S-001/S-001-cd1.strm": "broken",
+        "c/S-001/S-001-cd2.strm": "/mnt/cd2/115/embyx/rank/S/S-001-cd2.mp4\n",
+        "c/S-001/ S-001 .strm": "/mnt/cd2/115/embyx/rank/S/S-001.mp4\n"
+      },
+      "library_root": "mnt/cd2/115/embyx",
+      "titles": [
+        {
+          "avid": "S-001",
+          "directory": "c/S-001",
+          "parts": [
+            [
+              1,
+              "c/S-001/S-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "c/S-001/S-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/S/S-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "V-001",
+          "directory": "b/V-001",
+          "parts": [
+            [
+              1,
+              "b/V-001/V-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/V/V-001-cd1.mp4"
+            ],
+            [
+              2,
+              "b/V-001/V-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/V/V-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "W-0123",
+          "directory": "a/W-0123",
+          "parts": [
+            [
+              1,
+              "a/W-0123/W-0123-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/W/W-0123-cd1.mp4"
+            ],
+            [
+              2,
+              "a/W-0123/W-0123-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/W/W-0123-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        }
+      ]
+    },
+    {
+      "tree": "whole_copies",
+      "files": {
+        "a/W-0123/W-0123-cd1.strm": "/mnt/cd2/115/embyx/rank/W/W-0123-cd1.mp4\n",
+        "a/W-0123/W-0123-cd2.strm": "/mnt/cd2/115/embyx/rank/W/W-0123-cd2.mp4\n",
+        "a/W-0123/w-123.STRM": "/mnt/cd2/115/embyx/rank/W/w-123.mp4\n",
+        "b/V-001/V-001-cd1.strm": "/mnt/cd2/115/embyx/rank/V/V-001-cd1.mp4\n",
+        "b/V-001/V-001-cd2.strm": "/mnt/cd2/115/embyx/rank/V/V-001-cd2.mp4\n",
+        "b/V-001/V-001-CD9.strm.txt": "x",
+        "b/V-001/V-001.nfo": "x",
+        "c/S-001/S-001-cd1.strm": "broken",
+        "c/S-001/S-001-cd2.strm": "/mnt/cd2/115/embyx/rank/S/S-001-cd2.mp4\n",
+        "c/S-001/ S-001 .strm": "/mnt/cd2/115/embyx/rank/S/S-001.mp4\n"
+      },
+      "library_root": "/",
+      "titles": [
+        {
+          "avid": "S-001",
+          "directory": "c/S-001",
+          "parts": [
+            [
+              1,
+              "c/S-001/S-001-cd1.strm",
+              ""
+            ],
+            [
+              2,
+              "c/S-001/S-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/S/S-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "V-001",
+          "directory": "b/V-001",
+          "parts": [
+            [
+              1,
+              "b/V-001/V-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/V/V-001-cd1.mp4"
+            ],
+            [
+              2,
+              "b/V-001/V-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/V/V-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "mnt/cd2/115/embyx/rank",
+          "brand": "V",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        },
+        {
+          "avid": "W-0123",
+          "directory": "a/W-0123",
+          "parts": [
+            [
+              1,
+              "a/W-0123/W-0123-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/W/W-0123-cd1.mp4"
+            ],
+            [
+              2,
+              "a/W-0123/W-0123-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/W/W-0123-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "mnt/cd2/115/embyx/rank",
+          "brand": "W",
+          "problem": "whole_copy",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        }
+      ]
+    },
+    {
+      "tree": "links",
+      "files": {
+        "x/L-001/L-001-cd1.strm": "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4\n",
+        "x/L-001/L-001-cd2.strm": "/mnt/cd2/115/embyx/rank/L/L-001-cd2.mp4\n",
+        "y/LINKED": {
+          "symlink": "../x/L-001"
+        },
+        "z/F-001/F-001-cd1.strm": {
+          "symlink": "../../x/L-001/L-001-cd1.strm"
+        },
+        "z/F-001/F-001-cd2.strm": {
+          "symlink": "missing.strm"
+        }
+      },
+      "library_root": "/mnt/cd2/115/embyx",
+      "titles": [
+        {
+          "avid": "F-001",
+          "directory": "z/F-001",
+          "parts": [
+            [
+              1,
+              "z/F-001/F-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4"
+            ],
+            [
+              2,
+              "z/F-001/F-001-cd2.strm",
+              ""
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "L-001",
+          "directory": "x/L-001",
+          "parts": [
+            [
+              1,
+              "x/L-001/L-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4"
+            ],
+            [
+              2,
+              "x/L-001/L-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "L",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        }
+      ]
+    },
+    {
+      "tree": "links",
+      "files": {
+        "x/L-001/L-001-cd1.strm": "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4\n",
+        "x/L-001/L-001-cd2.strm": "/mnt/cd2/115/embyx/rank/L/L-001-cd2.mp4\n",
+        "y/LINKED": {
+          "symlink": "../x/L-001"
+        },
+        "z/F-001/F-001-cd1.strm": {
+          "symlink": "../../x/L-001/L-001-cd1.strm"
+        },
+        "z/F-001/F-001-cd2.strm": {
+          "symlink": "missing.strm"
+        }
+      },
+      "library_root": "/mnt/cd2/115/embyx/",
+      "titles": [
+        {
+          "avid": "F-001",
+          "directory": "z/F-001",
+          "parts": [
+            [
+              1,
+              "z/F-001/F-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4"
+            ],
+            [
+              2,
+              "z/F-001/F-001-cd2.strm",
+              ""
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "L-001",
+          "directory": "x/L-001",
+          "parts": [
+            [
+              1,
+              "x/L-001/L-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4"
+            ],
+            [
+              2,
+              "x/L-001/L-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "L",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        }
+      ]
+    },
+    {
+      "tree": "links",
+      "files": {
+        "x/L-001/L-001-cd1.strm": "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4\n",
+        "x/L-001/L-001-cd2.strm": "/mnt/cd2/115/embyx/rank/L/L-001-cd2.mp4\n",
+        "y/LINKED": {
+          "symlink": "../x/L-001"
+        },
+        "z/F-001/F-001-cd1.strm": {
+          "symlink": "../../x/L-001/L-001-cd1.strm"
+        },
+        "z/F-001/F-001-cd2.strm": {
+          "symlink": "missing.strm"
+        }
+      },
+      "library_root": "/mnt/cd2/115/embyx/rank",
+      "titles": [
+        {
+          "avid": "F-001",
+          "directory": "z/F-001",
+          "parts": [
+            [
+              1,
+              "z/F-001/F-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4"
+            ],
+            [
+              2,
+              "z/F-001/F-001-cd2.strm",
+              ""
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "L-001",
+          "directory": "x/L-001",
+          "parts": [
+            [
+              1,
+              "x/L-001/L-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4"
+            ],
+            [
+              2,
+              "x/L-001/L-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        }
+      ]
+    },
+    {
+      "tree": "links",
+      "files": {
+        "x/L-001/L-001-cd1.strm": "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4\n",
+        "x/L-001/L-001-cd2.strm": "/mnt/cd2/115/embyx/rank/L/L-001-cd2.mp4\n",
+        "y/LINKED": {
+          "symlink": "../x/L-001"
+        },
+        "z/F-001/F-001-cd1.strm": {
+          "symlink": "../../x/L-001/L-001-cd1.strm"
+        },
+        "z/F-001/F-001-cd2.strm": {
+          "symlink": "missing.strm"
+        }
+      },
+      "library_root": "mnt/cd2/115/embyx",
+      "titles": [
+        {
+          "avid": "F-001",
+          "directory": "z/F-001",
+          "parts": [
+            [
+              1,
+              "z/F-001/F-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4"
+            ],
+            [
+              2,
+              "z/F-001/F-001-cd2.strm",
+              ""
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "L-001",
+          "directory": "x/L-001",
+          "parts": [
+            [
+              1,
+              "x/L-001/L-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4"
+            ],
+            [
+              2,
+              "x/L-001/L-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        }
+      ]
+    },
+    {
+      "tree": "links",
+      "files": {
+        "x/L-001/L-001-cd1.strm": "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4\n",
+        "x/L-001/L-001-cd2.strm": "/mnt/cd2/115/embyx/rank/L/L-001-cd2.mp4\n",
+        "y/LINKED": {
+          "symlink": "../x/L-001"
+        },
+        "z/F-001/F-001-cd1.strm": {
+          "symlink": "../../x/L-001/L-001-cd1.strm"
+        },
+        "z/F-001/F-001-cd2.strm": {
+          "symlink": "missing.strm"
+        }
+      },
+      "library_root": "/",
+      "titles": [
+        {
+          "avid": "F-001",
+          "directory": "z/F-001",
+          "parts": [
+            [
+              1,
+              "z/F-001/F-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4"
+            ],
+            [
+              2,
+              "z/F-001/F-001-cd2.strm",
+              ""
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "L-001",
+          "directory": "x/L-001",
+          "parts": [
+            [
+              1,
+              "x/L-001/L-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4"
+            ],
+            [
+              2,
+              "x/L-001/L-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "mnt/cd2/115/embyx/rank",
+          "brand": "L",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        }
+      ]
+    }
+  ]
+}

@@ -9,3 +9,26 @@ publish.workspace = true
 
 [lints]
 workspace = true
+
+[dependencies]
+chrono.workspace = true
+embyx-core.workspace = true
+embyx-db = { workspace = true, optional = true }
+regex.workspace = true
+sha1.workspace = true
+sqlx = { workspace = true, optional = true }
+thiserror.workspace = true
+
+[features]
+default = ["db"]
+# The merge tasks in PostgreSQL (`tasks`). The merge-worker body needs no database, and the
+# binary leaves this out so it still builds on Windows, where `embyx-db` does not (WP15).
+db = ["dep:embyx-db", "dep:sqlx"]
+
+[target.'cfg(unix)'.dependencies]
+rustix.workspace = true
+
+[dev-dependencies]
+embyx-db = { workspace = true, features = ["test-support"] }
+tempfile.workspace = true
+tokio.workspace = true

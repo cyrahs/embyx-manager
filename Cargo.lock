@@ -1079,11 +1079,24 @@ name = "embyx-manager"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "embyx-merge",
 ]
 
 [[package]]
 name = "embyx-merge"
 version = "0.1.0"
+dependencies = [
+ "chrono",
+ "embyx-core",
+ "embyx-db",
+ "regex",
+ "rustix",
+ "sha1",
+ "sqlx",
+ "tempfile",
+ "thiserror 2.0.21",
+ "tokio",
+]
 
 [[package]]
 name = "embyx-monitor"

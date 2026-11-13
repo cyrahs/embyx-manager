@@ -1,0 +1,2066 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "merge_worker",
+  "cases": [
+    {
+      "scenario": {
+        "name": "prepare_copies_the_audio",
+        "files": {
+          "library/ABC-123-cd1.mp4": {
+            "size": 60000000000
+          },
+          "library/ABC-123-cd2.mp4": {
+            "size": 60000000000
+          },
+          "upload/": {}
+        },
+        "command": {
+          "parts": [
+            "<root>/library/ABC-123-cd1.mp4",
+            "<root>/library/ABC-123-cd2.mp4"
+          ],
+          "output": "<root>/upload/ABC-123.mp4",
+          "status": "<root>/upload/.transcode/7/audio.json",
+          "reserve_gib": 0.0,
+          "home_prepare": "<root>/upload/.transcode/7",
+          "home_assemble": null
+        },
+        "free": 1000000000000,
+        "memory_max": "3221225472\n",
+        "probes": {
+          "<root>/library/ABC-123-cd1.mp4": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"h264\",\n            \"codec_type\": \"video\",\n            \"width\": 4096,\n            \"height\": 2048,\n            \"nb_frames\": \"20\"\n        },\n        {\n            \"index\": 1,\n            \"codec_name\": \"aac\",\n            \"codec_type\": \"audio\",\n            \"sample_rate\": \"44100\",\n            \"channels\": 1,\n            \"bit_rate\": \"256000\",\n            \"nb_frames\": \"94\"\n        }\n    ],\n    \"format\": {\n        \"duration\": \"14400.0\"\n    }\n}\n",
+            "stderr": ""
+          },
+          "<root>/library/ABC-123-cd2.mp4": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"h264\",\n            \"codec_type\": \"video\",\n            \"width\": 4096,\n            \"height\": 2048,\n            \"nb_frames\": \"20\"\n        },\n        {\n            \"index\": 1,\n            \"codec_name\": \"aac\",\n            \"codec_type\": \"audio\",\n            \"sample_rate\": \"44100\",\n            \"channels\": 1,\n            \"bit_rate\": \"256000\",\n            \"nb_frames\": \"94\"\n        }\n    ],\n    \"format\": {\n        \"duration\": \"14400.0\"\n    }\n}\n",
+            "stderr": ""
+          }
+        },
+        "ffmpeg": [
+          {
+            "write": 2000,
+            "stdout": "frame=10\ntotal_size=4096\nout_time_us=3600000000\nout_time_ms=3600000000\nspeed=1x\nprogress=continue\nframe=10\ntotal_size=8192\nout_time_us=7200000000\nout_time_ms=7200000000\nspeed=1x\nprogress=continue\nframe=10\ntotal_size=12288\nout_time_us=10800000000\nout_time_ms=10800000000\nspeed=1x\nprogress=continue\nframe=10\ntotal_size=16384\nout_time_us=14400000000\nout_time_ms=14400000000\nspeed=1x\nprogress=end\n",
+            "stderr": "",
+            "returncode": 0
+          },
+          {
+            "write": 2000,
+            "stdout": "frame=10\ntotal_size=4096\nout_time_us=3600000000\nout_time_ms=3600000000\nspeed=1x\nprogress=continue\nframe=10\ntotal_size=8192\nout_time_us=7200000000\nout_time_ms=7200000000\nspeed=1x\nprogress=continue\nframe=10\ntotal_size=12288\nout_time_us=10800000000\nout_time_ms=10800000000\nspeed=1x\nprogress=continue\nframe=10\ntotal_size=16384\nout_time_us=14400000000\nout_time_ms=14400000000\nspeed=1x\nprogress=end\n",
+            "stderr": "",
+            "returncode": 0
+          }
+        ]
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/library/ABC-123-cd1.mp4"
+          ]
+        },
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/library/ABC-123-cd2.mp4"
+          ]
+        },
+        {
+          "argv": [
+            "ffmpeg",
+            "-hide_banner",
+            "-nostdin",
+            "-loglevel",
+            "error",
+            "-y",
+            "-i",
+            "<root>/library/ABC-123-cd1.mp4",
+            "-map",
+            "0:a",
+            "-vn",
+            "-sn",
+            "-dn",
+            "-c",
+            "copy",
+            "-f",
+            "matroska",
+            "-progress",
+            "pipe:1",
+            "-nostats",
+            "<root>/upload/.transcode/7/audio/.cd01.mka.part"
+          ],
+          "scripts": {}
+        },
+        {
+          "argv": [
+            "ffmpeg",
+            "-hide_banner",
+            "-nostdin",
+            "-loglevel",
+            "error",
+            "-y",
+            "-i",
+            "<root>/library/ABC-123-cd2.mp4",
+            "-map",
+            "0:a",
+            "-vn",
+            "-sn",
+            "-dn",
+            "-c",
+            "copy",
+            "-f",
+            "matroska",
+            "-progress",
+            "pipe:1",
+            "-nostats",
+            "<root>/upload/.transcode/7/audio/.cd02.mka.part"
+          ],
+          "scripts": {}
+        }
+      ],
+      "writes": [
+        "{\"state\": \"running\", \"phase\": \"checking\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"probing\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"audio\", \"progress\": 0.0, \"total_bytes\": 120000000000, \"duration\": 28800.0, \"video_bitrate\": 16538666, \"estimated_bytes\": 60460797600, \"has_audio\": true, \"parts\": [{\"duration\": 14400.0, \"size\": 60000000000}, {\"duration\": 14400.0, \"size\": 60000000000}], \"audio_done\": 0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"audio\", \"progress\": 0.0, \"total_bytes\": 120000000000, \"duration\": 28800.0, \"video_bitrate\": 16538666, \"estimated_bytes\": 60460797600, \"has_audio\": true, \"parts\": [{\"duration\": 14400.0, \"size\": 60000000000}, {\"duration\": 14400.0, \"size\": 60000000000}], \"audio_done\": 0, \"part\": 0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"audio\", \"progress\": 0.5, \"total_bytes\": 120000000000, \"duration\": 28800.0, \"video_bitrate\": 16538666, \"estimated_bytes\": 60460797600, \"has_audio\": true, \"parts\": [{\"duration\": 14400.0, \"size\": 60000000000}, {\"duration\": 14400.0, \"size\": 60000000000}], \"audio_done\": 0, \"part\": 0, \"written_bytes\": 12288, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"audio\", \"progress\": 0.5, \"total_bytes\": 120000000000, \"duration\": 28800.0, \"video_bitrate\": 16538666, \"estimated_bytes\": 60460797600, \"has_audio\": true, \"parts\": [{\"duration\": 14400.0, \"size\": 60000000000}, {\"duration\": 14400.0, \"size\": 60000000000}], \"audio_done\": 1, \"part\": 0, \"written_bytes\": 16384, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"audio\", \"progress\": 0.5, \"total_bytes\": 120000000000, \"duration\": 28800.0, \"video_bitrate\": 16538666, \"estimated_bytes\": 60460797600, \"has_audio\": true, \"parts\": [{\"duration\": 14400.0, \"size\": 60000000000}, {\"duration\": 14400.0, \"size\": 60000000000}], \"audio_done\": 1, \"part\": 1, \"written_bytes\": 16384, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"audio\", \"progress\": 0.5, \"total_bytes\": 120000000000, \"duration\": 28800.0, \"video_bitrate\": 16538666, \"estimated_bytes\": 60460797600, \"has_audio\": true, \"parts\": [{\"duration\": 14400.0, \"size\": 60000000000}, {\"duration\": 14400.0, \"size\": 60000000000}], \"audio_done\": 1, \"part\": 1, \"written_bytes\": 12288, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"audio\", \"progress\": 1.0, \"total_bytes\": 120000000000, \"duration\": 28800.0, \"video_bitrate\": 16538666, \"estimated_bytes\": 60460797600, \"has_audio\": true, \"parts\": [{\"duration\": 14400.0, \"size\": 60000000000}, {\"duration\": 14400.0, \"size\": 60000000000}], \"audio_done\": 2, \"part\": 1, \"written_bytes\": 16384, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"done\", \"phase\": \"done\", \"progress\": 1.0, \"total_bytes\": 120000000000, \"duration\": 28800.0, \"video_bitrate\": 16538666, \"estimated_bytes\": 60460797600, \"has_audio\": true, \"parts\": [{\"duration\": 14400.0, \"size\": 60000000000}, {\"duration\": 14400.0, \"size\": 60000000000}], \"audio_done\": 2, \"part\": 1, \"written_bytes\": 16384, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}"
+      ],
+      "code": 0,
+      "uncaught": null,
+      "stderr": "",
+      "tree": [
+        [
+          "cgroup/memory.max",
+          11
+        ],
+        [
+          "library/ABC-123-cd1.mp4",
+          60000000000
+        ],
+        [
+          "library/ABC-123-cd2.mp4",
+          60000000000
+        ],
+        [
+          "tmp/",
+          null
+        ],
+        [
+          "upload/.transcode/7/audio.json",
+          380
+        ],
+        [
+          "upload/.transcode/7/audio/cd01.mka",
+          2000
+        ],
+        [
+          "upload/.transcode/7/audio/cd02.mka",
+          2000
+        ]
+      ]
+    },
+    {
+      "scenario": {
+        "name": "prepare_keeps_audio_already_copied",
+        "files": {
+          "library/ABC-123-cd1.mp4": {
+            "size": 60000000000
+          },
+          "library/ABC-123-cd2.mp4": {
+            "size": 60000000000
+          },
+          "upload/.transcode/7/audio/cd01.mka": {
+            "size": 1234
+          }
+        },
+        "command": {
+          "parts": [
+            "<root>/library/ABC-123-cd1.mp4",
+            "<root>/library/ABC-123-cd2.mp4"
+          ],
+          "output": "<root>/upload/ABC-123.mp4",
+          "status": "<root>/upload/.transcode/7/audio.json",
+          "reserve_gib": 0.0,
+          "home_prepare": "<root>/upload/.transcode/7",
+          "home_assemble": null
+        },
+        "free": 1000000000000,
+        "memory_max": "3221225472\n",
+        "probes": {
+          "<root>/library/ABC-123-cd1.mp4": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"h264\",\n            \"codec_type\": \"video\",\n            \"width\": 4096,\n            \"height\": 2048,\n            \"nb_frames\": \"20\"\n        },\n        {\n            \"index\": 1,\n            \"codec_name\": \"aac\",\n            \"codec_type\": \"audio\",\n            \"sample_rate\": \"44100\",\n            \"channels\": 1,\n            \"bit_rate\": \"256000\",\n            \"nb_frames\": \"94\"\n        }\n    ],\n    \"format\": {\n        \"duration\": \"14400.0\"\n    }\n}\n",
+            "stderr": ""
+          },
+          "<root>/library/ABC-123-cd2.mp4": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"h264\",\n            \"codec_type\": \"video\",\n            \"width\": 4096,\n            \"height\": 2048,\n            \"nb_frames\": \"20\"\n        },\n        {\n            \"index\": 1,\n            \"codec_name\": \"aac\",\n            \"codec_type\": \"audio\",\n            \"sample_rate\": \"44100\",\n            \"channels\": 1,\n            \"bit_rate\": \"256000\",\n            \"nb_frames\": \"94\"\n        }\n    ],\n    \"format\": {\n        \"duration\": \"14400.0\"\n    }\n}\n",
+            "stderr": ""
+          }
+        },
+        "ffmpeg": [
+          {
+            "write": 2000,
+            "stdout": "",
+            "stderr": "",
+            "returncode": 0
+          }
+        ]
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/library/ABC-123-cd1.mp4"
+          ]
+        },
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/library/ABC-123-cd2.mp4"
+          ]
+        },
+        {
+          "argv": [
+            "ffmpeg",
+            "-hide_banner",
+            "-nostdin",
+            "-loglevel",
+            "error",
+            "-y",
+            "-i",
+            "<root>/library/ABC-123-cd2.mp4",
+            "-map",
+            "0:a",
+            "-vn",
+            "-sn",
+            "-dn",
+            "-c",
+            "copy",
+            "-f",
+            "matroska",
+            "-progress",
+            "pipe:1",
+            "-nostats",
+            "<root>/upload/.transcode/7/audio/.cd02.mka.part"
+          ],
+          "scripts": {}
+        }
+      ],
+      "writes": [
+        "{\"state\": \"running\", \"phase\": \"checking\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"probing\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"audio\", \"progress\": 0.0, \"total_bytes\": 120000000000, \"duration\": 28800.0, \"video_bitrate\": 16538666, \"estimated_bytes\": 60460797600, \"has_audio\": true, \"parts\": [{\"duration\": 14400.0, \"size\": 60000000000}, {\"duration\": 14400.0, \"size\": 60000000000}], \"audio_done\": 0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"audio\", \"progress\": 0.5, \"total_bytes\": 120000000000, \"duration\": 28800.0, \"video_bitrate\": 16538666, \"estimated_bytes\": 60460797600, \"has_audio\": true, \"parts\": [{\"duration\": 14400.0, \"size\": 60000000000}, {\"duration\": 14400.0, \"size\": 60000000000}], \"audio_done\": 1, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"audio\", \"progress\": 0.5, \"total_bytes\": 120000000000, \"duration\": 28800.0, \"video_bitrate\": 16538666, \"estimated_bytes\": 60460797600, \"has_audio\": true, \"parts\": [{\"duration\": 14400.0, \"size\": 60000000000}, {\"duration\": 14400.0, \"size\": 60000000000}], \"audio_done\": 1, \"part\": 1, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"audio\", \"progress\": 1.0, \"total_bytes\": 120000000000, \"duration\": 28800.0, \"video_bitrate\": 16538666, \"estimated_bytes\": 60460797600, \"has_audio\": true, \"parts\": [{\"duration\": 14400.0, \"size\": 60000000000}, {\"duration\": 14400.0, \"size\": 60000000000}], \"audio_done\": 2, \"part\": 1, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"done\", \"phase\": \"done\", \"progress\": 1.0, \"total_bytes\": 120000000000, \"duration\": 28800.0, \"video_bitrate\": 16538666, \"estimated_bytes\": 60460797600, \"has_audio\": true, \"parts\": [{\"duration\": 14400.0, \"size\": 60000000000}, {\"duration\": 14400.0, \"size\": 60000000000}], \"audio_done\": 2, \"part\": 1, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}"
+      ],
+      "code": 0,
+      "uncaught": null,
+      "stderr": "",
+      "tree": [
+        [
+          "cgroup/memory.max",
+          11
+        ],
+        [
+          "library/ABC-123-cd1.mp4",
+          60000000000
+        ],
+        [
+          "library/ABC-123-cd2.mp4",
+          60000000000
+        ],
+        [
+          "tmp/",
+          null
+        ],
+        [
+          "upload/.transcode/7/audio.json",
+          356
+        ],
+        [
+          "upload/.transcode/7/audio/cd01.mka",
+          1234
+        ],
+        [
+          "upload/.transcode/7/audio/cd02.mka",
+          2000
+        ]
+      ]
+    },
+    {
+      "scenario": {
+        "name": "prepare_without_audio",
+        "files": {
+          "library/ABC-123-cd1.mp4": {
+            "size": 60000000000
+          },
+          "library/ABC-123-cd2.mp4": {
+            "size": 60000000000
+          },
+          "upload/": {}
+        },
+        "command": {
+          "parts": [
+            "<root>/library/ABC-123-cd1.mp4",
+            "<root>/library/ABC-123-cd2.mp4"
+          ],
+          "output": "<root>/upload/ABC-123.mp4",
+          "status": "<root>/upload/.transcode/7/audio.json",
+          "reserve_gib": 0.0,
+          "home_prepare": "<root>/upload/.transcode/7",
+          "home_assemble": null
+        },
+        "free": 1000000000000,
+        "memory_max": "3221225472\n",
+        "probes": {
+          "<root>/library/ABC-123-cd1.mp4": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"h264\",\n            \"codec_type\": \"video\",\n            \"width\": 160,\n            \"height\": 120,\n            \"nb_frames\": \"20\"\n        }\n    ],\n    \"format\": {\n        \"duration\": \"14400.0\"\n    }\n}\n",
+            "stderr": ""
+          },
+          "<root>/library/ABC-123-cd2.mp4": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"h264\",\n            \"codec_type\": \"video\",\n            \"width\": 160,\n            \"height\": 120,\n            \"nb_frames\": \"20\"\n        }\n    ],\n    \"format\": {\n        \"duration\": \"14400.0\"\n    }\n}\n",
+            "stderr": ""
+          }
+        },
+        "ffmpeg": []
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/library/ABC-123-cd1.mp4"
+          ]
+        },
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/library/ABC-123-cd2.mp4"
+          ]
+        }
+      ],
+      "writes": [
+        "{\"state\": \"running\", \"phase\": \"checking\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"probing\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"audio\", \"progress\": 0.0, \"total_bytes\": 120000000000, \"duration\": 28800.0, \"video_bitrate\": 16666666, \"estimated_bytes\": 59999997600, \"has_audio\": false, \"parts\": [{\"duration\": 14400.0, \"size\": 60000000000}, {\"duration\": 14400.0, \"size\": 60000000000}], \"audio_done\": 0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"done\", \"phase\": \"done\", \"progress\": 1.0, \"total_bytes\": 120000000000, \"duration\": 28800.0, \"video_bitrate\": 16666666, \"estimated_bytes\": 59999997600, \"has_audio\": false, \"parts\": [{\"duration\": 14400.0, \"size\": 60000000000}, {\"duration\": 14400.0, \"size\": 60000000000}], \"audio_done\": 2, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}"
+      ],
+      "code": 0,
+      "uncaught": null,
+      "stderr": "",
+      "tree": [
+        [
+          "cgroup/memory.max",
+          11
+        ],
+        [
+          "library/ABC-123-cd1.mp4",
+          60000000000
+        ],
+        [
+          "library/ABC-123-cd2.mp4",
+          60000000000
+        ],
+        [
+          "tmp/",
+          null
+        ],
+        [
+          "upload/.transcode/7/audio.json",
+          346
+        ]
+      ]
+    },
+    {
+      "scenario": {
+        "name": "prepare_refuses_mov",
+        "files": {
+          "library/ABC-123-cd1.mov": {
+            "size": 10
+          },
+          "library/ABC-123-cd2.mov": {
+            "size": 10
+          }
+        },
+        "command": {
+          "parts": [
+            "<root>/library/ABC-123-cd1.mov",
+            "<root>/library/ABC-123-cd2.mov"
+          ],
+          "output": "<root>/upload/ABC-123.mov",
+          "status": "<root>/upload/.transcode/7/audio.json",
+          "reserve_gib": 0.0,
+          "home_prepare": "<root>/upload/.transcode/7",
+          "home_assemble": null
+        },
+        "free": 1000000000000,
+        "memory_max": "3221225472\n",
+        "probes": {},
+        "ffmpeg": []
+      },
+      "calls": [],
+      "writes": [
+        "{\"state\": \"running\", \"phase\": \"checking\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"failed\", \"phase\": \"checking\", \"progress\": 0.0, \"refused\": true, \"error\": \"a .mov merge cannot carry AV1\", \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}"
+      ],
+      "code": 0,
+      "uncaught": null,
+      "stderr": "merge refused: a .mov merge cannot carry AV1\n",
+      "tree": [
+        [
+          "cgroup/memory.max",
+          11
+        ],
+        [
+          "library/ABC-123-cd1.mov",
+          10
+        ],
+        [
+          "library/ABC-123-cd2.mov",
+          10
+        ],
+        [
+          "tmp/",
+          null
+        ],
+        [
+          "upload/.transcode/7/audio.json",
+          166
+        ]
+      ]
+    },
+    {
+      "scenario": {
+        "name": "prepare_short_of_space",
+        "files": {
+          "library/ABC-123-cd1.mp4": {
+            "size": 60000000000
+          },
+          "library/ABC-123-cd2.mp4": {
+            "size": 60000000000
+          },
+          "upload/": {}
+        },
+        "command": {
+          "parts": [
+            "<root>/library/ABC-123-cd1.mp4",
+            "<root>/library/ABC-123-cd2.mp4"
+          ],
+          "output": "<root>/upload/ABC-123.mp4",
+          "status": "<root>/upload/.transcode/7/audio.json",
+          "reserve_gib": 0.0,
+          "home_prepare": "<root>/upload/.transcode/7",
+          "home_assemble": null
+        },
+        "free": 10000000000,
+        "memory_max": "3221225472\n",
+        "probes": {
+          "<root>/library/ABC-123-cd1.mp4": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"h264\",\n            \"codec_type\": \"video\",\n            \"width\": 4096,\n            \"height\": 2048,\n            \"nb_frames\": \"20\"\n        },\n        {\n            \"index\": 1,\n            \"codec_name\": \"aac\",\n            \"codec_type\": \"audio\",\n            \"sample_rate\": \"44100\",\n            \"channels\": 1,\n            \"bit_rate\": \"256000\",\n            \"nb_frames\": \"94\"\n        }\n    ],\n    \"format\": {\n        \"duration\": \"14400.0\"\n    }\n}\n",
+            "stderr": ""
+          },
+          "<root>/library/ABC-123-cd2.mp4": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"h264\",\n            \"codec_type\": \"video\",\n            \"width\": 4096,\n            \"height\": 2048,\n            \"nb_frames\": \"20\"\n        },\n        {\n            \"index\": 1,\n            \"codec_name\": \"aac\",\n            \"codec_type\": \"audio\",\n            \"sample_rate\": \"44100\",\n            \"channels\": 1,\n            \"bit_rate\": \"256000\",\n            \"nb_frames\": \"94\"\n        }\n    ],\n    \"format\": {\n        \"duration\": \"14400.0\"\n    }\n}\n",
+            "stderr": ""
+          }
+        },
+        "ffmpeg": []
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/library/ABC-123-cd1.mp4"
+          ]
+        },
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/library/ABC-123-cd2.mp4"
+          ]
+        }
+      ],
+      "writes": [
+        "{\"state\": \"running\", \"phase\": \"checking\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"probing\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"failed\", \"phase\": \"probing\", \"progress\": 1.0, \"error\": \"not enough space in <root>/upload: 9.3 GiB free, 112.6 GiB needed plus a 0 GiB reserve\", \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}"
+      ],
+      "code": 1,
+      "uncaught": null,
+      "stderr": "merge failed: not enough space in <root>/upload: 9.3 GiB free, 112.6 GiB needed plus a 0 GiB reserve\n",
+      "tree": [
+        [
+          "cgroup/memory.max",
+          11
+        ],
+        [
+          "library/ABC-123-cd1.mp4",
+          60000000000
+        ],
+        [
+          "library/ABC-123-cd2.mp4",
+          60000000000
+        ],
+        [
+          "tmp/",
+          null
+        ],
+        [
+          "upload/.transcode/7/audio.json",
+          205
+        ]
+      ]
+    },
+    {
+      "scenario": {
+        "name": "prepare_audio_copy_fails",
+        "files": {
+          "library/ABC-123-cd1.mp4": {
+            "size": 60000000000
+          },
+          "library/ABC-123-cd2.mp4": {
+            "size": 60000000000
+          },
+          "upload/": {}
+        },
+        "command": {
+          "parts": [
+            "<root>/library/ABC-123-cd1.mp4",
+            "<root>/library/ABC-123-cd2.mp4"
+          ],
+          "output": "<root>/upload/ABC-123.mp4",
+          "status": "<root>/upload/.transcode/7/audio.json",
+          "reserve_gib": 0.0,
+          "home_prepare": "<root>/upload/.transcode/7",
+          "home_assemble": null
+        },
+        "free": 1000000000000,
+        "memory_max": "3221225472\n",
+        "probes": {
+          "<root>/library/ABC-123-cd1.mp4": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"h264\",\n            \"codec_type\": \"video\",\n            \"width\": 4096,\n            \"height\": 2048,\n            \"nb_frames\": \"20\"\n        },\n        {\n            \"index\": 1,\n            \"codec_name\": \"aac\",\n            \"codec_type\": \"audio\",\n            \"sample_rate\": \"44100\",\n            \"channels\": 1,\n            \"bit_rate\": \"256000\",\n            \"nb_frames\": \"94\"\n        }\n    ],\n    \"format\": {\n        \"duration\": \"14400.0\"\n    }\n}\n",
+            "stderr": ""
+          },
+          "<root>/library/ABC-123-cd2.mp4": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"h264\",\n            \"codec_type\": \"video\",\n            \"width\": 4096,\n            \"height\": 2048,\n            \"nb_frames\": \"20\"\n        },\n        {\n            \"index\": 1,\n            \"codec_name\": \"aac\",\n            \"codec_type\": \"audio\",\n            \"sample_rate\": \"44100\",\n            \"channels\": 1,\n            \"bit_rate\": \"256000\",\n            \"nb_frames\": \"94\"\n        }\n    ],\n    \"format\": {\n        \"duration\": \"14400.0\"\n    }\n}\n",
+            "stderr": ""
+          }
+        },
+        "ffmpeg": [
+          {
+            "write": 50,
+            "stdout": "",
+            "stderr": "Stream map 0:a matches no streams.\n",
+            "returncode": 1
+          }
+        ]
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/library/ABC-123-cd1.mp4"
+          ]
+        },
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/library/ABC-123-cd2.mp4"
+          ]
+        },
+        {
+          "argv": [
+            "ffmpeg",
+            "-hide_banner",
+            "-nostdin",
+            "-loglevel",
+            "error",
+            "-y",
+            "-i",
+            "<root>/library/ABC-123-cd1.mp4",
+            "-map",
+            "0:a",
+            "-vn",
+            "-sn",
+            "-dn",
+            "-c",
+            "copy",
+            "-f",
+            "matroska",
+            "-progress",
+            "pipe:1",
+            "-nostats",
+            "<root>/upload/.transcode/7/audio/.cd01.mka.part"
+          ],
+          "scripts": {}
+        }
+      ],
+      "writes": [
+        "{\"state\": \"running\", \"phase\": \"checking\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"probing\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"audio\", \"progress\": 0.0, \"total_bytes\": 120000000000, \"duration\": 28800.0, \"video_bitrate\": 16538666, \"estimated_bytes\": 60460797600, \"has_audio\": true, \"parts\": [{\"duration\": 14400.0, \"size\": 60000000000}, {\"duration\": 14400.0, \"size\": 60000000000}], \"audio_done\": 0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"audio\", \"progress\": 0.0, \"total_bytes\": 120000000000, \"duration\": 28800.0, \"video_bitrate\": 16538666, \"estimated_bytes\": 60460797600, \"has_audio\": true, \"parts\": [{\"duration\": 14400.0, \"size\": 60000000000}, {\"duration\": 14400.0, \"size\": 60000000000}], \"audio_done\": 0, \"part\": 0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"failed\", \"phase\": \"audio\", \"progress\": 0.0, \"total_bytes\": 120000000000, \"duration\": 28800.0, \"video_bitrate\": 16538666, \"estimated_bytes\": 60460797600, \"has_audio\": true, \"parts\": [{\"duration\": 14400.0, \"size\": 60000000000}, {\"duration\": 14400.0, \"size\": 60000000000}], \"audio_done\": 0, \"part\": 0, \"error\": \"ffmpeg failed: Stream map 0:a matches no streams.\", \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}"
+      ],
+      "code": 1,
+      "uncaught": null,
+      "stderr": "merge failed: ffmpeg failed: Stream map 0:a matches no streams.\n",
+      "tree": [
+        [
+          "cgroup/memory.max",
+          11
+        ],
+        [
+          "library/ABC-123-cd1.mp4",
+          60000000000
+        ],
+        [
+          "library/ABC-123-cd2.mp4",
+          60000000000
+        ],
+        [
+          "tmp/",
+          null
+        ],
+        [
+          "upload/.transcode/7/audio.json",
+          421
+        ],
+        [
+          "upload/.transcode/7/audio/.cd01.mka.part",
+          50
+        ]
+      ]
+    },
+    {
+      "scenario": {
+        "name": "assemble_lines_up_chunks_and_audio",
+        "files": {
+          "upload/.transcode/7/cd01/chunk-00000.mkv": {
+            "size": 1000
+          },
+          "upload/.transcode/7/cd01/chunk-00001.mkv": {
+            "size": 1001
+          },
+          "upload/.transcode/7/cd01/chunk-00002.mkv": {
+            "size": 1002
+          },
+          "upload/.transcode/7/audio/cd01.mka": {
+            "size": 500
+          },
+          "upload/.transcode/7/cd02/chunk-00000.mkv": {
+            "size": 1000
+          },
+          "upload/.transcode/7/cd02/chunk-00001.mkv": {
+            "size": 1001
+          },
+          "upload/.transcode/7/audio/cd02.mka": {
+            "size": 500
+          },
+          "upload/.transcode/7/manifest.json": {
+            "text": "{\"parts\": [{\"index\": 0, \"chunks\": [{\"index\": 0, \"duration\": 60.0}, {\"index\": 1, \"duration\": 60.0}, {\"index\": 2, \"duration\": 30.5}]}, {\"index\": 1, \"chunks\": [{\"index\": 0, \"duration\": 60.0}, {\"index\": 1, \"duration\": 59.9}]}]}"
+          },
+          "upload/.transcode/7/audio.json": {
+            "text": "{\"state\": \"done\", \"has_audio\": true, \"parts\": [{\"duration\": 150.25}, {\"duration\": 119.9}]}"
+          }
+        },
+        "command": {
+          "parts": [],
+          "output": "<root>/upload/ABC-123.mp4",
+          "status": "<root>/upload/.merge/1.json",
+          "reserve_gib": 0.0,
+          "home_prepare": null,
+          "home_assemble": "<root>/upload/.transcode/7"
+        },
+        "free": 1000000000000,
+        "memory_max": "3221225472\n",
+        "probes": {
+          "<root>/upload/.transcode/7/cd01/chunk-00000.mkv": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"av1\",\n            \"codec_type\": \"video\",\n            \"width\": 4096,\n            \"height\": 2048\n        }\n    ],\n    \"format\": {\n        \"duration\": \"60.0\"\n    }\n}\n",
+            "stderr": ""
+          },
+          "<root>/upload/.transcode/7/cd02/chunk-00000.mkv": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"av1\",\n            \"codec_type\": \"video\",\n            \"width\": 4096,\n            \"height\": 2048\n        }\n    ],\n    \"format\": {\n        \"duration\": \"60.0\"\n    }\n}\n",
+            "stderr": ""
+          },
+          "<root>/upload/.ABC-123.mp4.part": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"h264\",\n            \"codec_type\": \"video\",\n            \"width\": 160,\n            \"height\": 120,\n            \"nb_frames\": \"20\"\n        },\n        {\n            \"index\": 1,\n            \"codec_name\": \"aac\",\n            \"codec_type\": \"audio\",\n            \"sample_rate\": \"44100\",\n            \"channels\": 1,\n            \"bit_rate\": \"128000\",\n            \"nb_frames\": \"94\"\n        }\n    ],\n    \"format\": {\n        \"duration\": \"270.15\"\n    }\n}\n",
+            "stderr": ""
+          }
+        },
+        "ffmpeg": [
+          {
+            "write": 9000,
+            "stdout": "frame=10\ntotal_size=4096\nout_time_us=67537500\nout_time_ms=67537500\nspeed=1x\nprogress=continue\nframe=10\ntotal_size=8192\nout_time_us=135075000\nout_time_ms=135075000\nspeed=1x\nprogress=continue\nframe=10\ntotal_size=12288\nout_time_us=202612500\nout_time_ms=202612500\nspeed=1x\nprogress=continue\nframe=10\ntotal_size=16384\nout_time_us=270150000\nout_time_ms=270150000\nspeed=1x\nprogress=end\n",
+            "stderr": "",
+            "returncode": 0
+          }
+        ]
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/upload/.transcode/7/cd01/chunk-00000.mkv"
+          ]
+        },
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/upload/.transcode/7/cd02/chunk-00000.mkv"
+          ]
+        },
+        {
+          "argv": [
+            "ffmpeg",
+            "-hide_banner",
+            "-nostdin",
+            "-loglevel",
+            "error",
+            "-y",
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            "<root>/tmp/video.txt",
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            "<root>/tmp/audio.txt",
+            "-map",
+            "0:v",
+            "-map",
+            "1:a",
+            "-c",
+            "copy",
+            "-f",
+            "mp4",
+            "-progress",
+            "pipe:1",
+            "-nostats",
+            "<root>/upload/.ABC-123.mp4.part"
+          ],
+          "scripts": {
+            "<root>/tmp/video.txt": "file '<root>/upload/.transcode/7/cd01/chunk-00000.mkv'\nduration 60.000000\nfile '<root>/upload/.transcode/7/cd01/chunk-00001.mkv'\nduration 60.000000\nfile '<root>/upload/.transcode/7/cd01/chunk-00002.mkv'\nduration 30.250000\nfile '<root>/upload/.transcode/7/cd02/chunk-00000.mkv'\nduration 60.000000\nfile '<root>/upload/.transcode/7/cd02/chunk-00001.mkv'\nduration 59.900000\n",
+            "<root>/tmp/audio.txt": "file '<root>/upload/.transcode/7/audio/cd01.mka'\nduration 150.250000\nfile '<root>/upload/.transcode/7/audio/cd02.mka'\nduration 119.900000\n"
+          }
+        },
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/upload/.ABC-123.mp4.part"
+          ]
+        }
+      ],
+      "writes": [
+        "{\"state\": \"running\", \"phase\": \"checking\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"probing\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"merging\", \"progress\": 0.0, \"duration\": 270.15, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"merging\", \"progress\": 0.5, \"duration\": 270.15, \"written_bytes\": 12288, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"verifying\", \"progress\": 1.0, \"duration\": 270.15, \"written_bytes\": 16384, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"hashing\", \"progress\": 0.0, \"duration\": 270.15, \"written_bytes\": 16384, \"size\": 9000, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"done\", \"phase\": \"done\", \"progress\": 1.0, \"duration\": 270.15, \"written_bytes\": 16384, \"size\": 9000, \"sha1\": \"98295ECF02ACEDB91E4F6FB3BFD87AE19DBB94A2\", \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}"
+      ],
+      "code": 0,
+      "uncaught": null,
+      "stderr": "",
+      "tree": [
+        [
+          "cgroup/memory.max",
+          11
+        ],
+        [
+          "tmp/audio.txt",
+          138
+        ],
+        [
+          "tmp/video.txt",
+          370
+        ],
+        [
+          "upload/.merge/1.json",
+          211
+        ],
+        [
+          "upload/.transcode/7/audio.json",
+          90
+        ],
+        [
+          "upload/.transcode/7/audio/cd01.mka",
+          500
+        ],
+        [
+          "upload/.transcode/7/audio/cd02.mka",
+          500
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00000.mkv",
+          1000
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00001.mkv",
+          1001
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00002.mkv",
+          1002
+        ],
+        [
+          "upload/.transcode/7/cd02/chunk-00000.mkv",
+          1000
+        ],
+        [
+          "upload/.transcode/7/cd02/chunk-00001.mkv",
+          1001
+        ],
+        [
+          "upload/.transcode/7/manifest.json",
+          223
+        ],
+        [
+          "upload/ABC-123.mp4",
+          9000
+        ]
+      ]
+    },
+    {
+      "scenario": {
+        "name": "assemble_without_audio",
+        "files": {
+          "upload/.transcode/7/cd01/chunk-00000.mkv": {
+            "size": 1000
+          },
+          "upload/.transcode/7/cd01/chunk-00001.mkv": {
+            "size": 1001
+          },
+          "upload/.transcode/7/cd01/chunk-00002.mkv": {
+            "size": 1002
+          },
+          "upload/.transcode/7/cd02/chunk-00000.mkv": {
+            "size": 1000
+          },
+          "upload/.transcode/7/cd02/chunk-00001.mkv": {
+            "size": 1001
+          },
+          "upload/.transcode/7/manifest.json": {
+            "text": "{\"parts\": [{\"index\": 0, \"chunks\": [{\"index\": 0, \"duration\": 60.0}, {\"index\": 1, \"duration\": 60.0}, {\"index\": 2, \"duration\": 30.5}]}, {\"index\": 1, \"chunks\": [{\"index\": 0, \"duration\": 60.0}, {\"index\": 1, \"duration\": 59.9}]}]}"
+          },
+          "upload/.transcode/7/audio.json": {
+            "text": "{\"state\": \"done\", \"has_audio\": 0, \"parts\": [{\"duration\": 150.25}, {\"duration\": 119.9}]}"
+          }
+        },
+        "command": {
+          "parts": [],
+          "output": "<root>/upload/ABC-123.mkv",
+          "status": "<root>/upload/.merge/1.json",
+          "reserve_gib": 0.0,
+          "home_prepare": null,
+          "home_assemble": "<root>/upload/.transcode/7"
+        },
+        "free": 1000000000000,
+        "memory_max": "3221225472\n",
+        "probes": {
+          "<root>/upload/.transcode/7/cd01/chunk-00000.mkv": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"av1\",\n            \"codec_type\": \"video\",\n            \"width\": 4096,\n            \"height\": 2048\n        }\n    ],\n    \"format\": {\n        \"duration\": \"60.0\"\n    }\n}\n",
+            "stderr": ""
+          },
+          "<root>/upload/.transcode/7/cd02/chunk-00000.mkv": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"av1\",\n            \"codec_type\": \"video\",\n            \"width\": 4096,\n            \"height\": 2048\n        }\n    ],\n    \"format\": {\n        \"duration\": \"60.0\"\n    }\n}\n",
+            "stderr": ""
+          },
+          "<root>/upload/.ABC-123.mkv.part": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"h264\",\n            \"codec_type\": \"video\",\n            \"width\": 160,\n            \"height\": 120,\n            \"nb_frames\": \"20\"\n        },\n        {\n            \"index\": 1,\n            \"codec_name\": \"aac\",\n            \"codec_type\": \"audio\",\n            \"sample_rate\": \"44100\",\n            \"channels\": 1,\n            \"bit_rate\": \"128000\",\n            \"nb_frames\": \"94\"\n        }\n    ],\n    \"format\": {\n        \"duration\": \"270.0\"\n    }\n}\n",
+            "stderr": ""
+          }
+        },
+        "ffmpeg": [
+          {
+            "write": 9000,
+            "stdout": "",
+            "stderr": "",
+            "returncode": 0
+          }
+        ]
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/upload/.transcode/7/cd01/chunk-00000.mkv"
+          ]
+        },
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/upload/.transcode/7/cd02/chunk-00000.mkv"
+          ]
+        },
+        {
+          "argv": [
+            "ffmpeg",
+            "-hide_banner",
+            "-nostdin",
+            "-loglevel",
+            "error",
+            "-y",
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            "<root>/tmp/video.txt",
+            "-map",
+            "0:v",
+            "-c",
+            "copy",
+            "-f",
+            "matroska",
+            "-progress",
+            "pipe:1",
+            "-nostats",
+            "<root>/upload/.ABC-123.mkv.part"
+          ],
+          "scripts": {
+            "<root>/tmp/video.txt": "file '<root>/upload/.transcode/7/cd01/chunk-00000.mkv'\nduration 60.000000\nfile '<root>/upload/.transcode/7/cd01/chunk-00001.mkv'\nduration 60.000000\nfile '<root>/upload/.transcode/7/cd01/chunk-00002.mkv'\nduration 30.250000\nfile '<root>/upload/.transcode/7/cd02/chunk-00000.mkv'\nduration 60.000000\nfile '<root>/upload/.transcode/7/cd02/chunk-00001.mkv'\nduration 59.900000\n"
+          }
+        },
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/upload/.ABC-123.mkv.part"
+          ]
+        }
+      ],
+      "writes": [
+        "{\"state\": \"running\", \"phase\": \"checking\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"probing\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"merging\", \"progress\": 0.0, \"duration\": 270.15, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"verifying\", \"progress\": 1.0, \"duration\": 270.15, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"hashing\", \"progress\": 0.0, \"duration\": 270.15, \"size\": 9000, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"done\", \"phase\": \"done\", \"progress\": 1.0, \"duration\": 270.0, \"size\": 9000, \"sha1\": \"98295ECF02ACEDB91E4F6FB3BFD87AE19DBB94A2\", \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}"
+      ],
+      "code": 0,
+      "uncaught": null,
+      "stderr": "",
+      "tree": [
+        [
+          "cgroup/memory.max",
+          11
+        ],
+        [
+          "tmp/video.txt",
+          370
+        ],
+        [
+          "upload/.merge/1.json",
+          186
+        ],
+        [
+          "upload/.transcode/7/audio.json",
+          87
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00000.mkv",
+          1000
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00001.mkv",
+          1001
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00002.mkv",
+          1002
+        ],
+        [
+          "upload/.transcode/7/cd02/chunk-00000.mkv",
+          1000
+        ],
+        [
+          "upload/.transcode/7/cd02/chunk-00001.mkv",
+          1001
+        ],
+        [
+          "upload/.transcode/7/manifest.json",
+          223
+        ],
+        [
+          "upload/ABC-123.mkv",
+          9000
+        ]
+      ]
+    },
+    {
+      "scenario": {
+        "name": "assemble_without_a_manifest",
+        "files": {
+          "upload/.transcode/7/": {}
+        },
+        "command": {
+          "parts": [],
+          "output": "<root>/upload/ABC-123.mp4",
+          "status": "<root>/upload/.merge/1.json",
+          "reserve_gib": 0.0,
+          "home_prepare": null,
+          "home_assemble": "<root>/upload/.transcode/7"
+        },
+        "free": 1000000000000,
+        "memory_max": "3221225472\n",
+        "probes": {},
+        "ffmpeg": []
+      },
+      "calls": [],
+      "writes": [
+        "{\"state\": \"running\", \"phase\": \"checking\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"failed\", \"phase\": \"checking\", \"progress\": 0.0, \"error\": \"the transcode manifest or the copied audio is missing\", \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}"
+      ],
+      "code": 1,
+      "uncaught": null,
+      "stderr": "merge failed: the transcode manifest or the copied audio is missing\n",
+      "tree": [
+        [
+          "cgroup/memory.max",
+          11
+        ],
+        [
+          "tmp/",
+          null
+        ],
+        [
+          "upload/.merge/1.json",
+          173
+        ],
+        [
+          "upload/.transcode/7/",
+          null
+        ]
+      ]
+    },
+    {
+      "scenario": {
+        "name": "assemble_before_the_audio_is_done",
+        "files": {
+          "upload/.transcode/7/cd01/chunk-00000.mkv": {
+            "size": 1000
+          },
+          "upload/.transcode/7/cd01/chunk-00001.mkv": {
+            "size": 1001
+          },
+          "upload/.transcode/7/cd01/chunk-00002.mkv": {
+            "size": 1002
+          },
+          "upload/.transcode/7/audio/cd01.mka": {
+            "size": 500
+          },
+          "upload/.transcode/7/cd02/chunk-00000.mkv": {
+            "size": 1000
+          },
+          "upload/.transcode/7/cd02/chunk-00001.mkv": {
+            "size": 1001
+          },
+          "upload/.transcode/7/audio/cd02.mka": {
+            "size": 500
+          },
+          "upload/.transcode/7/manifest.json": {
+            "text": "{\"parts\": [{\"index\": 0, \"chunks\": [{\"index\": 0, \"duration\": 60.0}, {\"index\": 1, \"duration\": 60.0}, {\"index\": 2, \"duration\": 30.5}]}, {\"index\": 1, \"chunks\": [{\"index\": 0, \"duration\": 60.0}, {\"index\": 1, \"duration\": 59.9}]}]}"
+          },
+          "upload/.transcode/7/audio.json": {
+            "text": "{\"state\": \"running\", \"has_audio\": true, \"parts\": [{\"duration\": 150.25}, {\"duration\": 119.9}]}"
+          }
+        },
+        "command": {
+          "parts": [],
+          "output": "<root>/upload/ABC-123.mp4",
+          "status": "<root>/upload/.merge/1.json",
+          "reserve_gib": 0.0,
+          "home_prepare": null,
+          "home_assemble": "<root>/upload/.transcode/7"
+        },
+        "free": 1000000000000,
+        "memory_max": "3221225472\n",
+        "probes": {},
+        "ffmpeg": []
+      },
+      "calls": [],
+      "writes": [
+        "{\"state\": \"running\", \"phase\": \"checking\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"failed\", \"phase\": \"checking\", \"progress\": 0.0, \"error\": \"the transcode manifest or the copied audio is missing\", \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}"
+      ],
+      "code": 1,
+      "uncaught": null,
+      "stderr": "merge failed: the transcode manifest or the copied audio is missing\n",
+      "tree": [
+        [
+          "cgroup/memory.max",
+          11
+        ],
+        [
+          "tmp/",
+          null
+        ],
+        [
+          "upload/.merge/1.json",
+          173
+        ],
+        [
+          "upload/.transcode/7/audio.json",
+          93
+        ],
+        [
+          "upload/.transcode/7/audio/cd01.mka",
+          500
+        ],
+        [
+          "upload/.transcode/7/audio/cd02.mka",
+          500
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00000.mkv",
+          1000
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00001.mkv",
+          1001
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00002.mkv",
+          1002
+        ],
+        [
+          "upload/.transcode/7/cd02/chunk-00000.mkv",
+          1000
+        ],
+        [
+          "upload/.transcode/7/cd02/chunk-00001.mkv",
+          1001
+        ],
+        [
+          "upload/.transcode/7/manifest.json",
+          223
+        ]
+      ]
+    },
+    {
+      "scenario": {
+        "name": "assemble_with_a_part_too_many",
+        "files": {
+          "upload/.transcode/7/cd01/chunk-00000.mkv": {
+            "size": 1000
+          },
+          "upload/.transcode/7/cd01/chunk-00001.mkv": {
+            "size": 1001
+          },
+          "upload/.transcode/7/cd01/chunk-00002.mkv": {
+            "size": 1002
+          },
+          "upload/.transcode/7/audio/cd01.mka": {
+            "size": 500
+          },
+          "upload/.transcode/7/cd02/chunk-00000.mkv": {
+            "size": 1000
+          },
+          "upload/.transcode/7/cd02/chunk-00001.mkv": {
+            "size": 1001
+          },
+          "upload/.transcode/7/audio/cd02.mka": {
+            "size": 500
+          },
+          "upload/.transcode/7/manifest.json": {
+            "text": "{\"parts\": [{\"index\": 0, \"chunks\": [{\"index\": 0, \"duration\": 60.0}, {\"index\": 1, \"duration\": 60.0}, {\"index\": 2, \"duration\": 30.5}]}, {\"index\": 1, \"chunks\": [{\"index\": 0, \"duration\": 60.0}, {\"index\": 1, \"duration\": 59.9}]}]}"
+          },
+          "upload/.transcode/7/audio.json": {
+            "text": "{\"state\": \"done\", \"has_audio\": true, \"parts\": [{\"duration\": 150.25}]}"
+          }
+        },
+        "command": {
+          "parts": [],
+          "output": "<root>/upload/ABC-123.mp4",
+          "status": "<root>/upload/.merge/1.json",
+          "reserve_gib": 0.0,
+          "home_prepare": null,
+          "home_assemble": "<root>/upload/.transcode/7"
+        },
+        "free": 1000000000000,
+        "memory_max": "3221225472\n",
+        "probes": {},
+        "ffmpeg": []
+      },
+      "calls": [],
+      "writes": [
+        "{\"state\": \"running\", \"phase\": \"checking\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"failed\", \"phase\": \"checking\", \"progress\": 0.0, \"error\": \"the manifest lists 2 parts, the originals 1\", \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}"
+      ],
+      "code": 1,
+      "uncaught": null,
+      "stderr": "merge failed: the manifest lists 2 parts, the originals 1\n",
+      "tree": [
+        [
+          "cgroup/memory.max",
+          11
+        ],
+        [
+          "tmp/",
+          null
+        ],
+        [
+          "upload/.merge/1.json",
+          163
+        ],
+        [
+          "upload/.transcode/7/audio.json",
+          69
+        ],
+        [
+          "upload/.transcode/7/audio/cd01.mka",
+          500
+        ],
+        [
+          "upload/.transcode/7/audio/cd02.mka",
+          500
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00000.mkv",
+          1000
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00001.mkv",
+          1001
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00002.mkv",
+          1002
+        ],
+        [
+          "upload/.transcode/7/cd02/chunk-00000.mkv",
+          1000
+        ],
+        [
+          "upload/.transcode/7/cd02/chunk-00001.mkv",
+          1001
+        ],
+        [
+          "upload/.transcode/7/manifest.json",
+          223
+        ]
+      ]
+    },
+    {
+      "scenario": {
+        "name": "assemble_part_without_chunks",
+        "files": {
+          "upload/.transcode/7/cd01/chunk-00000.mkv": {
+            "size": 1000
+          },
+          "upload/.transcode/7/cd01/chunk-00001.mkv": {
+            "size": 1001
+          },
+          "upload/.transcode/7/cd01/chunk-00002.mkv": {
+            "size": 1002
+          },
+          "upload/.transcode/7/audio/cd01.mka": {
+            "size": 500
+          },
+          "upload/.transcode/7/cd02/chunk-00000.mkv": {
+            "size": 1000
+          },
+          "upload/.transcode/7/cd02/chunk-00001.mkv": {
+            "size": 1001
+          },
+          "upload/.transcode/7/audio/cd02.mka": {
+            "size": 500
+          },
+          "upload/.transcode/7/manifest.json": {
+            "text": "{\"parts\": [{\"index\": 0, \"chunks\": [{\"index\": 0, \"duration\": 60.0}]}, {\"index\": 1, \"chunks\": []}]}"
+          },
+          "upload/.transcode/7/audio.json": {
+            "text": "{\"state\": \"done\", \"has_audio\": true, \"parts\": [{\"duration\": 150.25}, {\"duration\": 119.9}]}"
+          }
+        },
+        "command": {
+          "parts": [],
+          "output": "<root>/upload/ABC-123.mp4",
+          "status": "<root>/upload/.merge/1.json",
+          "reserve_gib": 0.0,
+          "home_prepare": null,
+          "home_assemble": "<root>/upload/.transcode/7"
+        },
+        "free": 1000000000000,
+        "memory_max": "3221225472\n",
+        "probes": {
+          "<root>/upload/.transcode/7/cd01/chunk-00000.mkv": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"av1\",\n            \"codec_type\": \"video\",\n            \"width\": 4096,\n            \"height\": 2048\n        }\n    ],\n    \"format\": {\n        \"duration\": \"60.0\"\n    }\n}\n",
+            "stderr": ""
+          },
+          "<root>/upload/.transcode/7/cd02/chunk-00000.mkv": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"av1\",\n            \"codec_type\": \"video\",\n            \"width\": 4096,\n            \"height\": 2048\n        }\n    ],\n    \"format\": {\n        \"duration\": \"60.0\"\n    }\n}\n",
+            "stderr": ""
+          }
+        },
+        "ffmpeg": []
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/upload/.transcode/7/cd01/chunk-00000.mkv"
+          ]
+        }
+      ],
+      "writes": [
+        "{\"state\": \"running\", \"phase\": \"checking\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"probing\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"failed\", \"phase\": \"probing\", \"progress\": 0.5, \"error\": \"cd2 has no video chunks\", \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}"
+      ],
+      "code": 1,
+      "uncaught": null,
+      "stderr": "merge failed: cd2 has no video chunks\n",
+      "tree": [
+        [
+          "cgroup/memory.max",
+          11
+        ],
+        [
+          "tmp/",
+          null
+        ],
+        [
+          "upload/.merge/1.json",
+          142
+        ],
+        [
+          "upload/.transcode/7/audio.json",
+          90
+        ],
+        [
+          "upload/.transcode/7/audio/cd01.mka",
+          500
+        ],
+        [
+          "upload/.transcode/7/audio/cd02.mka",
+          500
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00000.mkv",
+          1000
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00001.mkv",
+          1001
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00002.mkv",
+          1002
+        ],
+        [
+          "upload/.transcode/7/cd02/chunk-00000.mkv",
+          1000
+        ],
+        [
+          "upload/.transcode/7/cd02/chunk-00001.mkv",
+          1001
+        ],
+        [
+          "upload/.transcode/7/manifest.json",
+          97
+        ]
+      ]
+    },
+    {
+      "scenario": {
+        "name": "assemble_chunk_missing",
+        "files": {
+          "upload/.transcode/7/cd01/chunk-00000.mkv": {
+            "size": 1000
+          },
+          "upload/.transcode/7/cd01/chunk-00001.mkv": {
+            "size": 1001
+          },
+          "upload/.transcode/7/cd01/chunk-00002.mkv": {
+            "size": 1002
+          },
+          "upload/.transcode/7/audio/cd01.mka": {
+            "size": 500
+          },
+          "upload/.transcode/7/cd02/chunk-00000.mkv": {
+            "size": 1000
+          },
+          "upload/.transcode/7/audio/cd02.mka": {
+            "size": 500
+          },
+          "upload/.transcode/7/manifest.json": {
+            "text": "{\"parts\": [{\"index\": 0, \"chunks\": [{\"index\": 0, \"duration\": 60.0}, {\"index\": 1, \"duration\": 60.0}, {\"index\": 2, \"duration\": 30.5}]}, {\"index\": 1, \"chunks\": [{\"index\": 0, \"duration\": 60.0}, {\"index\": 1, \"duration\": 59.9}]}]}"
+          },
+          "upload/.transcode/7/audio.json": {
+            "text": "{\"state\": \"done\", \"has_audio\": true, \"parts\": [{\"duration\": 150.25}, {\"duration\": 119.9}]}"
+          }
+        },
+        "command": {
+          "parts": [],
+          "output": "<root>/upload/ABC-123.mp4",
+          "status": "<root>/upload/.merge/1.json",
+          "reserve_gib": 0.0,
+          "home_prepare": null,
+          "home_assemble": "<root>/upload/.transcode/7"
+        },
+        "free": 1000000000000,
+        "memory_max": "3221225472\n",
+        "probes": {
+          "<root>/upload/.transcode/7/cd01/chunk-00000.mkv": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"av1\",\n            \"codec_type\": \"video\",\n            \"width\": 4096,\n            \"height\": 2048\n        }\n    ],\n    \"format\": {\n        \"duration\": \"60.0\"\n    }\n}\n",
+            "stderr": ""
+          },
+          "<root>/upload/.transcode/7/cd02/chunk-00000.mkv": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"av1\",\n            \"codec_type\": \"video\",\n            \"width\": 4096,\n            \"height\": 2048\n        }\n    ],\n    \"format\": {\n        \"duration\": \"60.0\"\n    }\n}\n",
+            "stderr": ""
+          }
+        },
+        "ffmpeg": []
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/upload/.transcode/7/cd01/chunk-00000.mkv"
+          ]
+        }
+      ],
+      "writes": [
+        "{\"state\": \"running\", \"phase\": \"checking\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"probing\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"failed\", \"phase\": \"probing\", \"progress\": 0.5, \"error\": \"chunk-00001.mkv of cd2 is missing\", \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}"
+      ],
+      "code": 1,
+      "uncaught": null,
+      "stderr": "merge failed: chunk-00001.mkv of cd2 is missing\n",
+      "tree": [
+        [
+          "cgroup/memory.max",
+          11
+        ],
+        [
+          "tmp/",
+          null
+        ],
+        [
+          "upload/.merge/1.json",
+          152
+        ],
+        [
+          "upload/.transcode/7/audio.json",
+          90
+        ],
+        [
+          "upload/.transcode/7/audio/cd01.mka",
+          500
+        ],
+        [
+          "upload/.transcode/7/audio/cd02.mka",
+          500
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00000.mkv",
+          1000
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00001.mkv",
+          1001
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00002.mkv",
+          1002
+        ],
+        [
+          "upload/.transcode/7/cd02/chunk-00000.mkv",
+          1000
+        ],
+        [
+          "upload/.transcode/7/manifest.json",
+          223
+        ]
+      ]
+    },
+    {
+      "scenario": {
+        "name": "assemble_chunks_that_differ",
+        "files": {
+          "upload/.transcode/7/cd01/chunk-00000.mkv": {
+            "size": 1000
+          },
+          "upload/.transcode/7/cd01/chunk-00001.mkv": {
+            "size": 1001
+          },
+          "upload/.transcode/7/cd01/chunk-00002.mkv": {
+            "size": 1002
+          },
+          "upload/.transcode/7/audio/cd01.mka": {
+            "size": 500
+          },
+          "upload/.transcode/7/cd02/chunk-00000.mkv": {
+            "size": 1000
+          },
+          "upload/.transcode/7/cd02/chunk-00001.mkv": {
+            "size": 1001
+          },
+          "upload/.transcode/7/audio/cd02.mka": {
+            "size": 500
+          },
+          "upload/.transcode/7/manifest.json": {
+            "text": "{\"parts\": [{\"index\": 0, \"chunks\": [{\"index\": 0, \"duration\": 60.0}, {\"index\": 1, \"duration\": 60.0}, {\"index\": 2, \"duration\": 30.5}]}, {\"index\": 1, \"chunks\": [{\"index\": 0, \"duration\": 60.0}, {\"index\": 1, \"duration\": 59.9}]}]}"
+          },
+          "upload/.transcode/7/audio.json": {
+            "text": "{\"state\": \"done\", \"has_audio\": true, \"parts\": [{\"duration\": 150.25}, {\"duration\": 119.9}]}"
+          }
+        },
+        "command": {
+          "parts": [],
+          "output": "<root>/upload/ABC-123.mp4",
+          "status": "<root>/upload/.merge/1.json",
+          "reserve_gib": 0.0,
+          "home_prepare": null,
+          "home_assemble": "<root>/upload/.transcode/7"
+        },
+        "free": 1000000000000,
+        "memory_max": "3221225472\n",
+        "probes": {
+          "<root>/upload/.transcode/7/cd01/chunk-00000.mkv": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"av1\",\n            \"codec_type\": \"video\",\n            \"width\": 4096,\n            \"height\": 2048\n        }\n    ],\n    \"format\": {\n        \"duration\": \"60.0\"\n    }\n}\n",
+            "stderr": ""
+          },
+          "<root>/upload/.transcode/7/cd02/chunk-00000.mkv": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"h264\",\n            \"codec_type\": \"video\",\n            \"width\": 160,\n            \"height\": 120,\n            \"nb_frames\": \"20\"\n        }\n    ],\n    \"format\": {\n        \"duration\": \"60.0\"\n    }\n}\n",
+            "stderr": ""
+          }
+        },
+        "ffmpeg": []
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/upload/.transcode/7/cd01/chunk-00000.mkv"
+          ]
+        },
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/upload/.transcode/7/cd02/chunk-00000.mkv"
+          ]
+        }
+      ],
+      "writes": [
+        "{\"state\": \"running\", \"phase\": \"checking\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"probing\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"failed\", \"phase\": \"probing\", \"progress\": 0.5, \"error\": \"the video chunks of cd2 differ from those of the first part\", \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}"
+      ],
+      "code": 1,
+      "uncaught": null,
+      "stderr": "merge failed: the video chunks of cd2 differ from those of the first part\n",
+      "tree": [
+        [
+          "cgroup/memory.max",
+          11
+        ],
+        [
+          "tmp/",
+          null
+        ],
+        [
+          "upload/.merge/1.json",
+          178
+        ],
+        [
+          "upload/.transcode/7/audio.json",
+          90
+        ],
+        [
+          "upload/.transcode/7/audio/cd01.mka",
+          500
+        ],
+        [
+          "upload/.transcode/7/audio/cd02.mka",
+          500
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00000.mkv",
+          1000
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00001.mkv",
+          1001
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00002.mkv",
+          1002
+        ],
+        [
+          "upload/.transcode/7/cd02/chunk-00000.mkv",
+          1000
+        ],
+        [
+          "upload/.transcode/7/cd02/chunk-00001.mkv",
+          1001
+        ],
+        [
+          "upload/.transcode/7/manifest.json",
+          223
+        ]
+      ]
+    },
+    {
+      "scenario": {
+        "name": "assemble_keeps_a_last_chunk_that_runs_long",
+        "files": {
+          "upload/.transcode/7/cd01/chunk-00000.mkv": {
+            "size": 1000
+          },
+          "upload/.transcode/7/cd01/chunk-00001.mkv": {
+            "size": 1001
+          },
+          "upload/.transcode/7/audio/cd01.mka": {
+            "size": 500
+          },
+          "upload/.transcode/7/cd02/chunk-00000.mkv": {
+            "size": 1000
+          },
+          "upload/.transcode/7/audio/cd02.mka": {
+            "size": 500
+          },
+          "upload/.transcode/7/manifest.json": {
+            "text": "{\"parts\": [{\"index\": 0, \"chunks\": [{\"index\": 0, \"duration\": 100.0}, {\"index\": 1, \"duration\": 60.0}]}, {\"index\": 1, \"chunks\": [{\"index\": 0, \"duration\": 200.0}]}]}"
+          },
+          "upload/.transcode/7/audio.json": {
+            "text": "{\"state\": \"done\", \"has_audio\": true, \"parts\": [{\"duration\": 90.0}, {\"duration\": 150.0}]}"
+          }
+        },
+        "command": {
+          "parts": [],
+          "output": "<root>/upload/ABC-123.mp4",
+          "status": "<root>/upload/.merge/1.json",
+          "reserve_gib": 0.0,
+          "home_prepare": null,
+          "home_assemble": "<root>/upload/.transcode/7"
+        },
+        "free": 1000000000000,
+        "memory_max": "3221225472\n",
+        "probes": {
+          "<root>/upload/.transcode/7/cd01/chunk-00000.mkv": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"av1\",\n            \"codec_type\": \"video\",\n            \"width\": 4096,\n            \"height\": 2048\n        }\n    ],\n    \"format\": {\n        \"duration\": \"60.0\"\n    }\n}\n",
+            "stderr": ""
+          },
+          "<root>/upload/.transcode/7/cd02/chunk-00000.mkv": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"av1\",\n            \"codec_type\": \"video\",\n            \"width\": 4096,\n            \"height\": 2048\n        }\n    ],\n    \"format\": {\n        \"duration\": \"60.0\"\n    }\n}\n",
+            "stderr": ""
+          },
+          "<root>/upload/.ABC-123.mp4.part": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"h264\",\n            \"codec_type\": \"video\",\n            \"width\": 160,\n            \"height\": 120,\n            \"nb_frames\": \"20\"\n        },\n        {\n            \"index\": 1,\n            \"codec_name\": \"aac\",\n            \"codec_type\": \"audio\",\n            \"sample_rate\": \"44100\",\n            \"channels\": 1,\n            \"bit_rate\": \"128000\",\n            \"nb_frames\": \"94\"\n        }\n    ],\n    \"format\": {\n        \"duration\": \"240.0\"\n    }\n}\n",
+            "stderr": ""
+          }
+        },
+        "ffmpeg": [
+          {
+            "write": 10,
+            "stdout": "",
+            "stderr": "",
+            "returncode": 0
+          }
+        ]
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/upload/.transcode/7/cd01/chunk-00000.mkv"
+          ]
+        },
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/upload/.transcode/7/cd02/chunk-00000.mkv"
+          ]
+        },
+        {
+          "argv": [
+            "ffmpeg",
+            "-hide_banner",
+            "-nostdin",
+            "-loglevel",
+            "error",
+            "-y",
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            "<root>/tmp/video.txt",
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            "<root>/tmp/audio.txt",
+            "-map",
+            "0:v",
+            "-map",
+            "1:a",
+            "-c",
+            "copy",
+            "-f",
+            "mp4",
+            "-progress",
+            "pipe:1",
+            "-nostats",
+            "<root>/upload/.ABC-123.mp4.part"
+          ],
+          "scripts": {
+            "<root>/tmp/video.txt": "file '<root>/upload/.transcode/7/cd01/chunk-00000.mkv'\nduration 100.000000\nfile '<root>/upload/.transcode/7/cd01/chunk-00001.mkv'\nduration 60.000000\nfile '<root>/upload/.transcode/7/cd02/chunk-00000.mkv'\nduration 150.000000\n",
+            "<root>/tmp/audio.txt": "file '<root>/upload/.transcode/7/audio/cd01.mka'\nduration 90.000000\nfile '<root>/upload/.transcode/7/audio/cd02.mka'\nduration 150.000000\n"
+          }
+        },
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/upload/.ABC-123.mp4.part"
+          ]
+        }
+      ],
+      "writes": [
+        "{\"state\": \"running\", \"phase\": \"checking\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"probing\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"merging\", \"progress\": 0.0, \"duration\": 240.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"verifying\", \"progress\": 1.0, \"duration\": 240.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"hashing\", \"progress\": 0.0, \"duration\": 240.0, \"size\": 10, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"done\", \"phase\": \"done\", \"progress\": 1.0, \"duration\": 240.0, \"size\": 10, \"sha1\": \"494179714A6CD627239DFEDEDF2DE9EF994CAF03\", \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}"
+      ],
+      "code": 0,
+      "uncaught": null,
+      "stderr": "",
+      "tree": [
+        [
+          "cgroup/memory.max",
+          11
+        ],
+        [
+          "tmp/audio.txt",
+          137
+        ],
+        [
+          "tmp/video.txt",
+          224
+        ],
+        [
+          "upload/.merge/1.json",
+          184
+        ],
+        [
+          "upload/.transcode/7/audio.json",
+          88
+        ],
+        [
+          "upload/.transcode/7/audio/cd01.mka",
+          500
+        ],
+        [
+          "upload/.transcode/7/audio/cd02.mka",
+          500
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00000.mkv",
+          1000
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00001.mkv",
+          1001
+        ],
+        [
+          "upload/.transcode/7/cd02/chunk-00000.mkv",
+          1000
+        ],
+        [
+          "upload/.transcode/7/manifest.json",
+          161
+        ],
+        [
+          "upload/ABC-123.mp4",
+          10
+        ]
+      ]
+    },
+    {
+      "scenario": {
+        "name": "assemble_uncaught_malformed_manifest",
+        "files": {
+          "upload/.transcode/7/cd01/chunk-00000.mkv": {
+            "size": 1000
+          },
+          "upload/.transcode/7/cd01/chunk-00001.mkv": {
+            "size": 1001
+          },
+          "upload/.transcode/7/cd01/chunk-00002.mkv": {
+            "size": 1002
+          },
+          "upload/.transcode/7/audio/cd01.mka": {
+            "size": 500
+          },
+          "upload/.transcode/7/cd02/chunk-00000.mkv": {
+            "size": 1000
+          },
+          "upload/.transcode/7/cd02/chunk-00001.mkv": {
+            "size": 1001
+          },
+          "upload/.transcode/7/audio/cd02.mka": {
+            "size": 500
+          },
+          "upload/.transcode/7/manifest.json": {
+            "text": "{\"parts\": [{\"index\": 0}, {\"index\": 1}]}"
+          },
+          "upload/.transcode/7/audio.json": {
+            "text": "{\"state\": \"done\", \"has_audio\": true, \"parts\": [{\"duration\": 150.25}, {\"duration\": 119.9}]}"
+          }
+        },
+        "command": {
+          "parts": [],
+          "output": "<root>/upload/ABC-123.mp4",
+          "status": "<root>/upload/.merge/1.json",
+          "reserve_gib": 0.0,
+          "home_prepare": null,
+          "home_assemble": "<root>/upload/.transcode/7"
+        },
+        "free": 1000000000000,
+        "memory_max": "3221225472\n",
+        "probes": {},
+        "ffmpeg": []
+      },
+      "calls": [],
+      "writes": [
+        "{\"state\": \"running\", \"phase\": \"checking\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"probing\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}"
+      ],
+      "code": null,
+      "uncaught": "KeyError",
+      "traceback_tail": "KeyError: 'chunks'",
+      "stderr": "",
+      "tree": [
+        [
+          "cgroup/memory.max",
+          11
+        ],
+        [
+          "tmp/",
+          null
+        ],
+        [
+          "upload/.merge/1.json",
+          107
+        ],
+        [
+          "upload/.transcode/7/audio.json",
+          90
+        ],
+        [
+          "upload/.transcode/7/audio/cd01.mka",
+          500
+        ],
+        [
+          "upload/.transcode/7/audio/cd02.mka",
+          500
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00000.mkv",
+          1000
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00001.mkv",
+          1001
+        ],
+        [
+          "upload/.transcode/7/cd01/chunk-00002.mkv",
+          1002
+        ],
+        [
+          "upload/.transcode/7/cd02/chunk-00000.mkv",
+          1000
+        ],
+        [
+          "upload/.transcode/7/cd02/chunk-00001.mkv",
+          1001
+        ],
+        [
+          "upload/.transcode/7/manifest.json",
+          39
+        ]
+      ]
+    }
+  ]
+}
