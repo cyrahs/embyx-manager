@@ -1,0 +1,2794 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "html",
+  "cases": [
+    {
+      "name": "tests/test_javbus.py:10",
+      "html": "\n<html>\n<script>\n    var gid = 12345;\n    var uc = 0;\n    var img = '/pics/cover/sample.jpg';\n</script>\n</html>\n",
+      "parsed_as": "xml",
+      "document": {
+        "a[href]": [],
+        "a.movie-box": [],
+        ".avatar-box .pb10": [],
+        "title": [],
+        "tr": [],
+        "table tbody tr": []
+      },
+      "rows": [],
+      "anchors": [],
+      "nyaapy": [],
+      "lxml_html_root": "html"
+    },
+    {
+      "name": "tests/test_javbus.py:20",
+      "html": "\n<html>\n    <tr>\n        <td width=\"70%\">\n            <a href=\"magnet:?xt=urn:btih:de439fca97a0365b47d9b087010115a94cad6853&dn=release1\">release1</a>\n        </td>\n        <td style=\"text-align:center\">\n            <a href=\"magnet:?xt=urn:btih:de439fca97a0365b47d9b087010115a94cad6853&dn=release1\">2.02GB</a>\n        </td>\n        <td style=\"text-align:center\">\n            <a href=\"magnet:?xt=urn:btih:de439fca97a0365b47d9b087010115a94cad6853&dn=release1\">2025-01-01</a>\n        </td>\n    </tr>\n    <tr>\n        <td width=\"70%\">\n            <a href=\"magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2\">release2</a>\n            <a class=\"btn btn-mini-new btn-primary\"\n               href=\"magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2\">高清</a>\n            <a class=\"btn btn-mini-new btn-warning\"\n               href=\"magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2\">字幕</a>\n        </td>\n        <td style=\"text-align:center\">\n            <a href=\"magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2\">1.5GB</a>\n        </td>\n        <td style=\"text-align:center\">\n            <a href=\"magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2\">2025-01-02</a>\n        </td>\n    </tr>\n    <a href=\"http://other-link.com\">Other Link</a>\n</html>\n",
+      "parsed_as": "html",
+      "document": {
+        "a[href]": [
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "magnet:?xt=urn:btih:de439fca97a0365b47d9b087010115a94cad6853&dn=release1"
+              ]
+            ],
+            "text": "release1",
+            "text_content": "release1"
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "magnet:?xt=urn:btih:de439fca97a0365b47d9b087010115a94cad6853&dn=release1"
+              ]
+            ],
+            "text": "2.02GB",
+            "text_content": "2.02GB"
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "magnet:?xt=urn:btih:de439fca97a0365b47d9b087010115a94cad6853&dn=release1"
+              ]
+            ],
+            "text": "2025-01-01",
+            "text_content": "2025-01-01"
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2"
+              ]
+            ],
+            "text": "release2",
+            "text_content": "release2"
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "class",
+                "btn btn-mini-new btn-primary"
+              ],
+              [
+                "href",
+                "magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2"
+              ]
+            ],
+            "text": "高清",
+            "text_content": "高清"
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "class",
+                "btn btn-mini-new btn-warning"
+              ],
+              [
+                "href",
+                "magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2"
+              ]
+            ],
+            "text": "字幕",
+            "text_content": "字幕"
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2"
+              ]
+            ],
+            "text": "1.5GB",
+            "text_content": "1.5GB"
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2"
+              ]
+            ],
+            "text": "2025-01-02",
+            "text_content": "2025-01-02"
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "http://other-link.com"
+              ]
+            ],
+            "text": "Other Link",
+            "text_content": "Other Link"
+          }
+        ],
+        "a.movie-box": [],
+        ".avatar-box .pb10": [],
+        "title": [],
+        "tr": [
+          {
+            "tag": "tr",
+            "attrs": [],
+            "text": "release1\n2.02GB\n2025-01-01",
+            "text_content": "\n        \n            release1\n        \n        \n            2.02GB\n        \n        \n            2025-01-01\n        \n    "
+          },
+          {
+            "tag": "tr",
+            "attrs": [],
+            "text": "release2 高清 字幕\n1.5GB\n2025-01-02",
+            "text_content": "\n        \n            release2\n            高清\n            字幕\n        \n        \n            1.5GB\n        \n        \n            2025-01-02\n        \n    "
+          }
+        ],
+        "table tbody tr": []
+      },
+      "rows": [
+        {
+          "td": [
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "width",
+                  "70%"
+                ]
+              ],
+              "text": "release1",
+              "text_content": "\n            release1\n        "
+            },
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "style",
+                  "text-align:center"
+                ]
+              ],
+              "text": "2.02GB",
+              "text_content": "\n            2.02GB\n        "
+            },
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "style",
+                  "text-align:center"
+                ]
+              ],
+              "text": "2025-01-01",
+              "text_content": "\n            2025-01-01\n        "
+            }
+          ],
+          "td:first-child a[href^=\"magnet\"]": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:de439fca97a0365b47d9b087010115a94cad6853&dn=release1"
+                ]
+              ],
+              "text": "release1",
+              "text_content": "release1"
+            }
+          ],
+          "td:first-child a": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:de439fca97a0365b47d9b087010115a94cad6853&dn=release1"
+                ]
+              ],
+              "text": "release1",
+              "text_content": "release1"
+            }
+          ],
+          "td:nth-child(1) a[href^='magnet:']": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:de439fca97a0365b47d9b087010115a94cad6853&dn=release1"
+                ]
+              ],
+              "text": "release1",
+              "text_content": "release1"
+            }
+          ],
+          "td:nth-child(2)": [
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "style",
+                  "text-align:center"
+                ]
+              ],
+              "text": "2.02GB",
+              "text_content": "\n            2.02GB\n        "
+            }
+          ],
+          "a[href^='magnet:']": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:de439fca97a0365b47d9b087010115a94cad6853&dn=release1"
+                ]
+              ],
+              "text": "release1",
+              "text_content": "release1"
+            },
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:de439fca97a0365b47d9b087010115a94cad6853&dn=release1"
+                ]
+              ],
+              "text": "2.02GB",
+              "text_content": "2.02GB"
+            },
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:de439fca97a0365b47d9b087010115a94cad6853&dn=release1"
+                ]
+              ],
+              "text": "2025-01-01",
+              "text_content": "2025-01-01"
+            }
+          ]
+        },
+        {
+          "td": [
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "width",
+                  "70%"
+                ]
+              ],
+              "text": "release2 高清 字幕",
+              "text_content": "\n            release2\n            高清\n            字幕\n        "
+            },
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "style",
+                  "text-align:center"
+                ]
+              ],
+              "text": "1.5GB",
+              "text_content": "\n            1.5GB\n        "
+            },
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "style",
+                  "text-align:center"
+                ]
+              ],
+              "text": "2025-01-02",
+              "text_content": "\n            2025-01-02\n        "
+            }
+          ],
+          "td:first-child a[href^=\"magnet\"]": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2"
+                ]
+              ],
+              "text": "release2",
+              "text_content": "release2"
+            },
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "class",
+                  "btn btn-mini-new btn-primary"
+                ],
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2"
+                ]
+              ],
+              "text": "高清",
+              "text_content": "高清"
+            },
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "class",
+                  "btn btn-mini-new btn-warning"
+                ],
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2"
+                ]
+              ],
+              "text": "字幕",
+              "text_content": "字幕"
+            }
+          ],
+          "td:first-child a": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2"
+                ]
+              ],
+              "text": "release2",
+              "text_content": "release2"
+            },
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "class",
+                  "btn btn-mini-new btn-primary"
+                ],
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2"
+                ]
+              ],
+              "text": "高清",
+              "text_content": "高清"
+            },
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "class",
+                  "btn btn-mini-new btn-warning"
+                ],
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2"
+                ]
+              ],
+              "text": "字幕",
+              "text_content": "字幕"
+            }
+          ],
+          "td:nth-child(1) a[href^='magnet:']": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2"
+                ]
+              ],
+              "text": "release2",
+              "text_content": "release2"
+            },
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "class",
+                  "btn btn-mini-new btn-primary"
+                ],
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2"
+                ]
+              ],
+              "text": "高清",
+              "text_content": "高清"
+            },
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "class",
+                  "btn btn-mini-new btn-warning"
+                ],
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2"
+                ]
+              ],
+              "text": "字幕",
+              "text_content": "字幕"
+            }
+          ],
+          "td:nth-child(2)": [
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "style",
+                  "text-align:center"
+                ]
+              ],
+              "text": "1.5GB",
+              "text_content": "\n            1.5GB\n        "
+            }
+          ],
+          "a[href^='magnet:']": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2"
+                ]
+              ],
+              "text": "release2",
+              "text_content": "release2"
+            },
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "class",
+                  "btn btn-mini-new btn-primary"
+                ],
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2"
+                ]
+              ],
+              "text": "高清",
+              "text_content": "高清"
+            },
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "class",
+                  "btn btn-mini-new btn-warning"
+                ],
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2"
+                ]
+              ],
+              "text": "字幕",
+              "text_content": "字幕"
+            },
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2"
+                ]
+              ],
+              "text": "1.5GB",
+              "text_content": "1.5GB"
+            },
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=release2"
+                ]
+              ],
+              "text": "2025-01-02",
+              "text_content": "2025-01-02"
+            }
+          ]
+        }
+      ],
+      "anchors": [
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        }
+      ],
+      "nyaapy": [],
+      "lxml_html_root": "html"
+    },
+    {
+      "name": "tests/test_javbus.py:107",
+      "html": "<html>No variables here</html>",
+      "parsed_as": "xml",
+      "document": {
+        "a[href]": [],
+        "a.movie-box": [],
+        ".avatar-box .pb10": [],
+        "title": [],
+        "tr": [],
+        "table tbody tr": []
+      },
+      "rows": [],
+      "anchors": [],
+      "nyaapy": [],
+      "lxml_html_root": "html"
+    },
+    {
+      "name": "tests/test_javbus.py:116",
+      "html": "\n    <html>\n        <a href=\"/star/a123\"></a>\n        <a href=\"https://www.javbus.com/star/B456/\"><img alt=\"演员乙\"></a>\n        <a class=\"avatar-box\" href=\"/star/A123\"><span>演员甲</span></a>\n        <a href=\"/star/A123\">重复演员</a>\n        <a href=\"/genre/7\">其他链接</a>\n    </html>\n    ",
+      "parsed_as": "html",
+      "document": {
+        "a[href]": [
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "/star/a123"
+              ]
+            ],
+            "text": "",
+            "text_content": ""
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "https://www.javbus.com/star/B456/"
+              ]
+            ],
+            "text": "",
+            "text_content": ""
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "class",
+                "avatar-box"
+              ],
+              [
+                "href",
+                "/star/A123"
+              ]
+            ],
+            "text": "演员甲",
+            "text_content": "演员甲"
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "/star/A123"
+              ]
+            ],
+            "text": "重复演员",
+            "text_content": "重复演员"
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "/genre/7"
+              ]
+            ],
+            "text": "其他链接",
+            "text_content": "其他链接"
+          }
+        ],
+        "a.movie-box": [],
+        ".avatar-box .pb10": [],
+        "title": [],
+        "tr": [],
+        "table tbody tr": []
+      },
+      "rows": [],
+      "anchors": [
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": [
+            {
+              "tag": "img",
+              "attrs": [
+                [
+                  "alt",
+                  "演员乙"
+                ]
+              ],
+              "text": "",
+              "text_content": ""
+            }
+          ]
+        },
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        }
+      ],
+      "nyaapy": [],
+      "lxml_html_root": "html"
+    },
+    {
+      "name": "tests/test_javbus.py:139",
+      "html": "\n    <html>\n        <a class=\"movie-box featured\" href=\"https://www.javbus.com/VID-001/\"></a>\n        <a class=\"movie-box\" href=\"https://www.javbus.com/VID-002\"></a>\n        <a class=\"movie-box\" href=\"https://www.javbus.com/VID-001\"></a> <!-- Duplicate -->\n    </html>\n    ",
+      "parsed_as": "xml",
+      "document": {
+        "a[href]": [
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "class",
+                "movie-box featured"
+              ],
+              [
+                "href",
+                "https://www.javbus.com/VID-001/"
+              ]
+            ],
+            "text": "",
+            "text_content": ""
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "class",
+                "movie-box"
+              ],
+              [
+                "href",
+                "https://www.javbus.com/VID-002"
+              ]
+            ],
+            "text": "",
+            "text_content": ""
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "class",
+                "movie-box"
+              ],
+              [
+                "href",
+                "https://www.javbus.com/VID-001"
+              ]
+            ],
+            "text": "",
+            "text_content": ""
+          }
+        ],
+        "a.movie-box": [
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "class",
+                "movie-box featured"
+              ],
+              [
+                "href",
+                "https://www.javbus.com/VID-001/"
+              ]
+            ],
+            "text": "",
+            "text_content": ""
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "class",
+                "movie-box"
+              ],
+              [
+                "href",
+                "https://www.javbus.com/VID-002"
+              ]
+            ],
+            "text": "",
+            "text_content": ""
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "class",
+                "movie-box"
+              ],
+              [
+                "href",
+                "https://www.javbus.com/VID-001"
+              ]
+            ],
+            "text": "",
+            "text_content": ""
+          }
+        ],
+        ".avatar-box .pb10": [],
+        "title": [],
+        "tr": [],
+        "table tbody tr": []
+      },
+      "rows": [],
+      "anchors": [
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        }
+      ],
+      "nyaapy": [],
+      "lxml_html_root": "html"
+    },
+    {
+      "name": "tests/test_javbus.py:160",
+      "html": "\n    <html>\n        <a href=\"/star/ACTOR-1/1\">1</a>\n        <a href=\"/star/ACTOR-1/2\">2</a>\n        <a href=\"/star/ACTOR-1/3\">3</a>\n    </html>\n    ",
+      "parsed_as": "xml",
+      "document": {
+        "a[href]": [
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "/star/ACTOR-1/1"
+              ]
+            ],
+            "text": "1",
+            "text_content": "1"
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "/star/ACTOR-1/2"
+              ]
+            ],
+            "text": "2",
+            "text_content": "2"
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "/star/ACTOR-1/3"
+              ]
+            ],
+            "text": "3",
+            "text_content": "3"
+          }
+        ],
+        "a.movie-box": [],
+        ".avatar-box .pb10": [],
+        "title": [],
+        "tr": [],
+        "table tbody tr": []
+      },
+      "rows": [],
+      "anchors": [
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        }
+      ],
+      "nyaapy": [],
+      "lxml_html_root": "html"
+    },
+    {
+      "name": "tests/test_javbus.py:175",
+      "html": "<html></html>",
+      "parsed_as": "xml",
+      "document": {
+        "a[href]": [],
+        "a.movie-box": [],
+        ".avatar-box .pb10": [],
+        "title": [],
+        "tr": [],
+        "table tbody tr": []
+      },
+      "rows": [],
+      "anchors": [],
+      "nyaapy": [],
+      "lxml_html_root": "html"
+    },
+    {
+      "name": "tests/test_javbus.py:211",
+      "html": "</a>",
+      "error": "ParserError: Document is empty"
+    },
+    {
+      "name": "tests/test_javbus.py:214",
+      "html": "\"></a>",
+      "parsed_as": "html",
+      "document": {
+        "a[href]": [],
+        "a.movie-box": [],
+        ".avatar-box .pb10": [],
+        "title": [],
+        "tr": [],
+        "table tbody tr": []
+      },
+      "rows": [],
+      "anchors": [],
+      "nyaapy": [],
+      "lxml_html_root": "p"
+    },
+    {
+      "name": "tests/test_javbus.py:258",
+      "html": "\n    <a class=\"movie-box\" href=\"/VID-001\"></a>\n    <a href=\"/star/ACTOR-1/3\">3</a>\n    ",
+      "parsed_as": "html",
+      "document": {
+        "a[href]": [
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "class",
+                "movie-box"
+              ],
+              [
+                "href",
+                "/VID-001"
+              ]
+            ],
+            "text": "",
+            "text_content": ""
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "/star/ACTOR-1/3"
+              ]
+            ],
+            "text": "3",
+            "text_content": "3"
+          }
+        ],
+        "a.movie-box": [
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "class",
+                "movie-box"
+              ],
+              [
+                "href",
+                "/VID-001"
+              ]
+            ],
+            "text": "",
+            "text_content": ""
+          }
+        ],
+        ".avatar-box .pb10": [],
+        "title": [],
+        "tr": [],
+        "table tbody tr": []
+      },
+      "rows": [],
+      "anchors": [
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        }
+      ],
+      "nyaapy": [],
+      "lxml_html_root": "span"
+    },
+    {
+      "name": "tests/test_javbus.py:283",
+      "html": "\n    <div id=\"waterfall\">\n      <a class=\"avatar-box text-center\" href=\"https://www.javbus.com/star/sl1\"><span class=\"pb10\">河北彩花</span></a>\n      <a class=\"avatar-box text-center\" href=\"https://www.javbus.com/star/new1\"><span class=\"pb10\">河北彩伽</span></a>\n      <a href=\"https://www.javbus.com/star/sl1\">dup</a>\n      <a href=\"https://www.javbus.com/genre/1\">not a star</a>\n    </div>\n    ",
+      "parsed_as": "xml",
+      "document": {
+        "a[href]": [
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "class",
+                "avatar-box text-center"
+              ],
+              [
+                "href",
+                "https://www.javbus.com/star/sl1"
+              ]
+            ],
+            "text": "河北彩花",
+            "text_content": "河北彩花"
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "class",
+                "avatar-box text-center"
+              ],
+              [
+                "href",
+                "https://www.javbus.com/star/new1"
+              ]
+            ],
+            "text": "河北彩伽",
+            "text_content": "河北彩伽"
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "https://www.javbus.com/star/sl1"
+              ]
+            ],
+            "text": "dup",
+            "text_content": "dup"
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "https://www.javbus.com/genre/1"
+              ]
+            ],
+            "text": "not a star",
+            "text_content": "not a star"
+          }
+        ],
+        "a.movie-box": [],
+        ".avatar-box .pb10": [
+          {
+            "tag": "span",
+            "attrs": [
+              [
+                "class",
+                "pb10"
+              ]
+            ],
+            "text": "河北彩花",
+            "text_content": "河北彩花"
+          },
+          {
+            "tag": "span",
+            "attrs": [
+              [
+                "class",
+                "pb10"
+              ]
+            ],
+            "text": "河北彩伽",
+            "text_content": "河北彩伽"
+          }
+        ],
+        "title": [],
+        "tr": [],
+        "table tbody tr": []
+      },
+      "rows": [],
+      "anchors": [
+        {
+          ".pb10": [
+            {
+              "tag": "span",
+              "attrs": [
+                [
+                  "class",
+                  "pb10"
+                ]
+              ],
+              "text": "河北彩花",
+              "text_content": "河北彩花"
+            }
+          ],
+          "img": []
+        },
+        {
+          ".pb10": [
+            {
+              "tag": "span",
+              "attrs": [
+                [
+                  "class",
+                  "pb10"
+                ]
+              ],
+              "text": "河北彩伽",
+              "text_content": "河北彩伽"
+            }
+          ],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        }
+      ],
+      "nyaapy": [],
+      "lxml_html_root": "div"
+    },
+    {
+      "name": "tests/test_magnet_sources.py:10",
+      "html": "\n    <table><tbody>\n      <tr>\n        <td><a href=\"magnet:?xt=urn:btih:abc&dn=name\">name</a></td>\n        <td>unknown</td>\n      </tr>\n    </tbody></table>\n    ",
+      "parsed_as": "html",
+      "document": {
+        "a[href]": [
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "magnet:?xt=urn:btih:abc&dn=name"
+              ]
+            ],
+            "text": "name",
+            "text_content": "name"
+          }
+        ],
+        "a.movie-box": [],
+        ".avatar-box .pb10": [],
+        "title": [],
+        "tr": [
+          {
+            "tag": "tr",
+            "attrs": [],
+            "text": "name\nunknown",
+            "text_content": "\n        name\n        unknown\n      "
+          }
+        ],
+        "table tbody tr": [
+          {
+            "tag": "tr",
+            "attrs": [],
+            "text": "name\nunknown",
+            "text_content": "\n        name\n        unknown\n      "
+          }
+        ]
+      },
+      "rows": [
+        {
+          "td": [
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "name",
+              "text_content": "name"
+            },
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "unknown",
+              "text_content": "unknown"
+            }
+          ],
+          "td:first-child a[href^=\"magnet\"]": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:abc&dn=name"
+                ]
+              ],
+              "text": "name",
+              "text_content": "name"
+            }
+          ],
+          "td:first-child a": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:abc&dn=name"
+                ]
+              ],
+              "text": "name",
+              "text_content": "name"
+            }
+          ],
+          "td:nth-child(1) a[href^='magnet:']": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:abc&dn=name"
+                ]
+              ],
+              "text": "name",
+              "text_content": "name"
+            }
+          ],
+          "td:nth-child(2)": [
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "unknown",
+              "text_content": "unknown"
+            }
+          ],
+          "a[href^='magnet:']": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:abc&dn=name"
+                ]
+              ],
+              "text": "name",
+              "text_content": "name"
+            }
+          ]
+        }
+      ],
+      "anchors": [
+        {
+          ".pb10": [],
+          "img": []
+        }
+      ],
+      "nyaapy": [
+        {
+          "class": null,
+          "cells": [
+            {
+              "text": null,
+              "links": [
+                {
+                  "href": "magnet:?xt=urn:btih:abc&dn=name",
+                  "text": "name"
+                }
+              ]
+            },
+            {
+              "text": "unknown",
+              "links": []
+            }
+          ]
+        }
+      ],
+      "lxml_html_root": "table"
+    },
+    {
+      "name": "tests/test_magnet_sources.py:23",
+      "html": "\n    <table><tbody>\n      <tr>\n        <td><a href=\"magnet:?xt=urn:btih:small&dn=small\">small</a></td>\n        <td>1 GiB</td>\n      </tr>\n      <tr>\n        <td><a href=\"magnet:?xt=urn:btih:big&dn=big\">big</a></td>\n        <td>3 GiB</td>\n      </tr>\n    </tbody></table>\n    ",
+      "parsed_as": "html",
+      "document": {
+        "a[href]": [
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "magnet:?xt=urn:btih:small&dn=small"
+              ]
+            ],
+            "text": "small",
+            "text_content": "small"
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "magnet:?xt=urn:btih:big&dn=big"
+              ]
+            ],
+            "text": "big",
+            "text_content": "big"
+          }
+        ],
+        "a.movie-box": [],
+        ".avatar-box .pb10": [],
+        "title": [],
+        "tr": [
+          {
+            "tag": "tr",
+            "attrs": [],
+            "text": "small\n1 GiB",
+            "text_content": "\n        small\n        1 GiB\n      "
+          },
+          {
+            "tag": "tr",
+            "attrs": [],
+            "text": "big\n3 GiB",
+            "text_content": "\n        big\n        3 GiB\n      "
+          }
+        ],
+        "table tbody tr": [
+          {
+            "tag": "tr",
+            "attrs": [],
+            "text": "small\n1 GiB",
+            "text_content": "\n        small\n        1 GiB\n      "
+          },
+          {
+            "tag": "tr",
+            "attrs": [],
+            "text": "big\n3 GiB",
+            "text_content": "\n        big\n        3 GiB\n      "
+          }
+        ]
+      },
+      "rows": [
+        {
+          "td": [
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "small",
+              "text_content": "small"
+            },
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "1 GiB",
+              "text_content": "1 GiB"
+            }
+          ],
+          "td:first-child a[href^=\"magnet\"]": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:small&dn=small"
+                ]
+              ],
+              "text": "small",
+              "text_content": "small"
+            }
+          ],
+          "td:first-child a": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:small&dn=small"
+                ]
+              ],
+              "text": "small",
+              "text_content": "small"
+            }
+          ],
+          "td:nth-child(1) a[href^='magnet:']": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:small&dn=small"
+                ]
+              ],
+              "text": "small",
+              "text_content": "small"
+            }
+          ],
+          "td:nth-child(2)": [
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "1 GiB",
+              "text_content": "1 GiB"
+            }
+          ],
+          "a[href^='magnet:']": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:small&dn=small"
+                ]
+              ],
+              "text": "small",
+              "text_content": "small"
+            }
+          ]
+        },
+        {
+          "td": [
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "big",
+              "text_content": "big"
+            },
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "3 GiB",
+              "text_content": "3 GiB"
+            }
+          ],
+          "td:first-child a[href^=\"magnet\"]": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:big&dn=big"
+                ]
+              ],
+              "text": "big",
+              "text_content": "big"
+            }
+          ],
+          "td:first-child a": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:big&dn=big"
+                ]
+              ],
+              "text": "big",
+              "text_content": "big"
+            }
+          ],
+          "td:nth-child(1) a[href^='magnet:']": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:big&dn=big"
+                ]
+              ],
+              "text": "big",
+              "text_content": "big"
+            }
+          ],
+          "td:nth-child(2)": [
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "3 GiB",
+              "text_content": "3 GiB"
+            }
+          ],
+          "a[href^='magnet:']": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:big&dn=big"
+                ]
+              ],
+              "text": "big",
+              "text_content": "big"
+            }
+          ]
+        }
+      ],
+      "anchors": [
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        }
+      ],
+      "nyaapy": [
+        {
+          "class": null,
+          "cells": [
+            {
+              "text": null,
+              "links": [
+                {
+                  "href": "magnet:?xt=urn:btih:small&dn=small",
+                  "text": "small"
+                }
+              ]
+            },
+            {
+              "text": "1 GiB",
+              "links": []
+            }
+          ]
+        },
+        {
+          "class": null,
+          "cells": [
+            {
+              "text": null,
+              "links": [
+                {
+                  "href": "magnet:?xt=urn:btih:big&dn=big",
+                  "text": "big"
+                }
+              ]
+            },
+            {
+              "text": "3 GiB",
+              "links": []
+            }
+          ]
+        }
+      ],
+      "lxml_html_root": "table"
+    },
+    {
+      "name": "tests/test_magnet_sources.py:50",
+      "html": "<img src=\"cover.jpg\"/><div id=\"video_info\"><table><tbody><tr><td>ID:</td><td>ABC-123</td></tr><tr><td>Release Date:</td><td>2026-01-01</td></tr></tbody></table></div>",
+      "parsed_as": "html",
+      "document": {
+        "a[href]": [],
+        "a.movie-box": [],
+        ".avatar-box .pb10": [],
+        "title": [],
+        "tr": [
+          {
+            "tag": "tr",
+            "attrs": [],
+            "text": "ID:\nABC-123",
+            "text_content": "ID:ABC-123"
+          },
+          {
+            "tag": "tr",
+            "attrs": [],
+            "text": "Release Date:\n2026-01-01",
+            "text_content": "Release Date:2026-01-01"
+          }
+        ],
+        "table tbody tr": [
+          {
+            "tag": "tr",
+            "attrs": [],
+            "text": "ID:\nABC-123",
+            "text_content": "ID:ABC-123"
+          },
+          {
+            "tag": "tr",
+            "attrs": [],
+            "text": "Release Date:\n2026-01-01",
+            "text_content": "Release Date:2026-01-01"
+          }
+        ]
+      },
+      "rows": [
+        {
+          "td": [
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "ID:",
+              "text_content": "ID:"
+            },
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "ABC-123",
+              "text_content": "ABC-123"
+            }
+          ],
+          "td:first-child a[href^=\"magnet\"]": [],
+          "td:first-child a": [],
+          "td:nth-child(1) a[href^='magnet:']": [],
+          "td:nth-child(2)": [
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "ABC-123",
+              "text_content": "ABC-123"
+            }
+          ],
+          "a[href^='magnet:']": []
+        },
+        {
+          "td": [
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "Release Date:",
+              "text_content": "Release Date:"
+            },
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "2026-01-01",
+              "text_content": "2026-01-01"
+            }
+          ],
+          "td:first-child a[href^=\"magnet\"]": [],
+          "td:first-child a": [],
+          "td:nth-child(1) a[href^='magnet:']": [],
+          "td:nth-child(2)": [
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "2026-01-01",
+              "text_content": "2026-01-01"
+            }
+          ],
+          "a[href^='magnet:']": []
+        }
+      ],
+      "anchors": [],
+      "nyaapy": [
+        {
+          "class": null,
+          "cells": [
+            {
+              "text": "ID:",
+              "links": []
+            },
+            {
+              "text": "ABC-123",
+              "links": []
+            }
+          ]
+        },
+        {
+          "class": null,
+          "cells": [
+            {
+              "text": "Release Date:",
+              "links": []
+            },
+            {
+              "text": "2026-01-01",
+              "links": []
+            }
+          ]
+        }
+      ],
+      "lxml_html_root": "div"
+    },
+    {
+      "name": "synthetic: sukebei result table (layout of a nyaa search page)",
+      "html": "<!DOCTYPE html><html><head><title>Sukebei</title></head><body><table class=\"table torrent-list\"><thead><tr><th>Category</th><th>Name</th></tr></thead><tbody><tr class=\"success\"><td><a href=\"/?c=2_2\" title=\"Real Life - Videos\"><img src=\"/static/img/icons/sukebei/2_2.png\" alt=\"Real Life - Videos\"></a></td><td colspan=\"2\"><a href=\"/view/4000001#comments\" class=\"comments\"><i class=\"fa fa-comments-o\"></i>2</a><a href=\"/view/4000001\" title=\"ABC-123 FHD\">ABC-123 FHD</a></td><td class=\"text-center\"><a href=\"/download/4000001.torrent\"><i class=\"fa fa-fw fa-download\"></i></a><a href=\"magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567&amp;dn=ABC-123\"><i class=\"fa fa-fw fa-magnet\"></i></a></td><td class=\"text-center\">2.1 GiB</td><td class=\"text-center\" data-timestamp=\"1767225600\">2026-01-01 00:00</td><td class=\"text-center\">12</td><td class=\"text-center\">0</td><td class=\"text-center\">80</td></tr><tr class=\"default\"><td><a href=\"/?c=2_2\"><img src=\"x.png\"></a></td><td colspan=\"2\"><a href=\"/view/4000002\" title=\"[HD] abc00123\">[HD] abc00123</a></td><td class=\"text-center\"><a href=\"/download/4000002.torrent\"></a><a href=\"magnet:?xt=urn:btih:fedcba9876543210fedcba9876543210fedcba98&dn=x\"></a></td><td class=\"text-center\">900.5 MiB</td><td class=\"text-center\">2025-12-31 10:00</td><td class=\"text-center\">3</td><td class=\"text-center\">1</td><td class=\"text-center\">7</td></tr></tbody></table></body></html>",
+      "parsed_as": "html",
+      "document": {
+        "a[href]": [
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "/?c=2_2"
+              ],
+              [
+                "title",
+                "Real Life - Videos"
+              ]
+            ],
+            "text": "",
+            "text_content": ""
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "/view/4000001#comments"
+              ],
+              [
+                "class",
+                "comments"
+              ]
+            ],
+            "text": "2",
+            "text_content": "2"
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "/view/4000001"
+              ],
+              [
+                "title",
+                "ABC-123 FHD"
+              ]
+            ],
+            "text": "ABC-123 FHD",
+            "text_content": "ABC-123 FHD"
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "/download/4000001.torrent"
+              ]
+            ],
+            "text": "",
+            "text_content": ""
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567&dn=ABC-123"
+              ]
+            ],
+            "text": "",
+            "text_content": ""
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "/?c=2_2"
+              ]
+            ],
+            "text": "",
+            "text_content": ""
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "/view/4000002"
+              ],
+              [
+                "title",
+                "[HD] abc00123"
+              ]
+            ],
+            "text": "[HD] abc00123",
+            "text_content": "[HD] abc00123"
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "/download/4000002.torrent"
+              ]
+            ],
+            "text": "",
+            "text_content": ""
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "magnet:?xt=urn:btih:fedcba9876543210fedcba9876543210fedcba98&dn=x"
+              ]
+            ],
+            "text": "",
+            "text_content": ""
+          }
+        ],
+        "a.movie-box": [],
+        ".avatar-box .pb10": [],
+        "title": [
+          {
+            "tag": "title",
+            "attrs": [],
+            "text": "Sukebei",
+            "text_content": "Sukebei"
+          }
+        ],
+        "tr": [
+          {
+            "tag": "tr",
+            "attrs": [],
+            "text": "Category\nName",
+            "text_content": "CategoryName"
+          },
+          {
+            "tag": "tr",
+            "attrs": [
+              [
+                "class",
+                "success"
+              ]
+            ],
+            "text": "2ABC-123 FHD\n2.1 GiB\n2026-01-01 00:00\n12\n0\n80",
+            "text_content": "2ABC-123 FHD2.1 GiB2026-01-01 00:0012080"
+          },
+          {
+            "tag": "tr",
+            "attrs": [
+              [
+                "class",
+                "default"
+              ]
+            ],
+            "text": "[HD] abc00123\n900.5 MiB\n2025-12-31 10:00\n3\n1\n7",
+            "text_content": "[HD] abc00123900.5 MiB2025-12-31 10:00317"
+          }
+        ],
+        "table tbody tr": [
+          {
+            "tag": "tr",
+            "attrs": [
+              [
+                "class",
+                "success"
+              ]
+            ],
+            "text": "2ABC-123 FHD\n2.1 GiB\n2026-01-01 00:00\n12\n0\n80",
+            "text_content": "2ABC-123 FHD2.1 GiB2026-01-01 00:0012080"
+          },
+          {
+            "tag": "tr",
+            "attrs": [
+              [
+                "class",
+                "default"
+              ]
+            ],
+            "text": "[HD] abc00123\n900.5 MiB\n2025-12-31 10:00\n3\n1\n7",
+            "text_content": "[HD] abc00123900.5 MiB2025-12-31 10:00317"
+          }
+        ]
+      },
+      "rows": [
+        {
+          "td": [],
+          "td:first-child a[href^=\"magnet\"]": [],
+          "td:first-child a": [],
+          "td:nth-child(1) a[href^='magnet:']": [],
+          "td:nth-child(2)": [],
+          "a[href^='magnet:']": []
+        },
+        {
+          "td": [
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "",
+              "text_content": ""
+            },
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "colspan",
+                  "2"
+                ]
+              ],
+              "text": "2ABC-123 FHD",
+              "text_content": "2ABC-123 FHD"
+            },
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "class",
+                  "text-center"
+                ]
+              ],
+              "text": "",
+              "text_content": ""
+            },
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "class",
+                  "text-center"
+                ]
+              ],
+              "text": "2.1 GiB",
+              "text_content": "2.1 GiB"
+            },
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "class",
+                  "text-center"
+                ],
+                [
+                  "data-timestamp",
+                  "1767225600"
+                ]
+              ],
+              "text": "2026-01-01 00:00",
+              "text_content": "2026-01-01 00:00"
+            },
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "class",
+                  "text-center"
+                ]
+              ],
+              "text": "12",
+              "text_content": "12"
+            },
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "class",
+                  "text-center"
+                ]
+              ],
+              "text": "0",
+              "text_content": "0"
+            },
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "class",
+                  "text-center"
+                ]
+              ],
+              "text": "80",
+              "text_content": "80"
+            }
+          ],
+          "td:first-child a[href^=\"magnet\"]": [],
+          "td:first-child a": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "/?c=2_2"
+                ],
+                [
+                  "title",
+                  "Real Life - Videos"
+                ]
+              ],
+              "text": "",
+              "text_content": ""
+            }
+          ],
+          "td:nth-child(1) a[href^='magnet:']": [],
+          "td:nth-child(2)": [
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "colspan",
+                  "2"
+                ]
+              ],
+              "text": "2ABC-123 FHD",
+              "text_content": "2ABC-123 FHD"
+            }
+          ],
+          "a[href^='magnet:']": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567&dn=ABC-123"
+                ]
+              ],
+              "text": "",
+              "text_content": ""
+            }
+          ]
+        },
+        {
+          "td": [
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "",
+              "text_content": ""
+            },
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "colspan",
+                  "2"
+                ]
+              ],
+              "text": "[HD] abc00123",
+              "text_content": "[HD] abc00123"
+            },
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "class",
+                  "text-center"
+                ]
+              ],
+              "text": "",
+              "text_content": ""
+            },
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "class",
+                  "text-center"
+                ]
+              ],
+              "text": "900.5 MiB",
+              "text_content": "900.5 MiB"
+            },
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "class",
+                  "text-center"
+                ]
+              ],
+              "text": "2025-12-31 10:00",
+              "text_content": "2025-12-31 10:00"
+            },
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "class",
+                  "text-center"
+                ]
+              ],
+              "text": "3",
+              "text_content": "3"
+            },
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "class",
+                  "text-center"
+                ]
+              ],
+              "text": "1",
+              "text_content": "1"
+            },
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "class",
+                  "text-center"
+                ]
+              ],
+              "text": "7",
+              "text_content": "7"
+            }
+          ],
+          "td:first-child a[href^=\"magnet\"]": [],
+          "td:first-child a": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "/?c=2_2"
+                ]
+              ],
+              "text": "",
+              "text_content": ""
+            }
+          ],
+          "td:nth-child(1) a[href^='magnet:']": [],
+          "td:nth-child(2)": [
+            {
+              "tag": "td",
+              "attrs": [
+                [
+                  "colspan",
+                  "2"
+                ]
+              ],
+              "text": "[HD] abc00123",
+              "text_content": "[HD] abc00123"
+            }
+          ],
+          "a[href^='magnet:']": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:fedcba9876543210fedcba9876543210fedcba98&dn=x"
+                ]
+              ],
+              "text": "",
+              "text_content": ""
+            }
+          ]
+        }
+      ],
+      "anchors": [
+        {
+          ".pb10": [],
+          "img": [
+            {
+              "tag": "img",
+              "attrs": [
+                [
+                  "src",
+                  "/static/img/icons/sukebei/2_2.png"
+                ],
+                [
+                  "alt",
+                  "Real Life - Videos"
+                ]
+              ],
+              "text": "",
+              "text_content": ""
+            }
+          ]
+        },
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": [
+            {
+              "tag": "img",
+              "attrs": [
+                [
+                  "src",
+                  "x.png"
+                ]
+              ],
+              "text": "",
+              "text_content": ""
+            }
+          ]
+        },
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        }
+      ],
+      "nyaapy": [
+        {
+          "class": "success",
+          "cells": [
+            {
+              "text": null,
+              "links": [
+                {
+                  "href": "/?c=2_2",
+                  "text": null
+                }
+              ]
+            },
+            {
+              "text": null,
+              "links": [
+                {
+                  "href": "/view/4000001#comments",
+                  "text": null
+                },
+                {
+                  "href": "/view/4000001",
+                  "text": "ABC-123 FHD"
+                }
+              ]
+            },
+            {
+              "text": null,
+              "links": [
+                {
+                  "href": "/download/4000001.torrent",
+                  "text": null
+                },
+                {
+                  "href": "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567&dn=ABC-123",
+                  "text": null
+                }
+              ]
+            },
+            {
+              "text": "2.1 GiB",
+              "links": []
+            },
+            {
+              "text": "2026-01-01 00:00",
+              "links": []
+            },
+            {
+              "text": "12",
+              "links": []
+            },
+            {
+              "text": "0",
+              "links": []
+            },
+            {
+              "text": "80",
+              "links": []
+            }
+          ]
+        },
+        {
+          "class": "default",
+          "cells": [
+            {
+              "text": null,
+              "links": [
+                {
+                  "href": "/?c=2_2",
+                  "text": null
+                }
+              ]
+            },
+            {
+              "text": null,
+              "links": [
+                {
+                  "href": "/view/4000002",
+                  "text": "[HD] abc00123"
+                }
+              ]
+            },
+            {
+              "text": null,
+              "links": [
+                {
+                  "href": "/download/4000002.torrent",
+                  "text": null
+                },
+                {
+                  "href": "magnet:?xt=urn:btih:fedcba9876543210fedcba9876543210fedcba98&dn=x",
+                  "text": null
+                }
+              ]
+            },
+            {
+              "text": "900.5 MiB",
+              "links": []
+            },
+            {
+              "text": "2025-12-31 10:00",
+              "links": []
+            },
+            {
+              "text": "3",
+              "links": []
+            },
+            {
+              "text": "1",
+              "links": []
+            },
+            {
+              "text": "7",
+              "links": []
+            }
+          ]
+        }
+      ],
+      "lxml_html_root": "html"
+    },
+    {
+      "name": "synthetic: magnet table without tbody, as a feed item may carry it",
+      "html": "<table><tr><td><a href=\"magnet:?xt=urn:btih:aaa&dn=A\">A</a></td><td>1.5GB</td></tr><tr><td><a href=\"magnet:?xt=urn:btih:bbb&dn=B\">B</a></td><td>2GB</td></tr></table>",
+      "parsed_as": "html",
+      "document": {
+        "a[href]": [
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "magnet:?xt=urn:btih:aaa&dn=A"
+              ]
+            ],
+            "text": "A",
+            "text_content": "A"
+          },
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "magnet:?xt=urn:btih:bbb&dn=B"
+              ]
+            ],
+            "text": "B",
+            "text_content": "B"
+          }
+        ],
+        "a.movie-box": [],
+        ".avatar-box .pb10": [],
+        "title": [],
+        "tr": [
+          {
+            "tag": "tr",
+            "attrs": [],
+            "text": "A\n1.5GB",
+            "text_content": "A1.5GB"
+          },
+          {
+            "tag": "tr",
+            "attrs": [],
+            "text": "B\n2GB",
+            "text_content": "B2GB"
+          }
+        ],
+        "table tbody tr": []
+      },
+      "rows": [
+        {
+          "td": [
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "A",
+              "text_content": "A"
+            },
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "1.5GB",
+              "text_content": "1.5GB"
+            }
+          ],
+          "td:first-child a[href^=\"magnet\"]": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:aaa&dn=A"
+                ]
+              ],
+              "text": "A",
+              "text_content": "A"
+            }
+          ],
+          "td:first-child a": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:aaa&dn=A"
+                ]
+              ],
+              "text": "A",
+              "text_content": "A"
+            }
+          ],
+          "td:nth-child(1) a[href^='magnet:']": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:aaa&dn=A"
+                ]
+              ],
+              "text": "A",
+              "text_content": "A"
+            }
+          ],
+          "td:nth-child(2)": [
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "1.5GB",
+              "text_content": "1.5GB"
+            }
+          ],
+          "a[href^='magnet:']": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:aaa&dn=A"
+                ]
+              ],
+              "text": "A",
+              "text_content": "A"
+            }
+          ]
+        },
+        {
+          "td": [
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "B",
+              "text_content": "B"
+            },
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "2GB",
+              "text_content": "2GB"
+            }
+          ],
+          "td:first-child a[href^=\"magnet\"]": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:bbb&dn=B"
+                ]
+              ],
+              "text": "B",
+              "text_content": "B"
+            }
+          ],
+          "td:first-child a": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:bbb&dn=B"
+                ]
+              ],
+              "text": "B",
+              "text_content": "B"
+            }
+          ],
+          "td:nth-child(1) a[href^='magnet:']": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:bbb&dn=B"
+                ]
+              ],
+              "text": "B",
+              "text_content": "B"
+            }
+          ],
+          "td:nth-child(2)": [
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "2GB",
+              "text_content": "2GB"
+            }
+          ],
+          "a[href^='magnet:']": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:bbb&dn=B"
+                ]
+              ],
+              "text": "B",
+              "text_content": "B"
+            }
+          ]
+        }
+      ],
+      "anchors": [
+        {
+          ".pb10": [],
+          "img": []
+        },
+        {
+          ".pb10": [],
+          "img": []
+        }
+      ],
+      "nyaapy": [],
+      "lxml_html_root": "table"
+    },
+    {
+      "name": "synthetic: unclosed cells and an unquoted attribute",
+      "html": "<html><body><table><tr><td><a href=magnet:?xt=urn:btih:ccc&dn=C>C<td>3.0GB<tr><td>x<td>y</table></body></html>",
+      "parsed_as": "html",
+      "document": {
+        "a[href]": [
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "magnet:?xt=urn:btih:ccc&dn=C"
+              ]
+            ],
+            "text": "C",
+            "text_content": "C"
+          }
+        ],
+        "a.movie-box": [],
+        ".avatar-box .pb10": [],
+        "title": [],
+        "tr": [
+          {
+            "tag": "tr",
+            "attrs": [],
+            "text": "C\n3.0GB",
+            "text_content": "C3.0GB"
+          },
+          {
+            "tag": "tr",
+            "attrs": [],
+            "text": "x\ny",
+            "text_content": "xy"
+          }
+        ],
+        "table tbody tr": []
+      },
+      "rows": [
+        {
+          "td": [
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "C",
+              "text_content": "C"
+            },
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "3.0GB",
+              "text_content": "3.0GB"
+            }
+          ],
+          "td:first-child a[href^=\"magnet\"]": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:ccc&dn=C"
+                ]
+              ],
+              "text": "C",
+              "text_content": "C"
+            }
+          ],
+          "td:first-child a": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:ccc&dn=C"
+                ]
+              ],
+              "text": "C",
+              "text_content": "C"
+            }
+          ],
+          "td:nth-child(1) a[href^='magnet:']": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:ccc&dn=C"
+                ]
+              ],
+              "text": "C",
+              "text_content": "C"
+            }
+          ],
+          "td:nth-child(2)": [
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "3.0GB",
+              "text_content": "3.0GB"
+            }
+          ],
+          "a[href^='magnet:']": [
+            {
+              "tag": "a",
+              "attrs": [
+                [
+                  "href",
+                  "magnet:?xt=urn:btih:ccc&dn=C"
+                ]
+              ],
+              "text": "C",
+              "text_content": "C"
+            }
+          ]
+        },
+        {
+          "td": [
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "x",
+              "text_content": "x"
+            },
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "y",
+              "text_content": "y"
+            }
+          ],
+          "td:first-child a[href^=\"magnet\"]": [],
+          "td:first-child a": [],
+          "td:nth-child(1) a[href^='magnet:']": [],
+          "td:nth-child(2)": [
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "y",
+              "text_content": "y"
+            }
+          ],
+          "a[href^='magnet:']": []
+        }
+      ],
+      "anchors": [
+        {
+          ".pb10": [],
+          "img": []
+        }
+      ],
+      "nyaapy": [],
+      "lxml_html_root": "html"
+    },
+    {
+      "name": "synthetic: a paragraph left open before a table",
+      "html": "<div class=\"avatar-box\"><p class=\"pb10\">  Star\n Name </p><p>open<table><tr><td>cell</td></tr></table>",
+      "parsed_as": "html",
+      "document": {
+        "a[href]": [],
+        "a.movie-box": [],
+        ".avatar-box .pb10": [
+          {
+            "tag": "p",
+            "attrs": [
+              [
+                "class",
+                "pb10"
+              ]
+            ],
+            "text": "Star Name",
+            "text_content": "  Star\n Name "
+          }
+        ],
+        "title": [],
+        "tr": [
+          {
+            "tag": "tr",
+            "attrs": [],
+            "text": "cell",
+            "text_content": "cell"
+          }
+        ],
+        "table tbody tr": []
+      },
+      "rows": [
+        {
+          "td": [
+            {
+              "tag": "td",
+              "attrs": [],
+              "text": "cell",
+              "text_content": "cell"
+            }
+          ],
+          "td:first-child a[href^=\"magnet\"]": [],
+          "td:first-child a": [],
+          "td:nth-child(1) a[href^='magnet:']": [],
+          "td:nth-child(2)": [],
+          "a[href^='magnet:']": []
+        }
+      ],
+      "anchors": [],
+      "nyaapy": [],
+      "lxml_html_root": "div"
+    },
+    {
+      "name": "synthetic: upper-case tags in well-formed markup (parsed as XML by pyquery)",
+      "html": "<html><body><A HREF=\"/star/abc\">Upper</A><a href=\"/star/def\">lower</a><TABLE><TR><TD>1</TD></TR></TABLE></body></html>",
+      "parsed_as": "xml",
+      "document": {
+        "a[href]": [
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "/star/def"
+              ]
+            ],
+            "text": "lower",
+            "text_content": "lower"
+          }
+        ],
+        "a.movie-box": [],
+        ".avatar-box .pb10": [],
+        "title": [],
+        "tr": [],
+        "table tbody tr": []
+      },
+      "rows": [],
+      "anchors": [
+        {
+          ".pb10": [],
+          "img": []
+        }
+      ],
+      "nyaapy": [],
+      "lxml_html_root": "html"
+    },
+    {
+      "name": "synthetic: entities and a CDATA-like script",
+      "html": "<html><body><a href=\"/star/x?a=1&amp;b=2\">A &amp; B&nbsp;C</a><script>if (a < b) {}</script></body></html>",
+      "parsed_as": "html",
+      "document": {
+        "a[href]": [
+          {
+            "tag": "a",
+            "attrs": [
+              [
+                "href",
+                "/star/x?a=1&b=2"
+              ]
+            ],
+            "text": "A & B C",
+            "text_content": "A & B C"
+          }
+        ],
+        "a.movie-box": [],
+        ".avatar-box .pb10": [],
+        "title": [],
+        "tr": [],
+        "table tbody tr": []
+      },
+      "rows": [],
+      "anchors": [
+        {
+          ".pb10": [],
+          "img": []
+        }
+      ],
+      "nyaapy": [],
+      "lxml_html_root": "html"
+    }
+  ]
+}

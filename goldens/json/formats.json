@@ -1,0 +1,40 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "json_dumps",
+  "cases": [
+    {
+      "name": "hash",
+      "mirrors": "fav's content hashes: sort_keys, separators=(',', ':'), ensure_ascii=False, default=str (no embyx-manager call site)"
+    },
+    {
+      "name": "pretty",
+      "mirrors": "fav's manifests: indent=2, sort_keys, ensure_ascii=False, default=str, plus a newline (no embyx-manager call site)"
+    },
+    {
+      "name": "compact",
+      "mirrors": "separators=(',', ':'), ensure_ascii=False, insertion order (no embyx-manager call site)"
+    },
+    {
+      "name": "plain",
+      "mirrors": "ensure_ascii=False, default separators, insertion order: monitor/playlists.py ranked entries, merge/tasks.py parts, merge/worker.py status file"
+    },
+    {
+      "name": "pretty_unsorted",
+      "mirrors": "indent=2, ensure_ascii=False, insertion order, no trailing newline (no embyx-manager call site)"
+    },
+    {
+      "name": "sorted_plain",
+      "mirrors": "ensure_ascii=False, sort_keys, default separators (no embyx-manager call site)"
+    },
+    {
+      "name": "sorted_compact_ascii",
+      "mirrors": "separators=(',', ':'), sort_keys, ensure_ascii=True: fill_actor/postgres_repository.py cloud file snapshots"
+    },
+    {
+      "name": "ascii",
+      "mirrors": "json.dumps defaults (ensure_ascii=True): the other *_json columns (fill_actor, monitor), merge/service.py manifest, merge/home_worker.py status"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+[package]
+name = "embyx-db"
+description = "PostgreSQL pool, the 19 migrations and advisory locks of embyx-manager"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[features]
+# The temporary-database helper and the database half of the effect-transcript harness.
+test-support = ["embyx-core/test-support"]
+
+[dependencies]
+embyx-core.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+tokio = { workspace = true, features = ["time"] }
+
+[dev-dependencies]
+chrono.workspace = true
+embyx-core = { workspace = true, features = ["test-support"] }
+tokio = { workspace = true, features = ["macros", "rt", "rt-multi-thread", "time"] }

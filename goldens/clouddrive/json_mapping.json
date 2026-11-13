@@ -1,0 +1,177 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "clouddrive",
+  "cases": [
+    {
+      "message": "google.protobuf.Empty",
+      "bytes": "",
+      "json": {}
+    },
+    {
+      "message": "clouddrive.FileOperationResult",
+      "bytes": "",
+      "json": {
+        "success": false,
+        "errorMessage": "",
+        "resultFilePaths": []
+      }
+    },
+    {
+      "message": "clouddrive.FileOperationResult",
+      "bytes": "08011a0e2f3131352f6f75742f612e747874",
+      "json": {
+        "success": true,
+        "resultFilePaths": [
+          "/115/out/a.txt"
+        ],
+        "errorMessage": ""
+      }
+    },
+    {
+      "message": "clouddrive.MoveFileRequest",
+      "bytes": "0a0d2f3131352f696e2f612e74787412082f3131352f6f75741802",
+      "json": {
+        "theFilePaths": [
+          "/115/in/a.txt"
+        ],
+        "destPath": "/115/out",
+        "conflictPolicy": "Skip"
+      }
+    },
+    {
+      "message": "clouddrive.MoveFileRequest",
+      "bytes": "0a022f6112022f621800",
+      "json": {
+        "theFilePaths": [
+          "/a"
+        ],
+        "destPath": "/b",
+        "conflictPolicy": "Overwrite"
+      }
+    },
+    {
+      "message": "clouddrive.MoveFileRequest",
+      "bytes": "12022f62",
+      "json": {
+        "destPath": "/b",
+        "theFilePaths": []
+      }
+    },
+    {
+      "message": "clouddrive.ListSubFileRequest",
+      "bytes": "0a042f3131351001",
+      "json": {
+        "path": "/115",
+        "forceRefresh": true
+      }
+    },
+    {
+      "message": "clouddrive.CloudDriveSystemInfo",
+      "bytes": "0801120466616b651801",
+      "json": {
+        "IsLogin": true,
+        "UserName": "fake",
+        "SystemReady": true
+      }
+    },
+    {
+      "message": "clouddrive.CloudDriveFile",
+      "bytes": "0a0d2f3131352f696e2f612e7478741205612e7478741a0d2f3131352f696e2f612e7478742080fca2b4ac03320c0880f2d6ca061080cab5ee01b2042c0802122830313233343536373839616263646566303132333435363738396162636465663031323334353637b2040a08011206414243444546",
+      "json": {
+        "id": "/115/in/a.txt",
+        "name": "a.txt",
+        "fullPathName": "/115/in/a.txt",
+        "size": "115000000000",
+        "createTime": "2026-01-01T00:00:00.500Z",
+        "fileHashes": {
+          "1": "ABCDEF",
+          "2": "0123456789abcdef0123456789abcdef01234567"
+        },
+        "fileType": "Directory",
+        "thumbnailUrl": "",
+        "previewUrl": "",
+        "originalPath": "",
+        "isDirectory": false,
+        "isRoot": false,
+        "isCloudRoot": false,
+        "isCloudDirectory": false,
+        "isCloudFile": false,
+        "isSearchResult": false,
+        "isForbidden": false,
+        "isLocal": false,
+        "canMount": false,
+        "canUnmount": false,
+        "canDirectAccessThumbnailURL": false,
+        "canSearch": false,
+        "hasDetailProperties": false,
+        "canOfflineDownload": false,
+        "canAddShareLink": false,
+        "canDeletePermanently": false,
+        "fileEncryptionType": "None",
+        "CanCreateEncryptedFolder": false,
+        "CanLock": false,
+        "CanSyncFileChangesFromCloud": false,
+        "supportOfflineDownloadManagement": false
+      }
+    },
+    {
+      "message": "clouddrive.SubFilesReply",
+      "bytes": "0a0e0a022f781201781a022f78f00101",
+      "json": {
+        "subFiles": [
+          {
+            "id": "/x",
+            "name": "x",
+            "fullPathName": "/x",
+            "isDirectory": true,
+            "size": "0",
+            "fileType": "Directory",
+            "thumbnailUrl": "",
+            "previewUrl": "",
+            "originalPath": "",
+            "isRoot": false,
+            "isCloudRoot": false,
+            "isCloudDirectory": false,
+            "isCloudFile": false,
+            "isSearchResult": false,
+            "isForbidden": false,
+            "isLocal": false,
+            "canMount": false,
+            "canUnmount": false,
+            "canDirectAccessThumbnailURL": false,
+            "canSearch": false,
+            "hasDetailProperties": false,
+            "canOfflineDownload": false,
+            "canAddShareLink": false,
+            "canDeletePermanently": false,
+            "fileHashes": {},
+            "fileEncryptionType": "None",
+            "CanCreateEncryptedFolder": false,
+            "CanLock": false,
+            "CanSyncFileChangesFromCloud": false,
+            "supportOfflineDownloadManagement": false
+          }
+        ]
+      }
+    },
+    {
+      "message": "clouddrive.AddOfflineFileRequest",
+      "bytes": "0a176d61676e65743a3f78743d75726e3a627469683a616161120d2f3131352f656d6279785f696e180a",
+      "json": {
+        "urls": "magnet:?xt=urn:btih:aaa",
+        "toFolder": "/115/embyx_in",
+        "checkFolderAfterSecs": "10"
+      }
+    },
+    {
+      "message": "clouddrive.CopyTaskRequest",
+      "bytes": "0a022f6112022f62",
+      "json": {
+        "sourcePath": "/a",
+        "destPath": "/b"
+      }
+    }
+  ]
+}

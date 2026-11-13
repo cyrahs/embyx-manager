@@ -1,0 +1,175 @@
+# Which work package ports which Python test (docs/rewrite/PLAN.md, "Per-WP scope").
+# A whole file, a wildcard inside it, or one exact test; the most specific pattern wins.
+# `status` follows the package: pending, in-progress, done. A done package may have
+# nothing pending, and a package done on `rust` stays done (tools/parity/parity.py).
+
+[WP0]
+title = "Foundation"
+status = "in-progress"
+tests = []
+
+[WP1]
+title = "Settings, schema, config store, AVID, magnets"
+status = "pending"
+tests = [
+  "tests/test_settings.py",
+  "tests/test_locking.py",
+  "tests/test_config_migrations.py",
+  "tests/test_archive_config.py",
+  "tests/test_rss_config.py",
+  # The config part of the file; the runtime wiring is WP12's.
+  "tests/test_fill_actor_config.py",
+  # The store part of the file; the connection-test endpoints and the API are WP4's.
+  "tests/test_config.py",
+  "tests/test_avid.py",
+  "tests/test_avid_corpus.py",
+  "tests/test_magnet.py",
+]
+
+[WP2]
+title = "HTTP clients and parsers"
+status = "pending"
+tests = [
+  "tests/test_javbus.py",
+  "tests/test_magnet_sources.py",
+  "tests/test_avbase.py",
+  "tests/test_jinjier.py",
+  "tests/test_emby.py",
+  "tests/test_monitor_feeds.py",
+]
+
+[WP3]
+title = "CloudDrive on tonic, Kubernetes Jobs"
+status = "pending"
+tests = [
+  "tests/test_clouddrive.py",
+  "tests/test_merge_service.py::test_job_names_are_dns_labels",
+  "tests/test_merge_service.py::test_build_job_fills_in_name_image_args_and_label",
+  "tests/test_merge_service.py::test_job_outcome_reads_conditions_and_counters",
+  "tests/test_merge_service.py::test_kube_client_runs_the_job_on_the_pods_own_image",
+]
+
+[WP4]
+title = "API shell, config API, serve"
+status = "pending"
+tests = [
+  "tests/test_bootstrap.py",
+  "tests/test_config.py::test_config_api_round_trip_masks_secrets",
+  "tests/test_config.py::test_clouddrive_test_endpoint_*",
+  "tests/test_config.py::test_emby_test_endpoint_*",
+  "tests/test_api.py::test_mutations_require_configured_bearer_token",
+  "tests/test_api.py::test_auth_session_*",
+  "tests/test_api.py::test_request_size_limit_and_health",
+]
+
+[WP5]
+title = "Acquisition ledger, runs, reports, cadence, intake"
+status = "pending"
+tests = [
+  "tests/test_monitor_acquisitions.py",
+  "tests/test_monitor_runs.py",
+  "tests/test_monitor_reports.py",
+  "tests/test_monitor_cadence.py",
+  "tests/test_monitor_release_dates.py",
+  "tests/test_monitor_intake.py",
+  "tests/test_monitor_subscriptions.py",
+]
+
+[WP6]
+title = "Archive, reconcile, move-in"
+status = "pending"
+tests = [
+  "tests/test_monitor_archive.py",
+  "tests/test_monitor_reconcile.py",
+  "tests/test_monitor_move_in.py",
+]
+
+[WP7]
+title = "Tracker, 换版, manual intake"
+status = "pending"
+tests = [
+  "tests/test_monitor_tracker.py",
+  "tests/test_monitor_replace.py",
+  "tests/test_monitor_manual.py",
+]
+
+[WP8]
+title = "RSS, mapping, playlists"
+status = "pending"
+tests = [
+  "tests/test_monitor_rss.py",
+  "tests/test_monitor_mapping.py",
+  "tests/test_monitor_playlist_sync.py",
+  "tests/test_monitor_playlists_repository.py",
+]
+
+[WP9]
+title = "Scheduler, monitor API, playlists API"
+status = "pending"
+tests = [
+  "tests/test_monitor_scheduler.py",
+  "tests/test_monitor_api.py",
+  "tests/test_playlists_api.py",
+  "tests/test_rss_category_routing.py",
+]
+
+[WP10]
+title = "Fill-actor persistence and cloud moves"
+status = "pending"
+tests = [
+  "tests/test_fill_actor_persistence.py",
+  "tests/test_cloud_move_persistence.py",
+  "tests/test_cloud_moves.py",
+  "tests/test_adapters.py",
+]
+
+[WP11]
+title = "Fill-actor service and recovery"
+status = "pending"
+tests = [
+  "tests/test_fill_actor_service.py",
+  "tests/test_fill_actor_recovery.py",
+  "tests/test_cloud_move_service.py",
+]
+
+[WP12]
+title = "Fill-actor jobs, API, wiring"
+status = "pending"
+tests = [
+  # The fill-actor part of the file; the shell tests are WP4's.
+  "tests/test_api.py",
+  "tests/test_fill_actor_jobs.py",
+  "tests/test_fill_actor_config.py::test_runtime_snapshot_tracks_the_stored_version",
+  "tests/test_fill_actor_config.py::test_unconfigured_section_yields_an_idle_runtime",
+]
+
+[WP13]
+title = "Merge worker"
+status = "pending"
+tests = [
+  "tests/test_merge_detect.py",
+  "tests/test_merge_worker.py",
+]
+
+[WP14]
+title = "Merge service, auto-merge, transcode, API"
+status = "pending"
+tests = [
+  # Everything but the merge.kube tests, which are WP3's.
+  "tests/test_merge_service.py",
+  "tests/test_merge_auto.py",
+  "tests/test_merge_transcode.py",
+  "tests/test_merge_api.py",
+]
+
+[WP15]
+title = "Home transcode worker"
+status = "pending"
+tests = [
+  "tests/test_home_worker.py",
+]
+
+[WP16]
+title = "Wrap-up and parity audit"
+status = "pending"
+tests = []

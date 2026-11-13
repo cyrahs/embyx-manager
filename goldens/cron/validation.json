@@ -1,0 +1,213 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "cron",
+  "cases": [
+    {
+      "expr": "0 4 * * *",
+      "normalized": "0 4 * * *",
+      "error": null
+    },
+    {
+      "expr": "30 3 * * 1",
+      "normalized": "30 3 * * 1",
+      "error": null
+    },
+    {
+      "expr": "*/15 * * * *",
+      "normalized": "*/15 * * * *",
+      "error": null
+    },
+    {
+      "expr": "*/30 * * * *",
+      "normalized": "*/30 * * * *",
+      "error": null
+    },
+    {
+      "expr": "0 */6 * * *",
+      "normalized": "0 */6 * * *",
+      "error": null
+    },
+    {
+      "expr": "0 4 * * 0,2-6",
+      "normalized": "0 4 * * 0,2-6",
+      "error": null
+    },
+    {
+      "expr": "0 4 * * 7",
+      "normalized": "0 4 * * 7",
+      "error": null
+    },
+    {
+      "expr": "0 9 * * sun",
+      "normalized": "0 9 * * sun",
+      "error": null
+    },
+    {
+      "expr": "0 9 * * mon-fri",
+      "normalized": "0 9 * * mon-fri",
+      "error": null
+    },
+    {
+      "expr": "0 9 * * MON-FRI",
+      "normalized": "0 9 * * MON-FRI",
+      "error": null
+    },
+    {
+      "expr": "0 0 1 * *",
+      "normalized": "0 0 1 * *",
+      "error": null
+    },
+    {
+      "expr": "0 0 31 * *",
+      "normalized": "0 0 31 * *",
+      "error": null
+    },
+    {
+      "expr": "0 0 29 2 *",
+      "normalized": "0 0 29 2 *",
+      "error": null
+    },
+    {
+      "expr": "59 23 31 12 *",
+      "normalized": "59 23 31 12 *",
+      "error": null
+    },
+    {
+      "expr": "0 4 1-7 * 1",
+      "normalized": "0 4 1-7 * 1",
+      "error": null
+    },
+    {
+      "expr": "0 4 * jan,jul *",
+      "normalized": "0 4 * jan,jul *",
+      "error": null
+    },
+    {
+      "expr": "0 0 L * *",
+      "normalized": "0 0 L * *",
+      "error": null
+    },
+    {
+      "expr": "0 0 * * 5L",
+      "normalized": "0 0 * * 5L",
+      "error": null
+    },
+    {
+      "expr": "0 0 * * 1#2",
+      "normalized": "0 0 * * 1#2",
+      "error": null
+    },
+    {
+      "expr": "0 0 15W * *",
+      "normalized": "0 0 15W * *",
+      "error": "Bad day-of-month"
+    },
+    {
+      "expr": "0 0 LW * *",
+      "normalized": "0 0 LW * *",
+      "error": null
+    },
+    {
+      "expr": "30 2 * * *",
+      "normalized": "30 2 * * *",
+      "error": null
+    },
+    {
+      "expr": "15 1 * * *",
+      "normalized": "15 1 * * *",
+      "error": null
+    },
+    {
+      "expr": "0 0-23/7 * * *",
+      "normalized": "0 0-23/7 * * *",
+      "error": null
+    },
+    {
+      "expr": "5-55/10 * * * *",
+      "normalized": "5-55/10 * * * *",
+      "error": null
+    },
+    {
+      "expr": "0 4 * * ?",
+      "normalized": "0 4 * * ?",
+      "error": "Bad day-of-week"
+    },
+    {
+      "expr": "0 4 ? * 1",
+      "normalized": "0 4 ? * 1",
+      "error": "Bad day-of-month"
+    },
+    {
+      "expr": "@daily",
+      "normalized": "@daily",
+      "error": "Wrong number of fields"
+    },
+    {
+      "expr": "@hourly",
+      "normalized": "@hourly",
+      "error": "Wrong number of fields"
+    },
+    {
+      "expr": "0 4 * * * *",
+      "normalized": "0 4 * * * *",
+      "error": null
+    },
+    {
+      "expr": "",
+      "normalized": "",
+      "error": "Wrong number of fields"
+    },
+    {
+      "expr": "every day at four",
+      "normalized": "every day at four",
+      "error": "Wrong number of fields"
+    },
+    {
+      "expr": "0 4 * *",
+      "normalized": "0 4 * *",
+      "error": "Wrong number of fields"
+    },
+    {
+      "expr": "99 4 * * *",
+      "normalized": "99 4 * * *",
+      "error": "Bad minute"
+    },
+    {
+      "expr": "0 24 * * *",
+      "normalized": "0 24 * * *",
+      "error": "Bad hour"
+    },
+    {
+      "expr": "0 4 32 * *",
+      "normalized": "0 4 32 * *",
+      "error": "Bad day-of-month"
+    },
+    {
+      "expr": "0 4 * 13 *",
+      "normalized": "0 4 * 13 *",
+      "error": "Bad month"
+    },
+    {
+      "expr": "0 4 * * 8",
+      "normalized": "0 4 * * 8",
+      "error": "Bad day-of-week"
+    },
+    {
+      "expr": "*/0 * * * *",
+      "normalized": "*/0 * * * *",
+      "error": "Bad minute"
+    },
+    {
+      "expr": "0 4 30 2 *",
+      "normalized": "0 4 30 2 *",
+      "error": "Bad day-of-month"
+    },
+    {
+      "expr": "0 4 * * mon-",
+      "normalized": "0 4 * * mon-",
+      "error": "Bad day-of-week"
+    }
+  ]
+}

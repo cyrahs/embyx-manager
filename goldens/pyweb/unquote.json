@@ -1,0 +1,68 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "pyweb",
+  "cases": [
+    {
+      "text": "File:Disc_Good_Night.png",
+      "result": "File:Disc_Good_Night.png"
+    },
+    {
+      "text": "File:Disc%20Good%20Night.png",
+      "result": "File:Disc Good Night.png"
+    },
+    {
+      "text": "%E4%B8%AD%E6%96%87",
+      "result": "中文"
+    },
+    {
+      "text": "%e4%b8%ad",
+      "result": "中"
+    },
+    {
+      "text": "%E4%B8",
+      "result": "�"
+    },
+    {
+      "text": "%FF%FE%41",
+      "result": "��A"
+    },
+    {
+      "text": "%C3%28",
+      "result": "�("
+    },
+    {
+      "text": "%ED%A0%80",
+      "result": "���"
+    },
+    {
+      "text": "%F0%9F%98%80",
+      "result": "😀"
+    },
+    {
+      "text": "%zz%4",
+      "result": "%zz%4"
+    },
+    {
+      "text": "%",
+      "result": "%"
+    },
+    {
+      "text": "100%",
+      "result": "100%"
+    },
+    {
+      "text": "中文%20混合",
+      "result": "中文 混合"
+    },
+    {
+      "text": "%2Fslash%3Aname%23",
+      "result": "/slash:name#"
+    },
+    {
+      "text": "+plus+",
+      "result": "+plus+"
+    }
+  ]
+}

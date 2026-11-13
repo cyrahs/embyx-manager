@@ -1,0 +1,11 @@
+[package]
+name = "embyx-merge"
+description = "Multi-part merges of embyx-manager: detection, tasks, service, auto-merge and the merge-worker body"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
