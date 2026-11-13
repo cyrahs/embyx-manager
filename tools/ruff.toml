@@ -16,4 +16,6 @@ extend-ignore = [
 # Wire-format parsing: protocol numbers are the point.
 "probes/*" = ["PLR2004", "C901"]
 "parity/parity.py" = ["C901"]
+# Golden inputs: look-alike and non-ASCII characters are the corner cases under test.
+"goldens/areas/{avid,config,magnet,settings}.py" = ["RUF001"]
 "tests/*" = ["ANN", "S101", "ARG001", "PLR2004", "TC003", "SLF001", "E501"]

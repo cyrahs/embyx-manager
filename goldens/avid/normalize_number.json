@@ -1,0 +1,132 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "avid",
+  "cases": [
+    {
+      "avid": "ABC-123",
+      "normalized": "ABC-123"
+    },
+    {
+      "avid": "ABC-0123",
+      "normalized": "ABC-123"
+    },
+    {
+      "avid": "ABC-00012",
+      "normalized": "ABC-012"
+    },
+    {
+      "avid": "ABC-1",
+      "normalized": "ABC-001"
+    },
+    {
+      "avid": "ABC-0",
+      "normalized": "ABC-000"
+    },
+    {
+      "avid": "ABC-000",
+      "normalized": "ABC-000"
+    },
+    {
+      "avid": "ABC-1234",
+      "normalized": "ABC-1234"
+    },
+    {
+      "avid": "ABC-01234",
+      "normalized": "ABC-1234"
+    },
+    {
+      "avid": "A1-007",
+      "normalized": "A1-007"
+    },
+    {
+      "avid": "123-045",
+      "normalized": "123-045"
+    },
+    {
+      "avid": "1A-5",
+      "normalized": "1A-005"
+    },
+    {
+      "avid": "FC2-00123",
+      "normalized": "FC2-00123"
+    },
+    {
+      "avid": "HEYZO-0012",
+      "normalized": "HEYZO-0012"
+    },
+    {
+      "avid": "MKBD-012",
+      "normalized": "MKBD-012"
+    },
+    {
+      "avid": "CW3D2DBD-01",
+      "normalized": "CW3D2DBD-01"
+    },
+    {
+      "avid": "abc-012",
+      "normalized": "abc-012"
+    },
+    {
+      "avid": "ABC-12A",
+      "normalized": "ABC-12A"
+    },
+    {
+      "avid": "ABC_012",
+      "normalized": "ABC_012"
+    },
+    {
+      "avid": "ABC-12\n",
+      "normalized": "ABC-012"
+    },
+    {
+      "avid": "ABC-١٢",
+      "normalized": "ABC-012"
+    },
+    {
+      "avid": "ABC-0٣",
+      "normalized": "ABC-003"
+    },
+    {
+      "avid": "-12",
+      "normalized": "-12"
+    },
+    {
+      "avid": "ABC-",
+      "normalized": "ABC-"
+    },
+    {
+      "avid": "ABC-12-3",
+      "normalized": "ABC-12-3"
+    },
+    {
+      "avid": "",
+      "normalized": ""
+    },
+    {
+      "avid": "S2M-01",
+      "normalized": "S2M-01"
+    },
+    {
+      "avid": "GETCHU-01",
+      "normalized": "GETCHU-01"
+    },
+    {
+      "avid": "KIND-007",
+      "normalized": "KIND-007"
+    },
+    {
+      "avid": "ABC-09999999999999999999999999999999999999999",
+      "normalized": "ABC-9999999999999999999999999999999999999999"
+    },
+    {
+      "avid": "ABC-00000000000000000000000000000000000000000000000000",
+      "normalized": "ABC-000"
+    },
+    {
+      "avid": "ABC-00000000000000000000000000000000000000000000012",
+      "normalized": "ABC-012"
+    }
+  ]
+}

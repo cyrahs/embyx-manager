@@ -1,0 +1,2036 @@
+{
+  "calls": [],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "db.catalog",
+  "outcome": {
+    "result": {
+      "columns": [
+        {
+          "column": "section",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "app_config",
+          "type": "text"
+        },
+        {
+          "column": "value_json",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "app_config",
+          "type": "text"
+        },
+        {
+          "column": "version",
+          "default": "1",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "app_config",
+          "type": "integer"
+        },
+        {
+          "column": "updated_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "app_config",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "avid",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "archive_acquisitions",
+          "type": "text"
+        },
+        {
+          "column": "state",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "archive_acquisitions",
+          "type": "text"
+        },
+        {
+          "column": "source",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "archive_acquisitions",
+          "type": "text"
+        },
+        {
+          "column": "note",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "archive_acquisitions",
+          "type": "text"
+        },
+        {
+          "column": "archived_paths_json",
+          "default": "'[]'::text",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "archive_acquisitions",
+          "type": "text"
+        },
+        {
+          "column": "next_action_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "archive_acquisitions",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "created_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "archive_acquisitions",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "updated_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "archive_acquisitions",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "task_dir_path",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "archive_acquisitions",
+          "type": "text"
+        },
+        {
+          "column": "release_date",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "archive_acquisitions",
+          "type": "date"
+        },
+        {
+          "column": "replace_paths_json",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "archive_acquisitions",
+          "type": "text"
+        },
+        {
+          "column": "replace_after_attempt",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "archive_acquisitions",
+          "type": "integer"
+        },
+        {
+          "column": "avid",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "archive_magnet_attempts",
+          "type": "text"
+        },
+        {
+          "column": "attempt_no",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "archive_magnet_attempts",
+          "type": "integer"
+        },
+        {
+          "column": "magnet",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "archive_magnet_attempts",
+          "type": "text"
+        },
+        {
+          "column": "info_hash",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "archive_magnet_attempts",
+          "type": "text"
+        },
+        {
+          "column": "magnet_source",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "archive_magnet_attempts",
+          "type": "text"
+        },
+        {
+          "column": "size_hint",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "archive_magnet_attempts",
+          "type": "bigint"
+        },
+        {
+          "column": "state",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "archive_magnet_attempts",
+          "type": "text"
+        },
+        {
+          "column": "progress",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "archive_magnet_attempts",
+          "type": "double precision"
+        },
+        {
+          "column": "error",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "archive_magnet_attempts",
+          "type": "text"
+        },
+        {
+          "column": "submitted_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "archive_magnet_attempts",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "updated_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "archive_magnet_attempts",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "id",
+          "default": null,
+          "generated": "",
+          "identity": "a",
+          "not_null": true,
+          "table": "feed_subscriptions",
+          "type": "bigint"
+        },
+        {
+          "column": "kind",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "feed_subscriptions",
+          "type": "text"
+        },
+        {
+          "column": "category",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "feed_subscriptions",
+          "type": "text"
+        },
+        {
+          "column": "enabled",
+          "default": "true",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "feed_subscriptions",
+          "type": "boolean"
+        },
+        {
+          "column": "url",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "feed_subscriptions",
+          "type": "text"
+        },
+        {
+          "column": "talent_id",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "feed_subscriptions",
+          "type": "integer"
+        },
+        {
+          "column": "name",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "feed_subscriptions",
+          "type": "text"
+        },
+        {
+          "column": "aliases_json",
+          "default": "'[]'::text",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "feed_subscriptions",
+          "type": "text"
+        },
+        {
+          "column": "cursor_json",
+          "default": "'[]'::text",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "feed_subscriptions",
+          "type": "text"
+        },
+        {
+          "column": "seed_pending",
+          "default": "false",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "feed_subscriptions",
+          "type": "boolean"
+        },
+        {
+          "column": "last_polled_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "feed_subscriptions",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "last_error",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "feed_subscriptions",
+          "type": "text"
+        },
+        {
+          "column": "created_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "feed_subscriptions",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "updated_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "feed_subscriptions",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "job_id",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_apply_jobs",
+          "type": "text"
+        },
+        {
+          "column": "revision",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_apply_jobs",
+          "type": "text"
+        },
+        {
+          "column": "candidate_ids_json",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_apply_jobs",
+          "type": "text"
+        },
+        {
+          "column": "result_json",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "fill_actor_apply_jobs",
+          "type": "text"
+        },
+        {
+          "column": "plan_id",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_candidates",
+          "type": "text"
+        },
+        {
+          "column": "candidate_id",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_candidates",
+          "type": "text"
+        },
+        {
+          "column": "video_id",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_candidates",
+          "type": "text"
+        },
+        {
+          "column": "source_path",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_candidates",
+          "type": "text"
+        },
+        {
+          "column": "source_root",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_candidates",
+          "type": "text"
+        },
+        {
+          "column": "destination_path",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_candidates",
+          "type": "text"
+        },
+        {
+          "column": "fingerprint_device",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_candidates",
+          "type": "bigint"
+        },
+        {
+          "column": "fingerprint_inode",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_candidates",
+          "type": "bigint"
+        },
+        {
+          "column": "fingerprint_size",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_candidates",
+          "type": "bigint"
+        },
+        {
+          "column": "fingerprint_mtime_ns",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_candidates",
+          "type": "bigint"
+        },
+        {
+          "column": "fingerprint_ctime_ns",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_candidates",
+          "type": "bigint"
+        },
+        {
+          "column": "candidate_kind",
+          "default": "'local_file'::text",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_candidates",
+          "type": "text"
+        },
+        {
+          "column": "mapping_sha256",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "fill_actor_candidates",
+          "type": "text"
+        },
+        {
+          "column": "cloud_source_path",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "fill_actor_candidates",
+          "type": "text"
+        },
+        {
+          "column": "cloud_destination_dir",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "fill_actor_candidates",
+          "type": "text"
+        },
+        {
+          "column": "cloud_file_json",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "fill_actor_candidates",
+          "type": "text"
+        },
+        {
+          "column": "plan_id",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_cloud_move_operations",
+          "type": "text"
+        },
+        {
+          "column": "candidate_id",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_cloud_move_operations",
+          "type": "text"
+        },
+        {
+          "column": "attempt_id",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_cloud_move_operations",
+          "type": "text"
+        },
+        {
+          "column": "source_path",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_cloud_move_operations",
+          "type": "text"
+        },
+        {
+          "column": "destination_dir",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_cloud_move_operations",
+          "type": "text"
+        },
+        {
+          "column": "state",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_cloud_move_operations",
+          "type": "text"
+        },
+        {
+          "column": "updated_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_cloud_move_operations",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "error_code",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "fill_actor_cloud_move_operations",
+          "type": "text"
+        },
+        {
+          "column": "job_id",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_jobs",
+          "type": "text"
+        },
+        {
+          "column": "operation",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_jobs",
+          "type": "text"
+        },
+        {
+          "column": "state",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_jobs",
+          "type": "text"
+        },
+        {
+          "column": "created_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_jobs",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "updated_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_jobs",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "plan_id",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "fill_actor_jobs",
+          "type": "text"
+        },
+        {
+          "column": "error_code",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "fill_actor_jobs",
+          "type": "text"
+        },
+        {
+          "column": "owner_id",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "fill_actor_jobs",
+          "type": "text"
+        },
+        {
+          "column": "lease_expires_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "fill_actor_jobs",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "actor_ids_json",
+          "default": "'[]'::text",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_jobs",
+          "type": "text"
+        },
+        {
+          "column": "progress_stage",
+          "default": "'queued'::text",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_jobs",
+          "type": "text"
+        },
+        {
+          "column": "progress_completed",
+          "default": "0",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_jobs",
+          "type": "integer"
+        },
+        {
+          "column": "progress_total",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "fill_actor_jobs",
+          "type": "integer"
+        },
+        {
+          "column": "progress_unit",
+          "default": "'items'::text",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_jobs",
+          "type": "text"
+        },
+        {
+          "column": "progress_current",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "fill_actor_jobs",
+          "type": "text"
+        },
+        {
+          "column": "progress_stage_started_at",
+          "default": "'1970-01-01 00:00:00+00'::timestamp with time zone",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_jobs",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "progress_updated_at",
+          "default": "'1970-01-01 00:00:00+00'::timestamp with time zone",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_jobs",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "plan_id",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_move_journal",
+          "type": "text"
+        },
+        {
+          "column": "candidate_id",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_move_journal",
+          "type": "text"
+        },
+        {
+          "column": "state",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_move_journal",
+          "type": "text"
+        },
+        {
+          "column": "updated_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_move_journal",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "plan_id",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_move_results",
+          "type": "text"
+        },
+        {
+          "column": "candidate_id",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_move_results",
+          "type": "text"
+        },
+        {
+          "column": "result_json",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_move_results",
+          "type": "text"
+        },
+        {
+          "column": "plan_id",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_plans",
+          "type": "text"
+        },
+        {
+          "column": "revision",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_plans",
+          "type": "text"
+        },
+        {
+          "column": "public_json",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_plans",
+          "type": "text"
+        },
+        {
+          "column": "created_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_plans",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "expires_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_plans",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "config_version",
+          "default": "0",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "fill_actor_plans",
+          "type": "integer"
+        },
+        {
+          "column": "id",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "health_probe",
+          "type": "integer"
+        },
+        {
+          "column": "checked_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "health_probe",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "id",
+          "default": "nextval('merge_tasks_id_seq'::regclass)",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_tasks",
+          "type": "bigint"
+        },
+        {
+          "column": "avid",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_tasks",
+          "type": "text"
+        },
+        {
+          "column": "source",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_tasks",
+          "type": "text"
+        },
+        {
+          "column": "library_dir",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_tasks",
+          "type": "text"
+        },
+        {
+          "column": "brand",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_tasks",
+          "type": "text"
+        },
+        {
+          "column": "parts_json",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_tasks",
+          "type": "text"
+        },
+        {
+          "column": "merged_name",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_tasks",
+          "type": "text"
+        },
+        {
+          "column": "state",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_tasks",
+          "type": "text"
+        },
+        {
+          "column": "failed_state",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "merge_tasks",
+          "type": "text"
+        },
+        {
+          "column": "job_name",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "merge_tasks",
+          "type": "text"
+        },
+        {
+          "column": "phase",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "merge_tasks",
+          "type": "text"
+        },
+        {
+          "column": "progress",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "merge_tasks",
+          "type": "double precision"
+        },
+        {
+          "column": "merged_bytes",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "merge_tasks",
+          "type": "bigint"
+        },
+        {
+          "column": "merged_sha1",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "merge_tasks",
+          "type": "text"
+        },
+        {
+          "column": "uploaded_bytes",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "merge_tasks",
+          "type": "bigint"
+        },
+        {
+          "column": "upload_attempts",
+          "default": "0",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_tasks",
+          "type": "integer"
+        },
+        {
+          "column": "error",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "merge_tasks",
+          "type": "text"
+        },
+        {
+          "column": "notice",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "merge_tasks",
+          "type": "text"
+        },
+        {
+          "column": "created_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_tasks",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "updated_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_tasks",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "state_changed_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_tasks",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "finished_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "merge_tasks",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "transcoder",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "merge_tasks",
+          "type": "text"
+        },
+        {
+          "column": "transcode_paused",
+          "default": "false",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_tasks",
+          "type": "boolean"
+        },
+        {
+          "column": "task_id",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_transcode_chunks",
+          "type": "bigint"
+        },
+        {
+          "column": "part_index",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_transcode_chunks",
+          "type": "integer"
+        },
+        {
+          "column": "chunk_index",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_transcode_chunks",
+          "type": "integer"
+        },
+        {
+          "column": "start_seconds",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_transcode_chunks",
+          "type": "double precision"
+        },
+        {
+          "column": "duration_seconds",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_transcode_chunks",
+          "type": "double precision"
+        },
+        {
+          "column": "frames",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_transcode_chunks",
+          "type": "integer"
+        },
+        {
+          "column": "bytes",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_transcode_chunks",
+          "type": "bigint"
+        },
+        {
+          "column": "sha256",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_transcode_chunks",
+          "type": "text"
+        },
+        {
+          "column": "created_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_transcode_chunks",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "task_id",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_transcode_parts",
+          "type": "bigint"
+        },
+        {
+          "column": "part_index",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_transcode_parts",
+          "type": "integer"
+        },
+        {
+          "column": "finished_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "merge_transcode_parts",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "run_id",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "pipeline_runs",
+          "type": "text"
+        },
+        {
+          "column": "pipeline",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "pipeline_runs",
+          "type": "text"
+        },
+        {
+          "column": "trigger",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "pipeline_runs",
+          "type": "text"
+        },
+        {
+          "column": "state",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "pipeline_runs",
+          "type": "text"
+        },
+        {
+          "column": "started_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "pipeline_runs",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "finished_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "pipeline_runs",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "stats_json",
+          "default": "'{}'::text",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "pipeline_runs",
+          "type": "text"
+        },
+        {
+          "column": "errors_json",
+          "default": "'[]'::text",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "pipeline_runs",
+          "type": "text"
+        },
+        {
+          "column": "log_json",
+          "default": "'[]'::text",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "pipeline_runs",
+          "type": "text"
+        },
+        {
+          "column": "id",
+          "default": "true",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "playlist_source",
+          "type": "boolean"
+        },
+        {
+          "column": "database_name",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "playlist_source",
+          "type": "text"
+        },
+        {
+          "column": "fetched_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "playlist_source",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "key",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "playlists",
+          "type": "text"
+        },
+        {
+          "column": "kind",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "playlists",
+          "type": "integer"
+        },
+        {
+          "column": "note",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "playlists",
+          "type": "text"
+        },
+        {
+          "column": "name",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "playlists",
+          "type": "text"
+        },
+        {
+          "column": "enabled",
+          "default": "true",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "playlists",
+          "type": "boolean"
+        },
+        {
+          "column": "entries_json",
+          "default": "'[]'::text",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "playlists",
+          "type": "text"
+        },
+        {
+          "column": "present_json",
+          "default": "'[]'::text",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "playlists",
+          "type": "text"
+        },
+        {
+          "column": "missing_json",
+          "default": "'[]'::text",
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "playlists",
+          "type": "text"
+        },
+        {
+          "column": "emby_playlist_id",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "playlists",
+          "type": "text"
+        },
+        {
+          "column": "last_synced_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "playlists",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "last_error",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": false,
+          "table": "playlists",
+          "type": "text"
+        },
+        {
+          "column": "created_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "playlists",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "updated_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "playlists",
+          "type": "timestamp with time zone"
+        },
+        {
+          "column": "version",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "schema_migrations",
+          "type": "integer"
+        },
+        {
+          "column": "applied_at",
+          "default": null,
+          "generated": "",
+          "identity": "",
+          "not_null": true,
+          "table": "schema_migrations",
+          "type": "timestamp with time zone"
+        }
+      ],
+      "constraints": [
+        {
+          "definition": "PRIMARY KEY (section)",
+          "name": "app_config_pkey",
+          "table": "app_config",
+          "type": "p"
+        },
+        {
+          "definition": "PRIMARY KEY (avid)",
+          "name": "archive_acquisitions_pkey",
+          "table": "archive_acquisitions",
+          "type": "p"
+        },
+        {
+          "definition": "CHECK ((state = ANY (ARRAY['discovered'::text, 'downloading'::text, 'archived'::text, 'resolve_failed'::text, 'exhausted'::text, 'needs_attention'::text, 'ignored'::text])))",
+          "name": "archive_acquisitions_state_check",
+          "table": "archive_acquisitions",
+          "type": "c"
+        },
+        {
+          "definition": "CHECK ((attempt_no > 0))",
+          "name": "archive_magnet_attempts_attempt_no_check",
+          "table": "archive_magnet_attempts",
+          "type": "c"
+        },
+        {
+          "definition": "FOREIGN KEY (avid) REFERENCES archive_acquisitions(avid) ON UPDATE CASCADE ON DELETE CASCADE",
+          "name": "archive_magnet_attempts_avid_fkey",
+          "table": "archive_magnet_attempts",
+          "type": "f"
+        },
+        {
+          "definition": "PRIMARY KEY (avid, attempt_no)",
+          "name": "archive_magnet_attempts_pkey",
+          "table": "archive_magnet_attempts",
+          "type": "p"
+        },
+        {
+          "definition": "CHECK ((state = ANY (ARRAY['pending'::text, 'submitted'::text, 'downloading'::text, 'finished'::text, 'archiving'::text, 'archived'::text, 'junk'::text, 'error'::text, 'stalled'::text, 'lost'::text])))",
+          "name": "archive_magnet_attempts_state_check",
+          "table": "archive_magnet_attempts",
+          "type": "c"
+        },
+        {
+          "definition": "CHECK (((kind = 'rss'::text) = (url IS NOT NULL)))",
+          "name": "feed_subscriptions_check",
+          "table": "feed_subscriptions",
+          "type": "c"
+        },
+        {
+          "definition": "CHECK (((kind = 'avbase_talent'::text) = (talent_id IS NOT NULL)))",
+          "name": "feed_subscriptions_check1",
+          "table": "feed_subscriptions",
+          "type": "c"
+        },
+        {
+          "definition": "CHECK ((kind = ANY (ARRAY['rss'::text, 'avbase_talent'::text])))",
+          "name": "feed_subscriptions_kind_check",
+          "table": "feed_subscriptions",
+          "type": "c"
+        },
+        {
+          "definition": "PRIMARY KEY (id)",
+          "name": "feed_subscriptions_pkey",
+          "table": "feed_subscriptions",
+          "type": "p"
+        },
+        {
+          "definition": "FOREIGN KEY (job_id) REFERENCES fill_actor_jobs(job_id) ON DELETE CASCADE",
+          "name": "fill_actor_apply_jobs_job_id_fkey",
+          "table": "fill_actor_apply_jobs",
+          "type": "f"
+        },
+        {
+          "definition": "PRIMARY KEY (job_id)",
+          "name": "fill_actor_apply_jobs_pkey",
+          "table": "fill_actor_apply_jobs",
+          "type": "p"
+        },
+        {
+          "definition": "CHECK ((length(revision) > 0))",
+          "name": "fill_actor_apply_jobs_revision_check",
+          "table": "fill_actor_apply_jobs",
+          "type": "c"
+        },
+        {
+          "definition": "CHECK ((candidate_kind = ANY (ARRAY['local_file'::text, 'cloud_strm'::text])))",
+          "name": "fill_actor_candidates_candidate_kind_check",
+          "table": "fill_actor_candidates",
+          "type": "c"
+        },
+        {
+          "definition": "PRIMARY KEY (plan_id, candidate_id)",
+          "name": "fill_actor_candidates_pkey",
+          "table": "fill_actor_candidates",
+          "type": "p"
+        },
+        {
+          "definition": "FOREIGN KEY (plan_id) REFERENCES fill_actor_plans(plan_id) ON DELETE CASCADE",
+          "name": "fill_actor_candidates_plan_id_fkey",
+          "table": "fill_actor_candidates",
+          "type": "f"
+        },
+        {
+          "definition": "CHECK ((((state = ANY (ARRAY['unknown'::text, 'conflict'::text, 'failed'::text])) AND (error_code IS NOT NULL)) OR ((state <> ALL (ARRAY['unknown'::text, 'conflict'::text, 'failed'::text])) AND (error_code IS NULL))))",
+          "name": "fill_actor_cloud_move_operations_check",
+          "table": "fill_actor_cloud_move_operations",
+          "type": "c"
+        },
+        {
+          "definition": "PRIMARY KEY (plan_id, candidate_id)",
+          "name": "fill_actor_cloud_move_operations_pkey",
+          "table": "fill_actor_cloud_move_operations",
+          "type": "p"
+        },
+        {
+          "definition": "FOREIGN KEY (plan_id, candidate_id) REFERENCES fill_actor_candidates(plan_id, candidate_id) ON DELETE CASCADE",
+          "name": "fill_actor_cloud_move_operations_plan_id_candidate_id_fkey",
+          "table": "fill_actor_cloud_move_operations",
+          "type": "f"
+        },
+        {
+          "definition": "CHECK ((state = ANY (ARRAY['prepared'::text, 'submitting'::text, 'verifying'::text, 'unknown'::text, 'succeeded'::text, 'conflict'::text, 'failed'::text])))",
+          "name": "fill_actor_cloud_move_operations_state_check",
+          "table": "fill_actor_cloud_move_operations",
+          "type": "c"
+        },
+        {
+          "definition": "CHECK ((operation = ANY (ARRAY['create_plan'::text, 'apply'::text])))",
+          "name": "fill_actor_jobs_operation_check",
+          "table": "fill_actor_jobs",
+          "type": "c"
+        },
+        {
+          "definition": "PRIMARY KEY (job_id)",
+          "name": "fill_actor_jobs_pkey",
+          "table": "fill_actor_jobs",
+          "type": "p"
+        },
+        {
+          "definition": "CHECK ((progress_completed >= 0))",
+          "name": "fill_actor_jobs_progress_completed_check",
+          "table": "fill_actor_jobs",
+          "type": "c"
+        },
+        {
+          "definition": "CHECK ((progress_stage = ANY (ARRAY['queued'::text, 'actor_catalog'::text, 'library_scan'::text, 'magnet_lookup'::text, 'submitting'::text, 'persisting'::text, 'done'::text, 'unknown'::text])))",
+          "name": "fill_actor_jobs_progress_stage_check",
+          "table": "fill_actor_jobs",
+          "type": "c"
+        },
+        {
+          "definition": "CHECK (((progress_total IS NULL) OR (progress_total >= 0)))",
+          "name": "fill_actor_jobs_progress_total_check",
+          "table": "fill_actor_jobs",
+          "type": "c"
+        },
+        {
+          "definition": "CHECK ((progress_unit = ANY (ARRAY['actors'::text, 'pages'::text, 'videos'::text, 'magnets'::text, 'steps'::text, 'items'::text])))",
+          "name": "fill_actor_jobs_progress_unit_check",
+          "table": "fill_actor_jobs",
+          "type": "c"
+        },
+        {
+          "definition": "CHECK ((state = ANY (ARRAY['queued'::text, 'running'::text, 'completed'::text, 'partial_failed'::text, 'failed'::text])))",
+          "name": "fill_actor_jobs_state_check",
+          "table": "fill_actor_jobs",
+          "type": "c"
+        },
+        {
+          "definition": "PRIMARY KEY (plan_id, candidate_id)",
+          "name": "fill_actor_move_journal_pkey",
+          "table": "fill_actor_move_journal",
+          "type": "p"
+        },
+        {
+          "definition": "FOREIGN KEY (plan_id, candidate_id) REFERENCES fill_actor_candidates(plan_id, candidate_id) ON DELETE CASCADE",
+          "name": "fill_actor_move_journal_plan_id_candidate_id_fkey",
+          "table": "fill_actor_move_journal",
+          "type": "f"
+        },
+        {
+          "definition": "CHECK ((state = ANY (ARRAY['prepared'::text, 'linked'::text, 'source_removed'::text, 'reconciled'::text])))",
+          "name": "fill_actor_move_journal_state_check",
+          "table": "fill_actor_move_journal",
+          "type": "c"
+        },
+        {
+          "definition": "PRIMARY KEY (plan_id, candidate_id)",
+          "name": "fill_actor_move_results_pkey",
+          "table": "fill_actor_move_results",
+          "type": "p"
+        },
+        {
+          "definition": "FOREIGN KEY (plan_id, candidate_id) REFERENCES fill_actor_candidates(plan_id, candidate_id) ON DELETE CASCADE",
+          "name": "fill_actor_move_results_plan_id_candidate_id_fkey",
+          "table": "fill_actor_move_results",
+          "type": "f"
+        },
+        {
+          "definition": "PRIMARY KEY (plan_id)",
+          "name": "fill_actor_plans_pkey",
+          "table": "fill_actor_plans",
+          "type": "p"
+        },
+        {
+          "definition": "CHECK ((id = 1))",
+          "name": "health_probe_id_check",
+          "table": "health_probe",
+          "type": "c"
+        },
+        {
+          "definition": "PRIMARY KEY (id)",
+          "name": "health_probe_pkey",
+          "table": "health_probe",
+          "type": "p"
+        },
+        {
+          "definition": "PRIMARY KEY (id)",
+          "name": "merge_tasks_pkey",
+          "table": "merge_tasks",
+          "type": "p"
+        },
+        {
+          "definition": "CHECK ((state = ANY (ARRAY['queued'::text, 'transcoding'::text, 'merging'::text, 'uploading'::text, 'verifying'::text, 'replacing'::text, 'archiving'::text, 'done'::text, 'failed'::text, 'cancelled'::text])))",
+          "name": "merge_tasks_state_check",
+          "table": "merge_tasks",
+          "type": "c"
+        },
+        {
+          "definition": "CHECK ((transcoder = ANY (ARRAY['home'::text, 'cpu'::text])))",
+          "name": "merge_tasks_transcoder_check",
+          "table": "merge_tasks",
+          "type": "c"
+        },
+        {
+          "definition": "PRIMARY KEY (task_id, part_index, chunk_index)",
+          "name": "merge_transcode_chunks_pkey",
+          "table": "merge_transcode_chunks",
+          "type": "p"
+        },
+        {
+          "definition": "FOREIGN KEY (task_id) REFERENCES merge_tasks(id) ON DELETE CASCADE",
+          "name": "merge_transcode_chunks_task_id_fkey",
+          "table": "merge_transcode_chunks",
+          "type": "f"
+        },
+        {
+          "definition": "PRIMARY KEY (task_id, part_index)",
+          "name": "merge_transcode_parts_pkey",
+          "table": "merge_transcode_parts",
+          "type": "p"
+        },
+        {
+          "definition": "FOREIGN KEY (task_id) REFERENCES merge_tasks(id) ON DELETE CASCADE",
+          "name": "merge_transcode_parts_task_id_fkey",
+          "table": "merge_transcode_parts",
+          "type": "f"
+        },
+        {
+          "definition": "CHECK ((pipeline = ANY (ARRAY['rss'::text, 'archive'::text, 'mapping'::text, 'playlists'::text])))",
+          "name": "pipeline_runs_pipeline_check",
+          "table": "pipeline_runs",
+          "type": "c"
+        },
+        {
+          "definition": "PRIMARY KEY (run_id)",
+          "name": "pipeline_runs_pkey",
+          "table": "pipeline_runs",
+          "type": "p"
+        },
+        {
+          "definition": "CHECK ((state = ANY (ARRAY['running'::text, 'completed'::text, 'failed'::text, 'cancelled'::text])))",
+          "name": "pipeline_runs_state_check",
+          "table": "pipeline_runs",
+          "type": "c"
+        },
+        {
+          "definition": "CHECK ((trigger = ANY (ARRAY['scheduled'::text, 'manual'::text, 'watchdog'::text, 'startup'::text])))",
+          "name": "pipeline_runs_trigger_check",
+          "table": "pipeline_runs",
+          "type": "c"
+        },
+        {
+          "definition": "CHECK (id)",
+          "name": "playlist_source_id_check",
+          "table": "playlist_source",
+          "type": "c"
+        },
+        {
+          "definition": "PRIMARY KEY (id)",
+          "name": "playlist_source_pkey",
+          "table": "playlist_source",
+          "type": "p"
+        },
+        {
+          "definition": "PRIMARY KEY (key)",
+          "name": "playlists_pkey",
+          "table": "playlists",
+          "type": "p"
+        },
+        {
+          "definition": "PRIMARY KEY (version)",
+          "name": "schema_migrations_pkey",
+          "table": "schema_migrations",
+          "type": "p"
+        }
+      ],
+      "indexes": [
+        {
+          "definition": "CREATE UNIQUE INDEX app_config_pkey ON public.app_config USING btree (section)",
+          "name": "app_config_pkey",
+          "table": "app_config"
+        },
+        {
+          "definition": "CREATE UNIQUE INDEX archive_acquisitions_pkey ON public.archive_acquisitions USING btree (avid)",
+          "name": "archive_acquisitions_pkey",
+          "table": "archive_acquisitions"
+        },
+        {
+          "definition": "CREATE INDEX archive_acquisitions_state_idx ON public.archive_acquisitions USING btree (state, next_action_at)",
+          "name": "archive_acquisitions_state_idx",
+          "table": "archive_acquisitions"
+        },
+        {
+          "definition": "CREATE INDEX archive_magnet_attempts_hash_idx ON public.archive_magnet_attempts USING btree (info_hash)",
+          "name": "archive_magnet_attempts_hash_idx",
+          "table": "archive_magnet_attempts"
+        },
+        {
+          "definition": "CREATE UNIQUE INDEX archive_magnet_attempts_live_hash_idx ON public.archive_magnet_attempts USING btree (info_hash) WHERE ((info_hash IS NOT NULL) AND (state = ANY (ARRAY['submitted'::text, 'downloading'::text, 'finished'::text, 'archiving'::text])))",
+          "name": "archive_magnet_attempts_live_hash_idx",
+          "table": "archive_magnet_attempts"
+        },
+        {
+          "definition": "CREATE UNIQUE INDEX archive_magnet_attempts_pkey ON public.archive_magnet_attempts USING btree (avid, attempt_no)",
+          "name": "archive_magnet_attempts_pkey",
+          "table": "archive_magnet_attempts"
+        },
+        {
+          "definition": "CREATE UNIQUE INDEX feed_subscriptions_pkey ON public.feed_subscriptions USING btree (id)",
+          "name": "feed_subscriptions_pkey",
+          "table": "feed_subscriptions"
+        },
+        {
+          "definition": "CREATE UNIQUE INDEX feed_subscriptions_talent_idx ON public.feed_subscriptions USING btree (talent_id) WHERE (talent_id IS NOT NULL)",
+          "name": "feed_subscriptions_talent_idx",
+          "table": "feed_subscriptions"
+        },
+        {
+          "definition": "CREATE UNIQUE INDEX feed_subscriptions_url_idx ON public.feed_subscriptions USING btree (url) WHERE (url IS NOT NULL)",
+          "name": "feed_subscriptions_url_idx",
+          "table": "feed_subscriptions"
+        },
+        {
+          "definition": "CREATE UNIQUE INDEX fill_actor_apply_jobs_pkey ON public.fill_actor_apply_jobs USING btree (job_id)",
+          "name": "fill_actor_apply_jobs_pkey",
+          "table": "fill_actor_apply_jobs"
+        },
+        {
+          "definition": "CREATE UNIQUE INDEX fill_actor_candidates_pkey ON public.fill_actor_candidates USING btree (plan_id, candidate_id)",
+          "name": "fill_actor_candidates_pkey",
+          "table": "fill_actor_candidates"
+        },
+        {
+          "definition": "CREATE UNIQUE INDEX fill_actor_cloud_move_operations_active_source_idx ON public.fill_actor_cloud_move_operations USING btree (source_path) WHERE (state = ANY (ARRAY['prepared'::text, 'submitting'::text, 'verifying'::text, 'unknown'::text]))",
+          "name": "fill_actor_cloud_move_operations_active_source_idx",
+          "table": "fill_actor_cloud_move_operations"
+        },
+        {
+          "definition": "CREATE UNIQUE INDEX fill_actor_cloud_move_operations_pkey ON public.fill_actor_cloud_move_operations USING btree (plan_id, candidate_id)",
+          "name": "fill_actor_cloud_move_operations_pkey",
+          "table": "fill_actor_cloud_move_operations"
+        },
+        {
+          "definition": "CREATE INDEX fill_actor_cloud_move_operations_state_idx ON public.fill_actor_cloud_move_operations USING btree (state, updated_at)",
+          "name": "fill_actor_cloud_move_operations_state_idx",
+          "table": "fill_actor_cloud_move_operations"
+        },
+        {
+          "definition": "CREATE INDEX fill_actor_jobs_lease_idx ON public.fill_actor_jobs USING btree (state, lease_expires_at)",
+          "name": "fill_actor_jobs_lease_idx",
+          "table": "fill_actor_jobs"
+        },
+        {
+          "definition": "CREATE UNIQUE INDEX fill_actor_jobs_pkey ON public.fill_actor_jobs USING btree (job_id)",
+          "name": "fill_actor_jobs_pkey",
+          "table": "fill_actor_jobs"
+        },
+        {
+          "definition": "CREATE INDEX fill_actor_jobs_plan_id_idx ON public.fill_actor_jobs USING btree (plan_id)",
+          "name": "fill_actor_jobs_plan_id_idx",
+          "table": "fill_actor_jobs"
+        },
+        {
+          "definition": "CREATE INDEX fill_actor_jobs_queue_idx ON public.fill_actor_jobs USING btree (created_at, job_id) WHERE (state = 'queued'::text)",
+          "name": "fill_actor_jobs_queue_idx",
+          "table": "fill_actor_jobs"
+        },
+        {
+          "definition": "CREATE UNIQUE INDEX fill_actor_move_journal_pkey ON public.fill_actor_move_journal USING btree (plan_id, candidate_id)",
+          "name": "fill_actor_move_journal_pkey",
+          "table": "fill_actor_move_journal"
+        },
+        {
+          "definition": "CREATE INDEX fill_actor_move_journal_state_idx ON public.fill_actor_move_journal USING btree (state, updated_at)",
+          "name": "fill_actor_move_journal_state_idx",
+          "table": "fill_actor_move_journal"
+        },
+        {
+          "definition": "CREATE UNIQUE INDEX fill_actor_move_results_pkey ON public.fill_actor_move_results USING btree (plan_id, candidate_id)",
+          "name": "fill_actor_move_results_pkey",
+          "table": "fill_actor_move_results"
+        },
+        {
+          "definition": "CREATE INDEX fill_actor_plans_expires_at_idx ON public.fill_actor_plans USING btree (expires_at)",
+          "name": "fill_actor_plans_expires_at_idx",
+          "table": "fill_actor_plans"
+        },
+        {
+          "definition": "CREATE UNIQUE INDEX fill_actor_plans_pkey ON public.fill_actor_plans USING btree (plan_id)",
+          "name": "fill_actor_plans_pkey",
+          "table": "fill_actor_plans"
+        },
+        {
+          "definition": "CREATE UNIQUE INDEX health_probe_pkey ON public.health_probe USING btree (id)",
+          "name": "health_probe_pkey",
+          "table": "health_probe"
+        },
+        {
+          "definition": "CREATE UNIQUE INDEX merge_tasks_one_open_per_avid ON public.merge_tasks USING btree (avid) WHERE (state <> ALL (ARRAY['done'::text, 'cancelled'::text]))",
+          "name": "merge_tasks_one_open_per_avid",
+          "table": "merge_tasks"
+        },
+        {
+          "definition": "CREATE UNIQUE INDEX merge_tasks_pkey ON public.merge_tasks USING btree (id)",
+          "name": "merge_tasks_pkey",
+          "table": "merge_tasks"
+        },
+        {
+          "definition": "CREATE UNIQUE INDEX merge_transcode_chunks_pkey ON public.merge_transcode_chunks USING btree (task_id, part_index, chunk_index)",
+          "name": "merge_transcode_chunks_pkey",
+          "table": "merge_transcode_chunks"
+        },
+        {
+          "definition": "CREATE UNIQUE INDEX merge_transcode_parts_pkey ON public.merge_transcode_parts USING btree (task_id, part_index)",
+          "name": "merge_transcode_parts_pkey",
+          "table": "merge_transcode_parts"
+        },
+        {
+          "definition": "CREATE INDEX pipeline_runs_pipeline_idx ON public.pipeline_runs USING btree (pipeline, started_at DESC)",
+          "name": "pipeline_runs_pipeline_idx",
+          "table": "pipeline_runs"
+        },
+        {
+          "definition": "CREATE UNIQUE INDEX pipeline_runs_pkey ON public.pipeline_runs USING btree (run_id)",
+          "name": "pipeline_runs_pkey",
+          "table": "pipeline_runs"
+        },
+        {
+          "definition": "CREATE UNIQUE INDEX playlist_source_pkey ON public.playlist_source USING btree (id)",
+          "name": "playlist_source_pkey",
+          "table": "playlist_source"
+        },
+        {
+          "definition": "CREATE UNIQUE INDEX playlists_pkey ON public.playlists USING btree (key)",
+          "name": "playlists_pkey",
+          "table": "playlists"
+        },
+        {
+          "definition": "CREATE UNIQUE INDEX schema_migrations_pkey ON public.schema_migrations USING btree (version)",
+          "name": "schema_migrations_pkey",
+          "table": "schema_migrations"
+        }
+      ],
+      "sequences": [
+        {
+          "increment": 1,
+          "name": "feed_subscriptions_id_seq",
+          "start": 1,
+          "type": "bigint"
+        },
+        {
+          "increment": 1,
+          "name": "merge_tasks_id_seq",
+          "start": 1,
+          "type": "bigint"
+        }
+      ],
+      "versions": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ]
+    }
+  },
+  "rows": {
+    "app_config": [],
+    "archive_acquisitions": [],
+    "archive_magnet_attempts": [],
+    "feed_subscriptions": [],
+    "fill_actor_apply_jobs": [],
+    "fill_actor_candidates": [],
+    "fill_actor_cloud_move_operations": [],
+    "fill_actor_jobs": [],
+    "fill_actor_move_journal": [],
+    "fill_actor_move_results": [],
+    "fill_actor_plans": [],
+    "health_probe": [],
+    "merge_tasks": [],
+    "merge_transcode_chunks": [],
+    "merge_transcode_parts": [],
+    "pipeline_runs": [],
+    "playlist_source": [],
+    "playlists": []
+  },
+  "scenario": "db/schema",
+  "tree": {}
+}

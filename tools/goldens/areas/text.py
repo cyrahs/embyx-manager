@@ -3,7 +3,9 @@
 `str.strip()` and `str.split()` cut at `str.isspace()` characters, which include the
 ASCII separators U+001C..U+001F that Unicode's White_Space does not; `str.isdigit()` and
 `str.isdecimal()` accept every Unicode digit, not only ASCII ones (AVID and number parsing
-from WP1 on). These goldens are the full code-point scan of Python 3.13 (Unicode 15.1).
+from WP1 on); `str.isalnum()` decides whether a domain-shaped token is followed by more of the
+title (`core/avid.py`) and `str.isprintable()` what `repr()` escapes. These goldens are the
+full code-point scan of Python 3.13 (Unicode 15.1).
 
 Copied from fav's golden generator (`tools/goldens/areas/text.py` at the commit named in
 docs/CONVENTIONS.md), as the goldens of the helpers copied with it.
@@ -42,7 +44,17 @@ def _isdecimal() -> list[dict[str, Any]]:
     return [{'ranges': _ranges(str.isdecimal)}]
 
 
+def _isalnum() -> list[dict[str, Any]]:
+    return [{'ranges': _ranges(str.isalnum)}]
+
+
+def _isprintable() -> list[dict[str, Any]]:
+    return [{'ranges': _ranges(str.isprintable)}]
+
+
 GOLDENS = {
+    'text/isalnum.json': _isalnum,
+    'text/isprintable.json': _isprintable,
     'text/isspace.json': _isspace,
     'text/isdigit.json': _isdigit,
     'text/isdecimal.json': _isdecimal,

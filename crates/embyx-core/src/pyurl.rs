@@ -273,6 +273,57 @@ fn urlparse(url: &str, default_scheme: &str) -> Result<(SplitResult, String), Ur
 }
 
 impl SplitResult {
+    /// `_userinfo`: the user and password before the last `@` of the netloc.
+    fn userinfo(&self) -> (Option<&str>, Option<&str>) {
+        match self.netloc.rsplit_once('@') {
+            Some((userinfo, _)) => match userinfo.split_once(':') {
+                Some((user, password)) => (Some(user), Some(password)),
+                None => (Some(userinfo), None),
+            },
+            None => (None, None),
+        }
+    }
+
+    /// `SplitResult.username`.
+    pub fn username(&self) -> Option<&str> {
+        self.userinfo().0
+    }
+
+    /// `SplitResult.password`.
+    pub fn password(&self) -> Option<&str> {
+        self.userinfo().1
+    }
+
+    /// `SplitResult.port`: `None` without one; Python's `ValueError` text for a port that is
+    /// not ASCII digits or is beyond 65535.
+    pub fn port(&self) -> Result<Option<u16>, UrlError> {
+        let host_info = self
+            .netloc
+            .rsplit_once('@')
+            .map_or(self.netloc.as_str(), |(_, host)| host);
+        let port = match host_info.split_once('[') {
+            Some((_, bracketed)) => bracketed
+                .split_once(']')
+                .map_or("", |(_, rest)| rest.split_once(':').map_or("", |(_, port)| port)),
+            None => host_info.split_once(':').map_or("", |(_, port)| port),
+        };
+        if port.is_empty() {
+            return Ok(None);
+        }
+        if !port.bytes().all(|byte| byte.is_ascii_digit()) {
+            return Err(UrlError(format!(
+                "Port could not be cast to integer value as {}",
+                crate::pytext::py_repr(port)
+            )));
+        }
+        let value = port.trim_start_matches('0');
+        match value.parse::<u32>() {
+            Ok(number) if number <= 65_535 => Ok(Some(u16::try_from(number).unwrap_or(u16::MAX))),
+            _ if value.is_empty() => Ok(Some(0)),
+            _ => Err(UrlError("Port out of range 0-65535".to_owned())),
+        }
+    }
+
     /// `SplitResult.hostname`: the host without user info, brackets or port, lowercased
     /// (an IPv6 zone keeps its case); `None` when empty.
     pub fn hostname(&self) -> Option<String> {

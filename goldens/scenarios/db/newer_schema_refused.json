@@ -1,0 +1,31 @@
+{
+  "calls": [],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "db.open",
+  "outcome": {
+    "error": {
+      "message": "unsupported embyx-manager database schema version: 20",
+      "type": "UnsupportedSchemaVersionError"
+    }
+  },
+  "rows": {},
+  "scenario": "db/newer_schema_refused",
+  "tree": {}
+}

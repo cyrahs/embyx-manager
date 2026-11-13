@@ -1,0 +1,177 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "db",
+  "cases": [
+    {
+      "current_schema_version": 19,
+      "advisory_namespace": 1162691160,
+      "lock_keys": {
+        "migration": 0,
+        "enqueue": 1,
+        "mutation": 2,
+        "locking.mutation": 2,
+        "locking.namespace": 1162691160
+      },
+      "unsupported_version_message": "unsupported embyx-manager database schema version: 20"
+    },
+    {
+      "version": 1,
+      "statements": [
+        "\n        CREATE TABLE fill_actor_plans (\n            plan_id TEXT PRIMARY KEY,\n            revision TEXT NOT NULL,\n            public_json TEXT NOT NULL,\n            created_at TIMESTAMPTZ NOT NULL,\n            expires_at TIMESTAMPTZ NOT NULL\n        )\n        ",
+        "CREATE INDEX fill_actor_plans_expires_at_idx ON fill_actor_plans (expires_at)",
+        "\n        CREATE TABLE fill_actor_candidates (\n            plan_id TEXT NOT NULL,\n            candidate_id TEXT NOT NULL,\n            video_id TEXT NOT NULL,\n            source_path TEXT NOT NULL,\n            source_root TEXT NOT NULL,\n            destination_path TEXT NOT NULL,\n            fingerprint_device BIGINT NOT NULL,\n            fingerprint_inode BIGINT NOT NULL,\n            fingerprint_size BIGINT NOT NULL,\n            fingerprint_mtime_ns BIGINT NOT NULL,\n            fingerprint_ctime_ns BIGINT NOT NULL,\n            candidate_kind TEXT NOT NULL DEFAULT 'local_file'\n                CHECK (candidate_kind IN ('local_file', 'cloud_strm')),\n            mapping_sha256 TEXT,\n            cloud_source_path TEXT,\n            cloud_destination_dir TEXT,\n            cloud_file_json TEXT,\n            PRIMARY KEY (plan_id, candidate_id),\n            FOREIGN KEY (plan_id) REFERENCES fill_actor_plans (plan_id) ON DELETE CASCADE\n        )\n        ",
+        "\n        CREATE TABLE fill_actor_move_results (\n            plan_id TEXT NOT NULL,\n            candidate_id TEXT NOT NULL,\n            result_json TEXT NOT NULL,\n            PRIMARY KEY (plan_id, candidate_id),\n            FOREIGN KEY (plan_id, candidate_id)\n                REFERENCES fill_actor_candidates (plan_id, candidate_id) ON DELETE CASCADE\n        )\n        ",
+        "\n        CREATE TABLE fill_actor_jobs (\n            job_id TEXT PRIMARY KEY,\n            operation TEXT NOT NULL CHECK (operation IN ('create_plan', 'apply')),\n            state TEXT NOT NULL CHECK (state IN ('queued', 'running', 'completed', 'partial_failed', 'failed')),\n            created_at TIMESTAMPTZ NOT NULL,\n            updated_at TIMESTAMPTZ NOT NULL,\n            plan_id TEXT,\n            error_code TEXT,\n            owner_id TEXT,\n            lease_expires_at TIMESTAMPTZ,\n            actor_ids_json TEXT NOT NULL DEFAULT '[]',\n            progress_stage TEXT NOT NULL DEFAULT 'queued' CHECK (progress_stage IN (\n                'queued', 'actor_catalog', 'library_scan', 'magnet_lookup', 'persisting', 'done', 'unknown'\n            )),\n            progress_completed INTEGER NOT NULL DEFAULT 0 CHECK (progress_completed >= 0),\n            progress_total INTEGER CHECK (progress_total IS NULL OR progress_total >= 0),\n            progress_unit TEXT NOT NULL DEFAULT 'items'\n                CHECK (progress_unit IN ('actors', 'pages', 'videos', 'magnets', 'steps', 'items')),\n            progress_current TEXT,\n            progress_stage_started_at TIMESTAMPTZ NOT NULL DEFAULT '1970-01-01T00:00:00+00:00',\n            progress_updated_at TIMESTAMPTZ NOT NULL DEFAULT '1970-01-01T00:00:00+00:00'\n        )\n        ",
+        "CREATE INDEX fill_actor_jobs_plan_id_idx ON fill_actor_jobs (plan_id)",
+        "CREATE INDEX fill_actor_jobs_lease_idx ON fill_actor_jobs (state, lease_expires_at)",
+        "CREATE INDEX fill_actor_jobs_queue_idx ON fill_actor_jobs (created_at, job_id) WHERE state = 'queued'",
+        "\n        CREATE TABLE fill_actor_job_feeds (\n            job_id TEXT NOT NULL,\n            actor_id TEXT NOT NULL,\n            state TEXT NOT NULL CHECK (state IN ('queued', 'warming', 'ready', 'failed')),\n            attempts INTEGER NOT NULL DEFAULT 0 CHECK (attempts >= 0),\n            updated_at TIMESTAMPTZ NOT NULL,\n            error_code TEXT CHECK (error_code IS NULL OR error_code IN (\n                'rsshub_timeout', 'rsshub_network_error', 'rsshub_http_error',\n                'rsshub_invalid_feed', 'rsshub_not_ready', 'rsshub_cancelled'\n            )),\n            freshrss_add_url TEXT,\n            CHECK (\n                (state = 'failed' AND error_code IS NOT NULL)\n                OR (state != 'failed' AND error_code IS NULL)\n            ),\n            PRIMARY KEY (job_id, actor_id),\n            FOREIGN KEY (job_id) REFERENCES fill_actor_jobs (job_id) ON DELETE CASCADE\n        )\n        ",
+        "CREATE INDEX fill_actor_job_feeds_state_idx ON fill_actor_job_feeds (state, updated_at)",
+        "\n        CREATE TABLE fill_actor_move_journal (\n            plan_id TEXT NOT NULL,\n            candidate_id TEXT NOT NULL,\n            state TEXT NOT NULL CHECK (state IN ('prepared', 'linked', 'source_removed', 'reconciled')),\n            updated_at TIMESTAMPTZ NOT NULL,\n            PRIMARY KEY (plan_id, candidate_id),\n            FOREIGN KEY (plan_id, candidate_id)\n                REFERENCES fill_actor_candidates (plan_id, candidate_id) ON DELETE CASCADE\n        )\n        ",
+        "CREATE INDEX fill_actor_move_journal_state_idx ON fill_actor_move_journal (state, updated_at)",
+        "\n        CREATE TABLE fill_actor_cloud_move_operations (\n            plan_id TEXT NOT NULL,\n            candidate_id TEXT NOT NULL,\n            attempt_id TEXT NOT NULL,\n            source_path TEXT NOT NULL,\n            destination_dir TEXT NOT NULL,\n            state TEXT NOT NULL CHECK (state IN (\n                'prepared', 'submitting', 'verifying', 'unknown', 'succeeded', 'conflict', 'failed'\n            )),\n            updated_at TIMESTAMPTZ NOT NULL,\n            error_code TEXT,\n            CHECK (\n                (state IN ('unknown', 'conflict', 'failed') AND error_code IS NOT NULL)\n                OR (state NOT IN ('unknown', 'conflict', 'failed') AND error_code IS NULL)\n            ),\n            PRIMARY KEY (plan_id, candidate_id),\n            FOREIGN KEY (plan_id, candidate_id)\n                REFERENCES fill_actor_candidates (plan_id, candidate_id) ON DELETE CASCADE\n        )\n        ",
+        "\n        CREATE INDEX fill_actor_cloud_move_operations_state_idx\n        ON fill_actor_cloud_move_operations (state, updated_at)\n        ",
+        "\n        CREATE UNIQUE INDEX fill_actor_cloud_move_operations_active_source_idx\n        ON fill_actor_cloud_move_operations (source_path)\n        WHERE state IN ('prepared', 'submitting', 'verifying', 'unknown')\n        ",
+        "\n        CREATE TABLE fill_actor_apply_jobs (\n            job_id TEXT PRIMARY KEY,\n            revision TEXT NOT NULL CHECK (length(revision) > 0),\n            candidate_ids_json TEXT NOT NULL,\n            result_json TEXT,\n            FOREIGN KEY (job_id) REFERENCES fill_actor_jobs (job_id) ON DELETE CASCADE\n        )\n        ",
+        "\n        CREATE TABLE health_probe (\n            id INTEGER PRIMARY KEY CHECK (id = 1),\n            checked_at TIMESTAMPTZ NOT NULL\n        )\n        "
+      ]
+    },
+    {
+      "version": 2,
+      "statements": [
+        "\n    CREATE TABLE app_config (\n        section TEXT PRIMARY KEY,\n        value_json TEXT NOT NULL,\n        version INTEGER NOT NULL DEFAULT 1,\n        updated_at TIMESTAMPTZ NOT NULL\n    )\n    "
+      ]
+    },
+    {
+      "version": 3,
+      "statements": [
+        "\n    CREATE TABLE pipeline_runs (\n        run_id TEXT PRIMARY KEY,\n        pipeline TEXT NOT NULL CHECK (pipeline IN ('rss', 'archive', 'mapping')),\n        trigger TEXT NOT NULL CHECK (trigger IN ('scheduled', 'manual', 'watchdog', 'startup')),\n        state TEXT NOT NULL CHECK (state IN ('running', 'completed', 'failed', 'cancelled')),\n        started_at TIMESTAMPTZ NOT NULL,\n        finished_at TIMESTAMPTZ,\n        stats_json TEXT NOT NULL DEFAULT '{}',\n        errors_json TEXT NOT NULL DEFAULT '[]',\n        log_json TEXT NOT NULL DEFAULT '[]'\n    )\n    ",
+        "CREATE INDEX pipeline_runs_pipeline_idx ON pipeline_runs (pipeline, started_at DESC)",
+        "\n    CREATE TABLE rss_failed_avids (\n        avid TEXT PRIMARY KEY,\n        failed_at TIMESTAMPTZ NOT NULL\n    )\n    "
+      ]
+    },
+    {
+      "version": 4,
+      "statements": [
+        "ALTER TABLE fill_actor_plans ADD COLUMN config_version INTEGER NOT NULL DEFAULT 0"
+      ]
+    },
+    {
+      "version": 5,
+      "statements": [
+        "\n    CREATE TABLE archive_acquisitions (\n        avid TEXT PRIMARY KEY,\n        state TEXT NOT NULL CHECK (state IN (\n            'discovered', 'downloading', 'archived',\n            'resolve_failed', 'exhausted', 'needs_attention', 'ignored'\n        )),\n        source TEXT NOT NULL CHECK (source IN ('rss_actor', 'rss_rank', 'manual', 'reconcile')),\n        note TEXT,\n        archived_paths_json TEXT NOT NULL DEFAULT '[]',\n        next_action_at TIMESTAMPTZ,\n        created_at TIMESTAMPTZ NOT NULL,\n        updated_at TIMESTAMPTZ NOT NULL\n    )\n    ",
+        "CREATE INDEX archive_acquisitions_state_idx ON archive_acquisitions (state, next_action_at)",
+        "\n    CREATE TABLE archive_magnet_attempts (\n        avid TEXT NOT NULL REFERENCES archive_acquisitions (avid) ON DELETE CASCADE,\n        attempt_no INTEGER NOT NULL CHECK (attempt_no > 0),\n        magnet TEXT NOT NULL,\n        info_hash TEXT,\n        magnet_source TEXT NOT NULL,\n        size_hint BIGINT,\n        state TEXT NOT NULL CHECK (state IN (\n            'pending', 'submitted', 'downloading', 'finished',\n            'archiving', 'archived', 'junk', 'error', 'stalled', 'lost'\n        )),\n        -- Double, not real: CloudDrive's percendDone is a double, and a float4\n        -- column would round it so every poll looked like fresh progress and no\n        -- download would ever be seen as stalled.\n        progress DOUBLE PRECISION,\n        error TEXT,\n        submitted_at TIMESTAMPTZ,\n        updated_at TIMESTAMPTZ NOT NULL,\n        PRIMARY KEY (avid, attempt_no)\n    )\n    ",
+        "CREATE INDEX archive_magnet_attempts_hash_idx ON archive_magnet_attempts (info_hash)",
+        "\n    CREATE UNIQUE INDEX archive_magnet_attempts_live_hash_idx\n    ON archive_magnet_attempts (info_hash)\n    WHERE info_hash IS NOT NULL AND state IN ('submitted', 'downloading', 'finished', 'archiving')\n    ",
+        "\n    INSERT INTO archive_acquisitions (avid, state, source, next_action_at, created_at, updated_at)\n    SELECT avid, 'resolve_failed', 'rss_actor', failed_at + make_interval(secs => 86400), failed_at, failed_at\n    FROM rss_failed_avids\n    ON CONFLICT (avid) DO NOTHING\n    ",
+        "DROP TABLE rss_failed_avids"
+      ]
+    },
+    {
+      "version": 6,
+      "statements": [
+        "\n    UPDATE app_config\n    SET value_json = (value_json::jsonb - 'cloud_name' - 'cloud_account_id')::text\n    WHERE section = 'clouddrive'\n    "
+      ]
+    },
+    {
+      "version": 7,
+      "statements": [
+        "\n    UPDATE app_config\n    SET value_json = (value_json::jsonb - 'task_dir_local' - 'task_dst' - 'task_priority')::text\n    WHERE section = 'archive'\n    "
+      ]
+    },
+    {
+      "version": 8,
+      "statements": [
+        "ALTER TABLE archive_acquisitions ADD COLUMN task_dir_path TEXT",
+        "\n    UPDATE archive_acquisitions\n    SET task_dir_path = (\n        SELECT NULLIF(trim(value_json::jsonb ->> 'task_dir_path'), '')\n        FROM app_config WHERE section = 'clouddrive'\n    )\n    ",
+        "\n    UPDATE app_config\n    SET value_json = (\n        (value_json::jsonb - 'actor_label' - 'rank_label')\n        || jsonb_build_object('categories', COALESCE((\n            SELECT jsonb_agg(jsonb_build_object('label', label, 'task_dir_path', inbox.path) ORDER BY ord)\n            FROM (\n                SELECT DISTINCT ON (label) label, ord\n                FROM unnest(ARRAY[\n                    COALESCE(NULLIF(trim(value_json::jsonb ->> 'actor_label'), ''), 'Actor'),\n                    COALESCE(NULLIF(trim(value_json::jsonb ->> 'rank_label'), ''), 'Rank')\n                ]) WITH ORDINALITY AS entries(label, ord)\n                ORDER BY label, ord\n            ) unique_labels\n            -- Both categories inherit the one directory. A deployment that never\n            -- configured it has nowhere to point them: the join drops every row\n            -- and it gets no categories, which the settings page asks for, rather\n            -- than categories that would fail validation.\n            CROSS JOIN (\n                SELECT NULLIF(trim(value_json::jsonb ->> 'task_dir_path'), '') AS path\n                FROM app_config WHERE section = 'clouddrive'\n            ) inbox\n            WHERE inbox.path IS NOT NULL\n        ), '[]'::jsonb))\n    )::text\n    WHERE section = 'rss'\n    ",
+        "\n    UPDATE app_config\n    SET value_json = (value_json::jsonb - 'task_dir_path')::text\n    WHERE section = 'clouddrive'\n    ",
+        "ALTER TABLE archive_acquisitions DROP CONSTRAINT archive_acquisitions_source_check"
+      ]
+    },
+    {
+      "version": 9,
+      "statements": [
+        "\n    UPDATE app_config\n    SET value_json = (value_json::jsonb || jsonb_build_object('tracker_interval_seconds', 1800))::text\n    WHERE section = 'archive'\n      AND value_json::jsonb ->> 'tracker_interval_seconds' = '300'\n    "
+      ]
+    },
+    {
+      "version": 10,
+      "statements": [
+        "ALTER TABLE fill_actor_jobs DROP CONSTRAINT fill_actor_jobs_progress_stage_check",
+        "\n    ALTER TABLE fill_actor_jobs ADD CONSTRAINT fill_actor_jobs_progress_stage_check\n    CHECK (progress_stage IN (\n        'queued', 'actor_catalog', 'library_scan', 'magnet_lookup', 'submitting', 'persisting', 'done', 'unknown'\n    ))\n    "
+      ]
+    },
+    {
+      "version": 11,
+      "statements": [
+        "ALTER TABLE archive_acquisitions ADD COLUMN release_date DATE"
+      ]
+    },
+    {
+      "version": 12,
+      "statements": [
+        "\n    CREATE TABLE feed_subscriptions (\n        id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,\n        kind TEXT NOT NULL CHECK (kind IN ('rss', 'avbase_talent')),\n        category TEXT NOT NULL,\n        enabled BOOLEAN NOT NULL DEFAULT TRUE,\n        url TEXT,\n        talent_id INTEGER,\n        name TEXT,\n        aliases_json TEXT NOT NULL DEFAULT '[]',\n        cursor_json TEXT NOT NULL DEFAULT '[]',\n        seed_pending BOOLEAN NOT NULL DEFAULT FALSE,\n        last_polled_at TIMESTAMPTZ,\n        last_error TEXT,\n        created_at TIMESTAMPTZ NOT NULL,\n        updated_at TIMESTAMPTZ NOT NULL,\n        CHECK ((kind = 'rss') = (url IS NOT NULL)),\n        CHECK ((kind = 'avbase_talent') = (talent_id IS NOT NULL))\n    )\n    ",
+        "CREATE UNIQUE INDEX feed_subscriptions_url_idx ON feed_subscriptions (url) WHERE url IS NOT NULL",
+        "CREATE UNIQUE INDEX feed_subscriptions_talent_idx ON feed_subscriptions (talent_id) WHERE talent_id IS NOT NULL"
+      ]
+    },
+    {
+      "version": 13,
+      "statements": [
+        "ALTER TABLE archive_magnet_attempts DROP CONSTRAINT archive_magnet_attempts_avid_fkey",
+        "\n    ALTER TABLE archive_magnet_attempts ADD CONSTRAINT archive_magnet_attempts_avid_fkey\n        FOREIGN KEY (avid) REFERENCES archive_acquisitions (avid) ON UPDATE CASCADE ON DELETE CASCADE\n    ",
+        "\n    WITH candidates AS (\n        SELECT\n            avid,\n            split_part(avid, '-', 1) || '-' || CASE\n                WHEN length(ltrim(split_part(avid, '-', 2), '0')) >= 3 THEN ltrim(split_part(avid, '-', 2), '0')\n                ELSE lpad(ltrim(split_part(avid, '-', 2), '0'), 3, '0')\n            END AS normalized\n        FROM archive_acquisitions\n        WHERE avid ~ '^[A-Z0-9]*[A-Z][A-Z0-9]*-[0-9]+$'\n          AND split_part(avid, '-', 1) NOT IN (\n              'FC2', 'HEYZO', 'HEYDOUGA', 'GETCHU', 'GYUTTO', 'MKBD', 'MKD',\n              'S2M', 'S2MBD', 'MK3D2DBD', 'CW3D2BD', 'CW3D2DBD'\n          )\n    )\n    UPDATE archive_acquisitions AS row\n    SET avid = candidates.normalized\n    FROM candidates\n    WHERE row.avid = candidates.avid\n      AND candidates.normalized <> candidates.avid\n      AND NOT EXISTS (SELECT 1 FROM archive_acquisitions taken WHERE taken.avid = candidates.normalized)\n      AND (SELECT count(*) FROM candidates same WHERE same.normalized = candidates.normalized) = 1\n    "
+      ]
+    },
+    {
+      "version": 14,
+      "statements": [
+        "DROP TABLE IF EXISTS fill_actor_job_feeds",
+        "DELETE FROM app_config WHERE section IN ('freshrss', 'feeds')"
+      ]
+    },
+    {
+      "version": 15,
+      "statements": [
+        "\n    CREATE TABLE playlists (\n        key TEXT PRIMARY KEY,\n        kind INTEGER NOT NULL,\n        note TEXT NOT NULL,\n        name TEXT NOT NULL,\n        enabled BOOLEAN NOT NULL DEFAULT TRUE,\n        entries_json TEXT NOT NULL DEFAULT '[]',\n        present_json TEXT NOT NULL DEFAULT '[]',\n        missing_json TEXT NOT NULL DEFAULT '[]',\n        emby_playlist_id TEXT,\n        last_synced_at TIMESTAMPTZ,\n        last_error TEXT,\n        created_at TIMESTAMPTZ NOT NULL,\n        updated_at TIMESTAMPTZ NOT NULL\n    )\n    ",
+        "\n    CREATE TABLE playlist_source (\n        id BOOLEAN PRIMARY KEY DEFAULT TRUE CHECK (id),\n        database_name TEXT NOT NULL,\n        fetched_at TIMESTAMPTZ NOT NULL\n    )\n    "
+      ]
+    },
+    {
+      "version": 16,
+      "statements": [
+        "ALTER TABLE pipeline_runs DROP CONSTRAINT pipeline_runs_pipeline_check",
+        "\n    ALTER TABLE pipeline_runs ADD CONSTRAINT pipeline_runs_pipeline_check\n    CHECK (pipeline IN ('rss', 'archive', 'mapping', 'playlists'))\n    "
+      ]
+    },
+    {
+      "version": 17,
+      "statements": [
+        "\n    CREATE TABLE merge_tasks (\n        id BIGSERIAL PRIMARY KEY,\n        avid TEXT NOT NULL,\n        source TEXT NOT NULL,\n        library_dir TEXT NOT NULL,\n        brand TEXT NOT NULL,\n        parts_json TEXT NOT NULL,\n        merged_name TEXT NOT NULL,\n        state TEXT NOT NULL CHECK (state IN (\n            'queued', 'merging', 'uploading', 'verifying', 'replacing', 'archiving',\n            'done', 'failed', 'cancelled'\n        )),\n        failed_state TEXT,\n        job_name TEXT,\n        phase TEXT,\n        progress DOUBLE PRECISION,\n        merged_bytes BIGINT,\n        merged_sha1 TEXT,\n        uploaded_bytes BIGINT,\n        upload_attempts INTEGER NOT NULL DEFAULT 0,\n        error TEXT,\n        notice TEXT,\n        created_at TIMESTAMPTZ NOT NULL,\n        updated_at TIMESTAMPTZ NOT NULL,\n        state_changed_at TIMESTAMPTZ NOT NULL,\n        finished_at TIMESTAMPTZ\n    )\n    ",
+        "\n    CREATE UNIQUE INDEX merge_tasks_one_open_per_avid ON merge_tasks (avid)\n    WHERE state NOT IN ('done', 'cancelled')\n    "
+      ]
+    },
+    {
+      "version": 18,
+      "statements": [
+        "ALTER TABLE archive_acquisitions ADD COLUMN replace_paths_json TEXT",
+        "ALTER TABLE archive_acquisitions ADD COLUMN replace_after_attempt INTEGER"
+      ]
+    },
+    {
+      "version": 19,
+      "statements": [
+        "ALTER TABLE merge_tasks DROP CONSTRAINT merge_tasks_state_check",
+        "\n    ALTER TABLE merge_tasks ADD CONSTRAINT merge_tasks_state_check CHECK (state IN (\n        'queued', 'transcoding', 'merging', 'uploading', 'verifying', 'replacing', 'archiving',\n        'done', 'failed', 'cancelled'\n    ))\n    ",
+        "ALTER TABLE merge_tasks ADD COLUMN transcoder TEXT CHECK (transcoder IN ('home', 'cpu'))",
+        "ALTER TABLE merge_tasks ADD COLUMN transcode_paused BOOLEAN NOT NULL DEFAULT FALSE",
+        "\n    CREATE TABLE merge_transcode_chunks (\n        task_id BIGINT NOT NULL REFERENCES merge_tasks (id) ON DELETE CASCADE,\n        part_index INTEGER NOT NULL,\n        chunk_index INTEGER NOT NULL,\n        start_seconds DOUBLE PRECISION NOT NULL,\n        duration_seconds DOUBLE PRECISION NOT NULL,\n        frames INTEGER NOT NULL,\n        bytes BIGINT NOT NULL,\n        sha256 TEXT NOT NULL,\n        created_at TIMESTAMPTZ NOT NULL,\n        PRIMARY KEY (task_id, part_index, chunk_index)\n    )\n    ",
+        "\n    CREATE TABLE merge_transcode_parts (\n        task_id BIGINT NOT NULL REFERENCES merge_tasks (id) ON DELETE CASCADE,\n        part_index INTEGER NOT NULL,\n        finished_at TIMESTAMPTZ NOT NULL,\n        PRIMARY KEY (task_id, part_index)\n    )\n    "
+      ]
+    }
+  ]
+}

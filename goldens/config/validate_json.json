@@ -1,0 +1,651 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "config",
+  "cases": [
+    {
+      "section": "clouddrive",
+      "text": "{\"address\":\"\",\"api_token\":\"\",\"secure\":true}",
+      "dump_json": "{\"address\":\"\",\"api_token\":\"\",\"secure\":true}"
+    },
+    {
+      "section": "emby",
+      "text": "{\"address\":\"\",\"api_key\":\"\"}",
+      "dump_json": "{\"address\":\"\",\"api_key\":\"\"}"
+    },
+    {
+      "section": "avid",
+      "text": "{\"id_exceptions\":[],\"ignored_id_patterns\":[]}",
+      "dump_json": "{\"id_exceptions\":[],\"ignored_id_patterns\":[]}"
+    },
+    {
+      "section": "rss",
+      "text": "{\"enabled\":false,\"interval_seconds\":1800,\"categories\":[],\"failed_avid_cooldown_seconds\":86400}",
+      "dump_json": "{\"enabled\":false,\"interval_seconds\":1800,\"categories\":[],\"failed_avid_cooldown_seconds\":86400}"
+    },
+    {
+      "section": "archive",
+      "text": "{\"enabled\":false,\"scan_cron\":\"0 4 * * *\",\"src_dir\":\"\",\"dst_dir\":\"\",\"mapping\":{},\"priority_mapping\":{},\"min_size_mb\":0,\"brand_mapping\":{},\"tracker_interval_seconds\":1800,\"stall_timeout_hours\":24,\"max_attempts\":5}",
+      "dump_json": "{\"enabled\":false,\"scan_cron\":\"0 4 * * *\",\"src_dir\":\"\",\"dst_dir\":\"\",\"mapping\":{},\"priority_mapping\":{},\"min_size_mb\":0,\"brand_mapping\":{},\"tracker_interval_seconds\":1800,\"stall_timeout_hours\":24,\"max_attempts\":5}"
+    },
+    {
+      "section": "mapping",
+      "text": "{\"enabled\":false,\"src_dir\":\"\",\"dst_dir\":\"\",\"debounce_seconds\":2.0,\"full_sync_interval_seconds\":86400}",
+      "dump_json": "{\"enabled\":false,\"src_dir\":\"\",\"dst_dir\":\"\",\"debounce_seconds\":2.0,\"full_sync_interval_seconds\":86400}"
+    },
+    {
+      "section": "playlists",
+      "text": "{\"enabled\":false,\"interval_seconds\":86400,\"source_url\":\"https://jinjier.art/sql\",\"task_dir_path\":\"\"}",
+      "dump_json": "{\"enabled\":false,\"interval_seconds\":86400,\"source_url\":\"https://jinjier.art/sql\",\"task_dir_path\":\"\"}"
+    },
+    {
+      "section": "fill_actor",
+      "text": "{\"actor_root\":\"\",\"additional_roots\":[],\"move_in_root\":\"\",\"move_in_by_brand\":false,\"root_sentinel\":\".embyx-root\",\"apply_enabled\":false,\"cloud_strm_mount_prefix\":\"\",\"cloud_source_roots\":[],\"cloud_move_in_root\":\"\",\"task_dir_path\":\"\"}",
+      "dump_json": "{\"actor_root\":\"\",\"additional_roots\":[],\"move_in_root\":\"\",\"move_in_by_brand\":false,\"root_sentinel\":\".embyx-root\",\"apply_enabled\":false,\"cloud_strm_mount_prefix\":\"\",\"cloud_source_roots\":[],\"cloud_move_in_root\":\"\",\"task_dir_path\":\"\"}"
+    },
+    {
+      "section": "merge",
+      "text": "{\"work_dir\":\"/downloads/upload\",\"cloud_work_dir\":\"/downloads/upload\",\"cloud_staging_dir\":\"/115/upload\",\"cloud_mount_prefix\":\"/mnt/cd2\",\"free_space_reserve_gib\":20,\"auto_enabled\":false,\"auto_include_stackable\":false,\"auto_pause_on_failure\":false,\"home_transcode_enabled\":false}",
+      "dump_json": "{\"work_dir\":\"/downloads/upload\",\"cloud_work_dir\":\"/downloads/upload\",\"cloud_staging_dir\":\"/115/upload\",\"cloud_mount_prefix\":\"/mnt/cd2\",\"free_space_reserve_gib\":20,\"auto_enabled\":false,\"auto_include_stackable\":false,\"auto_pause_on_failure\":false,\"home_transcode_enabled\":false}"
+    },
+    {
+      "section": "rss",
+      "text": "{\"interval_seconds\": \"12\"}",
+      "dump_json": "{\"enabled\":false,\"interval_seconds\":12,\"categories\":[],\"failed_avid_cooldown_seconds\":86400}"
+    },
+    {
+      "section": "rss",
+      "text": "{\"enabled\": 1, \"interval_seconds\": true}",
+      "dump_json": "{\"enabled\":true,\"interval_seconds\":1,\"categories\":[],\"failed_avid_cooldown_seconds\":86400}"
+    },
+    {
+      "section": "rss",
+      "text": "{\"interval_seconds\": 12.0}",
+      "dump_json": "{\"enabled\":false,\"interval_seconds\":12,\"categories\":[],\"failed_avid_cooldown_seconds\":86400}"
+    },
+    {
+      "section": "rss",
+      "text": "{\"interval_seconds\": 1e2}",
+      "dump_json": "{\"enabled\":false,\"interval_seconds\":100,\"categories\":[],\"failed_avid_cooldown_seconds\":86400}"
+    },
+    {
+      "section": "rss",
+      "text": "{\"interval_seconds\": 1.5}",
+      "errors": [
+        {
+          "type": "int_from_float",
+          "loc": [
+            "interval_seconds"
+          ],
+          "msg": "Input should be a valid integer, got a number with a fractional part"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "text": "{\"interval_seconds\":1,\"interval_seconds\":\"x\"}",
+      "errors": [
+        {
+          "type": "int_parsing",
+          "loc": [
+            "interval_seconds"
+          ],
+          "msg": "Input should be a valid integer, unable to parse string as an integer"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "text": "{\"interval_seconds\":\"x\",\"interval_seconds\":2}",
+      "dump_json": "{\"enabled\":false,\"interval_seconds\":2,\"categories\":[],\"failed_avid_cooldown_seconds\":86400}"
+    },
+    {
+      "section": "rss",
+      "text": "{\"a\":1,\"a\":2}",
+      "errors": [
+        {
+          "type": "extra_forbidden",
+          "loc": [
+            "a"
+          ],
+          "msg": "Extra inputs are not permitted"
+        },
+        {
+          "type": "extra_forbidden",
+          "loc": [
+            "a"
+          ],
+          "msg": "Extra inputs are not permitted"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "text": "[]",
+      "errors": [
+        {
+          "type": "model_type",
+          "loc": [],
+          "msg": "Input should be an object"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "text": "\"x\"",
+      "errors": [
+        {
+          "type": "model_type",
+          "loc": [],
+          "msg": "Input should be an object"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "text": "null",
+      "errors": [
+        {
+          "type": "model_type",
+          "loc": [],
+          "msg": "Input should be an object"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "text": "",
+      "errors": [
+        {
+          "type": "json_invalid",
+          "loc": [],
+          "msg": "Invalid JSON: EOF while parsing a value at line 1 column 0"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "text": "x",
+      "errors": [
+        {
+          "type": "json_invalid",
+          "loc": [],
+          "msg": "Invalid JSON: expected value at line 1 column 1"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "text": "{\"enabled\":true,}",
+      "errors": [
+        {
+          "type": "json_invalid",
+          "loc": [],
+          "msg": "Invalid JSON: trailing comma at line 1 column 17"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "text": "{\"enabled\":true",
+      "errors": [
+        {
+          "type": "json_invalid",
+          "loc": [],
+          "msg": "Invalid JSON: EOF while parsing an object at line 1 column 15"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "text": " {\"enabled\": true} ",
+      "dump_json": "{\"enabled\":true,\"interval_seconds\":1800,\"categories\":[],\"failed_avid_cooldown_seconds\":86400}"
+    },
+    {
+      "section": "rss",
+      "text": "{\"enabled\": true} x",
+      "errors": [
+        {
+          "type": "json_invalid",
+          "loc": [],
+          "msg": "Invalid JSON: trailing characters at line 1 column 19"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "text": "{\"categories\": [{\"label\": \"Actor\", \"task_dir_path\": \"/115/embyx_in\"}, {\"label\": \"Rank\", \"task_dir_path\": \"/115/embyx_in\"}], \"enabled\": true, \"interval_seconds\": 900, \"failed_avid_cooldown_seconds\": 3600}",
+      "dump_json": "{\"enabled\":true,\"interval_seconds\":900,\"categories\":[{\"label\":\"Actor\",\"task_dir_path\":\"/115/embyx_in\"},{\"label\":\"Rank\",\"task_dir_path\":\"/115/embyx_in\"}],\"failed_avid_cooldown_seconds\":3600}"
+    },
+    {
+      "section": "rss",
+      "text": "{\"categories\": [\"x\"]}",
+      "errors": [
+        {
+          "type": "model_type",
+          "loc": [
+            "categories",
+            0
+          ],
+          "msg": "Input should be an object"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "text": "{\"categories\": [{\"label\": \"a\"}]}",
+      "errors": [
+        {
+          "type": "missing",
+          "loc": [
+            "categories",
+            0,
+            "task_dir_path"
+          ],
+          "msg": "Field required"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "text": "{\"categories\": {\"label\": \"a\"}}",
+      "errors": [
+        {
+          "type": "tuple_type",
+          "loc": [
+            "categories"
+          ],
+          "msg": "Input should be a valid array"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "text": "{\"actor_label\": \"Actor\"}",
+      "errors": [
+        {
+          "type": "extra_forbidden",
+          "loc": [
+            "actor_label"
+          ],
+          "msg": "Extra inputs are not permitted"
+        }
+      ]
+    },
+    {
+      "section": "mapping",
+      "text": "{\"debounce_seconds\": NaN}",
+      "dump_json": "{\"enabled\":false,\"src_dir\":\"\",\"dst_dir\":\"\",\"debounce_seconds\":null,\"full_sync_interval_seconds\":86400}"
+    },
+    {
+      "section": "mapping",
+      "text": "{\"debounce_seconds\": Infinity}",
+      "dump_json": "{\"enabled\":false,\"src_dir\":\"\",\"dst_dir\":\"\",\"debounce_seconds\":null,\"full_sync_interval_seconds\":86400}"
+    },
+    {
+      "section": "mapping",
+      "text": "{\"debounce_seconds\": -Infinity}",
+      "dump_json": "{\"enabled\":false,\"src_dir\":\"\",\"dst_dir\":\"\",\"debounce_seconds\":null,\"full_sync_interval_seconds\":86400}"
+    },
+    {
+      "section": "mapping",
+      "text": "{\"debounce_seconds\": null}",
+      "errors": [
+        {
+          "type": "float_type",
+          "loc": [
+            "debounce_seconds"
+          ],
+          "msg": "Input should be a valid number"
+        }
+      ]
+    },
+    {
+      "section": "mapping",
+      "text": "{\"debounce_seconds\": 2}",
+      "dump_json": "{\"enabled\":false,\"src_dir\":\"\",\"dst_dir\":\"\",\"debounce_seconds\":2.0,\"full_sync_interval_seconds\":86400}"
+    },
+    {
+      "section": "mapping",
+      "text": "{\"debounce_seconds\": 1E400}",
+      "dump_json": "{\"enabled\":false,\"src_dir\":\"\",\"dst_dir\":\"\",\"debounce_seconds\":null,\"full_sync_interval_seconds\":86400}"
+    },
+    {
+      "section": "mapping",
+      "text": "{\"debounce_seconds\": 0.1e1, \"full_sync_interval_seconds\": 86400.0}",
+      "dump_json": "{\"enabled\":false,\"src_dir\":\"\",\"dst_dir\":\"\",\"debounce_seconds\":1.0,\"full_sync_interval_seconds\":86400}"
+    },
+    {
+      "section": "mapping",
+      "text": "{\"src_dir\": \"\\u00e4\\ud83d\\ude00\", \"dst_dir\": \"/x\"}",
+      "dump_json": "{\"enabled\":false,\"src_dir\":\"ä😀\",\"dst_dir\":\"/x\",\"debounce_seconds\":2.0,\"full_sync_interval_seconds\":86400}"
+    },
+    {
+      "section": "avid",
+      "text": "{\"id_exceptions\": [\"a\"], \"ignored_id_patterns\": []}",
+      "dump_json": "{\"id_exceptions\":[\"a\"],\"ignored_id_patterns\":[]}"
+    },
+    {
+      "section": "avid",
+      "text": "{\"id_exceptions\": \"a\"}",
+      "errors": [
+        {
+          "type": "tuple_type",
+          "loc": [
+            "id_exceptions"
+          ],
+          "msg": "Input should be a valid array"
+        }
+      ]
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"address\": \"clouddrive:19798\", \"api_token\": \"x\", \"secure\": false}",
+      "dump_json": "{\"address\":\"clouddrive:19798\",\"api_token\":\"x\",\"secure\":false}"
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"address\": \"clouddrive:19798\", \"secure\": true, \"api_token\": \"x\", \"task_dir_path\": \"/x\"}",
+      "errors": [
+        {
+          "type": "extra_forbidden",
+          "loc": [
+            "task_dir_path"
+          ],
+          "msg": "Extra inputs are not permitted"
+        }
+      ]
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"secure\": \"true\"}",
+      "dump_json": "{\"address\":\"\",\"api_token\":\"\",\"secure\":true}"
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"secure\": \"yes\"}",
+      "dump_json": "{\"address\":\"\",\"api_token\":\"\",\"secure\":true}"
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"address\": 1, \"bogus\": 1}",
+      "errors": [
+        {
+          "type": "extra_forbidden",
+          "loc": [
+            "bogus"
+          ],
+          "msg": "Extra inputs are not permitted"
+        },
+        {
+          "type": "string_type",
+          "loc": [
+            "address"
+          ],
+          "msg": "Input should be a valid string"
+        }
+      ]
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"bogus\": 1, \"address\": 1, \"secure\": \"x\", \"more\": 2}",
+      "errors": [
+        {
+          "type": "extra_forbidden",
+          "loc": [
+            "bogus"
+          ],
+          "msg": "Extra inputs are not permitted"
+        },
+        {
+          "type": "extra_forbidden",
+          "loc": [
+            "more"
+          ],
+          "msg": "Extra inputs are not permitted"
+        },
+        {
+          "type": "string_type",
+          "loc": [
+            "address"
+          ],
+          "msg": "Input should be a valid string"
+        },
+        {
+          "type": "bool_parsing",
+          "loc": [
+            "secure"
+          ],
+          "msg": "Input should be a valid boolean, unable to interpret input"
+        }
+      ]
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"secure\": 2}",
+      "errors": [
+        {
+          "type": "bool_parsing",
+          "loc": [
+            "secure"
+          ],
+          "msg": "Input should be a valid boolean, unable to interpret input"
+        }
+      ]
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"secure\": 999999999999999999}",
+      "errors": [
+        {
+          "type": "bool_parsing",
+          "loc": [
+            "secure"
+          ],
+          "msg": "Input should be a valid boolean, unable to interpret input"
+        }
+      ]
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"secure\": 1000000000000000000}",
+      "errors": [
+        {
+          "type": "bool_type",
+          "loc": [
+            "secure"
+          ],
+          "msg": "Input should be a valid boolean"
+        }
+      ]
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"secure\": -999999999999999999}",
+      "errors": [
+        {
+          "type": "bool_parsing",
+          "loc": [
+            "secure"
+          ],
+          "msg": "Input should be a valid boolean, unable to interpret input"
+        }
+      ]
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"secure\": -1000000000000000000}",
+      "errors": [
+        {
+          "type": "bool_type",
+          "loc": [
+            "secure"
+          ],
+          "msg": "Input should be a valid boolean"
+        }
+      ]
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"secure\": 9223372036854775807}",
+      "errors": [
+        {
+          "type": "bool_type",
+          "loc": [
+            "secure"
+          ],
+          "msg": "Input should be a valid boolean"
+        }
+      ]
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"secure\": 1e20}",
+      "errors": [
+        {
+          "type": "bool_type",
+          "loc": [
+            "secure"
+          ],
+          "msg": "Input should be a valid boolean"
+        }
+      ]
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"secure\": 9.2e18}",
+      "errors": [
+        {
+          "type": "bool_parsing",
+          "loc": [
+            "secure"
+          ],
+          "msg": "Input should be a valid boolean, unable to interpret input"
+        }
+      ]
+    },
+    {
+      "section": "clouddrive",
+      "text": "{\"secure\": 2.5}",
+      "errors": [
+        {
+          "type": "bool_type",
+          "loc": [
+            "secure"
+          ],
+          "msg": "Input should be a valid boolean"
+        }
+      ]
+    },
+    {
+      "section": "rss",
+      "text": "{\"categories\": [{\"task_dir_path\": 1, \"extra\": 1}], \"zz\": 1, \"enabled\": \"x\"}",
+      "errors": [
+        {
+          "type": "extra_forbidden",
+          "loc": [
+            "zz"
+          ],
+          "msg": "Extra inputs are not permitted"
+        },
+        {
+          "type": "bool_parsing",
+          "loc": [
+            "enabled"
+          ],
+          "msg": "Input should be a valid boolean, unable to interpret input"
+        },
+        {
+          "type": "extra_forbidden",
+          "loc": [
+            "categories",
+            0,
+            "extra"
+          ],
+          "msg": "Extra inputs are not permitted"
+        },
+        {
+          "type": "missing",
+          "loc": [
+            "categories",
+            0,
+            "label"
+          ],
+          "msg": "Field required"
+        },
+        {
+          "type": "string_type",
+          "loc": [
+            "categories",
+            0,
+            "task_dir_path"
+          ],
+          "msg": "Input should be a valid string"
+        }
+      ]
+    },
+    {
+      "section": "archive",
+      "text": "{\"brand_mapping\": {\"x\": [\"a\"]}, \"mapping\": {\"a/\": \"b/\"}, \"tracker_interval_seconds\": 1800}",
+      "dump_json": "{\"enabled\":false,\"scan_cron\":\"0 4 * * *\",\"src_dir\":\"\",\"dst_dir\":\"\",\"mapping\":{\"a\":\"b\"},\"priority_mapping\":{},\"min_size_mb\":0,\"brand_mapping\":{\"x\":[\"A\"]},\"tracker_interval_seconds\":1800,\"stall_timeout_hours\":24,\"max_attempts\":5}"
+    },
+    {
+      "section": "archive",
+      "text": "{\"scan_cron\": \"0  4 * * *\"}",
+      "dump_json": "{\"enabled\":false,\"scan_cron\":\"0 4 * * *\",\"src_dir\":\"\",\"dst_dir\":\"\",\"mapping\":{},\"priority_mapping\":{},\"min_size_mb\":0,\"brand_mapping\":{},\"tracker_interval_seconds\":1800,\"stall_timeout_hours\":24,\"max_attempts\":5}"
+    },
+    {
+      "section": "archive",
+      "text": "{\"mapping\": {\"a\": \"b\"}, \"priority_mapping\": {\"a\": \"c\"}}",
+      "errors": [
+        {
+          "type": "value_error",
+          "loc": [],
+          "msg": "Value error, archive.mapping and archive.priority_mapping must not share the source subdirectory 'a'"
+        }
+      ]
+    },
+    {
+      "section": "archive",
+      "text": "{\"mapping\": {\"1\": \"b\"}}",
+      "dump_json": "{\"enabled\":false,\"scan_cron\":\"0 4 * * *\",\"src_dir\":\"\",\"dst_dir\":\"\",\"mapping\":{\"1\":\"b\"},\"priority_mapping\":{},\"min_size_mb\":0,\"brand_mapping\":{},\"tracker_interval_seconds\":1800,\"stall_timeout_hours\":24,\"max_attempts\":5}"
+    },
+    {
+      "section": "archive",
+      "text": "{\"mapping\": {\"a\": \"b\", \"a\": \"c\"}}",
+      "dump_json": "{\"enabled\":false,\"scan_cron\":\"0 4 * * *\",\"src_dir\":\"\",\"dst_dir\":\"\",\"mapping\":{\"a\":\"c\"},\"priority_mapping\":{},\"min_size_mb\":0,\"brand_mapping\":{},\"tracker_interval_seconds\":1800,\"stall_timeout_hours\":24,\"max_attempts\":5}"
+    },
+    {
+      "section": "fill_actor",
+      "text": "{\"additional_roots\": [\"/a\"], \"cloud_source_roots\": []}",
+      "dump_json": "{\"actor_root\":\"\",\"additional_roots\":[\"/a\"],\"move_in_root\":\"\",\"move_in_by_brand\":false,\"root_sentinel\":\".embyx-root\",\"apply_enabled\":false,\"cloud_strm_mount_prefix\":\"\",\"cloud_source_roots\":[],\"cloud_move_in_root\":\"\",\"task_dir_path\":\"\"}"
+    },
+    {
+      "section": "fill_actor",
+      "text": "{\"apply_enabled\": true}",
+      "errors": [
+        {
+          "type": "value_error",
+          "loc": [],
+          "msg": "Value error, fill_actor.apply_enabled requires the CloudDrive move path configuration"
+        }
+      ]
+    },
+    {
+      "section": "merge",
+      "text": "{\"auto_enabled\": \"true\", \"free_space_reserve_gib\": \"20\"}",
+      "dump_json": "{\"work_dir\":\"/downloads/upload\",\"cloud_work_dir\":\"/downloads/upload\",\"cloud_staging_dir\":\"/115/upload\",\"cloud_mount_prefix\":\"/mnt/cd2\",\"free_space_reserve_gib\":20,\"auto_enabled\":true,\"auto_include_stackable\":false,\"auto_pause_on_failure\":false,\"home_transcode_enabled\":false}"
+    },
+    {
+      "section": "emby",
+      "text": "{\"address\": \"http://Host:8096/\", \"api_key\": \"k\"}",
+      "dump_json": "{\"address\":\"http://Host:8096\",\"api_key\":\"k\"}"
+    },
+    {
+      "section": "playlists",
+      "text": "{\"source_url\": \"https://jinjier.art/sql/\"}",
+      "dump_json": "{\"enabled\":false,\"interval_seconds\":86400,\"source_url\":\"https://jinjier.art/sql\",\"task_dir_path\":\"\"}"
+    }
+  ]
+}

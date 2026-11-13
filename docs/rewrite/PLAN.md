@@ -257,7 +257,7 @@ feed. Where the TLS fingerprint matters the probe runs from the production netwo
 | WP | Phase | Status | Content | Python lines (approx.) | Needs |
 | --- | --- | --- | --- | --- | --- |
 | WP0 | 0 foundation | done (#81); live fingerprint proof done (follow-up PR) | Workspace at the root, `rust.yml` (checks only, with the caching fav ended up with), docs (`PLAN`, `CONVENTIONS`, `DIVERGENCES`, `PARITY`, `API-COVERAGE`), `BASELINE`, golden generator, parity script, scenario runner skeleton, helpers copied from fav, API-coverage probes (impersonating client, tonic from the descriptor, HTML parser, cron, notify, Windows build of an empty worker crate) | new | |
-| WP1 | 1 core | pending | Env settings, database layer and the 19 migrations, advisory locks, config models and store, AVID parser, magnet, media, errors | 2,300 | WP0 |
+| WP1 | 1 core | done (#83) | Env settings, database layer and the 19 migrations, advisory locks, config models and store, AVID parser, magnet, media, errors | 2,300 | WP0 |
 | WP2 | 2 clients | pending | HTTP factory, JavBus, sukebei, feeds, feed magnets, AVBase on the impersonating client, jinjier, Emby | 1,450 | WP1 |
 | WP3 | 2 clients | pending | CloudDrive over tonic with the cancel-safe wrapper and a fake server; Kubernetes Jobs client | 700 | WP1 |
 | WP4 | 2 API | pending | axum shell: auth, health, size limit, SPA hosting, config API with the two connection tests, OpenAPI check, page smoke. Checkpoint A (note only) | 900 | WP2, WP3 |
@@ -375,6 +375,15 @@ or says why one stays.
 - `examples/fetch_probe.rs`, `tools/probes/tls_fingerprint.py`, `live_fingerprint.py` and `live_probe_pod.sh`
   exist for the AVBase and JavBus client decision; WP2 reruns the comparison against its configured clients,
   WP16 removes them if nothing else needs them.
+- `embyx_core::config::lax` (WP1) emulates pydantic's lax mode for the field types the nine sections use (`str`,
+  `bool`, `int` as `i64`, `float`, tuples of `str`, `dict[str, str]`, `dict[str, tuple[str, ...]]`, a nested
+  model list) with pydantic's error `type`, `loc` and `msg`. WP4 (request bodies) and WP10/WP12 (fill-actor
+  models) extend it there rather than writing a second one; a new type gets its own golden cases.
+- `embyx_core::cron` (WP1) is cronsim's parser only (what `archive.scan_cron` validation needs); WP9 computes
+  fire times with croner (API-COVERAGE) and should check both agree on what they accept.
+- The config snapshot refresh loop and the store's wiring into the app are WP4's / WP9's (`bootstrap.py`);
+  `embyx_db::config_store::ConfigStore` offers `load`, `refresh`, `get::<Section>()`, `get_with_version`,
+  `sections` and `update`.
 
 ## Experiment log
 
@@ -384,3 +393,4 @@ the independent review found; review findings are summarised with a link to the 
 | WP | PR | Time spent | Rework | Independent review findings | Notes |
 | --- | --- | --- | --- | --- | --- |
 | WP0 | #81 | 2 h (18:30Z-20:30Z), plus the offline fingerprint work added at 19:23Z | 1 push (review fixes); CI green first time | 0 high, 3 medium (unsafe guard missed multi-line attributes; placeholders in API-COVERAGE; three WP4 tests needing fill-actor code), 7 low, nits: all fixed, except parity's bare-name claim check (deferred to WP15, Cleanup notes) and the live probe's per-request sessions (documented in API-COVERAGE) | Started 2026-11-13 18:30Z. Probes: sqlx's dropped lock wait keeps the lock (port cancels with `pg_cancel_backend`); croner matches cronsim once evaluated in the fixed offset `astimezone()` gives; wreq's ClientHello matches curl_cffi's (Chrome 149 vs 150 sig-alg difference), headers need configuring; scraper differs from lxml on implied `tbody`, bare `<tr>` rows and XML-parsed upper-case tags. Rust and Python render the harness transcript byte for byte. Live run from nas-us-2 (follow-up PR): both wreq candidates got AVBase, `httpx-rs` was challenged; JavBus served every client |
+| WP1 | #83 | ~1 h 30 min (20:10Z-21:40Z), review fixes included | 1 push (review fixes); CI green first time | 0 blocker, 1 major (a dropped advisory-lock wait queued its cancel on the pool, so waiters holding every connection were never cancelled: now a connection of its own, test with a full pool), 4 minor (magnet regex without the `İ`/`ı` rewrite; `int()` skipping U+001C-U+001F; JSON-mode error order and `bool_type` for big numbers; DSN scheme unchecked, leaving a scheme-less URL's password in `Debug`), 6 nits: all fixed with Python-derived goldens, except non-UTF-8 env values and the 4300-digit `int()` limit (D19, D20) and a weak test (replaced) | Started 2026-11-13 ~20:10Z. 70 tests / 996 cases ported, 0 waived. Both AVID corpora and ~190 corners equal; 442 + 55 pydantic validation cases equal (type, loc, msg) except D10 / D12; four transcripts (schema from the catalog, v4 upgrade through the data migrations, newer-schema refusal, config store) byte for byte; local `pg_dump --schema-only` of a Python- and a Rust-migrated database identical. Found while porting: Python's ignorecase lets `İ`/`ı` match `i` and `[a-z]` (D15, AVID patterns rewritten); `int(x, 16)` accepts a `0x` prefix in a 40-char btih; pydantic writes 1e-05 as `0.00001` but 1e-06 as `1e-6`; `casefold()` turns `ß` and the `ﬀ`-`ﬆ` ligatures into ASCII (settings booleans and `localhost`) |

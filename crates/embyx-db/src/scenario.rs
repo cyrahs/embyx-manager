@@ -1,9 +1,10 @@
 //! The database half of the effect transcripts (docs/rewrite/SCENARIOS.md).
 //!
-//! Mirrors `tools/scenarios/runner.py`: [`seed`] runs the spec's `database.sql` statements
-//! (and, from WP1 on, the application schema), [`dump_rows`] reads every dumped table as
-//! PostgreSQL's own `to_jsonb` renders it, so both builds compare rows without a type
-//! mapping of their own.
+//! Mirrors `tools/scenarios/runner.py`: [`seed`] applies the application schema when the
+//! spec asks for it and runs the spec's `database.sql` statements, [`dump_rows`] reads every
+//! dumped table as PostgreSQL's own `to_jsonb` renders it, so both builds compare rows
+//! without a type mapping of their own. [`unseeded_fakes`] is the fakes' dump for a
+//! scenario that seeds none of them.
 
 use embyx_core::pyjson::{self, Dict, Value};
 use embyx_core::scenario::Spec;
@@ -22,14 +23,14 @@ WHERE table_schema = 'public' AND table_type = 'BASE TABLE' AND table_name <> 's
 ORDER BY table_name
 ";
 
-/// `runner.seed_database`. `schema = "app"` needs the migrations, which arrive in WP1.
+/// `runner.seed_database`: `schema = "app"` migrates the database as the application does.
 pub async fn seed(pool: &PgPool, spec: &Spec) {
     let database = spec.section("database");
-    let schema = database.get("schema").and_then(Value::as_str).unwrap_or("none");
-    assert_eq!(
-        schema, "none",
-        "database.schema = {schema:?} needs the application migrations (WP1)"
-    );
+    match database.get("schema").and_then(Value::as_str).unwrap_or("none") {
+        "app" => crate::database::migrate(pool).await.expect("the application schema"),
+        "none" => {}
+        other => panic!("database.schema must be \"none\" or \"app\", not {other:?}"),
+    }
     for statement in database.get("sql").and_then(Value::as_list).unwrap_or_default() {
         let statement = statement.as_str().expect("SQL statements are strings").to_owned();
         // Seed SQL is written by the scenario author, never built from data.
@@ -75,3 +76,43 @@ pub async fn dump_rows(pool: &PgPool, spec: &Spec) -> Value {
     }
     Value::Dict(rows)
 }
+
+/// The fakes' final state for a scenario that seeds none of them (the database-only
+/// scenarios): an empty CloudDrive (its root directory only) and no HTTP routes left.
+pub fn unseeded_fakes(spec: &Spec) -> Value {
+    for fake in ["clouddrive", "kubernetes", "emby"] {
+        assert!(
+            spec.get(fake).is_none(),
+            "{} seeds the {fake} fake; use the fake itself",
+            spec.operation()
+        );
+    }
+    let clouddrive: Dict = [
+        ("copy_tasks".to_owned(), Value::List(Vec::new())),
+        ("directories".to_owned(), Value::List(vec![Value::from("/")])),
+        ("files".to_owned(), Value::List(Vec::new())),
+        ("offline_tasks".to_owned(), Value::List(Vec::new())),
+        ("uploads".to_owned(), Value::List(Vec::new())),
+    ]
+    .into_iter()
+    .collect();
+    let no_routes = || {
+        Value::Dict(
+            [("routes_left".to_owned(), Value::List(Vec::new()))]
+                .into_iter()
+                .collect(),
+        )
+    };
+    Value::Dict(
+        [
+            ("clouddrive".to_owned(), Value::Dict(clouddrive)),
+            ("emby".to_owned(), no_routes()),
+            ("kubernetes".to_owned(), no_routes()),
+        ]
+        .into_iter()
+        .collect(),
+    )
+}
+
+#[cfg(test)]
+mod tests;

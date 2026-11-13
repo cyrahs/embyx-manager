@@ -1,0 +1,76 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "avid",
+  "cases": [
+    {
+      "path": "ABC-123/whatever!!.mp4",
+      "id": "ABC-123"
+    },
+    {
+      "path": "library/ABC-123/cover.jpg",
+      "id": "ABC-123"
+    },
+    {
+      "path": "/mnt/library/SSIS-001/SSIS-001.mp4",
+      "id": "SSIS-001"
+    },
+    {
+      "path": "/mnt/library/nothing/here.mp4",
+      "id": ""
+    },
+    {
+      "path": "/",
+      "id": ""
+    },
+    {
+      "path": "",
+      "id": ""
+    },
+    {
+      "path": ".",
+      "id": ""
+    },
+    {
+      "path": "..",
+      "id": ""
+    },
+    {
+      "path": "a/..",
+      "id": ""
+    },
+    {
+      "path": "ABC-123/..",
+      "id": "ABC-123"
+    },
+    {
+      "path": "ABC-123/.",
+      "id": "ABC-123"
+    },
+    {
+      "path": "ABC-123//x.mp4",
+      "id": "ABC-123"
+    },
+    {
+      "path": "//ABC-123/x",
+      "id": "ABC-123"
+    },
+    {
+      "path": "FC2-1234567/readme.txt",
+      "id": "FC2-1234567"
+    },
+    {
+      "path": "x)(y/ABC-123.mp4",
+      "id": "ABC-123"
+    },
+    {
+      "path": "ABC-123/x)(y",
+      "id": "ABC-123"
+    },
+    {
+      "path": "hjd2048.com-xyz/ABP-984/x",
+      "id": "ABP-984"
+    }
+  ]
+}

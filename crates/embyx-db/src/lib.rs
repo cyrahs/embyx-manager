@@ -1,10 +1,15 @@
 //! PostgreSQL access of embyx-manager.
 //!
-//! Python origin: `db.py` and `locking.py`. WP1 ports the pool, the 19 migrations and the
-//! advisory locks. WP0 provides the test database helper ([`testdb`], feature
-//! `test-support`), the database half of the effect-transcript harness ([`scenario`], same
-//! feature) and the sqlx API-coverage probe (`probes`, tests only).
+//! Python origin: `db.py`, `locking.py` and `config/store.py`: the pool and the 19
+//! migrations ([`database`], [`migrations`]), the file and advisory locks ([`locking`]) and
+//! the versioned config store ([`config_store`]). Behind the `test-support` feature: the
+//! test database helper ([`testdb`]) and the database half of the effect-transcript harness
+//! ([`scenario`]); the sqlx API-coverage probe (`probes`) is tests only.
 
+pub mod config_store;
+pub mod database;
+pub mod locking;
+pub mod migrations;
 #[cfg(test)]
 mod probes;
 #[cfg(any(test, feature = "test-support"))]

@@ -10,7 +10,7 @@ tests = []
 
 [WP1]
 title = "Settings, schema, config store, AVID, magnets"
-status = "pending"
+status = "done"
 tests = [
   "tests/test_settings.py",
   "tests/test_locking.py",

@@ -9,6 +9,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from operations import harness
+from operations import config, db, harness
 
-OPERATIONS: dict[str, Any] = {**harness.OPERATIONS}
+OPERATIONS: dict[str, Any] = {**harness.OPERATIONS, **db.OPERATIONS, **config.OPERATIONS}

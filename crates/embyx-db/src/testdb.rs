@@ -6,14 +6,15 @@
 //! Nothing here may point at a real embyx database: the server must be a disposable one.
 //!
 //! Adapted from fav (`fav-db/src/testdb.rs`); see docs/CONVENTIONS.md, "Code copied from
-//! fav". WP1 adds the application's `Database` type; until then the helper hands out a
-//! plain pool.
+//! fav". [`TestDatabase::database`] hands out the application's [`Database`] on it.
 
 use std::str::FromStr;
 use std::sync::atomic::{AtomicU32, Ordering};
 
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use sqlx::{AssertSqlSafe, ConnectOptions as _, Connection as _, PgConnection, PgPool};
+
+use crate::database::Database;
 
 pub const URL_VARIABLE: &str = "EMBYX_MANAGER_TEST_DATABASE_URL";
 
@@ -80,6 +81,12 @@ impl TestDatabase {
 
     pub fn name(&self) -> &str {
         &self.name
+    }
+
+    /// The application's [`Database`] on this database (its own pool; migrated on first use).
+    /// Close it before [`drop_database`](Self::drop_database).
+    pub fn database(&self) -> Database {
+        Database::from_options(self.options.clone())
     }
 
     /// Connect options for this database, for a test that needs its own connections.

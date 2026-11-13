@@ -1,0 +1,48 @@
+# The schema both builds' migrations leave (cross-version contract 1): every column with its
+# type, nullability, default and identity; every constraint and index by its definition as
+# PostgreSQL prints it; the sequences; the applied versions.
+description = "db: the application schema after all 19 migrations, from the catalog"
+operation = "db.catalog"
+
+[args]
+catalog = """
+SELECT jsonb_build_object(
+    'columns', (
+        SELECT jsonb_agg(jsonb_build_object(
+            'table', c.relname, 'column', a.attname, 'type', format_type(a.atttypid, a.atttypmod),
+            'not_null', a.attnotnull, 'default', pg_get_expr(d.adbin, d.adrelid),
+            'identity', a.attidentity::text, 'generated', a.attgenerated::text
+        ) ORDER BY c.relname, a.attnum)
+        FROM pg_attribute a
+        JOIN pg_class c ON c.oid = a.attrelid
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        LEFT JOIN pg_attrdef d ON d.adrelid = a.attrelid AND d.adnum = a.attnum
+        WHERE n.nspname = 'public' AND c.relkind = 'r' AND a.attnum > 0 AND NOT a.attisdropped
+    ),
+    'constraints', (
+        SELECT jsonb_agg(jsonb_build_object(
+            'table', c.relname, 'name', k.conname, 'type', k.contype::text,
+            'definition', pg_get_constraintdef(k.oid)
+        ) ORDER BY c.relname, k.conname)
+        FROM pg_constraint k
+        JOIN pg_class c ON c.oid = k.conrelid
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE n.nspname = 'public'
+    ),
+    'indexes', (
+        SELECT jsonb_agg(jsonb_build_object('table', tablename, 'name', indexname, 'definition', indexdef)
+            ORDER BY tablename, indexname)
+        FROM pg_indexes WHERE schemaname = 'public'
+    ),
+    'sequences', (
+        SELECT jsonb_agg(jsonb_build_object(
+            'name', sequencename, 'type', data_type::text, 'start', start_value, 'increment', increment_by
+        ) ORDER BY sequencename)
+        FROM pg_sequences WHERE schemaname = 'public'
+    ),
+    'versions', (SELECT jsonb_agg(version ORDER BY version) FROM schema_migrations)
+)::text
+"""
+
+[database]
+schema = "app"

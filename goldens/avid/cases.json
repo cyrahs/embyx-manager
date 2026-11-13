@@ -1,0 +1,1796 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "avid",
+  "cases": [
+    {
+      "title": "ABC-123",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "ABC-123",
+      "strip_extension": "ABC-123",
+      "cd": null
+    },
+    {
+      "title": "abc-123.mp4",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "abc-123",
+      "strip_extension": "abc-123",
+      "cd": null
+    },
+    {
+      "title": "ABC123",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "ABC123",
+      "strip_extension": "ABC123",
+      "cd": null
+    },
+    {
+      "title": "[prestige] ABP-123 something",
+      "avid": "ABP-123",
+      "brand": "ABP",
+      "variant_tags": [],
+      "strip_variant_tags": "[prestige] ABP-123 something",
+      "strip_extension": "[prestige] ABP-123 something",
+      "cd": null
+    },
+    {
+      "title": "FC2-PPV-1234567",
+      "avid": "FC2-1234567",
+      "brand": "FC2",
+      "variant_tags": [],
+      "strip_variant_tags": "FC2-PPV-1234567",
+      "strip_extension": "FC2-PPV-1234567",
+      "cd": null
+    },
+    {
+      "title": "fc2ppv 123456",
+      "avid": "FC2-123456",
+      "brand": "FC2",
+      "variant_tags": [],
+      "strip_variant_tags": "fc2ppv 123456",
+      "strip_extension": "fc2ppv 123456",
+      "cd": null
+    },
+    {
+      "title": "HEYDOUGA-4017-233",
+      "avid": "HEYDOUGA-4017-233",
+      "brand": "HEYDOUGA",
+      "variant_tags": [],
+      "strip_variant_tags": "HEYDOUGA-4017-233",
+      "strip_extension": "HEYDOUGA-4017-233",
+      "cd": null
+    },
+    {
+      "title": "hey-4017-233",
+      "avid": "HEYDOUGA-4017-233",
+      "brand": "HEYDOUGA",
+      "variant_tags": [],
+      "strip_variant_tags": "hey-4017-233",
+      "strip_extension": "hey-4017-233",
+      "cd": null
+    },
+    {
+      "title": "GETCHU-1234567",
+      "avid": "GETCHU-1234567",
+      "brand": "GETCHU",
+      "variant_tags": [],
+      "strip_variant_tags": "GETCHU-1234567",
+      "strip_extension": "GETCHU-1234567",
+      "cd": null
+    },
+    {
+      "title": "GYUTTO-123456",
+      "avid": "GYUTTO-123456",
+      "brand": "GYUTTO",
+      "variant_tags": [],
+      "strip_variant_tags": "GYUTTO-123456",
+      "strip_extension": "GYUTTO-123456",
+      "cd": null
+    },
+    {
+      "title": "259LUXU-1234",
+      "avid": "259LUXU-1234",
+      "brand": "259LUXU",
+      "variant_tags": [],
+      "strip_variant_tags": "259LUXU-1234",
+      "strip_extension": "259LUXU-1234",
+      "cd": null
+    },
+    {
+      "title": "32ID-020",
+      "avid": "32ID-020",
+      "brand": "32ID",
+      "variant_tags": [],
+      "strip_variant_tags": "32ID-020",
+      "strip_extension": "32ID-020",
+      "cd": null
+    },
+    {
+      "title": "17id_021.mp4",
+      "avid": "17ID-021",
+      "brand": "17ID",
+      "variant_tags": [],
+      "strip_variant_tags": "17id_021",
+      "strip_extension": "17id_021",
+      "cd": null
+    },
+    {
+      "title": "CW3D2BD-04 3D キャットウォーク ポイズン 04 : 波多野結衣",
+      "avid": "CW3D2BD-04",
+      "brand": "CW3D2BD",
+      "variant_tags": [],
+      "strip_variant_tags": "CW3D2BD-04 3D キャットウォーク ポイズン 04 : 波多野結衣",
+      "strip_extension": "CW3D2BD-04 3D キャットウォーク ポイズン 04 : 波多野結衣",
+      "cd": null
+    },
+    {
+      "title": "[BD-ISO] 3D CATWALK POISON 05 : Megumi Shino (CW3D2BD-05)",
+      "avid": "CW3D2BD-05",
+      "brand": "CW3D2BD",
+      "variant_tags": [
+        "ISO"
+      ],
+      "strip_variant_tags": "[BD-] 3D CATWALK POISON 05 : Megumi Shino (CW3D2BD-05)",
+      "strip_extension": "[BD-ISO] 3D CATWALK POISON 05 : Megumi Shino (CW3D2BD-05)",
+      "cd": null
+    },
+    {
+      "title": "CW3D2DBD-24 キャットウォーク ポイズン 24",
+      "avid": "CW3D2DBD-24",
+      "brand": "CW3D2DBD",
+      "variant_tags": [],
+      "strip_variant_tags": "CW3D2DBD-24 キャットウォーク ポイズン 24",
+      "strip_extension": "CW3D2DBD-24 キャットウォーク ポイズン 24",
+      "cd": null
+    },
+    {
+      "title": "3D-CW3D2DBD-28.mp4",
+      "avid": "CW3D2DBD-28",
+      "brand": "CW3D2DBD",
+      "variant_tags": [],
+      "strip_variant_tags": "3D-CW3D2DBD-28",
+      "strip_extension": "3D-CW3D2DBD-28",
+      "cd": null
+    },
+    {
+      "title": "MK3D2DBD-01",
+      "avid": "MK3D2DBD-01",
+      "brand": "MK3D2DBD",
+      "variant_tags": [],
+      "strip_variant_tags": "MK3D2DBD-01",
+      "strip_extension": "MK3D2DBD-01",
+      "cd": null
+    },
+    {
+      "title": "MKBD-S03",
+      "avid": "MKBD-S03",
+      "brand": "MKBD",
+      "variant_tags": [],
+      "strip_variant_tags": "MKBD-S03",
+      "strip_extension": "MKBD-S03",
+      "cd": null
+    },
+    {
+      "title": "S2MBD-048",
+      "avid": "S2MBD-048",
+      "brand": "S2MBD",
+      "variant_tags": [],
+      "strip_variant_tags": "S2MBD-048",
+      "strip_extension": "S2MBD-048",
+      "cd": null
+    },
+    {
+      "title": "S2M-001",
+      "avid": "S2M-001",
+      "brand": "S2M",
+      "variant_tags": [],
+      "strip_variant_tags": "S2M-001",
+      "strip_extension": "S2M-001",
+      "cd": null
+    },
+    {
+      "title": "IBW-123z",
+      "avid": "IBW-123Z",
+      "brand": "IBW",
+      "variant_tags": [],
+      "strip_variant_tags": "IBW-123z",
+      "strip_extension": "IBW-123z",
+      "cd": null
+    },
+    {
+      "title": "T28-557",
+      "avid": "T28-557",
+      "brand": "T28",
+      "variant_tags": [],
+      "strip_variant_tags": "T28-557",
+      "strip_extension": "T28-557",
+      "cd": null
+    },
+    {
+      "title": "n1234",
+      "avid": "N1234",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "n1234",
+      "strip_extension": "n1234",
+      "cd": null
+    },
+    {
+      "title": "N-0893.strm",
+      "avid": "N0893",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "N-0893",
+      "strip_extension": "N-0893",
+      "cd": null
+    },
+    {
+      "title": "k_1234",
+      "avid": "K1234",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "k_1234",
+      "strip_extension": "k_1234",
+      "cd": null
+    },
+    {
+      "title": "123456-789",
+      "avid": "123456-789",
+      "brand": "12",
+      "variant_tags": [],
+      "strip_variant_tags": "123456-789",
+      "strip_extension": "123456-789",
+      "cd": null
+    },
+    {
+      "title": "123456_789",
+      "avid": "123456_789",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "123456_789",
+      "strip_extension": "123456_789",
+      "cd": null
+    },
+    {
+      "title": "ABP-123中出し温泉旅行",
+      "avid": "ABP-123",
+      "brand": "ABP",
+      "variant_tags": [],
+      "strip_variant_tags": "ABP-123中出し温泉旅行",
+      "strip_extension": "ABP-123中出し温泉旅行",
+      "cd": null
+    },
+    {
+      "title": "START-123あの子と",
+      "avid": "START-123",
+      "brand": "START",
+      "variant_tags": [],
+      "strip_variant_tags": "START-123あの子と",
+      "strip_extension": "START-123あの子と",
+      "cd": null
+    },
+    {
+      "title": "SSIS-001 新人NO.1STYLE",
+      "avid": "SSIS-001",
+      "brand": "SSIS",
+      "variant_tags": [],
+      "strip_variant_tags": "SSIS-001 新人NO.1STYLE",
+      "strip_extension": "SSIS-001 新人NO.1STYLE",
+      "cd": null
+    },
+    {
+      "title": "259LUXU-1234 ラグジュTV",
+      "avid": "259LUXU-1234",
+      "brand": "259LUXU",
+      "variant_tags": [],
+      "strip_variant_tags": "259LUXU-1234 ラグジュTV",
+      "strip_extension": "259LUXU-1234 ラグジュTV",
+      "cd": null
+    },
+    {
+      "title": "FC2-PPV-1234567 個人撮影",
+      "avid": "FC2-1234567",
+      "brand": "FC2",
+      "variant_tags": [],
+      "strip_variant_tags": "FC2-PPV-1234567 個人撮影",
+      "strip_extension": "FC2-PPV-1234567 個人撮影",
+      "cd": null
+    },
+    {
+      "title": "hjd2048.com-0601meyd524-h264.mp4",
+      "avid": "MEYD-524",
+      "brand": "MEYD",
+      "variant_tags": [
+        "H264"
+      ],
+      "strip_variant_tags": "hjd2048.com-0601meyd524-",
+      "strip_extension": "hjd2048.com-0601meyd524-h264",
+      "cd": null
+    },
+    {
+      "title": "hhd800.com@T-28621.mp4",
+      "avid": "T-28621",
+      "brand": "T",
+      "variant_tags": [],
+      "strip_variant_tags": "hhd800.com@T-28621",
+      "strip_extension": "hhd800.com@T-28621",
+      "cd": null
+    },
+    {
+      "title": "ABC-123/whatever!!.mp4",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "ABC-123/whatever!!",
+      "strip_extension": "ABC-123/whatever!!",
+      "cd": null
+    },
+    {
+      "title": "!!!",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "!!!",
+      "strip_extension": "!!!",
+      "cd": null
+    },
+    {
+      "title": "prefix weird-special suffix 123",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "prefix weird-special suffix 123",
+      "strip_extension": "prefix weird-special suffix 123",
+      "cd": null
+    },
+    {
+      "title": "ABC-123 1080P",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [
+        "1080P"
+      ],
+      "strip_variant_tags": "ABC-123 ",
+      "strip_extension": "ABC-123 1080P",
+      "cd": null
+    },
+    {
+      "title": "ABC-00123",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "ABC-00123",
+      "strip_extension": "ABC-00123",
+      "cd": null
+    },
+    {
+      "title": "abc00123.mp4",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "abc00123",
+      "strip_extension": "abc00123",
+      "cd": null
+    },
+    {
+      "title": "ssis00123",
+      "avid": "SSIS-123",
+      "brand": "SSIS",
+      "variant_tags": [],
+      "strip_variant_tags": "ssis00123",
+      "strip_extension": "ssis00123",
+      "cd": null
+    },
+    {
+      "title": "118abp00077.mp4",
+      "avid": "ABP-077",
+      "brand": "ABP",
+      "variant_tags": [],
+      "strip_variant_tags": "118abp00077",
+      "strip_extension": "118abp00077",
+      "cd": null
+    },
+    {
+      "title": "ABC-00012",
+      "avid": "ABC-012",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "ABC-00012",
+      "strip_extension": "ABC-00012",
+      "cd": null
+    },
+    {
+      "title": "ABP-012",
+      "avid": "ABP-012",
+      "brand": "ABP",
+      "variant_tags": [],
+      "strip_variant_tags": "ABP-012",
+      "strip_extension": "ABP-012",
+      "cd": null
+    },
+    {
+      "title": "FC2-00123",
+      "avid": "FC2-00123",
+      "brand": "FC2",
+      "variant_tags": [],
+      "strip_variant_tags": "FC2-00123",
+      "strip_extension": "FC2-00123",
+      "cd": null
+    },
+    {
+      "title": "ABC-0123",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "ABC-0123",
+      "strip_extension": "ABC-0123",
+      "cd": null
+    },
+    {
+      "title": "heyzo_hd_1380_full.mp4",
+      "avid": "HEYZO-1380",
+      "brand": "HEYZO",
+      "variant_tags": [
+        "HD"
+      ],
+      "strip_variant_tags": "heyzo__1380_full",
+      "strip_extension": "heyzo_hd_1380_full",
+      "cd": null
+    },
+    {
+      "title": "heyzo_lt_1380_full.mp4",
+      "avid": "HEYZO-1380",
+      "brand": "HEYZO",
+      "variant_tags": [
+        "LT"
+      ],
+      "strip_variant_tags": "heyzo__1380_full",
+      "strip_extension": "heyzo_lt_1380_full",
+      "cd": null
+    },
+    {
+      "title": "@x@imouser.com_SDMF-016_1.2K.mp4",
+      "avid": "SDMF-016",
+      "brand": "SDMF",
+      "variant_tags": [
+        "2K"
+      ],
+      "strip_variant_tags": "@x@imouser.com_SDMF-016_1.",
+      "strip_extension": "@x@imouser.com_SDMF-016_1.2K",
+      "cd": null
+    },
+    {
+      "title": "[Uncensored] SDDE-618",
+      "avid": "SDDE-618",
+      "brand": "SDDE",
+      "variant_tags": [
+        "UNCENSORED"
+      ],
+      "strip_variant_tags": "[] SDDE-618",
+      "strip_extension": "[Uncensored] SDDE-618",
+      "cd": null
+    },
+    {
+      "title": "062620-001-carib-1080p.mp4",
+      "avid": "062620-001",
+      "brand": "06",
+      "variant_tags": [
+        "1080P"
+      ],
+      "strip_variant_tags": "062620-001-carib-",
+      "strip_extension": "062620-001-carib-1080p",
+      "cd": null
+    },
+    {
+      "title": "1pondo-020317-001.mp4",
+      "avid": "020317-001",
+      "brand": "02",
+      "variant_tags": [],
+      "strip_variant_tags": "1pondo-020317-001",
+      "strip_extension": "1pondo-020317-001",
+      "cd": null
+    },
+    {
+      "title": "[Bdxav.Club]Tokyo-Hot-n1340 (title)",
+      "avid": "N1340",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "[Bdxav.Club]Tokyo-Hot-n1340 (title)",
+      "strip_extension": "[Bdxav.Club]Tokyo-Hot-n1340 (title)",
+      "cd": null
+    },
+    {
+      "title": "[psk.la]Carib-080520-001-FHD",
+      "avid": "080520-001",
+      "brand": "08",
+      "variant_tags": [
+        "FHD"
+      ],
+      "strip_variant_tags": "[psk.la]Carib-080520-001-",
+      "strip_extension": "[psk.la]Carib-080520-001-FHD",
+      "cd": null
+    },
+    {
+      "title": "HD_GS-333",
+      "avid": "GS-333",
+      "brand": "GS",
+      "variant_tags": [
+        "HD"
+      ],
+      "strip_variant_tags": "_GS-333",
+      "strip_extension": "HD_GS-333",
+      "cd": null
+    },
+    {
+      "title": "ABP-030-C-c_c-C-Cd1-cd4.mp4",
+      "avid": "ABP-030",
+      "brand": "ABP",
+      "variant_tags": [],
+      "strip_variant_tags": "ABP-030-C-c_c-C-Cd1-cd4",
+      "strip_extension": "ABP-030-C-c_c-C-Cd1-cd4",
+      "cd": null
+    },
+    {
+      "title": "test.xxx@133ARA-030 hello",
+      "avid": "ARA-030",
+      "brand": "ARA",
+      "variant_tags": [],
+      "strip_variant_tags": "test.xxx@133ARA-030 hello",
+      "strip_extension": "test.xxx@133ARA-030 hello",
+      "cd": null
+    },
+    {
+      "title": "hhd800.com@HUNTB-269",
+      "avid": "HUNTB-269",
+      "brand": "HUNTB",
+      "variant_tags": [],
+      "strip_variant_tags": "hhd800.com@HUNTB-269",
+      "strip_extension": "hhd800.com@HUNTB-269",
+      "cd": null
+    },
+    {
+      "title": "HTTM-0066",
+      "avid": "HTTM-066",
+      "brand": "HTTM",
+      "variant_tags": [],
+      "strip_variant_tags": "HTTM-0066",
+      "strip_extension": "HTTM-0066",
+      "cd": null
+    },
+    {
+      "title": "MXDLP-0337.mp4",
+      "avid": "MXDLP-337",
+      "brand": "MXDLP",
+      "variant_tags": [],
+      "strip_variant_tags": "MXDLP-0337",
+      "strip_extension": "MXDLP-0337",
+      "cd": null
+    },
+    {
+      "title": "3DSVR-0707",
+      "avid": "DSVR-707",
+      "brand": "DSVR",
+      "variant_tags": [],
+      "strip_variant_tags": "3DSVR-0707",
+      "strip_extension": "3DSVR-0707",
+      "cd": null
+    },
+    {
+      "title": "TBW-19",
+      "avid": "TBW-019",
+      "brand": "TBW",
+      "variant_tags": [],
+      "strip_variant_tags": "TBW-19",
+      "strip_extension": "TBW-19",
+      "cd": null
+    },
+    {
+      "title": "abp-01",
+      "avid": "ABP-001",
+      "brand": "ABP",
+      "variant_tags": [],
+      "strip_variant_tags": "abp-01",
+      "strip_extension": "abp-01",
+      "cd": null
+    },
+    {
+      "title": "IPZZ-1234",
+      "avid": "IPZZ-1234",
+      "brand": "IPZZ",
+      "variant_tags": [],
+      "strip_variant_tags": "IPZZ-1234",
+      "strip_extension": "IPZZ-1234",
+      "cd": null
+    },
+    {
+      "title": "T-28621",
+      "avid": "T-28621",
+      "brand": "T",
+      "variant_tags": [],
+      "strip_variant_tags": "T-28621",
+      "strip_extension": "T-28621",
+      "cd": null
+    },
+    {
+      "title": "IBW-949z",
+      "avid": "IBW-949Z",
+      "brand": "IBW",
+      "variant_tags": [],
+      "strip_variant_tags": "IBW-949z",
+      "strip_extension": "IBW-949z",
+      "cd": null
+    },
+    {
+      "title": "MKD-S03",
+      "avid": "MKD-S03",
+      "brand": "MKD",
+      "variant_tags": [],
+      "strip_variant_tags": "MKD-S03",
+      "strip_extension": "MKD-S03",
+      "cd": null
+    },
+    {
+      "title": "",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "",
+      "strip_extension": "",
+      "cd": null
+    },
+    {
+      "title": " ",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": " ",
+      "strip_extension": " ",
+      "cd": null
+    },
+    {
+      "title": ".mp4",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [
+        "MP4"
+      ],
+      "strip_variant_tags": ".",
+      "strip_extension": ".mp4",
+      "cd": null
+    },
+    {
+      "title": "ABC-123.",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "ABC-123.",
+      "strip_extension": "ABC-123.",
+      "cd": null
+    },
+    {
+      "title": "ABC-123.longextension",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "ABC-123.longextension",
+      "strip_extension": "ABC-123.longextension",
+      "cd": null
+    },
+    {
+      "title": "ABC-123.日本語ext",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "ABC-123.日本語ext",
+      "strip_extension": "ABC-123.日本語ext",
+      "cd": null
+    },
+    {
+      "title": "ABC-123.日本",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "ABC-123",
+      "strip_extension": "ABC-123",
+      "cd": null
+    },
+    {
+      "title": "ABC-١٢٣",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "ABC-١٢٣",
+      "strip_extension": "ABC-١٢٣",
+      "cd": null
+    },
+    {
+      "title": "ABC-１２３",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "ABC-１２３",
+      "strip_extension": "ABC-１２３",
+      "cd": null
+    },
+    {
+      "title": "ABC-٣٤",
+      "avid": "ABC-034",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "ABC-٣٤",
+      "strip_extension": "ABC-٣٤",
+      "cd": null
+    },
+    {
+      "title": "ＡＢＣ-123",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "ＡＢＣ-123",
+      "strip_extension": "ＡＢＣ-123",
+      "cd": null
+    },
+    {
+      "title": "ABC-123\n",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "ABC-123\n",
+      "strip_extension": "ABC-123\n",
+      "cd": null
+    },
+    {
+      "title": "ABC-12\n",
+      "avid": "ABC-012",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "ABC-12\n",
+      "strip_extension": "ABC-12\n",
+      "cd": null
+    },
+    {
+      "title": "ABC-123 CD2.mp4",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "ABC-123 CD2",
+      "strip_extension": "ABC-123 CD2",
+      "cd": "2"
+    },
+    {
+      "title": "abc-123-cd1\n",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "abc-123-cd1\n",
+      "strip_extension": "abc-123-cd1\n",
+      "cd": null
+    },
+    {
+      "title": "abc-123-C \n",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "abc-123-C \n",
+      "strip_extension": "abc-123-C \n",
+      "cd": null
+    },
+    {
+      "title": "X-1",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "X-1",
+      "strip_extension": "X-1",
+      "cd": null
+    },
+    {
+      "title": "AB-12",
+      "avid": "AB-012",
+      "brand": "AB",
+      "variant_tags": [],
+      "strip_variant_tags": "AB-12",
+      "strip_extension": "AB-12",
+      "cd": null
+    },
+    {
+      "title": "A-12",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "A-12",
+      "strip_extension": "A-12",
+      "cd": null
+    },
+    {
+      "title": "ABCDEFGHIJK-123",
+      "avid": "BCDEFGHIJK-123",
+      "brand": "BCDEFGHIJK",
+      "variant_tags": [],
+      "strip_variant_tags": "ABCDEFGHIJK-123",
+      "strip_extension": "ABCDEFGHIJK-123",
+      "cd": null
+    },
+    {
+      "title": "ABCDEFGHIJ-123456",
+      "avid": "ABCDEFGHIJ-12345",
+      "brand": "ABCDEFGHIJ",
+      "variant_tags": [],
+      "strip_variant_tags": "ABCDEFGHIJ-123456",
+      "strip_extension": "ABCDEFGHIJ-123456",
+      "cd": null
+    },
+    {
+      "title": "abc_123_456",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "abc_123_456",
+      "strip_extension": "abc_123_456",
+      "cd": null
+    },
+    {
+      "title": "(ABC)(123)",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "(ABC)(123)",
+      "strip_extension": "(ABC)(123)",
+      "cd": null
+    },
+    {
+      "title": "foo)(bar",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "foo)(bar",
+      "strip_extension": "foo)(bar",
+      "cd": null
+    },
+    {
+      "title": "AB)(12",
+      "avid": "AB-012",
+      "brand": "AB",
+      "variant_tags": [],
+      "strip_variant_tags": "AB)(12",
+      "strip_extension": "AB)(12",
+      "cd": null
+    },
+    {
+      "title": "xx)(ABC123",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "xx)(ABC123",
+      "strip_extension": "xx)(ABC123",
+      "cd": null
+    },
+    {
+      "title": "NOBRAND",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "NOBRAND",
+      "strip_extension": "NOBRAND",
+      "cd": null
+    },
+    {
+      "title": "RED123",
+      "avid": "RED123",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "RED123",
+      "strip_extension": "RED123",
+      "cd": null
+    },
+    {
+      "title": "SKY234",
+      "avid": "SKY234",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "SKY234",
+      "strip_extension": "SKY234",
+      "cd": null
+    },
+    {
+      "title": "EX0012",
+      "avid": "EX0012",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "EX0012",
+      "strip_extension": "EX0012",
+      "cd": null
+    },
+    {
+      "title": "red199 sky399",
+      "avid": "RED199",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "red199 sky399",
+      "strip_extension": "red199 sky399",
+      "cd": null
+    },
+    {
+      "title": "MARRA-A030",
+      "avid": "MARRA-A030",
+      "brand": "MARRA",
+      "variant_tags": [],
+      "strip_variant_tags": "MARRA-A030",
+      "strip_extension": "MARRA-A030",
+      "cd": null
+    },
+    {
+      "title": "abc-a030",
+      "avid": "ABC-A030",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "abc-a030",
+      "strip_extension": "abc-a030",
+      "cd": null
+    },
+    {
+      "title": "4102-023",
+      "avid": "4102-023",
+      "brand": "41",
+      "variant_tags": [],
+      "strip_variant_tags": "4102-023",
+      "strip_extension": "4102-023",
+      "cd": null
+    },
+    {
+      "title": "xx4102_023yy",
+      "avid": "XX-4102",
+      "brand": "XX",
+      "variant_tags": [],
+      "strip_variant_tags": "xx4102_023yy",
+      "strip_extension": "xx4102_023yy",
+      "cd": null
+    },
+    {
+      "title": "K-1234-5",
+      "avid": "K1234",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "K-1234-5",
+      "strip_extension": "K-1234-5",
+      "cd": null
+    },
+    {
+      "title": "n0893 k0001",
+      "avid": "N0893",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "n0893 k0001",
+      "strip_extension": "n0893 k0001",
+      "cd": null
+    },
+    {
+      "title": "T-12345",
+      "avid": "T-12345",
+      "brand": "T",
+      "variant_tags": [],
+      "strip_variant_tags": "T-12345",
+      "strip_extension": "T-12345",
+      "cd": null
+    },
+    {
+      "title": "T_12345.mp4",
+      "avid": "T-12345",
+      "brand": "T",
+      "variant_tags": [],
+      "strip_variant_tags": "T_12345",
+      "strip_extension": "T_12345",
+      "cd": null
+    },
+    {
+      "title": "aT-12345",
+      "avid": "AT-12345",
+      "brand": "AT",
+      "variant_tags": [],
+      "strip_variant_tags": "aT-12345",
+      "strip_extension": "aT-12345",
+      "cd": null
+    },
+    {
+      "title": "T38-123",
+      "avid": "T38-123",
+      "brand": "T38",
+      "variant_tags": [],
+      "strip_variant_tags": "T38-123",
+      "strip_extension": "T38-123",
+      "cd": null
+    },
+    {
+      "title": "T23-001",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "T23-001",
+      "strip_extension": "T23-001",
+      "cd": null
+    },
+    {
+      "title": "HEYZO-1380",
+      "avid": "HEYZO-1380",
+      "brand": "HEYZO",
+      "variant_tags": [],
+      "strip_variant_tags": "HEYZO-1380",
+      "strip_extension": "HEYZO-1380",
+      "cd": null
+    },
+    {
+      "title": "heyzo 1380",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "heyzo 1380",
+      "strip_extension": "heyzo 1380",
+      "cd": null
+    },
+    {
+      "title": "heyzo_1380",
+      "avid": "HEYZO-1380",
+      "brand": "HEYZO",
+      "variant_tags": [],
+      "strip_variant_tags": "heyzo_1380",
+      "strip_extension": "heyzo_1380",
+      "cd": null
+    },
+    {
+      "title": "HEYDOUGA_4017_0233",
+      "avid": "HEYDOUGA-4017-233",
+      "brand": "HEYDOUGA",
+      "variant_tags": [],
+      "strip_variant_tags": "HEYDOUGA_4017_0233",
+      "strip_extension": "HEYDOUGA_4017_0233",
+      "cd": null
+    },
+    {
+      "title": "heydouga-4017-02331",
+      "avid": "HEYDOUGA-4017-2331",
+      "brand": "HEYDOUGA",
+      "variant_tags": [],
+      "strip_variant_tags": "heydouga-4017-02331",
+      "strip_extension": "heydouga-4017-02331",
+      "cd": null
+    },
+    {
+      "title": "GETCHU_123",
+      "avid": "GETCHU-123",
+      "brand": "GETCHU",
+      "variant_tags": [],
+      "strip_variant_tags": "GETCHU_123",
+      "strip_extension": "GETCHU_123",
+      "cd": null
+    },
+    {
+      "title": "getchu123",
+      "avid": "GETCHU-123",
+      "brand": "GETCHU",
+      "variant_tags": [],
+      "strip_variant_tags": "getchu123",
+      "strip_extension": "getchu123",
+      "cd": null
+    },
+    {
+      "title": "GYUTTO_123",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "GYUTTO_123",
+      "strip_extension": "GYUTTO_123",
+      "cd": null
+    },
+    {
+      "title": "259luxu-001",
+      "avid": "259LUXU-001",
+      "brand": "259LUXU",
+      "variant_tags": [],
+      "strip_variant_tags": "259luxu-001",
+      "strip_extension": "259luxu-001",
+      "cd": null
+    },
+    {
+      "title": "259LUXU_001",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "259LUXU_001",
+      "strip_extension": "259LUXU_001",
+      "cd": null
+    },
+    {
+      "title": "FC2PPV-12345678",
+      "avid": "FC2-1234567",
+      "brand": "FC2",
+      "variant_tags": [],
+      "strip_variant_tags": "FC2PPV-12345678",
+      "strip_extension": "FC2PPV-12345678",
+      "cd": null
+    },
+    {
+      "title": "fc2-ppv_1234",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "fc2-ppv_1234",
+      "strip_extension": "fc2-ppv_1234",
+      "cd": null
+    },
+    {
+      "title": "FC2 PPV 1234567",
+      "avid": "FC2-1234567",
+      "brand": "FC2",
+      "variant_tags": [],
+      "strip_variant_tags": "FC2 PPV 1234567",
+      "strip_extension": "FC2 PPV 1234567",
+      "cd": null
+    },
+    {
+      "title": "fc2_1234567_1080p.mp4",
+      "avid": "FC2-1234567",
+      "brand": "FC2",
+      "variant_tags": [
+        "1080P"
+      ],
+      "strip_variant_tags": "fc2_1234567_",
+      "strip_extension": "fc2_1234567_1080p",
+      "cd": null
+    },
+    {
+      "title": "[FHD]abc-123",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [
+        "FHD"
+      ],
+      "strip_variant_tags": "[]abc-123",
+      "strip_extension": "[FHD]abc-123",
+      "cd": null
+    },
+    {
+      "title": "fhd-abc-123",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [
+        "FHD"
+      ],
+      "strip_variant_tags": "-abc-123",
+      "strip_extension": "fhd-abc-123",
+      "cd": null
+    },
+    {
+      "title": "sd_abc-123",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [
+        "SD"
+      ],
+      "strip_variant_tags": "_abc-123",
+      "strip_extension": "sd_abc-123",
+      "cd": null
+    },
+    {
+      "title": "hd-abc-123",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [
+        "HD"
+      ],
+      "strip_variant_tags": "-abc-123",
+      "strip_extension": "hd-abc-123",
+      "cd": null
+    },
+    {
+      "title": "SDAB-123-sd",
+      "avid": "SDAB-123",
+      "brand": "SDAB",
+      "variant_tags": [
+        "SD"
+      ],
+      "strip_variant_tags": "SDAB-123-",
+      "strip_extension": "SDAB-123-sd",
+      "cd": null
+    },
+    {
+      "title": "uhd-ABC-123-4K-HQ.mkv",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [
+        "4K",
+        "HQ",
+        "UHD"
+      ],
+      "strip_variant_tags": "-ABC-123--",
+      "strip_extension": "uhd-ABC-123-4K-HQ",
+      "cd": null
+    },
+    {
+      "title": "ABC-123-x265-10bit.mkv",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [
+        "X265"
+      ],
+      "strip_variant_tags": "ABC-123--10bit",
+      "strip_extension": "ABC-123-x265-10bit",
+      "cd": null
+    },
+    {
+      "title": "ABC-123_2160p_uncensored_leak.mp4",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [
+        "2160P",
+        "LEAK",
+        "UNCENSORED"
+      ],
+      "strip_variant_tags": "ABC-123___",
+      "strip_extension": "ABC-123_2160p_uncensored_leak",
+      "cd": null
+    },
+    {
+      "title": "GIGL-677_4K60FPS.mp4",
+      "avid": "GIGL-677",
+      "brand": "GIGL",
+      "variant_tags": [
+        "4K",
+        "60FPS"
+      ],
+      "strip_variant_tags": "GIGL-677_",
+      "strip_extension": "GIGL-677_4K60FPS",
+      "cd": null
+    },
+    {
+      "title": "vema-181-4k-C.mp4",
+      "avid": "VEMA-181",
+      "brand": "VEMA",
+      "variant_tags": [
+        "4K"
+      ],
+      "strip_variant_tags": "vema-181--C",
+      "strip_extension": "vema-181-4k-C",
+      "cd": null
+    },
+    {
+      "title": "ABC-1234k.mp4",
+      "avid": "ABC-1234",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "ABC-1234k",
+      "strip_extension": "ABC-1234k",
+      "cd": null
+    },
+    {
+      "title": "4k.mp4",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [
+        "4K"
+      ],
+      "strip_variant_tags": "",
+      "strip_extension": "4k",
+      "cd": null
+    },
+    {
+      "title": "caribbeancom 123456-789",
+      "avid": "123456-789",
+      "brand": "12",
+      "variant_tags": [],
+      "strip_variant_tags": "caribbeancom 123456-789",
+      "strip_extension": "caribbeancom 123456-789",
+      "cd": null
+    },
+    {
+      "title": "caribbeancompr-123456_789",
+      "avid": "123456_789",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "caribbeancompr-123456_789",
+      "strip_extension": "caribbeancompr-123456_789",
+      "cd": null
+    },
+    {
+      "title": "10musume-123456_01",
+      "avid": "123456_01",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "10musume-123456_01",
+      "strip_extension": "10musume-123456_01",
+      "cd": null
+    },
+    {
+      "title": "pacopacomama 012345_123",
+      "avid": "012345_123",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "pacopacomama 012345_123",
+      "strip_extension": "pacopacomama 012345_123",
+      "cd": null
+    },
+    {
+      "title": "muramura-123456_789",
+      "avid": "123456_789",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "muramura-123456_789",
+      "strip_extension": "muramura-123456_789",
+      "cd": null
+    },
+    {
+      "title": "tokyo hot n1234",
+      "avid": "N1234",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "tokyo hot n1234",
+      "strip_extension": "tokyo hot n1234",
+      "cd": null
+    },
+    {
+      "title": "tokyo_hot-k0001",
+      "avid": "K0001",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "tokyo_hot-k0001",
+      "strip_extension": "tokyo_hot-k0001",
+      "cd": null
+    },
+    {
+      "title": "tokyohot abc123",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "tokyohot abc123",
+      "strip_extension": "tokyohot abc123",
+      "cd": null
+    },
+    {
+      "title": "1pon 123456_001",
+      "avid": "123456_001",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "1pon 123456_001",
+      "strip_extension": "1pon 123456_001",
+      "cd": null
+    },
+    {
+      "title": "pond-123456-001",
+      "avid": "123456-001",
+      "brand": "12",
+      "variant_tags": [],
+      "strip_variant_tags": "pond-123456-001",
+      "strip_extension": "pond-123456-001",
+      "cd": null
+    },
+    {
+      "title": "carib",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "carib",
+      "strip_extension": "carib",
+      "cd": null
+    },
+    {
+      "title": "carib-",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "carib-",
+      "strip_extension": "carib-",
+      "cd": null
+    },
+    {
+      "title": "abc.com",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "abc",
+      "strip_extension": "abc",
+      "cd": null
+    },
+    {
+      "title": "abc.com-",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "abc",
+      "strip_extension": "abc",
+      "cd": null
+    },
+    {
+      "title": "uus75.com",
+      "avid": "UUS-075",
+      "brand": "UUS",
+      "variant_tags": [],
+      "strip_variant_tags": "uus75",
+      "strip_extension": "uus75",
+      "cd": null
+    },
+    {
+      "title": "xyz.net abc-123",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "xyz.net abc-123",
+      "strip_extension": "xyz.net abc-123",
+      "cd": null
+    },
+    {
+      "title": "site.app-ABC-123",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "site.app-ABC-123",
+      "strip_extension": "site.app-ABC-123",
+      "cd": null
+    },
+    {
+      "title": "site.xyz.ABC-123",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "site.xyz.ABC-123",
+      "strip_extension": "site.xyz.ABC-123",
+      "cd": null
+    },
+    {
+      "title": "foo.COM.bar",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "foo.COM",
+      "strip_extension": "foo.COM",
+      "cd": null
+    },
+    {
+      "title": "aa.com bb.net",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "aa.com bb",
+      "strip_extension": "aa.com bb",
+      "cd": null
+    },
+    {
+      "title": "Kelvin-K123",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "Kelvin-K123",
+      "strip_extension": "Kelvin-K123",
+      "cd": null
+    },
+    {
+      "title": "İPZ-123",
+      "avid": "İPZ-123",
+      "brand": "İPZ",
+      "variant_tags": [],
+      "strip_variant_tags": "İPZ-123",
+      "strip_extension": "İPZ-123",
+      "cd": null
+    },
+    {
+      "title": "ıpz-123",
+      "avid": "IPZ-123",
+      "brand": "IPZ",
+      "variant_tags": [],
+      "strip_variant_tags": "ıpz-123",
+      "strip_extension": "ıpz-123",
+      "cd": null
+    },
+    {
+      "title": "ß-123",
+      "avid": "SS-123",
+      "brand": "SS",
+      "variant_tags": [],
+      "strip_variant_tags": "ß-123",
+      "strip_extension": "ß-123",
+      "cd": null
+    },
+    {
+      "title": "ﬀ-123",
+      "avid": "FF-123",
+      "brand": "FF",
+      "variant_tags": [],
+      "strip_variant_tags": "ﬀ-123",
+      "strip_extension": "ﬀ-123",
+      "cd": null
+    },
+    {
+      "title": "ABC-123ABC-456",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "ABC-123ABC-456",
+      "strip_extension": "ABC-123ABC-456",
+      "cd": null
+    },
+    {
+      "title": "ABC--123",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "ABC--123",
+      "strip_extension": "ABC--123",
+      "cd": null
+    },
+    {
+      "title": "ABC__123",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "ABC__123",
+      "strip_extension": "ABC__123",
+      "cd": null
+    },
+    {
+      "title": "ABC. .123",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "ABC. ",
+      "strip_extension": "ABC. ",
+      "cd": null
+    },
+    {
+      "title": "ABC - 123",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "ABC - 123",
+      "strip_extension": "ABC - 123",
+      "cd": null
+    },
+    {
+      "title": "abc-123-ch",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "abc-123-ch",
+      "strip_extension": "abc-123-ch",
+      "cd": null
+    },
+    {
+      "title": "abc-123ch",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "abc-123ch",
+      "strip_extension": "abc-123ch",
+      "cd": null
+    },
+    {
+      "title": "abc-123-uc",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "abc-123-uc",
+      "strip_extension": "abc-123-uc",
+      "cd": null
+    },
+    {
+      "title": "abc-123hhb",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "abc-123hhb",
+      "strip_extension": "abc-123hhb",
+      "cd": null
+    },
+    {
+      "title": "abc-123hhb3",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "abc-123hhb3",
+      "strip_extension": "abc-123hhb3",
+      "cd": null
+    },
+    {
+      "title": "abc-123-cd12",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "abc-123-cd12",
+      "strip_extension": "abc-123-cd12",
+      "cd": null
+    },
+    {
+      "title": "abc-123-cd123",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "abc-123-cd123",
+      "strip_extension": "abc-123-cd123",
+      "cd": null
+    },
+    {
+      "title": "abc-123_c_ch",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "abc-123_c_ch",
+      "strip_extension": "abc-123_c_ch",
+      "cd": null
+    },
+    {
+      "title": "ABC-123 chinese",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "ABC-123 chinese",
+      "strip_extension": "ABC-123 chinese",
+      "cd": null
+    },
+    {
+      "title": "abc-123z",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "abc-123z",
+      "strip_extension": "abc-123z",
+      "cd": null
+    },
+    {
+      "title": "ibw_123Z",
+      "avid": "IBW-123Z",
+      "brand": "IBW",
+      "variant_tags": [],
+      "strip_variant_tags": "ibw_123Z",
+      "strip_extension": "ibw_123Z",
+      "cd": null
+    },
+    {
+      "title": "IBW-12345z",
+      "avid": "IBW-12345Z",
+      "brand": "IBW",
+      "variant_tags": [],
+      "strip_variant_tags": "IBW-12345z",
+      "strip_extension": "IBW-12345z",
+      "cd": null
+    },
+    {
+      "title": "17ID_02",
+      "avid": "17ID-002",
+      "brand": "17ID",
+      "variant_tags": [],
+      "strip_variant_tags": "17ID_02",
+      "strip_extension": "17ID_02",
+      "cd": null
+    },
+    {
+      "title": "170ID-12345",
+      "avid": "170ID-12345",
+      "brand": "170ID",
+      "variant_tags": [],
+      "strip_variant_tags": "170ID-12345",
+      "strip_extension": "170ID-12345",
+      "cd": null
+    },
+    {
+      "title": "1ID-12",
+      "avid": "ID-012",
+      "brand": "ID",
+      "variant_tags": [],
+      "strip_variant_tags": "1ID-12",
+      "strip_extension": "1ID-12",
+      "cd": null
+    },
+    {
+      "title": "S2M_05",
+      "avid": "S2M-05",
+      "brand": "S2M",
+      "variant_tags": [],
+      "strip_variant_tags": "S2M_05",
+      "strip_extension": "S2M_05",
+      "cd": null
+    },
+    {
+      "title": "S2MBD-1234",
+      "avid": "S2MBD-123",
+      "brand": "S2MBD",
+      "variant_tags": [],
+      "strip_variant_tags": "S2MBD-1234",
+      "strip_extension": "S2MBD-1234",
+      "cd": null
+    },
+    {
+      "title": "mkbd_s1",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "mkbd_s1",
+      "strip_extension": "mkbd_s1",
+      "cd": null
+    },
+    {
+      "title": "MKD-S123",
+      "avid": "MKD-S123",
+      "brand": "MKD",
+      "variant_tags": [],
+      "strip_variant_tags": "MKD-S123",
+      "strip_extension": "MKD-S123",
+      "cd": null
+    },
+    {
+      "title": "CW3D2BD_4",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "CW3D2BD_4",
+      "strip_extension": "CW3D2BD_4",
+      "cd": null
+    },
+    {
+      "title": "AB3D2BD-12",
+      "avid": "AB3D2BD-012",
+      "brand": "AB3D2BD",
+      "variant_tags": [],
+      "strip_variant_tags": "AB3D2BD-12",
+      "strip_extension": "AB3D2BD-12",
+      "cd": null
+    },
+    {
+      "title": "ABCDE3D2BD-12",
+      "avid": "BCDE3D2BD-012",
+      "brand": "BCDE3D2BD",
+      "variant_tags": [],
+      "strip_variant_tags": "ABCDE3D2BD-12",
+      "strip_extension": "ABCDE3D2BD-12",
+      "cd": null
+    },
+    {
+      "title": "1_2_3",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "1_2_3",
+      "strip_extension": "1_2_3",
+      "cd": null
+    },
+    {
+      "title": "/",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "/",
+      "strip_extension": "/",
+      "cd": null
+    },
+    {
+      "title": "a/b/c",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "a/b/c",
+      "strip_extension": "a/b/c",
+      "cd": null
+    },
+    {
+      "title": "..",
+      "avid": "",
+      "brand": null,
+      "variant_tags": [],
+      "strip_variant_tags": "..",
+      "strip_extension": "..",
+      "cd": null
+    },
+    {
+      "title": "ABC-123/..",
+      "avid": "ABC-123",
+      "brand": "ABC",
+      "variant_tags": [],
+      "strip_variant_tags": "ABC-123/..",
+      "strip_extension": "ABC-123/..",
+      "cd": null
+    }
+  ]
+}
