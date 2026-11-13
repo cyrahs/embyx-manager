@@ -387,7 +387,7 @@ fn pages_and_choices_match_the_baseline() {
             other => panic!("unknown golden kind {other}"),
         }
     }
-    assert_eq!((pages, choices), (6, 13));
+    assert_eq!((pages, choices), (10, 13));
 }
 
 #[test]
@@ -399,4 +399,15 @@ fn failed_searches_log_their_params_as_python_shows_the_dict() {
         ("p", "2".to_owned()),
     ];
     assert_eq!(params_repr(&params), r#"{'f': 0, 'c': '2_2', 'q': "AB'C", 'p': 2}"#);
+}
+
+#[test]
+fn the_trusted_size_is_compared_with_the_float_exactly() {
+    // 2^53 + 3 rounds to the float 2^53 + 4, but Python compares the int exactly:
+    // `9007199254740995 >= 9007199254740996.0` is False.
+    assert!(!int_at_least(9_007_199_254_740_995, 9_007_199_254_740_996.0));
+    assert!(int_at_least(9_007_199_254_740_996, 9_007_199_254_740_996.0));
+    assert!(int_at_least(5, 4.2) && !int_at_least(4, 4.2) && int_at_least(-4, -4.2));
+    assert!(!int_at_least(i128::MAX, f64::INFINITY) && int_at_least(i128::MIN, f64::NEG_INFINITY));
+    assert!(!int_at_least(0, f64::NAN));
 }

@@ -388,6 +388,20 @@ async fn playlist_round_trip_keeps_order_and_addresses_entries() {
     .map(|(name, value)| ((*name).to_owned(), vec![(*value).to_owned()]))
     .collect();
     assert_eq!(create.2, expected);
+    let delete = calls
+        .iter()
+        .find(|call| call.1 == "/emby/Items/Delete")
+        .expect("delete call");
+    let expected: Params = std::iter::once(("Ids".to_owned(), vec![playlist_id.clone()])).collect();
+    assert_eq!(delete.2, expected);
+    // Empty edits never reach the server.
+    assert_eq!(
+        calls
+            .iter()
+            .filter(|call| matches!(call.0.as_str(), "POST" | "DELETE") && call.1.ends_with("/Items"))
+            .count(),
+        2
+    );
 }
 
 #[test]

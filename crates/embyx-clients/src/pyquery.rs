@@ -110,6 +110,9 @@ impl Document {
     /// `lxml.html.fromstring(text)` / `etree.fromstring(text, etree.HTMLParser())`, without the
     /// XML attempt (nyaapy).
     pub fn parse_html(text: &str) -> Result<Self, ParseError> {
+        if XML_ENCODING_DECLARATION.is_match(text) {
+            return Err(ParseError::EncodingDeclaration);
+        }
         let (html, has_content) = html_tree(text);
         if !has_content {
             return Err(ParseError::Empty);

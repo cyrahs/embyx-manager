@@ -282,6 +282,10 @@ NYAA_PAGES = [
     '<table><tbody><tr><td>2_2</td></tr></tbody></table>',
     '<table><tbody><tr><td><a>no href</a></td></tr></tbody></table>',
     '<table><tr><td>?c=2_2</td></tr></table>',
+    '<?xml version="1.0" encoding="utf-8"?><html><body><table><tbody><tr><td>2_2</td></tr></tbody></table></body>',
+    ' <?xml version="1.0" encoding="utf-8"?><p>x</p>',
+    '<?xml version="1.0"?><table><tbody><tr><td>2_2</td></tr></tbody></table>',
+    '   ',
 ]
 
 SEARCH_RESULTS = [

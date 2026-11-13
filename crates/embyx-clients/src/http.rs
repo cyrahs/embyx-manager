@@ -106,20 +106,26 @@ pub fn with_params(url: &str, params: &[(&str, String)]) -> String {
 /// `response.text` for a body: decoded with the `charset` of `content_type`, else UTF-8,
 /// undecodable bytes replaced (U+FFFD), as httpx's `TextDecoder(errors="replace")` does.
 pub fn decode_text(body: &[u8], content_type: Option<&str>) -> String {
-    let charset = content_type.and_then(charset_of).map(str::to_ascii_lowercase);
-    match charset.as_deref() {
-        Some("iso-8859-1" | "iso8859-1" | "latin-1" | "latin1" | "l1") => {
-            body.iter().map(|&byte| char::from(byte)).collect()
+    content_type
+        .and_then(charset_of)
+        .and_then(|label| decode_label(body, label))
+        .unwrap_or_else(|| String::from_utf8_lossy(body).into_owned())
+}
+
+/// `body.decode(label, errors='replace')`, or `None` when no codec has that name.
+pub fn decode_label(body: &[u8], label: &str) -> Option<String> {
+    match label.to_ascii_lowercase().as_str() {
+        "utf-8" | "utf8" => Some(String::from_utf8_lossy(body).into_owned()),
+        "iso-8859-1" | "iso8859-1" | "latin-1" | "latin1" | "l1" => {
+            Some(body.iter().map(|&byte| char::from(byte)).collect())
         }
-        Some("ascii" | "us-ascii") => body
-            .iter()
-            .map(|&byte| if byte.is_ascii() { char::from(byte) } else { '\u{fffd}' })
-            .collect(),
-        Some(label) if !matches!(label, "utf-8" | "utf8") => match encoding_rs::Encoding::for_label(label.as_bytes()) {
-            Some(encoding) => encoding.decode_without_bom_handling(body).0.into_owned(),
-            None => String::from_utf8_lossy(body).into_owned(),
-        },
-        _ => String::from_utf8_lossy(body).into_owned(),
+        "ascii" | "us-ascii" => Some(
+            body.iter()
+                .map(|&byte| if byte.is_ascii() { char::from(byte) } else { '\u{fffd}' })
+                .collect(),
+        ),
+        label => encoding_rs::Encoding::for_label(label.as_bytes())
+            .map(|encoding| encoding.decode_without_bom_handling(body).0.into_owned()),
     }
 }
 

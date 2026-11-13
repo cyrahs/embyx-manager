@@ -96,6 +96,8 @@ roxmltree = "0.21"
 # jinjier's ranking database: sqlite3 `deserialize` (bundled SQLite) and `zipfile`.
 rusqlite = { version = "0.39", features = ["bundled", "serialize"] }
 zip = { version = "9", default-features = false, features = ["deflate"] }
+# `str.casefold()` (full Unicode case folding) where AVBase compares work IDs.
+caseless = "0.2"
 # `response.text` for a charset other than UTF-8 / latin-1 (reqwest's own decoder).
 encoding_rs = "0.8"
 # Next-fire times of the archive scan cron (cronsim in Python).

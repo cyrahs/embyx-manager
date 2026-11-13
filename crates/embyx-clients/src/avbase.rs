@@ -20,7 +20,7 @@ use std::time::Duration;
 
 use chrono::{Datelike as _, NaiveDate};
 use embyx_core::pyjson::{self, JsonEncoding, Value};
-use embyx_core::pytext::{casefold, py_decimal_value, py_isdigit, py_repr, py_strip};
+use embyx_core::pytext::{py_decimal_value, py_isdigit, py_repr, py_strip};
 use embyx_core::pyurl::{quote, unquote, urlsplit};
 use futures_util::future::BoxFuture;
 use tokio::sync::{Mutex, Semaphore};
@@ -36,21 +36,22 @@ pub const WORKS_PER_PAGE: i128 = 30;
 pub struct AvbaseResponse {
     pub status: u16,
     pub content_type: Option<String>,
-    /// `response.text`.
-    pub text: String,
     /// `response.content`.
     pub body: Vec<u8>,
 }
 
 impl AvbaseResponse {
     pub fn new(status: u16, content_type: Option<String>, body: Vec<u8>) -> Self {
-        let text = session::curl_text(&body, content_type.as_deref());
         Self {
             status,
             content_type,
-            text,
             body,
         }
+    }
+
+    /// `response.text` (`curl_cffi`'s decoding, which can raise for an unknown charset).
+    pub fn text(&self) -> Result<String, AvbaseError> {
+        session::curl_text(&self.body, self.content_type.as_deref()).map_err(AvbaseError::Raised)
     }
 
     /// `response.json()`: `json.loads(content)`, or the text when the charset is not one JSON
@@ -59,6 +60,13 @@ impl AvbaseResponse {
         let decode_error = |error: &pyjson::LoadError, text: &str| {
             AvbaseError::Raised(Raised::new("JSONDecodeError", error.python_message(text)))
         };
+        if let Some(charset) = session::charset_encoding(self.content_type.as_deref()) {
+            let encoding = charset.to_lowercase().replace('_', "-");
+            if !session::JSON_NATIVE_ENCODINGS.contains(&encoding.as_str()) {
+                let text = self.text()?;
+                return pyjson::loads(&text).map_err(|error| decode_error(&error, &text));
+            }
+        }
         let text = match pyjson::detect_json_encoding(&self.body) {
             JsonEncoding::Utf8(bytes) => match std::str::from_utf8(bytes) {
                 Ok(text) => text.to_owned(),
@@ -277,9 +285,11 @@ impl AvbaseClient {
         let mut cached = self.build_id.lock().await;
         if cached.is_none() || refresh {
             let response = self.get(&format!("{}/", self.host), &[]).await?;
-            let found = (response.status == 200)
-                .then(|| BUILD_ID.captures(&response.text).map(|found| found[1].to_owned()))
-                .flatten();
+            let found = if response.status == 200 {
+                BUILD_ID.captures(&response.text()?).map(|found| found[1].to_owned())
+            } else {
+                None
+            };
             let Some(build) = found else {
                 return Err(AvbaseError::Unavailable(format!(
                     "no build id on the AVBase home page (HTTP {})",
@@ -329,7 +339,7 @@ impl AvbaseClient {
                 response.status
             )));
         }
-        let Some(name) = talent_name_from_feed(&response.text)? else {
+        let Some(name) = talent_name_from_feed(&response.text()?)? else {
             return Ok(None);
         };
         let talent = self.talent(&name).await?;
@@ -389,9 +399,9 @@ impl AvbaseClient {
         if work_id.contains(':') {
             return self.work_route(work_id).await;
         }
-        let wanted = casefold(&strip_prefix(work_id));
+        let wanted = caseless::default_case_fold_str(&strip_prefix(work_id));
         for candidate in self.search_works(work_id).await? {
-            if casefold(&candidate.work_id) == wanted {
+            if caseless::default_case_fold_str(&candidate.work_id) == wanted {
                 let route_id = if candidate.prefix.is_empty() {
                     candidate.work_id.clone()
                 } else {

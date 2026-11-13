@@ -610,18 +610,47 @@ async fn the_impersonating_session_reports_transport_failures_by_curl_cffi_class
     assert_eq!(error.class_name(), "Timeout");
     assert!(!error.is_avbase_error());
 
-    let web = FakeWeb::start(|_: &Seen| Reply::Close).await;
-    let error = impersonating(&web.proxy, Duration::from_secs(5))
-        .build_id(false)
-        .await
-        .unwrap_err();
-    assert!(matches!(error, AvbaseError::Transport { .. }), "{error:?}");
-
+    // The classes curl_cffi 0.16.3 raised for the same failures on a local server: curl 52
+    // (empty reply), 18 (body cut short), 56 (reset), 7 (proxy refused).
+    for (reply, class) in [
+        (Reply::Close, "ConnectionError"),
+        (
+            Reply::Truncated {
+                status: 200,
+                sent: b"abc".to_vec(),
+                length: 100,
+            },
+            "IncompleteRead",
+        ),
+        (Reply::Reset, "ConnectionError"),
+    ] {
+        let web = FakeWeb::start(move |_: &Seen| reply.clone()).await;
+        let error = impersonating(&web.proxy, Duration::from_secs(5))
+            .build_id(false)
+            .await
+            .unwrap_err();
+        assert!(matches!(error, AvbaseError::Transport { .. }), "{error:?}");
+        assert_eq!(error.class_name(), class, "{error:?}");
+    }
     let error = impersonating("http://127.0.0.1:9", Duration::from_secs(5))
         .build_id(false)
         .await
         .unwrap_err();
-    assert!(matches!(error, AvbaseError::Transport { .. }), "{error:?}");
+    assert_eq!(error.class_name(), "ConnectionError", "{error:?}");
+
+    // An untrusted certificate: curl 60.
+    let web = FakeWeb::start(|_: &Seen| Reply::bytes(200, "x")).await;
+    let options = AvbaseOptions {
+        host: "https://avbase.test".to_owned(),
+        proxy: Some(web.proxy.clone()),
+        ..AvbaseOptions::default()
+    };
+    let session = session::ImpersonatingSession::new(&AvbaseClient::session_options(&options)).expect("session");
+    let error = AvbaseClient::with_session(&options, Arc::new(session))
+        .build_id(false)
+        .await
+        .unwrap_err();
+    assert_eq!(error.class_name(), "CertificateVerifyError", "{error:?}");
 }
 
 #[test]
@@ -784,5 +813,65 @@ fn parsers_match_the_baseline() {
     }
     for kind in ["date", "query", "feed", "talent", "listing", "detail"] {
         assert!(seen.get(kind).copied().unwrap_or(0) > 0, "no {kind} cases");
+    }
+}
+
+#[test]
+fn json_and_text_follow_curl_cffi_charset_rules() {
+    // Each result checked against `curl_cffi.requests.models.Response` at the baseline.
+    let response =
+        |content_type: &str, body: &[u8]| AvbaseResponse::new(200, Some(content_type.to_owned()), body.to_vec());
+    let decoded = |content_type: &str, body: &[u8]| {
+        response(content_type, body)
+            .json()
+            .map(|value| pyjson::dumps(&value, &pyjson::DumpOptions::compact()).expect("json"))
+            .map_err(|error| (error.class_name(), error.to_string()))
+    };
+    let invalid = Err((
+        "UnicodeDecodeError",
+        "'utf-8' codec can't decode byte 0xe9 in position 9: invalid continuation byte".to_owned(),
+    ));
+    // A charset JSON does not read natively: `json.loads(response.text)`.
+    assert_eq!(
+        decoded("application/json; charset=iso-8859-1", b"{\"a\":\"caf\xe9\"}"),
+        Ok("{\"a\":\"café\"}".to_owned())
+    );
+    // An unknown codec: `text` falls back to a strict `utf-8-sig` decode.
+    assert_eq!(
+        decoded("application/json; charset=x-unknown", b"{\"a\":\"caf\xe9\"}"),
+        invalid
+    );
+    assert_eq!(
+        decoded("application/json; charset=x-unknown", b"\xef\xbb\xbf{\"a\":1}"),
+        Ok("{\"a\":1}".to_owned())
+    );
+    assert_eq!(
+        decoded("application/json; charset=UTF_8", b"{\"a\":1}"),
+        Ok("{\"a\":1}".to_owned())
+    );
+    // `charset=` is matched case-sensitively, so this one reads the bytes.
+    assert_eq!(
+        decoded("application/json; Charset=latin1", b"{\"a\":\"caf\xe9\"}"),
+        invalid
+    );
+    assert_eq!(
+        response("text/html; charset=windows-1252", b"\x80").text(),
+        Ok("€".to_owned())
+    );
+    assert_eq!(response("text/html", b"").text(), Ok(String::new()));
+}
+
+#[test]
+fn work_ids_are_compared_with_full_case_folding() {
+    // `str.casefold()` at the baseline: ϐ → β, ß → ss, ﬀ → ff, the Ohm sign → ω, İ → i̇.
+    for (text, folded) in [
+        ("ϐ", "β"),
+        ("ẞ-1", "ss-1"),
+        ("ﬀ", "ff"),
+        ("\u{2126}", "ω"),
+        ("İ", "i\u{307}"),
+        ("ABC-1", "abc-1"),
+    ] {
+        assert_eq!(caseless::default_case_fold_str(text), folded, "{text}");
     }
 }

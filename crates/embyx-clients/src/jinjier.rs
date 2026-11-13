@@ -41,10 +41,11 @@ const ZIP_MAGIC: &[u8] = b"PK\x03\x04";
 const DATABASE_MEMBER_SUFFIX: &str = ".sqlite3";
 
 /// `^\d{6}[_-]\d{3}$` (Python's `\d` is any Unicode decimal digit, as Rust's).
-static DATE_CODE_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\d{6}[_-]\d{3}\n?$").expect("static regex"));
-/// `dbFile\s*=\s*"(\d{8})\.gif"`.
+static DATE_CODE_RE: LazyLock<Regex> =
+    LazyLock::new(|| embyx_core::pyre::compile(r"^\d{6}[_-]\d{3}\n?$", false, false));
+/// `dbFile\s*=\s*"(\d{8})\.gif"` (`pyre` gives `\s` Python's meaning, D2).
 static DB_FILE_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r#"dbFile\s*=\s*"(\d{8})\.gif""#).expect("static regex"));
+    LazyLock::new(|| embyx_core::pyre::compile(r#"dbFile\s*=\s*"(\d{8})\.gif""#, false, false));
 
 /// `JinjierError`: the ranking source could not be read. `str(exc)` is the message.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -108,9 +109,34 @@ pub fn is_excluded_code(avid: &str) -> bool {
 /// A `ranks` row as the query returns it.
 struct Row {
     kind: i64,
-    note: String,
-    name: String,
+    /// As stored: Python reads a row's note and name only when it uses the row (D30).
+    note: SqlValue,
+    name: SqlValue,
 }
+
+/// A list being built: kind, the note of its first row, entries, the codes seen.
+type ListBuild<'a> = (i64, &'a SqlValue, Vec<RankedEntry>, HashSet<String>);
+
+/// A note or name that is read: Python's `str` methods fail on anything but text (D30).
+fn text(value: &SqlValue) -> Result<&str, JinjierError> {
+    match value {
+        SqlValue::Text(text) => Ok(text),
+        _ => Err(JinjierError(UNEXPECTED_TYPES.to_owned())),
+    }
+}
+
+/// `f'{note}'` in the awards key: Python formats a note of any type.
+fn note_key(value: &SqlValue) -> Result<String, JinjierError> {
+    match value {
+        SqlValue::Text(text) => Ok(text.clone()),
+        SqlValue::Null => Ok("None".to_owned()),
+        SqlValue::Integer(number) => Ok(number.to_string()),
+        SqlValue::Real(number) => Ok(embyx_core::pyjson::float_repr(*number)),
+        SqlValue::Blob(_) => Err(JinjierError(UNEXPECTED_TYPES.to_owned())),
+    }
+}
+
+const UNEXPECTED_TYPES: &str = "not a readable ranking database: unexpected column types in ranks";
 
 /// `sqlite3.Error` text: SQLite's own message.
 fn sqlite_message(error: &rusqlite::Error) -> String {
@@ -142,9 +168,9 @@ fn read_rows(database: &[u8]) -> Result<Vec<Row>, String> {
     let mut out = Vec::new();
     for row in rows {
         let (kind, note, name) = row.map_err(|error| sqlite_message(&error))?;
-        // The site's table holds integer kinds and text notes and names; anything else is
-        // not the database this reads (D30).
-        let (SqlValue::Integer(kind), SqlValue::Text(note), SqlValue::Text(name)) = (kind, note, name) else {
+        // The site's table holds integer kinds; Python's `2007 <= kind` fails on any other
+        // (D30). Notes and names are checked where they are read.
+        let SqlValue::Integer(kind) = kind else {
             return Err("unexpected column types in ranks".to_owned());
         };
         out.push(Row { kind, note, name });
@@ -160,49 +186,57 @@ fn read_rows(database: &[u8]) -> Result<Vec<Row>, String> {
 pub fn parse_lists(database: &[u8], avid_of: &dyn Fn(&str) -> String) -> Result<Vec<RankedList>, JinjierError> {
     let rows =
         read_rows(database).map_err(|message| JinjierError(format!("not a readable ranking database: {message}")))?;
-    let uncensored: HashSet<String> = rows
-        .iter()
-        .filter(|row| row.kind == KIND_UNCENSORED)
-        .map(|row| code_of(&row.name, avid_of))
-        .filter(|avid| !avid.is_empty())
-        .collect();
+    let mut uncensored: HashSet<String> = HashSet::new();
+    for row in rows.iter().filter(|row| row.kind == KIND_UNCENSORED) {
+        let avid = code_of(text(&row.name)?, avid_of);
+        if !avid.is_empty() {
+            uncensored.insert(avid);
+        }
+    }
     let mut order: Vec<String> = Vec::new();
-    let mut lists: HashMap<String, (i64, String, Vec<RankedEntry>, HashSet<String>)> = HashMap::new();
+    let mut lists: HashMap<String, ListBuild<'_>> = HashMap::new();
     for row in &rows {
         if !is_playlist_kind(row.kind) {
             continue;
         }
-        let key = list_key(row.kind, &row.note);
+        let key = list_key(row.kind, &note_key(&row.note)?);
         let (_, _, entries, seen) = lists.entry(key.clone()).or_insert_with(|| {
             order.push(key.clone());
-            (row.kind, row.note.clone(), Vec::new(), HashSet::new())
+            (row.kind, &row.note, Vec::new(), HashSet::new())
         });
-        let avid = code_of(&row.name, avid_of);
+        let name = text(&row.name)?;
+        let avid = code_of(name, avid_of);
         if avid.is_empty() || seen.contains(&avid) {
             continue;
         }
-        if row.name.contains(UNCENSORED_TAG) || uncensored.contains(&avid) || is_excluded_code(&avid) {
+        if name.contains(UNCENSORED_TAG) || uncensored.contains(&avid) || is_excluded_code(&avid) {
             continue;
         }
         seen.insert(avid.clone());
         entries.push(RankedEntry {
             rank: entries.len() + 1,
             avid,
-            title: title_of(&row.name),
+            title: title_of(name),
         });
     }
-    Ok(order
-        .into_iter()
-        .filter_map(|key| {
-            let (kind, note, entries, _) = lists.remove(&key)?;
-            (!entries.is_empty()).then_some(RankedList {
-                key,
-                kind,
-                note,
-                entries,
-            })
-        })
-        .collect())
+    // A list that is kept needs a text note: Python would carry any other value to the
+    // `playlists` table, whose `note` is `TEXT NOT NULL`, and fail there (D30).
+    let mut out = Vec::new();
+    for key in order {
+        let Some((kind, note, entries, _)) = lists.remove(&key) else {
+            continue;
+        };
+        if entries.is_empty() {
+            continue;
+        }
+        out.push(RankedList {
+            key,
+            kind,
+            note: text(note)?.to_owned(),
+            entries,
+        });
+    }
+    Ok(out)
 }
 
 /// `str.partition(' ')` on the stripped name.

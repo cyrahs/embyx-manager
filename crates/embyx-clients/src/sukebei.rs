@@ -14,7 +14,7 @@ use tokio::sync::Semaphore;
 use crate::http::{HttpxError, response_text, with_params};
 use crate::net::retry::{Sleeper, tokio_sleeper};
 use crate::net::{BuildError, ClientOptions, HttpClient, Request};
-use crate::pyquery::{Document, lxml_text};
+use crate::pyquery::{Document, ParseError, lxml_text};
 use crate::size::{SizeError, parse_size};
 use crate::tenacity;
 
@@ -87,6 +87,26 @@ impl From<HttpxError> for SukebeiError {
     }
 }
 
+/// `left >= right` for an `int` and a `float`, compared exactly as Python compares them.
+fn int_at_least(left: i128, right: f64) -> bool {
+    if right.is_nan() {
+        return false;
+    }
+    let bound = right.ceil();
+    // `i128::MAX as f64` is 2^127, exactly; every whole float below it converts exactly.
+    #[expect(clippy::cast_precision_loss, reason = "2^127 is exact in f64")]
+    let limit = i128::MAX as f64;
+    if bound >= limit {
+        return false;
+    }
+    if bound < -limit {
+        return true;
+    }
+    #[expect(clippy::cast_possible_truncation, reason = "a whole number inside the i128 range")]
+    let bound = bound as i128;
+    left >= bound
+}
+
 /// The search's `params` dict as Python's `%s` shows it: `f` and `p` are integers.
 fn params_repr(params: &[(&str, String)]) -> String {
     let items: Vec<String> = params
@@ -131,12 +151,22 @@ fn sukebei_category(text: &str) -> Result<Option<String>, SukebeiError> {
 
 /// `nyaapy.parser.parse_nyaa(text, limit=None, site=SUKEBEINYAASI)`.
 pub fn parse_nyaa(text: &str) -> Result<Vec<NyaaTorrent>, SukebeiError> {
-    let Ok(tree) = Document::parse_html(text) else {
+    let tree = match Document::parse_html(text) {
+        Ok(tree) => tree,
+        // lxml refuses a `str` that declares its encoding.
+        Err(error @ ParseError::EncodingDeclaration) => {
+            return Err(SukebeiError::Raised {
+                class: "ValueError",
+                message: error.to_string(),
+            });
+        }
         // `etree.fromstring` gives None for an empty document; nyaapy calls `.xpath` on it.
-        return Err(SukebeiError::Raised {
-            class: "AttributeError",
-            message: "'NoneType' object has no attribute 'xpath'".to_owned(),
-        });
+        Err(_) => {
+            return Err(SukebeiError::Raised {
+                class: "AttributeError",
+                message: "'NoneType' object has no attribute 'xpath'".to_owned(),
+            });
+        }
     };
     let mut torrents = Vec::new();
     // `//tbody//tr`: rows anywhere below a tbody the page itself has.
@@ -283,9 +313,9 @@ pub fn choose_magnet(keyword: &str, results: Vec<NyaaTorrent>) -> Result<Option<
     }
     parsed.sort_by_key(|(_, size)| std::cmp::Reverse(*size));
     let trusted = parsed.iter().find(|(item, _)| item.kind == "trusted").cloned();
-    #[expect(clippy::cast_precision_loss, reason = "Python compares the int with a float product")]
+    #[expect(clippy::cast_precision_loss, reason = "Python's `int * float` rounds the int first")]
     let chosen = match &trusted {
-        Some(first) if first.1 as f64 >= parsed[0].1 as f64 * TRUSTED_SIZE_TOLERANCE => {
+        Some(first) if int_at_least(first.1, parsed[0].1 as f64 * TRUSTED_SIZE_TOLERANCE) => {
             parsed.iter().position(|entry| entry == first).unwrap_or(0)
         }
         _ => 0,

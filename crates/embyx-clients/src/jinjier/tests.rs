@@ -203,18 +203,55 @@ fn parse_rejects_bytes_that_are_not_a_ranking_database() {
     assert!(error.0.starts_with("not a readable ranking database: "), "{error}");
 }
 
-#[test]
-fn rows_of_other_types_are_not_a_ranking_database() {
-    // D30: Python would fail on the first row with a `TypeError` or `AttributeError`.
+/// A `ranks` table of untyped columns holding `rows` (kind, number, name, note).
+fn untyped(rows: &str) -> Vec<u8> {
     let connection = rusqlite::Connection::open_in_memory().expect("open");
     connection
-        .execute_batch(
+        .execute_batch(&format!(
             "CREATE TABLE ranks (id INTEGER PRIMARY KEY, kind, number, name, note);\
-             INSERT INTO ranks (kind, number, name, note) VALUES (7, 1, NULL, 'x');",
-        )
+             INSERT INTO ranks (kind, number, name, note) VALUES {rows};"
+        ))
         .expect("rows");
-    let error = parse_lists(&serialize(&connection), &avid_of()).unwrap_err();
-    assert!(error.0.starts_with("not a readable ranking database: "), "{error}");
+    serialize(&connection)
+}
+
+#[test]
+fn notes_and_names_are_checked_only_where_python_reads_them() {
+    // Python reads a row's name and note only when it uses the row (each result below was
+    // checked against the baseline's `parse_lists`).
+    let lists = parse_lists(
+        &untyped("(7, 1, 'ABP-001 title', 'JavDB'), (1, 1, NULL, NULL)"),
+        &avid_of(),
+    )
+    .unwrap();
+    assert_eq!(lists.len(), 1);
+    assert_eq!((lists[0].key.as_str(), lists[0].note.as_str()), ("k7", "JavDB"));
+    assert_eq!(lists[0].entries[0].avid, "ABP-001");
+    // A list left empty never needs its note.
+    assert_eq!(
+        parse_lists(&untyped("(7, 1, 'nothing', NULL)"), &avid_of()),
+        Ok(Vec::new())
+    );
+}
+
+#[test]
+fn rows_of_other_types_are_not_a_ranking_database() {
+    let refused = |rows: &str| {
+        let error = parse_lists(&untyped(rows), &avid_of()).unwrap_err();
+        assert_eq!(
+            error.0, "not a readable ranking database: unexpected column types in ranks",
+            "{rows}"
+        );
+    };
+    // Python: `AttributeError` on `name.strip()` (a used row, or an uncensored-list row).
+    refused("(7, 1, NULL, 'JavDB')");
+    refused("(8, 1, NULL, 'x')");
+    // Python: `TypeError` from `2007 <= '7'`.
+    refused("('7', 1, 'ABP-001 t', 'n')");
+    // D30: Python returns these lists with a note of `None` or `5`, which the `playlists`
+    // table (`note TEXT NOT NULL`) then refuses; here the import fails at once.
+    refused("(7, 1, 'ABP-001 title', 'JavDB'), (7, 2, 'no code here', NULL)");
+    refused("(4, 1, 'ABP-001 t', 5)");
 }
 
 // py: tests/test_jinjier.py::test_excluded_codes cases=10
@@ -447,4 +484,13 @@ fn codes_and_kinds_match_the_baseline() {
         }
     }
     assert_eq!((codes, kinds), (19, 13));
+}
+
+#[test]
+fn the_database_name_pattern_spaces_as_python_does() {
+    // Python's `\s` takes U+001C to U+001F as well.
+    let found = DB_FILE_RE
+        .captures("dbFile\u{1c}=\u{1f}\"20260112.gif\"")
+        .expect("a match");
+    assert_eq!(&found[1], "20260112");
 }

@@ -13,6 +13,7 @@
 //! signature algorithms in the ClientHello, and the text of transport errors (D29).
 
 use std::fmt;
+use std::sync::LazyLock;
 use std::time::Duration;
 
 use futures_util::future::BoxFuture;
@@ -20,7 +21,8 @@ use wreq::header::{HeaderMap, HeaderName, HeaderValue, OrigHeaderMap};
 use wreq::http2::{StreamDependency, StreamId};
 
 use super::{AvbaseError, AvbaseResponse, AvbaseSession};
-use crate::http::{decode_text, with_params};
+use crate::http::{decode_label, utf8_error_message, with_params};
+use crate::pyvalue::Raised;
 
 /// `curl_cffi` 0.16.3 `impersonate='chrome'` (chrome150): its default headers, in its order
 /// (`tools/probes/tls_fingerprint.py` records them).
@@ -151,25 +153,56 @@ impl ImpersonatingSession {
     }
 }
 
-/// `curl_cffi`'s exception class for a failed request.
-fn transport_error(error: &wreq::Error) -> AvbaseError {
-    let class = if error.is_timeout() {
+/// `curl_cffi`'s exception class for a failed request (`code2error`, by the libcurl code the
+/// same failure gives): a refused, closed or reset connection is `ConnectionError` (curl 7, 52,
+/// 56), a body cut short `IncompleteRead` (18), a certificate that does not verify
+/// `CertificateVerifyError` (60), another TLS failure `SSLError` (35).
+fn transport_class(error: &wreq::Error, chain: &str) -> &'static str {
+    if error.is_timeout() {
         "Timeout"
-    } else if error.is_connect() {
-        "ConnectionError"
+    } else if error.is_builder() {
+        "InvalidURL"
     } else if error.is_redirect() {
         "TooManyRedirects"
+    } else if error.is_dns() {
+        if error.is_proxy_connect() {
+            "ProxyError"
+        } else {
+            "DNSError"
+        }
+    } else if chain.contains("CERTIFICATE_VERIFY_FAILED") || chain.contains("certificate verify failed") {
+        "CertificateVerifyError"
+    } else if error.is_tls() || chain.contains("SSL") || chain.contains("TLS") {
+        "SSLError"
+    } else if chain.contains("end of file before message length reached") {
+        "IncompleteRead"
+    } else if error.is_request()
+        || error.is_body()
+        || error.is_connect()
+        || error.is_proxy_connect()
+        || error.is_connection_reset()
+    {
+        "ConnectionError"
     } else {
         "RequestException"
-    };
+    }
+}
+
+/// A failed request: `curl_cffi`'s class, wreq's text (D29).
+fn transport_error(error: &wreq::Error) -> AvbaseError {
     // wreq's text names the URL, which carries nothing secret for AVBase.
-    let mut message = error.to_string();
+    // The class is read from the causes only: the top line carries the URL.
+    let mut causes = String::new();
     let mut source = std::error::Error::source(error);
     while let Some(cause) = source {
-        message = format!("{message}: {cause}");
+        causes.push_str(": ");
+        causes.push_str(&cause.to_string());
         source = cause.source();
     }
-    AvbaseError::Transport { class, message }
+    AvbaseError::Transport {
+        class: transport_class(error, &causes),
+        message: format!("{error}{causes}"),
+    }
 }
 
 impl AvbaseSession for ImpersonatingSession {
@@ -200,8 +233,45 @@ impl AvbaseSession for ImpersonatingSession {
     }
 }
 
-/// `response.text` as `curl_cffi` decodes it: the `charset=` of the `Content-Type`, else
-/// UTF-8, undecodable bytes replaced.
-pub(super) fn curl_text(body: &[u8], content_type: Option<&str>) -> String {
-    decode_text(body, content_type)
+/// `CHARSET_RE.search(content_type)`: `curl_cffi`'s `charset_encoding`.
+pub(super) fn charset_encoding(content_type: Option<&str>) -> Option<String> {
+    static CHARSET: LazyLock<regex::Regex> =
+        LazyLock::new(|| embyx_core::pyre::compile(r"charset=([\w-]+)", false, false));
+    CHARSET.captures(content_type?).map(|found| found[1].to_owned())
+}
+
+/// The encodings `curl_cffi`'s `json()` hands bytes to `json.loads` for (RFC 7159).
+pub(super) const JSON_NATIVE_ENCODINGS: [&str; 15] = [
+    "utf-8",
+    "utf8",
+    "utf-8-sig",
+    "utf-16",
+    "utf16",
+    "utf-16-be",
+    "utf-16-le",
+    "utf-16be",
+    "utf-16le",
+    "utf-32",
+    "utf32",
+    "utf-32-be",
+    "utf-32-le",
+    "utf-32be",
+    "utf-32le",
+];
+
+/// `response.text` as `curl_cffi` decodes it: the `charset=` of the `Content-Type` (else
+/// UTF-8), undecodable bytes replaced; a charset no codec has falls back to a strict
+/// `utf-8-sig` decode, which raises `UnicodeDecodeError` on bytes that are not UTF-8.
+pub(super) fn curl_text(body: &[u8], content_type: Option<&str>) -> Result<String, Raised> {
+    if body.is_empty() {
+        return Ok(String::new());
+    }
+    let encoding = charset_encoding(content_type).unwrap_or_else(|| "utf-8".to_owned());
+    if let Some(text) = decode_label(body, &encoding) {
+        return Ok(text);
+    }
+    let rest = body.strip_prefix(b"\xef\xbb\xbf").unwrap_or(body);
+    std::str::from_utf8(rest)
+        .map(str::to_owned)
+        .map_err(|error| Raised::new("UnicodeDecodeError", utf8_error_message(rest, &error)))
 }
