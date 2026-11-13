@@ -9,7 +9,9 @@ encode on an NVIDIA GPU at home instead (NVENC AV1), and the cluster does the re
 
 1. Auto-merge or **合并** queues a title. With **超过 115GB 的交给家里的 GPU 转码** on in
    Settings → 合并, a title whose parts exceed the limit stays `queued` until the worker
-   claims it. It does not hold up the lossless merges behind it.
+   claims it. While the worker is offline, the title does not hold up the lossless
+   merges behind it. Once the worker is online, auto-merge stops queuing new titles,
+   so the title goes next after the merge under way.
 2. When the worker asks for work and nothing else is merging, the task moves to
    `transcoding`. An *audio Job* (`embyx-audio-<id>-…`) probes the parts and copies each
    part's audio into `/upload/merge/.transcode/<id>/audio/`, at the same time as the GPU works.
