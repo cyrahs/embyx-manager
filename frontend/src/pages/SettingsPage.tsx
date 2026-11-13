@@ -290,6 +290,12 @@ const SECTION_SPECS: SectionSpec[] = [
         kind: 'boolean',
         hint: '关闭时失败的作品留在任务列表里等重试或移除，自动合并跳过它继续下一部。',
       },
+      {
+        key: 'home_transcode_enabled',
+        label: '超过 115GB 的交给家里的 GPU 转码',
+        kind: 'boolean',
+        hint: '打开后，超限作品等家里的 transcode-worker 来领，worker 没开时只是等待，不占队列；关闭时用集群 CPU 转码。',
+      },
     ],
   },
   {

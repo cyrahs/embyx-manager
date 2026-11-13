@@ -472,6 +472,9 @@ class MergeConfig(ConfigSection):
     auto_include_stackable: bool = False
     #: Stop automatic merging when a task fails, instead of skipping that title and going on.
     auto_pause_on_failure: bool = False
+    #: Hand a merge too big for 115 to the home transcode worker (a GPU outside the
+    #: cluster) instead of the merge Job's CPU encoder; it waits while the worker is off.
+    home_transcode_enabled: bool = False
 
     @field_validator('work_dir', 'cloud_work_dir', 'cloud_staging_dir', 'cloud_mount_prefix')
     @classmethod

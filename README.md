@@ -71,7 +71,9 @@ Three peer features; `/` redirects to the dashboard and no feature owns the app 
   copies the result into a staging folder under `/115/upload`, and once size and SHA-1 match
   the originals go to 115's recycle bin and the merged file moves into the title's intake
   route under `embyx_in`, where the archive files it as usual. One title merges at a time; a
-  failed step can be retried where it stopped.
+  failed step can be retried where it stopped. Titles over 115 GB are re-encoded to AV1,
+  either on the cluster's CPU or by a home GPU worker (`embyx-manager transcode-worker`);
+  see [docs/home-transcode.md](docs/home-transcode.md).
 - **Settings** (`/settings`): CloudDrive, Emby (address and API key, with a connection
   test), Fill Actor library roots, pipeline behavior,
   RSS categories, and avid parsing rules are stored in the database, editable from the
@@ -97,6 +99,8 @@ database and is edited on the Settings page.
 | `EMBYX_MANAGER_TLS_TERMINATED` | app | Assert TLS-terminating proxy for non-loopback bind | `false` |
 | `EMBYX_MANAGER_HOST` / `EMBYX_MANAGER_PORT` | app | Bind address / port | `127.0.0.1:8000` |
 | `EMBYX_MANAGER_MAX_REQUEST_BYTES` | app | Maximum mutation body | `65536` |
+| `EMBYX_MANAGER_TRANSCODE_PORT` | merge | Second listener for the home transcode worker's API only | unset (off) |
+| `EMBYX_MANAGER_TRANSCODE_TOKEN` | merge | Bearer token that worker must send | optional |
 | `EMBYX_MANAGER_MAX_ACTORS` / `EMBYX_MANAGER_MAX_VIDEOS` | fill actor | Per-plan limits | `20` / `2000` |
 | `EMBYX_MANAGER_MAGNET_CONCURRENCY` | fill actor | Magnet lookup concurrency | `8` |
 

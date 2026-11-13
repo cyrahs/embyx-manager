@@ -5,25 +5,40 @@ import sys
 import tomllib
 from pathlib import Path
 
-import uvicorn
-
-from embyx_manager.bootstrap import build_app
-from embyx_manager.config import ConfigStore
-from embyx_manager.db import Database
-from embyx_manager.merge import worker
-from embyx_manager.settings import Settings
-
 
 def _serve() -> None:
+    import uvicorn  # noqa: PLC0415 - the worker subcommands run without the web stack
+
+    from embyx_manager.bootstrap import build_app  # noqa: PLC0415
+    from embyx_manager.settings import Settings  # noqa: PLC0415
+
     settings = Settings.from_env()
     app = build_app(settings)
-    uvicorn.run(
-        app,
-        host=settings.host,
-        port=settings.port,
-        proxy_headers=False,
-        server_header=False,
-    )
+    transcode_app = getattr(app.state, 'transcode_app', None)
+    if settings.transcode_port is None or transcode_app is None:
+        uvicorn.run(app, host=settings.host, port=settings.port, proxy_headers=False, server_header=False)
+        return
+    # The home transcode worker's endpoints listen apart, on a port only its gateway reaches.
+    servers = [
+        uvicorn.Server(
+            uvicorn.Config(app, host=settings.host, port=settings.port, proxy_headers=False, server_header=False)
+        ),
+        uvicorn.Server(
+            uvicorn.Config(
+                transcode_app,
+                host=settings.host,
+                port=settings.transcode_port,
+                proxy_headers=False,
+                server_header=False,
+                lifespan='off',
+            )
+        ),
+    ]
+
+    async def serve_both() -> None:
+        await asyncio.gather(*(server.serve() for server in servers))
+
+    asyncio.run(serve_both())
 
 
 def _import_config(config_path: Path, database_url: str) -> None:
@@ -74,6 +89,9 @@ def _import_config(config_path: Path, database_url: str) -> None:
             'dst_dir': str(mapping.get('dst_dir', '')),
         }
 
+    from embyx_manager.config import ConfigStore  # noqa: PLC0415
+    from embyx_manager.db import Database  # noqa: PLC0415
+
     async def push() -> None:
         database = Database(database_url)
         store = ConfigStore(database)
@@ -112,12 +130,36 @@ def main() -> None:
     worker_parser.add_argument('--output', required=True, help='the merged file to write')
     worker_parser.add_argument('--status', required=True, help='the JSON status file the app polls')
     worker_parser.add_argument('--reserve-gib', type=float, default=20.0, help='space to leave free on the volume')
-    worker_parser.add_argument('parts', nargs='+', help='the parts, in order')
+    worker_parser.add_argument(
+        '--home-prepare', default=None, help='probe the parts and copy their audio here for the home transcode worker'
+    )
+    worker_parser.add_argument(
+        '--home-assemble', default=None, help="merge the home transcode worker's chunks and the audio kept here"
+    )
+    worker_parser.add_argument('parts', nargs='*', help='the parts, in order')
+    home_parser = subparsers.add_parser(
+        'transcode-worker',
+        help="re-encode merges too big for 115 on this machine's NVIDIA GPU (the home transcode worker)",
+    )
+    from embyx_manager.merge import home_worker  # noqa: PLC0415
+
+    home_worker.add_arguments(home_parser)
     args = parser.parse_args()
 
+    if args.command == 'transcode-worker':
+        raise SystemExit(home_worker.main(args))
     if args.command == 'merge-worker':
+        from embyx_manager.merge import worker  # noqa: PLC0415
+
         raise SystemExit(
-            worker.run(args.parts, output=args.output, status_path=args.status, reserve_gib=args.reserve_gib)
+            worker.run(
+                args.parts,
+                output=args.output,
+                status_path=args.status,
+                reserve_gib=args.reserve_gib,
+                home_prepare=args.home_prepare,
+                home_assemble=args.home_assemble,
+            )
         )
     if args.command == 'import-config':
         database_url = args.database_url or os.environ.get('EMBYX_MANAGER_DATABASE_URL')

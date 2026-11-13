@@ -67,6 +67,8 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
+# The home transcode worker talks to its operator in Chinese, punctuation and all.
+"src/embyx_manager/merge/home_worker.py" = ["RUF001"]
 "scripts/*" = ["INP001", "T201"]
 "tests/**" = [
   "ANN",

@@ -1,5 +1,6 @@
 import asyncio
 from pathlib import Path
+from types import SimpleNamespace
 
 import asyncpg
 from fastapi.testclient import TestClient
@@ -69,7 +70,7 @@ def test_bootstrap_wires_fill_actor_onto_the_catalog_and_the_app_root(monkeypatc
     captured: dict[str, dict] = {}
     jobs = object()
     fill_actor_router = object()
-    app = object()
+    app = SimpleNamespace(state=SimpleNamespace())
 
     def make_jobs(**kwargs):
         captured['jobs'] = kwargs
@@ -102,3 +103,5 @@ def test_bootstrap_wires_fill_actor_onto_the_catalog_and_the_app_root(monkeypatc
     assert set(captured['api']['feature_health']) == {'fill_actor'}
     assert 'service' not in captured['api']
     assert 'jobs' not in captured['api']
+    # The home transcode worker's endpoints get an app of their own for the second listener.
+    assert app.state.transcode_app is not None

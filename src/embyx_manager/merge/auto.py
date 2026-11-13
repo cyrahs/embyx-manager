@@ -13,9 +13,13 @@ still be read from CloudDrive's cache, so it would be merged a second time.
 A title the library already holds whole, beside its parts, is never queued:
 the archive would refuse the merged copy once the parts were gone.
 
+A title waiting on the home transcode worker while the worker is away does
+not count as under way, so the titles after it go on.
+
 A title is queued only when its parts fit on the work volume with the
-reserve to spare. One that does not is skipped for now and looked at again
-on the next round, once uploads have freed the space.
+reserve to spare, and room left for what home transcodes are yet to write.
+One that does not is skipped for now and looked at again on the next round,
+once uploads have freed the space.
 """
 
 import asyncio
@@ -124,7 +128,12 @@ class AutoMerger:
         titles, scanned_at = scanned
         if scanned_at != self._refused_scan:
             self._refused, self._refused_scan = {}, scanned_at
-        room = self._free_space(Path(config.work_dir)) - config.free_space_reserve_gib * GIB
+        room = (
+            self._free_space(Path(config.work_dir))
+            - config.free_space_reserve_gib * GIB
+            # What a home transcode is yet to write.
+            - self._service.reserved_bytes(open_tasks)
+        )
         settled = await self._repository.cancelled_avids() | await self._repository.merged_avids()
         failed = {task.avid for task in open_tasks if task.state == MergeState.FAILED}
         skipped: list[SkippedTitle] = []
@@ -148,7 +157,9 @@ class AutoMerger:
         failed = [task for task in open_tasks if task.state == MergeState.FAILED]
         if failed and config.auto_pause_on_failure:
             return AutoState.PAUSED
-        return AutoState.BUSY if len(open_tasks) > len(failed) else None
+        # A title waiting on the home transcode worker while it is away holds up nothing.
+        under_way = [task for task in open_tasks if task.state != MergeState.FAILED and not self._service.parked(task)]
+        return AutoState.BUSY if under_way else None
 
     async def _try_queue(
         self, title: MultipartTitle, config: MergeConfig, room: int, skipped: list[SkippedTitle]

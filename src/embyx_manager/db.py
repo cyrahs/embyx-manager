@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 
 import asyncpg
 
-CURRENT_SCHEMA_VERSION = 18
+CURRENT_SCHEMA_VERSION = 19
 
 # Advisory-lock key space for embyx-manager; low word selects the resource.
 ADVISORY_NAMESPACE = 0x454D4258  # 'EMBX'
@@ -632,4 +632,44 @@ _MIGRATIONS[17] = (
 _MIGRATIONS[18] = (
     'ALTER TABLE archive_acquisitions ADD COLUMN replace_paths_json TEXT',
     'ALTER TABLE archive_acquisitions ADD COLUMN replace_after_attempt INTEGER',
+)
+
+# A merge too big for 115 can have its video re-encoded by a worker outside the
+# cluster (the home GPU) before the merge Job assembles it: the task waits in
+# transcoding while the worker uploads the video in chunks, one row each, and a
+# Job copies the parts' audio. transcoder says who re-encodes: NULL lets the app
+# decide, 'home' once the worker took the task, 'cpu' once someone sent it back
+# to the merge Job's own encoder.
+_MIGRATIONS[19] = (
+    'ALTER TABLE merge_tasks DROP CONSTRAINT merge_tasks_state_check',
+    """
+    ALTER TABLE merge_tasks ADD CONSTRAINT merge_tasks_state_check CHECK (state IN (
+        'queued', 'transcoding', 'merging', 'uploading', 'verifying', 'replacing', 'archiving',
+        'done', 'failed', 'cancelled'
+    ))
+    """,
+    "ALTER TABLE merge_tasks ADD COLUMN transcoder TEXT CHECK (transcoder IN ('home', 'cpu'))",
+    'ALTER TABLE merge_tasks ADD COLUMN transcode_paused BOOLEAN NOT NULL DEFAULT FALSE',
+    """
+    CREATE TABLE merge_transcode_chunks (
+        task_id BIGINT NOT NULL REFERENCES merge_tasks (id) ON DELETE CASCADE,
+        part_index INTEGER NOT NULL,
+        chunk_index INTEGER NOT NULL,
+        start_seconds DOUBLE PRECISION NOT NULL,
+        duration_seconds DOUBLE PRECISION NOT NULL,
+        frames INTEGER NOT NULL,
+        bytes BIGINT NOT NULL,
+        sha256 TEXT NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL,
+        PRIMARY KEY (task_id, part_index, chunk_index)
+    )
+    """,
+    """
+    CREATE TABLE merge_transcode_parts (
+        task_id BIGINT NOT NULL REFERENCES merge_tasks (id) ON DELETE CASCADE,
+        part_index INTEGER NOT NULL,
+        finished_at TIMESTAMPTZ NOT NULL,
+        PRIMARY KEY (task_id, part_index)
+    )
+    """,
 )

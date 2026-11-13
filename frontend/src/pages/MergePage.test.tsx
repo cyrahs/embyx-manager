@@ -71,9 +71,50 @@ const TASK = {
   retryable: false,
 }
 
+const TRANSCODING = {
+  ...TASK,
+  id: 7,
+  avid: 'UNVRSP-003',
+  part_count: 33,
+  state: 'transcoding',
+  merged_bytes: null,
+  uploaded_bytes: null,
+  notice: null,
+  transcoder: 'home',
+  home: true,
+  transcode_paused: false,
+  transcode: {
+    parts_done: 3,
+    part_count: 33,
+    encoded_seconds: 1800,
+    encoded_bytes: 5 * 1024 ** 3,
+    duration: 7200,
+    video_bitrate: 5_000_000,
+    audio_done: 10,
+    audio_state: 'audio',
+    paused: false,
+  },
+}
+
+const WORKER = {
+  online: true,
+  seen_at: '2026-11-13T06:00:00Z',
+  name: 'GAMING-PC',
+  version: '0.1.0',
+  task_id: 7,
+  state: 'encoding',
+  parts: [
+    { index: 3, fps: 182.4, position: 100 },
+    { index: 4, fps: 176.9, position: 80 },
+  ],
+  upload_bps: 28_000_000,
+  queue_chunks: 2,
+  queue_bytes: 300 * 1024 ** 2,
+}
+
 describe('merge page', () => {
   let titlesBody: unknown
-  let tasksBody: { items: unknown[]; unavailable: string | null; auto?: unknown }
+  let tasksBody: { items: unknown[]; unavailable: string | null; auto?: unknown; worker?: unknown }
   let fetchMock: ReturnType<typeof vi.fn>
 
   beforeEach(() => {
@@ -95,6 +136,8 @@ describe('merge page', () => {
       }
       if (url === '/api/merge/tasks') return jsonResponse(tasksBody)
       if (url === '/api/merge/tasks/4/cancel') return jsonResponse({ ...TASK, state: 'cancelled', cancellable: false })
+      if (url === '/api/merge/tasks/7/pause') return jsonResponse({ ...TRANSCODING, transcode_paused: true })
+      if (url === '/api/merge/tasks/7/use-cpu') return jsonResponse({ ...TRANSCODING, state: 'queued', home: false })
       return jsonResponse({ error: { code: 'not_found' } }, 404)
     })
     vi.stubGlobal('fetch', fetchMock)
@@ -290,5 +333,38 @@ describe('merge page', () => {
     expect(await screen.findByText('这个部署没有挂载合并 Job 的模板')).toBeInTheDocument()
     const many = await screen.findByRole('region', { name: '10 盘及以上 · 1' })
     expect(within(many).getByRole('button', { name: '合并' })).toBeDisabled()
+  })
+
+  it('shows a home GPU transcode with the worker and lets it pause or move to the cluster CPU', async () => {
+    tasksBody = { items: [TRANSCODING], unavailable: null, worker: WORKER }
+    renderPage()
+
+    const tasks = await screen.findByRole('region', { name: '合并任务' })
+    expect(within(tasks).getByText('转码中（家里 GPU）')).toBeInTheDocument()
+    expect(within(tasks).getByText('3/33 盘 25% · 已传 5.0 GiB · 集群在复制音频')).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        '家里的 GPU worker（GAMING-PC）在线，在转码：cd4 182 fps、cd5 177 fps · 上传 28.0 Mbps · 待传 2 块 300 MiB',
+      ),
+    ).toBeInTheDocument()
+
+    await userEvent.click(within(tasks).getByRole('button', { name: '暂停' }))
+    expect(fetchMock).toHaveBeenCalledWith('/api/merge/tasks/7/pause', expect.objectContaining({ method: 'POST' }))
+
+    await userEvent.click(within(tasks).getByRole('button', { name: '改用集群 CPU' }))
+    expect(fetchMock).not.toHaveBeenCalledWith('/api/merge/tasks/7/use-cpu', expect.anything())
+    await userEvent.click(within(tasks).getByRole('button', { name: '确认改用集群 CPU' }))
+    expect(fetchMock).toHaveBeenCalledWith('/api/merge/tasks/7/use-cpu', expect.objectContaining({ method: 'POST' }))
+  })
+
+  it('says when an oversize title waits for the worker while it is away', async () => {
+    const waiting = { ...TRANSCODING, state: 'queued', transcode: null, notice: 'waiting for the home transcode worker' }
+    tasksBody = { items: [waiting], unavailable: null, worker: { ...WORKER, online: false, task_id: null, parts: [] } }
+    renderPage()
+
+    const tasks = await screen.findByRole('region', { name: '合并任务' })
+    expect(within(tasks).getByText('等家里的 GPU 转码')).toBeInTheDocument()
+    expect(within(tasks).getByText('等家里的 GPU worker 上线')).toBeInTheDocument()
+    expect(screen.getByText(/家里的 GPU worker（GAMING-PC）离线/)).toBeInTheDocument()
   })
 })

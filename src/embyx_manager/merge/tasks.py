@@ -14,6 +14,9 @@ from embyx_manager.db import Database
 class MergeState(StrEnum):
     #: Waiting for the merge Job slot; one title merges at a time.
     QUEUED = 'queued'
+    #: A worker outside the cluster re-encodes the video, too big for 115 as it is,
+    #: while a Job copies the parts' audio; the merge Job assembles both after.
+    TRANSCODING = 'transcoding'
     #: The Job is concatenating the parts onto the work volume.
     MERGING = 'merging'
     #: CloudDrive is copying the merged file into the 115 staging directory.
@@ -32,7 +35,14 @@ class MergeState(StrEnum):
 FINISHED_STATES = frozenset({MergeState.DONE, MergeState.CANCELLED})
 #: The states a task can be cancelled in; past them the originals may be gone.
 CANCELLABLE_STATES = frozenset(
-    {MergeState.QUEUED, MergeState.MERGING, MergeState.UPLOADING, MergeState.VERIFYING, MergeState.FAILED},
+    {
+        MergeState.QUEUED,
+        MergeState.TRANSCODING,
+        MergeState.MERGING,
+        MergeState.UPLOADING,
+        MergeState.VERIFYING,
+        MergeState.FAILED,
+    },
 )
 #: Columns a state handler may change besides ``state``.
 _UPDATABLE = frozenset(
@@ -48,6 +58,8 @@ _UPDATABLE = frozenset(
         'error',
         'notice',
         'finished_at',
+        'transcoder',
+        'transcode_paused',
     },
 )
 RECENT_FINISHED_LIMIT = 20
@@ -85,6 +97,10 @@ class MergeTask:
     updated_at: datetime
     state_changed_at: datetime
     finished_at: datetime | None
+    #: Who re-encodes a merge too big for 115: None until decided, ``home`` or ``cpu``.
+    transcoder: str | None = None
+    #: Someone asked the home worker to stop after its current chunk.
+    transcode_paused: bool = False
 
 
 class MergeTaskRepository:
@@ -245,4 +261,6 @@ def _from_row(row: asyncpg.Record) -> MergeTask:
         updated_at=row['updated_at'],
         state_changed_at=row['state_changed_at'],
         finished_at=row['finished_at'],
+        transcoder=row['transcoder'],
+        transcode_paused=row['transcode_paused'],
     )
