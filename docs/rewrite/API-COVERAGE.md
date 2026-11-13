@@ -12,7 +12,7 @@ are in the workspace `Cargo.toml`.
 | grpcio 1.83 + generated `clouddrive_pb2*.py` | `tonic` / `tonic-prost` / `prost` **0.14**, code from the baseline's descriptor | Sufficient | `embyx-clients/src/probes.rs` (`grpc`) |
 | `MessageToDict` (the scenario fake's records) | `prost-reflect` **0.16** (serde) | Byte-identical on the golden cases | `embyx-clients/src/probes.rs` |
 | pyquery 2.1 / lxml 5.4, nyaapy 0.7 | `scraper` **0.29** (html5ever) | Sufficient with three known tree differences | `embyx-clients/src/probes.rs` (`html`) |
-| curl_cffi 0.16.3 `impersonate='chrome'` | `wreq` **=6.0.0-rc.31** + `wreq-util` **=3.0.0-rc.14** (BoringSSL) | Provisional choice `wreq-tuned`; live proof pending | `embyx-clients/src/probes.rs` (`impersonation`), `tools/probes/tls_fingerprint.py`, `tools/probes/live_fingerprint.py` |
+| curl_cffi 0.16.3 `impersonate='chrome'` | `wreq` **=6.0.0-rc.31** + `wreq-util` **=3.0.0-rc.14** (BoringSSL) | `wreq-tuned` chosen; both wreq candidates got AVBase live, a plain client (`httpx-rs`) was challenged | `embyx-clients/src/probes.rs` (`impersonation`), `tools/probes/tls_fingerprint.py`, `tools/probes/live_fingerprint.py` |
 | cronsim 2.7 | `croner` **4** + `chrono-tz` | Sufficient for fires; validation needs a pre-check | `embyx-monitor/src/probes.rs` |
 | watchdog 6.0 (inotify) | `notify` **8** | Sufficient; directories that arrive must be walked by us | `embyx-monitor/src/probes.rs` (`watcher`) |
 | ctypes `renameat2`, `os.link`, `fcntl.flock` | `rustix` **1** (fs) and std | Sufficient | `embyx-fill-actor/src/probes.rs` |
@@ -130,26 +130,50 @@ environment). The order and spelling of the head are otherwise the same.
 
 ### Live proof from nas-us-2
 
-Not run yet. Max approved one run from a one-off pod on nas-us-2 (2026-11-13 19:23Z, plan "Questions for
-Max", item 3); creating the Pod was stopped by the session's safety check until Max confirms it in the WP0
-thread. Everything for the run is in place: `tools/probes/live_probe_pod.sh <commit>` (the pod's script) and
-`tools/probes/live_fingerprint.py --live` (at most 10 anonymous GETs per site, 3 s apart, no redirect
-followed, no retry; verified against a local fake server). The result lands in a docs-only follow-up PR
-into `rust`; if it has not run when WP2 starts, WP2 takes the probe over.
+Run once on 2026-11-13 from a one-off pod on nas-us-2 (created 20:26:54Z, log read about 20:37Z), at commit `13f8fb3`, after Max
+approved it (19:23Z) and confirmed it in the WP0 thread (20:26Z). The Pod was deleted afterwards and confirmed
+gone. `tools/probes/live_probe_pod.sh` built the probe in the pod (3 min 16 s with a 2-CPU limit) and ran
+`tools/probes/live_fingerprint.py --live`. That run sent 10 anonymous GETs to each site, 3 s apart, with no
+redirect followed and no retry.
 
-Each request is a fresh client (one `fetch_probe` process, one curl_cffi or httpx session), so the AVBase
-data routes go out without the cookies (such as `__cf_bm`) that `clients/avbase.py`'s single session would
-carry from the home page. That is the same for the control and the candidates, so the comparison holds; a
-challenge on a data route alone may be the missing cookie rather than the fingerprint.
+The local fingerprints taken in the pod match the offline ones above. `wreq-tuned` has the same HTTP/2 hash
+as curl_cffi (`6682fe4a1b95`); only the ML-DSA signature algorithms keep its TLS hash apart.
 
-The Pod it creates: `default` namespace, `nodeSelector kubernetes.io/hostname: nas-us-2`, image
+| Site, request | curl_cffi (control) | `wreq` | `wreq-tuned` | `httpx-rs` | httpx (Python) |
+| --- | --- | --- | --- | --- | --- |
+| AVBase home page (build id) | 200, page | 200, page | 200, page | **403, `cf-mitigated: challenge`** | not sent |
+| AVBase talent data route (`河北彩花`) | 200, JSON | 200, JSON | 200, JSON | not sent | not sent |
+| AVBase work data route (`SSIS-001`) | 200, JSON | 200, JSON | 200, JSON | not sent | not sent |
+| JavBus star search (`河北彩花`) | 200, page | 200, page | 200, page | 200, page | 200, page |
+| JavBus video page (`SSIS-001`) | 200, page | 200, page | 200, page | 200, page | 200, page |
+
+"Not sent" is by design: `httpx-rs` asks AVBase for the home page only, and Python httpx is the baseline's
+client for JavBus only. Every 200 above had the verdict `page` (build id found, `pageProps` JSON, star links).
+
+What this one run, from one IP, shows:
+
+- AVBase challenged the one non-impersonating request (`httpx-rs`: 403, `cf-mitigated: challenge`), while
+  the control and both wreq candidates got the page from the same IP. The node's IP is not refused, and AVBase
+  needs impersonation, at least today. The 403 is not pinned on TLS alone: `httpx-rs` also differs in headers.
+- Both wreq candidates passed, the stock one as well. The data routes answered JSON without the home page's
+  cookies, so per-request clients were no handicap.
+- JavBus served both plain clients (the baseline's httpx and `httpx-rs`) on this run.
+- Body sizes match within a few dozen bytes on JavBus (dynamic page parts), and exactly among the three
+  clients that got AVBase's pages.
+
+Each request was a fresh client (one `fetch_probe` process, one curl_cffi or httpx session). The AVBase data
+routes therefore went out without the cookies (such as `__cf_bm`) that `clients/avbase.py`'s single session
+would carry from the home page.
+
+The Pod: `default` namespace, `nodeSelector kubernetes.io/hostname: nas-us-2`, image
 `docker.io/library/rust:1.97.0`, `restartPolicy: Never`, `activeDeadlineSeconds: 1800`,
 `automountServiceAccountToken: false`, `enableServiceLinks: false`, `dnsPolicy: Default`, no volumes, no
-Secret or ConfigMap, requests 100m / 256Mi, limits 2 CPU / 4Gi; the command fetches
-`live_probe_pod.sh` from the pushed commit and runs it with that commit.
+Secret or ConfigMap, requests 100m / 256Mi, limits 2 CPU / 4Gi; the command fetched
+`live_probe_pod.sh` from the commit and ran it with that commit.
 
-Recommendation for WP2 (provisional until the live proof): `wreq-tuned` for AVBase, the httpx-shaped client
-for JavBus and sukebei as the baseline uses httpx there. Pin `wreq` and `wreq-util` exactly (release candidates).
+Recommendation for WP2: use `wreq-tuned` for AVBase. The live run shows that both wreq candidates pass;
+`wreq-tuned` stays the choice because it is the closest to curl_cffi offline. Use the httpx-shaped client for
+JavBus (it got the pages live) and sukebei (not probed live; the baseline uses httpx there too). Pin `wreq` and `wreq-util` exactly (release candidates).
 WP2 reruns `tls_fingerprint.py` against its configured clients and records the result; equal TLS and HTTP/2
 fields are the bar, the Chrome major version may differ by one. If WP2 changes a client, it may repeat the
 live probe once under the same conditions (plan, "Questions for Max", item 3). Fallback: the
