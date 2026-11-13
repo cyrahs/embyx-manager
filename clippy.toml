@@ -1,2 +1,2 @@
 # Proper nouns the docs use often; ".." keeps clippy's defaults.
-doc-valid-idents = ["PostgreSQL", "CloudDrive", "FastAPI", "OpenAPI", "JavBus", "AVBase", "SQLite", "GitHub", "WireGuard", "NVENC", "SVT-AV1", "FFmpeg", "ffmpeg", "ffprobe", "BoringSSL", "ClientHello", "HTTP/2", ".."]
+doc-valid-idents = ["PostgreSQL", "CloudDrive", "FastAPI", "OpenAPI", "JavBus", "AVBase", "SQLite", "GitHub", "WireGuard", "NVENC", "SVT-AV1", "FFmpeg", "ffmpeg", "ffprobe", "BoringSSL", "ClientHello", "HTTP/2", "RSSHub", "ElementTree", ".."]

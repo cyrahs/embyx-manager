@@ -11,6 +11,8 @@ publish.workspace = true
 workspace = true
 
 [dependencies]
+embyx-clients.workspace = true
+embyx-core.workspace = true
 
 [dev-dependencies]
 chrono.workspace = true

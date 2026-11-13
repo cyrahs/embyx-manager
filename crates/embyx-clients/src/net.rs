@@ -28,7 +28,7 @@ pub mod proxy;
 pub mod retry;
 pub mod subprocess;
 
-pub use client::{ClientOptions, HttpClient, Request, Response, StatusError, TransportError};
+pub use client::{BuildError, ClientOptions, HttpClient, Request, Response, StatusError, TransportError};
 
 static CRYPTO_PROVIDER: Once = Once::new();
 
@@ -54,6 +54,8 @@ pub fn client_builder() -> reqwest::ClientBuilder {
 pub enum ErrorClass {
     ConnectTimeout,
     ReadTimeout,
+    /// No connection of the pool came free in time (`limits=httpx.Limits(max_connections=...)`).
+    PoolTimeout,
     ConnectError,
     ReadError,
     RemoteProtocolError,
@@ -139,6 +141,7 @@ impl ErrorClass {
         match self {
             Self::ConnectTimeout => "ConnectTimeout",
             Self::ReadTimeout => "ReadTimeout",
+            Self::PoolTimeout => "PoolTimeout",
             Self::ConnectError => "ConnectError",
             Self::ReadError => "ReadError",
             Self::RemoteProtocolError => "RemoteProtocolError",
@@ -153,7 +156,7 @@ impl ErrorClass {
 
     /// `isinstance(exc, httpx.TimeoutException)`.
     pub fn is_timeout(self) -> bool {
-        matches!(self, Self::ConnectTimeout | Self::ReadTimeout)
+        matches!(self, Self::ConnectTimeout | Self::ReadTimeout | Self::PoolTimeout)
     }
 
     /// `isinstance(exc, httpx.NetworkError)`: connect, read, write and close errors.

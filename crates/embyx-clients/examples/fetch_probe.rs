@@ -14,8 +14,15 @@
 //!   `impersonate='chrome'` sends; an `-H` header replaces a default in place or is appended,
 //!   as `curl_cffi` merges a session's headers.
 //! - `httpx`: `embyx_clients::net::HttpClient`, the httpx-shaped reqwest client (rustls).
+//! - `avbase` (WP2): the session `AvbaseClient::new` builds for the default host
+//!   (`avbase::session::ImpersonatingSession`: `wreq-tuned` with the client's own `Referer`
+//!   and `Accept-Language`, cookies kept, redirects followed); `-H` is ignored.
+//! - `javbus` (WP2): the client `JavBusClient::new` builds (`JavBusClient::client_options`:
+//!   the httpx-shaped client with its `Accept-Language` and `Cookie`); `-H` is ignored.
 //!
-//! No client follows a redirect or retries: the live run counts every request it sends.
+//! The WP0 candidates follow no redirect and never retry: the live run counts every request it
+//! sends. `wreq-tuned` takes its headers and HEADERS priority from
+//! `avbase::session::chrome_emulation`, which the application uses as well.
 //! Prints one JSON object: the status, a few response headers (never cookies), the final URL,
 //! the body's size, or the error. `--body` writes the body to a file for the caller to judge.
 //! `--root` trusts that certificate (DER) instead of the usual roots; the wreq clients then
@@ -24,42 +31,15 @@
 use std::process::ExitCode;
 use std::time::Duration;
 
+use embyx_clients::avbase::session::{ImpersonatingSession, chrome_emulation};
+use embyx_clients::avbase::{AvbaseClient, AvbaseOptions, AvbaseSession as _};
+use embyx_clients::javbus::{JavBusClient, JavBusOptions};
 use embyx_clients::net::{ClientOptions, HttpClient, Request};
 use embyx_core::pyjson::{self, Dict, DumpOptions, Value};
-use wreq::header::{HeaderMap, HeaderName, HeaderValue, OrigHeaderMap};
-use wreq::http2::{StreamDependency, StreamId};
 
 const TIMEOUT: Duration = Duration::from_secs(30);
 /// Response headers worth recording: who answered and whether Cloudflare challenged.
 const KEPT_HEADERS: [&str; 5] = ["server", "cf-mitigated", "content-type", "location", "cf-cache-status"];
-
-/// `curl_cffi` 0.16.3 `impersonate='chrome'` (chrome150), in its order (`tls_fingerprint.py`).
-const CURL_CFFI_CHROME: [(&str, &str); 13] = [
-    (
-        "sec-ch-ua",
-        "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\", \"Google Chrome\";v=\"150\"",
-    ),
-    ("sec-ch-ua-mobile", "?0"),
-    ("sec-ch-ua-platform", "\"macOS\""),
-    ("upgrade-insecure-requests", "1"),
-    (
-        "user-agent",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) \
-         Chrome/150.0.0.0 Safari/537.36",
-    ),
-    (
-        "accept",
-        "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,\
-         application/signed-exchange;v=b3;q=0.7",
-    ),
-    ("sec-fetch-site", "none"),
-    ("sec-fetch-mode", "navigate"),
-    ("sec-fetch-user", "?1"),
-    ("sec-fetch-dest", "document"),
-    ("accept-encoding", "gzip, deflate, br, zstd"),
-    ("accept-language", "en-US,en;q=0.9"),
-    ("priority", "u=0, i"),
-];
 
 struct Args {
     client: String,
@@ -107,34 +87,16 @@ fn kept(name: &str) -> bool {
 }
 
 fn wreq_client(args: &Args, tuned: bool) -> Result<wreq::Client, String> {
-    let mut emulation = wreq::IntoEmulation::into_emulation(wreq_util::Emulation::Chrome149);
-    if tuned {
-        let mut list: Vec<(String, String)> = CURL_CFFI_CHROME
+    let emulation = if tuned {
+        let headers: Vec<(&str, &str)> = args
+            .headers
             .iter()
-            .map(|(name, value)| ((*name).to_owned(), (*value).to_owned()))
+            .map(|(name, value)| (name.as_str(), value.as_str()))
             .collect();
-        for (name, value) in &args.headers {
-            let lower = name.to_ascii_lowercase();
-            match list.iter_mut().find(|(existing, _)| *existing == lower) {
-                Some(slot) => slot.1.clone_from(value),
-                None => list.push((lower, value.clone())),
-            }
-        }
-        let mut headers = HeaderMap::new();
-        let mut order = OrigHeaderMap::new();
-        for (name, value) in list {
-            let name = HeaderName::from_bytes(name.as_bytes()).map_err(|error| error.to_string())?;
-            let value = HeaderValue::from_str(&value).map_err(|error| error.to_string())?;
-            order.insert(name.clone());
-            headers.insert(name, value);
-        }
-        emulation.headers = headers;
-        emulation.orig_headers = order;
-        if let Some(http2) = emulation.http2_options.as_mut() {
-            // Chrome's (and curl_cffi's) HEADERS frame: exclusive on stream 0, weight 256.
-            http2.headers_stream_dependency = Some(StreamDependency::new(StreamId::zero(), 255, true));
-        }
-    }
+        chrome_emulation(&headers)?
+    } else {
+        wreq::IntoEmulation::into_emulation(wreq_util::Emulation::Chrome149)
+    };
     wreq::Client::builder()
         .emulation(emulation)
         .timeout(TIMEOUT)
@@ -172,16 +134,45 @@ async fn fetch_wreq(args: &Args, tuned: bool) -> Result<Outcome, String> {
     })
 }
 
-async fn fetch_httpx(args: &Args) -> Result<Outcome, String> {
-    let options = ClientOptions {
+/// The session `AvbaseClient::new` builds, trusting `--root`.
+async fn fetch_avbase(args: &Args) -> Result<Outcome, String> {
+    let options = AvbaseOptions {
         timeout: TIMEOUT,
+        ..AvbaseOptions::default()
+    };
+    let session = ImpersonatingSession::new(&embyx_clients::avbase::session::SessionOptions {
         roots: args.root.iter().cloned().collect(),
-        ..ClientOptions::default()
+        ..AvbaseClient::session_options(&options)
+    })?;
+    let response = session.get(&args.url, &[]).await.map_err(|error| error.to_string())?;
+    Ok(Outcome {
+        status: response.status,
+        url: args.url.clone(),
+        headers: response
+            .content_type
+            .map(|value| ("content-type".to_owned(), value))
+            .into_iter()
+            .collect(),
+        body: response.body,
+    })
+}
+
+async fn fetch_httpx(args: &Args, configured: Option<ClientOptions>) -> Result<Outcome, String> {
+    let roots: Vec<Vec<u8>> = args.root.iter().cloned().collect();
+    let options = match configured {
+        Some(options) => ClientOptions { roots, ..options },
+        None => ClientOptions {
+            timeout: TIMEOUT,
+            roots,
+            ..ClientOptions::default()
+        },
     };
     let client = HttpClient::new(&options).map_err(|error| error.to_string())?;
     let mut request = Request::get(args.url.clone());
-    for (name, value) in &args.headers {
-        request = request.header(name.clone(), value.clone());
+    if !matches!(args.client.as_str(), "javbus") {
+        for (name, value) in &args.headers {
+            request = request.header(name.clone(), value.clone());
+        }
     }
     let response = client.send(request).await.map_err(|error| error.to_string())?;
     let status = response.status();
@@ -218,7 +209,15 @@ async fn main() -> ExitCode {
     let result = match args.client.as_str() {
         "wreq" => fetch_wreq(&args, false).await,
         "wreq-tuned" => fetch_wreq(&args, true).await,
-        "httpx" => fetch_httpx(&args).await,
+        "httpx" => fetch_httpx(&args, None).await,
+        "avbase" => fetch_avbase(&args).await,
+        "javbus" => {
+            let options = JavBusOptions {
+                timeout: TIMEOUT,
+                ..JavBusOptions::default()
+            };
+            fetch_httpx(&args, Some(JavBusClient::client_options(&options))).await
+        }
         other => Err(format!("unknown client {other}")),
     };
     let mut report = Dict::new();

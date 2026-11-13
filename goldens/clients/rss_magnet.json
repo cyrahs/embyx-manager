@@ -1,0 +1,64 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "clients",
+  "cases": [
+    {
+      "html": "<table><tbody><tr><td><a href=\"magnet:?xt=urn:btih:small&dn=small\">small</a></td><td>1 GiB</td></tr><tr><td><a href=\"magnet:?xt=urn:btih:big&dn=b%20ig\">big</a></td><td>3 GiB</td></tr></tbody></table>",
+      "magnet": "magnet:?xt=urn:btih:big&dn=ABC-123"
+    },
+    {
+      "html": "<table><tbody><tr><td><a href=\"magnet:?xt=urn:btih:abc&dn=name\">name</a></td><td>unknown</td></tr></tbody></table>",
+      "magnet": null
+    },
+    {
+      "html": "<table><tr><td><a href=\"magnet:?xt=urn:btih:a&dn=A\">A</a></td><td>1 GB</td></tr></table>",
+      "magnet": null
+    },
+    {
+      "html": "<table><tbody><tr><td>x</td><td><a href=\"magnet:?xt=urn:btih:a\">1 GB</a></td></tr></tbody></table>",
+      "error": "AttributeError",
+      "message": "'NoneType' object has no attribute 'split'"
+    },
+    {
+      "html": "<table><tbody><tr><td><a href=\"magnet:?xt=urn:btih:a&tr=x\">a</a></td><td>2 GB</td></tr><tr><td><a href=\"magnet:?xt=urn:btih:b&dn=B&dn=C\">b</a></td><td>1 GB</td></tr><tr><td><a href=\"magnet:?xt=urn:btih:c&dn=\">c</a></td><td>2 GB</td></tr></tbody></table>",
+      "magnet": "magnet:?xt=urn:btih:a&dn=ABC-123"
+    },
+    {
+      "html": "<table><tbody><tr><td><a href=\"magnet:?xt=urn:btih:a\">a</a></td><td>²</td></tr></tbody></table>",
+      "error": "ValueError",
+      "message": "invalid literal for int() with base 10: '²'"
+    },
+    {
+      "html": "<img src=\"cover.jpg\"/><div id=\"video_info\"><table><tbody><tr><td>ID:</td><td>ABC-123</td></tr></tbody></table></div>",
+      "magnet": null
+    },
+    {
+      "html": "<TABLE><TBODY><TR><TD><a href=\"magnet:?xt=urn:btih:up\">up</a></TD><TD>1 GB</TD></TR></TBODY></TABLE>",
+      "magnet": null
+    },
+    {
+      "html": "<p>no table</p>",
+      "magnet": null
+    },
+    {
+      "html": "",
+      "magnet": null
+    },
+    {
+      "html": "   ",
+      "magnet": null
+    },
+    {
+      "html": "</p>",
+      "error": "ParserError",
+      "message": "Document is empty"
+    },
+    {
+      "html": "<?xml version=\"1.0\" encoding=\"utf-8\"?><table/>",
+      "error": "ValueError",
+      "message": "Unicode strings with encoding declaration are not supported. Please use bytes input or XML fragments without declaration."
+    }
+  ]
+}

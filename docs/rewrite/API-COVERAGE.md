@@ -187,7 +187,23 @@ Known differences WP2 must keep in mind:
 - The httpx-shaped client (JavBus, sukebei, the other httpx paths) sends `Accept-Encoding: gzip, deflate,
   br` where the baseline's httpx sends `gzip, deflate`, and its TLS is rustls where Python's is OpenSSL
   (different cipher list, groups and signature algorithms). Decide in WP2 whether to drop `br` to match,
-  and record the choice in `DIVERGENCES.md`.
+  and record the choice in `DIVERGENCES.md`. WP2: dropped, the head now matches (D25).
+
+### WP2 rerun against the configured clients
+
+Rerun locally on 2026-11-13 (22:30Z, listener on 127.0.0.1 only, no other request) with two more clients in
+`fetch_probe`: `avbase` is the session `AvbaseClient::new` builds (`avbase::session::ImpersonatingSession`,
+whose emulation `avbase::session::chrome_emulation` is also what `wreq-tuned` now uses), `javbus` the client
+`JavBusClient::new` builds (`JavBusClient::client_options`). `tls_fingerprint.py` compares them as `avbase-rs`
+with curl_cffi and `javbus-rs` with the baseline's httpx:
+
+| Pair | Result |
+| --- | --- |
+| curl_cffi vs `avbase-rs` | equal in every TLS and HTTP/2 field (ciphers, extensions, groups, key shares, versions, ALPN, ALPS, certificate compression, SETTINGS, WINDOW_UPDATE, HEADERS priority, pseudo-header order, header names, values and order with the client's `Referer` and `Accept-Language`) except the three ML-DSA signature algorithms. HTTP/2 hash `6682fe4a1b95` on both; TLS hash `470269530ed7` (curl_cffi `c78a4367561c`), the same as `wreq-tuned` |
+| httpx vs `javbus-rs` | HTTP/1.1 head equal line for line (`Accept-Encoding: gzip, deflate`, `User-Agent: python-httpx/0.28.1`, `Accept-Language`, `Cookie: existmag=all`, same order); TLS differs as rustls and OpenSSL do (D25) |
+
+Both meet the bar set above. The AVBase client is unchanged from what the live run tested, so the live probe
+was not repeated.
 
 Build: BoringSSL compiles from source (`cmake`, a C/C++ compiler; the GitHub Ubuntu runner has both). A cold
 build of `wreq` and `wreq-util` (with BoringSSL and the rest of `embyx-clients`) takes 35 s on 4 cores

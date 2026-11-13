@@ -86,8 +86,20 @@ tonic-prost-build = { version = "0.14", default-features = false }
 prost = "0.14"
 prost-types = "0.14"
 prost-reflect = { version = "0.16", features = ["serde"] }
-# The HTML parser for JavBus, sukebei and the feed magnet tables (lxml in Python).
+# The HTML parser for JavBus, sukebei and the feed magnet tables (lxml in Python). html5ever and
+# ego-tree are scraper's own (same versions): `embyx_clients::pyquery` drives the tree builder itself.
 scraper = "0.29"
+html5ever = "0.40"
+ego-tree = "0.11"
+# ElementTree / expat (feeds, the AVBase talent feed) and lxml's XML parser (pyquery's first try).
+roxmltree = "0.21"
+# jinjier's ranking database: sqlite3 `deserialize` (bundled SQLite) and `zipfile`.
+rusqlite = { version = "0.39", features = ["bundled", "serialize"] }
+zip = { version = "9", default-features = false, features = ["deflate"] }
+# `str.casefold()` (full Unicode case folding) where AVBase compares work IDs.
+caseless = "0.2"
+# `response.text` for a charset other than UTF-8 / latin-1 (reqwest's own decoder).
+encoding_rs = "0.8"
 # Next-fire times of the archive scan cron (cronsim in Python).
 croner = "4"
 # The .strm watcher (watchdog in Python).

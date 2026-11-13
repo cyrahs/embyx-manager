@@ -16,6 +16,8 @@ extensions are compared as sets; everything else is compared in order.
 
 Needs `openssl` (certificate), `cargo` (the example) and the project's environment
 (curl_cffi, httpx). The result is summarized in docs/rewrite/API-COVERAGE.md ("wreq").
+WP2 added `avbase-rs` and `javbus-rs`: the sessions `AvbaseClient` and `JavBusClient` build,
+compared with curl_cffi and httpx.
 """
 
 from __future__ import annotations
@@ -291,9 +293,20 @@ CLIENTS = {
     'wreq-tuned': AVBASE_HEADERS,
     'httpx-py': JAVBUS_HEADERS,
     'httpx-rs': JAVBUS_HEADERS,
+    # WP2: the clients as the application configures them (they add their own headers).
+    'avbase-rs': AVBASE_HEADERS,
+    'javbus-rs': JAVBUS_HEADERS,
 }
 # Which capture each candidate is compared with.
-PAIRS = (('curl_cffi', 'wreq'), ('curl_cffi', 'wreq-tuned'), ('httpx-py', 'httpx-rs'))
+PAIRS = (
+    ('curl_cffi', 'wreq'),
+    ('curl_cffi', 'wreq-tuned'),
+    ('httpx-py', 'httpx-rs'),
+    ('curl_cffi', 'avbase-rs'),
+    ('httpx-py', 'javbus-rs'),
+)
+# Rust client name -> the fetch_probe client it runs.
+PROBE_CLIENTS = {'httpx-rs': 'httpx', 'avbase-rs': 'avbase', 'javbus-rs': 'javbus'}
 
 
 def build_fetch_probe() -> Path:
@@ -317,7 +330,7 @@ def fetch(  # noqa: PLR0913 - one keyword per knob of the probe
     """One GET with `client`; `root_der` set means the URL is the local listener."""
     if client in {'curl_cffi', 'httpx-py'}:
         return _fetch_python(client, url, headers, local=root_der is not None, body=body, timeout=timeout)
-    command = [str(FETCH_PROBE), 'httpx' if client == 'httpx-rs' else client, url]
+    command = [str(FETCH_PROBE), PROBE_CLIENTS.get(client, client), url]
     for name, value in headers.items():
         command += ['-H', f'{name}: {value}']
     if root_der is not None:
@@ -403,6 +416,8 @@ def run(clients: dict[str, dict[str, str]] = CLIENTS) -> dict[str, Any]:
     results['curl_cffi']['impersonates'] = __import__('curl_cffi.requests.impersonate', fromlist=['x']).DEFAULT_CHROME
     results['wreq']['emulation'] = 'wreq_util::Emulation::Chrome149'
     results['wreq-tuned']['emulation'] = 'Chrome149 with curl_cffi headers and HEADERS weight 256'
+    if 'avbase-rs' in results:
+        results['avbase-rs']['emulation'] = 'AvbaseClient session (avbase::session::chrome_emulation)'
     return results
 
 
