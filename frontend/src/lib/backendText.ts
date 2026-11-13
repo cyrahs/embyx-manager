@@ -64,6 +64,12 @@ const EXACT_TEXT: Record<string, string> = {
   'the merge Job disappeared before it finished': '合并 Job 在完成前消失了',
   'the merge Job failed': '合并 Job 失败',
   '115 never reported a SHA-1 for the uploaded file': '115 一直没有给出上传文件的 SHA-1',
+  // Home GPU transcodes (merge/service.py, merge/worker.py).
+  'waiting for the home transcode worker': '等家里的 GPU worker 上线',
+  'every part is re-encoded; waiting for the running merge Job to finish': '各盘已经转完，等正在跑的合并 Job 结束后拼接',
+  'the audio Job failed': '音频 Job 失败',
+  'the audio Job ended without reporting a result': '音频 Job 结束了，但没有报告结果',
+  'the transcode manifest or the copied audio is missing': '转码清单或复制出的音频不见了',
 }
 
 const TEXT_PATTERNS: Array<[RegExp, (match: RegExpMatchArray) => string]> = [
@@ -80,6 +86,7 @@ const TEXT_PATTERNS: Array<[RegExp, (match: RegExpMatchArray) => string]> = [
   [/^unexpected response: HTTP (\d+)$/, (m) => `响应异常（HTTP ${m[1]}）`],
   [/^connection failed: (.+)$/, (m) => `连接失败：${m[1]}`],
   [/^the merge Job failed: (.+)$/s, (m) => `合并 Job 失败：${m[1]}`],
+  [/^the audio Job failed: (.+)$/s, (m) => `音频 Job 失败：${m[1]}`],
   [/^not enough space in (\S+): (.+)$/, (m) => `${m[1]} 空间不足：${m[2]}`],
   [/^(\S+) carries different streams than (\S+); a stream copy would break$/, (m) => `${m[1]} 的音视频流和 ${m[2]} 不一致，无法无损合并`],
   [/^uploaded SHA-1 (\S+) differs from the merged file \((\S+)\)$/, (m) => `上传后的 SHA-1 ${m[1]} 与合并文件（${m[2]}）不一致`],

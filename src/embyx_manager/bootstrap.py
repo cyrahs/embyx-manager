@@ -59,6 +59,8 @@ from embyx_manager.merge.auto import AutoMerger
 from embyx_manager.merge.kube import KubeJobs
 from embyx_manager.merge.service import MergeService
 from embyx_manager.merge.tasks import MergeTaskRepository
+from embyx_manager.merge.transcode import TranscodeRepository
+from embyx_manager.merge.transcode_api import create_transcode_app, create_transcode_router
 from embyx_manager.monitor.acquisitions import AcquisitionRepository
 from embyx_manager.monitor.api import AcquisitionApi, SubscriptionsApi, create_monitor_router
 from embyx_manager.monitor.archive import ArchivePipeline
@@ -577,6 +579,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         archive_config=lambda: store.get(ArchiveConfig),
         clouddrive_config=lambda: store.get(CloudDriveConfig),
         trigger=_trigger_after_merge,
+        transcodes=TranscodeRepository(database),
     )
     merge_catalog = MergeCatalog(
         archive=lambda: store.get(ArchiveConfig),
@@ -660,7 +663,7 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
                     await database.aclose()
 
     frontend_dist = Path(__file__).resolve().parent / 'static'
-    return create_app(
+    app = create_app(
         app_ready=repository.health_check,
         routers=(fill_actor_router, config_router, monitor_router, playlists_router, merge_router),
         feature_health={'fill_actor': fill_actor_health(service=service, repository=repository)},
@@ -674,6 +677,11 @@ def build_app(settings: Settings) -> FastAPI:  # noqa: C901, PLR0915 - assembly 
         max_request_bytes=settings.max_request_bytes,
         frontend_dist=frontend_dist,
     )
+    # Served on a port of its own by __main__ when EMBYX_MANAGER_TRANSCODE_PORT is set.
+    app.state.transcode_app = create_transcode_app(
+        create_transcode_router(merge_service, token=settings.transcode_token),
+    )
+    return app
 
 
 def _rss_configuration_gap(store: ConfigStore) -> str | None:

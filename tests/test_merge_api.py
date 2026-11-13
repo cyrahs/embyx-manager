@@ -24,6 +24,7 @@ from embyx_manager.merge.api import (
 )
 from embyx_manager.merge.service import MergeActionError
 from embyx_manager.merge.tasks import MergeState, MergeTask, MergeTaskConflictError
+from embyx_manager.merge.transcode import WorkerPresence
 from tests.test_merge_detect import ARCHIVE, parts, strm
 
 NOW = datetime(2026, 10, 2, 20, 0, tzinfo=UTC)
@@ -84,6 +85,17 @@ class FakeService:
 
     def wake(self) -> None:
         self.woken += 1
+
+    def home_bound(self, task: MergeTask) -> bool:
+        del task
+        return False
+
+    async def transcode_view(self, task: MergeTask) -> None:
+        del task
+
+    @property
+    def presence(self):
+        return WorkerPresence()
 
     async def cancel(self, task_id: int) -> MergeTask:
         if task_id != 1:
@@ -203,6 +215,7 @@ def test_create_is_refused_while_merging_is_unavailable(tmp_path: Path) -> None:
         'items': [],
         'unavailable': 'the merge Job template is not mounted',
         'auto': None,
+        'worker': None,
     }
 
 

@@ -411,6 +411,7 @@ export interface MergeTitleList {
 
 export type MergeState =
   | 'queued'
+  | 'transcoding'
   | 'merging'
   | 'uploading'
   | 'verifying'
@@ -440,6 +441,46 @@ export interface MergeTask {
   finished_at: string | null
   cancellable: boolean
   retryable: boolean
+  /** Who re-encodes a merge too big for 115: the home GPU worker, the cluster's CPU, or not decided yet. */
+  transcoder?: 'home' | 'cpu' | null
+  /** Waits for, or is with, the home transcode worker. */
+  home?: boolean
+  transcode?: MergeTranscode | null
+  /** The operator paused the home worker on this task. */
+  transcode_paused?: boolean
+}
+
+/** The home worker's progress on a task, while it is transcoding. */
+export interface MergeTranscode {
+  parts_done: number
+  part_count: number
+  encoded_seconds: number
+  encoded_bytes: number
+  duration: number | null
+  video_bitrate: number | null
+  audio_done: number | null
+  audio_state: string | null
+  paused: boolean
+}
+
+export interface MergeWorkerPart {
+  index: number
+  fps: number
+  position: number
+}
+
+/** The home transcode worker's last report. */
+export interface MergeWorker {
+  online: boolean
+  seen_at: string
+  name: string
+  version: string
+  task_id: number | null
+  state: string
+  parts: MergeWorkerPart[]
+  upload_bps: number
+  queue_chunks: number
+  queue_bytes: number
 }
 
 export type MergeAutoState = 'off' | 'unavailable' | 'busy' | 'paused' | 'idle'
@@ -463,4 +504,5 @@ export interface MergeTaskList {
   items: MergeTask[]
   unavailable: string | null
   auto?: MergeAutoStatus | null
+  worker?: MergeWorker | null
 }

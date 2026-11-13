@@ -162,9 +162,17 @@ class TaskView(BaseModel):
     finished_at: datetime | None
     cancellable: bool
     retryable: bool
+    #: Who re-encodes a merge too big for 115: ``home``, ``cpu`` or not decided.
+    transcoder: str | None = None
+    #: Waits for (or is with) the home transcode worker.
+    home: bool = False
+    #: The home worker's progress on the task, while it is transcoding.
+    transcode: dict[str, Any] | None = None
+    #: The operator paused the home worker on this task.
+    transcode_paused: bool = False
 
     @classmethod
-    def from_task(cls, task: MergeTask) -> 'TaskView':
+    def from_task(cls, task: MergeTask, *, home: bool = False, transcode: dict[str, Any] | None = None) -> 'TaskView':
         # A task failed while archiving may be removed only once the library
         # holds the title whole; the cancel itself checks that.
         cancellable = task.state in CANCELLABLE_STATES and not (
@@ -190,6 +198,10 @@ class TaskView(BaseModel):
             finished_at=task.finished_at,
             cancellable=cancellable,
             retryable=task.state == MergeState.FAILED,
+            transcoder=task.transcoder,
+            home=home,
+            transcode=transcode,
+            transcode_paused=task.transcode_paused,
         )
 
 
@@ -198,6 +210,8 @@ class TasksView(BaseModel):
     #: Why merging cannot run in this deployment, when it cannot.
     unavailable: str | None
     auto: AutoStatus | None = None
+    #: The home transcode worker's last report, with ``online``; None before it ever called.
+    worker: dict[str, Any] | None = None
 
 
 class MergeRequest(BaseModel):
@@ -279,20 +293,47 @@ async def current_title(catalog: MergeCatalog, cache: TitleScanCache, avid: str)
     return next((title for title in rescanned if title.avid.upper() == wanted), None)
 
 
-def _add_task_routes(
+def _add_task_routes(  # noqa: C901 - one endpoint each
     router: APIRouter,
     catalog: MergeCatalog,
     cache: TitleScanCache,
     tasks: MergeTasksApi,
     dependencies: list[Any],
 ) -> None:
+    async def view(task: MergeTask) -> TaskView:
+        home = task.transcoder == 'home' or tasks.service.home_bound(task)
+        transcode = await tasks.service.transcode_view(task) if task.state == MergeState.TRANSCODING else None
+        return TaskView.from_task(task, home=home, transcode=transcode)
+
     @router.get('/tasks')
     async def list_tasks() -> TasksView:
         return TasksView(
-            items=[TaskView.from_task(task) for task in await tasks.repository.listing()],
+            items=[await view(task) for task in await tasks.repository.listing()],
             unavailable=tasks.service.unavailable(),
             auto=tasks.auto_status() if tasks.auto_status is not None else None,
+            worker=tasks.service.presence.view(),
         )
+
+    @router.post('/tasks/{task_id}/pause', dependencies=dependencies)
+    async def pause_task(task_id: int) -> TaskView:
+        try:
+            return await view(await tasks.service.set_paused(task_id, paused=True))
+        except MergeActionError as exc:
+            raise ApiError(_ACTION_STATUS.get(exc.code, 409), exc.code) from exc
+
+    @router.post('/tasks/{task_id}/resume', dependencies=dependencies)
+    async def resume_task(task_id: int) -> TaskView:
+        try:
+            return await view(await tasks.service.set_paused(task_id, paused=False))
+        except MergeActionError as exc:
+            raise ApiError(_ACTION_STATUS.get(exc.code, 409), exc.code) from exc
+
+    @router.post('/tasks/{task_id}/use-cpu', dependencies=dependencies)
+    async def use_cpu(task_id: int) -> TaskView:
+        try:
+            return await view(await tasks.service.use_cpu(task_id))
+        except MergeActionError as exc:
+            raise ApiError(_ACTION_STATUS.get(exc.code, 409), exc.code) from exc
 
     @router.post('/tasks', status_code=201, dependencies=dependencies)
     async def create_task(request: MergeRequest) -> TaskView:

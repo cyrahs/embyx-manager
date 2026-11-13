@@ -41,6 +41,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from embyx_manager.merge.transcode import audio_path, audio_status_path, chunk_path, concat_script, read_json
+
 #: The containers a merge can write, by file suffix; the parts' own container is kept.
 MUXERS = {
     '.mp4': 'mp4',
@@ -74,6 +76,9 @@ TRANSCODE_BUDGET_SHARE = 0.9
 #: re-encode keeps the picture and the file comes out about a third smaller than an
 #: HEVC one would.
 TRANSCODE_SOURCE_SHARE = 0.4
+#: The share the home worker's NVENC AV1 gets instead: a hardware encoder needs
+#: more bits than SVT-AV1 preset 8 for the same picture.
+HOME_SOURCE_SHARE = 0.45
 #: Assumed for an audio stream whose container does not state its bitrate.
 FALLBACK_AUDIO_BITS = 320_000
 #: The muxers a re-encoded AV1 stream may go into (MOV cannot carry AV1).
@@ -281,14 +286,16 @@ def _check_parts(parts: Sequence[Path], output: Path) -> int:
     return total
 
 
-def transcode_bitrate(total_bytes: int, duration: float, audio_bits: int) -> int:
+def transcode_bitrate(
+    total_bytes: int, duration: float, audio_bits: int, *, share: float = TRANSCODE_SOURCE_SHARE
+) -> int:
     """The video bitrate, in bits per second, that brings a re-encode under 115's limit.
 
-    The lower of what the budget leaves after the copied audio and a share of
+    The lower of what the budget leaves after the copied audio and ``share`` of
     the parts' own video bitrate.
     """
     budget = MAX_UPLOAD_BYTES * TRANSCODE_BUDGET_SHARE * 8 / duration - audio_bits
-    source = max(total_bytes * 8 / duration - audio_bits, 0) * TRANSCODE_SOURCE_SHARE
+    source = max(total_bytes * 8 / duration - audio_bits, 0) * share
     bits = int(min(budget, source))
     if bits <= 0:
         msg = f'the audio alone leaves no room for video under {MAX_UPLOAD_BYTES // 10**9} GB'
@@ -440,16 +447,8 @@ def merge(  # noqa: PLR0913
     status.update(total_bytes=total_bytes)
     muxer = MUXERS[output.suffix.lower()]
 
-    status.update(phase='probing')
-    probes = []
-    for index, part in enumerate(parts, start=1):
-        probes.append(probe(part, ffprobe=ffprobe))
-        status.update(force=False, progress=index / len(parts))
+    probes = _probe_all(parts, status, ffprobe=ffprobe)
     first = probes[0]
-    for part, result in zip(parts, probes, strict=True):
-        if result.by_kind() != first.by_kind():
-            msg = f'{part.name} carries different streams than {parts[0].name}; a stream copy would break'
-            raise MergeRefusedError(msg)
     _check_memory(probes, muxer, memory_limit, transcode=transcode)
     expected = sum(result.duration for result in probes)
     video_bits = transcode_bitrate(total_bytes, expected, first.audio_bits) if transcode else None
@@ -498,24 +497,7 @@ def merge(  # noqa: PLR0913
     finally:
         shutil.rmtree(staging, ignore_errors=True)
 
-    status.update(phase='verifying', progress=1.0)
-    merged = probe(target, ffprobe=ffprobe)
-    tolerance = max(DURATION_TOLERANCE_SECONDS, expected * DURATION_TOLERANCE_SHARE)
-    if abs(merged.duration - expected) > tolerance:
-        msg = f'merged duration {merged.duration:.1f}s does not match the parts ({expected:.1f}s)'
-        raise MergeWorkerError(msg)
-
-    size = target.stat().st_size
-    if size > MAX_UPLOAD_BYTES:
-        msg = (
-            f'the re-encoded file came to {size / 10**9:.1f} GB, still more than the '
-            f'{MAX_UPLOAD_BYTES // 10**9} GB 115 accepts in one file'
-        )
-        raise MergeRefusedError(msg)
-    status.update(phase='hashing', progress=0.0, size=size)
-    digest = sha1_of(target, on_progress=lambda done: status.update(force=False, progress=done / size if size else 1.0))
-    target.replace(output)
-    return {'size': size, 'sha1': digest, 'duration': merged.duration}
+    return _finish(target, output, expected, status, ffprobe=ffprobe)
 
 
 def _concat(  # noqa: PLR0913
@@ -580,25 +562,294 @@ def _concat(  # noqa: PLR0913
     )
 
 
-def run(argv_parts: Sequence[str], *, output: str, status_path: str, reserve_gib: float) -> int:
+def _probe_all(parts: Sequence[Path], status: StatusFile, *, ffprobe: str) -> list[Probe]:
+    """Probe every part and check they carry the same streams, as a stream copy needs."""
+    status.update(phase='probing')
+    probes = []
+    for index, part in enumerate(parts, start=1):
+        probes.append(probe(part, ffprobe=ffprobe))
+        status.update(force=False, progress=index / len(parts))
+    first = probes[0]
+    for part, result in zip(parts, probes, strict=True):
+        if result.by_kind() != first.by_kind():
+            msg = f'{part.name} carries different streams than {parts[0].name}; a stream copy would break'
+            raise MergeRefusedError(msg)
+    return probes
+
+
+def prepare_home(  # noqa: PLR0913
+    parts: Sequence[Path],
+    output: Path,
+    status: StatusFile,
+    *,
+    transcode_dir: Path,
+    reserve_bytes: int,
+    ffmpeg: str = 'ffmpeg',
+    ffprobe: str = 'ffprobe',
+    memory_limit: int | None = None,
+) -> dict[str, Any]:
+    """Probe the parts for the home worker, then copy their audio into ``transcode_dir``.
+
+    The status says each part's duration and the video bitrate as soon as the
+    probe is done, which is all the worker waits for; the audio copy, a full
+    read of every part, runs while the worker encodes. Audio already copied by
+    an earlier run of the Job is kept.
+    """
+    status.update(phase='checking', progress=0.0)
+    total_bytes = _check_parts(parts, output)
+    muxer = MUXERS[output.suffix.lower()]
+    if muxer not in TRANSCODE_MUXERS:
+        msg = f'a {output.suffix} merge cannot carry AV1'
+        raise MergeRefusedError(msg)
+    probes = _probe_all(parts, status, ffprobe=ffprobe)
+    _check_memory(probes, muxer, memory_limit)
+    expected = sum(result.duration for result in probes)
+    first = probes[0]
+    video_bits = transcode_bitrate(total_bytes, expected, first.audio_bits, share=HOME_SOURCE_SHARE)
+    estimate = int(video_bits * expected / 8) + int(first.audio_bits * expected / 8)
+    # The chunks and the assembled file sit on the volume together for a while.
+    _check_space(output, 2 * estimate, reserve_bytes)
+    has_audio = any(stream[0] == 'audio' for stream in first.signature)
+    status.update(
+        phase='audio',
+        progress=0.0,
+        total_bytes=total_bytes,
+        duration=expected,
+        video_bitrate=video_bits,
+        estimated_bytes=estimate,
+        has_audio=has_audio,
+        parts=[
+            {'duration': result.duration, 'size': part.stat().st_size}
+            for part, result in zip(parts, probes, strict=True)
+        ],
+        audio_done=0,
+    )
+    for index, part in enumerate(parts):
+        if not has_audio:
+            break
+        target = audio_path(transcode_dir, index)
+        if not target.is_file():
+            target.parent.mkdir(parents=True, exist_ok=True)
+            temporary = target.with_name(f'.{target.name}.part')
+            status.update(part=index)
+            _run_ffmpeg(
+                [
+                    ffmpeg,
+                    '-hide_banner',
+                    '-nostdin',
+                    '-loglevel',
+                    'error',
+                    '-y',
+                    '-i',
+                    str(part),
+                    '-map',
+                    '0:a',
+                    '-vn',
+                    '-sn',
+                    '-dn',
+                    '-c',
+                    'copy',
+                    '-f',
+                    'matroska',
+                    '-progress',
+                    'pipe:1',
+                    '-nostats',
+                    str(temporary),
+                ],
+                duration=probes[index].duration,
+                status=status,
+            )
+            temporary.replace(target)
+        status.update(audio_done=index + 1, progress=(index + 1) / len(parts))
+    return {'audio_done': len(parts)}
+
+
+def assemble_home(  # noqa: PLR0913
+    output: Path,
+    status: StatusFile,
+    *,
+    transcode_dir: Path,
+    reserve_bytes: int,
+    workdir: Path,
+    ffmpeg: str = 'ffmpeg',
+    ffprobe: str = 'ffprobe',
+) -> dict[str, Any]:
+    """Put the home worker's video chunks and the copied audio together into ``output``.
+
+    ``manifest.json`` in ``transcode_dir`` (written by the app) lists each
+    part's chunks and durations. Every part starts where it started in the
+    originals: the last chunk of a part is stretched or cut to the part's
+    duration, and its audio given the same, which is how the concat demuxer
+    lines up a lossless merge.
+    """
+    status.update(phase='checking', progress=0.0)
+    manifest = read_json(transcode_dir / 'manifest.json')
+    prepared = read_json(audio_status_path(transcode_dir))
+    if manifest is None or prepared is None or prepared.get('state') != 'done':
+        msg = 'the transcode manifest or the copied audio is missing'
+        raise MergeWorkerError(msg)
+    durations = [float(entry['duration']) for entry in prepared['parts']]
+    has_audio = bool(prepared.get('has_audio'))
+    if len(manifest['parts']) != len(durations):
+        msg = f'the manifest lists {len(manifest["parts"])} parts, the originals {len(durations)}'
+        raise MergeWorkerError(msg)
+    status.update(phase='probing')
+    video, audio, needed = _assembly_inputs(
+        manifest, durations, transcode_dir, has_audio=has_audio, status=status, ffprobe=ffprobe
+    )
+    _check_space(output, needed, reserve_bytes)
+    expected = sum(durations)
+    video_script = workdir / 'video.txt'
+    video_script.write_text(concat_script(video), encoding='utf-8')
+    inputs = ['-f', 'concat', '-safe', '0', '-i', str(video_script)]
+    maps = ['-map', '0:v']
+    if has_audio:
+        audio_script = workdir / 'audio.txt'
+        audio_script.write_text(concat_script(audio), encoding='utf-8')
+        inputs += ['-f', 'concat', '-safe', '0', '-i', str(audio_script)]
+        maps += ['-map', '1:a']
+    target = partial_path(output)
+    status.update(phase='merging', progress=0.0, duration=expected)
+    _run_ffmpeg(
+        [
+            ffmpeg,
+            '-hide_banner',
+            '-nostdin',
+            '-loglevel',
+            'error',
+            '-y',
+            *inputs,
+            *maps,
+            '-c',
+            'copy',
+            '-f',
+            MUXERS[output.suffix.lower()],
+            '-progress',
+            'pipe:1',
+            '-nostats',
+            str(target),
+        ],
+        duration=expected,
+        status=status,
+    )
+    return _finish(target, output, expected, status, ffprobe=ffprobe)
+
+
+def _assembly_inputs(  # noqa: PLR0913
+    manifest: dict[str, Any],
+    durations: Sequence[float],
+    transcode_dir: Path,
+    *,
+    has_audio: bool,
+    status: StatusFile,
+    ffprobe: str,
+) -> tuple[list[tuple[Path, float]], list[tuple[Path, float]], int]:
+    """The video chunks and audio tracks with the durations they take, and their bytes."""
+    video: list[tuple[Path, float]] = []
+    audio: list[tuple[Path, float]] = []
+    needed = 0
+    signature: tuple[tuple[object, ...], ...] | None = None
+    for part in manifest['parts']:
+        index = int(part['index'])
+        chunks = part['chunks']
+        if not chunks:
+            msg = f'cd{index + 1} has no video chunks'
+            raise MergeWorkerError(msg)
+        paths = [chunk_path(transcode_dir, index, int(chunk['index'])) for chunk in chunks]
+        lengths = [float(chunk['duration']) for chunk in chunks]
+        # The part's last chunk ends where the original part ends.
+        rest = durations[index] - sum(lengths[:-1])
+        if rest > 0:
+            lengths[-1] = rest
+        tracks = [audio_path(transcode_dir, index)] if has_audio else []
+        for path in (*paths, *tracks):
+            try:
+                needed += path.stat().st_size
+            except OSError as exc:
+                msg = f'{path.name} of cd{index + 1} is missing'
+                raise MergeWorkerError(msg) from exc
+        video.extend(zip(paths, lengths, strict=True))
+        audio.extend((track, durations[index]) for track in tracks)
+        # The parts must agree on the encoded stream, as a stream copy needs.
+        found = probe(paths[0], ffprobe=ffprobe).signature
+        if signature is not None and found != signature:
+            msg = f'the video chunks of cd{index + 1} differ from those of the first part'
+            raise MergeWorkerError(msg)
+        signature = found
+        status.update(force=False, progress=(index + 1) / max(len(durations), 1))
+    return video, audio, needed
+
+
+def _finish(target: Path, output: Path, expected: float, status: StatusFile, *, ffprobe: str) -> dict[str, Any]:
+    """Check the written merge, hash it and move it into place."""
+    status.update(phase='verifying', progress=1.0)
+    merged = probe(target, ffprobe=ffprobe)
+    tolerance = max(DURATION_TOLERANCE_SECONDS, expected * DURATION_TOLERANCE_SHARE)
+    if abs(merged.duration - expected) > tolerance:
+        msg = f'merged duration {merged.duration:.1f}s does not match the parts ({expected:.1f}s)'
+        raise MergeWorkerError(msg)
+
+    size = target.stat().st_size
+    if size > MAX_UPLOAD_BYTES:
+        msg = (
+            f'the re-encoded file came to {size / 10**9:.1f} GB, still more than the '
+            f'{MAX_UPLOAD_BYTES // 10**9} GB 115 accepts in one file'
+        )
+        raise MergeRefusedError(msg)
+    status.update(phase='hashing', progress=0.0, size=size)
+    digest = sha1_of(target, on_progress=lambda done: status.update(force=False, progress=done / size if size else 1.0))
+    target.replace(output)
+    return {'size': size, 'sha1': digest, 'duration': merged.duration}
+
+
+def run(  # noqa: PLR0913
+    argv_parts: Sequence[str],
+    *,
+    output: str,
+    status_path: str,
+    reserve_gib: float,
+    home_prepare: str | None = None,
+    home_assemble: str | None = None,
+) -> int:
     """The ``merge-worker`` subcommand.
 
     Exits 0 once the merged file is in place, and also when the parts were
     refused as unmergeable: the status file then says ``failed`` with
     ``refused`` set, which is a finished answer rather than a broken Job.
+    ``home_prepare`` instead probes the parts and copies their audio for the
+    home transcode worker into that directory; ``home_assemble`` merges what
+    the worker and that run left there.
     """
     status = StatusFile(Path(status_path))
     output_path = Path(output)
     workdir = Path(os.environ.get('TMPDIR', '/tmp'))  # noqa: S108 - the Job mounts an emptyDir there
     try:
-        result = merge(
-            [Path(part) for part in argv_parts],
-            output_path,
-            status,
-            reserve_bytes=int(reserve_gib * GIB),
-            workdir=workdir,
-            memory_limit=memory_limit(),
-        )
+        if home_prepare is not None:
+            result = prepare_home(
+                [Path(part) for part in argv_parts],
+                output_path,
+                status,
+                transcode_dir=Path(home_prepare),
+                reserve_bytes=int(reserve_gib * GIB),
+                memory_limit=memory_limit(),
+            )
+        elif home_assemble is not None:
+            result = assemble_home(
+                output_path,
+                status,
+                transcode_dir=Path(home_assemble),
+                reserve_bytes=int(reserve_gib * GIB),
+                workdir=workdir,
+            )
+        else:
+            result = merge(
+                [Path(part) for part in argv_parts],
+                output_path,
+                status,
+                reserve_bytes=int(reserve_gib * GIB),
+                workdir=workdir,
+                memory_limit=memory_limit(),
+            )
     except MergeRefusedError as exc:
         partial_path(output_path).unlink(missing_ok=True)
         status.update(state='failed', refused=True, error=str(exc))

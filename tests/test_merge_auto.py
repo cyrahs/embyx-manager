@@ -39,12 +39,21 @@ class FakeRepository:
 class FakeService:
     def __init__(self) -> None:
         self.woken = 0
+        self.parked_avids: set[str] = set()
+        self.reserved = 0
 
     def unavailable(self) -> str | None:
         return None
 
     def wake(self) -> None:
         self.woken += 1
+
+    def parked(self, task) -> bool:
+        return task.avid in self.parked_avids
+
+    def reserved_bytes(self, tasks) -> int:
+        del tasks
+        return self.reserved
 
 
 class FakeCloud:

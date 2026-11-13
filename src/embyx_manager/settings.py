@@ -54,6 +54,11 @@ class Settings:
     max_actors: int = 20
     max_videos: int = 2_000
     magnet_concurrency: int = 8
+    #: A second listener for the home transcode worker's endpoints alone, which its
+    #: WireGuard gateway forwards to; None leaves the worker out.
+    transcode_port: int | None = None
+    #: A bearer token the worker must also present, when set.
+    transcode_token: str | None = None
 
     @classmethod
     def from_env(cls) -> 'Settings':
@@ -67,6 +72,12 @@ class Settings:
             max_actors=_positive_int('EMBYX_MANAGER_MAX_ACTORS', 20),
             max_videos=_positive_int('EMBYX_MANAGER_MAX_VIDEOS', 2_000),
             magnet_concurrency=_positive_int('EMBYX_MANAGER_MAGNET_CONCURRENCY', 8),
+            transcode_port=(
+                _positive_int('EMBYX_MANAGER_TRANSCODE_PORT', 1)
+                if os.environ.get('EMBYX_MANAGER_TRANSCODE_PORT')
+                else None
+            ),
+            transcode_token=os.environ.get('EMBYX_MANAGER_TRANSCODE_TOKEN') or None,
         )
         settings.validate_exposure()
         return settings

@@ -330,6 +330,7 @@ const CODE_MESSAGES: Record<string, string> = {
   merge_discard_failed: '没能删掉 embyx_in 里多余的合并文件，请稍后再试。',
   merge_task_not_failed: '只有失败的任务可以重试。',
   merge_task_changed: '任务状态刚刚变化了，请刷新后重试。',
+  merge_task_not_transcoding: '这个任务不在等家里的 GPU 转码，不能这样操作。',
 }
 
 /** The operator-facing message for an error code a response carried in its body. */
@@ -1005,5 +1006,17 @@ export async function cancelMergeTask(id: number): Promise<MergeTask> {
 
 export async function retryMergeTask(id: number): Promise<MergeTask> {
   const body = await request(`/api/merge/tasks/${id}/retry`, { method: 'POST' })
+  return body as unknown as MergeTask
+}
+
+/** Pauses or resumes the home GPU worker on this task. */
+export async function pauseMergeTranscode(id: number, paused: boolean): Promise<MergeTask> {
+  const body = await request(`/api/merge/tasks/${id}/${paused ? 'pause' : 'resume'}`, { method: 'POST' })
+  return body as unknown as MergeTask
+}
+
+/** Hands a home transcode back to the cluster's own CPU encoder, dropping what the worker did. */
+export async function moveMergeToClusterCpu(id: number): Promise<MergeTask> {
+  const body = await request(`/api/merge/tasks/${id}/use-cpu`, { method: 'POST' })
   return body as unknown as MergeTask
 }

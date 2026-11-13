@@ -11,7 +11,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import { ApiError, cancelMergeTask, createMergeTask, listMergeTasks, listMergeTitles, retryMergeTask } from '../api'
+import {
+  ApiError,
+  cancelMergeTask,
+  createMergeTask,
+  listMergeTasks,
+  listMergeTitles,
+  pauseMergeTranscode,
+  retryMergeTask,
+  moveMergeToClusterCpu,
+} from '../api'
 import { Notice } from '../components/Feedback'
 import { ChevronIcon, Spinner } from '../components/Icons'
 import { localizeBackendText } from '../lib/backendText'
@@ -25,6 +34,7 @@ import type {
   MergeTitle,
   MergeTitleList,
   MergeTitleProblem,
+  MergeWorker,
 } from '../types'
 
 /** Emby stacks a single digit only. */
@@ -40,6 +50,7 @@ const PROBLEM_LABELS: Record<MergeTitleProblem, string> = {
 
 const STATE_LABELS: Record<MergeState, string> = {
   queued: '排队中',
+  transcoding: '转码中（家里 GPU）',
   merging: '合并中',
   uploading: '上传中',
   verifying: '校验中',
@@ -63,7 +74,15 @@ const PHASE_LABELS: Record<string, string> = {
 
 const FINISHED: ReadonlySet<MergeState> = new Set(['done', 'cancelled'])
 /** States the loop is still working through, which the page keeps polling for. */
-const MOVING: ReadonlySet<MergeState> = new Set(['queued', 'merging', 'uploading', 'verifying', 'replacing', 'archiving'])
+const MOVING: ReadonlySet<MergeState> = new Set([
+  'queued',
+  'transcoding',
+  'merging',
+  'uploading',
+  'verifying',
+  'replacing',
+  'archiving',
+])
 
 type TaskFilter = 'moving' | 'failed' | 'finished' | 'all'
 
@@ -114,7 +133,18 @@ function percent(value: number | null): string {
   return value === null ? '' : ` ${Math.round(value * 100)}%`
 }
 
+function transcodeProgress(task: MergeTask): string {
+  const transcode = task.transcode
+  if (!transcode) return task.phase === 'probing' ? '读取分盘信息' : ''
+  const share = transcode.duration ? Math.min(transcode.encoded_seconds / transcode.duration, 1) : null
+  const audio = transcode.audio_state === 'done' ? '' : ' · 集群在复制音频'
+  const paused = task.transcode_paused ? '已暂停 · ' : ''
+  return `${paused}${transcode.parts_done}/${transcode.part_count} 盘${percent(share)} · 已传 ${formatBytes(transcode.encoded_bytes)}${audio}`
+}
+
 function taskProgress(task: MergeTask): string {
+  if (task.state === 'transcoding') return transcodeProgress(task)
+  if (task.state === 'queued' && task.home) return task.transcode_paused ? '已暂停' : '等家里的 GPU 转码'
   if (task.state === 'merging') return `${PHASE_LABELS[task.phase ?? ''] ?? task.phase ?? ''}${percent(task.progress)}`
   if (task.state === 'uploading') return `${formatBytes(task.uploaded_bytes ?? 0)} / ${formatBytes(task.merged_bytes)}`
   if (task.state === 'failed' && task.failed_state) return `在「${STATE_LABELS[task.failed_state]}」时失败`
@@ -193,6 +223,39 @@ function AutoLine({ auto }: { auto: MergeAutoStatus }) {
       自动合并：{AUTO_LABELS[auto.state]}
       {room}
       {shown.length > 0 && `。跳过 ${shown.join('、')}${more}`}
+    </p>
+  )
+}
+
+const WORKER_STATES: Record<string, string> = {
+  encoding: '在转码',
+  paused: '已暂停',
+  stopping: '在收尾（转完当前块就停）',
+  waiting: '在等任务',
+  idle: '空闲',
+}
+
+function formatRate(bitsPerSecond: number): string {
+  return `${(bitsPerSecond / 1e6).toFixed(1)} Mbps`
+}
+
+/** The home GPU worker: whether it is there and what it is doing. */
+function WorkerLine({ worker }: { worker: MergeWorker | null | undefined }) {
+  if (!worker) return <p className="settings-hint">家里的 GPU worker 还没连过来。</p>
+  if (!worker.online) {
+    return (
+      <p className="settings-hint">
+        家里的 GPU worker（{worker.name}）离线，上次联系 {formatTime(worker.seen_at)}。超过 115GB 的作品会等它回来，不占合并队列。
+      </p>
+    )
+  }
+  const parts = worker.parts.map((part) => `cd${part.index + 1} ${Math.round(part.fps)} fps`).join('、')
+  return (
+    <p className="settings-hint">
+      家里的 GPU worker（{worker.name}）在线，{WORKER_STATES[worker.state] ?? worker.state}
+      {parts && `：${parts}`}
+      {worker.task_id !== null &&
+        ` · 上传 ${formatRate(worker.upload_bps)} · 待传 ${worker.queue_chunks} 块 ${formatBytes(worker.queue_bytes)}`}
     </p>
   )
 }
@@ -341,6 +404,8 @@ function TaskTable({
   onArm,
   onCancel,
   onRetry,
+  onPause,
+  onUseCpu,
 }: {
   tasks: MergeTask[]
   busy: string | null
@@ -348,6 +413,8 @@ function TaskTable({
   onArm: (key: string | null) => void
   onCancel: (task: MergeTask) => void
   onRetry: (task: MergeTask) => void
+  onPause: (task: MergeTask, paused: boolean) => void
+  onUseCpu: (task: MergeTask) => void
 }) {
   return (
     <div className="run-table-wrap capped">
@@ -366,6 +433,11 @@ function TaskTable({
         <tbody>
           {tasks.map((task) => {
             const message = task.error ?? task.notice
+            const withGpu = Boolean(task.home) && (task.state === 'queued' || task.state === 'transcoding')
+            const toCpu =
+              Boolean(task.home) &&
+              (withGpu || (task.state === 'failed' && ['queued', 'transcoding', 'merging'].includes(task.failed_state ?? '')))
+            const paused = Boolean(task.transcode_paused)
             return (
               <tr key={task.id}>
                 <td className="cell-id">
@@ -384,6 +456,35 @@ function TaskTable({
                 </td>
                 <td data-label="操作" className="cell-actions">
                   <div className="merge-actions">
+                    {withGpu && (
+                      <button
+                        className="text-button"
+                        type="button"
+                        disabled={busy !== null}
+                        onClick={() => onPause(task, !paused)}
+                      >
+                        {paused ? '继续' : '暂停'}
+                      </button>
+                    )}
+                    {toCpu &&
+                      (armed === `cpu-${task.id}` ? (
+                        <ArmedConfirm
+                          label="确认改用集群 CPU"
+                          hint="家里已经转好的块会被丢掉，集群用 CPU 从头转 AV1，可能要好几天。"
+                          disabled={busy !== null}
+                          onConfirm={() => onUseCpu(task)}
+                          onDisarm={() => onArm(null)}
+                        />
+                      ) : (
+                        <button
+                          className="text-button"
+                          type="button"
+                          disabled={busy !== null}
+                          onClick={() => onArm(`cpu-${task.id}`)}
+                        >
+                          改用集群 CPU
+                        </button>
+                      ))}
                     {task.retryable && (
                       <button className="text-button" type="button" disabled={busy !== null} onClick={() => onRetry(task)}>
                         重试
@@ -555,6 +656,9 @@ export default function MergePage() {
           />
         )}
         {tasks?.auto && <AutoLine auto={tasks.auto} />}
+        {tasks && (tasks.worker || tasks.items.some((task) => task.home && !FINISHED.has(task.state))) && (
+          <WorkerLine worker={tasks.worker} />
+        )}
         {tasks?.unavailable && (
           <Notice tone="warning" title="暂时不能合并" body={localizeBackendText(tasks.unavailable)} />
         )}
@@ -598,6 +702,11 @@ export default function MergePage() {
                   void act(`task-${task.id}`, () => cancelMergeTask(task.id))
                 }}
                 onRetry={(task) => void act(`task-${task.id}`, () => retryMergeTask(task.id))}
+                onPause={(task, paused) => void act(`task-${task.id}`, () => pauseMergeTranscode(task.id, paused))}
+                onUseCpu={(task) => {
+                  setArmed(null)
+                  void act(`task-${task.id}`, () => moveMergeToClusterCpu(task.id))
+                }}
               />
             )}
           </section>
