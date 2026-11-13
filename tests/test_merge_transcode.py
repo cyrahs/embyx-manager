@@ -139,8 +139,10 @@ async def test_an_oversize_title_waits_for_the_worker_without_holding_up_the_que
     assert (big.state, big.notice) == (MergeState.QUEUED, service_module.WAITING_FOR_WORKER)
     assert harness.service.parked(big)
     assert (await harness.state(small)).state == MergeState.MERGING
-    # The worker waits while the cluster merges something else.
+    # The worker waits while the cluster merges something else, and once it is
+    # there the title holds back auto-merge so that it comes next.
     assert (await harness.claim()) == {'task': None, 'wait': 'busy'}
+    assert not harness.service.parked(big)
     assert harness.service.reserved_bytes((big,)) > 0
 
 

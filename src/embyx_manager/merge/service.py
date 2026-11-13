@@ -449,10 +449,16 @@ class MergeService:
         return total is not None and total > MAX_UPLOAD_BYTES and MUXERS.get(suffix) in TRANSCODE_MUXERS
 
     def parked(self, task: MergeTask) -> bool:
-        """A task waiting on the home worker while it is away, which holds up nothing else."""
+        """A task waiting on the home worker while it is away, which holds up nothing else.
+
+        Once the worker is there, the task holds auto-merge back like any other, so
+        the merge under way is the last before the worker can claim it.
+        """
+        if self._presence.online():
+            return False
         if task.state == MergeState.QUEUED:
             return self.home_bound(task)
-        return task.state == MergeState.TRANSCODING and not self._presence.online()
+        return task.state == MergeState.TRANSCODING
 
     def reserved_bytes(self, tasks: tuple[MergeTask, ...]) -> int:
         """What home transcodes still mean to write to the work volume: chunks plus the assembled file."""
