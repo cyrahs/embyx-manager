@@ -626,7 +626,10 @@ class MergeService:
                 waiting = [task for task in tasks if task.state == MergeState.QUEUED and self.home_bound(task)]
                 if not waiting:
                     return {'task': None, 'wait': 'idle'}
-                others = [task for task in tasks if task.state != MergeState.FAILED and task not in waiting]
+                # The encode takes hours and its assembly waits for the merge slot anyway, so
+                # it may start while an earlier title uploads, is verified or is archived.
+                ahead = {MergeState.QUEUED, MergeState.MERGING}
+                others = [task for task in tasks if task.state in ahead and task not in waiting]
                 if others:
                     return {'task': None, 'wait': 'busy'}
                 try:
