@@ -35,7 +35,7 @@ embyx-db = { path = "crates/embyx-db" }
 embyx-clients = { path = "crates/embyx-clients", default-features = false }
 embyx-monitor = { path = "crates/embyx-monitor" }
 embyx-fill-actor = { path = "crates/embyx-fill-actor" }
-embyx-merge = { path = "crates/embyx-merge" }
+embyx-merge = { path = "crates/embyx-merge", default-features = false }
 embyx-transcode-worker = { path = "crates/embyx-transcode-worker" }
 embyx-api = { path = "crates/embyx-api" }
 
@@ -60,6 +60,7 @@ reqwest = { version = "0.13", default-features = false }
 rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12", "logging"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
+sha1 = "0.11"
 sha2 = "0.11"
 tempfile = "3"
 thiserror = "2"

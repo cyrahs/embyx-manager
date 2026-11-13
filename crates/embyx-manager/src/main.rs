@@ -3,9 +3,10 @@
 //!
 //! Python origin: `src/embyx_manager/__main__.py`. The three commands and their flags are
 //! declared here as Python declares them; their bodies arrive with their work packages
-//! (`docs/rewrite/PLAN.md`): `serve` in WP4, `merge-worker` in WP13, `transcode-worker` in
-//! WP15. Until then each one stops with "not implemented yet", the one placeholder WP0 is
-//! allowed. `import-config` is not ported (PLAN.md, decision 1).
+//! (`docs/rewrite/PLAN.md`): `serve` in WP4, `merge-worker` in WP13 (done:
+//! `embyx_merge::worker::run`), `transcode-worker` in WP15. Until then `serve` and
+//! `transcode-worker` stop with "not implemented yet", the one placeholder WP0 is allowed.
+//! `import-config` is not ported (PLAN.md, decision 1).
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -40,7 +41,7 @@ struct MergeWorkerArgs {
     #[arg(long)]
     status: String,
     /// space to leave free on the volume
-    #[arg(long = "reserve-gib", default_value_t = 20.0)]
+    #[arg(long = "reserve-gib", default_value_t = 20.0, value_parser = parse_float)]
     reserve_gib: f64,
     /// probe the parts and copy their audio here for the home transcode worker
     #[arg(long = "home-prepare")]
@@ -100,6 +101,11 @@ impl std::fmt::Debug for TranscodeWorkerArgs {
     }
 }
 
+/// `argparse`'s `type=float`: Python's `float()` of the text.
+fn parse_float(text: &str) -> Result<f64, String> {
+    embyx_merge::parse_float(text).ok_or_else(|| format!("invalid float value: {text:?}"))
+}
+
 /// The command a parsed command line runs, and the work package that implements it.
 fn planned(command: Option<&Command>) -> (&'static str, &'static str) {
     match command {
@@ -109,13 +115,38 @@ fn planned(command: Option<&Command>) -> (&'static str, &'static str) {
     }
 }
 
+/// `merge-worker`: `worker.run(...)` in `__main__.py`.
+fn merge_worker(args: MergeWorkerArgs) -> ExitCode {
+    use embyx_merge::worker::{self, Environment, StatusFile, Worker};
+    let command = worker::Command {
+        parts: args.parts,
+        output: args.output,
+        status: args.status,
+        reserve_gib: args.reserve_gib,
+        home_prepare: args.home_prepare,
+        home_assemble: args.home_assemble,
+    };
+    let mut status = StatusFile::new(worker::py_path(&command.status));
+    let code = worker::run(
+        &Worker::default(),
+        &command,
+        &mut status,
+        &Environment::from_process(),
+        &mut std::io::stderr(),
+    );
+    ExitCode::from(u8::try_from(code).unwrap_or(1))
+}
+
 fn main() -> ExitCode {
     let cli = Cli::parse();
+    if let Some(Command::MergeWorker(args)) = cli.command {
+        return merge_worker(args);
+    }
     let (name, package) = planned(cli.command.as_ref());
-    // The binary has no logging yet (WP1 adds it); this one line is its whole output.
+    // The binary has no logging yet (WP4 adds it); this one line is its whole output.
     #[allow(
         clippy::print_stderr,
-        reason = "the placeholder's only output, until WP1 adds logging"
+        reason = "the placeholder's only output, until WP4 and WP15 replace it"
     )]
     {
         eprintln!("embyx-manager {name}: not implemented yet ({package}, docs/rewrite/PLAN.md)");

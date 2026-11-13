@@ -16,5 +16,6 @@ path = "src/main.rs"
 
 [dependencies]
 clap.workspace = true
+embyx-merge.workspace = true
 
 [dev-dependencies]
