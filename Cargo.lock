@@ -1102,13 +1102,21 @@ dependencies = [
 name = "embyx-monitor"
 version = "0.1.0"
 dependencies = [
+ "caseless",
  "chrono",
  "chrono-tz",
  "croner",
  "embyx-clients",
  "embyx-core",
+ "embyx-db",
+ "getrandom 0.4.3",
+ "indexmap",
  "notify",
+ "sqlx",
  "tempfile",
+ "thiserror 2.0.21",
+ "tokio",
+ "tracing",
 ]
 
 [[package]]

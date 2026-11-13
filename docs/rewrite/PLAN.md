@@ -261,7 +261,7 @@ feed. Where the TLS fingerprint matters the probe runs from the production netwo
 | WP2 | 2 clients | done (#85) | HTTP factory, JavBus, sukebei, feeds, feed magnets, AVBase on the impersonating client, jinjier, Emby | 1,450 | WP1 |
 | WP3 | 2 clients | done (#84) | CloudDrive over tonic with the cancel-safe wrapper and a fake server; Kubernetes Jobs client | 700 | WP1 |
 | WP4 | 2 API | pending | axum shell: auth, health, size limit, SPA hosting, config API with the two connection tests, OpenAPI check, page smoke. Checkpoint A (note only) | 900 | WP2, WP3 |
-| WP5 | 3 monitor | pending | Ledger, runs, reports, cadence, release dates, intake, subscriptions | 2,000 | WP2, WP3 |
+| WP5 | 3 monitor | done | Ledger, runs, reports, cadence, release dates, intake, subscriptions | 2,000 | WP2, WP3 |
 | WP6 | 3 monitor | pending | Archive, reconcile, move-in (filesystem effects) | 1,100 | WP1 |
 | WP7 | 3 monitor | pending | Tracker, 换版, manual intake | 1,250 | WP5, WP6 |
 | WP8 | 3 monitor | pending | RSS pipeline, mapping pipeline, playlists and playlist sync | 1,150 | WP5 |
@@ -412,6 +412,17 @@ or says why one stays.
   ffmpeg and uv before `cargo test`. CI's ffmpeg is Ubuntu's (6.1), the image's Debian 13's (7.1.5); the
   argument lists are pinned by goldens, so only the real-ffmpeg tests see the version. WP16 keeps or drops
   the cross-check with the Python tree.
+- WP5 left these for later packages. `embyx_monitor::acquisitions::Ledger` is a dyn-compatible trait over the
+  ledger: `AcquisitionRepository` implements it, and `embyx_monitor::testing::FakeLedger` (feature
+  `test-support`) is Python's `FakeLedger` from `tests/test_monitor_rss.py` rule for rule, so WP6-WP9 port their
+  intake, RSS, tracker, manual, replace and API tests against the same fake (it adds `states_for` and
+  `task_dirs_for`, which the Python fake lacks). `reports::RunContext` and `reports::PyException` are how a
+  pipeline writes Python's run-log bytes (`: repr(exc)` included); `reports::Raised` stands for any exception
+  that exists only as text. `support::Clock`, `fixed_clock` and `py_add`/`py_sub` (datetime arithmetic with
+  Python's `OverflowError`) are shared by the monitor crate; `support::uuid4_hex` uses `getrandom`, which WP14
+  can reuse for Job names. `intake::operation_result_text` is `str(FileOperationResult)`, for any later log line
+  that quotes a CloudDrive result. The `intake/steps` scenario (`tools/scenarios/operations/intake.py`) pins clocks
+  by patching the modules' `datetime` and skips `CLOUD_RETRY`'s waits; WP6-WP9 scenarios can do the same.
 
 ## Experiment log
 

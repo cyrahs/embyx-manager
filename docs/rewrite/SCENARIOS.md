@@ -122,6 +122,13 @@ the runner does and `dump()` gives the transcript's `fakes`.
   reported as `{type, code, details}`: a transport failure's text names the peer's port and is
   the stack's own (D40). `clouddrive/cancelled_move` shows a move whose caller was cancelled,
   with its response.
+- **WP5 (done):** `intake/steps` runs the intake (`enqueue`, `queue`, `retry_due`) over the real ledger,
+  `AsyncCloudDrive` against the fake and stub magnet sources from `args`, and stores the run with
+  `PipelineRunRepository`, so the rows pin `archive_acquisitions`, `archive_magnet_attempts` and
+  `pipeline_runs` bytes. The operation pins the intake's and the run repository's clock by patching the
+  modules' `datetime` (moved by a step's `advance_seconds`) and skips `CLOUD_RETRY`'s waits; the Rust test
+  injects the same clock and a recording sleeper. `uuid4().hex` run ids have no dashes, so they are marked
+  `volatile`.
 - **WP6/WP7 (archive, reconcile, move-in, tracker, 换版):** many files at once. Use `lanes` mode
   with a lane key on the file path when only per-file order is the contract; seed hard links and
   compare `nlink`; database timestamps written with `now()` are `volatile`, timestamps written

@@ -49,6 +49,10 @@ chrono-tz = "0.10"
 clap = { version = "4.6", features = ["derive"] }
 fancy-regex = "0.20"
 futures-util = { version = "0.3", default-features = false }
+# `uuid.uuid4().hex` run ids (WP5): 16 random bytes from the OS.
+getrandom = "0.4"
+# Insertion-ordered maps where Python relies on dict order (the monitor's in-memory ledger).
+indexmap = "2"
 hex = "0.4"
 http = "1"
 http-body-util = "0.1"

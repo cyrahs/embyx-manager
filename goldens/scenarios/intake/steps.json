@@ -1,0 +1,361 @@
+{
+  "calls": [
+    {
+      "error": {
+        "code": "UNAVAILABLE",
+        "details": "connection reset"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "AddOfflineFiles",
+      "request": {
+        "checkFolderAfterSecs": "10",
+        "toFolder": "/115/task",
+        "urls": "magnet:?xt=urn:btih:1111111111111111111111111111111111111111&dn=ABC-001"
+      },
+      "seq": 1
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "AddOfflineFiles",
+      "request": {
+        "checkFolderAfterSecs": "10",
+        "toFolder": "/115/task",
+        "urls": "magnet:?xt=urn:btih:1111111111111111111111111111111111111111&dn=ABC-001"
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 2
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "AddOfflineFiles",
+      "request": {
+        "checkFolderAfterSecs": "10",
+        "toFolder": "/115/task",
+        "urls": "magnet:?xt=urn:btih:dddddddddddddddddddddddddddddddddddddddd&dn=ABC-002"
+      },
+      "response": {
+        "errorMessage": "任务已存在",
+        "resultFilePaths": [],
+        "success": false
+      },
+      "seq": 3
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "AddOfflineFiles",
+      "request": {
+        "checkFolderAfterSecs": "10",
+        "toFolder": "/115/task",
+        "urls": "magnet:?xt=urn:btih:2222222222222222222222222222222222222222&dn=ABC-002"
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 4
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "AddOfflineFiles",
+      "request": {
+        "checkFolderAfterSecs": "10",
+        "toFolder": "/115/nowhere",
+        "urls": "magnet:?xt=urn:btih:5555555555555555555555555555555555555555&dn=ABC-005"
+      },
+      "response": {
+        "errorMessage": "destination not found: /115/nowhere",
+        "resultFilePaths": [],
+        "success": false
+      },
+      "seq": 5
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "AddOfflineFiles",
+      "request": {
+        "checkFolderAfterSecs": "10",
+        "toFolder": "/115/task",
+        "urls": "magnet:?xt=urn:btih:4444444444444444444444444444444444444444&dn=ABC-004"
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 6
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/",
+        "/115/task"
+      ],
+      "files": [],
+      "offline_tasks": [
+        {
+          "folder": "/115/task",
+          "info_hash": "dddddddddddddddddddddddddddddddddddddddd",
+          "name": "OLD-002",
+          "progress": 50.0,
+          "size": 7,
+          "status": "OFFLINE_DOWNLOADING",
+          "url": "magnet:?xt=urn:btih:dddddddddddddddddddddddddddddddddddddddd"
+        },
+        {
+          "folder": "/115/task",
+          "info_hash": "1111111111111111111111111111111111111111",
+          "name": "ABC-001",
+          "progress": 0.0,
+          "size": 0,
+          "status": "OFFLINE_INIT",
+          "url": "magnet:?xt=urn:btih:1111111111111111111111111111111111111111&dn=ABC-001"
+        },
+        {
+          "folder": "/115/task",
+          "info_hash": "2222222222222222222222222222222222222222",
+          "name": "ABC-002",
+          "progress": 0.0,
+          "size": 0,
+          "status": "OFFLINE_INIT",
+          "url": "magnet:?xt=urn:btih:2222222222222222222222222222222222222222&dn=ABC-002"
+        },
+        {
+          "folder": "/115/task",
+          "info_hash": "4444444444444444444444444444444444444444",
+          "name": "ABC-004",
+          "progress": 0.0,
+          "size": 0,
+          "status": "OFFLINE_INIT",
+          "url": "magnet:?xt=urn:btih:4444444444444444444444444444444444444444&dn=ABC-004"
+        }
+      ],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "intake.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "op": "enqueue",
+          "result": "submitted"
+        },
+        {
+          "op": "enqueue",
+          "result": "submitted"
+        },
+        {
+          "op": "enqueue",
+          "result": "no_magnet"
+        },
+        {
+          "op": "queue",
+          "result": "queued"
+        },
+        {
+          "op": "enqueue",
+          "result": "already_tracked"
+        },
+        {
+          "op": "enqueue",
+          "result": "submit_failed"
+        },
+        {
+          "op": "retry_due",
+          "result": 2
+        }
+      ]
+    }
+  },
+  "rows": {
+    "app_config": [],
+    "archive_acquisitions": [
+      {
+        "archived_paths_json": "[]",
+        "avid": "ABC-001",
+        "created_at": "2026-09-03T05:30:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss:Actor",
+        "state": "downloading",
+        "task_dir_path": "/115/task",
+        "updated_at": "2026-09-03T05:30:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "ABC-002",
+        "created_at": "2026-09-03T05:30:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "fill_actor",
+        "state": "downloading",
+        "task_dir_path": "/115/task",
+        "updated_at": "2026-09-03T05:30:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "ABC-003",
+        "created_at": "2026-09-03T05:30:00+00:00",
+        "next_action_at": "2026-09-03T08:30:00+00:00",
+        "note": "no magnet found",
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss:Actor",
+        "state": "resolve_failed",
+        "task_dir_path": "/115/task",
+        "updated_at": "2026-09-03T07:30:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "ABC-004",
+        "created_at": "2026-09-03T05:30:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": "2026-08-28",
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "fill_actor",
+        "state": "downloading",
+        "task_dir_path": "/115/task",
+        "updated_at": "2026-09-03T07:30:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "ABC-005",
+        "created_at": "2026-09-03T05:30:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "manual",
+        "state": "discovered",
+        "task_dir_path": "/115/nowhere",
+        "updated_at": "2026-09-03T05:30:00+00:00"
+      }
+    ],
+    "archive_magnet_attempts": [
+      {
+        "attempt_no": 1,
+        "avid": "ABC-001",
+        "error": null,
+        "info_hash": "1111111111111111111111111111111111111111",
+        "magnet": "magnet:?xt=urn:btih:1111111111111111111111111111111111111111&dn=ABC-001",
+        "magnet_source": "sukebei",
+        "progress": null,
+        "size_hint": null,
+        "state": "submitted",
+        "submitted_at": "2026-09-03T05:30:00+00:00",
+        "updated_at": "2026-09-03T05:30:00+00:00"
+      },
+      {
+        "attempt_no": 1,
+        "avid": "ABC-002",
+        "error": "failed to add the offline task",
+        "info_hash": "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
+        "magnet": "magnet:?xt=urn:btih:dddddddddddddddddddddddddddddddddddddddd&dn=ABC-002",
+        "magnet_source": "javbus",
+        "progress": null,
+        "size_hint": 7000000000,
+        "state": "error",
+        "submitted_at": "2026-09-03T05:30:00+00:00",
+        "updated_at": "2026-09-03T05:30:00+00:00"
+      },
+      {
+        "attempt_no": 2,
+        "avid": "ABC-002",
+        "error": null,
+        "info_hash": "2222222222222222222222222222222222222222",
+        "magnet": "magnet:?xt=urn:btih:2222222222222222222222222222222222222222&dn=ABC-002",
+        "magnet_source": "javbus",
+        "progress": null,
+        "size_hint": 3000000000,
+        "state": "submitted",
+        "submitted_at": "2026-09-03T05:30:00+00:00",
+        "updated_at": "2026-09-03T05:30:00+00:00"
+      },
+      {
+        "attempt_no": 1,
+        "avid": "ABC-004",
+        "error": null,
+        "info_hash": "4444444444444444444444444444444444444444",
+        "magnet": "magnet:?xt=urn:btih:4444444444444444444444444444444444444444&dn=ABC-004",
+        "magnet_source": "sukebei",
+        "progress": null,
+        "size_hint": null,
+        "state": "submitted",
+        "submitted_at": "2026-09-03T07:30:00+00:00",
+        "updated_at": "2026-09-03T07:30:00+00:00"
+      },
+      {
+        "attempt_no": 1,
+        "avid": "ABC-005",
+        "error": "failed to add the offline task",
+        "info_hash": "5555555555555555555555555555555555555555",
+        "magnet": "magnet:?xt=urn:btih:5555555555555555555555555555555555555555&dn=ABC-005",
+        "magnet_source": "rss_item",
+        "progress": null,
+        "size_hint": null,
+        "state": "error",
+        "submitted_at": "2026-09-03T05:30:00+00:00",
+        "updated_at": "2026-09-03T05:30:00+00:00"
+      }
+    ],
+    "feed_subscriptions": [],
+    "fill_actor_apply_jobs": [],
+    "fill_actor_candidates": [],
+    "fill_actor_cloud_move_operations": [],
+    "fill_actor_jobs": [],
+    "fill_actor_move_journal": [],
+    "fill_actor_move_results": [],
+    "fill_actor_plans": [],
+    "health_probe": [],
+    "merge_tasks": [],
+    "merge_transcode_chunks": [],
+    "merge_transcode_parts": [],
+    "pipeline_runs": [
+      {
+        "errors_json": "[\"ERROR: Failed to add magnet for ABC-002: errorMessage: \\\"\\u4efb\\u52a1\\u5df2\\u5b58\\u5728\\\"\\n\", \"ERROR: Failed to add magnet for ABC-005: errorMessage: \\\"destination not found: /115/nowhere\\\"\\n\"]",
+        "finished_at": "2026-09-03T07:30:00+00:00",
+        "log_json": "[\"Added magnet for ABC-001\", \"ERROR: Failed to add magnet for ABC-002: errorMessage: \\\"\\u4efb\\u52a1\\u5df2\\u5b58\\u5728\\\"\\n\", \"Added magnet for ABC-002\", \"WARNING: Failed to get any magnet for ABC-003\", \"ERROR: Failed to add magnet for ABC-005: errorMessage: \\\"destination not found: /115/nowhere\\\"\\n\", \"JavBus does not list ABC-004 yet\", \"Added magnet for ABC-004\", \"WARNING: Retry submitted nothing for ABC-003\", \"Retried 2 cooled-down avids\"]",
+        "pipeline": "rss",
+        "run_id": "<volatile:1>",
+        "started_at": "2026-09-03T05:30:00+00:00",
+        "state": "completed",
+        "stats_json": "{\"candidates_recorded\": 5, \"magnets_added\": 3, \"add_failed\": 2, \"queued\": 1, \"retry_submitted\": 1, \"retry_no_magnet\": 1, \"retry_due\": 2}",
+        "trigger": "manual"
+      }
+    ],
+    "playlist_source": [],
+    "playlists": []
+  },
+  "scenario": "intake/steps",
+  "tree": {}
+}
