@@ -4,7 +4,7 @@
 //! copied from fav"): JSON read and written like Python ([`pyjson`]), Python's string
 //! predicates ([`pytext`]), `urllib.parse` ([`pyurl`]), `pathlib.PurePosixPath` ([`pypath`])
 //! and Python `re` patterns ([`pyre`]). WP1 adds the env settings, config models, errors,
-//! the AVID parser, magnets and media helpers.
+//! the AVID parser, magnets and media helpers; WP3 `posixpath` ([`posixpath`]).
 //!
 //! Behind the `test-support` feature: [`golden`] reads the Python-generated goldens and
 //! [`scenario`] is the Rust side of the effect transcripts (docs/rewrite/SCENARIOS.md).
@@ -17,6 +17,7 @@ pub mod errors;
 pub mod golden;
 pub mod magnet;
 pub mod media;
+pub mod posixpath;
 pub mod pyjson;
 pub mod pypath;
 pub mod pyre;

@@ -1,0 +1,428 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "kube",
+  "cases": [
+    {
+      "task_id": 1,
+      "avid": "SQTEVR-009",
+      "name": "embyx-merge-1-sqtevr-009"
+    },
+    {
+      "task_id": 1,
+      "avid": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "name": "embyx-merge-1-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "task_id": 1,
+      "avid": "X_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.Z",
+      "name": "embyx-merge-1-x-y-zx-y-zx-y-zx-y-zx-y-zx-y-zx-y-zx-y"
+    },
+    {
+      "task_id": 1,
+      "avid": "abc-001",
+      "name": "embyx-merge-1-abc-001"
+    },
+    {
+      "task_id": 1,
+      "avid": "--ABC--001--",
+      "name": "embyx-merge-1-abc-001"
+    },
+    {
+      "task_id": 1,
+      "avid": "中文-001",
+      "name": "embyx-merge-1-001"
+    },
+    {
+      "task_id": 1,
+      "avid": "İPZ-123",
+      "name": "embyx-merge-1-i-pz-123"
+    },
+    {
+      "task_id": 1,
+      "avid": "ß-1",
+      "name": "embyx-merge-1-1"
+    },
+    {
+      "task_id": 1,
+      "avid": "",
+      "name": "embyx-merge-1"
+    },
+    {
+      "task_id": 1,
+      "avid": "---",
+      "name": "embyx-merge-1"
+    },
+    {
+      "task_id": 1,
+      "avid": "FC2-PPV-1234567",
+      "name": "embyx-merge-1-fc2-ppv-1234567"
+    },
+    {
+      "task_id": 1,
+      "avid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b",
+      "name": "embyx-merge-1-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b"
+    },
+    {
+      "task_id": 1,
+      "avid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b",
+      "name": "embyx-merge-1-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b"
+    },
+    {
+      "task_id": 1,
+      "avid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b",
+      "name": "embyx-merge-1-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b"
+    },
+    {
+      "task_id": 7,
+      "avid": "SQTEVR-009",
+      "name": "embyx-merge-7-sqtevr-009"
+    },
+    {
+      "task_id": 7,
+      "avid": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "name": "embyx-merge-7-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "task_id": 7,
+      "avid": "X_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.Z",
+      "name": "embyx-merge-7-x-y-zx-y-zx-y-zx-y-zx-y-zx-y-zx-y-zx-y"
+    },
+    {
+      "task_id": 7,
+      "avid": "abc-001",
+      "name": "embyx-merge-7-abc-001"
+    },
+    {
+      "task_id": 7,
+      "avid": "--ABC--001--",
+      "name": "embyx-merge-7-abc-001"
+    },
+    {
+      "task_id": 7,
+      "avid": "中文-001",
+      "name": "embyx-merge-7-001"
+    },
+    {
+      "task_id": 7,
+      "avid": "İPZ-123",
+      "name": "embyx-merge-7-i-pz-123"
+    },
+    {
+      "task_id": 7,
+      "avid": "ß-1",
+      "name": "embyx-merge-7-1"
+    },
+    {
+      "task_id": 7,
+      "avid": "",
+      "name": "embyx-merge-7"
+    },
+    {
+      "task_id": 7,
+      "avid": "---",
+      "name": "embyx-merge-7"
+    },
+    {
+      "task_id": 7,
+      "avid": "FC2-PPV-1234567",
+      "name": "embyx-merge-7-fc2-ppv-1234567"
+    },
+    {
+      "task_id": 7,
+      "avid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b",
+      "name": "embyx-merge-7-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b"
+    },
+    {
+      "task_id": 7,
+      "avid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b",
+      "name": "embyx-merge-7-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b"
+    },
+    {
+      "task_id": 7,
+      "avid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b",
+      "name": "embyx-merge-7-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b"
+    },
+    {
+      "task_id": 12345,
+      "avid": "SQTEVR-009",
+      "name": "embyx-merge-12345-sqtevr-009"
+    },
+    {
+      "task_id": 12345,
+      "avid": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "name": "embyx-merge-12345-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "task_id": 12345,
+      "avid": "X_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.Z",
+      "name": "embyx-merge-12345-x-y-zx-y-zx-y-zx-y-zx-y-zx-y-zx-y"
+    },
+    {
+      "task_id": 12345,
+      "avid": "abc-001",
+      "name": "embyx-merge-12345-abc-001"
+    },
+    {
+      "task_id": 12345,
+      "avid": "--ABC--001--",
+      "name": "embyx-merge-12345-abc-001"
+    },
+    {
+      "task_id": 12345,
+      "avid": "中文-001",
+      "name": "embyx-merge-12345-001"
+    },
+    {
+      "task_id": 12345,
+      "avid": "İPZ-123",
+      "name": "embyx-merge-12345-i-pz-123"
+    },
+    {
+      "task_id": 12345,
+      "avid": "ß-1",
+      "name": "embyx-merge-12345-1"
+    },
+    {
+      "task_id": 12345,
+      "avid": "",
+      "name": "embyx-merge-12345"
+    },
+    {
+      "task_id": 12345,
+      "avid": "---",
+      "name": "embyx-merge-12345"
+    },
+    {
+      "task_id": 12345,
+      "avid": "FC2-PPV-1234567",
+      "name": "embyx-merge-12345-fc2-ppv-1234567"
+    },
+    {
+      "task_id": 12345,
+      "avid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b",
+      "name": "embyx-merge-12345-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "task_id": 12345,
+      "avid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b",
+      "name": "embyx-merge-12345-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "task_id": 12345,
+      "avid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b",
+      "name": "embyx-merge-12345-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "task_id": 0,
+      "avid": "SQTEVR-009",
+      "name": "embyx-merge-0-sqtevr-009"
+    },
+    {
+      "task_id": 0,
+      "avid": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "name": "embyx-merge-0-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "task_id": 0,
+      "avid": "X_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.Z",
+      "name": "embyx-merge-0-x-y-zx-y-zx-y-zx-y-zx-y-zx-y-zx-y-zx-y"
+    },
+    {
+      "task_id": 0,
+      "avid": "abc-001",
+      "name": "embyx-merge-0-abc-001"
+    },
+    {
+      "task_id": 0,
+      "avid": "--ABC--001--",
+      "name": "embyx-merge-0-abc-001"
+    },
+    {
+      "task_id": 0,
+      "avid": "中文-001",
+      "name": "embyx-merge-0-001"
+    },
+    {
+      "task_id": 0,
+      "avid": "İPZ-123",
+      "name": "embyx-merge-0-i-pz-123"
+    },
+    {
+      "task_id": 0,
+      "avid": "ß-1",
+      "name": "embyx-merge-0-1"
+    },
+    {
+      "task_id": 0,
+      "avid": "",
+      "name": "embyx-merge-0"
+    },
+    {
+      "task_id": 0,
+      "avid": "---",
+      "name": "embyx-merge-0"
+    },
+    {
+      "task_id": 0,
+      "avid": "FC2-PPV-1234567",
+      "name": "embyx-merge-0-fc2-ppv-1234567"
+    },
+    {
+      "task_id": 0,
+      "avid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b",
+      "name": "embyx-merge-0-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b"
+    },
+    {
+      "task_id": 0,
+      "avid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b",
+      "name": "embyx-merge-0-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b"
+    },
+    {
+      "task_id": 0,
+      "avid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b",
+      "name": "embyx-merge-0-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b"
+    },
+    {
+      "task_id": -3,
+      "avid": "SQTEVR-009",
+      "name": "embyx-merge--3-sqtevr-009"
+    },
+    {
+      "task_id": -3,
+      "avid": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "name": "embyx-merge--3-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "task_id": -3,
+      "avid": "X_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.Z",
+      "name": "embyx-merge--3-x-y-zx-y-zx-y-zx-y-zx-y-zx-y-zx-y-zx"
+    },
+    {
+      "task_id": -3,
+      "avid": "abc-001",
+      "name": "embyx-merge--3-abc-001"
+    },
+    {
+      "task_id": -3,
+      "avid": "--ABC--001--",
+      "name": "embyx-merge--3-abc-001"
+    },
+    {
+      "task_id": -3,
+      "avid": "中文-001",
+      "name": "embyx-merge--3-001"
+    },
+    {
+      "task_id": -3,
+      "avid": "İPZ-123",
+      "name": "embyx-merge--3-i-pz-123"
+    },
+    {
+      "task_id": -3,
+      "avid": "ß-1",
+      "name": "embyx-merge--3-1"
+    },
+    {
+      "task_id": -3,
+      "avid": "",
+      "name": "embyx-merge--3"
+    },
+    {
+      "task_id": -3,
+      "avid": "---",
+      "name": "embyx-merge--3"
+    },
+    {
+      "task_id": -3,
+      "avid": "FC2-PPV-1234567",
+      "name": "embyx-merge--3-fc2-ppv-1234567"
+    },
+    {
+      "task_id": -3,
+      "avid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b",
+      "name": "embyx-merge--3-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b"
+    },
+    {
+      "task_id": -3,
+      "avid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b",
+      "name": "embyx-merge--3-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b"
+    },
+    {
+      "task_id": -3,
+      "avid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b",
+      "name": "embyx-merge--3-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b"
+    },
+    {
+      "task_id": 1000000000000000,
+      "avid": "SQTEVR-009",
+      "name": "embyx-merge-1000000000000000-sqtevr-009"
+    },
+    {
+      "task_id": 1000000000000000,
+      "avid": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "name": "embyx-merge-1000000000000000-aaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "task_id": 1000000000000000,
+      "avid": "X_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.ZX_Y.Z",
+      "name": "embyx-merge-1000000000000000-x-y-zx-y-zx-y-zx-y-zx-y"
+    },
+    {
+      "task_id": 1000000000000000,
+      "avid": "abc-001",
+      "name": "embyx-merge-1000000000000000-abc-001"
+    },
+    {
+      "task_id": 1000000000000000,
+      "avid": "--ABC--001--",
+      "name": "embyx-merge-1000000000000000-abc-001"
+    },
+    {
+      "task_id": 1000000000000000,
+      "avid": "中文-001",
+      "name": "embyx-merge-1000000000000000-001"
+    },
+    {
+      "task_id": 1000000000000000,
+      "avid": "İPZ-123",
+      "name": "embyx-merge-1000000000000000-i-pz-123"
+    },
+    {
+      "task_id": 1000000000000000,
+      "avid": "ß-1",
+      "name": "embyx-merge-1000000000000000-1"
+    },
+    {
+      "task_id": 1000000000000000,
+      "avid": "",
+      "name": "embyx-merge-1000000000000000"
+    },
+    {
+      "task_id": 1000000000000000,
+      "avid": "---",
+      "name": "embyx-merge-1000000000000000"
+    },
+    {
+      "task_id": 1000000000000000,
+      "avid": "FC2-PPV-1234567",
+      "name": "embyx-merge-1000000000000000-fc2-ppv-1234567"
+    },
+    {
+      "task_id": 1000000000000000,
+      "avid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b",
+      "name": "embyx-merge-1000000000000000-aaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "task_id": 1000000000000000,
+      "avid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b",
+      "name": "embyx-merge-1000000000000000-aaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "task_id": 1000000000000000,
+      "avid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-b",
+      "name": "embyx-merge-1000000000000000-aaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ]
+}

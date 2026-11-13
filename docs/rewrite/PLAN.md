@@ -259,7 +259,7 @@ feed. Where the TLS fingerprint matters the probe runs from the production netwo
 | WP0 | 0 foundation | done (#81); live fingerprint proof done (follow-up PR) | Workspace at the root, `rust.yml` (checks only, with the caching fav ended up with), docs (`PLAN`, `CONVENTIONS`, `DIVERGENCES`, `PARITY`, `API-COVERAGE`), `BASELINE`, golden generator, parity script, scenario runner skeleton, helpers copied from fav, API-coverage probes (impersonating client, tonic from the descriptor, HTML parser, cron, notify, Windows build of an empty worker crate) | new | |
 | WP1 | 1 core | done (#83) | Env settings, database layer and the 19 migrations, advisory locks, config models and store, AVID parser, magnet, media, errors | 2,300 | WP0 |
 | WP2 | 2 clients | pending | HTTP factory, JavBus, sukebei, feeds, feed magnets, AVBase on the impersonating client, jinjier, Emby | 1,450 | WP1 |
-| WP3 | 2 clients | pending | CloudDrive over tonic with the cancel-safe wrapper and a fake server; Kubernetes Jobs client | 700 | WP1 |
+| WP3 | 2 clients | in review | CloudDrive over tonic with the cancel-safe wrapper and a fake server; Kubernetes Jobs client | 700 | WP1 |
 | WP4 | 2 API | pending | axum shell: auth, health, size limit, SPA hosting, config API with the two connection tests, OpenAPI check, page smoke. Checkpoint A (note only) | 900 | WP2, WP3 |
 | WP5 | 3 monitor | pending | Ledger, runs, reports, cadence, release dates, intake, subscriptions | 2,000 | WP2, WP3 |
 | WP6 | 3 monitor | pending | Archive, reconcile, move-in (filesystem effects) | 1,100 | WP1 |
@@ -365,9 +365,16 @@ or says why one stays.
 - `json/formats.json` keeps fav's five formats next to the two embyx-manager uses (`ascii`, `plain`) and the
   one WP0 added (`sorted_compact_ascii`), so the copied helper's tests stay whole. Drop the unused ones with the
   unused `DumpOptions` constructors in WP16.
-- The Rust fake CloudDrive (`embyx-clients/src/clouddrive/fake.rs`) serves `GetSystemInfo`, `GetSubFiles` and
-  `MoveFile`; WP3 ports the rest of `tools/scenarios/fakes/clouddrive.py` rule for rule, and the HTTP fakes
-  (`fakes/http.py`) with the first scenario that seeds them.
+- The Rust fake CloudDrive (`embyx-clients/src/clouddrive/fake.rs`) serves all 14 RPCs rule for rule from
+  `tools/scenarios/fakes/clouddrive.py` (WP3), with test hooks the Python fake lacks (`seen()` for headers and
+  deadlines, `hold(method)` to keep a call in flight). The HTTP fakes are `embyx_clients::fakehttp` (a port of
+  `fakes/http.py`); `embyx_clients::scenario::ScenarioFakes` starts all three as the runner does. WP8 (Emby
+  playlists) and WP14 (Jobs) replace a route table with a state model in both fakes at once, keeping the record
+  shape.
+- `embyx_core::posixpath` (WP3) is Python's `posixpath` (`normpath`, `split`, `dirname`, `basename`, `join`) for
+  CloudDrive API paths, next to fav's `pypath` (`pathlib` semantics for local paths). Use `posixpath` where
+  Python calls `posixpath`, `pypath` where it uses `PurePosixPath`; they differ on `..`, `//` and trailing
+  slashes (`goldens/text/posixpath.json`).
 - `tools/parity/parity.py` checks that a claimed Rust test is compiled by its bare function name in the Linux
   test listing. A claim on a function that is not compiled passes if another compiled test has the same name,
   and a Windows-only test cannot be claimed. WP15 (the first Windows-only tests) makes the check match module

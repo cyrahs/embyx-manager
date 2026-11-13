@@ -1,0 +1,507 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "kube",
+  "cases": [
+    {
+      "template": {
+        "apiVersion": "batch/v1",
+        "kind": "Job",
+        "metadata": {
+          "labels": {
+            "app": "embyx-merge"
+          }
+        },
+        "spec": {
+          "backoffLimit": 0,
+          "template": {
+            "spec": {
+              "containers": [
+                {
+                  "name": "merge",
+                  "command": [
+                    "embyx-manager",
+                    "merge-worker"
+                  ],
+                  "image": "placeholder"
+                },
+                {
+                  "name": "sidecar"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "value": {
+        "apiVersion": "batch/v1",
+        "kind": "Job",
+        "metadata": {
+          "labels": {
+            "app": "embyx-merge",
+            "embyx-manager/merge-task": "1"
+          },
+          "name": "embyx-merge-1-abc"
+        },
+        "spec": {
+          "backoffLimit": 0,
+          "template": {
+            "spec": {
+              "containers": [
+                {
+                  "name": "merge",
+                  "command": [
+                    "embyx-manager",
+                    "merge-worker"
+                  ],
+                  "image": "ghcr.io/cyrahs/embyx-manager@sha256:1",
+                  "args": [
+                    "--output",
+                    "o",
+                    "中文"
+                  ]
+                },
+                {
+                  "name": "sidecar"
+                }
+              ]
+            },
+            "metadata": {
+              "labels": {
+                "embyx-manager/merge-task": "1"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "template": {
+        "spec": {
+          "template": {
+            "spec": {
+              "containers": [
+                {}
+              ]
+            }
+          }
+        }
+      },
+      "value": {
+        "spec": {
+          "template": {
+            "spec": {
+              "containers": [
+                {
+                  "image": "ghcr.io/cyrahs/embyx-manager@sha256:1",
+                  "args": [
+                    "--output",
+                    "o",
+                    "中文"
+                  ]
+                }
+              ]
+            },
+            "metadata": {
+              "labels": {
+                "embyx-manager/merge-task": "1"
+              }
+            }
+          }
+        },
+        "metadata": {
+          "name": "embyx-merge-1-abc",
+          "labels": {
+            "embyx-manager/merge-task": "1"
+          }
+        }
+      }
+    },
+    {
+      "template": {
+        "apiVersion": "batch/v1",
+        "kind": "Job",
+        "metadata": {
+          "labels": {
+            "app": "embyx-merge"
+          }
+        },
+        "spec": {
+          "backoffLimit": 0,
+          "template": {
+            "spec": {
+              "containers": [
+                {
+                  "name": "merge",
+                  "command": [
+                    "embyx-manager",
+                    "merge-worker"
+                  ],
+                  "image": "placeholder"
+                },
+                {
+                  "name": "sidecar"
+                }
+              ]
+            },
+            "metadata": {
+              "labels": {
+                "app": "pod"
+              },
+              "annotations": {
+                "a": "b"
+              }
+            }
+          }
+        }
+      },
+      "value": {
+        "apiVersion": "batch/v1",
+        "kind": "Job",
+        "metadata": {
+          "labels": {
+            "app": "embyx-merge",
+            "embyx-manager/merge-task": "1"
+          },
+          "name": "embyx-merge-1-abc"
+        },
+        "spec": {
+          "backoffLimit": 0,
+          "template": {
+            "spec": {
+              "containers": [
+                {
+                  "name": "merge",
+                  "command": [
+                    "embyx-manager",
+                    "merge-worker"
+                  ],
+                  "image": "ghcr.io/cyrahs/embyx-manager@sha256:1",
+                  "args": [
+                    "--output",
+                    "o",
+                    "中文"
+                  ]
+                },
+                {
+                  "name": "sidecar"
+                }
+              ]
+            },
+            "metadata": {
+              "labels": {
+                "app": "pod",
+                "embyx-manager/merge-task": "1"
+              },
+              "annotations": {
+                "a": "b"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "template": {
+        "metadata": {},
+        "spec": {
+          "template": {
+            "spec": {
+              "containers": [
+                {
+                  "name": "merge",
+                  "args": [
+                    "old"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "value": {
+        "metadata": {
+          "name": "embyx-merge-1-abc",
+          "labels": {
+            "embyx-manager/merge-task": "1"
+          }
+        },
+        "spec": {
+          "template": {
+            "spec": {
+              "containers": [
+                {
+                  "name": "merge",
+                  "args": [
+                    "--output",
+                    "o",
+                    "中文"
+                  ],
+                  "image": "ghcr.io/cyrahs/embyx-manager@sha256:1"
+                }
+              ]
+            },
+            "metadata": {
+              "labels": {
+                "embyx-manager/merge-task": "1"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "template": {
+        "metadata": {
+          "name": "old",
+          "labels": {
+            "embyx-manager/merge-task": "old"
+          }
+        },
+        "spec": {
+          "template": {
+            "spec": {
+              "containers": [
+                {}
+              ]
+            }
+          }
+        }
+      },
+      "value": {
+        "metadata": {
+          "name": "embyx-merge-1-abc",
+          "labels": {
+            "embyx-manager/merge-task": "1"
+          }
+        },
+        "spec": {
+          "template": {
+            "spec": {
+              "containers": [
+                {
+                  "image": "ghcr.io/cyrahs/embyx-manager@sha256:1",
+                  "args": [
+                    "--output",
+                    "o",
+                    "中文"
+                  ]
+                }
+              ]
+            },
+            "metadata": {
+              "labels": {
+                "embyx-manager/merge-task": "1"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "template": {},
+      "error": {
+        "type": "KeyError",
+        "message": "'spec'"
+      }
+    },
+    {
+      "template": {
+        "spec": {}
+      },
+      "error": {
+        "type": "KeyError",
+        "message": "'template'"
+      }
+    },
+    {
+      "template": {
+        "spec": {
+          "template": {}
+        }
+      },
+      "error": {
+        "type": "KeyError",
+        "message": "'spec'"
+      }
+    },
+    {
+      "template": {
+        "spec": {
+          "template": {
+            "spec": {}
+          }
+        }
+      },
+      "error": {
+        "type": "KeyError",
+        "message": "'containers'"
+      }
+    },
+    {
+      "template": {
+        "spec": {
+          "template": {
+            "spec": {
+              "containers": []
+            }
+          }
+        }
+      },
+      "error": {
+        "type": "IndexError",
+        "message": "list index out of range"
+      }
+    },
+    {
+      "template": {
+        "spec": {
+          "template": {
+            "spec": {
+              "containers": {}
+            }
+          }
+        }
+      },
+      "error": {
+        "type": "KeyError",
+        "message": "0"
+      }
+    },
+    {
+      "template": {
+        "spec": {
+          "template": {
+            "spec": {
+              "containers": "x"
+            }
+          }
+        }
+      },
+      "error": {
+        "type": "TypeError",
+        "message": "'str' object does not support item assignment"
+      }
+    },
+    {
+      "template": {
+        "metadata": null,
+        "spec": {
+          "template": {
+            "spec": {
+              "containers": [
+                {}
+              ]
+            }
+          }
+        }
+      },
+      "error": {
+        "type": "TypeError",
+        "message": "'NoneType' object does not support item assignment"
+      }
+    },
+    {
+      "template": {
+        "metadata": {
+          "labels": null
+        },
+        "spec": {
+          "template": {
+            "spec": {
+              "containers": [
+                {}
+              ]
+            }
+          }
+        }
+      },
+      "error": {
+        "type": "TypeError",
+        "message": "'NoneType' object does not support item assignment"
+      }
+    },
+    {
+      "template": {
+        "spec": null
+      },
+      "error": {
+        "type": "TypeError",
+        "message": "'NoneType' object is not subscriptable"
+      }
+    },
+    {
+      "template": {
+        "spec": [
+          1
+        ]
+      },
+      "error": {
+        "type": "TypeError",
+        "message": "list indices must be integers or slices, not str"
+      }
+    },
+    {
+      "template": {
+        "spec": {
+          "template": {
+            "metadata": 5,
+            "spec": {
+              "containers": [
+                {}
+              ]
+            }
+          }
+        }
+      },
+      "error": {
+        "type": "AttributeError",
+        "message": "'int' object has no attribute 'setdefault'"
+      }
+    },
+    {
+      "template": {
+        "spec": {
+          "template": {
+            "spec": {
+              "containers": [
+                null
+              ]
+            }
+          }
+        }
+      },
+      "error": {
+        "type": "TypeError",
+        "message": "'NoneType' object does not support item assignment"
+      }
+    },
+    {
+      "template": {
+        "spec": {
+          "template": {
+            "spec": {
+              "containers": [
+                [
+                  1
+                ]
+              ]
+            }
+          }
+        }
+      },
+      "error": {
+        "type": "TypeError",
+        "message": "list indices must be integers or slices, not str"
+      }
+    },
+    {
+      "template": [],
+      "error": {
+        "type": "AttributeError",
+        "message": "'list' object has no attribute 'setdefault'"
+      }
+    }
+  ]
+}

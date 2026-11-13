@@ -40,7 +40,7 @@ tests = [
 
 [WP3]
 title = "CloudDrive on tonic, Kubernetes Jobs"
-status = "pending"
+status = "done"
 tests = [
   "tests/test_clouddrive.py",
   "tests/test_merge_service.py::test_job_names_are_dns_labels",

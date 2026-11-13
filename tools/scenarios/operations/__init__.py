@@ -9,6 +9,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from operations import config, db, harness
+from operations import clouddrive, config, db, harness, kube
 
-OPERATIONS: dict[str, Any] = {**harness.OPERATIONS, **db.OPERATIONS, **config.OPERATIONS}
+OPERATIONS: dict[str, Any] = {
+    **harness.OPERATIONS,
+    **db.OPERATIONS,
+    **config.OPERATIONS,
+    **clouddrive.OPERATIONS,
+    **kube.OPERATIONS,
+}

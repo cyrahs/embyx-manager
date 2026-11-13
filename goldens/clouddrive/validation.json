@@ -1,0 +1,844 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "clouddrive_wrapper",
+  "cases": [
+    {
+      "kind": "api_path",
+      "value": "",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/",
+      "allow_root": {
+        "value": "/"
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "//",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "///",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/a",
+      "allow_root": {
+        "value": "/a"
+      },
+      "deny_root": {
+        "value": "/a"
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/a/",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/a//b",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/a/./b",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/a/../b",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/../a",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/..",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/.",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "a",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "a/b",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "a/../..",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "../a",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "./a",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": ".",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "..",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "//a/b",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "///a/b",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/a/b/",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/a/b//",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/115/embyx_in/ABC-001.mp4",
+      "allow_root": {
+        "value": "/115/embyx_in/ABC-001.mp4"
+      },
+      "deny_root": {
+        "value": "/115/embyx_in/ABC-001.mp4"
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/115/embyx_in/",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/115/a b/c.mp4",
+      "allow_root": {
+        "value": "/115/a b/c.mp4"
+      },
+      "deny_root": {
+        "value": "/115/a b/c.mp4"
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/中文/文件.mp4",
+      "allow_root": {
+        "value": "/中文/文件.mp4"
+      },
+      "deny_root": {
+        "value": "/中文/文件.mp4"
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "a//",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/a/b/..",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/a/b/../..",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/a/b/../../..",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/...",
+      "allow_root": {
+        "value": "/..."
+      },
+      "deny_root": {
+        "value": "/..."
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/a/.../b",
+      "allow_root": {
+        "value": "/a/.../b"
+      },
+      "deny_root": {
+        "value": "/a/.../b"
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/a\\b",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "a/b/../c/./d",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "//..",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/path\nname",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/path\u0000name",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/path\u001fname",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/pathname",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/pathname",
+      "allow_root": {
+        "value": "/pathname"
+      },
+      "deny_root": {
+        "value": "/pathname"
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/pathname",
+      "allow_root": {
+        "value": "/pathname"
+      },
+      "deny_root": {
+        "value": "/pathname"
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/path name",
+      "allow_root": {
+        "value": "/path name"
+      },
+      "deny_root": {
+        "value": "/path name"
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/path\tname",
+      "allow_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      },
+      "deny_root": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive API path must be a canonical absolute POSIX path"
+        }
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/path name",
+      "allow_root": {
+        "value": "/path name"
+      },
+      "deny_root": {
+        "value": "/path name"
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/路径/ok",
+      "allow_root": {
+        "value": "/路径/ok"
+      },
+      "deny_root": {
+        "value": "/路径/ok"
+      }
+    },
+    {
+      "kind": "api_path",
+      "value": "/emoji/😀",
+      "allow_root": {
+        "value": "/emoji/😀"
+      },
+      "deny_root": {
+        "value": "/emoji/😀"
+      }
+    },
+    {
+      "kind": "segment",
+      "value": "",
+      "outcome": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive folder name must be one safe path segment"
+        }
+      }
+    },
+    {
+      "kind": "segment",
+      "value": ".",
+      "outcome": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive folder name must be one safe path segment"
+        }
+      }
+    },
+    {
+      "kind": "segment",
+      "value": "..",
+      "outcome": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive folder name must be one safe path segment"
+        }
+      }
+    },
+    {
+      "kind": "segment",
+      "value": "...",
+      "outcome": {
+        "value": "..."
+      }
+    },
+    {
+      "kind": "segment",
+      "value": "ABC",
+      "outcome": {
+        "value": "ABC"
+      }
+    },
+    {
+      "kind": "segment",
+      "value": "nested/ABC",
+      "outcome": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive folder name must be one safe path segment"
+        }
+      }
+    },
+    {
+      "kind": "segment",
+      "value": "bad\\name",
+      "outcome": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive folder name must be one safe path segment"
+        }
+      }
+    },
+    {
+      "kind": "segment",
+      "value": "bad\nname",
+      "outcome": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive folder name must be one safe path segment"
+        }
+      }
+    },
+    {
+      "kind": "segment",
+      "value": "bad\u0000name",
+      "outcome": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive folder name must be one safe path segment"
+        }
+      }
+    },
+    {
+      "kind": "segment",
+      "value": "badname",
+      "outcome": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive folder name must be one safe path segment"
+        }
+      }
+    },
+    {
+      "kind": "segment",
+      "value": "bad\u001bname",
+      "outcome": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive folder name must be one safe path segment"
+        }
+      }
+    },
+    {
+      "kind": "segment",
+      "value": "okname",
+      "outcome": {
+        "value": "okname"
+      }
+    },
+    {
+      "kind": "segment",
+      "value": "ok",
+      "outcome": {
+        "value": "ok"
+      }
+    },
+    {
+      "kind": "segment",
+      "value": " ",
+      "outcome": {
+        "value": " "
+      }
+    },
+    {
+      "kind": "segment",
+      "value": "ABC-001 (1)",
+      "outcome": {
+        "value": "ABC-001 (1)"
+      }
+    },
+    {
+      "kind": "segment",
+      "value": "中文",
+      "outcome": {
+        "value": "中文"
+      }
+    },
+    {
+      "kind": "segment",
+      "value": "/",
+      "outcome": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive folder name must be one safe path segment"
+        }
+      }
+    },
+    {
+      "kind": "segment",
+      "value": "a/",
+      "outcome": {
+        "error": {
+          "type": "ValueError",
+          "message": "CloudDrive folder name must be one safe path segment"
+        }
+      }
+    }
+  ]
+}

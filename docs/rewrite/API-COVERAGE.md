@@ -57,8 +57,8 @@ does not match the service) and generates client and server with `tonic-prost-bu
 | Server streaming `GetSubFiles` (`for response in stub.GetSubFiles(...)`) | `Streaming<SubFilesReply>::message()` | Test |
 | `NOT_FOUND` → `FileNotFoundError(details)`, `INVALID_ARGUMENT` "can't open a file as directory" → `NotADirectoryError` | `Status::code()` / `message()`, intact also when the stream fails before its first message | Test |
 | Chinese details (`任务已存在`) | `grpc-message` is percent-encoded on the wire and decoded back | Test |
-| `grpc.secure_channel(address, ssl_channel_credentials())` (`secure=True`) | Not probed: needs tonic's `tls-ring` + roots features. WP3 adds them and tests against the fake with a self-signed certificate | — |
-| `timeout=` per call | `Request::set_timeout` (sends `grpc-timeout`) or `tokio::time::timeout` around the call; WP3 decides which matches the Python behaviour on expiry | — |
+| `grpc.secure_channel(address, ssl_channel_credentials())` (`secure=True`) | tonic features `tls-ring` + `tls-webpki-roots`: `ClientTlsConfig::new().with_webpki_roots()` (WP3, D42) | Test: the fake served over TLS with an `rcgen` certificate, trusted and untrusted (`clouddrive/tests.rs`) |
+| `timeout=` per call | Both: `Request::set_timeout` sends `grpc-timeout` as grpcio does, and `tokio::time::timeout` around the whole call (connect and stream included) enforces it; tonic's own `CANCELLED` `Timeout expired` is mapped to grpcio's `DEADLINE_EXCEEDED` `Deadline Exceeded` (WP3) | Test: a stalled fake, both unary and streaming; the fake records the `grpc-timeout` it received |
 
 `CloudDriveSystemInfo` has no version field: the Python `check()` always reports version `''`; WP3 keeps that.
 

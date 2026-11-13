@@ -1,0 +1,143 @@
+# The merge Job contract's Kubernetes side (WP3): the client reads the token and the Job
+# template from the mounted files for each request and Job, starts Jobs on the pod's own
+# image (looked up once), treats 409 on create and 404 on get/delete as answers, tails the
+# Job pod's log, and turns other statuses and a broken template into errors.
+description = "kube: create, read, delete and tail merge Jobs against the fake API"
+operation = "kube.steps"
+
+[args]
+namespace = "media"
+pod_name = "embyx-manager-7d9f-abcde"
+
+[[args.steps]]
+op = "get_job"
+args = { name = "embyx-merge-1-abc-001" }
+
+[[args.steps]]
+op = "create_job"
+args = { name = "embyx-merge-1-abc-001", args = ["merge-worker", "--task", "1", "中文"], task_id = 1 }
+
+[[args.steps]]
+op = "create_job"
+args = { name = "embyx-merge-1-abc-001", args = ["merge-worker", "--task", "1"], task_id = 1 }
+
+[[args.steps]]
+op = "own_image"
+
+[[args.steps]]
+op = "write_template"
+args = { template = { metadata = { labels = { app = "embyx-merge", tier = "batch" } }, spec = { backoffLimit = 0, template = { spec = { restartPolicy = "Never", containers = [{ name = "merge", image = "placeholder" }] } } } } }
+
+[[args.steps]]
+op = "create_job"
+args = { name = "embyx-merge-2-def-002", args = ["merge-worker", "--task", "2"], task_id = 2 }
+
+[[args.steps]]
+op = "get_job"
+args = { name = "embyx-merge-1-abc-001" }
+
+[[args.steps]]
+op = "log_tail"
+args = { name = "embyx-merge-1-abc-001", lines = 5 }
+
+[[args.steps]]
+op = "log_tail"
+args = { name = "embyx-merge-2-def-002" }
+
+[[args.steps]]
+op = "delete_job"
+args = { name = "embyx-merge-1-abc-001" }
+
+[[args.steps]]
+op = "delete_job"
+args = { name = "embyx-merge-1-abc-001" }
+
+[[args.steps]]
+op = "get_job"
+args = { name = "embyx-merge-1-abc-001" }
+
+[[args.steps]]
+op = "write_template"
+args = { template = { spec = { template = {} } } }
+
+[[args.steps]]
+op = "create_job"
+args = { name = "embyx-merge-3-ghi-003", args = [], task_id = 3 }
+
+[roots]
+names = ["mount"]
+
+[[tree]]
+path = "mount/token"
+text = "scenario-service-account-token\n"
+
+[[tree]]
+path = "mount/job.json"
+text = '{"apiVersion": "batch/v1", "kind": "Job", "metadata": {"labels": {"app": "embyx-merge"}}, "spec": {"backoffLimit": 0, "template": {"spec": {"containers": [{"name": "merge", "image": "placeholder", "command": ["embyx-manager"]}]}}}}'
+
+[[kubernetes.routes]]
+method = "GET"
+path = "/api/v1/namespaces/media/pods/embyx-manager-7d9f-abcde"
+body = { spec = { containers = [{ name = "embyx-manager", image = "ghcr.io/cyrahs/embyx-manager:latest" }] }, status = { containerStatuses = [{ name = "embyx-manager", imageID = "docker-pullable://ghcr.io/cyrahs/embyx-manager@sha256:0123abcd" }] } }
+
+[[kubernetes.routes]]
+method = "GET"
+path = "/apis/batch/v1/namespaces/media/jobs/embyx-merge-1-abc-001"
+status = 404
+body = { kind = "Status", reason = "NotFound" }
+times = 1
+
+[[kubernetes.routes]]
+method = "POST"
+path = "/apis/batch/v1/namespaces/media/jobs"
+status = 201
+body = { kind = "Job" }
+times = 1
+
+[[kubernetes.routes]]
+method = "POST"
+path = "/apis/batch/v1/namespaces/media/jobs"
+status = 409
+body = { kind = "Status", reason = "AlreadyExists" }
+times = 1
+
+[[kubernetes.routes]]
+method = "POST"
+path = "/apis/batch/v1/namespaces/media/jobs"
+status = 201
+body = { kind = "Job" }
+times = 1
+
+[[kubernetes.routes]]
+method = "GET"
+path = "/apis/batch/v1/namespaces/media/jobs/embyx-merge-1-abc-001"
+body = { metadata = { name = "embyx-merge-1-abc-001" }, status = { failed = 1, conditions = [{ type = "Failed", status = "True", reason = "BackoffLimitExceeded", message = "Job has reached the specified backoff limit" }] } }
+times = 1
+
+[[kubernetes.routes]]
+method = "GET"
+path = "/api/v1/namespaces/media/pods"
+body = { items = [{ metadata = { name = "embyx-merge-1-abc-001-old" } }, { metadata = { name = "embyx-merge-1-abc-001-x7k2p" } }] }
+times = 1
+
+[[kubernetes.routes]]
+method = "GET"
+path = "/api/v1/namespaces/media/pods/embyx-merge-1-abc-001-x7k2p/log"
+body = "ffmpeg: concat failed\n"
+
+[[kubernetes.routes]]
+method = "GET"
+path = "/api/v1/namespaces/media/pods"
+body = { items = [] }
+
+[[kubernetes.routes]]
+method = "DELETE"
+path = "/apis/batch/v1/namespaces/media/jobs/embyx-merge-1-abc-001"
+body = { kind = "Status", status = "Success" }
+times = 1
+
+[[kubernetes.routes]]
+method = "GET"
+path = "/apis/batch/v1/namespaces/media/jobs/embyx-merge-1-abc-001"
+status = 500
+body = { message = "etcdserver: request timed out" }

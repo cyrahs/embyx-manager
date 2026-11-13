@@ -91,13 +91,16 @@ which is what makes the transcripts comparable. A port copies a fake rule for ru
   server serving the 14 RPCs the client uses, over a socket, so the scenario exercises the real
   client stack. State: directories, files with sizes and hashes, offline tasks, copy tasks, the
   upload queue; scripted errors fail the next `times` calls of a method. The Rust fake serves
-  `GetSystemInfo`, `GetSubFiles` and `MoveFile` in WP0 and answers `UNIMPLEMENTED` with a message
-  naming WP3 for the rest; WP3 ports the remaining eleven with their scenarios.
-- **Kubernetes and Emby** (`fakes/http.py`): a scripted route table (first matching route answers,
-  used up after `times`; anything else is 404 `{"error": "no route"}`). Not ported to Rust in WP0:
-  the Rust harness asserts a spec does not seed them and dumps `{"routes_left": []}`. WP3 ports
-  the route table; a WP that needs a stateful model (Kubernetes Jobs for WP14, Emby playlists for
-  WP8) replaces the route table for that fake on both sides, keeping the call record shape.
+  all 14 RPCs rule for rule (WP3).
+- **Kubernetes and Emby** (`fakes/http.py`; Rust `embyx_clients::fakehttp`): a scripted route
+  table (first matching route answers, matched on method and path without the query, used up
+  after `times`; anything else is 404 `{"error": "no route"}`). Answers are JSON (`json.dumps`
+  with `ensure_ascii=False`), so a text body such as a pod log arrives quoted, on both sides.
+  A WP that needs a stateful model (Kubernetes Jobs for WP14, Emby playlists for WP8) replaces
+  the route table for that fake on both sides, keeping the call record shape.
+
+`embyx_clients::scenario::ScenarioFakes::start(&spec, &recorder)` starts the three fakes the way
+the runner does and `dump()` gives the transcript's `fakes`.
 
 ## Adding a scenario
 
@@ -113,10 +116,12 @@ which is what makes the transcripts comparable. A port copies a fake rule for ru
 
 ## What later work packages need from this
 
-- **WP3 (CloudDrive, Kubernetes client):** ports the rest of the CloudDrive fake and the HTTP
-  route table, and builds the Kubernetes fake API server; keep the call record shape. A
-  CloudDrive mutation that was sent is awaited to its end even when the caller is cancelled: a
-  scenario that cancels must still show the call with its response.
+- **WP3 (done):** `clouddrive/*` and `kube/jobs` run the wrapper and the Jobs client step by step
+  (`clouddrive.steps`, `kube.steps`: a list of `{op, args}` reported as `{op, result | error}`);
+  a later WP can add a spec for a client corner without new operation code. An RPC error is
+  reported as `{type, code, details}`: a transport failure's text names the peer's port and is
+  the stack's own (D40). `clouddrive/cancelled_move` shows a move whose caller was cancelled,
+  with its response.
 - **WP6/WP7 (archive, reconcile, move-in, tracker, 换版):** many files at once. Use `lanes` mode
   with a lane key on the file path when only per-file order is the contract; seed hard links and
   compare `nlink`; database timestamps written with `now()` are `volatile`, timestamps written

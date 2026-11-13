@@ -1,13 +1,22 @@
 //! CloudDrive over gRPC.
 //!
 //! Python origin: `src/embyx_manager/clients/clouddrive/` (`client.py`, `aio.py`, and the
-//! generated `clouddrive_pb2*.py`). WP0 provides only [`proto`], the messages and the
-//! client and server stubs generated from the baseline's descriptor (`build.rs`), limited to
-//! the 14 RPCs the Python client calls, and the start of the scenario fake ([`fake`], tests
-//! only). WP3 ports the wrapper on top of it and the rest of the fake.
+//! generated `clouddrive_pb2*.py`). [`proto`] holds the messages and the client and server
+//! stubs generated from the baseline's descriptor (`build.rs`), limited to the 14 RPCs the
+//! Python client calls; [`client`] is `client.py` (one method per RPC, deadlines, error
+//! mapping); [`aio`] is `aio.py` (path validation, plain values, calls that run to their end
+//! even when the caller is dropped). [`fake`] (tests only) is the recording fake server of the
+//! effect transcripts.
 
+pub mod aio;
+pub mod client;
 #[cfg(any(test, feature = "test-support"))]
 pub mod fake;
+#[cfg(test)]
+mod tests;
+
+pub use aio::{AsyncCloudDrive, CloudFile, CopyStatus, CopyTask, OfflineStatus, OfflineTask, UploadState};
+pub use client::{ClientOptions, CloudDriveClient, CloudDriveError, RpcError, Timeouts};
 
 /// The generated `clouddrive` package: messages, `cloud_drive_file_srv_client` and
 /// `cloud_drive_file_srv_server`.
