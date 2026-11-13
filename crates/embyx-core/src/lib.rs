@@ -9,8 +9,14 @@
 //! Behind the `test-support` feature: [`golden`] reads the Python-generated goldens and
 //! [`scenario`] is the Rust side of the effect transcripts (docs/rewrite/SCENARIOS.md).
 
+pub mod avid;
+pub mod config;
+pub mod cron;
+pub mod errors;
 #[cfg(any(test, feature = "test-support"))]
 pub mod golden;
+pub mod magnet;
+pub mod media;
 pub mod pyjson;
 pub mod pypath;
 pub mod pyre;
@@ -18,3 +24,4 @@ pub mod pytext;
 pub mod pyurl;
 #[cfg(any(test, feature = "test-support"))]
 pub mod scenario;
+pub mod settings;

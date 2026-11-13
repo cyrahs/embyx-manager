@@ -6,6 +6,12 @@
 //! full code-point scan of Python 3.13 (`goldens/text/`).
 //!
 //! Copied from fav (`fav-core/src/pytext.rs`); see docs/CONVENTIONS.md, "Code copied from fav".
+//! WP1 added `str.isalnum()`, `str.isprintable()`, `repr(str)` and `int(str)`, which the
+//! AVID parser, the config sections' messages and the env settings use.
+
+mod tables;
+
+pub use tables::{PY_ALNUM, PY_PRINTABLE};
 
 /// Code-point ranges where Python 3.13's `str.isspace()` is true.
 pub const PY_WHITESPACE: &[(u32, u32)] = &[
@@ -261,9 +267,90 @@ pub fn py_lstrip_chars<'a>(text: &'a str, chars: &[char]) -> &'a str {
     text.trim_start_matches(|ch| chars.contains(&ch))
 }
 
+/// Python `ch.isalnum()`.
+pub fn is_py_alnum(ch: char) -> bool {
+    in_ranges(PY_ALNUM, ch)
+}
+
+/// Python `ch.isprintable()`.
+pub fn is_py_printable(ch: char) -> bool {
+    in_ranges(PY_PRINTABLE, ch)
+}
+
+/// Python `repr(text)` for a `str`: single quotes unless the text holds a single quote and
+/// no double quote; backslash, the quote, `\t`, `\n`, `\r` escaped; other characters that
+/// are not printable written as `\xhh`, `\uhhhh` or `\Uhhhhhhhh`.
+pub fn py_repr(text: &str) -> String {
+    use std::fmt::Write as _;
+    let quote = if text.contains('\'') && !text.contains('"') {
+        '"'
+    } else {
+        '\''
+    };
+    let mut out = String::with_capacity(text.len() + 2);
+    out.push(quote);
+    for ch in text.chars() {
+        match ch {
+            '\\' => out.push_str("\\\\"),
+            '\t' => out.push_str("\\t"),
+            '\n' => out.push_str("\\n"),
+            '\r' => out.push_str("\\r"),
+            ch if ch == quote => {
+                out.push('\\');
+                out.push(ch);
+            }
+            ch if ch.is_ascii() && (ch < ' ' || ch == '\u{7f}') => {
+                let _ = write!(out, "\\x{:02x}", u32::from(ch));
+            }
+            ch if ch.is_ascii() || is_py_printable(ch) => out.push(ch),
+            ch => {
+                let code = u32::from(ch);
+                let _ = if code <= 0xff {
+                    write!(out, "\\x{code:02x}")
+                } else if code <= 0xffff {
+                    write!(out, "\\u{code:04x}")
+                } else {
+                    write!(out, "\\U{code:08x}")
+                };
+            }
+        }
+    }
+    out.push(quote);
+    out
+}
+
+/// Python `int(text)` (base 10): surrounding whitespace dropped, an optional sign, decimal
+/// digits of any script with single underscores between them. The error is Python's
+/// `ValueError` text. Values beyond `i128` are refused with a message of this port's
+/// (Python's ints are unbounded; nothing embyx-manager reads comes close).
+pub fn py_int(text: &str) -> Result<i128, String> {
+    let invalid = || format!("invalid literal for int() with base 10: {}", py_repr(text));
+    let stripped = py_strip(text);
+    let (negative, digits) = match stripped.as_bytes().first() {
+        Some(b'-') => (true, &stripped[1..]),
+        Some(b'+') => (false, &stripped[1..]),
+        _ => (false, stripped),
+    };
+    if digits.is_empty() || digits.starts_with('_') || digits.ends_with('_') || digits.contains("__") {
+        return Err(invalid());
+    }
+    let mut total: i128 = 0;
+    for ch in digits.chars().filter(|&ch| ch != '_') {
+        let digit = py_decimal_value(ch).ok_or_else(invalid)?;
+        total = total
+            .checked_mul(10)
+            .and_then(|value| value.checked_add(i128::from(digit)))
+            .ok_or_else(|| format!("integer out of range: {}", py_repr(text)))?;
+    }
+    Ok(if negative { -total } else { total })
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{PY_DECIMALS, PY_DIGITS, PY_WHITESPACE, py_int_decimal, py_isdecimal, py_isdigit, py_split, py_strip};
+    use super::{
+        PY_ALNUM, PY_DECIMALS, PY_DIGITS, PY_PRINTABLE, PY_WHITESPACE, py_int, py_int_decimal, py_isdecimal,
+        py_isdigit, py_repr, py_split, py_strip,
+    };
     use crate::golden;
 
     fn golden_ranges(path: &str) -> Vec<(u32, u32)> {
@@ -314,5 +401,44 @@ mod tests {
             ["*/5", "*", "*", "*", "*"]
         );
         assert!(py_isdigit("\u{661}\u{662}") && py_isdigit("\u{b2}") && !py_isdigit("\u{bd}") && !py_isdigit(""));
+    }
+
+    #[test]
+    fn alnum_table_matches_python_isalnum() {
+        assert_eq!(golden_ranges("text/isalnum.json"), PY_ALNUM);
+    }
+
+    #[test]
+    fn printable_table_matches_python_isprintable() {
+        assert_eq!(golden_ranges("text/isprintable.json"), PY_PRINTABLE);
+    }
+
+    #[test]
+    fn repr_quotes_and_escapes_like_python() {
+        assert_eq!(py_repr("vip"), "'vip'");
+        assert_eq!(py_repr("it's"), "\"it's\"");
+        assert_eq!(py_repr("it's \"x\""), "'it\\'s \"x\"'");
+        assert_eq!(py_repr("a\\b\t\n\r\u{0}\u{7f}"), "'a\\\\b\\t\\n\\r\\x00\\x7f'");
+        assert_eq!(
+            py_repr("ä 排行 \u{a0}\u{2028}\u{e000}\u{1f600}\u{e0001}"),
+            "'ä 排行 \\xa0\\u2028\\ue000\u{1f600}\\U000e0001'"
+        );
+    }
+
+    #[test]
+    fn int_parses_like_python_int() {
+        assert_eq!(py_int(" 7 "), Ok(7));
+        assert_eq!(py_int("+7"), Ok(7));
+        assert_eq!(py_int("-0"), Ok(0));
+        assert_eq!(py_int("1_000"), Ok(1000));
+        assert_eq!(py_int("\u{661}\u{662}"), Ok(12));
+        assert_eq!(py_int("\u{3000}12\u{1c}"), Ok(12));
+        for bad in ["", " ", "x", "7.0", "1__0", "_1", "1_", "+-1", "\u{b2}", "0x10", "1 0"] {
+            assert_eq!(
+                py_int(bad),
+                Err(format!("invalid literal for int() with base 10: {}", py_repr(bad))),
+                "{bad:?}"
+            );
+        }
     }
 }

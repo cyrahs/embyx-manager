@@ -105,6 +105,15 @@ pub fn compile_fancy(pattern: &str, ignore_case: bool, dot_all: bool) -> fancy_r
         .expect("valid pattern")
 }
 
+/// `re.compile(pattern, flags)` for a user-supplied pattern: `Err` holds the engine's
+/// message instead of panicking.
+pub fn try_compile_fancy(pattern: &str, ignore_case: bool, dot_all: bool) -> Result<fancy_regex::Regex, String> {
+    fancy_regex::RegexBuilder::new(&format!("{}{}", flags(ignore_case, dot_all), translate(pattern)))
+        .backtrack_limit(BACKTRACK_LIMIT)
+        .build()
+        .map_err(|error| error.to_string())
+}
+
 /// Python has no limit; this one is far beyond any page the parsers see. A search that
 /// reaches it counts as no match.
 const BACKTRACK_LIMIT: usize = 50_000_000;

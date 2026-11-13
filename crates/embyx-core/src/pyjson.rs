@@ -46,6 +46,16 @@ pub enum Key {
     Null,
 }
 
+impl Key {
+    /// The key's text when it is a string, as every key `json.loads` reads is.
+    pub fn as_str(&self) -> Option<&str> {
+        match self {
+            Self::Str(text) => Some(text),
+            _ => None,
+        }
+    }
+}
+
 /// An insertion-ordered dictionary, like Python's `dict`.
 #[derive(Debug, Clone, Default)]
 pub struct Dict {
