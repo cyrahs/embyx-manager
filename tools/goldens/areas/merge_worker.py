@@ -171,6 +171,43 @@ def merge_scenarios() -> list[dict[str, Any]]:
             ffmpeg=[ffmpeg(100, stdout=progress(2.0)), ffmpeg(100, stdout=progress(2.0)), ffmpeg(3000)],
         )
     )
+    # The second remux fails: the staging directory goes, the error names that ffmpeg run.
+    out.append(
+        scenario(
+            'merge_reorder_fails',
+            files={**parts_of(3, '.mkv'), 'upload/': {}},
+            command={'parts': part_paths(3, '.mkv'), 'output': f'{ROOT}/upload/ABC-123.mkv'},
+            probes=reordered,
+            ffmpeg=[
+                ffmpeg(100, stdout=progress(2.0)),
+                ffmpeg(40, stderr='[matroska @ 0x1] broken\nError muxing\n', returncode=1),
+            ],
+        )
+    )
+    # A NaN in a stream property: json.loads gives every NaN the same object, so the
+    # signatures still compare equal and the merge goes ahead.
+    nan_probe = raw_probe(
+        '{"format": {"duration": "2.0"}, "streams": [{"codec_type": "video", "codec_name": "h264", '
+        '"width": NaN, "height": 120}]}'
+    )
+    out.append(
+        scenario(
+            'merge_nan_in_signature',
+            files={**parts_of(2), 'upload/': {}},
+            command={'parts': part_paths(2)},
+            probes={**dict.fromkeys(part_paths(2), nan_probe), partial: probe('4.0')},
+            ffmpeg=[ffmpeg(5000, stdout=progress(4.0))],
+        )
+    )
+    # ffprobe itself is missing: Python's OSError text, a failed merge.
+    out.append(
+        scenario(
+            'merge_ffprobe_missing',
+            files={**parts_of(2), 'upload/': {}},
+            command={'parts': part_paths(2)},
+            probes={part_paths(2)[0]: {'oserror': errno.ENOENT}},
+        )
+    )
     out.append(
         scenario(
             'merge_reorder_short_of_space',
@@ -691,6 +728,8 @@ class _Recorder:
     def run(self, argv: list[str], **_kwargs: Any) -> types.SimpleNamespace:
         self.calls.append({'argv': [self.mask(arg) for arg in argv]})
         answer = self.spec['probes'].get(self.mask(argv[-1]), failed_probe('No such file or directory\n'))
+        if 'oserror' in answer:
+            raise OSError(answer['oserror'], os.strerror(answer['oserror']), argv[0])
         return types.SimpleNamespace(
             returncode=answer['returncode'],
             stdout=answer['stdout'].encode(),

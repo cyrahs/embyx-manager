@@ -242,11 +242,17 @@ fn is_video(stream: &[Value]) -> bool {
     stream.first().and_then(Value::as_str) == Some("video")
 }
 
+/// Python's tuple `==` over two signatures. Tuples compare their items by identity first, and
+/// `json.loads` gives every `NaN` the same float object, so a `NaN` equals a `NaN` here.
 fn same_signature(a: &[Vec<Value>], b: &[Vec<Value>]) -> bool {
+    let same = |x: &Value, y: &Value| match (x, y) {
+        (Value::Float(x), Value::Float(y)) if x.is_nan() && y.is_nan() => true,
+        _ => py::eq(x, y),
+    };
     a.len() == b.len()
         && a.iter()
             .zip(b)
-            .all(|(x, y)| x.len() == y.len() && x.iter().zip(y).all(|(x, y)| py::eq(x, y)))
+            .all(|(x, y)| x.len() == y.len() && x.iter().zip(y).all(|(x, y)| same(x, y)))
 }
 
 impl Probe {
@@ -625,13 +631,27 @@ impl Worker {
         // error every few bytes, and once the pipe's 64 KiB fill up ffmpeg stops mid-write.
         let reader = {
             let tail = Arc::clone(&tail);
-            std::thread::Builder::new()
+            let spawned = std::thread::Builder::new()
                 .name("ffmpeg-stderr".to_owned())
-                .spawn(move || keep_tail(stderr, &tail))
-                .map_err(|error| WorkerError::Failed(py::os_error(&error, None, None)))?
+                .spawn(move || keep_tail(stderr, &tail));
+            match spawned {
+                Ok(reader) => reader,
+                Err(error) => {
+                    // `threading.Thread.start` raises inside `with Popen`, whose exit waits.
+                    stop(process.as_ref());
+                    return Err(cannot_start_thread(&error));
+                }
+            }
         };
         let stall_seconds = self.settings.stall_seconds;
-        let mut watch = StallWatch::start(Arc::clone(&process), stall_seconds);
+        let mut watch = match StallWatch::start(Arc::clone(&process), stall_seconds) {
+            Ok(watch) => watch,
+            Err(error) => {
+                stop(process.as_ref());
+                let _ = reader.join();
+                return Err(cannot_start_thread(&error));
+            }
+        };
         let outcome = follow_progress(stdout, duration, status, &watch, process.as_ref());
         watch.stop();
         if !matches!(process.try_wait(), Ok(Some(_))) {
@@ -1369,6 +1389,19 @@ fn follow_progress(
 }
 
 /// `Popen.wait()`, polling so the stall watch can still kill a process that closed its output.
+/// Kill a process that is still running and reap it.
+fn stop(process: &dyn Process) {
+    if !matches!(process.try_wait(), Ok(Some(_))) {
+        process.kill();
+    }
+    let _ = wait(process);
+}
+
+/// `RuntimeError: can't start new thread`, which Python's worker does not catch.
+fn cannot_start_thread(_error: &io::Error) -> WorkerError {
+    WorkerError::Uncaught(PyException::new("RuntimeError", "can't start new thread"))
+}
+
 fn wait(process: &dyn Process) -> Option<i64> {
     loop {
         match process.try_wait() {
@@ -1388,7 +1421,7 @@ struct StallWatch {
 }
 
 impl StallWatch {
-    fn start(process: Arc<dyn Process>, stall_seconds: f64) -> Self {
+    fn start(process: Arc<dyn Process>, stall_seconds: f64) -> io::Result<Self> {
         let last = Arc::new(Mutex::new(Instant::now()));
         let fired = Arc::new(AtomicBool::new(false));
         let (done, stopped) = mpsc::channel::<()>();
@@ -1408,15 +1441,14 @@ impl StallWatch {
                             return;
                         }
                     }
-                })
-                .ok()
+                })?
         };
-        Self {
+        Ok(Self {
             last,
             fired,
             done: Some(done),
-            thread,
-        }
+            thread: Some(thread),
+        })
     }
 
     fn advanced(&self) {

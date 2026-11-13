@@ -13,15 +13,12 @@ use std::path::Path;
 use embyx_core::pyjson::{self, Value};
 use embyx_core::pytext;
 
-/// `sum(values)` of Python floats, which starts from the int `0`: the first value is taken as
-/// it is, the rest are added with Neumaier's compensation (Python 3.12 and later), and the
-/// compensation is added at the end unless it is zero or not finite.
+/// `sum(values)` of Python floats. `CPython` starts from the int `0`, so the first value is
+/// added to `0.0` (`sum([-0.0])` is `0.0`); the values are added with Neumaier's compensation
+/// (Python 3.12 and later), and the compensation is added at the end unless it is zero or not
+/// finite. An empty input gives `0.0` where Python gives the int `0` (D145).
 pub(crate) fn sum(values: impl IntoIterator<Item = f64>) -> f64 {
-    let mut values = values.into_iter();
-    let Some(first) = values.next() else {
-        return 0.0;
-    };
-    let mut total = first;
+    let mut total = 0.0_f64;
     let mut compensation = 0.0_f64;
     for value in values {
         let next = total + value;
@@ -354,6 +351,9 @@ mod tests {
         assert_eq!(sum([1e100, 1.0, -1e100, 1.0]).to_bits(), 2.0_f64.to_bits());
         assert_eq!(sum(std::iter::empty()).to_bits(), 0.0_f64.to_bits());
         assert!(sum([f64::INFINITY, 1.0]).is_infinite());
+        // CPython starts from the int 0: a negative zero does not survive.
+        assert_eq!(sum([-0.0, -0.0]).to_bits(), 0.0_f64.to_bits());
+        assert_eq!(sum([-0.0]).to_bits(), 0.0_f64.to_bits());
     }
 
     #[test]

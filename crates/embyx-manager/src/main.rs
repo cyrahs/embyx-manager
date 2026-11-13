@@ -31,8 +31,11 @@ enum Command {
     TranscodeWorker(TranscodeWorkerArgs),
 }
 
-/// `merge-worker`'s arguments (`__main__.py`, `worker_parser`).
+/// `merge-worker`'s arguments (`__main__.py`, `worker_parser`). As with argparse, a unique
+/// prefix of a long option is taken (`--out`), a repeated option keeps its last value, and a
+/// negative number is a value (`--reserve-gib -1`).
 #[derive(Debug, Args)]
+#[command(infer_long_args = true, args_override_self = true)]
 struct MergeWorkerArgs {
     /// the merged file to write
     #[arg(long)]
@@ -41,7 +44,7 @@ struct MergeWorkerArgs {
     #[arg(long)]
     status: String,
     /// space to leave free on the volume
-    #[arg(long = "reserve-gib", default_value_t = 20.0, value_parser = parse_float)]
+    #[arg(long = "reserve-gib", default_value_t = 20.0, value_parser = parse_float, allow_negative_numbers = true)]
     reserve_gib: f64,
     /// probe the parts and copy their audio here for the home transcode worker
     #[arg(long = "home-prepare")]
@@ -163,6 +166,52 @@ mod tests {
     #[test]
     fn the_command_line_is_well_formed() {
         Cli::command().debug_assert();
+    }
+
+    /// argparse's habits, which the Python app never relies on but an operator might.
+    #[test]
+    fn merge_worker_options_parse_as_argparse_parses_them() {
+        let parse = |args: &[&str]| {
+            let cli = Cli::try_parse_from(args).expect("parses");
+            let Some(Command::MergeWorker(args)) = cli.command else {
+                panic!("merge-worker");
+            };
+            args
+        };
+        // A unique prefix, a repeated option (the last wins), a negative number.
+        let args = parse(&[
+            "embyx-manager",
+            "merge-worker",
+            "--out",
+            "x.mp4",
+            "--output",
+            "A.mp4",
+            "--stat",
+            "s.json",
+            "--reserve-gib",
+            "-1.5",
+            "--",
+            "a-1.mp4",
+            "a-2.mp4",
+        ]);
+        assert_eq!(args.output, "A.mp4");
+        assert_eq!(args.status, "s.json");
+        assert!((args.reserve_gib + 1.5).abs() < f64::EPSILON);
+        assert_eq!(args.parts, ["a-1.mp4", "a-2.mp4"]);
+        // An ambiguous prefix is refused, as argparse refuses it.
+        assert!(
+            Cli::try_parse_from([
+                "embyx-manager",
+                "merge-worker",
+                "--output",
+                "A.mp4",
+                "--status",
+                "s.json",
+                "--home",
+                "x",
+            ])
+            .is_err()
+        );
     }
 
     #[test]

@@ -123,6 +123,20 @@ def _trees() -> list[dict[str, Any]]:
             },
         }
     )
+    # Symbolic links: a linked directory is listed but not entered (os.walk), a linked strm is
+    # read through the link, a dangling one is unreadable.
+    trees.append(
+        {
+            'name': 'links',
+            'files': {
+                'x/L-001/L-001-cd1.strm': _part('rank/L', 'L-001-cd1.mp4'),
+                'x/L-001/L-001-cd2.strm': _part('rank/L', 'L-001-cd2.mp4'),
+                'y/LINKED': {'symlink': '../x/L-001'},
+                'z/F-001/F-001-cd1.strm': {'symlink': '../../x/L-001/L-001-cd1.strm'},
+                'z/F-001/F-001-cd2.strm': {'symlink': 'missing.strm'},
+            },
+        }
+    )
     return trees
 
 
@@ -150,7 +164,9 @@ def _scans() -> list[dict[str, Any]]:
                 for relative, content in tree['files'].items():
                     path = root / relative
                     path.parent.mkdir(parents=True, exist_ok=True)
-                    if isinstance(content, list):
+                    if isinstance(content, dict):
+                        path.symlink_to(content['symlink'])
+                    elif isinstance(content, list):
                         path.write_bytes(bytes(content))
                     else:
                         path.write_bytes(content.encode('utf-8'))

@@ -629,6 +629,432 @@
     },
     {
       "scenario": {
+        "name": "merge_reorder_fails",
+        "files": {
+          "library/ABC-123-cd1.mkv": {
+            "size": 1000000
+          },
+          "library/ABC-123-cd2.mkv": {
+            "size": 1000000
+          },
+          "library/ABC-123-cd3.mkv": {
+            "size": 1000000
+          },
+          "upload/": {}
+        },
+        "command": {
+          "parts": [
+            "<root>/library/ABC-123-cd1.mkv",
+            "<root>/library/ABC-123-cd2.mkv",
+            "<root>/library/ABC-123-cd3.mkv"
+          ],
+          "output": "<root>/upload/ABC-123.mkv",
+          "status": "<root>/upload/.merge/1.json",
+          "reserve_gib": 0.0,
+          "home_prepare": null,
+          "home_assemble": null
+        },
+        "free": 1000000000000,
+        "memory_max": "3221225472\n",
+        "probes": {
+          "<root>/library/ABC-123-cd1.mkv": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"aac\",\n            \"codec_type\": \"audio\",\n            \"sample_rate\": \"44100\",\n            \"channels\": 1,\n            \"bit_rate\": \"128000\",\n            \"nb_frames\": \"94\"\n        },\n        {\n            \"index\": 1,\n            \"codec_name\": \"h264\",\n            \"codec_type\": \"video\",\n            \"width\": 160,\n            \"height\": 120,\n            \"nb_frames\": \"20\"\n        }\n    ],\n    \"format\": {\n        \"duration\": \"2.0\"\n    }\n}\n",
+            "stderr": ""
+          },
+          "<root>/library/ABC-123-cd2.mkv": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"h264\",\n            \"codec_type\": \"video\",\n            \"width\": 160,\n            \"height\": 120,\n            \"nb_frames\": \"20\"\n        },\n        {\n            \"index\": 1,\n            \"codec_name\": \"aac\",\n            \"codec_type\": \"audio\",\n            \"sample_rate\": \"44100\",\n            \"channels\": 1,\n            \"bit_rate\": \"128000\",\n            \"nb_frames\": \"94\"\n        }\n    ],\n    \"format\": {\n        \"duration\": \"2.0\"\n    }\n}\n",
+            "stderr": ""
+          },
+          "<root>/library/ABC-123-cd3.mkv": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"aac\",\n            \"codec_type\": \"audio\",\n            \"sample_rate\": \"44100\",\n            \"channels\": 1,\n            \"bit_rate\": \"128000\",\n            \"nb_frames\": \"94\"\n        },\n        {\n            \"index\": 1,\n            \"codec_name\": \"h264\",\n            \"codec_type\": \"video\",\n            \"width\": 160,\n            \"height\": 120,\n            \"nb_frames\": \"20\"\n        }\n    ],\n    \"format\": {\n        \"duration\": \"2.0\"\n    }\n}\n",
+            "stderr": ""
+          }
+        },
+        "ffmpeg": [
+          {
+            "write": 100,
+            "stdout": "frame=10\ntotal_size=4096\nout_time_us=500000\nout_time_ms=500000\nspeed=1x\nprogress=continue\nframe=10\ntotal_size=8192\nout_time_us=1000000\nout_time_ms=1000000\nspeed=1x\nprogress=continue\nframe=10\ntotal_size=12288\nout_time_us=1500000\nout_time_ms=1500000\nspeed=1x\nprogress=continue\nframe=10\ntotal_size=16384\nout_time_us=2000000\nout_time_ms=2000000\nspeed=1x\nprogress=end\n",
+            "stderr": "",
+            "returncode": 0
+          },
+          {
+            "write": 40,
+            "stdout": "",
+            "stderr": "[matroska @ 0x1] broken\nError muxing\n",
+            "returncode": 1
+          }
+        ]
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/library/ABC-123-cd1.mkv"
+          ]
+        },
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/library/ABC-123-cd2.mkv"
+          ]
+        },
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/library/ABC-123-cd3.mkv"
+          ]
+        },
+        {
+          "argv": [
+            "ffmpeg",
+            "-hide_banner",
+            "-nostdin",
+            "-loglevel",
+            "error",
+            "-y",
+            "-i",
+            "<root>/library/ABC-123-cd1.mkv",
+            "-map",
+            "0:v",
+            "-map",
+            "0:a?",
+            "-c",
+            "copy",
+            "-f",
+            "matroska",
+            "-progress",
+            "pipe:1",
+            "-nostats",
+            "<root>/upload/.ABC-123.mkv.parts/ABC-123-cd1.mkv"
+          ],
+          "scripts": {}
+        },
+        {
+          "argv": [
+            "ffmpeg",
+            "-hide_banner",
+            "-nostdin",
+            "-loglevel",
+            "error",
+            "-y",
+            "-i",
+            "<root>/library/ABC-123-cd3.mkv",
+            "-map",
+            "0:v",
+            "-map",
+            "0:a?",
+            "-c",
+            "copy",
+            "-f",
+            "matroska",
+            "-progress",
+            "pipe:1",
+            "-nostats",
+            "<root>/upload/.ABC-123.mkv.parts/ABC-123-cd3.mkv"
+          ],
+          "scripts": {}
+        }
+      ],
+      "writes": [
+        "{\"state\": \"running\", \"phase\": \"checking\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"checking\", \"progress\": 0.0, \"total_bytes\": 3000000, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"probing\", \"progress\": 0.0, \"total_bytes\": 3000000, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"reordering\", \"progress\": 0.0, \"total_bytes\": 3000000, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"reordering\", \"progress\": 0.5, \"total_bytes\": 3000000, \"written_bytes\": 12288, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"reordering\", \"progress\": 0.0, \"total_bytes\": 3000000, \"written_bytes\": 16384, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"failed\", \"phase\": \"reordering\", \"progress\": 0.0, \"total_bytes\": 3000000, \"written_bytes\": 16384, \"error\": \"ffmpeg failed: [matroska @ 0x1] broken | Error muxing\", \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}"
+      ],
+      "code": 1,
+      "uncaught": null,
+      "stderr": "merge failed: ffmpeg failed: [matroska @ 0x1] broken | Error muxing\n",
+      "tree": [
+        [
+          "cgroup/memory.max",
+          11
+        ],
+        [
+          "library/ABC-123-cd1.mkv",
+          1000000
+        ],
+        [
+          "library/ABC-123-cd2.mkv",
+          1000000
+        ],
+        [
+          "library/ABC-123-cd3.mkv",
+          1000000
+        ],
+        [
+          "tmp/",
+          null
+        ],
+        [
+          "upload/.merge/1.json",
+          223
+        ]
+      ]
+    },
+    {
+      "scenario": {
+        "name": "merge_nan_in_signature",
+        "files": {
+          "library/ABC-123-cd1.mp4": {
+            "size": 1000000
+          },
+          "library/ABC-123-cd2.mp4": {
+            "size": 1000000
+          },
+          "upload/": {}
+        },
+        "command": {
+          "parts": [
+            "<root>/library/ABC-123-cd1.mp4",
+            "<root>/library/ABC-123-cd2.mp4"
+          ],
+          "output": "<root>/upload/ABC-123.mp4",
+          "status": "<root>/upload/.merge/1.json",
+          "reserve_gib": 0.0,
+          "home_prepare": null,
+          "home_assemble": null
+        },
+        "free": 1000000000000,
+        "memory_max": "3221225472\n",
+        "probes": {
+          "<root>/library/ABC-123-cd1.mp4": {
+            "returncode": 0,
+            "stdout": "{\"format\": {\"duration\": \"2.0\"}, \"streams\": [{\"codec_type\": \"video\", \"codec_name\": \"h264\", \"width\": NaN, \"height\": 120}]}",
+            "stderr": ""
+          },
+          "<root>/library/ABC-123-cd2.mp4": {
+            "returncode": 0,
+            "stdout": "{\"format\": {\"duration\": \"2.0\"}, \"streams\": [{\"codec_type\": \"video\", \"codec_name\": \"h264\", \"width\": NaN, \"height\": 120}]}",
+            "stderr": ""
+          },
+          "<root>/upload/.ABC-123.mp4.part": {
+            "returncode": 0,
+            "stdout": "{\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"h264\",\n            \"codec_type\": \"video\",\n            \"width\": 160,\n            \"height\": 120,\n            \"nb_frames\": \"20\"\n        },\n        {\n            \"index\": 1,\n            \"codec_name\": \"aac\",\n            \"codec_type\": \"audio\",\n            \"sample_rate\": \"44100\",\n            \"channels\": 1,\n            \"bit_rate\": \"128000\",\n            \"nb_frames\": \"94\"\n        }\n    ],\n    \"format\": {\n        \"duration\": \"4.0\"\n    }\n}\n",
+            "stderr": ""
+          }
+        },
+        "ffmpeg": [
+          {
+            "write": 5000,
+            "stdout": "frame=10\ntotal_size=4096\nout_time_us=1000000\nout_time_ms=1000000\nspeed=1x\nprogress=continue\nframe=10\ntotal_size=8192\nout_time_us=2000000\nout_time_ms=2000000\nspeed=1x\nprogress=continue\nframe=10\ntotal_size=12288\nout_time_us=3000000\nout_time_ms=3000000\nspeed=1x\nprogress=continue\nframe=10\ntotal_size=16384\nout_time_us=4000000\nout_time_ms=4000000\nspeed=1x\nprogress=end\n",
+            "stderr": "",
+            "returncode": 0
+          }
+        ]
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/library/ABC-123-cd1.mp4"
+          ]
+        },
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/library/ABC-123-cd2.mp4"
+          ]
+        },
+        {
+          "argv": [
+            "ffmpeg",
+            "-hide_banner",
+            "-nostdin",
+            "-loglevel",
+            "error",
+            "-y",
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            "<root>/tmp/concat.txt",
+            "-map",
+            "0:v",
+            "-map",
+            "0:a?",
+            "-c",
+            "copy",
+            "-f",
+            "mp4",
+            "-progress",
+            "pipe:1",
+            "-nostats",
+            "<root>/upload/.ABC-123.mp4.part"
+          ],
+          "scripts": {
+            "<root>/tmp/concat.txt": "file '<root>/library/ABC-123-cd1.mp4'\nfile '<root>/library/ABC-123-cd2.mp4'\n"
+          }
+        },
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/upload/.ABC-123.mp4.part"
+          ]
+        }
+      ],
+      "writes": [
+        "{\"state\": \"running\", \"phase\": \"checking\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"checking\", \"progress\": 0.0, \"total_bytes\": 2000000, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"probing\", \"progress\": 0.0, \"total_bytes\": 2000000, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"merging\", \"progress\": 0.0, \"total_bytes\": 2000000, \"duration\": 4.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"merging\", \"progress\": 0.5, \"total_bytes\": 2000000, \"duration\": 4.0, \"written_bytes\": 12288, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"verifying\", \"progress\": 1.0, \"total_bytes\": 2000000, \"duration\": 4.0, \"written_bytes\": 16384, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"hashing\", \"progress\": 0.0, \"total_bytes\": 2000000, \"duration\": 4.0, \"written_bytes\": 16384, \"size\": 5000, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"done\", \"phase\": \"done\", \"progress\": 1.0, \"total_bytes\": 2000000, \"duration\": 4.0, \"written_bytes\": 16384, \"size\": 5000, \"sha1\": \"4BA51528E69C2EFD8C40CDEAC3EE1984ACC05478\", \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}"
+      ],
+      "code": 0,
+      "uncaught": null,
+      "stderr": "",
+      "tree": [
+        [
+          "cgroup/memory.max",
+          11
+        ],
+        [
+          "library/ABC-123-cd1.mp4",
+          1000000
+        ],
+        [
+          "library/ABC-123-cd2.mp4",
+          1000000
+        ],
+        [
+          "tmp/concat.txt",
+          76
+        ],
+        [
+          "upload/.merge/1.json",
+          232
+        ],
+        [
+          "upload/ABC-123.mp4",
+          5000
+        ]
+      ]
+    },
+    {
+      "scenario": {
+        "name": "merge_ffprobe_missing",
+        "files": {
+          "library/ABC-123-cd1.mp4": {
+            "size": 1000000
+          },
+          "library/ABC-123-cd2.mp4": {
+            "size": 1000000
+          },
+          "upload/": {}
+        },
+        "command": {
+          "parts": [
+            "<root>/library/ABC-123-cd1.mp4",
+            "<root>/library/ABC-123-cd2.mp4"
+          ],
+          "output": "<root>/upload/ABC-123.mp4",
+          "status": "<root>/upload/.merge/1.json",
+          "reserve_gib": 0.0,
+          "home_prepare": null,
+          "home_assemble": null
+        },
+        "free": 1000000000000,
+        "memory_max": "3221225472\n",
+        "probes": {
+          "<root>/library/ABC-123-cd1.mp4": {
+            "oserror": 2
+          }
+        },
+        "ffmpeg": []
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            "<root>/library/ABC-123-cd1.mp4"
+          ]
+        }
+      ],
+      "writes": [
+        "{\"state\": \"running\", \"phase\": \"checking\", \"progress\": 0.0, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"checking\", \"progress\": 0.0, \"total_bytes\": 2000000, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"running\", \"phase\": \"probing\", \"progress\": 0.0, \"total_bytes\": 2000000, \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}",
+        "{\"state\": \"failed\", \"phase\": \"probing\", \"progress\": 0.0, \"total_bytes\": 2000000, \"error\": \"[Errno 2] No such file or directory: 'ffprobe'\", \"updated_at\": \"2026-11-13T22:30:26.123456+00:00\"}"
+      ],
+      "code": 1,
+      "uncaught": null,
+      "stderr": "merge failed: [Errno 2] No such file or directory: 'ffprobe'\n",
+      "tree": [
+        [
+          "cgroup/memory.max",
+          11
+        ],
+        [
+          "library/ABC-123-cd1.mp4",
+          1000000
+        ],
+        [
+          "library/ABC-123-cd2.mp4",
+          1000000
+        ],
+        [
+          "tmp/",
+          null
+        ],
+        [
+          "upload/.merge/1.json",
+          189
+        ]
+      ]
+    },
+    {
+      "scenario": {
         "name": "merge_reorder_short_of_space",
         "files": {
           "library/ABC-123-cd1.mkv": {

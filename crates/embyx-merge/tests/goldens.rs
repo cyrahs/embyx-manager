@@ -85,6 +85,14 @@ impl Exec for Recorder {
             .push(Value::Dict(call));
         let key = self.mask(argv.last().expect("a path"));
         let answer = self.probes.get(&key);
+        if let Some(code) = answer.and_then(|answer| match answer {
+            Value::Dict(fields) => fields.get("oserror"),
+            _ => None,
+        }) {
+            return Err(io::Error::from_raw_os_error(
+                i32::try_from(golden::int(code)).expect("errno"),
+            ));
+        }
         Ok(match answer {
             Some(answer) => Captured {
                 returncode: i64::try_from(golden::int(golden::get(answer, "returncode"))).expect("small"),
@@ -620,6 +628,11 @@ fn scans_find_what_python_finds() {
             let path = tmp.path().join(relative.as_str().expect("a path"));
             fs::create_dir_all(path.parent().expect("parent")).expect("mkdir");
             let bytes = match content {
+                Value::Dict(link) => {
+                    let target = text(link.get("symlink").expect("a symlink target"));
+                    std::os::unix::fs::symlink(target, &path).expect("symlink");
+                    continue;
+                }
                 Value::Str(content) => content.clone().into_bytes(),
                 Value::List(values) => values
                     .iter()

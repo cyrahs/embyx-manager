@@ -3833,6 +3833,331 @@
           "complete": false
         }
       ]
+    },
+    {
+      "tree": "links",
+      "files": {
+        "x/L-001/L-001-cd1.strm": "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4\n",
+        "x/L-001/L-001-cd2.strm": "/mnt/cd2/115/embyx/rank/L/L-001-cd2.mp4\n",
+        "y/LINKED": {
+          "symlink": "../x/L-001"
+        },
+        "z/F-001/F-001-cd1.strm": {
+          "symlink": "../../x/L-001/L-001-cd1.strm"
+        },
+        "z/F-001/F-001-cd2.strm": {
+          "symlink": "missing.strm"
+        }
+      },
+      "library_root": "/mnt/cd2/115/embyx",
+      "titles": [
+        {
+          "avid": "F-001",
+          "directory": "z/F-001",
+          "parts": [
+            [
+              1,
+              "z/F-001/F-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4"
+            ],
+            [
+              2,
+              "z/F-001/F-001-cd2.strm",
+              ""
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "L-001",
+          "directory": "x/L-001",
+          "parts": [
+            [
+              1,
+              "x/L-001/L-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4"
+            ],
+            [
+              2,
+              "x/L-001/L-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "L",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        }
+      ]
+    },
+    {
+      "tree": "links",
+      "files": {
+        "x/L-001/L-001-cd1.strm": "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4\n",
+        "x/L-001/L-001-cd2.strm": "/mnt/cd2/115/embyx/rank/L/L-001-cd2.mp4\n",
+        "y/LINKED": {
+          "symlink": "../x/L-001"
+        },
+        "z/F-001/F-001-cd1.strm": {
+          "symlink": "../../x/L-001/L-001-cd1.strm"
+        },
+        "z/F-001/F-001-cd2.strm": {
+          "symlink": "missing.strm"
+        }
+      },
+      "library_root": "/mnt/cd2/115/embyx/",
+      "titles": [
+        {
+          "avid": "F-001",
+          "directory": "z/F-001",
+          "parts": [
+            [
+              1,
+              "z/F-001/F-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4"
+            ],
+            [
+              2,
+              "z/F-001/F-001-cd2.strm",
+              ""
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "L-001",
+          "directory": "x/L-001",
+          "parts": [
+            [
+              1,
+              "x/L-001/L-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4"
+            ],
+            [
+              2,
+              "x/L-001/L-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "rank",
+          "brand": "L",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        }
+      ]
+    },
+    {
+      "tree": "links",
+      "files": {
+        "x/L-001/L-001-cd1.strm": "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4\n",
+        "x/L-001/L-001-cd2.strm": "/mnt/cd2/115/embyx/rank/L/L-001-cd2.mp4\n",
+        "y/LINKED": {
+          "symlink": "../x/L-001"
+        },
+        "z/F-001/F-001-cd1.strm": {
+          "symlink": "../../x/L-001/L-001-cd1.strm"
+        },
+        "z/F-001/F-001-cd2.strm": {
+          "symlink": "missing.strm"
+        }
+      },
+      "library_root": "/mnt/cd2/115/embyx/rank",
+      "titles": [
+        {
+          "avid": "F-001",
+          "directory": "z/F-001",
+          "parts": [
+            [
+              1,
+              "z/F-001/F-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4"
+            ],
+            [
+              2,
+              "z/F-001/F-001-cd2.strm",
+              ""
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "L-001",
+          "directory": "x/L-001",
+          "parts": [
+            [
+              1,
+              "x/L-001/L-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4"
+            ],
+            [
+              2,
+              "x/L-001/L-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        }
+      ]
+    },
+    {
+      "tree": "links",
+      "files": {
+        "x/L-001/L-001-cd1.strm": "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4\n",
+        "x/L-001/L-001-cd2.strm": "/mnt/cd2/115/embyx/rank/L/L-001-cd2.mp4\n",
+        "y/LINKED": {
+          "symlink": "../x/L-001"
+        },
+        "z/F-001/F-001-cd1.strm": {
+          "symlink": "../../x/L-001/L-001-cd1.strm"
+        },
+        "z/F-001/F-001-cd2.strm": {
+          "symlink": "missing.strm"
+        }
+      },
+      "library_root": "mnt/cd2/115/embyx",
+      "titles": [
+        {
+          "avid": "F-001",
+          "directory": "z/F-001",
+          "parts": [
+            [
+              1,
+              "z/F-001/F-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4"
+            ],
+            [
+              2,
+              "z/F-001/F-001-cd2.strm",
+              ""
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "L-001",
+          "directory": "x/L-001",
+          "parts": [
+            [
+              1,
+              "x/L-001/L-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4"
+            ],
+            [
+              2,
+              "x/L-001/L-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "outside_library",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        }
+      ]
+    },
+    {
+      "tree": "links",
+      "files": {
+        "x/L-001/L-001-cd1.strm": "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4\n",
+        "x/L-001/L-001-cd2.strm": "/mnt/cd2/115/embyx/rank/L/L-001-cd2.mp4\n",
+        "y/LINKED": {
+          "symlink": "../x/L-001"
+        },
+        "z/F-001/F-001-cd1.strm": {
+          "symlink": "../../x/L-001/L-001-cd1.strm"
+        },
+        "z/F-001/F-001-cd2.strm": {
+          "symlink": "missing.strm"
+        }
+      },
+      "library_root": "/",
+      "titles": [
+        {
+          "avid": "F-001",
+          "directory": "z/F-001",
+          "parts": [
+            [
+              1,
+              "z/F-001/F-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4"
+            ],
+            [
+              2,
+              "z/F-001/F-001-cd2.strm",
+              ""
+            ]
+          ],
+          "missing": [],
+          "library_dir": null,
+          "brand": null,
+          "problem": "unreadable_strm",
+          "part_count": 2,
+          "stackable": true,
+          "complete": false
+        },
+        {
+          "avid": "L-001",
+          "directory": "x/L-001",
+          "parts": [
+            [
+              1,
+              "x/L-001/L-001-cd1.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd1.mp4"
+            ],
+            [
+              2,
+              "x/L-001/L-001-cd2.strm",
+              "/mnt/cd2/115/embyx/rank/L/L-001-cd2.mp4"
+            ]
+          ],
+          "missing": [],
+          "library_dir": "mnt/cd2/115/embyx/rank",
+          "brand": "L",
+          "problem": null,
+          "part_count": 2,
+          "stackable": true,
+          "complete": true
+        }
+      ]
     }
   ]
 }
