@@ -269,7 +269,7 @@ feed. Where the TLS fingerprint matters the probe runs from the production netwo
 | WP10 | 4 fill actor | pending | PostgreSQL repository, models, cloud moves, adapters | 1,850 | WP3, WP5 |
 | WP11 | 4 fill actor | pending | Service: scan, plan, local moves with journal and recovery, cloud moves | 2,100 | WP10 |
 | WP12 | 4 fill actor | pending | Job manager, API, health, lifespan | 1,200 | WP11, WP4 |
-| WP13 | 5 merge | pending | Detect, task repository, the `merge-worker` command (probe, checks, concat, remux, AV1 re-encode, home prepare and assemble) | 1,650 | WP1 |
+| WP13 | 5 merge | in review | Detect, task repository, the `merge-worker` command (probe, checks, concat, remux, AV1 re-encode, home prepare and assemble) | 1,650 | WP1 |
 | WP14 | 5 merge | pending | Merge service, auto-merge, transcode bookkeeping, merge API, transcode listener. May be split into "service" and "API + transcode" | 2,300 | WP13, WP3, WP9 |
 | WP15 | 5 merge | pending | Home transcode worker, Windows build and a Windows CI job, protocol tests both ways | 1,150 | WP14 |
 | WP16 | 6 wrap-up | pending | `Dockerfile.rust` (build only), memory benchmark, parity audit, catch-up with `main`, level 2 and level 3 as far as Max allowed, final report data | new | all |
@@ -397,6 +397,21 @@ or says why one stays.
 - The config snapshot refresh loop and the store's wiring into the app are WP4's / WP9's (`bootstrap.py`);
   `embyx_db::config_store::ConfigStore` offers `load`, `refresh`, `get::<Section>()`, `get_with_version`,
   `sections` and `update`.
+- `embyx_merge::py` (WP13) holds private Python-semantics helpers the worker needed (CPython's float `sum`,
+  `float()` of text, `==` across int/float/bool, `.Nf` and `{:,}` formatting, `splitlines`, the `OSError` text
+  `[Errno N] strerror: 'path'`). `embyx-clients` has its own `OSError` text (`PyOsError`) and `embyx-core`'s
+  `pytext` overlaps; WP16 moves what two crates use into `embyx-core`.
+- Two subprocess runners: `embyx_clients::net::subprocess::SystemRunner` (async, D3) and the merge worker's
+  blocking `embyx_merge::worker::exec::SystemExec` (D140). WP15's home worker picks one; WP16 drops the
+  other if nothing else uses it.
+- `embyx-merge`'s database half sits behind its default `db` feature and the binary leaves it out, so the
+  binary still builds on Windows (D144). WP14 puts the service behind `db` too; WP4 (`serve`) and WP15 (the
+  Windows asset with only `transcode-worker`) settle the binary's features.
+- The real-ffmpeg cross-check (`crates/embyx-merge/tests/ffmpeg_parity.rs` with
+  `tools/merge_ffmpeg/python_worker.py`) runs the Python worker from the Rust tests, so `rust.yml` installs
+  ffmpeg and uv before `cargo test`. CI's ffmpeg is Ubuntu's (6.1), the image's Debian 13's (7.1.5); the
+  argument lists are pinned by goldens, so only the real-ffmpeg tests see the version. WP16 keeps or drops
+  the cross-check with the Python tree.
 
 ## Experiment log
 

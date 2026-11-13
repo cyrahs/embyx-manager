@@ -129,6 +129,9 @@ the runner does and `dump()` gives the transcript's `fakes`.
 - **WP9 (scheduler):** fires come from `clock`; a scenario runs one tick, not a loop.
 - **WP11 (fill-actor service):** one scenario per journal state to recover from; seed the journal
   rows and the half-done tree, and let the transcript show the recovered end state.
+- **WP13 (done):** `merge/tasks` runs `MergeTaskRepository` step by step (`merge.tasks`, the same
+  `{op, args}` shape); its rows pin the `parts_json` bytes. Timestamps the repository takes from the wall
+  clock are `rows.merge_tasks.*` selectors; a WP14 spec can add steps without new operation code.
 - **WP14 (merge service):** the Kubernetes fake needs Job state (create, read, delete, status) on
   both sides; generated Job names and task UUIDs are covered by the UUID step or by
   `calls.kubernetes.<method>.<path>` selectors.

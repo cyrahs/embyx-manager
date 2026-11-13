@@ -13,5 +13,6 @@ service. CI runs every `--check` in `.github/workflows/rust.yml`. Lint them with
 | CloudDrive descriptor: the `FileDescriptorSet` embedded in `clouddrive_pb2.py`, for tonic's code generation | `uv run python tools/codegen/clouddrive_descriptor.py` (write), `--check` |
 | TLS fingerprint probe: ClientHello and HTTP/2 frames of curl_cffi and httpx against the Rust candidates of `crates/embyx-clients/examples/fetch_probe.rs`, on a local listener only (`docs/rewrite/API-COVERAGE.md`) | `uv run --with hpack==4.1.0 python tools/probes/tls_fingerprint.py [--json OUT]` |
 | Live fingerprint run: the same clients against AVBase and JavBus, once, only from the probe pod Max approved (`live_probe_pod.sh <commit>`); without `--live` it stops after the local part | `uv run --with hpack==4.1.0 python tools/probes/live_fingerprint.py [--live]` |
+| Merge worker cross-check: the baseline's `worker.run` on real ffmpeg, printing every status write; `crates/embyx-merge/tests/ffmpeg_parity.rs` runs it beside the Rust worker on copies of the same parts (needs ffmpeg) | `uv run python tools/merge_ffmpeg/python_worker.py '<command as JSON>'` (the Rust test calls it) |
 | Tree check: baseline files unchanged, no ignored Rust tests, `unsafe` only where allowed | `tools/check_tree.sh` |
 | Tool self-tests | `uv run pytest tools/tests -q -p no:cacheprovider` |
