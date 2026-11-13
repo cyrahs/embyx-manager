@@ -146,6 +146,17 @@ async def test_an_oversize_title_waits_for_the_worker_without_holding_up_the_que
     assert harness.service.reserved_bytes((big,)) > 0
 
 
+async def test_the_worker_starts_while_an_earlier_title_is_only_uploading(harness: Harness) -> None:
+    big = await harness.create()
+    small = await harness.create('ABP-123', tuple(f'/mnt/cd2/115/embyx/rank/ABP-123-cd{n}.mp4' for n in (1, 2)))
+    await harness.repository.transition(small.id, MergeState.QUEUED, MergeState.UPLOADING)
+
+    answer = await harness.claim()
+
+    assert answer == {'task': None, 'wait': 'probing', 'task_id': big.id}
+    assert (await harness.state(big)).state == MergeState.TRANSCODING
+
+
 async def test_without_the_setting_an_oversize_title_goes_to_the_clusters_own_encoder(harness: Harness) -> None:
     harness.config = MergeConfig(work_dir=str(harness.work))
     task = await harness.create()
