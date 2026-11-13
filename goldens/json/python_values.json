@@ -1,0 +1,112 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "json_dumps",
+  "cases": [
+    {
+      "expr": "{10: 'a', 9: 'b', 100: 'c'}",
+      "outputs": {
+        "hash": "{\"9\":\"b\",\"10\":\"a\",\"100\":\"c\"}",
+        "pretty": "{\n  \"9\": \"b\",\n  \"10\": \"a\",\n  \"100\": \"c\"\n}\n",
+        "compact": "{\"10\":\"a\",\"9\":\"b\",\"100\":\"c\"}",
+        "plain": "{\"10\": \"a\", \"9\": \"b\", \"100\": \"c\"}",
+        "pretty_unsorted": "{\n  \"10\": \"a\",\n  \"9\": \"b\",\n  \"100\": \"c\"\n}",
+        "sorted_plain": "{\"9\": \"b\", \"10\": \"a\", \"100\": \"c\"}",
+        "sorted_compact_ascii": "{\"9\":\"b\",\"10\":\"a\",\"100\":\"c\"}",
+        "ascii": "{\"10\": \"a\", \"9\": \"b\", \"100\": \"c\"}"
+      }
+    },
+    {
+      "expr": "{-1: 'neg', 0: 'zero', 2: 'two'}",
+      "outputs": {
+        "hash": "{\"-1\":\"neg\",\"0\":\"zero\",\"2\":\"two\"}",
+        "pretty": "{\n  \"-1\": \"neg\",\n  \"0\": \"zero\",\n  \"2\": \"two\"\n}\n",
+        "compact": "{\"-1\":\"neg\",\"0\":\"zero\",\"2\":\"two\"}",
+        "plain": "{\"-1\": \"neg\", \"0\": \"zero\", \"2\": \"two\"}",
+        "pretty_unsorted": "{\n  \"-1\": \"neg\",\n  \"0\": \"zero\",\n  \"2\": \"two\"\n}",
+        "sorted_plain": "{\"-1\": \"neg\", \"0\": \"zero\", \"2\": \"two\"}",
+        "sorted_compact_ascii": "{\"-1\":\"neg\",\"0\":\"zero\",\"2\":\"two\"}",
+        "ascii": "{\"-1\": \"neg\", \"0\": \"zero\", \"2\": \"two\"}"
+      }
+    },
+    {
+      "expr": "{1.5: 'x', 0.25: 'y'}",
+      "outputs": {
+        "hash": "{\"0.25\":\"y\",\"1.5\":\"x\"}",
+        "pretty": "{\n  \"0.25\": \"y\",\n  \"1.5\": \"x\"\n}\n",
+        "compact": "{\"1.5\":\"x\",\"0.25\":\"y\"}",
+        "plain": "{\"1.5\": \"x\", \"0.25\": \"y\"}",
+        "pretty_unsorted": "{\n  \"1.5\": \"x\",\n  \"0.25\": \"y\"\n}",
+        "sorted_plain": "{\"0.25\": \"y\", \"1.5\": \"x\"}",
+        "sorted_compact_ascii": "{\"0.25\":\"y\",\"1.5\":\"x\"}",
+        "ascii": "{\"1.5\": \"x\", \"0.25\": \"y\"}"
+      }
+    },
+    {
+      "expr": "{True: 't', False: 'f'}",
+      "outputs": {
+        "hash": "{\"false\":\"f\",\"true\":\"t\"}",
+        "pretty": "{\n  \"false\": \"f\",\n  \"true\": \"t\"\n}\n",
+        "compact": "{\"true\":\"t\",\"false\":\"f\"}",
+        "plain": "{\"true\": \"t\", \"false\": \"f\"}",
+        "pretty_unsorted": "{\n  \"true\": \"t\",\n  \"false\": \"f\"\n}",
+        "sorted_plain": "{\"false\": \"f\", \"true\": \"t\"}",
+        "sorted_compact_ascii": "{\"false\":\"f\",\"true\":\"t\"}",
+        "ascii": "{\"true\": \"t\", \"false\": \"f\"}"
+      }
+    },
+    {
+      "expr": "{None: 'none'}",
+      "outputs": {
+        "hash": "{\"null\":\"none\"}",
+        "pretty": "{\n  \"null\": \"none\"\n}\n",
+        "compact": "{\"null\":\"none\"}",
+        "plain": "{\"null\": \"none\"}",
+        "pretty_unsorted": "{\n  \"null\": \"none\"\n}",
+        "sorted_plain": "{\"null\": \"none\"}",
+        "sorted_compact_ascii": "{\"null\":\"none\"}",
+        "ascii": "{\"null\": \"none\"}"
+      }
+    },
+    {
+      "expr": "{'k': (1, 'two', (3,))}",
+      "outputs": {
+        "hash": "{\"k\":[1,\"two\",[3]]}",
+        "pretty": "{\n  \"k\": [\n    1,\n    \"two\",\n    [\n      3\n    ]\n  ]\n}\n",
+        "compact": "{\"k\":[1,\"two\",[3]]}",
+        "plain": "{\"k\": [1, \"two\", [3]]}",
+        "pretty_unsorted": "{\n  \"k\": [\n    1,\n    \"two\",\n    [\n      3\n    ]\n  ]\n}",
+        "sorted_plain": "{\"k\": [1, \"two\", [3]]}",
+        "sorted_compact_ascii": "{\"k\":[1,\"two\",[3]]}",
+        "ascii": "{\"k\": [1, \"two\", [3]]}"
+      }
+    },
+    {
+      "expr": "[float('nan'), float('inf'), float('-inf')]",
+      "outputs": {
+        "hash": "[NaN,Infinity,-Infinity]",
+        "pretty": "[\n  NaN,\n  Infinity,\n  -Infinity\n]\n",
+        "compact": "[NaN,Infinity,-Infinity]",
+        "plain": "[NaN, Infinity, -Infinity]",
+        "pretty_unsorted": "[\n  NaN,\n  Infinity,\n  -Infinity\n]",
+        "sorted_plain": "[NaN, Infinity, -Infinity]",
+        "sorted_compact_ascii": "[NaN,Infinity,-Infinity]",
+        "ascii": "[NaN, Infinity, -Infinity]"
+      }
+    },
+    {
+      "expr": "{'b': 1.0, 'a': -0.0}",
+      "outputs": {
+        "hash": "{\"a\":-0.0,\"b\":1.0}",
+        "pretty": "{\n  \"a\": -0.0,\n  \"b\": 1.0\n}\n",
+        "compact": "{\"b\":1.0,\"a\":-0.0}",
+        "plain": "{\"b\": 1.0, \"a\": -0.0}",
+        "pretty_unsorted": "{\n  \"b\": 1.0,\n  \"a\": -0.0\n}",
+        "sorted_plain": "{\"a\": -0.0, \"b\": 1.0}",
+        "sorted_compact_ascii": "{\"a\":-0.0,\"b\":1.0}",
+        "ascii": "{\"b\": 1.0, \"a\": -0.0}"
+      }
+    }
+  ]
+}

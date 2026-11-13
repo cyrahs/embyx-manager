@@ -1,0 +1,6 @@
+# Python tests the Rust build does not port, each with a reason of at least 20 characters
+# (tools/parity/parity.py). WP16 re-reads every entry.
+#
+# [[waiver]]
+# test = "tests/test_x.py::test_y"
+# reason = "Why the behaviour it checks does not exist in the Rust build."

@@ -1,0 +1,204 @@
+name: Rust rewrite
+
+# Checks for the Rust build (docs/rewrite/PLAN.md), on pull requests into `rust` and on
+# pushes to it. Read-only by design: no job here builds or publishes an image, deploys or
+# tags, and none has a token that could. The Python tree's own CI (ci.yml) runs as well.
+
+on:
+  push:
+    branches: [ rust ]
+  pull_request:
+    branches: [ rust ]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rust-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CARGO_TERM_COLOR: always
+  # Goldens and transcripts are made with this exact Python (docs/CONVENTIONS.md).
+  UV_PYTHON: '3.13.18'
+
+jobs:
+  # The Python tree is the reference and must stay byte-identical to BASELINE.
+  tree:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        fetch-depth: 0
+
+    - name: Python tree unchanged, no ignored Rust tests, unsafe confined
+      run: tools/check_tree.sh
+
+  python-tools:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: tests
+          POSTGRES_DB: embyx_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tests -d embyx_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # A disposable server: each scenario creates and drops its own database.
+      EMBYX_MANAGER_TEST_DATABASE_URL: postgresql://tests@127.0.0.1:5432/embyx_test
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v9.0.0
+      with:
+        python-version: '3.13.18'
+        enable-cache: true
+
+    - name: Install dependencies
+      run: uv sync --locked
+
+    - name: Goldens match the Python baseline
+      run: uv run python tools/goldens/generate.py --check
+
+    - name: Effect transcripts match the Python baseline
+      run: uv run python tools/scenarios/runner.py --check
+
+    - name: CloudDrive descriptor matches the baseline stubs
+      run: uv run python tools/codegen/clouddrive_descriptor.py --check
+
+    - name: Tool self-tests
+      run: uv run pytest tools/tests -q -p no:cacheprovider
+
+    - name: Ruff (tools)
+      run: |
+        uv run ruff check tools
+        uv run ruff format --check tools
+
+  # Format, clippy, the tests (none may be ignored) and the parity check in one job, so
+  # they share one compile. Debug info is reduced to line tables: backtraces keep file and
+  # line, and compiling and linking the test binaries gets faster (as in fav's CI).
+  rust:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: tests
+          POSTGRES_DB: embyx_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tests -d embyx_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # Tests that need PostgreSQL create their own temporary database through this.
+      EMBYX_MANAGER_TEST_DATABASE_URL: postgresql://tests@127.0.0.1:5432/embyx_test
+      RUSTFLAGS: -D warnings
+      CARGO_INCREMENTAL: '0'
+      CARGO_PROFILE_DEV_DEBUG: line-tables-only
+
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        # The parity check reads the base branch's scope file.
+        fetch-depth: 0
+
+    - name: Install the pinned toolchain (rust-toolchain.toml)
+      run: |
+        rustup toolchain install
+        rustup show active-toolchain
+
+    - uses: Swatinem/rust-cache@v2
+
+    - name: Format
+      run: cargo fmt --all -- --check
+
+    - name: Clippy
+      run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+    - name: Test (no test may be ignored)
+      run: |
+        set -o pipefail
+        cargo test --workspace --locked 2>&1 | tee "$RUNNER_TEMP/cargo-test.log"
+        if grep -E '^test result: .* [1-9][0-9]* ignored' "$RUNNER_TEMP/cargo-test.log"; then
+          echo "::error::ignored tests are not allowed"
+          exit 1
+        fi
+
+    - name: List compiled tests for the parity check
+      run: cargo test --workspace --locked -- --list --format terse > "$RUNNER_TEMP/rust-tests.txt"
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v9.0.0
+      with:
+        python-version: '3.13.18'
+        enable-cache: true
+
+    - name: Test parity
+      run: |
+        uv sync --locked
+        uv run pytest --collect-only -q > "$RUNNER_TEMP/pytest-collected.txt"
+        base_args=()
+        if [ -n "${BASE_REV}" ] && git show "${BASE_REV}:tools/parity/scope.toml" > "$RUNNER_TEMP/base-scope.toml" 2>/dev/null; then
+          base_args=(--base-scope "$RUNNER_TEMP/base-scope.toml")
+        else
+          echo "no scope file at ${BASE_REV}; skipping the base comparison"
+        fi
+        uv run python tools/parity/parity.py --check \
+          --pytest-collected "$RUNNER_TEMP/pytest-collected.txt" \
+          --rust-tests "$RUNNER_TEMP/rust-tests.txt" \
+          "${base_args[@]}"
+      env:
+        BASE_REV: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
+
+  # The home transcode worker runs on Windows (WP15). Its crate and the binary must build
+  # there, and the process-control probe runs there.
+  windows:
+    runs-on: windows-latest
+
+    env:
+      RUSTFLAGS: -D warnings
+      CARGO_INCREMENTAL: '0'
+      CARGO_PROFILE_DEV_DEBUG: line-tables-only
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Install the pinned toolchain (rust-toolchain.toml)
+      run: |
+        rustup toolchain install
+        rustup show active-toolchain
+
+    - uses: Swatinem/rust-cache@v2
+
+    - name: Clippy (worker crate and binary)
+      run: cargo clippy -p embyx-transcode-worker -p embyx-manager --all-targets --locked -- -D warnings
+
+    - name: Test (worker crate and binary; no test may be ignored)
+      shell: bash
+      run: |
+        set -o pipefail
+        cargo test -p embyx-transcode-worker -p embyx-manager --locked 2>&1 | tee "$RUNNER_TEMP/cargo-test.log"
+        if grep -E '^test result: .* [1-9][0-9]* ignored' "$RUNNER_TEMP/cargo-test.log"; then
+          echo "::error::ignored tests are not allowed"
+          exit 1
+        fi
+
+    - name: Build the binary
+      run: cargo build -p embyx-manager --locked

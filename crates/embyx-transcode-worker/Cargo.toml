@@ -1,0 +1,23 @@
+[package]
+name = "embyx-transcode-worker"
+description = "The home transcode worker of embyx-manager (Windows and Linux; no database or gRPC)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["rt", "time", "signal", "macros"] }
+
+[target.'cfg(unix)'.dev-dependencies]
+nix.workspace = true
+
+[target.'cfg(windows)'.dev-dependencies]
+windows-sys.workspace = true
+windows-link = "0.2"

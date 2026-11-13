@@ -1,0 +1,19 @@
+# The repository's ruff rules, plus what command-line tools need (adapted from fav).
+extend = "../pyproject.toml"
+# The application package is first-party here too (import sorting).
+src = ["../src", "."]
+
+[lint]
+extend-ignore = [
+  "T201",    # these are CLI tools; print is their output
+  "INP001",  # scripts and their modules, not an importable package
+  "S603",    # the tools run fixed command lines of their own (git, cargo, openssl)
+  "S607",
+]
+
+[lint.per-file-ignores]
+# Same allowances the repository's own tests take (pyproject.toml, tests/**).
+# Wire-format parsing: protocol numbers are the point.
+"probes/*" = ["PLR2004", "C901"]
+"parity/parity.py" = ["C901"]
+"tests/*" = ["ANN", "S101", "ARG001", "PLR2004", "TC003", "SLF001", "E501"]

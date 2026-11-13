@@ -1,0 +1,130 @@
+{
+  "calls": [
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "MoveFile",
+      "request": {
+        "conflictPolicy": "Skip",
+        "destPath": "/115/out",
+        "theFilePaths": [
+          "/115/in/a.txt"
+        ]
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [
+          "/115/out/a.txt"
+        ],
+        "success": true
+      },
+      "seq": 1
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/",
+        "/115/in",
+        "/115/out"
+      ],
+      "files": [
+        {
+          "hashes": {},
+          "path": "/115/in/b.txt",
+          "size": 3
+        },
+        {
+          "hashes": {
+            "2": "0123456789abcdef0123456789abcdef01234567"
+          },
+          "path": "/115/out/a.txt",
+          "size": 8
+        }
+      ],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "harness.trivial",
+  "outcome": {
+    "result": {
+      "move": {
+        "errorMessage": "",
+        "resultFilePaths": [
+          "/115/out/a.txt"
+        ],
+        "success": true
+      },
+      "target": "{upload}/out/a.txt"
+    }
+  },
+  "rows": {
+    "items": [
+      {
+        "created_at": "<volatile:1>",
+        "id": 1,
+        "meta_json": "{\"size\": 8, \"ratio\": 1.0}",
+        "moved_at": "2026-11-13T18:22:00+00:00",
+        "name": "a.txt",
+        "state": "moved"
+      },
+      {
+        "created_at": "<volatile:1>",
+        "id": 2,
+        "meta_json": "{}",
+        "moved_at": null,
+        "name": "b.txt",
+        "state": "new"
+      }
+    ]
+  },
+  "scenario": "harness/trivial",
+  "tree": {
+    "library": [
+      {
+        "kind": "dir",
+        "path": "sorted"
+      }
+    ],
+    "upload": [
+      {
+        "kind": "dir",
+        "path": "in"
+      },
+      {
+        "kind": "file",
+        "nlink": 2,
+        "path": "in/b-link.txt",
+        "sha256": "cd2eb0837c9b4c96",
+        "size": 3
+      },
+      {
+        "kind": "file",
+        "nlink": 2,
+        "path": "in/b.txt",
+        "sha256": "cd2eb0837c9b4c96",
+        "size": 3
+      },
+      {
+        "kind": "dir",
+        "path": "out"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "out/a.txt",
+        "sha256": "fed7f05c10bc95d5",
+        "size": 8
+      }
+    ]
+  }
+}

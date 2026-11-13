@@ -18,3 +18,6 @@ src/embyx_manager/static/
 
 # agent scratch
 .claude/
+
+# Rust build (docs/rewrite/PLAN.md)
+/target/

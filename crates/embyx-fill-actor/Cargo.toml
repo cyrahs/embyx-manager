@@ -1,0 +1,17 @@
+[package]
+name = "embyx-fill-actor"
+description = "The fill-actor pipeline of embyx-manager: scan, plan, journaled local moves and cloud moves"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+
+[dev-dependencies]
+rustix.workspace = true
+tempfile.workspace = true

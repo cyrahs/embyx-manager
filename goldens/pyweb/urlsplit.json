@@ -1,0 +1,78 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "pyweb",
+  "cases": [
+    {
+      "url": "https://i.pximg.net/img-original/img/2024/01/01/00/00/00/1_p0.jpg",
+      "parts": [
+        "https",
+        "i.pximg.net",
+        "/img-original/img/2024/01/01/00/00/00/1_p0.jpg",
+        "",
+        ""
+      ]
+    },
+    {
+      "url": "https://i.pximg.net/no-extension",
+      "parts": [
+        "https",
+        "i.pximg.net",
+        "/no-extension",
+        "",
+        ""
+      ]
+    },
+    {
+      "url": "https://i.pximg.net/a.b/c?x=1.png#y.gif",
+      "parts": [
+        "https",
+        "i.pximg.net",
+        "/a.b/c",
+        "x=1.png",
+        "y.gif"
+      ]
+    },
+    {
+      "url": "/wiki/File:A.png",
+      "parts": [
+        "",
+        "",
+        "/wiki/File:A.png",
+        "",
+        ""
+      ]
+    },
+    {
+      "url": "no-scheme.jpg",
+      "parts": [
+        "",
+        "",
+        "no-scheme.jpg",
+        "",
+        ""
+      ]
+    },
+    {
+      "url": "1:2/x.png",
+      "parts": [
+        "",
+        "",
+        "1:2/x.png",
+        "",
+        ""
+      ]
+    },
+    {
+      "url": "HTTP://Host/Path.PNG",
+      "parts": [
+        "http",
+        "Host",
+        "/Path.PNG",
+        "",
+        ""
+      ]
+    }
+  ]
+}
