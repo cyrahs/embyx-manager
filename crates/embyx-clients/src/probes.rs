@@ -124,8 +124,13 @@ mod grpc {
         assert_eq!(file.code(), Code::InvalidArgument);
         assert!(file.message().contains("can't open a file as directory"));
 
-        let not_ported = client.get_copy_tasks(authorized(())).await.expect_err("not ported");
-        assert_eq!(not_ported.code(), Code::Unimplemented);
+        // The rest of the 14 RPCs (WP3): an empty copy-task list from a fresh fake.
+        let copies = client
+            .get_copy_tasks(authorized(()))
+            .await
+            .expect("GetCopyTasks")
+            .into_inner();
+        assert!(copies.copy_tasks.is_empty());
 
         let methods: Vec<String> = recorder
             .calls()
@@ -134,7 +139,14 @@ mod grpc {
             .collect();
         assert_eq!(
             methods,
-            ["GetSystemInfo", "MoveFile", "GetSubFiles", "GetSubFiles", "GetSubFiles"]
+            [
+                "GetSystemInfo",
+                "MoveFile",
+                "GetSubFiles",
+                "GetSubFiles",
+                "GetSubFiles",
+                "GetCopyTasks"
+            ]
         );
         drop(served);
     }

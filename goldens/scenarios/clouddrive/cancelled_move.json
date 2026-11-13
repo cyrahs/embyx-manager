@@ -1,0 +1,59 @@
+{
+  "calls": [
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "MoveFile",
+      "request": {
+        "conflictPolicy": "Skip",
+        "destPath": "/115/out",
+        "theFilePaths": [
+          "/115/in/ABC-001.mp4"
+        ]
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [
+          "/115/out/ABC-001.mp4"
+        ],
+        "success": true
+      },
+      "seq": 1
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/",
+        "/115/in",
+        "/115/out"
+      ],
+      "files": [
+        {
+          "hashes": {},
+          "path": "/115/out/ABC-001.mp4",
+          "size": 1
+        }
+      ],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "clouddrive.cancelled_move",
+  "outcome": {
+    "result": {
+      "caller": "cancelled"
+    }
+  },
+  "rows": {},
+  "scenario": "clouddrive/cancelled_move",
+  "tree": {}
+}

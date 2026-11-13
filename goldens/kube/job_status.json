@@ -1,0 +1,289 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "kube",
+  "cases": [
+    {
+      "job": {},
+      "outcome": "running",
+      "failure": ""
+    },
+    {
+      "job": {
+        "status": null
+      },
+      "outcome": "running",
+      "failure": ""
+    },
+    {
+      "job": {
+        "status": {}
+      },
+      "outcome": "running",
+      "failure": ""
+    },
+    {
+      "job": {
+        "status": {
+          "conditions": [
+            {
+              "type": "Complete",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "outcome": "succeeded",
+      "failure": ""
+    },
+    {
+      "job": {
+        "status": {
+          "conditions": [
+            {
+              "type": "Failed",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "outcome": "failed",
+      "failure": ""
+    },
+    {
+      "job": {
+        "status": {
+          "conditions": [
+            {
+              "type": "Failed",
+              "status": "True",
+              "reason": "DeadlineExceeded"
+            }
+          ]
+        }
+      },
+      "outcome": "failed",
+      "failure": "DeadlineExceeded"
+    },
+    {
+      "job": {
+        "status": {
+          "conditions": [
+            {
+              "type": "Failed",
+              "status": "True",
+              "reason": "BackoffLimitExceeded",
+              "message": "Job has reached the specified backoff limit"
+            }
+          ]
+        }
+      },
+      "outcome": "failed",
+      "failure": "Job has reached the specified backoff limit"
+    },
+    {
+      "job": {
+        "status": {
+          "conditions": [
+            {
+              "type": "Failed",
+              "status": "True",
+              "message": "",
+              "reason": "R"
+            }
+          ]
+        }
+      },
+      "outcome": "failed",
+      "failure": "R"
+    },
+    {
+      "job": {
+        "status": {
+          "conditions": [
+            {
+              "type": "Failed",
+              "status": "True",
+              "message": null,
+              "reason": null
+            }
+          ]
+        }
+      },
+      "outcome": "failed",
+      "failure": ""
+    },
+    {
+      "job": {
+        "status": {
+          "conditions": [
+            {
+              "type": "Failed",
+              "status": "True",
+              "message": 5
+            }
+          ]
+        }
+      },
+      "outcome": "failed",
+      "failure": "5"
+    },
+    {
+      "job": {
+        "status": {
+          "conditions": [
+            {
+              "type": "Failed",
+              "status": "False",
+              "message": "not yet"
+            }
+          ]
+        }
+      },
+      "outcome": "running",
+      "failure": ""
+    },
+    {
+      "job": {
+        "status": {
+          "conditions": [
+            {
+              "type": "Complete",
+              "status": "False"
+            },
+            {
+              "type": "Failed",
+              "status": "True",
+              "message": "second"
+            }
+          ]
+        }
+      },
+      "outcome": "failed",
+      "failure": "second"
+    },
+    {
+      "job": {
+        "status": {
+          "conditions": [
+            {
+              "type": "Suspended",
+              "status": "True"
+            },
+            {
+              "type": "Complete",
+              "status": "True"
+            }
+          ]
+        }
+      },
+      "outcome": "succeeded",
+      "failure": ""
+    },
+    {
+      "job": {
+        "status": {
+          "conditions": [
+            {
+              "type": "Complete",
+              "status": true
+            }
+          ]
+        }
+      },
+      "outcome": "running",
+      "failure": ""
+    },
+    {
+      "job": {
+        "status": {
+          "conditions": null,
+          "succeeded": 1
+        }
+      },
+      "outcome": "succeeded",
+      "failure": ""
+    },
+    {
+      "job": {
+        "status": {
+          "conditions": [],
+          "failed": 1
+        }
+      },
+      "outcome": "failed",
+      "failure": ""
+    },
+    {
+      "job": {
+        "status": {
+          "failed": 1
+        }
+      },
+      "outcome": "failed",
+      "failure": ""
+    },
+    {
+      "job": {
+        "status": {
+          "failed": 0,
+          "succeeded": 0,
+          "active": 1
+        }
+      },
+      "outcome": "running",
+      "failure": ""
+    },
+    {
+      "job": {
+        "status": {
+          "active": 1
+        }
+      },
+      "outcome": "running",
+      "failure": ""
+    },
+    {
+      "job": {
+        "status": {
+          "succeeded": 2,
+          "failed": 1
+        }
+      },
+      "outcome": "succeeded",
+      "failure": ""
+    },
+    {
+      "job": {
+        "status": {
+          "conditions": [
+            {
+              "type": "Failed",
+              "status": "True"
+            }
+          ],
+          "succeeded": 1
+        }
+      },
+      "outcome": "failed",
+      "failure": ""
+    },
+    {
+      "job": {
+        "status": {
+          "conditions": [
+            {
+              "type": "FailureTarget",
+              "status": "True",
+              "message": "target"
+            }
+          ],
+          "failed": 1
+        }
+      },
+      "outcome": "failed",
+      "failure": ""
+    }
+  ]
+}

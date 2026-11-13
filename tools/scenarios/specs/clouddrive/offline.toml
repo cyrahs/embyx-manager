@@ -1,0 +1,48 @@
+# Offline (magnet) tasks through the wrapper (WP3): adding, a duplicate, listing by folder,
+# removing by hash with and without the files. Hashes go out lowercased.
+description = "clouddrive: add, list and remove offline tasks"
+operation = "clouddrive.steps"
+
+[[args.steps]]
+op = "add_offline_files"
+args = { urls = ["magnet:?xt=urn:btih:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&dn=ABC-001", "magnet:?xt=urn:btih:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"], folder = "/115/offline" }
+
+[[args.steps]]
+op = "add_offline_files"
+args = { urls = ["magnet:?xt=urn:btih:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb&dn=again"], folder = "/115/offline" }
+
+[[args.steps]]
+op = "add_offline_files"
+args = { urls = ["magnet:?xt=urn:btih:cccccccccccccccccccccccccccccccccccccccc"], folder = "/115/nowhere" }
+
+[[args.steps]]
+op = "list_offline_files"
+args = { path = "/115/offline" }
+
+[[args.steps]]
+op = "list_offline_files"
+args = { path = "/115/other" }
+
+[[args.steps]]
+op = "remove_offline_files"
+args = { hashes = ["DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"], path = "/115/other", delete_files = true }
+
+[[args.steps]]
+op = "remove_offline_files"
+args = { hashes = ["BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"], path = "/115/offline", delete_files = false }
+
+[[args.steps]]
+op = "list_offline_files"
+args = { path = "/115/offline" }
+
+[[args.steps]]
+op = "list_offline_files"
+args = { path = "/115/other" }
+
+[clouddrive]
+directories = ["/115/offline", "/115/other"]
+files = [{ path = "/115/other/DONE-001/DONE-001.mp4", size = 9 }]
+offline_tasks = [
+    { name = "DONE-001", url = "magnet:?xt=urn:btih:dddddddddddddddddddddddddddddddddddddddd", folder = "/115/other", info_hash = "dddddddddddddddddddddddddddddddddddddddd", status = "OFFLINE_FINISHED", size = 9, progress = 100.0 },
+    { name = "FAIL-001", url = "magnet:?xt=urn:btih:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", folder = "/115/other", info_hash = "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", status = "OFFLINE_ERROR", size = 0, progress = 12.5 },
+]

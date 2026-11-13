@@ -65,6 +65,7 @@ tempfile = "3"
 thiserror = "2"
 tokio = { version = "1.54", features = ["macros", "rt-multi-thread"] }
 tokio-rustls = { version = "0.26", default-features = false, features = ["logging", "tls12"] }
+tokio-util = { version = "0.7", default-features = false, features = ["rt"] }
 toml = "0.9"
 tower-http = { version = "0.6", default-features = false }
 tower-service = "0.3"
@@ -78,7 +79,8 @@ webpki-roots = "1"
 sqlx = { version = "0.9", default-features = false, features = ["runtime-tokio", "postgres", "chrono", "json", "tls-rustls-ring-webpki"] }
 # CloudDrive over gRPC: code generated at build time from the descriptor set extracted from the
 # baseline's clouddrive_pb2.py (no .proto file, no protoc).
-tonic = { version = "0.14", default-features = false, features = ["codegen", "transport", "router"] }
+# `tls-ring` + `tls-webpki-roots`: `secure=True` (grpcio's bundled roots are the same Mozilla set).
+tonic = { version = "0.14", default-features = false, features = ["codegen", "transport", "router", "tls-ring", "tls-webpki-roots"] }
 tonic-prost = "0.14"
 tonic-prost-build = { version = "0.14", default-features = false }
 prost = "0.14"

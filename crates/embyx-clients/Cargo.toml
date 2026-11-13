@@ -13,7 +13,7 @@ workspace = true
 [features]
 default = ["clouddrive"]
 # The CloudDrive gRPC client (tonic). Off for builds that must not carry gRPC.
-clouddrive = ["dep:tonic", "dep:tonic-prost", "dep:prost", "dep:prost-types"]
+clouddrive = ["dep:tonic", "dep:tonic-prost", "dep:prost", "dep:prost-types", "dep:tokio-util"]
 # The fake web (`net::fakeweb`) and the scenario fake CloudDrive (`clouddrive::fake`).
 test-support = ["dep:rcgen", "dep:prost-reflect", "dep:tokio-stream", "embyx-core/test-support"]
 
@@ -52,6 +52,7 @@ thiserror.workspace = true
 tokio = { workspace = true, features = ["fs", "io-util", "time", "rt", "macros", "process", "net"] }
 tokio-rustls.workspace = true
 tonic = { workspace = true, optional = true }
+tokio-util = { workspace = true, optional = true }
 tokio-stream = { version = "0.1", features = ["net"], optional = true }
 tonic-prost = { workspace = true, optional = true }
 url.workspace = true

@@ -1,0 +1,113 @@
+# The wrapper over the fake's file tree (WP3, contract 6): listing, stat, folders, moves,
+# renames and deletes, with the refusals the wrapper makes before any call and the errors
+# the fake answers. Both builds' clients must send the same requests and report the same values.
+description = "clouddrive: list, stat, create folders, move, rename and delete through the wrapper"
+operation = "clouddrive.steps"
+
+[[args.steps]]
+op = "check"
+
+[[args.steps]]
+op = "list_directory"
+args = { path = "/115/in" }
+
+[[args.steps]]
+op = "list_directory"
+args = { path = "/115/in", force_refresh = false }
+
+[[args.steps]]
+op = "list_directory"
+args = { path = "/115/in/ABC-001.mp4" }
+
+[[args.steps]]
+op = "list_directory"
+args = { path = "/115/missing" }
+
+[[args.steps]]
+op = "list_directory"
+args = { path = "relative/dir" }
+
+[[args.steps]]
+op = "stat_file"
+args = { path = "/115/in/ABC-001.mp4" }
+
+[[args.steps]]
+op = "stat_file"
+args = { path = "/115/in/none.mp4" }
+
+[[args.steps]]
+op = "stat_file"
+args = { path = "/115/gone/none.mp4" }
+
+[[args.steps]]
+op = "stat_file"
+args = { path = "/" }
+
+[[args.steps]]
+op = "ensure_directory"
+args = { parent = "/115/out", name = "中文 目录" }
+
+[[args.steps]]
+op = "ensure_directory"
+args = { parent = "/115/out", name = "中文 目录" }
+
+[[args.steps]]
+op = "ensure_directory"
+args = { parent = "/115/out", name = "a/b" }
+
+[[args.steps]]
+op = "ensure_directory"
+args = { parent = "/115/nowhere", name = "x" }
+
+[[args.steps]]
+op = "move_file"
+args = { source = "/115/in/ABC-001.mp4", destination = "/115/out" }
+
+[[args.steps]]
+op = "move_file"
+args = { source = "/115/in/ABC-002.mp4", destination = "/115/out" }
+
+[[args.steps]]
+op = "move_file"
+args = { source = "/115/in/none.mp4", destination = "/115/out" }
+
+[[args.steps]]
+op = "move_file"
+args = { source = "/115/in/ABC-003.mp4", destination = "/115/nowhere" }
+
+[[args.steps]]
+op = "move_file"
+args = { source = "/115/in/../x.mp4", destination = "/115/out" }
+
+[[args.steps]]
+op = "rename_file"
+args = { path = "/115/in/ABC-003.mp4", name = "ABC-003-C.mp4" }
+
+[[args.steps]]
+op = "rename_file"
+args = { path = "/115/in/none.mp4", name = "x.mp4" }
+
+[[args.steps]]
+op = "delete_files"
+args = { paths = ["/115/in/ABC-003-C.mp4", "/115/out/中文 目录"] }
+
+[[args.steps]]
+op = "delete_files"
+args = { paths = ["/115/in/none.mp4"] }
+
+[[args.steps]]
+op = "delete_files"
+args = { paths = [] }
+
+[[args.steps]]
+op = "list_directory"
+args = { path = "/115/out" }
+
+[clouddrive]
+directories = ["/115/in", "/115/out"]
+files = [
+    { path = "/115/in/ABC-001.mp4", size = 1048576, hashes = { "2" = "0123456789abcdef0123456789abcdef01234567" } },
+    { path = "/115/in/ABC-002.mp4", size = 3 },
+    { path = "/115/out/ABC-002.mp4", size = 4 },
+    { path = "/115/in/ABC-003.mp4", size = 5, hashes = { "1" = "d41d8cd98f00b204e9800998ecf8427e", "2" = "da39a3ee5e6b4b0d3255bfef95601890afd80709" } },
+]
