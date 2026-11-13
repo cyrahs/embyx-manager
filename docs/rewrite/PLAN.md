@@ -256,7 +256,7 @@ feed. Where the TLS fingerprint matters the probe runs from the production netwo
 
 | WP | Phase | Status | Content | Python lines (approx.) | Needs |
 | --- | --- | --- | --- | --- | --- |
-| WP0 | 0 foundation | done (#81); live fingerprint proof pending Max's confirmation, follow-up PR | Workspace at the root, `rust.yml` (checks only, with the caching fav ended up with), docs (`PLAN`, `CONVENTIONS`, `DIVERGENCES`, `PARITY`, `API-COVERAGE`), `BASELINE`, golden generator, parity script, scenario runner skeleton, helpers copied from fav, API-coverage probes (impersonating client, tonic from the descriptor, HTML parser, cron, notify, Windows build of an empty worker crate) | new | |
+| WP0 | 0 foundation | done (#81); live fingerprint proof done (follow-up PR) | Workspace at the root, `rust.yml` (checks only, with the caching fav ended up with), docs (`PLAN`, `CONVENTIONS`, `DIVERGENCES`, `PARITY`, `API-COVERAGE`), `BASELINE`, golden generator, parity script, scenario runner skeleton, helpers copied from fav, API-coverage probes (impersonating client, tonic from the descriptor, HTML parser, cron, notify, Windows build of an empty worker crate) | new | |
 | WP1 | 1 core | pending | Env settings, database layer and the 19 migrations, advisory locks, config models and store, AVID parser, magnet, media, errors | 2,300 | WP0 |
 | WP2 | 2 clients | pending | HTTP factory, JavBus, sukebei, feeds, feed magnets, AVBase on the impersonating client, jinjier, Emby | 1,450 | WP1 |
 | WP3 | 2 clients | pending | CloudDrive over tonic with the cancel-safe wrapper and a fake server; Kubernetes Jobs client | 700 | WP1 |
