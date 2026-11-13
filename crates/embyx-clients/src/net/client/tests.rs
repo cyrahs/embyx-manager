@@ -148,7 +148,7 @@ async fn a_post_redirected_by_302_becomes_a_get() {
 }
 
 /// Set in the child process of [`trust_env_false_ignores_the_environment_proxy`].
-const TRUST_ENV_CHILD: &str = "FAV_NET_TRUST_ENV_CHILD";
+const TRUST_ENV_CHILD: &str = "EMBYX_NET_TRUST_ENV_CHILD";
 const PROXY_VARIABLES: [&str; 8] = [
     "HTTP_PROXY",
     "http_proxy",

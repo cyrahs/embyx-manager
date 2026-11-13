@@ -103,6 +103,11 @@ SYNTHETIC: list[tuple[str, str]] = [
         ),
     ),
     (
+        # What an empty JavBus page leaves after the markup around it is gone.
+        'an end tag and no element',
+        '</a>',
+    ),
+    (
         'entities and a CDATA-like script',
         '<html><body><a href="/star/x?a=1&amp;b=2">A &amp; B&nbsp;C</a><script>if (a < b) {}</script></body></html>',
     ),
@@ -114,8 +119,11 @@ def _fixtures() -> list[tuple[str, str]]:
     seen: set[str] = set()
     for relative in TEST_FILES:
         tree = ast.parse((REPO_ROOT / relative).read_text(encoding='utf-8'))
+        # Pieces of an f-string are not documents of their own: the page it renders depends on
+        # runtime values, so it is left out rather than taken apart.
+        pieces = {id(part) for node in ast.walk(tree) if isinstance(node, ast.JoinedStr) for part in node.values}
         for node in ast.walk(tree):
-            if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            if isinstance(node, ast.Constant) and isinstance(node.value, str) and id(node) not in pieces:
                 text = node.value
                 if '<' in text and '>' in text and text.strip() and text not in seen:
                     seen.add(text)

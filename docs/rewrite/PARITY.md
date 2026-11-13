@@ -18,7 +18,7 @@ gives a reason, and *pending* otherwise. Scope per work package comes from
 | WP1 | Settings, schema, config store, AVID, magnets | pending | 70 | 996 | 0 | 0 | 70 |
 | WP2 | HTTP clients and parsers | pending | 58 | 85 | 0 | 0 | 58 |
 | WP3 | CloudDrive on tonic, Kubernetes Jobs | pending | 21 | 31 | 0 | 0 | 21 |
-| WP4 | API shell, config API, serve | pending | 12 | 12 | 0 | 0 | 12 |
+| WP4 | API shell, config API, serve | pending | 9 | 9 | 0 | 0 | 9 |
 | WP5 | Acquisition ledger, runs, reports, cadence, intake | pending | 93 | 97 | 0 | 0 | 93 |
 | WP6 | Archive, reconcile, move-in | pending | 69 | 69 | 0 | 0 | 69 |
 | WP7 | Tracker, 换版, manual intake | pending | 57 | 57 | 0 | 0 | 57 |
@@ -26,7 +26,7 @@ gives a reason, and *pending* otherwise. Scope per work package comes from
 | WP9 | Scheduler, monitor API, playlists API | pending | 66 | 66 | 0 | 0 | 66 |
 | WP10 | Fill-actor persistence and cloud moves | pending | 35 | 51 | 0 | 0 | 35 |
 | WP11 | Fill-actor service and recovery | pending | 67 | 78 | 0 | 0 | 67 |
-| WP12 | Fill-actor jobs, API, wiring | pending | 36 | 39 | 0 | 0 | 36 |
+| WP12 | Fill-actor jobs, API, wiring | pending | 39 | 42 | 0 | 0 | 39 |
 | WP13 | Merge worker | pending | 26 | 28 | 0 | 0 | 26 |
 | WP14 | Merge service, auto-merge, transcode, API | pending | 63 | 63 | 0 | 0 | 63 |
 | WP15 | Home transcode worker | pending | 4 | 4 | 0 | 0 | 4 |
@@ -42,7 +42,7 @@ gives a reason, and *pending* otherwise. Scope per work package comes from
 | `tests/test_avbase.py` | WP2 | 13 | 24 | 0 | 0 | 13 |
 | `tests/test_avid.py` | WP1 | 18 | 88 | 0 | 0 | 18 |
 | `tests/test_avid_corpus.py` | WP1 | 3 | 825 | 0 | 0 | 3 |
-| `tests/test_bootstrap.py` | WP4 | 2 | 2 | 0 | 0 | 2 |
+| `tests/test_bootstrap.py` | WP4, WP12 | 2 | 2 | 0 | 0 | 2 |
 | `tests/test_cloud_move_persistence.py` | WP10 | 3 | 3 | 0 | 0 | 3 |
 | `tests/test_cloud_move_service.py` | WP11 | 13 | 15 | 0 | 0 | 13 |
 | `tests/test_cloud_moves.py` | WP10 | 5 | 12 | 0 | 0 | 5 |

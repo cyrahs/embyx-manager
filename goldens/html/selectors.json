@@ -896,28 +896,6 @@
       "lxml_html_root": "html"
     },
     {
-      "name": "tests/test_javbus.py:211",
-      "html": "</a>",
-      "error": "ParserError: Document is empty"
-    },
-    {
-      "name": "tests/test_javbus.py:214",
-      "html": "\"></a>",
-      "parsed_as": "html",
-      "document": {
-        "a[href]": [],
-        "a.movie-box": [],
-        ".avatar-box .pb10": [],
-        "title": [],
-        "tr": [],
-        "table tbody tr": []
-      },
-      "rows": [],
-      "anchors": [],
-      "nyaapy": [],
-      "lxml_html_root": "p"
-    },
-    {
       "name": "tests/test_javbus.py:258",
       "html": "\n    <a class=\"movie-box\" href=\"/VID-001\"></a>\n    <a href=\"/star/ACTOR-1/3\">3</a>\n    ",
       "parsed_as": "html",
@@ -2755,6 +2733,11 @@
       ],
       "nyaapy": [],
       "lxml_html_root": "html"
+    },
+    {
+      "name": "synthetic: an end tag and no element",
+      "html": "</a>",
+      "error": "ParserError: Document is empty"
     },
     {
       "name": "synthetic: entities and a CDATA-like script",

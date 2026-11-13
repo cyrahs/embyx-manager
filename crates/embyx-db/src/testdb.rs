@@ -17,8 +17,8 @@ use sqlx::{AssertSqlSafe, ConnectOptions as _, Connection as _, PgConnection, Pg
 
 pub const URL_VARIABLE: &str = "EMBYX_MANAGER_TEST_DATABASE_URL";
 
-/// Every test database's name starts with this; `tools/dropdbs.sh`-style cleanups of
-/// leftovers after a crashed run match on it.
+/// Every test database's name starts with this; after a crashed run, drop the leftovers by
+/// this prefix (the command is in docs/CONVENTIONS.md, "Tests").
 pub const NAME_PREFIX: &str = "embyx_test_";
 
 static COUNTER: AtomicU32 = AtomicU32::new(0);

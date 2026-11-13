@@ -20,7 +20,9 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from cronsim import CronSim, CronSimError
+from pydantic import ValidationError
 
+from embyx_manager.config.models import ArchiveConfig
 from embyx_manager.monitor.scheduler import _next_cron_fire
 
 # The default, the tests' expressions, and what the settings page could be given.
@@ -95,6 +97,7 @@ def _iso(value: datetime | None) -> str | None:
 
 
 def _validation() -> list[dict[str, Any]]:
+    """cronsim's own verdict (what croner is compared with) and the config model's (WP1)."""
     cases = []
     for expr in EXPRESSIONS:
         normalized = ' '.join(expr.split())
@@ -103,7 +106,11 @@ def _validation() -> list[dict[str, Any]]:
             error = None
         except CronSimError as exc:
             error = str(exc)
-        cases.append({'expr': expr, 'normalized': normalized, 'error': error})
+        try:
+            model: dict[str, Any] = {'value': ArchiveConfig.model_validate({'scan_cron': expr}).scan_cron}
+        except ValidationError as exc:
+            model = {'errors': exc.errors(include_url=False, include_context=False)}
+        cases.append({'expr': expr, 'normalized': normalized, 'error': error, 'model': model})
     return cases
 
 

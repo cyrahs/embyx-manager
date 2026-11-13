@@ -12,7 +12,7 @@ are in the workspace `Cargo.toml`.
 | grpcio 1.83 + generated `clouddrive_pb2*.py` | `tonic` / `tonic-prost` / `prost` **0.14**, code from the baseline's descriptor | Sufficient | `embyx-clients/src/probes.rs` (`grpc`) |
 | `MessageToDict` (the scenario fake's records) | `prost-reflect` **0.16** (serde) | Byte-identical on the golden cases | `embyx-clients/src/probes.rs` |
 | pyquery 2.1 / lxml 5.4, nyaapy 0.7 | `scraper` **0.29** (html5ever) | Sufficient with three known tree differences | `embyx-clients/src/probes.rs` (`html`) |
-| curl_cffi 0.16.3 `impersonate='chrome'` | `wreq` **=6.0.0-rc.31** + `wreq-util` **=3.0.0-rc.14** (BoringSSL) | LIVE_VERDICT_PENDING | `embyx-clients/src/probes.rs` (`impersonation`), `tools/probes/tls_fingerprint.py`, `tools/probes/live_fingerprint.py` |
+| curl_cffi 0.16.3 `impersonate='chrome'` | `wreq` **=6.0.0-rc.31** + `wreq-util` **=3.0.0-rc.14** (BoringSSL) | Provisional choice `wreq-tuned`; live proof pending | `embyx-clients/src/probes.rs` (`impersonation`), `tools/probes/tls_fingerprint.py`, `tools/probes/live_fingerprint.py` |
 | cronsim 2.7 | `croner` **4** + `chrono-tz` | Sufficient for fires; validation needs a pre-check | `embyx-monitor/src/probes.rs` |
 | watchdog 6.0 (inotify) | `notify` **8** | Sufficient; directories that arrive must be walked by us | `embyx-monitor/src/probes.rs` (`watcher`) |
 | ctypes `renameat2`, `os.link`, `fcntl.flock` | `rustix` **1** (fs) and std | Sufficient | `embyx-fill-actor/src/probes.rs` |
@@ -74,9 +74,10 @@ Fallback: none needed. If a later CloudDrive descriptor adds RPCs, rerun the des
 
 `pyquery.PyQuery(text)` tries lxml's XML parser first and falls back to `lxml.html` only when the text is not
 well-formed XML; nyaapy walks an `lxml.etree.HTMLParser` tree. `tools/goldens/areas/html.py` records, for every
-markup literal in `tests/test_javbus.py` and `tests/test_magnet_sources.py` and for six synthetic pages (a sukebei
+markup literal in `tests/test_javbus.py` and `tests/test_magnet_sources.py` and for seven synthetic pages (a sukebei
 result table, a table without `tbody`, unclosed cells, a `<p>` left open before a table, upper-case tags,
-entities), what each selector the code uses matches (tag, attributes, `text_content`). The probe compares
+an end tag with no element, entities); f-string fragments are left out, since the page they render depends on
+runtime values, what each selector the code uses matches (tag, attributes, `text_content`). The probe compares
 scraper with that and pins the differences:
 
 | Where | lxml / pyquery | scraper | Who handles it |
@@ -84,7 +85,7 @@ scraper with that and pins the differences:
 | `table tbody tr` on a table without `tbody` (`rss_magnet.py`) | No match: lxml inserts no implied `tbody` | Matches: html5ever inserts it | WP2: feed magnet tables. The baseline finds no rows in a `tbody`-less table; the port must not find more |
 | Bare `<tr>` rows outside a table (JavBus's magnet AJAX answer, `javbus.py` `get_magnets`) | `lxml.html` keeps them | html5ever drops a `tr` outside a table | WP2: parse such a fragment inside `<table>…</table>`; the probe shows that recovers the rows and cells (`bare_rows_need_a_table_context`) |
 | Well-formed markup with upper-case tags | Parsed as XML, where `A` is not `a`: no match | HTML: tags lower-cased, matches | Real pages are not well-formed XML; WP2 records it as a divergence only if a recorded page hits it |
-| A blank document | pyquery raises `ParserError` | An empty document | WP2 maps it to the error the Python code raises |
+| A document with no element (only an end tag) | pyquery raises `ParserError` | An empty document | WP2 maps it to the error the Python code raises |
 
 Everything else matches: attributes (order aside: scraper keeps them sorted, the code reads them by name),
 `text_content`, `:first-child`, `:nth-child`, `[href^='magnet:']`, the sukebei layout, entities, scripts.
@@ -129,13 +130,40 @@ environment). The order and spelling of the head are otherwise the same.
 
 ### Live proof from nas-us-2
 
-RESULT_PENDING
+Not run yet. Max approved one run from a one-off pod on nas-us-2 (2026-11-13 19:23Z, plan "Questions for
+Max", item 3); creating the Pod was stopped by the session's safety check until Max confirms it in the WP0
+thread. Everything for the run is in place: `tools/probes/live_probe_pod.sh <commit>` (the pod's script) and
+`tools/probes/live_fingerprint.py --live` (at most 10 anonymous GETs per site, 3 s apart, no redirect
+followed, no retry; verified against a local fake server). The result lands in a docs-only follow-up PR
+into `rust`; if it has not run when WP2 starts, WP2 takes the probe over.
 
-Recommendation for WP2: LIVE_RECOMMENDATION_PENDING. Pin `wreq` and `wreq-util` exactly (release candidates).
+Each request is a fresh client (one `fetch_probe` process, one curl_cffi or httpx session), so the AVBase
+data routes go out without the cookies (such as `__cf_bm`) that `clients/avbase.py`'s single session would
+carry from the home page. That is the same for the control and the candidates, so the comparison holds; a
+challenge on a data route alone may be the missing cookie rather than the fingerprint.
+
+The Pod it creates: `default` namespace, `nodeSelector kubernetes.io/hostname: nas-us-2`, image
+`docker.io/library/rust:1.97.0`, `restartPolicy: Never`, `activeDeadlineSeconds: 1800`,
+`automountServiceAccountToken: false`, `enableServiceLinks: false`, `dnsPolicy: Default`, no volumes, no
+Secret or ConfigMap, requests 100m / 256Mi, limits 2 CPU / 4Gi; the command fetches
+`live_probe_pod.sh` from the pushed commit and runs it with that commit.
+
+Recommendation for WP2 (provisional until the live proof): `wreq-tuned` for AVBase, the httpx-shaped client
+for JavBus and sukebei as the baseline uses httpx there. Pin `wreq` and `wreq-util` exactly (release candidates).
 WP2 reruns `tls_fingerprint.py` against its configured clients and records the result; equal TLS and HTTP/2
 fields are the bar, the Chrome major version may differ by one. If WP2 changes a client, it may repeat the
 live probe once under the same conditions (plan, "Questions for Max", item 3). Fallback: the
 `curl-impersonate` binary (the same library curl_cffi wraps) as a subprocess, behind the same client trait.
+
+Known differences WP2 must keep in mind:
+
+- wreq's ClientHello lacks the three ML-DSA signature algorithms (`0x0904`-`0x0906`) that curl_cffi chrome150
+  sends first; no `wreq-util` profile offers them yet. Everything else in TLS and HTTP/2 matches with the
+  tuned headers and weight.
+- The httpx-shaped client (JavBus, sukebei, the other httpx paths) sends `Accept-Encoding: gzip, deflate,
+  br` where the baseline's httpx sends `gzip, deflate`, and its TLS is rustls where Python's is OpenSSL
+  (different cipher list, groups and signature algorithms). Decide in WP2 whether to drop `br` to match,
+  and record the choice in `DIVERGENCES.md`.
 
 Build: BoringSSL compiles from source (`cmake`, a C/C++ compiler; the GitHub Ubuntu runner has both). A cold
 build of `wreq` and `wreq-util` (with BoringSSL and the rest of `embyx-clients`) takes 35 s on 4 cores

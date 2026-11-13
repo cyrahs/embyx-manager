@@ -84,7 +84,8 @@ A module names the Python module it ports in its doc comment (`src/embyx_manager
 - Database tests run against real PostgreSQL, one temporary database per test, created through
   `EMBYX_MANAGER_TEST_DATABASE_URL` (`embyx_db::testdb::TestDatabase`, behind the `test-support` feature).
   A test that needs it and does not find it fails; it does not skip. Drop leftover `embyx_test_*`
-  databases after a crashed run.
+  databases after a crashed run:
+  `psql "$EMBYX_MANAGER_TEST_DATABASE_URL" -Atc "SELECT format('DROP DATABASE %I;', datname) FROM pg_database WHERE datname LIKE 'embyx\_test\_%'" | psql "$EMBYX_MANAGER_TEST_DATABASE_URL"`.
 - HTTP is faked with `embyx_clients::net::fakeweb::FakeWeb` (a local proxy the client is pointed at:
   `Reply::status`/`bytes`/`json`, `Reply::Close` for a hang-up, `Reply::Stall` for a stall) or a local
   server; CloudDrive with `embyx_clients::clouddrive::fake::FakeCloudDrive` over a real socket. Write the

@@ -3,8 +3,9 @@
 The `*_json` TEXT columns, the merge status files and manifests are written with
 `json.dumps`; a Rust writer must produce the same bytes (stored JSON is a cross-version
 contract). Each case gives the input as JSON text (what `json.loads` reads) and the exact
-output of every format below: `ascii` and `plain` are the two embyx-manager uses, the
-others come with the copied helper and are kept so its tests stay whole.
+output of every format below: `ascii`, `plain` and `sorted_compact_ascii` (the fill
+actor's `postgres_repository.py`) are the ones embyx-manager uses; the others come with the
+copied helper and are kept so its tests stay whole.
 
 Copied from fav's golden generator (`tools/goldens/areas/json_dumps.py` at the commit named in
 docs/CONVENTIONS.md), as the goldens of the helpers copied with it.

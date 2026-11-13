@@ -3,11 +3,11 @@
 //! Python's `str.strip()` and `str.split()` cut at `str.isspace()` characters, which
 //! include U+001C..U+001F (not Unicode `White_Space`, so not Rust's `trim()`), and
 //! `str.isdigit()` accepts every Unicode digit. The tables below are checked against a
-//! full code-point scan of Python 3.12 (`goldens/text/`).
+//! full code-point scan of Python 3.13 (`goldens/text/`).
 //!
 //! Copied from fav (`fav-core/src/pytext.rs`); see docs/CONVENTIONS.md, "Code copied from fav".
 
-/// Code-point ranges where Python 3.12's `str.isspace()` is true.
+/// Code-point ranges where Python 3.13's `str.isspace()` is true.
 pub const PY_WHITESPACE: &[(u32, u32)] = &[
     (0x0009, 0x000D),
     (0x001C, 0x0020),
@@ -21,7 +21,7 @@ pub const PY_WHITESPACE: &[(u32, u32)] = &[
     (0x3000, 0x3000),
 ];
 
-/// Code-point ranges where Python 3.12's `str.isdigit()` is true (Unicode 15.0).
+/// Code-point ranges where Python 3.13's `str.isdigit()` is true (Unicode 15.1).
 pub const PY_DIGITS: &[(u32, u32)] = &[
     (0x0030, 0x0039),
     (0x00B2, 0x00B3),
@@ -108,7 +108,7 @@ pub const PY_DIGITS: &[(u32, u32)] = &[
     (0x1FBF0, 0x1FBF9),
 ];
 
-/// Code-point ranges where Python 3.12's `str.isdecimal()` is true (Unicode 15.0, category
+/// Code-point ranges where Python 3.13's `str.isdecimal()` is true (Unicode 15.1, category
 /// `Nd`). Every range is a run of whole `0`..`9` sequences, so a digit's value is its
 /// offset from the range start, modulo 10.
 pub const PY_DECIMALS: &[(u32, u32)] = &[

@@ -7,207 +7,474 @@
     {
       "expr": "0 4 * * *",
       "normalized": "0 4 * * *",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "0 4 * * *"
+      }
     },
     {
       "expr": "30 3 * * 1",
       "normalized": "30 3 * * 1",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "30 3 * * 1"
+      }
     },
     {
       "expr": "*/15 * * * *",
       "normalized": "*/15 * * * *",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "*/15 * * * *"
+      }
     },
     {
       "expr": "*/30 * * * *",
       "normalized": "*/30 * * * *",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "*/30 * * * *"
+      }
     },
     {
       "expr": "0 */6 * * *",
       "normalized": "0 */6 * * *",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "0 */6 * * *"
+      }
     },
     {
       "expr": "0 4 * * 0,2-6",
       "normalized": "0 4 * * 0,2-6",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "0 4 * * 0,2-6"
+      }
     },
     {
       "expr": "0 4 * * 7",
       "normalized": "0 4 * * 7",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "0 4 * * 7"
+      }
     },
     {
       "expr": "0 9 * * sun",
       "normalized": "0 9 * * sun",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "0 9 * * sun"
+      }
     },
     {
       "expr": "0 9 * * mon-fri",
       "normalized": "0 9 * * mon-fri",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "0 9 * * mon-fri"
+      }
     },
     {
       "expr": "0 9 * * MON-FRI",
       "normalized": "0 9 * * MON-FRI",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "0 9 * * MON-FRI"
+      }
     },
     {
       "expr": "0 0 1 * *",
       "normalized": "0 0 1 * *",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "0 0 1 * *"
+      }
     },
     {
       "expr": "0 0 31 * *",
       "normalized": "0 0 31 * *",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "0 0 31 * *"
+      }
     },
     {
       "expr": "0 0 29 2 *",
       "normalized": "0 0 29 2 *",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "0 0 29 2 *"
+      }
     },
     {
       "expr": "59 23 31 12 *",
       "normalized": "59 23 31 12 *",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "59 23 31 12 *"
+      }
     },
     {
       "expr": "0 4 1-7 * 1",
       "normalized": "0 4 1-7 * 1",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "0 4 1-7 * 1"
+      }
     },
     {
       "expr": "0 4 * jan,jul *",
       "normalized": "0 4 * jan,jul *",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "0 4 * jan,jul *"
+      }
     },
     {
       "expr": "0 0 L * *",
       "normalized": "0 0 L * *",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "0 0 L * *"
+      }
     },
     {
       "expr": "0 0 * * 5L",
       "normalized": "0 0 * * 5L",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "0 0 * * 5L"
+      }
     },
     {
       "expr": "0 0 * * 1#2",
       "normalized": "0 0 * * 1#2",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "0 0 * * 1#2"
+      }
     },
     {
       "expr": "0 0 15W * *",
       "normalized": "0 0 15W * *",
-      "error": "Bad day-of-month"
+      "error": "Bad day-of-month",
+      "model": {
+        "errors": [
+          {
+            "type": "value_error",
+            "loc": [
+              "scan_cron"
+            ],
+            "msg": "Value error, archive.scan_cron is not a valid cron expression: Bad day-of-month",
+            "input": "0 0 15W * *"
+          }
+        ]
+      }
     },
     {
       "expr": "0 0 LW * *",
       "normalized": "0 0 LW * *",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "0 0 LW * *"
+      }
     },
     {
       "expr": "30 2 * * *",
       "normalized": "30 2 * * *",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "30 2 * * *"
+      }
     },
     {
       "expr": "15 1 * * *",
       "normalized": "15 1 * * *",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "15 1 * * *"
+      }
     },
     {
       "expr": "0 0-23/7 * * *",
       "normalized": "0 0-23/7 * * *",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "0 0-23/7 * * *"
+      }
     },
     {
       "expr": "5-55/10 * * * *",
       "normalized": "5-55/10 * * * *",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "5-55/10 * * * *"
+      }
     },
     {
       "expr": "0 4 * * ?",
       "normalized": "0 4 * * ?",
-      "error": "Bad day-of-week"
+      "error": "Bad day-of-week",
+      "model": {
+        "errors": [
+          {
+            "type": "value_error",
+            "loc": [
+              "scan_cron"
+            ],
+            "msg": "Value error, archive.scan_cron is not a valid cron expression: Bad day-of-week",
+            "input": "0 4 * * ?"
+          }
+        ]
+      }
     },
     {
       "expr": "0 4 ? * 1",
       "normalized": "0 4 ? * 1",
-      "error": "Bad day-of-month"
+      "error": "Bad day-of-month",
+      "model": {
+        "errors": [
+          {
+            "type": "value_error",
+            "loc": [
+              "scan_cron"
+            ],
+            "msg": "Value error, archive.scan_cron is not a valid cron expression: Bad day-of-month",
+            "input": "0 4 ? * 1"
+          }
+        ]
+      }
     },
     {
       "expr": "@daily",
       "normalized": "@daily",
-      "error": "Wrong number of fields"
+      "error": "Wrong number of fields",
+      "model": {
+        "errors": [
+          {
+            "type": "value_error",
+            "loc": [
+              "scan_cron"
+            ],
+            "msg": "Value error, archive.scan_cron is not a valid cron expression: Wrong number of fields",
+            "input": "@daily"
+          }
+        ]
+      }
     },
     {
       "expr": "@hourly",
       "normalized": "@hourly",
-      "error": "Wrong number of fields"
+      "error": "Wrong number of fields",
+      "model": {
+        "errors": [
+          {
+            "type": "value_error",
+            "loc": [
+              "scan_cron"
+            ],
+            "msg": "Value error, archive.scan_cron is not a valid cron expression: Wrong number of fields",
+            "input": "@hourly"
+          }
+        ]
+      }
     },
     {
       "expr": "0 4 * * * *",
       "normalized": "0 4 * * * *",
-      "error": null
+      "error": null,
+      "model": {
+        "value": "0 4 * * * *"
+      }
     },
     {
       "expr": "",
       "normalized": "",
-      "error": "Wrong number of fields"
+      "error": "Wrong number of fields",
+      "model": {
+        "errors": [
+          {
+            "type": "value_error",
+            "loc": [
+              "scan_cron"
+            ],
+            "msg": "Value error, archive.scan_cron is not a valid cron expression: Wrong number of fields",
+            "input": ""
+          }
+        ]
+      }
     },
     {
       "expr": "every day at four",
       "normalized": "every day at four",
-      "error": "Wrong number of fields"
+      "error": "Wrong number of fields",
+      "model": {
+        "errors": [
+          {
+            "type": "value_error",
+            "loc": [
+              "scan_cron"
+            ],
+            "msg": "Value error, archive.scan_cron is not a valid cron expression: Wrong number of fields",
+            "input": "every day at four"
+          }
+        ]
+      }
     },
     {
       "expr": "0 4 * *",
       "normalized": "0 4 * *",
-      "error": "Wrong number of fields"
+      "error": "Wrong number of fields",
+      "model": {
+        "errors": [
+          {
+            "type": "value_error",
+            "loc": [
+              "scan_cron"
+            ],
+            "msg": "Value error, archive.scan_cron is not a valid cron expression: Wrong number of fields",
+            "input": "0 4 * *"
+          }
+        ]
+      }
     },
     {
       "expr": "99 4 * * *",
       "normalized": "99 4 * * *",
-      "error": "Bad minute"
+      "error": "Bad minute",
+      "model": {
+        "errors": [
+          {
+            "type": "value_error",
+            "loc": [
+              "scan_cron"
+            ],
+            "msg": "Value error, archive.scan_cron is not a valid cron expression: Bad minute",
+            "input": "99 4 * * *"
+          }
+        ]
+      }
     },
     {
       "expr": "0 24 * * *",
       "normalized": "0 24 * * *",
-      "error": "Bad hour"
+      "error": "Bad hour",
+      "model": {
+        "errors": [
+          {
+            "type": "value_error",
+            "loc": [
+              "scan_cron"
+            ],
+            "msg": "Value error, archive.scan_cron is not a valid cron expression: Bad hour",
+            "input": "0 24 * * *"
+          }
+        ]
+      }
     },
     {
       "expr": "0 4 32 * *",
       "normalized": "0 4 32 * *",
-      "error": "Bad day-of-month"
+      "error": "Bad day-of-month",
+      "model": {
+        "errors": [
+          {
+            "type": "value_error",
+            "loc": [
+              "scan_cron"
+            ],
+            "msg": "Value error, archive.scan_cron is not a valid cron expression: Bad day-of-month",
+            "input": "0 4 32 * *"
+          }
+        ]
+      }
     },
     {
       "expr": "0 4 * 13 *",
       "normalized": "0 4 * 13 *",
-      "error": "Bad month"
+      "error": "Bad month",
+      "model": {
+        "errors": [
+          {
+            "type": "value_error",
+            "loc": [
+              "scan_cron"
+            ],
+            "msg": "Value error, archive.scan_cron is not a valid cron expression: Bad month",
+            "input": "0 4 * 13 *"
+          }
+        ]
+      }
     },
     {
       "expr": "0 4 * * 8",
       "normalized": "0 4 * * 8",
-      "error": "Bad day-of-week"
+      "error": "Bad day-of-week",
+      "model": {
+        "errors": [
+          {
+            "type": "value_error",
+            "loc": [
+              "scan_cron"
+            ],
+            "msg": "Value error, archive.scan_cron is not a valid cron expression: Bad day-of-week",
+            "input": "0 4 * * 8"
+          }
+        ]
+      }
     },
     {
       "expr": "*/0 * * * *",
       "normalized": "*/0 * * * *",
-      "error": "Bad minute"
+      "error": "Bad minute",
+      "model": {
+        "errors": [
+          {
+            "type": "value_error",
+            "loc": [
+              "scan_cron"
+            ],
+            "msg": "Value error, archive.scan_cron is not a valid cron expression: Bad minute",
+            "input": "*/0 * * * *"
+          }
+        ]
+      }
     },
     {
       "expr": "0 4 30 2 *",
       "normalized": "0 4 30 2 *",
-      "error": "Bad day-of-month"
+      "error": "Bad day-of-month",
+      "model": {
+        "errors": [
+          {
+            "type": "value_error",
+            "loc": [
+              "scan_cron"
+            ],
+            "msg": "Value error, archive.scan_cron is not a valid cron expression: Bad day-of-month",
+            "input": "0 4 30 2 *"
+          }
+        ]
+      }
     },
     {
       "expr": "0 4 * * mon-",
       "normalized": "0 4 * * mon-",
-      "error": "Bad day-of-week"
+      "error": "Bad day-of-week",
+      "model": {
+        "errors": [
+          {
+            "type": "value_error",
+            "loc": [
+              "scan_cron"
+            ],
+            "msg": "Value error, archive.scan_cron is not a valid cron expression: Bad day-of-week",
+            "input": "0 4 * * mon-"
+          }
+        ]
+      }
     }
   ]
 }

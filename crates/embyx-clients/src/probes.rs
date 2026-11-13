@@ -281,8 +281,8 @@ mod html {
     }
 
     /// The documented differences: `(case, scope)`. Why each happens is in
-    /// docs/rewrite/API-COVERAGE.md ("scraper"); WP5 (JavBus) and WP7 (magnet sources)
-    /// decide how the port meets the baseline there.
+    /// docs/rewrite/API-COVERAGE.md ("scraper"); WP2 (JavBus and the magnet sources)
+    /// decides how the port meets the baseline there.
     const KNOWN: &[(&str, &str)] = &[
         // html5ever inserts the implied `tbody`; lxml does not, so `table tbody tr`
         // (`rss_magnet.py`) finds rows in scraper that pyquery never saw.
@@ -306,8 +306,8 @@ mod html {
         // a table, lxml.html keeps it (see `bare_rows_need_a_table_context`).
         ("tests/test_javbus.py:20", "doc:tr"),
         ("tests/test_javbus.py:20", "rows:0!=2"),
-        // pyquery raises ParserError on a blank document; html5ever returns an empty one.
-        ("tests/test_javbus.py:211", "error"),
+        // pyquery raises ParserError on a document with no element; html5ever returns an empty one.
+        ("synthetic: an end tag and no element", "error"),
     ];
 
     #[test]
@@ -394,7 +394,7 @@ mod impersonation {
         });
 
         let client = wreq::Client::builder()
-            .emulation(wreq_util::Emulation::Chrome137)
+            .emulation(wreq_util::Emulation::Chrome149)
             .tls_cert_verification(false)
             .build()
             .expect("client");

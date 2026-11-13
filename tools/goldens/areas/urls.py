@@ -1,10 +1,9 @@
-"""`urllib.parse` and `pathlib` as the sources use them (WP5).
+"""`urllib.parse` and `pathlib` answers the copied `pyurl` and `pypath` helpers must equal.
 
-Jandan picks candidate URLs, hosts and file extensions with `urlsplit`/`urlunsplit` and
-`Path(...).suffix`; Kemono names files with `Path(name).stem`/`.suffix` and reads creator
-ids out of URL paths; Jandan's request field is `quote`d and `unquote`d. The Rust port
-follows CPython's code (`fav_core::pyurl`), not the WHATWG URL standard, and these are
-Python 3.12's answers it must equal.
+embyx-manager splits and joins URLs (the site clients, RSS links, CloudDrive and Emby endpoints),
+quotes path segments (`quote(name, safe='')` for AVBase and JavBus) and takes file names apart
+with `PurePosixPath`. The Rust helpers follow CPython's code, not the WHATWG URL standard, and
+these are Python 3.13's answers.
 
 Copied from fav's golden generator (`tools/goldens/areas/urls.py` at the commit named in
 docs/CONVENTIONS.md), as the goldens of the helpers copied with it.

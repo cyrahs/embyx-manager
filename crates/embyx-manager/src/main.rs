@@ -52,8 +52,9 @@ struct MergeWorkerArgs {
     parts: Vec<String>,
 }
 
-/// `transcode-worker`'s arguments (`merge/home_worker.py`, `add_arguments`).
-#[derive(Debug, Args)]
+/// `transcode-worker`'s arguments (`merge/home_worker.py`, `add_arguments`). `Debug` is
+/// written by hand so the bearer token never reaches a log.
+#[derive(Args)]
 struct TranscodeWorkerArgs {
     /// TOML settings file
     #[arg(long)]
@@ -81,6 +82,22 @@ struct TranscodeWorkerArgs {
     /// ffprobe executable
     #[arg(long)]
     ffprobe: Option<String>,
+}
+
+impl std::fmt::Debug for TranscodeWorkerArgs {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TranscodeWorkerArgs")
+            .field("config", &self.config)
+            .field("server", &self.server)
+            .field("token", &self.token.as_ref().map(|_| "<redacted>"))
+            .field("cache_dir", &self.cache_dir)
+            .field("upload_mbps", &self.upload_mbps)
+            .field("jobs", &self.jobs)
+            .field("max_queue_gb", &self.max_queue_gb)
+            .field("ffmpeg", &self.ffmpeg)
+            .field("ffprobe", &self.ffprobe)
+            .finish()
+    }
 }
 
 /// The command a parsed command line runs, and the work package that implements it.
@@ -150,6 +167,15 @@ mod tests {
             "2",
         ]);
         assert_eq!(planned(worker.command.as_ref()), ("transcode-worker", "WP15"));
+    }
+
+    #[test]
+    fn the_worker_token_never_shows_in_debug() {
+        let cli =
+            Cli::try_parse_from(["embyx-manager", "transcode-worker", "--token", "s3cret-token"]).expect("parses");
+        let shown = format!("{:?}", cli.command);
+        assert!(!shown.contains("s3cret-token"), "{shown}");
+        assert!(shown.contains("<redacted>"), "{shown}");
     }
 
     #[test]

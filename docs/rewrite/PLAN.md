@@ -256,7 +256,7 @@ feed. Where the TLS fingerprint matters the probe runs from the production netwo
 
 | WP | Phase | Status | Content | Python lines (approx.) | Needs |
 | --- | --- | --- | --- | --- | --- |
-| WP0 | 0 foundation | in progress (this PR) | Workspace at the root, `rust.yml` (checks only, with the caching fav ended up with), docs (`PLAN`, `CONVENTIONS`, `DIVERGENCES`, `PARITY`, `API-COVERAGE`), `BASELINE`, golden generator, parity script, scenario runner skeleton, helpers copied from fav, API-coverage probes (impersonating client, tonic from the descriptor, HTML parser, cron, notify, Windows build of an empty worker crate) | new | |
+| WP0 | 0 foundation | done (#81); live fingerprint proof pending Max's confirmation, follow-up PR | Workspace at the root, `rust.yml` (checks only, with the caching fav ended up with), docs (`PLAN`, `CONVENTIONS`, `DIVERGENCES`, `PARITY`, `API-COVERAGE`), `BASELINE`, golden generator, parity script, scenario runner skeleton, helpers copied from fav, API-coverage probes (impersonating client, tonic from the descriptor, HTML parser, cron, notify, Windows build of an empty worker crate) | new | |
 | WP1 | 1 core | pending | Env settings, database layer and the 19 migrations, advisory locks, config models and store, AVID parser, magnet, media, errors | 2,300 | WP0 |
 | WP2 | 2 clients | pending | HTTP factory, JavBus, sukebei, feeds, feed magnets, AVBase on the impersonating client, jinjier, Emby | 1,450 | WP1 |
 | WP3 | 2 clients | pending | CloudDrive over tonic with the cancel-safe wrapper and a fake server; Kubernetes Jobs client | 700 | WP1 |
@@ -368,6 +368,10 @@ or says why one stays.
 - The Rust fake CloudDrive (`embyx-clients/src/clouddrive/fake.rs`) serves `GetSystemInfo`, `GetSubFiles` and
   `MoveFile`; WP3 ports the rest of `tools/scenarios/fakes/clouddrive.py` rule for rule, and the HTTP fakes
   (`fakes/http.py`) with the first scenario that seeds them.
+- `tools/parity/parity.py` checks that a claimed Rust test is compiled by its bare function name in the Linux
+  test listing. A claim on a function that is not compiled passes if another compiled test has the same name,
+  and a Windows-only test cannot be claimed. WP15 (the first Windows-only tests) makes the check match module
+  paths and accept the Windows job's listing.
 - `examples/fetch_probe.rs`, `tools/probes/tls_fingerprint.py`, `live_fingerprint.py` and `live_probe_pod.sh`
   exist for the AVBase and JavBus client decision; WP2 reruns the comparison against its configured clients,
   WP16 removes them if nothing else needs them.
@@ -379,4 +383,4 @@ the independent review found; review findings are summarised with a link to the 
 
 | WP | PR | Time spent | Rework | Independent review findings | Notes |
 | --- | --- | --- | --- | --- | --- |
-| WP0 | (this PR) | (filled at merge) | (filled at merge) | (filled at merge) | Started 2026-11-13 18:30Z. Probes: sqlx's dropped lock wait keeps the lock (port cancels with `pg_cancel_backend`); croner matches cronsim once evaluated in the fixed offset `astimezone()` gives; wreq's ClientHello matches curl_cffi's (Chrome 149 vs 150 sig-alg difference), headers need configuring; scraper differs from lxml on implied `tbody`, bare `<tr>` rows and XML-parsed upper-case tags. Rust and Python render the harness transcript byte for byte |
+| WP0 | #81 | 2 h (18:30Z-20:30Z), plus the offline fingerprint work added at 19:23Z | 1 push (review fixes); CI green first time | 0 high, 3 medium (unsafe guard missed multi-line attributes; placeholders in API-COVERAGE; three WP4 tests needing fill-actor code), 7 low, nits: all fixed, except parity's bare-name claim check (deferred to WP15, Cleanup notes) and the live probe's per-request sessions (documented in API-COVERAGE) | Started 2026-11-13 18:30Z. Probes: sqlx's dropped lock wait keeps the lock (port cancels with `pg_cancel_backend`); croner matches cronsim once evaluated in the fixed offset `astimezone()` gives; wreq's ClientHello matches curl_cffi's (Chrome 149 vs 150 sig-alg difference), headers need configuring; scraper differs from lxml on implied `tbody`, bare `<tr>` rows and XML-parsed upper-case tags. Rust and Python render the harness transcript byte for byte |

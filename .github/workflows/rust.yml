@@ -190,8 +190,15 @@ jobs:
     - name: Clippy (worker crate and binary)
       run: cargo clippy -p embyx-transcode-worker -p embyx-manager --all-targets --locked -- -D warnings
 
-    - name: Test (worker crate and binary)
-      run: cargo test -p embyx-transcode-worker -p embyx-manager --locked
+    - name: Test (worker crate and binary; no test may be ignored)
+      shell: bash
+      run: |
+        set -o pipefail
+        cargo test -p embyx-transcode-worker -p embyx-manager --locked 2>&1 | tee "$RUNNER_TEMP/cargo-test.log"
+        if grep -E '^test result: .* [1-9][0-9]* ignored' "$RUNNER_TEMP/cargo-test.log"; then
+          echo "::error::ignored tests are not allowed"
+          exit 1
+        fi
 
     - name: Build the binary
       run: cargo build -p embyx-manager --locked

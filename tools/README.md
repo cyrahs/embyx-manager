@@ -7,7 +7,7 @@ service. CI runs every `--check` in `.github/workflows/rust.yml`. Lint them with
 
 | Tool | Run it |
 | --- | --- |
-| Golden generator: outputs of the baseline's own code, one module per area in `goldens/areas/`, written to `goldens/` | `uv run python tools/goldens/generate.py` (write), `--check` (compare) |
+| Golden generator: outputs of the baseline's own code, one module per area in `tools/goldens/areas/`, written to `goldens/` | `uv run python tools/goldens/generate.py` (write), `--check` (compare) |
 | Scenario runner: effect transcripts, `docs/rewrite/SCENARIOS.md`; needs `EMBYX_MANAGER_TEST_DATABASE_URL` (a disposable server) | `uv run python tools/scenarios/runner.py [area/name ...]`, `--check` |
 | Parity script: Python tests against the `// py:` claims of Rust tests, writes `docs/rewrite/PARITY.md` | `uv run pytest --collect-only -q > collected.txt`, `cargo test --workspace -- --list --format terse > rust.txt`, then `uv run python tools/parity/parity.py --write --pytest-collected collected.txt --rust-tests rust.txt` (or `--check`; CI adds `--base-scope` with the base branch's scope file) |
 | CloudDrive descriptor: the `FileDescriptorSet` embedded in `clouddrive_pb2.py`, for tonic's code generation | `uv run python tools/codegen/clouddrive_descriptor.py` (write), `--check` |

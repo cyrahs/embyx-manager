@@ -34,7 +34,6 @@ import threading
 from pathlib import Path
 from typing import Any
 
-import hpack
 from curl_cffi import requests as curl_requests
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -141,6 +140,16 @@ def parse_client_hello(record: bytes) -> dict[str, Any]:
     }
 
 
+def _headers_arrived(data: bytes) -> bool:
+    """Whether `data` holds the first HEADERS frame yet; a frame cut short is not an error."""
+    import hpack  # noqa: PLC0415 - only the captures need it (`uv run --with hpack`)
+
+    try:
+        return 'header_order' in parse_http2(data)
+    except (ValueError, IndexError, struct.error, hpack.HPACKError):
+        return False
+
+
 def parse_http2(data: bytes) -> dict[str, Any]:
     """SETTINGS, WINDOW_UPDATE and the first HEADERS frame after the client preface."""
     if not data.startswith(PREFACE):
@@ -148,6 +157,8 @@ def parse_http2(data: bytes) -> dict[str, Any]:
         raise ValueError(msg)
     at = len(PREFACE)
     result: dict[str, Any] = {'frames': []}
+    import hpack  # noqa: PLC0415 - only the captures need it (`uv run --with hpack`)
+
     decoder = hpack.Decoder()
     while at + 9 <= len(data):
         length = int.from_bytes(data[at : at + 3], 'big')
@@ -261,9 +272,8 @@ class Listener:
                             if b'\r\n\r\n' in data:
                                 break
                             continue
-                        with contextlib.suppress(ValueError, IndexError, struct.error, hpack.HPACKError):
-                            if 'header_order' in parse_http2(data):
-                                break
+                        if _headers_arrived(data):
+                            break
                 if result['negotiated_alpn'] == 'h2':
                     result['http2'] = parse_http2(data)
                 else:

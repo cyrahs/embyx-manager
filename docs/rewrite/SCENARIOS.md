@@ -30,7 +30,7 @@ a scenario talks to a real service.
 | --- | --- |
 | `description` | One line. |
 | `operation` | A name in `operations.OPERATIONS` (Python) and in the Rust test that ports it. |
-| `clock` | The scenario's "now" (RFC 3339 with offset); default `2026-01-01T00:00:00+00:00`. The operation gets it as `ctx.now`; code under test must take its clock from there. |
+| `clock` | The scenario's "now" (RFC 3339 with offset); default `2026-01-01T00:00:00+00:00`. The operation gets it as `ctx.now`; code under test must take its clock from there. The Python runner's local zone is UTC (`TZ=UTC`, `tzset()`); a Rust operation that needs a local zone takes it injected, as UTC, never from the process environment. |
 | `args` | Free-form table passed to the operation. |
 | `volatile` | Selectors of values that may differ between runs (below). |
 | `ordering.mode` | `total` (default) or `lanes`; `ordering.lane_keys.<fake> = "<dotted path>"` in `lanes` mode. |

@@ -53,8 +53,8 @@ fn urlsplit_matches_python() {
     }
 }
 
-// WP5's `urls` goldens: `SplitResult.hostname`, the round trip through `urlunsplit`,
-// `quote` with and without `safe`, and the `PurePosixPath` parts Kemono and Jandan use.
+// The `urls` goldens (copied with the helper from fav): `SplitResult.hostname`, the round
+// trip through `urlunsplit`, `quote` with and without `safe`, and `PurePosixPath` parts.
 #[test]
 fn urlsplit_hostname_and_unsplit_match_python() {
     let document = golden::load("urls/urlsplit.json");

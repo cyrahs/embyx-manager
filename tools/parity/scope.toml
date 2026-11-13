@@ -57,9 +57,7 @@ tests = [
   "tests/test_config.py::test_config_api_round_trip_masks_secrets",
   "tests/test_config.py::test_clouddrive_test_endpoint_*",
   "tests/test_config.py::test_emby_test_endpoint_*",
-  "tests/test_api.py::test_mutations_require_configured_bearer_token",
   "tests/test_api.py::test_auth_session_*",
-  "tests/test_api.py::test_request_size_limit_and_health",
 ]
 
 [WP5]
@@ -141,6 +139,11 @@ tests = [
   "tests/test_fill_actor_jobs.py",
   "tests/test_fill_actor_config.py::test_runtime_snapshot_tracks_the_stored_version",
   "tests/test_fill_actor_config.py::test_unconfigured_section_yields_an_idle_runtime",
+  # These three need the fill-actor routes, health block or wiring, which arrive here; WP4
+  # covers the shell with tests of its own (no `// py:` claim) until then.
+  "tests/test_api.py::test_mutations_require_configured_bearer_token",
+  "tests/test_api.py::test_request_size_limit_and_health",
+  "tests/test_bootstrap.py::test_bootstrap_wires_fill_actor_onto_the_catalog_and_the_app_root",
 ]
 
 [WP13]
