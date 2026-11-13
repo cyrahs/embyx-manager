@@ -217,6 +217,11 @@ def test_transcode_bitrate_fits_the_budget_or_a_share_of_the_source() -> None:
     # A source far above the budget gets the budget, audio included, under 115 GB.
     bits = worker.transcode_bitrate(400_000_000_000, hours, 256_000)
     assert (bits + 256_000) * hours / 8 == pytest.approx(worker.MAX_UPLOAD_BYTES * worker.TRANSCODE_BUDGET_SHARE)
+    # The home worker's NVENC overshoots its target, so it aims lower under the limit.
+    home = worker.transcode_bitrate(
+        400_000_000_000, hours, 256_000, share=worker.HOME_SOURCE_SHARE, budget_share=worker.HOME_BUDGET_SHARE
+    )
+    assert (home + 256_000) * hours / 8 * 1.15 < worker.MAX_UPLOAD_BYTES
     with pytest.raises(MergeRefusedError, match='audio alone'):
         worker.transcode_bitrate(400_000_000_000, hours, 10**9)
 

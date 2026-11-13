@@ -64,10 +64,10 @@ from embyx_manager.merge.transcode import (
     transcode_dir,
 )
 from embyx_manager.merge.worker import (
+    HOME_BUDGET_SHARE,
     HOME_SOURCE_SHARE,
     MAX_UPLOAD_BYTES,
     MUXERS,
-    TRANSCODE_BUDGET_SHARE,
     TRANSCODE_MUXERS,
     partial_path,
     read_status,
@@ -461,7 +461,7 @@ class MergeService:
             if task.state not in {MergeState.QUEUED, MergeState.TRANSCODING} or not self.home_bound(task):
                 continue
             total = self._totals.get(task.id, MAX_UPLOAD_BYTES)
-            reserved += 2 * int(min(MAX_UPLOAD_BYTES * TRANSCODE_BUDGET_SHARE, total * HOME_SOURCE_SHARE))
+            reserved += 2 * int(min(MAX_UPLOAD_BYTES * HOME_BUDGET_SHARE, total * HOME_SOURCE_SHARE))
         return reserved
 
     async def _note_waiting(self, task: MergeTask, *, online: bool) -> None:

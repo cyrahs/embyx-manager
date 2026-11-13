@@ -76,9 +76,14 @@ TRANSCODE_BUDGET_SHARE = 0.9
 #: re-encode keeps the picture and the file comes out about a third smaller than an
 #: HEVC one would.
 TRANSCODE_SOURCE_SHARE = 0.4
-#: The share the home worker's NVENC AV1 gets instead: a hardware encoder needs
-#: more bits than SVT-AV1 preset 8 for the same picture.
-HOME_SOURCE_SHARE = 0.45
+#: The share the home worker's NVENC AV1 (RTX 5090, p7 uhq 10-bit) gets instead.
+#: On the same clip, measured against the parts' 12.28 Mb/s: 40% gave VMAF 93.1
+#: (min 87.8), 45% 93.7 (88.4), 50% 94.2 (89.3); the cluster's SVT-AV1 at 40%
+#: scored 92.3 (86.5) in that run. 50% is the first to keep every frame above 89.
+HOME_SOURCE_SHARE = 0.5
+#: NVENC's VBR came out 9-14% above its target in that test, so the home path
+#: aims lower under 115's limit than the CPU path does.
+HOME_BUDGET_SHARE = 0.8
 #: Assumed for an audio stream whose container does not state its bitrate.
 FALLBACK_AUDIO_BITS = 320_000
 #: The muxers a re-encoded AV1 stream may go into (MOV cannot carry AV1).
@@ -287,14 +292,19 @@ def _check_parts(parts: Sequence[Path], output: Path) -> int:
 
 
 def transcode_bitrate(
-    total_bytes: int, duration: float, audio_bits: int, *, share: float = TRANSCODE_SOURCE_SHARE
+    total_bytes: int,
+    duration: float,
+    audio_bits: int,
+    *,
+    share: float = TRANSCODE_SOURCE_SHARE,
+    budget_share: float = TRANSCODE_BUDGET_SHARE,
 ) -> int:
     """The video bitrate, in bits per second, that brings a re-encode under 115's limit.
 
     The lower of what the budget leaves after the copied audio and ``share`` of
     the parts' own video bitrate.
     """
-    budget = MAX_UPLOAD_BYTES * TRANSCODE_BUDGET_SHARE * 8 / duration - audio_bits
+    budget = MAX_UPLOAD_BYTES * budget_share * 8 / duration - audio_bits
     source = max(total_bytes * 8 / duration - audio_bits, 0) * share
     bits = int(min(budget, source))
     if bits <= 0:
@@ -605,7 +615,9 @@ def prepare_home(  # noqa: PLR0913
     _check_memory(probes, muxer, memory_limit)
     expected = sum(result.duration for result in probes)
     first = probes[0]
-    video_bits = transcode_bitrate(total_bytes, expected, first.audio_bits, share=HOME_SOURCE_SHARE)
+    video_bits = transcode_bitrate(
+        total_bytes, expected, first.audio_bits, share=HOME_SOURCE_SHARE, budget_share=HOME_BUDGET_SHARE
+    )
     estimate = int(video_bits * expected / 8) + int(first.audio_bits * expected / 8)
     # The chunks and the assembled file sit on the volume together for a while.
     _check_space(output, 2 * estimate, reserve_bytes)
