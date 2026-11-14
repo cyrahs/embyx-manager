@@ -1,0 +1,301 @@
+# Every way one folder can end (WP6): filed and deleted with its extras, a nested video, the
+# multi-part shapes (indexed, unindexed lead, letters), a 4K cut beating its smaller twin, a
+# phone rip dropped, a "(1)" copy deleted, and the folders left for an operator: two AVIDs,
+# no AVID, an unexpected AVID, unrelated videos, a phone rip too large, a path that is not a
+# directory. Then the two-step path the tracker takes (inspect, then file) and a loose group.
+description = "archive: the outcome of archive_folder for each folder shape"
+operation = "archive.steps"
+
+[roots]
+names = ["task", "library"]
+
+[args.config]
+src_dir = "task"
+dst_dir = "library"
+mapping = { intake = "sorted" }
+brand_mapping = { special = ["SPC"] }
+min_size_mb = 0
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/ABC-101 release", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/nested", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/set", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/[44x.me]rvg-080", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/PPT-057", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/TBW-19", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/dual", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/urvrsp-430", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/hjd2048.com-1129nhdtb201-h264", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/dupes", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/dupes-differ", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/mixed", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/whatever", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/ABC-109", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/surprise", dst = "sorted", expected_avid = "ABC-110" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/vrkm-1846", dst = "sorted", expected_avid = "VRKM-1846" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/padded", dst = "sorted", expected_avid = "VRKM-1847" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/making of", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/OKAX449", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/SPC-113 brand", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/loose.txt", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/gone", dst = "sorted" }
+
+[[args.steps]]
+op = "inspect_folder"
+args = { folder = "task/intake/two-step", expected_avid = "ABC-116" }
+
+[[args.steps]]
+op = "file_selection"
+args = { folder = "task/intake/two-step", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_loose_group"
+args = { avid = "ABC-117", videos = ["task/intake/ABC-117-cd2.mp4", "task/intake/ABC-117-cd1.mp4"], dst = "sorted" }
+
+[[tree]]
+path = "library/sorted"
+kind = "dir"
+
+[[tree]]
+path = "task/intake/ABC-101 release/ABC-101.mp4"
+size = 100
+
+[[tree]]
+path = "task/intake/ABC-101 release/ABC-101.nfo"
+text = "<movie/>"
+
+[[tree]]
+path = "task/intake/ABC-101 release/cover.jpg"
+size = 7
+
+[[tree]]
+path = "task/intake/ABC-101 release/extras/ad.txt"
+text = "visit us"
+
+[[tree]]
+path = "task/intake/nested/inner/abc-102 1080p.mkv"
+size = 20
+
+[[tree]]
+path = "task/intake/set/ABC-103-1.mp4"
+size = 31
+
+[[tree]]
+path = "task/intake/set/ABC-103-2.mp4"
+size = 32
+
+[[tree]]
+path = "task/intake/[44x.me]rvg-080/[44x.me]rvg-080.mp4"
+size = 54
+
+[[tree]]
+path = "task/intake/[44x.me]rvg-080/[44x.me]rvg-080-2.mp4"
+size = 61
+
+[[tree]]
+path = "task/intake/[44x.me]rvg-080/[44x.me]rvg-080-3.mp4"
+size = 58
+
+[[tree]]
+path = "task/intake/PPT-057/PPT-057A_HD.mp4"
+size = 47
+
+[[tree]]
+path = "task/intake/PPT-057/PPT-057B_HD.mp4"
+size = 58
+
+[[tree]]
+path = "task/intake/TBW-19/TBW-19-1.mp4"
+size = 46
+
+[[tree]]
+path = "task/intake/TBW-19/TBW-19_02.mp4"
+size = 91
+
+[[tree]]
+path = "task/intake/dual/ABC-104.mp4"
+size = 30
+
+[[tree]]
+path = "task/intake/dual/ABC-104 4k.mp4"
+size = 90
+
+[[tree]]
+path = "task/intake/urvrsp-430/4k2.com@urvrsp00430_1_8k.mp4"
+size = 34
+
+[[tree]]
+path = "task/intake/urvrsp-430/4k2.com@urvrsp00430_1_hq.mp4"
+size = 14
+
+[[tree]]
+path = "task/intake/urvrsp-430/4k2.com@urvrsp00430_2_8k.mp4"
+size = 40
+
+[[tree]]
+path = "task/intake/urvrsp-430/4k2.com@urvrsp00430_2_hq.mp4"
+size = 39
+
+[[tree]]
+path = "task/intake/hjd2048.com-1129nhdtb201-h264/hjd2048.com-1129nhdtb201-h264.mp4"
+size = 65
+
+[[tree]]
+path = "task/intake/hjd2048.com-1129nhdtb201-h264/nhdtb201-5.mp4"
+size = 9
+
+[[tree]]
+path = "task/intake/dupes/ABC-105.mp4"
+size = 40
+
+[[tree]]
+path = "task/intake/dupes/ABC-105 (1).mp4"
+size = 40
+
+[[tree]]
+path = "task/intake/dupes-differ/ABC-106.mp4"
+size = 40
+
+[[tree]]
+path = "task/intake/dupes-differ/ABC-106 (1).mp4"
+size = 41
+
+[[tree]]
+path = "task/intake/mixed/ABC-107.mp4"
+size = 10
+
+[[tree]]
+path = "task/intake/mixed/DEF-108.mp4"
+size = 10
+
+[[tree]]
+path = "task/intake/whatever/movie.mp4"
+size = 10
+
+[[tree]]
+path = "task/intake/ABC-109/movie.mp4"
+size = 10
+
+[[tree]]
+path = "task/intake/surprise/DEF-110.mp4"
+size = 10
+
+[[tree]]
+path = "task/intake/vrkm-1846/masex.tv@vrkm01846_1_8k.mp4"
+size = 11
+
+[[tree]]
+path = "task/intake/vrkm-1846/masex.tv@vrkm01846_2_8k.mp4"
+size = 12
+
+[[tree]]
+path = "task/intake/padded/VRKM-1847_1.mp4"
+size = 11
+
+[[tree]]
+path = "task/intake/padded/VRKM-01847_2.mp4"
+size = 12
+
+[[tree]]
+path = "task/intake/making of/ABC-112.mp4"
+size = 10
+
+[[tree]]
+path = "task/intake/making of/ABC-112 making of.mp4"
+size = 10
+
+[[tree]]
+path = "task/intake/OKAX449/okax449-h264.mp4"
+size = 100
+
+[[tree]]
+path = "task/intake/OKAX449/okax449-5.mp4"
+size = 80
+
+[[tree]]
+path = "task/intake/SPC-113 brand/SPC-113.wmv"
+size = 10
+
+[[tree]]
+path = "task/intake/loose.txt"
+text = "not a folder"
+
+[[tree]]
+path = "task/intake/two-step/ABC-0116.mp4"
+size = 10
+
+[[tree]]
+path = "task/intake/two-step/sample.txt"
+text = "s"
+
+[[tree]]
+path = "task/intake/ABC-117-cd2.mp4"
+size = 2
+
+[[tree]]
+path = "task/intake/ABC-117-cd1.mp4"
+size = 1

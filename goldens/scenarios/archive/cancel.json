@@ -1,0 +1,235 @@
+{
+  "calls": [
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/ABC"
+      },
+      "response": null,
+      "seq": 1
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-501-cd1.mp4",
+        "src": "{task}/intake/aaa/ABC-501-1.mp4"
+      },
+      "response": null,
+      "seq": 2
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-501-cd2.mp4",
+        "src": "{task}/intake/aaa/ABC-501-2.mp4"
+      },
+      "response": null,
+      "seq": 3
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/aaa"
+      },
+      "response": null,
+      "seq": 4
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/ABC"
+      },
+      "response": null,
+      "seq": 5
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-502.mp4",
+        "src": "{task}/intake/bbb/ABC-502.mp4"
+      },
+      "response": null,
+      "seq": 6
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/bbb"
+      },
+      "response": null,
+      "seq": 7
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/other/DEF"
+      },
+      "response": null,
+      "seq": 8
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/other/DEF/DEF-511.mp4",
+        "src": "{task}/loose/DEF-511.mp4"
+      },
+      "response": null,
+      "seq": 9
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "archive.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "error": {
+            "message": "",
+            "type": "RunCancelledError"
+          },
+          "errors": [],
+          "log": [],
+          "op": "run",
+          "stats": {}
+        },
+        {
+          "error": {
+            "message": "",
+            "type": "RunCancelledError"
+          },
+          "errors": [],
+          "log": [
+            "processing {task}/intake -> {library}/sorted",
+            "moving ABC-501-1.mp4 to sorted/ABC/ABC-501-cd1.mp4",
+            "moving ABC-501-2.mp4 to sorted/ABC/ABC-501-cd2.mp4"
+          ],
+          "op": "run",
+          "stats": {
+            "folders_discarded": 1,
+            "videos_archived": 2
+          }
+        },
+        {
+          "error": {
+            "message": "",
+            "type": "RunCancelledError"
+          },
+          "errors": [],
+          "log": [
+            "processing {task}/intake -> {library}/sorted",
+            "moving ABC-502.mp4 to sorted/ABC/ABC-502.mp4",
+            "processing {task}/loose -> {library}/other",
+            "moving DEF-511.mp4 to other/DEF/DEF-511.mp4"
+          ],
+          "op": "run",
+          "stats": {
+            "folders_discarded": 1,
+            "videos_archived": 2
+          }
+        }
+      ]
+    }
+  },
+  "rows": {},
+  "scenario": "archive/cancel",
+  "tree": {
+    "library": [
+      {
+        "kind": "dir",
+        "path": "other"
+      },
+      {
+        "kind": "dir",
+        "path": "other/DEF"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "other/DEF/DEF-511.mp4",
+        "sha256": "2481a63c85a62cf8",
+        "size": 4
+      },
+      {
+        "kind": "dir",
+        "path": "sorted"
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/ABC"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-501-cd1.mp4",
+        "sha256": "2d711642b726b044",
+        "size": 1
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-501-cd2.mp4",
+        "sha256": "5dde896887f6754c",
+        "size": 2
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-502.mp4",
+        "sha256": "cd2eb0837c9b4c96",
+        "size": 3
+      }
+    ],
+    "task": [
+      {
+        "kind": "dir",
+        "path": "intake"
+      },
+      {
+        "kind": "dir",
+        "path": "loose"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "loose/DEF-512.mp4",
+        "sha256": "eaf16bc07968e013",
+        "size": 5
+      }
+    ]
+  }
+}

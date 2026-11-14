@@ -1,0 +1,159 @@
+# Priority routes (WP6): a priority arrival promotes every part of the normal copy and then
+# finds its own destination taken; promotion keeps both when the priority side already holds
+# the name; a normal arrival skips an AVID the priority side holds; brand-mapped brands skip
+# both guards; `library_holdings` promotes for a priority task directory and reports every
+# copy otherwise; `replaced_copies` ignores absolute, `..` and foreign paths; the routes a
+# task directory maps to.
+description = "archive: priority promotion, the library check, replaced copies"
+operation = "archive.steps"
+
+[roots]
+names = ["task", "library"]
+
+[args.config]
+src_dir = "task"
+dst_dir = "library"
+mapping = { intake = "sorted", extra = "other" }
+priority_mapping = { vip = "starred" }
+brand_mapping = { special = ["SPC"] }
+min_size_mb = 0
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/vip/ABC-201 4k", dst = "starred", priority = true }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/vip/ABC-202", dst = "starred", priority = true }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/ABC-203", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/SPC-204", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/vip/ABC-205", dst = "starred", priority = true }
+
+[[args.steps]]
+op = "library_holdings"
+args = { avid = "ABC-206", task_dir = "/task/intake" }
+
+[[args.steps]]
+op = "library_holdings"
+args = { avid = "ABC-206", task_dir = "/task/vip" }
+
+[[args.steps]]
+op = "library_holdings"
+args = { avid = "ABC-207", task_dir = "/elsewhere/entirely" }
+
+[[args.steps]]
+op = "library_holdings"
+args = { avid = "ABC-207" }
+
+[[args.steps]]
+op = "library_holdings"
+args = { avid = "NOBRAND", task_dir = "/task/vip" }
+
+[[args.steps]]
+op = "replaced_copies"
+args = { avid = "ABC-207", paths = ["other/ABC/ABC-207.mp4", "other/ABC/ABC-207.mp4", "/abs/ABC-207.mp4", "other/../other/ABC/ABC-207.mp4", "other/ABC/ABC-2070.mp4", "other/ABC/./ABC-207.mp4", "sorted/ABC/missing.mp4"] }
+
+[[args.steps]]
+op = "route_for_task_dir"
+args = { task_dir = "/task/intake" }
+
+[[args.steps]]
+op = "route_for_task_dir"
+args = { task_dir = "/task/vip/" }
+
+[[args.steps]]
+op = "route_for_task_dir"
+args = { task_dir = "task/extra" }
+
+[[args.steps]]
+op = "route_for_task_dir"
+args = { task_dir = "/intake/task" }
+
+[[args.steps]]
+op = "route_for_task_dir"
+args = { task_dir = "/" }
+
+[[args.steps]]
+op = "route_for_task_dir"
+args = { task_dir = "" }
+
+[[tree]]
+path = "library/sorted/ABC/ABC-201.mp4"
+size = 11
+
+[[tree]]
+path = "task/vip/ABC-201 4k/ABC-201-4k.mp4"
+size = 21
+
+[[tree]]
+path = "library/sorted/ABC/ABC-202-cd1.mp4"
+size = 12
+
+[[tree]]
+path = "library/sorted/ABC/ABC-202-cd2.mp4"
+size = 13
+
+[[tree]]
+path = "library/other/ABC/ABC-202-cd1.mp4"
+size = 14
+
+[[tree]]
+path = "library/starred/ABC/ABC-202-cd1.mp4"
+size = 15
+
+[[tree]]
+path = "task/vip/ABC-202/ABC-202.mp4"
+size = 22
+
+[[tree]]
+path = "library/starred/ABC/ABC-203.mp4"
+size = 16
+
+[[tree]]
+path = "task/intake/ABC-203/ABC-203.mp4"
+size = 23
+
+[[tree]]
+path = "library/starred/SPC/SPC-204.mp4"
+size = 17
+
+[[tree]]
+path = "task/intake/SPC-204/SPC-204.mp4"
+size = 24
+
+[[tree]]
+path = "library/sorted/ABC/ABC-2050.mp4"
+size = 18
+
+[[tree]]
+path = "task/vip/ABC-205/ABC-205.mp4"
+size = 25
+
+[[tree]]
+path = "library/sorted/ABC/ABC-206.mp4"
+size = 19
+
+[[tree]]
+path = "library/sorted/ABC/ABC-206-cd2.mp4"
+size = 20
+
+[[tree]]
+path = "library/other/ABC/ABC-207.mp4"
+size = 26
+
+[[tree]]
+path = "library/other/ABC/ABC-207.nfo"
+size = 1
+
+[[tree]]
+path = "library/other/ABC/ABC-2070.mp4"
+size = 27

@@ -74,7 +74,7 @@ tests = [
 
 [WP6]
 title = "Archive, reconcile, move-in"
-status = "pending"
+status = "done"
 tests = [
   "tests/test_monitor_archive.py",
   "tests/test_monitor_reconcile.py",

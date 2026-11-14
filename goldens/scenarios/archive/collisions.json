@@ -1,0 +1,385 @@
+{
+  "calls": [
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/ABC"
+      },
+      "response": null,
+      "seq": 1
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-114.mp4",
+        "src": "{task}/intake/hardlinked/ABC-114.mp4"
+      },
+      "response": null,
+      "seq": 2
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/hardlinked"
+      },
+      "response": null,
+      "seq": 3
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/ABC"
+      },
+      "response": null,
+      "seq": 4
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-115.mp4",
+        "src": "{task}/intake/linked/ABC-115.mp4"
+      },
+      "response": null,
+      "seq": 5
+    },
+    {
+      "error": {
+        "message": "[Errno None] None: PosixPath('{task}/intake/linked')",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/linked"
+      },
+      "seq": 6
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/ABC"
+      },
+      "response": null,
+      "seq": 7
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-119.mp4",
+        "src": "{task}/intake/longer/ABC-119.mp4"
+      },
+      "response": null,
+      "seq": 8
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/longer"
+      },
+      "response": null,
+      "seq": 9
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "archive.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "errors": [],
+          "log": [
+            "WARNING: sorted/ABC/ABC-111.mp4 exists, skipping"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [],
+            "avid": "ABC-111",
+            "outcome": "needs_attention",
+            "reason": "destination already holds this avid"
+          },
+          "stats": {}
+        },
+        {
+          "errors": [],
+          "log": [
+            "WARNING: sorted/ABC/ABC-112-cd2.mp4 exists, skipping"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [],
+            "avid": "ABC-112",
+            "outcome": "needs_attention",
+            "reason": "destination already holds this avid"
+          },
+          "stats": {}
+        },
+        {
+          "errors": [],
+          "log": [
+            "moving ABC-114.mp4 to sorted/ABC/ABC-114.mp4"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [
+              "sorted/ABC/ABC-114.mp4"
+            ],
+            "avid": "ABC-114",
+            "outcome": "archived",
+            "reason": ""
+          },
+          "stats": {
+            "folders_discarded": 1,
+            "videos_archived": 1
+          }
+        },
+        {
+          "errors": [
+            "ERROR: archived linked but failed to remove it: OSError('Cannot call rmtree on a symbolic link')"
+          ],
+          "log": [
+            "moving ABC-115.mp4 to sorted/ABC/ABC-115.mp4",
+            "ERROR: archived linked but failed to remove it: OSError('Cannot call rmtree on a symbolic link')"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [
+              "sorted/ABC/ABC-115.mp4"
+            ],
+            "avid": "ABC-115",
+            "outcome": "archived",
+            "reason": ""
+          },
+          "stats": {
+            "videos_archived": 1
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "ads holds no video above 1MB"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [],
+            "avid": "",
+            "outcome": "junk",
+            "reason": "no video above the size threshold"
+          },
+          "stats": {}
+        },
+        {
+          "errors": [],
+          "log": [
+            "moving ABC-119.mp4 to sorted/ABC/ABC-119.mp4"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [
+              "sorted/ABC/ABC-119.mp4"
+            ],
+            "avid": "ABC-119",
+            "outcome": "archived",
+            "reason": ""
+          },
+          "stats": {
+            "folders_discarded": 1,
+            "videos_archived": 1
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "WARNING: sorted/ABC/ABC-111.mp4 exists, skipping"
+          ],
+          "op": "archive_loose_group",
+          "result": {
+            "archived_paths": [],
+            "avid": "ABC-111",
+            "outcome": "needs_attention",
+            "reason": "destination already holds this avid"
+          },
+          "stats": {}
+        }
+      ]
+    }
+  },
+  "rows": {},
+  "scenario": "archive/collisions",
+  "tree": {
+    "library": [
+      {
+        "kind": "dir",
+        "path": "sorted"
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/ABC"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-111.mp4",
+        "sha256": "3256fefc87af01a4",
+        "size": 999
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-112-cd2.mp4",
+        "sha256": "eaf16bc07968e013",
+        "size": 5
+      },
+      {
+        "kind": "file",
+        "nlink": 2,
+        "path": "sorted/ABC/ABC-114.mp4",
+        "sha256": "dfc9339ad63a4fa6",
+        "size": 1048579
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-115.mp4",
+        "sha256": "b699aa5b9c6c2768",
+        "size": 1048580
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-119.mp4",
+        "sha256": "87fdbc9d8a44bce1",
+        "size": 1048581
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-1190.mp4",
+        "sha256": "cd2eb0837c9b4c96",
+        "size": 3
+      }
+    ],
+    "outside": [
+      {
+        "kind": "dir",
+        "path": "keep"
+      },
+      {
+        "kind": "file",
+        "nlink": 2,
+        "path": "keep/ABC-114.mp4",
+        "sha256": "dfc9339ad63a4fa6",
+        "size": 1048579
+      },
+      {
+        "kind": "dir",
+        "path": "linked"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "linked/ABC-115.nfo",
+        "sha256": "87d3be25624a99ae",
+        "size": 8
+      }
+    ],
+    "task": [
+      {
+        "kind": "dir",
+        "path": "intake"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/ABC-111.mp4",
+        "sha256": "ddc2b229712668aa",
+        "size": 1048578
+      },
+      {
+        "kind": "dir",
+        "path": "intake/ads"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/ads/ABC-118.mp4",
+        "sha256": "8f990ba0b577b51c",
+        "size": 1048576
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/ads/promo.mp4",
+        "sha256": "09ecb6ebc8bcefc7",
+        "size": 100
+      },
+      {
+        "kind": "dir",
+        "path": "intake/again"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/again/ABC-111.mp4",
+        "sha256": "154b8ed3c2383ce4",
+        "size": 1048577
+      },
+      {
+        "kind": "symlink",
+        "path": "intake/linked",
+        "target": "../../outside/linked"
+      },
+      {
+        "kind": "dir",
+        "path": "intake/part-taken"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/part-taken/ABC-112-1.mp4",
+        "sha256": "154b8ed3c2383ce4",
+        "size": 1048577
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/part-taken/ABC-112-2.mp4",
+        "sha256": "ddc2b229712668aa",
+        "size": 1048578
+      }
+    ]
+  }
+}

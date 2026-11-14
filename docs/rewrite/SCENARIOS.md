@@ -129,10 +129,20 @@ the runner does and `dump()` gives the transcript's `fakes`.
   modules' `datetime` (moved by a step's `advance_seconds`) and skips `CLOUD_RETRY`'s waits; the Rust test
   injects the same clock and a recording sleeper. `uuid4().hex` run ids have no dashes, so they are marked
   `volatile`.
-- **WP6/WP7 (archive, reconcile, move-in, tracker, 换版):** many files at once. Use `lanes` mode
-  with a lane key on the file path when only per-file order is the contract; seed hard links and
-  compare `nlink`; database timestamps written with `now()` are `volatile`, timestamps written
-  from the scenario clock are not.
+- **WP6 (done):** `archive/*`, `reconcile/*` and `move_in/*` run `archive.steps`, `reconcile.steps` and
+  `move_in.steps` (`tools/scenarios/operations/archive.py`) over a tree the steps shape (`write`, `remove`,
+  unrecorded) and through a recording file system: Python patches `Path.rename`, `unlink`, `mkdir`
+  (the outermost call only), `rglob`, `iterdir`, `stat` and `shutil.rmtree`; Rust wraps `LocalFs` in
+  `fs::recording::RecordingFs`. Each mutation is a call `{fake: "fs", method, request, response | error}` in the
+  order made (the runner's `Context.record`, a new hook any operation can use), and `args.faults`
+  (`{op, path, errno | message, times}`) and `args.stops` (`{op, path}`: `request_stop()` right after that call)
+  make failures and mid-run cancellation reproducible. Each step reports its result or error, the run's stats,
+  log tail and errors; the transcript adds the final `tree` and the ledger `rows`. Ordered calls
+  rather than `lanes`, because the order of renames and deletions is the contract. The runner's TOML is read
+  in insertion order on both sides (`toml`'s `preserve_order`), so a spec's mapping tables keep their order.
+- **WP7 (tracker, 换版):** add tracker and replace steps to the same operation; seed hard links and compare
+  `nlink` where a copy is linked; database timestamps written with `now()` are `volatile`, timestamps
+  written from the scenario clock are not.
 - **WP9 (scheduler):** fires come from `clock`; a scenario runs one tick, not a loop.
 - **WP11 (fill-actor service):** one scenario per journal state to recover from; seed the journal
   rows and the half-done tree, and let the transcript show the recovered end state.

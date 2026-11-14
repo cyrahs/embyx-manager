@@ -1,0 +1,63 @@
+# Reconcile failures (WP6): a stop requested while a folder is being filed ends the pass at the
+# next folder, with the filed folder recorded; a folder whose files cannot be measured ends the
+# pass with the error; a filed folder whose AVID's row is ignored ends the pass with the
+# ledger's IllegalTransitionError after the files moved (the row stays ignored).
+description = "reconcile: cancellation, a measuring error, an illegal ledger transition"
+operation = "reconcile.steps"
+clock = "2026-09-05T03:00:00+00:00"
+
+[roots]
+names = ["task", "library"]
+
+[args.config]
+src_dir = "task"
+dst_dir = "library"
+mapping = { intake = "sorted" }
+min_size_mb = 0
+
+[[args.stops]]
+op = "rmtree"
+path = "task/intake/AAA-701"
+
+[[args.faults]]
+op = "stat"
+path = "task/intake/CCC-703/CCC-703.mp4"
+errno = 5
+times = 2
+
+[[args.steps]]
+op = "run"
+
+[[args.steps]]
+op = "run"
+
+[[args.steps]]
+op = "run"
+
+[[args.steps]]
+op = "run"
+
+[[args.steps]]
+op = "run"
+
+[[tree]]
+path = "task/intake/AAA-701/AAA-701.mp4"
+size = 1
+
+[[tree]]
+path = "task/intake/BBB-702/BBB-702.mp4"
+size = 2
+
+[[tree]]
+path = "task/intake/CCC-703/CCC-703.mp4"
+size = 3
+
+[[tree]]
+path = "task/intake/DDD-704/DDD-704.mp4"
+size = 4
+
+[database]
+schema = "app"
+sql = [
+    "INSERT INTO archive_acquisitions (avid, state, source, created_at, updated_at) VALUES ('DDD-704', 'ignored', 'manual', '2026-09-01T00:00:00Z', '2026-09-01T00:00:00Z')",
+]

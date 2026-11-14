@@ -262,7 +262,7 @@ feed. Where the TLS fingerprint matters the probe runs from the production netwo
 | WP3 | 2 clients | done (#84) | CloudDrive over tonic with the cancel-safe wrapper and a fake server; Kubernetes Jobs client | 700 | WP1 |
 | WP4 | 2 API | done (#88) | axum shell: auth, health, size limit, SPA hosting, config API with the two connection tests, OpenAPI check, page smoke. Checkpoint A (note only) | 900 | WP2, WP3 |
 | WP5 | 3 monitor | done (#87) | Ledger, runs, reports, cadence, release dates, intake, subscriptions | 2,000 | WP2, WP3 |
-| WP6 | 3 monitor | pending | Archive, reconcile, move-in (filesystem effects) | 1,100 | WP1 |
+| WP6 | 3 monitor | done (#PRNUM) | Archive, reconcile, move-in (filesystem effects) | 1,100 | WP1 |
 | WP7 | 3 monitor | pending | Tracker, 换版, manual intake | 1,250 | WP5, WP6 |
 | WP8 | 3 monitor | pending | RSS pipeline, mapping pipeline, playlists and playlist sync | 1,150 | WP5 |
 | WP9 | 3 monitor | pending | Scheduler (cron, watcher, tracker bursts), monitor API, playlists API, wiring | 1,700 | WP7, WP8, WP4 |
@@ -423,6 +423,22 @@ or says why one stays.
   can reuse for Job names. `intake::operation_result_text` is `str(FileOperationResult)`, for any later log line
   that quotes a CloudDrive result. The `intake/steps` scenario (`tools/scenarios/operations/intake.py`) pins clocks
   by patching the modules' `datetime` and skips `CLOUD_RETRY`'s waits; WP6-WP9 scenarios can do the same.
+- WP6 left these for later packages. `embyx_monitor::fs` is the file system as `pathlib`/`shutil` see it (D70):
+  the `Fs` trait, `LocalFs` (with `_rmtree_safe_fd` on `rustix`), the free functions `is_dir`, `is_file`,
+  `exists`, `is_symlink`, `is_video`, `iterdir`, `rglob`, `mkdir_parents`, and `PyOsError` with Python's class,
+  `str()` and `repr()`; `fs::recording::RecordingFs` (feature `test-support`) records every mutation in the
+  scenario call shape and injects `OSError`s and stop requests by operation and path. WP7's tracker and 换版 and
+  WP11's local moves should take an `Arc<dyn Fs>` rather than calling `std::fs`. `PyOsError` is a third copy of
+  the `OSError` text (with `embyx_clients`' `PyOsError` and `embyx_merge::py`); WP16 merges them into
+  `embyx-core`. `ArchivePipeline` keeps Python's public surface (`archive_folder`, `inspect_folder` +
+  `file_selection`, `archive_loose_group`, `replaced_copies`, `library_holdings`, `route_for_task_dir`,
+  `avid_of`, `covers_other_route`, `routes`) for WP7 and WP9; its file work is synchronous and async callers wrap
+  it in `archive::blocking` (D71). `reconcile::{record_archived, record_attention}` are the shared ledger writes
+  of reconcile and move-in. The library move keeps Python's exists-then-rename; `RENAME_NOREPLACE` (`rustix`,
+  as WP11 needs for fill actor) would close the window between the check and the rename in both builds, a
+  behaviour change for Max to decide after the rewrite. The scenario operation
+  (`tools/scenarios/operations/archive.py`, `archive/scenarios.rs`) runs `{op, args}` steps over a seeded
+  tree through `RecordingFs` (faults, stops, `advance_seconds`); WP7 can add tracker steps to it.
 
 - WP4 left these for later packages. The request models (`UpdateSectionRequest`, `TestConnectionRequest`) are
   validated in `embyx_api::body` against pydantic goldens (`goldens/api/request_models.json`) rather than through
