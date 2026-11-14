@@ -54,13 +54,12 @@ fn pin_times(spec: &Spec, seeded: &Seeded) {
         .section("roots")
         .get("names")
         .and_then(Value::as_list)
-        .map(|names| {
+        .map_or_else(Vec::new, |names| {
             names
                 .iter()
                 .map(|name| name.as_str().expect("a root name").to_owned())
                 .collect()
-        })
-        .unwrap_or_else(Vec::new);
+        });
     for name in names {
         walk(seeded.root(&name), stamp);
     }

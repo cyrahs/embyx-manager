@@ -55,16 +55,14 @@ impl StubSource {
 
 impl RankingSource for StubSource {
     fn discover_database_name(&self) -> BoxFuture<'_, Result<String, JinjierError>> {
-        let result = match self.answers().get("name").and_then(Value::as_str) {
-            Some(name) => {
-                self.call("discover_database_name", Dict::new(), Ok(Value::from(name)));
-                Ok(name.to_owned())
-            }
-            None => {
-                let error = JinjierError("page changed".to_owned());
-                self.call("discover_database_name", Dict::new(), Err(&error));
-                Err(error)
-            }
+        let answers = self.answers();
+        let result = if let Some(name) = answers.get("name").and_then(Value::as_str) {
+            self.call("discover_database_name", Dict::new(), Ok(Value::from(name)));
+            Ok(name.to_owned())
+        } else {
+            let error = JinjierError("page changed".to_owned());
+            self.call("discover_database_name", Dict::new(), Err(&error));
+            Err(error)
         };
         Box::pin(async move { result })
     }

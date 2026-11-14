@@ -33,7 +33,7 @@ fn os_error(error: &io::Error, filename: &Path) -> PyOsError {
     PyOsError::from_io(error, Some(filename), None)
 }
 
-fn errno_of(error: &rustix::io::Errno) -> i32 {
+fn errno_of(error: rustix::io::Errno) -> i32 {
     error.raw_os_error()
 }
 
@@ -134,7 +134,7 @@ fn set_times(dst: &Path, metadata: &Metadata) -> Result<(), PyOsError> {
             tv_nsec: metadata.mtime_nsec(),
         },
     };
-    utimensat(CWD, dst, &times, AtFlags::empty()).map_err(|error| PyOsError::errno(errno_of(&error), Some(dst), None))
+    utimensat(CWD, dst, &times, AtFlags::empty()).map_err(|error| PyOsError::errno(errno_of(error), Some(dst), None))
 }
 
 /// `os.listxattr(path)`: the names, growing the buffer as the size changes under it.
@@ -180,8 +180,8 @@ fn copy_xattrs(src: &Path, dst: &Path) -> Result<(), PyOsError> {
     use std::os::unix::ffi::OsStrExt as _;
     let names = match list_xattrs(src) {
         Ok(names) => names,
-        Err(error) if [ENOTSUP, ENODATA, EINVAL].contains(&errno_of(&error)) => return Ok(()),
-        Err(error) => return Err(PyOsError::errno(errno_of(&error), Some(src), None)),
+        Err(error) if [ENOTSUP, ENODATA, EINVAL].contains(&errno_of(error)) => return Ok(()),
+        Err(error) => return Err(PyOsError::errno(errno_of(error), Some(src), None)),
     };
     for name in names {
         let copied = get_xattr(src, &name).map_err(|error| (error, src)).and_then(|value| {
@@ -195,8 +195,8 @@ fn copy_xattrs(src: &Path, dst: &Path) -> Result<(), PyOsError> {
         });
         match copied {
             Ok(()) => {}
-            Err((error, _)) if [EPERM, ENOTSUP, ENODATA, EINVAL, EACCES].contains(&errno_of(&error)) => {}
-            Err((error, path)) => return Err(PyOsError::errno(errno_of(&error), Some(path), None)),
+            Err((error, _)) if [EPERM, ENOTSUP, ENODATA, EINVAL, EACCES].contains(&errno_of(error)) => {}
+            Err((error, path)) => return Err(PyOsError::errno(errno_of(error), Some(path), None)),
         }
     }
     Ok(())

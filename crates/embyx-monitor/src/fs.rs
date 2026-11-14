@@ -49,10 +49,9 @@ const IGNORED_ERRNOS: [i32; 4] = [ENOENT, ENOTDIR, EBADF, ELOOP];
 pub struct PyOsError {
     /// `exc.errno`; `None` for `OSError(message)`.
     pub errno: Option<i32>,
-    /// `exc.strerror`.
-    pub strerror: Option<String>,
-    /// The single argument of `OSError(message)`.
-    message: Option<String>,
+    /// `exc.strerror` when there is an errno, otherwise the single argument of
+    /// `OSError(message)` (one field keeps the error small).
+    text: Option<String>,
     /// `exc.filename` and `exc.filename2`.
     pub filename: Option<Filename>,
     pub filename2: Option<Filename>,
@@ -89,8 +88,7 @@ impl PyOsError {
     pub fn errno(code: i32, filename: Option<&Path>, filename2: Option<&Path>) -> Self {
         Self {
             errno: Some(code),
-            strerror: Some(strerror(code)),
-            message: None,
+            text: Some(strerror(code)),
             filename: filename.map(Filename::of),
             filename2: filename2.map(Filename::of),
             class: None,
@@ -101,8 +99,7 @@ impl PyOsError {
     pub fn message(message: impl Into<String>) -> Self {
         Self {
             errno: None,
-            strerror: None,
-            message: Some(message.into()),
+            text: Some(message.into()),
             filename: None,
             filename2: None,
             class: None,
@@ -138,6 +135,20 @@ impl PyOsError {
         self
     }
 
+    /// `exc.strerror`.
+    pub fn strerror(&self) -> Option<&str> {
+        self.errno.and(self.text.as_deref())
+    }
+
+    /// The single argument of `OSError(message)`.
+    fn argument(&self) -> Option<&str> {
+        if self.errno.is_some() {
+            None
+        } else {
+            self.text.as_deref()
+        }
+    }
+
     /// Whether `pathlib` reads this error as "the path is not there".
     pub fn is_ignored_by_pathlib(&self) -> bool {
         self.errno.is_some_and(|code| IGNORED_ERRNOS.contains(&code))
@@ -148,7 +159,7 @@ impl fmt::Display for PyOsError {
     /// `OSError.__str__`.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let errno = self.errno.map_or_else(|| "None".to_owned(), |code| code.to_string());
-        let strerror = self.strerror.as_deref().unwrap_or("None");
+        let strerror = self.strerror().unwrap_or("None");
         match (&self.filename, &self.filename2) {
             (Some(filename), Some(filename2)) => write!(
                 f,
@@ -157,9 +168,9 @@ impl fmt::Display for PyOsError {
                 filename2.py_repr()
             ),
             (Some(filename), None) => write!(f, "[Errno {errno}] {strerror}: {}", filename.py_repr()),
-            (None, _) => match (self.errno, &self.strerror) {
+            (None, _) => match (self.errno, self.strerror()) {
                 (Some(_), Some(_)) => write!(f, "[Errno {errno}] {strerror}"),
-                _ => f.write_str(self.message.as_deref().unwrap_or("")),
+                _ => f.write_str(self.argument().unwrap_or("")),
             },
         }
     }
@@ -194,7 +205,7 @@ impl PyException for PyOsError {
 
     /// `repr(exc)`: the arguments without the file names.
     fn py_repr(&self) -> String {
-        match (&self.message, self.errno, &self.strerror) {
+        match (self.argument(), self.errno, self.strerror()) {
             (Some(message), _, _) => format!("{}({})", self.class_name(), py_repr(message)),
             (None, Some(code), Some(strerror)) => format!("{}({code}, {})", self.class_name(), py_repr(strerror)),
             _ => format!("{}()", self.class_name()),
@@ -215,7 +226,7 @@ pub fn path_text(path: &Path) -> String {
     path.to_string_lossy().into_owned()
 }
 
-/// `st_mtime`: `(double)sec + (double)nsec * 1e-9`, the float CPython builds.
+/// `st_mtime`: `(double)sec + (double)nsec * 1e-9`, the float `CPython` builds.
 #[expect(clippy::cast_precision_loss, reason = "CPython's own double arithmetic")]
 fn py_mtime(metadata: &std::fs::Metadata) -> f64 {
     use std::os::unix::fs::MetadataExt as _;
@@ -227,7 +238,7 @@ fn py_mtime(metadata: &std::fs::Metadata) -> f64 {
 pub struct FileStat {
     pub kind: FileKind,
     pub size: u64,
-    /// `st_mtime`: seconds as a float, `sec + nsec * 1e-9` as CPython computes it.
+    /// `st_mtime`: seconds as a float, `sec + nsec * 1e-9` as `CPython` computes it.
     pub mtime: f64,
 }
 

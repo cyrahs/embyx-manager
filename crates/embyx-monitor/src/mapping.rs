@@ -264,12 +264,11 @@ impl MappingPipeline {
             let src_rel_dir = py_parent(&py_parent(&relative));
             let src = py_join(&self.src_dir, &src_rel_dir).join(dst.file_name().unwrap_or_default());
             let parent = py_parent(&dst);
-            let index = match deleted.iter().position(|(directory, _)| *directory == parent) {
-                Some(index) => index,
-                None => {
-                    deleted.push((parent, Vec::new()));
-                    deleted.len() - 1
-                }
+            let index = if let Some(index) = deleted.iter().position(|(directory, _)| *directory == parent) {
+                index
+            } else {
+                deleted.push((parent, Vec::new()));
+                deleted.len() - 1
             };
             if !fs::exists(fs, &src)? || self.moved(&src, &dst)? {
                 fs.unlink(&dst)?;

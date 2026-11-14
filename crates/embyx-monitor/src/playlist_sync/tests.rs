@@ -391,11 +391,11 @@ fn record_named(
     }
 }
 
-fn source_state(name: &str) -> Option<PlaylistSourceState> {
-    Some(PlaylistSourceState {
+fn source_state(name: &str) -> PlaylistSourceState {
+    PlaylistSourceState {
         database_name: name.to_owned(),
         fetched_at: now(),
-    })
+    }
 }
 
 fn make_pipeline(
@@ -443,7 +443,7 @@ async fn first_run_downloads_and_stores_the_lists_then_creates_playlists() {
     make_pipeline(&repository, &source, &emby).run(&run).await.expect("run");
 
     assert_eq!(source.downloads(), 1);
-    assert_eq!(repository.source_state(), source_state("20260112"));
+    assert_eq!(repository.source_state(), Some(source_state("20260112")));
     assert_eq!(
         repository.keys(),
         [
@@ -477,7 +477,10 @@ async fn first_run_downloads_and_stores_the_lists_then_creates_playlists() {
 // py: tests/test_monitor_playlist_sync.py::test_same_database_name_skips_the_download
 #[tokio::test]
 async fn same_database_name_skips_the_download() {
-    let repository = FakeRepository::new(vec![record("k7", &["SSNI-497"], true, None)], source_state("20260112"));
+    let repository = FakeRepository::new(
+        vec![record("k7", &["SSNI-497"], true, None)],
+        Some(source_state("20260112")),
+    );
     let source = FakeSource::new(Some("20260112"));
     let emby = Arc::new(FakeEmby::new(&[("SSNI-497", "10")]));
     let run = ctx();
@@ -494,7 +497,7 @@ async fn same_database_name_skips_the_download() {
 #[tokio::test]
 async fn new_database_name_replaces_entries_but_keeps_the_operators_flag() {
     let old = record("k7", &["OLD-001"], false, None);
-    let repository = FakeRepository::new(vec![old], source_state("20250101"));
+    let repository = FakeRepository::new(vec![old], Some(source_state("20250101")));
     let source = FakeSource::new(Some("20260112"));
     let emby = Arc::new(FakeEmby::new(&[("SSNI-497", "10")]));
 
@@ -519,7 +522,10 @@ async fn new_database_name_replaces_entries_but_keeps_the_operators_flag() {
 // py: tests/test_monitor_playlist_sync.py::test_source_outage_keeps_syncing_the_stored_lists
 #[tokio::test]
 async fn source_outage_keeps_syncing_the_stored_lists() {
-    let repository = FakeRepository::new(vec![record("k7", &["SSNI-497"], true, None)], source_state("20260112"));
+    let repository = FakeRepository::new(
+        vec![record("k7", &["SSNI-497"], true, None)],
+        Some(source_state("20260112")),
+    );
     let emby = Arc::new(FakeEmby::new(&[("SSNI-497", "10")]));
     let run = ctx();
 
@@ -574,7 +580,7 @@ async fn playlist_in_the_right_order_is_left_alone() {
     emby.clear_calls();
     let repository = FakeRepository::new(
         vec![record("k7", &["A-001", "B-002"], true, Some(&playlist_id))],
-        source_state("x"),
+        Some(source_state("x")),
     );
     let run = ctx();
 
@@ -599,7 +605,7 @@ async fn changed_order_or_membership_rebuilds_the_playlist_in_one_pass() {
     emby.clear_calls();
     let repository = FakeRepository::new(
         vec![record("k7", &["A-001", "B-002", "C-003"], true, Some(&playlist_id))],
-        source_state("x"),
+        Some(source_state("x")),
     );
     let run = ctx();
 
@@ -623,7 +629,10 @@ async fn changed_order_or_membership_rebuilds_the_playlist_in_one_pass() {
 #[tokio::test]
 async fn playlist_deleted_on_the_server_is_recreated() {
     let emby = Arc::new(FakeEmby::new(&[("A-001", "1")]));
-    let repository = FakeRepository::new(vec![record("k7", &["A-001"], true, Some("gone"))], source_state("x"));
+    let repository = FakeRepository::new(
+        vec![record("k7", &["A-001"], true, Some("gone"))],
+        Some(source_state("x")),
+    );
     let run = ctx();
 
     make_pipeline(&repository, &FakeSource::new(Some("x")), &emby)
@@ -644,7 +653,7 @@ async fn disabled_list_has_its_playlist_removed_and_gap_still_counted() {
     let playlist_id = emby.create("JavDB 有码 TOP250", &strings(&["1"])).expect("create");
     let repository = FakeRepository::new(
         vec![record("k7", &["A-001", "B-002"], false, Some(&playlist_id))],
-        source_state("x"),
+        Some(source_state("x")),
     );
     let run = ctx();
 
@@ -681,7 +690,7 @@ async fn one_list_failing_on_emby_is_recorded_and_the_rest_continue() {
             record_named("k7", &["A-001"], true, None, 7, "Broken"),
             record_named("k2024", &["B-002"], true, None, 2024, "JavDB 2024 TOP250"),
         ],
-        source_state("x"),
+        Some(source_state("x")),
     );
     let run = ctx();
 
@@ -750,7 +759,7 @@ async fn an_error_that_is_not_an_emby_error_ends_the_run() {
             record_named("k7", &["A-001"], true, None, 7, "First"),
             record_named("k2024", &["A-001"], true, None, 2024, "Second"),
         ],
-        source_state("x"),
+        Some(source_state("x")),
     );
     let emby: Arc<dyn PlaylistServer> = Arc::new(Malformed(FakeEmby::new(&[("A-001", "1")])));
     let parser = AvidParser::default();

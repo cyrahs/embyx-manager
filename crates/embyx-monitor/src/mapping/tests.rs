@@ -192,7 +192,7 @@ fn incremental_reports_failed_paths() {
         .run_incremental(&ctx, std::slice::from_ref(&changed), &[])
         .expect("run_incremental");
 
-    assert_eq!(failed_changed, [changed.clone()]);
+    assert_eq!(failed_changed, std::slice::from_ref(&changed));
     assert!(failed_deleted.is_empty());
     assert_eq!(
         ctx.errors(),
@@ -548,6 +548,7 @@ fn outcome<T: Into<embyx_core::pyjson::Value>>(result: Result<T, PyOsError>, tmp
 }
 
 #[test]
+#[expect(clippy::too_many_lines, reason = "one golden walk through every file system call")]
 fn file_system_calls_match_python() {
     use embyx_core::pyjson::Value;
     let document = golden::load("monitor/mapping_fs.json");
@@ -621,7 +622,10 @@ fn file_system_calls_match_python() {
     );
     assert_eq!(names(&into_dir), texts(golden::get(copy, "into_dir")));
     assert_eq!(
-        Value::Bool(local.stat(&src, true).expect("stat").mtime == local.stat(&dst, true).expect("stat").mtime),
+        Value::Bool(
+            local.stat(&src, true).expect("stat").mtime.to_bits()
+                == local.stat(&dst, true).expect("stat").mtime.to_bits(),
+        ),
         *golden::get(copy, "st_mtime_equal")
     );
 

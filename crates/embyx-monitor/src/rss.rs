@@ -843,7 +843,7 @@ impl RssPipeline {
         ctx: &RunContext,
     ) -> Result<IndexMap<String, Vec<MagnetCandidate>>, RssError> {
         let resolved: Mutex<IndexMap<String, Vec<MagnetCandidate>>> = Mutex::new(IndexMap::new());
-        let resolves = avid_item.keys().map(|avid| {
+        let lookups = avid_item.keys().map(|avid| {
             let item_magnet = item_magnets.get(avid).cloned().flatten();
             let resolved = &resolved;
             async move {
@@ -859,7 +859,7 @@ impl RssPipeline {
                 }
             }
         });
-        futures_util::future::join_all(resolves).await;
+        futures_util::future::join_all(lookups).await;
         let resolved = resolved.into_inner().unwrap_or_else(std::sync::PoisonError::into_inner);
         let found: usize = resolved.values().map(Vec::len).sum();
         ctx.add("magnets_found", i64::try_from(found).unwrap_or(i64::MAX));

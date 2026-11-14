@@ -2,6 +2,7 @@
 //! subscription registry, scripted feeds, magnet sources and CloudDrive.
 
 use std::collections::{BTreeMap, VecDeque};
+use std::fmt::Write as _;
 use std::sync::Mutex;
 
 use chrono::{TimeDelta, Utc};
@@ -89,13 +90,13 @@ fn feed_xml(items: &[Item]) -> Vec<u8> {
     let mut entries = String::new();
     for item in items {
         entries.push_str("<item>");
-        entries.push_str(&format!("<guid>{}</guid>", escape(&item.id)));
-        entries.push_str(&format!("<title>{}</title>", escape(&item.title)));
+        write!(entries, "<guid>{}</guid>", escape(&item.id)).expect("a String write");
+        write!(entries, "<title>{}</title>", escape(&item.title)).expect("a String write");
         if let Some(link) = item.link.as_deref().filter(|link| !link.is_empty()) {
-            entries.push_str(&format!("<link>{}</link>", escape(link)));
+            write!(entries, "<link>{}</link>", escape(link)).expect("a String write");
         }
         if !item.content.is_empty() {
-            entries.push_str(&format!("<description><![CDATA[{}]]></description>", item.content));
+            write!(entries, "<description><![CDATA[{}]]></description>", item.content).expect("a String write");
         }
         entries.push_str("</item>");
     }
@@ -129,12 +130,13 @@ fn not_found(url: &str) -> FetchError {
     })))
 }
 
+type FetchQueue = VecDeque<Result<Vec<u8>, FetchError>>;
 type FetchFn = Box<dyn Fn(&str) -> Result<Vec<u8>, FetchError> + Send + Sync>;
 
 /// `deps.fetch`: an `AsyncMock` answering from a function or a list of side effects.
 struct FakeFetch {
     answer: FetchFn,
-    queued: Mutex<Option<VecDeque<Result<Vec<u8>, FetchError>>>>,
+    queued: Mutex<Option<FetchQueue>>,
     calls: Mutex<Vec<String>>,
 }
 
