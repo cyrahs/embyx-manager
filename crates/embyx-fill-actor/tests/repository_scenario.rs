@@ -34,23 +34,29 @@ impl<E: std::fmt::Display + ClassName> From<E> for Failure {
 }
 
 trait ClassName {
-    fn class(&self) -> &str;
+    fn class(&self) -> &'static str;
 }
 
 impl ClassName for embyx_fill_actor::postgres_repository::RepositoryError {
-    fn class(&self) -> &str {
+    fn class(&self) -> &'static str {
         self.class_name()
     }
 }
 
 impl ClassName for embyx_core::config::lax::ValidationError {
-    fn class(&self) -> &str {
+    fn class(&self) -> &'static str {
         Self::CLASS
     }
 }
 
+impl ClassName for embyx_fill_actor::records::RecordError {
+    fn class(&self) -> &'static str {
+        "ValueError"
+    }
+}
+
 impl ClassName for embyx_fill_actor::cloud_moves::CheckError {
-    fn class(&self) -> &str {
+    fn class(&self) -> &'static str {
         self.class_name()
     }
 }
@@ -120,25 +126,31 @@ fn candidate(args: &Value) -> Result<CandidateRecord, Failure> {
         Some(Value::Dict(mapping)) => Some(CloudFileMetadata::from_mapping(mapping)?),
         Some(other) => panic!("cloud_file {other:?}"),
     };
+    // `__post_init__`, once the arguments are built.
+    record.validate()?;
     Ok(record)
 }
 
 fn plan(args: &Value) -> Result<PlanRecord, Failure> {
+    // Python's keyword arguments, in order: the public plan, then the candidates.
+    let public = FillActorPlan::validate_json(&text(get(args, "public")))?;
     let candidates = match get(args, "candidates") {
         Value::List(items) => items.iter().map(candidate).collect::<Result<Vec<_>, _>>()?,
         other => panic!("candidates {other:?}"),
     };
-    Ok(PlanRecord {
-        public: FillActorPlan::validate_json(&text(get(args, "public")))?,
+    let record = PlanRecord {
+        public,
         candidates,
         config_version: args
             .get("config_version")
             .map_or(0, |value| i32::try_from(int(value)).expect("i32")),
-    })
+    };
+    record.validate()?;
+    Ok(record)
 }
 
-fn progress(args: &Value) -> JobProgress {
-    JobProgress {
+fn progress(args: &Value) -> Result<JobProgress, Failure> {
+    let record = JobProgress {
         stage: JobStage::parse(&text(get(args, "stage"))).expect("a stage"),
         completed: int(get(args, "completed")),
         total: match get(args, "total") {
@@ -149,10 +161,12 @@ fn progress(args: &Value) -> JobProgress {
         current: optional_text(args, "current"),
         stage_started_at: time(get(args, "stage_started_at")),
         updated_at: time(get(args, "updated_at")),
-    }
+    };
+    record.validate()?;
+    Ok(record)
 }
 
-fn job(args: &Value) -> JobRecord {
+fn job(args: &Value) -> Result<JobRecord, Failure> {
     let mut record = JobRecord::new(
         text(get(args, "job_id")),
         JobOperation::parse(&text(get(args, "operation"))).expect("an operation"),
@@ -166,9 +180,9 @@ fn job(args: &Value) -> JobRecord {
     record.owner_id = optional_text(args, "owner_id");
     record.lease_expires_at = args.get("lease_expires_at").map(time);
     if let Some(given) = args.get("progress") {
-        record.progress = progress(given);
+        record.progress = progress(given)?;
     }
-    record
+    Ok(record)
 }
 
 fn apply_result(args: &Value, key: &str) -> Result<Option<ApplyResult>, Failure> {
@@ -179,12 +193,14 @@ fn apply_result(args: &Value, key: &str) -> Result<Option<ApplyResult>, Failure>
 }
 
 fn apply_job(args: &Value) -> Result<ApplyJobRecord, Failure> {
-    Ok(ApplyJobRecord {
-        job: job(get(args, "job")),
+    let record = ApplyJobRecord {
+        job: job(get(args, "job"))?,
         revision: text(get(args, "revision")),
         candidate_ids: texts(get(args, "candidate_ids")),
         result: apply_result(args, "result")?,
-    })
+    };
+    record.validate()?;
+    Ok(record)
 }
 
 fn journal(args: &Value) -> MoveJournalRecord {
@@ -196,8 +212,8 @@ fn journal(args: &Value) -> MoveJournalRecord {
     }
 }
 
-fn operation(args: &Value) -> CloudMoveOperationRecord {
-    CloudMoveOperationRecord {
+fn operation(args: &Value) -> Result<CloudMoveOperationRecord, Failure> {
+    let record = CloudMoveOperationRecord {
         plan_id: text(get(args, "plan_id")),
         candidate_id: text(get(args, "candidate_id")),
         attempt_id: text(get(args, "attempt_id")),
@@ -206,7 +222,9 @@ fn operation(args: &Value) -> CloudMoveOperationRecord {
         state: CloudMoveOperationState::parse(&text(get(args, "state"))).expect("a cloud move state"),
         updated_at: time(get(args, "updated_at")),
         error_code: optional_text(args, "error_code"),
-    }
+    };
+    record.validate()?;
+    Ok(record)
 }
 
 fn move_result(args: &Value) -> Result<MoveResult, Failure> {
@@ -429,12 +447,12 @@ async fn run_step(repository: &PostgresFillActorRepository, op: &str, args: &Val
         ),
         "list_move_results" => list(&repository.list_move_results(&id("plan_id")).await?, report_move_result),
         "save_job" => {
-            repository.save_job(&job(get(args, "job"))).await?;
+            repository.save_job(&job(get(args, "job"))?).await?;
             Value::Null
         }
         "enqueue_job" => Value::Bool(
             repository
-                .enqueue_job(&job(get(args, "job")), int(get(args, "max_active")))
+                .enqueue_job(&job(get(args, "job"))?, int(get(args, "max_active")))
                 .await?,
         ),
         "enqueue_apply_job" => report_enqueued(
@@ -472,7 +490,7 @@ async fn run_step(repository: &PostgresFillActorRepository, op: &str, args: &Val
                 .update_owned_job_progress(
                     &id("job_id"),
                     &id("owner_id"),
-                    &progress(get(args, "progress")),
+                    &progress(get(args, "progress"))?,
                     time(get(args, "now")),
                 )
                 .await?,
@@ -487,7 +505,7 @@ async fn run_step(repository: &PostgresFillActorRepository, op: &str, args: &Val
                         JobState::parse(&id("state")).expect("a state"),
                         optional_text(args, "error_code").as_deref(),
                         time(get(args, "now")),
-                        &progress(get(args, "progress")),
+                        &progress(get(args, "progress"))?,
                         result.as_ref(),
                     )
                     .await?,
@@ -523,7 +541,7 @@ async fn run_step(repository: &PostgresFillActorRepository, op: &str, args: &Val
         "list_unreconciled_moves" => list(&repository.list_unreconciled_moves().await?, report_journal),
         "save_cloud_move_operation" => {
             repository
-                .save_cloud_move_operation(&operation(get(args, "operation")))
+                .save_cloud_move_operation(&operation(get(args, "operation"))?)
                 .await?;
             Value::Null
         }
@@ -537,7 +555,7 @@ async fn run_step(repository: &PostgresFillActorRepository, op: &str, args: &Val
         "list_unresolved_cloud_moves" => list(&repository.list_unresolved_cloud_moves().await?, report_operation),
         "finalize_cloud_move" => {
             repository
-                .finalize_cloud_move(&operation(get(args, "operation")), &move_result(args)?)
+                .finalize_cloud_move(&operation(get(args, "operation"))?, &move_result(args)?)
                 .await?;
             Value::Null
         }

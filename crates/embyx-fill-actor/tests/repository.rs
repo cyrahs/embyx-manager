@@ -1029,3 +1029,43 @@ async fn postgres_prevents_two_unresolved_operations_for_one_cloud_source() {
         .unwrap();
     fixture.finish().await;
 }
+
+/// Python builds a record (`__post_init__`) before the repository sees it, so a record that
+/// refuses itself fails with its own message, ahead of the repository's checks.
+#[tokio::test]
+async fn a_record_refuses_itself_before_the_repository_checks_it() {
+    let fixture = Fixture::new().await;
+    let repository = &fixture.repository;
+    let record = cloud_plan_record("plan-1", "candidate-1");
+    let own = "successful or in-progress CloudDrive operations must not carry an error code";
+
+    let succeeded = operation(&record, CloudMoveOperationState::Succeeded, Some("cloud_move_failed"));
+    let error = repository.save_cloud_move_operation(&succeeded).await.unwrap_err();
+    assert_eq!((error.class_name(), error.to_string().as_str()), ("ValueError", own));
+
+    let verifying = operation(&record, CloudMoveOperationState::Verifying, Some("destination_exists"));
+    let mut result = terminal_result(&record, MoveState::Conflict, Some("destination_exists"));
+    result.candidate_id = "other".to_owned();
+    let error = repository.finalize_cloud_move(&verifying, &result).await.unwrap_err();
+    assert_eq!(error.to_string(), own);
+
+    let mut apply = ApplyJobRecord {
+        job: job(
+            "apply-1",
+            JobOperation::Apply,
+            JobState::Queued,
+            at(10, 0),
+            Some("plan-1"),
+        ),
+        revision: String::new(),
+        candidate_ids: strings(&["candidate-1"]),
+        result: None,
+    };
+    apply.job.progress.completed = 3;
+    apply.job.progress.total = Some(2);
+    let error = repository.enqueue_apply_job(&apply, 1).await.unwrap_err();
+    assert_eq!(error.to_string(), "job progress completed must not exceed total");
+    assert!(repository.get_job("apply-1").await.unwrap().is_none());
+
+    fixture.finish().await;
+}

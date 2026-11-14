@@ -173,21 +173,17 @@ impl<A: AvbaseCatalog, J: JavBusCatalog> UnionActorCatalog<A, J> {
         }
         for star in &stars {
             let key = format!("javbus:{}", star.actor_id);
-            match self.javbus.scrape(&star.actor_id, progress).await {
-                Ok(ids) => {
-                    counts.insert(key, i64::try_from(ids.len()).unwrap_or(i64::MAX));
-                    video_ids.extend(ids);
-                }
+            if let Ok(ids) = self.javbus.scrape(&star.actor_id, progress).await {
+                counts.insert(key, i64::try_from(ids.len()).unwrap_or(i64::MAX));
+                video_ids.extend(ids);
+            } else {
                 // JavBus is the supplement, not the source of truth.
-                Err(error) => {
-                    tracing::warn!(
-                        logger = LOGGER,
-                        error = %error,
-                        "JavBus star {} could not be listed; continuing without it",
-                        star.actor_id
-                    );
-                    counts.insert(key, -1);
-                }
+                tracing::warn!(
+                    logger = LOGGER,
+                    "JavBus star {} could not be listed; continuing without it",
+                    star.actor_id
+                );
+                counts.insert(key, -1);
             }
         }
         Ok(CatalogListing {
@@ -576,17 +572,20 @@ impl<C: CloudDriveApi> CloudDriveFileMover<C> {
             return;
         };
         // A call may start on a new handle while the earlier ones settle: go round until a
-        // pass saw every handle.
-        let mut settled = 0;
+        // pass saw every handle. Settled handles are dropped, so a scoped mover kept for
+        // more than one unit of work does not hold every handle it ever used.
         loop {
-            let handles: Vec<C> = scope.lock().unwrap_or_else(PoisonError::into_inner)[settled..].to_vec();
+            let handles: Vec<C> = scope.lock().unwrap_or_else(PoisonError::into_inner).clone();
             if handles.is_empty() {
                 return;
             }
             for handle in &handles {
                 handle.settle().await;
             }
-            settled += handles.len();
+            let mut held = scope.lock().unwrap_or_else(PoisonError::into_inner);
+            // Another `settle` on the same scope may have dropped some already.
+            let done = handles.len().min(held.len());
+            held.drain(..done);
         }
     }
 }

@@ -270,7 +270,8 @@ pub trait CloudFileMover: Send + Sync {
 
     /// A mover on the same CloudDrive whose calls [`Self::settle`] waits for: what code that
     /// cancels work around a mutation and then acts on the outcome runs that work on
-    /// (`AsyncCloudDrive::scoped`, D41).
+    /// (`AsyncCloudDrive::scoped`, D41). Take one per unit of work (one move, one
+    /// reconciliation), as Python opens one `scoped()` per execution.
     fn scoped(&self) -> std::sync::Arc<dyn CloudFileMover>;
 
     /// Wait until no call started through this scoped mover is running, also those whose

@@ -328,6 +328,20 @@
         "op": "save_cloud_move_operation"
       },
       {
+        "error": {
+          "message": "successful or in-progress CloudDrive operations must not carry an error code",
+          "type": "ValueError"
+        },
+        "op": "save_cloud_move_operation"
+      },
+      {
+        "error": {
+          "message": "successful or in-progress CloudDrive operations must not carry an error code",
+          "type": "ValueError"
+        },
+        "op": "finalize_cloud_move"
+      },
+      {
         "op": "get_cloud_move_operation",
         "result": {
           "attempt_id": "attempt-1",
@@ -689,6 +703,13 @@
           "outcome": "full",
           "record": null
         }
+      },
+      {
+        "error": {
+          "message": "job progress completed must not exceed total",
+          "type": "ValueError"
+        },
+        "op": "enqueue_apply_job"
       },
       {
         "op": "claim_next_job",

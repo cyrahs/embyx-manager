@@ -52,9 +52,9 @@ pub enum RepositoryError {
     Validation(ValidationError),
     /// A stored CloudDrive snapshot that `CloudFileMetadata.from_mapping` refuses.
     Check(CheckError),
-    /// A path that is not UTF-8 cannot be stored (`UnicodeEncodeError` where Python's
-    /// surrogate-escaped `str(path)` meets asyncpg's encoder; DIVERGENCES.md D113).
-    NotUtf8(PathBuf),
+    /// `RuntimeError(message)`: a compare-and-set the repository's own lock should make
+    /// impossible did not hold.
+    Runtime(&'static str),
 }
 
 impl RepositoryError {
@@ -67,7 +67,7 @@ impl RepositoryError {
             Self::Transition(error) => error.class_name(),
             Self::Validation(_) => ValidationError::CLASS,
             Self::Check(error) => error.class_name(),
-            Self::NotUtf8(_) => "UnicodeEncodeError",
+            Self::Runtime(_) => "RuntimeError",
         }
     }
 
@@ -75,10 +75,10 @@ impl RepositoryError {
     /// (`ValidationError` is one too).
     pub fn is_value_error(&self) -> bool {
         match self {
-            Self::Value(_) | Self::Record(_) | Self::Transition(_) | Self::Validation(_) | Self::NotUtf8(_) => true,
+            Self::Value(_) | Self::Record(_) | Self::Transition(_) | Self::Validation(_) => true,
             Self::Check(error) => error.is_value_error(),
             Self::Store(StoreError::Decode { class, .. }) => *class != "TypeError",
-            Self::Store(_) | Self::MissingCandidate { .. } => false,
+            Self::Store(_) | Self::MissingCandidate { .. } | Self::Runtime(_) => false,
         }
     }
 }
@@ -90,16 +90,11 @@ impl fmt::Display for RepositoryError {
             Self::MissingCandidate { plan_id, candidate_id } => {
                 write!(f, "({}, {})", py_repr(plan_id), py_repr(candidate_id))
             }
-            Self::Value(message) => f.write_str(message),
+            Self::Value(message) | Self::Runtime(message) => f.write_str(message),
             Self::Record(error) => error.fmt(f),
             Self::Transition(error) => error.fmt(f),
             Self::Validation(error) => error.fmt(f),
             Self::Check(error) => error.fmt(f),
-            Self::NotUtf8(path) => write!(
-                f,
-                "'utf-8' codec can't encode the path {}: surrogates not allowed",
-                py_repr(&path.to_string_lossy())
-            ),
         }
     }
 }
@@ -171,13 +166,17 @@ impl PostgresFillActorRepository {
     /// `save_plan(record)`: the plan and its candidates in one transaction; candidates the
     /// plan no longer has are deleted.
     pub async fn save_plan(&self, record: &PlanRecord) -> Result<()> {
-        record.validate()?;
-        let public = &record.public;
-        let mut rows = Vec::with_capacity(record.candidates.len());
+        // Python's records refuse themselves when built: each candidate, then the plan.
         for candidate in &record.candidates {
             candidate.validate()?;
-            rows.push(CandidateRow::from_record(candidate)?);
         }
+        record.validate()?;
+        let public = &record.public;
+        let rows = record
+            .candidates
+            .iter()
+            .map(CandidateRow::from_record)
+            .collect::<Result<Vec<_>>>()?;
         let pool = self.pool().await?;
         let mut transaction = pool.begin().await?;
         sqlx::query(
@@ -438,6 +437,7 @@ impl PostgresFillActorRepository {
     /// `enqueue_job(record, max_active=)`: insert the job unless the queue is full or the id
     /// is taken.
     pub async fn enqueue_job(&self, record: &JobRecord, max_active: i64) -> Result<bool> {
+        record.progress.validate()?;
         let pool = self.pool().await?;
         let mut transaction = pool.begin().await?;
         lock_enqueue(&mut transaction).await?;
@@ -458,6 +458,8 @@ impl PostgresFillActorRepository {
     /// `enqueue_apply_job(record, max_active=)`: an apply request is idempotent by job id;
     /// the same id with another plan, revision or selection is a conflict.
     pub async fn enqueue_apply_job(&self, record: &ApplyJobRecord, max_active: i64) -> Result<EnqueueApplyJobResult> {
+        // Built in Python's order: the progress, then the apply record.
+        record.job.progress.validate()?;
         record.validate()?;
         let pool = self.pool().await?;
         let mut transaction = pool.begin().await?;
@@ -765,13 +767,13 @@ impl PostgresFillActorRepository {
         let status: PgQueryResult = values.bind(query).bind(job_id).execute(&mut *transaction).await?;
         if status.rows_affected() != 1 {
             // FOR UPDATE serializes competing writers; Python raises RuntimeError here.
-            return Err(RepositoryError::Value("cancelled job transition was not atomic"));
+            return Err(RepositoryError::Runtime("cancelled job transition was not atomic"));
         }
         let cancelled = sqlx::query("SELECT * FROM fill_actor_jobs WHERE job_id = $1")
             .bind(job_id)
             .fetch_optional(&mut *transaction)
             .await?
-            .ok_or(RepositoryError::Value("cancelled job disappeared"))?;
+            .ok_or(RepositoryError::Runtime("cancelled job disappeared"))?;
         let job = job_from_row(&cancelled)?;
         transaction.commit().await?;
         Ok(CancelJobResult {
@@ -910,12 +912,13 @@ impl PostgresFillActorRepository {
     /// `save_cloud_move_operation(record)`: advance a CloudDrive move that is not over yet
     /// (a terminal state goes through [`Self::finalize_cloud_move`] with its result).
     pub async fn save_cloud_move_operation(&self, record: &CloudMoveOperationRecord) -> Result<()> {
+        // `__post_init__` runs before the repository sees the record.
+        record.validate()?;
         if record.state.terminal() {
             return Err(RepositoryError::Value(
                 "terminal CloudDrive operations must be finalized with their result",
             ));
         }
-        record.validate()?;
         let pool = self.pool().await?;
         let mut transaction = pool.begin().await?;
         execute_save_cloud_move_operation(&mut transaction, record).await?;
@@ -958,6 +961,7 @@ impl PostgresFillActorRepository {
     /// `finalize_cloud_move(operation, result)`: the terminal state and the move's result,
     /// in one transaction.
     pub async fn finalize_cloud_move(&self, operation: &CloudMoveOperationRecord, result: &MoveResult) -> Result<()> {
+        operation.validate()?;
         if !operation.state.terminal() {
             return Err(RepositoryError::Value(
                 "finalized CloudDrive operation must be terminal",
@@ -966,7 +970,6 @@ impl PostgresFillActorRepository {
         if operation.candidate_id != result.candidate_id {
             return Err(RepositoryError::Value("CloudDrive result must match its operation"));
         }
-        operation.validate()?;
         let pool = self.pool().await?;
         let mut transaction = pool.begin().await?;
         execute_save_cloud_move_operation(&mut transaction, operation).await?;
@@ -1272,19 +1275,139 @@ struct CandidateRow {
     destination: String,
 }
 
-fn path_text(path: &Path) -> Result<String> {
-    let text = path
-        .to_str()
-        .ok_or_else(|| RepositoryError::NotUtf8(path.to_path_buf()))?;
-    Ok(PyPath::new(text).as_str().to_owned())
+/// `str(path)` bound as query argument `$position`. A path that is not UTF-8 is Python's
+/// surrogate-escaped `str`, which asyncpg cannot encode: its `DataError` names the argument,
+/// the value's `repr` (cut at 40 characters) and the `UnicodeEncodeError` (DIVERGENCES.md
+/// D113).
+fn path_text(path: &Path, position: usize) -> Result<String> {
+    if let Some(text) = path.to_str() {
+        return Ok(PyPath::new(text).as_str().to_owned());
+    }
+    Err(RepositoryError::Store(StoreError::Argument(unencodable_path(
+        path, position,
+    ))))
+}
+
+/// One code point of a surrogate-escaped `str`: a character, or an undecodable byte
+/// (`U+DC80`..`U+DCFF`).
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum PyChar {
+    Char(char),
+    Escaped(u8),
+}
+
+/// `bytes.decode('utf-8', 'surrogateescape')`.
+fn surrogateescape(mut bytes: &[u8]) -> Vec<PyChar> {
+    let mut chars = Vec::with_capacity(bytes.len());
+    while !bytes.is_empty() {
+        match std::str::from_utf8(bytes) {
+            Ok(text) => {
+                chars.extend(text.chars().map(PyChar::Char));
+                break;
+            }
+            Err(error) => {
+                let (valid, rest) = bytes.split_at(error.valid_up_to());
+                // `valid_up_to` bytes are UTF-8 by the error's own word.
+                chars.extend(String::from_utf8_lossy(valid).chars().map(PyChar::Char));
+                let bad = error.error_len().unwrap_or(rest.len());
+                chars.extend(rest[..bad].iter().map(|&byte| PyChar::Escaped(byte)));
+                bytes = &rest[bad..];
+            }
+        }
+    }
+    chars
+}
+
+/// `str(Path(text))` on the bytes: `/` and `.` are ASCII, so pathlib's normalisation does
+/// not depend on the decoding.
+fn normalized_path_bytes(bytes: &[u8]) -> Vec<u8> {
+    let root: &[u8] = if bytes.starts_with(b"//") && !bytes.starts_with(b"///") {
+        b"//"
+    } else if bytes.starts_with(b"/") {
+        b"/"
+    } else {
+        b""
+    };
+    let parts: Vec<&[u8]> = bytes
+        .split(|&byte| byte == b'/')
+        .filter(|part| !part.is_empty() && *part != b".")
+        .collect();
+    let mut out = root.to_vec();
+    out.extend(parts.join(&b'/'));
+    if out.is_empty() {
+        out.push(b'.');
+    }
+    out
+}
+
+/// `repr(text)` of a surrogate-escaped `str`.
+fn surrogate_repr(chars: &[PyChar]) -> String {
+    use std::fmt::Write as _;
+    let text: String = chars
+        .iter()
+        .filter_map(|ch| match ch {
+            PyChar::Char(ch) => Some(*ch),
+            PyChar::Escaped(_) => None,
+        })
+        .collect();
+    let quoted = py_repr(&text);
+    let quote = quoted.chars().next().unwrap_or('\'');
+    let mut out = String::with_capacity(quoted.len() + chars.len() * 6);
+    out.push(quote);
+    for ch in chars {
+        match ch {
+            PyChar::Escaped(byte) => {
+                let _ = write!(out, "\\u{:04x}", 0xdc00 | u32::from(*byte));
+            }
+            PyChar::Char(ch) if *ch == quote => {
+                out.push('\\');
+                out.push(*ch);
+            }
+            PyChar::Char(ch) => {
+                // `py_repr` of one character, without its quotes; the quote is handled above.
+                let one = py_repr(&ch.to_string());
+                out.push_str(&one[1..one.len() - 1]);
+            }
+        }
+    }
+    out.push(quote);
+    out
+}
+
+/// asyncpg's `DataError` text for a path argument that is not UTF-8.
+fn unencodable_path(path: &Path, position: usize) -> String {
+    use std::os::unix::ffi::OsStrExt as _;
+    let chars = surrogateescape(&normalized_path_bytes(path.as_os_str().as_bytes()));
+    let mut repr = surrogate_repr(&chars);
+    if repr.chars().count() > 40 {
+        repr = repr.chars().take(40).collect::<String>() + "...";
+    }
+    // The UTF-8 encoder reports the first run of consecutive surrogates.
+    let start = chars
+        .iter()
+        .position(|ch| matches!(ch, PyChar::Escaped(_)))
+        .unwrap_or_default();
+    let run = chars[start..]
+        .iter()
+        .take_while(|ch| matches!(ch, PyChar::Escaped(_)))
+        .count();
+    let what = match chars.get(start) {
+        Some(PyChar::Escaped(byte)) if run == 1 => {
+            format!("character '\\u{:04x}' in position {start}", 0xdc00 | u32::from(*byte))
+        }
+        _ => format!("characters in position {start}-{}", start + run.max(1) - 1),
+    };
+    format!(
+        "invalid input for query argument ${position}: {repr} ('utf-8' codec can't encode {what}: surrogates not allowed)"
+    )
 }
 
 impl CandidateRow {
     fn from_record(record: &CandidateRecord) -> Result<Self> {
         Ok(Self {
-            source: path_text(&record.source)?,
-            source_root: path_text(&record.source_root)?,
-            destination: path_text(&record.destination)?,
+            source: path_text(&record.source, 4)?,
+            source_root: path_text(&record.source_root, 5)?,
+            destination: path_text(&record.destination, 6)?,
         })
     }
 }
@@ -1464,4 +1587,59 @@ fn progress_from_row(row: &PgRow) -> Result<JobProgress> {
     };
     progress.validate()?;
     Ok(progress)
+}
+
+#[cfg(test)]
+mod tests {
+    use std::ffi::OsStr;
+    use std::os::unix::ffi::OsStrExt as _;
+    use std::path::Path;
+
+    use super::{RepositoryError, path_text};
+
+    /// asyncpg's `DataError` text for each path, from `str(Path(os.fsdecode(raw)))` bound as
+    /// the argument (`repr` cut at 40 characters, the codec error's first run of escapes).
+    #[test]
+    fn a_path_that_is_not_utf8_is_asyncpgs_data_error() {
+        let cases: [(&[u8], usize, &str); 6] = [
+            (
+                b"/additional/\xff.mp4",
+                4,
+                r"invalid input for query argument $4: '/additional/\udcff.mp4' ('utf-8' codec can't encode character '\udcff' in position 12: surrogates not allowed)",
+            ),
+            (
+                b"/a/\xff\xfe\xc3/x",
+                5,
+                r"invalid input for query argument $5: '/a/\udcff\udcfe\udcc3/x' ('utf-8' codec can't encode characters in position 3-5: surrogates not allowed)",
+            ),
+            (
+                b"/very/long/directory/name/that/goes/on/\xff/and/on.mp4",
+                6,
+                r"invalid input for query argument $6: '/very/long/directory/name/that/goes/on/... ('utf-8' codec can't encode character '\udcff' in position 39: surrogates not allowed)",
+            ),
+            (
+                b"/it's/\xff",
+                4,
+                r#"invalid input for query argument $4: "/it's/\udcff" ('utf-8' codec can't encode character '\udcff' in position 6: surrogates not allowed)"#,
+            ),
+            (
+                b"//./a//b/\xe2\x82/c\xff",
+                4,
+                r"invalid input for query argument $4: '//a/b/\udce2\udc82/c\udcff' ('utf-8' codec can't encode characters in position 6-7: surrogates not allowed)",
+            ),
+            (
+                b"/tab\t/\xe9t\xc3\xa9/\xff",
+                6,
+                "invalid input for query argument $6: '/tab\\t/\\udce9t\u{e9}/\\udcff' ('utf-8' codec can't encode character '\\udce9' in position 6: surrogates not allowed)",
+            ),
+        ];
+        for (raw, position, expected) in cases {
+            let error = path_text(Path::new(OsStr::from_bytes(raw)), position).unwrap_err();
+            assert_eq!(error.class_name(), "DataError");
+            assert!(!error.is_value_error());
+            assert!(matches!(error, RepositoryError::Store(_)));
+            assert_eq!(error.to_string(), expected, "{raw:?}");
+        }
+        assert_eq!(path_text(Path::new("//./a//b/"), 4).unwrap(), "//a/b");
+    }
 }

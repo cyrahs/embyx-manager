@@ -144,6 +144,15 @@ args.operation = { plan_id = "plan-1", candidate_id = "c-cloud", attempt_id = "a
 op = "save_cloud_move_operation"
 args.operation = { plan_id = "plan-1", candidate_id = "c-cloud", attempt_id = "attempt-1", source_path = "/cloud/library/source-b/ABC/ABC-002.mp4", destination_dir = "/cloud/library/destination/ABC", state = "failed", updated_at = "2026-07-13T10:05:00+00:00", error_code = "cloud_move_failed" }
 
+# A record that refuses itself when built fails before the repository's own checks.
+[[args.steps]]
+op = "save_cloud_move_operation"
+args.operation = { plan_id = "plan-1", candidate_id = "c-cloud", attempt_id = "attempt-1", source_path = "/cloud/library/source-b/ABC/ABC-002.mp4", destination_dir = "/cloud/library/destination/ABC", state = "succeeded", updated_at = "2026-07-13T10:05:00+00:00", error_code = "cloud_move_failed" }
+
+[[args.steps]]
+op = "finalize_cloud_move"
+args = { operation = { plan_id = "plan-1", candidate_id = "c-cloud", attempt_id = "attempt-1", source_path = "/cloud/library/source-b/ABC/ABC-002.mp4", destination_dir = "/cloud/library/destination/ABC", state = "verifying", updated_at = "2026-07-13T10:06:00+00:00", error_code = "destination_exists" }, result = '{"candidate_id": "other", "video_id": "ABC-002", "file_name": "ABC-002.strm", "state": "conflict", "error_code": "destination_exists"}' }
+
 [[args.steps]]
 op = "get_cloud_move_operation"
 args = { plan_id = "plan-1", candidate_id = "c-cloud" }
@@ -239,6 +248,10 @@ args = { max_active = 1, record = { revision = "other", candidate_ids = ["c-1"],
 [[args.steps]]
 op = "enqueue_apply_job"
 args = { max_active = 1, record = { revision = "rev-2", candidate_ids = ["c-1"], job = { job_id = "apply-2", operation = "apply", state = "queued", created_at = "2026-07-13T10:22:00+00:00", updated_at = "2026-07-13T10:22:00+00:00", plan_id = "plan-2" } } }
+
+[[args.steps]]
+op = "enqueue_apply_job"
+args = { max_active = 1, record = { revision = "", candidate_ids = ["c-1"], job = { job_id = "apply-3", operation = "apply", state = "queued", created_at = "2026-07-13T10:22:00+00:00", updated_at = "2026-07-13T10:22:00+00:00", plan_id = "plan-2", progress = { stage = "queued", completed = 3, total = 2, unit = "items", current = "", stage_started_at = "2026-07-13T10:22:00+00:00", updated_at = "2026-07-13T10:22:00+00:00" } } } }
 
 [[args.steps]]
 op = "claim_next_job"
