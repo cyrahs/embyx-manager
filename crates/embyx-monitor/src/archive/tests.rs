@@ -1059,3 +1059,42 @@ fn an_unmatched_task_dir_still_finds_the_copy() {
 
     assert_eq!(held, paths(&["sorted/ABC/ABC-123.mp4"]));
 }
+
+#[test]
+fn videos_with_names_that_are_not_utf8_need_attention_instead_of_being_compared() {
+    // Lossy text would read these two as one name and its `(1)` copy, and delete the second
+    // (D72); Python keeps the bytes apart and finds two unrelated videos. Either way nothing
+    // may be deleted.
+    use std::ffi::OsStr;
+    use std::os::unix::ffi::OsStrExt;
+
+    let tree = Tree::new();
+    let pipeline = make_pipeline(&tree);
+    let folder = pipeline.src_dir.join("intake/bytes");
+    let first = write_video(&folder.join(OsStr::from_bytes(b"\xfeABC-123.mp4")));
+    let second = write_video(&folder.join(OsStr::from_bytes(b"\xffABC-123 (1).mp4")));
+
+    let result = archive(&pipeline, &folder);
+
+    assert_eq!(result.outcome, Outcome::NeedsAttention);
+    assert_eq!(result.reason, "a video name is not UTF-8");
+    assert!(first.exists());
+    assert!(second.exists());
+}
+
+#[test]
+fn promotion_keeps_a_file_name_that_is_not_utf8() {
+    use std::ffi::OsStr;
+    use std::os::unix::ffi::OsStrExt;
+
+    let tree = Tree::new();
+    let pipeline = make_priority_pipeline(&tree);
+    let name = OsStr::from_bytes(b"ABC-123-\xff.mp4");
+    write_video(&tree.path("library/sorted/ABC").join(name));
+
+    pipeline
+        .library_holdings("ABC-123", &make_ctx(), Some("/task/vip"))
+        .expect("holdings");
+
+    assert!(tree.path("library/starred/ABC").join(name).exists());
+}

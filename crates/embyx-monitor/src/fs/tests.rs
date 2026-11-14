@@ -202,3 +202,43 @@ fn rmtree_refuses_links_and_files_naming_the_path_object() {
     assert!(tree.path("target/keep.mp4").exists());
     assert!(file.exists());
 }
+
+#[test]
+fn an_error_inside_rmtree_names_the_walked_directory_and_a_vanished_entry_is_skipped() {
+    let top = Path::new("/srv/task/folder");
+    let below = Path::new("/srv/task/folder/inner");
+    let failed = || Err(PyOsError::errno(13, None, None));
+    // `err.filename = path`: the `Path` object at the top, the joined `str` below it.
+    let error = named(failed(), top, top, true).expect_err("raised");
+    assert_eq!(
+        error.to_string(),
+        "[Errno 13] Permission denied: PosixPath('/srv/task/folder')"
+    );
+    let error = named(failed(), top, below, false).expect_err("raised");
+    assert_eq!(
+        error.to_string(),
+        "[Errno 13] Permission denied: '/srv/task/folder/inner'"
+    );
+    // `FileNotFoundError` is reported only at the top.
+    let vanished = || Err(PyOsError::errno(ENOENT, None, None));
+    assert!(named(vanished(), top, top, true).is_err());
+    assert_eq!(named(vanished(), top, below, false), Ok(()));
+}
+
+#[test]
+fn rmtree_lists_a_directory_through_its_open_descriptor() {
+    // `os.scandir(topfd)` reads a duplicate of the descriptor instead of opening the directory
+    // again, so an empty directory without search permission is still listed and removed (the
+    // permission bits only bite when the tests run as a regular user, as CI's do).
+    let tree = Tree::new();
+    tree.file("t/a.mp4");
+    let empty = tree.path("t/empty-readonly");
+    stdfs::create_dir_all(&empty).expect("mkdir");
+    let mut permissions = stdfs::metadata(&empty).expect("stat").permissions();
+    std::os::unix::fs::PermissionsExt::set_mode(&mut permissions, 0o444);
+    stdfs::set_permissions(&empty, permissions).expect("chmod");
+
+    LocalFs.rmtree(&tree.path("t")).expect("rmtree");
+
+    assert!(!tree.path("t").exists());
+}

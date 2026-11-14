@@ -471,6 +471,11 @@ fn archive_failures_match_the_python_transcript() {
 }
 
 #[test]
+fn archive_links_and_promotion_match_the_python_transcript() {
+    archive_steps("archive/links_and_promotion");
+}
+
+#[test]
 fn archive_cancel_matches_the_python_transcript() {
     archive_steps("archive/cancel");
 }

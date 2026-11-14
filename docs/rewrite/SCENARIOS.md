@@ -129,7 +129,7 @@ the runner does and `dump()` gives the transcript's `fakes`.
   modules' `datetime` (moved by a step's `advance_seconds`) and skips `CLOUD_RETRY`'s waits; the Rust test
   injects the same clock and a recording sleeper. `uuid4().hex` run ids have no dashes, so they are marked
   `volatile`.
-- **WP6 (done):** `archive/*`, `reconcile/*` and `move_in/*` run `archive.steps`, `reconcile.steps` and
+- **WP6 (done):** `archive/*` (outcomes, collisions, priority, run, failures, cancel, links and promotion), `reconcile/*` and `move_in/*` run `archive.steps`, `reconcile.steps` and
   `move_in.steps` (`tools/scenarios/operations/archive.py`) over a tree the steps shape (`write`, `remove`,
   unrecorded) and through a recording file system: Python patches `Path.rename`, `unlink`, `mkdir`
   (the outermost call only), `rglob`, `iterdir`, `stat` and `shutil.rmtree`; Rust wraps `LocalFs` in

@@ -103,8 +103,9 @@ impl PyOsError {
         }
     }
 
-    /// The error an `os` call raises for this I/O error. An error without an errno (none of
-    /// the calls here produce one) keeps its text as the message.
+    /// The error an `os` call raises for this I/O error. An error without an errno (a path
+    /// with a NUL byte, which pathlib reads as `False` or `ValueError`; D70) keeps its text as
+    /// the message.
     pub fn from_io(error: &io::Error, filename: Option<&Path>, filename2: Option<&Path>) -> Self {
         if let Some(code) = error.raw_os_error() {
             return Self::errno(code, filename, filename2);
@@ -292,6 +293,9 @@ pub fn mkdir_parents<F: Fs + ?Sized>(fs: &F, path: &Path) -> Result<(), PyOsErro
             mkdir_parents(fs, &parent)?;
             match fs.mkdir(path) {
                 Ok(()) => Ok(()),
+                // The retry is `self.mkdir(mode, parents=False, exist_ok=exist_ok)`, which
+                // raises `FileNotFoundError` as it is.
+                Err(error) if error.errno == Some(ENOENT) => Err(error),
                 Err(error) => exists_as_dir(fs, path, error),
             }
         }
@@ -504,7 +508,10 @@ fn rmtree_step(top: &Path, step: Removal, stack: &mut Vec<Removal>) -> Result<()
             return Err(PyOsError::message("Cannot call rmtree on a symbolic link"));
         }
         let mut entries = Vec::new();
-        for entry in Dir::read_from(&*opened).map_err(errno_error)? {
+        // `os.scandir(topfd)` is `fdopendir(dup(topfd))`: no second open of the directory, so a
+        // directory without search permission is still listed.
+        let listing = rustix::io::dup(&*opened).map_err(errno_error)?;
+        for entry in Dir::new(listing).map_err(errno_error)? {
             let entry = entry.map_err(errno_error)?;
             let entry_name = OsStr::from_bytes(entry.file_name().to_bytes()).to_owned();
             if entry_name == "." || entry_name == ".." {

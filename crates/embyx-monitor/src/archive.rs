@@ -776,6 +776,21 @@ impl ArchivePipeline {
                 "no video above the size threshold",
             )));
         }
+        if videos.len() > 1
+            && videos
+                .iter()
+                .any(|video| video.file_name().is_some_and(|name| name.to_str().is_none()))
+        {
+            // Not in Python (D72): names are compared as text below, and lossy text could make
+            // two different files look like copies or variants of one cut, which deletes one.
+            let reason = "a video name is not UTF-8";
+            ctx.warning(&format!("{reason} in {}, skipping", name_of(folder)));
+            return Ok(Inspection::Concluded(ArchiveResult::new(
+                Outcome::NeedsAttention,
+                "",
+                reason,
+            )));
+        }
         let videos = self.drop_duplicate_copies(folder, videos, ctx)?;
         let avid = match self.identify_avid(folder, &videos, ctx, expected_avid) {
             Ok(avid) => avid,
@@ -1218,7 +1233,7 @@ impl ArchivePipeline {
                 continue;
             }
             for archived in self.matching_archived(avid, &source_dir)? {
-                let target = target_dir.join(name_of(&archived));
+                let target = target_dir.join(archived.file_name().unwrap_or_default());
                 if fs::exists(&*self.fs, &target)? {
                     ctx.warning(&format!(
                         "cannot promote {}, {} exists",
