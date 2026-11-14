@@ -1306,6 +1306,6 @@ pub fn blocking<T>(work: impl FnOnce() -> T) -> T {
 }
 
 #[cfg(test)]
-mod scenarios;
+pub(crate) mod scenarios;
 #[cfg(test)]
 mod tests;
