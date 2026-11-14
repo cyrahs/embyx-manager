@@ -363,6 +363,7 @@ fn assemble(parts: &[PathBuf], directory: &Path, output: &Path, durations: &[f64
 #[cfg(not(unix))]
 fn assemble(_parts: &[PathBuf], _directory: &Path, _output: &Path, _durations: &[f64]) {}
 
+#[cfg(unix)]
 fn text(path: &Path) -> String {
     path.to_string_lossy().into_owned()
 }
