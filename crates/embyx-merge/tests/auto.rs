@@ -220,7 +220,7 @@ impl Harness {
                 api_token: "t".to_owned(),
                 ..CloudDriveConfig::default()
             }),
-            Arc::new(|_| Box::pin(async {})),
+            Arc::new(|_| Box::pin(async { Ok(()) })),
         ));
         let root = tmp.path().to_string_lossy().into_owned();
         let catalog = MergeCatalog {

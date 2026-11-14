@@ -6,22 +6,29 @@ use http::Method;
 
 use super::{PENDING, document, structural_diff};
 use crate::app::{TRANSCODE_TITLE, VERSION};
-use crate::routing::ApiRouter;
 use crate::testing::{request, send};
 
 fn baseline(name: &str) -> Value {
     golden::cases(&golden::load(&format!("api/openapi_{name}.json")))[0].clone()
 }
 
-/// The main app as `build_app` assembles it, without a database behind it.
-async fn served_main() -> Value {
+/// Both apps as `build_app` assembles them, without a database behind them.
+fn assembled() -> crate::bootstrap::Assembled {
     let settings = embyx_core::settings::Settings {
         database_url: "postgresql://openapi@127.0.0.1:9/openapi".to_owned(),
         ..embyx_core::settings::Settings::default()
     };
-    let app = crate::bootstrap::build_app(&settings, None).expect("assembled").app;
-    let (_, body) = send(&app, request(Method::GET, "/openapi.json", &[], None)).await;
+    crate::bootstrap::build_app(&settings, None).expect("assembled")
+}
+
+async fn served(app: &crate::routing::App) -> Value {
+    let (_, body) = send(app, request(Method::GET, "/openapi.json", &[], None)).await;
     pyjson::loads(std::str::from_utf8(&body).expect("UTF-8")).expect("JSON")
+}
+
+/// The main app's document.
+async fn served_main() -> Value {
+    served(&assembled().app).await
 }
 
 #[tokio::test]
@@ -30,14 +37,11 @@ async fn the_main_document_matches_the_baseline_but_for_pending_routes() {
     assert!(problems.is_empty(), "{}", problems.join("\n"));
 }
 
-#[test]
-fn the_transcode_document_matches_the_baseline_but_for_pending_routes() {
-    let rust = pyjson::loads(&document(
-        TRANSCODE_TITLE,
-        VERSION,
-        ApiRouter::new("/api/transcode").routes(),
-    ))
-    .expect("JSON");
+/// The transcode listener serves no document (`openapi_url=None`); its routes give the one
+/// `app.openapi()` would build.
+#[tokio::test]
+async fn the_transcode_document_matches_the_baseline_but_for_pending_routes() {
+    let rust = pyjson::loads(&document(TRANSCODE_TITLE, VERSION, assembled().transcode_app.routes())).expect("JSON");
     let problems = structural_diff("transcode", &baseline("transcode"), &rust);
     assert!(problems.is_empty(), "{}", problems.join("\n"));
 }

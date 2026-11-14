@@ -134,16 +134,43 @@ pub async fn scan(
     Ok((archive, Some(scanned)))
 }
 
-/// `warm_title_cache`: scan once at startup so the first visit after a deploy does not wait on
-/// the walk.
-pub async fn warm_title_cache(catalog: &MergeCatalog, cache: &TitleScanCache) {
-    if let Err(error) = scan(catalog, cache, false).await {
-        tracing::error!(
-            logger = "embyx_manager.merge.api",
-            error = %error,
-            "could not scan the mapping tree for multi-part titles"
-        );
+/// Aborts the task it holds when dropped, so cancelling the warm-up cancels its scan.
+struct AbortOnDrop<T>(tokio::task::JoinHandle<T>);
+
+impl<T> Drop for AbortOnDrop<T> {
+    fn drop(&mut self) {
+        self.0.abort();
     }
+}
+
+/// The text of a panic, as `str(exc)` would give it.
+fn panic_text(payload: &(dyn std::any::Any + Send)) -> String {
+    payload
+        .downcast_ref::<&str>()
+        .map(|text| (*text).to_owned())
+        .or_else(|| payload.downcast_ref::<String>().cloned())
+        .unwrap_or_else(|| "the scan panicked".to_owned())
+}
+
+/// `warm_title_cache`: scan once at startup so the first visit after a deploy does not wait on
+/// the walk. Python logs any exception (`except Exception`); a section getter that panics is
+/// this build's raising one, so the scan runs as a task of its own and a panic is logged too.
+pub async fn warm_title_cache(catalog: &MergeCatalog, cache: &TitleScanCache) {
+    let (catalog, cache) = (catalog.clone(), cache.clone());
+    let mut task = AbortOnDrop(tokio::spawn(
+        async move { scan(&catalog, &cache, false).await.map(drop) },
+    ));
+    let error = match (&mut task.0).await {
+        Ok(Ok(())) => return,
+        Ok(Err(error)) => error.to_string(),
+        Err(join) if join.is_panic() => panic_text(join.into_panic().as_ref()),
+        Err(join) => join.to_string(),
+    };
+    tracing::error!(
+        logger = "embyx_manager.merge.api",
+        error = %error,
+        "could not scan the mapping tree for multi-part titles"
+    );
 }
 
 /// `str.upper()`.

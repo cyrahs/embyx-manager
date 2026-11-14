@@ -20,6 +20,12 @@ task of the listing after the step):
   `duration`, `frames`, the bytes as `text`, `sha256` unless it is the text's), `finish_part`,
   `transcode_view`, `home`;
 - `auto` (one round of auto-merge, reporting its status);
+- `request` (`app`: `main` or `transcode`, `method`, `path`, `json` or `text`, `headers`): one
+  HTTP request through httpx's ASGI transport to the merge router in `create_app` (the token
+  `args.api_token`) or to the transcode listener (`create_transcode_app` with the token
+  `args.transcode_token`), both over this world's service, catalog, title cache and auto-merge
+  status as `build_app` wires them; reported with `status`, the `REPORTED_HEADERS` it has and
+  `body` (JSON, else text);
 - unrecorded changes: `write` (`path` as `<root>/<relative>`, `text` or `json`), `remove`,
   `advance` (`seconds` on the clock), `job_status` (`name`, `status`: the cluster changed a Job),
   `cloud` (`edit` and its `args`: `FakeCloudDrive.edit`), `free_space` (`gib`).
@@ -40,6 +46,9 @@ from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any, ClassVar
 from unittest import mock
 
+import httpx
+
+from embyx_manager.api import create_app, make_mutation_auth
 from embyx_manager.clients.clouddrive import AsyncCloudDrive, CloudDriveClient
 from embyx_manager.config.models import ArchiveConfig, CloudDriveConfig, MappingConfig, MergeConfig
 from embyx_manager.db import Database
@@ -49,18 +58,22 @@ from embyx_manager.merge import auto as auto_module
 from embyx_manager.merge import service as service_module
 from embyx_manager.merge import tasks as tasks_module
 from embyx_manager.merge import transcode as transcode_module
-from embyx_manager.merge.api import MergeCatalog, TitleScanCache
+from embyx_manager.merge import transcode_api as transcode_api_module
+from embyx_manager.merge.api import MergeCatalog, MergeTasksApi, TitleScanCache, create_merge_router
 from embyx_manager.merge.auto import GIB, AutoMerger
 from embyx_manager.merge.kube import KubeJobs
 from embyx_manager.merge.service import ChunkRefusedError, MergeActionError, MergeService
 from embyx_manager.merge.tasks import MergeTaskRepository
 from embyx_manager.merge.transcode import Chunk, TranscodeRepository, WorkerPresence, WorkerReport
+from embyx_manager.merge.transcode_api import create_transcode_app, create_transcode_router
 from operations.merge import _task
 
 if TYPE_CHECKING:
     from runner import Context
 
 TOKEN = 'scenario-token'  # noqa: S105 - the fake's token, not a secret
+#: The response headers a `request` step reports, in order.
+REPORTED_HEADERS = ('content-type', 'cache-control', 'www-authenticate')
 JOB_TEMPLATE = {
     'apiVersion': 'batch/v1',
     'kind': 'Job',
@@ -174,24 +187,69 @@ class _World:
         async def task_dirs_for(avids: Any) -> dict[str, str]:
             return {avid: ledger[avid] for avid in avids if avid in ledger}
 
+        catalog = MergeCatalog(
+            archive=lambda: self.archive,
+            mapping=lambda: MappingConfig(src_dir='/remote', dst_dir=str(ctx.roots['mapping'])),
+            task_dirs_for=task_dirs_for,
+        )
+        cache = TitleScanCache()
         self.auto = AutoMerger(
             repository=self.repository,
-            catalog=MergeCatalog(
-                archive=lambda: self.archive,
-                mapping=lambda: MappingConfig(src_dir='/remote', dst_dir=str(ctx.roots['mapping'])),
-                task_dirs_for=task_dirs_for,
-            ),
-            cache=TitleScanCache(),
+            catalog=catalog,
+            cache=cache,
             service=self.service,
             merge_config=lambda: self.merge,
             cloud=lambda: self.cloud,  # type: ignore[arg-type,return-value]
             free_space=lambda _path: self.free_gib * GIB,
         )
+        api_token = args.get('api_token')
+
+        async def ready() -> bool:
+            return True
+
+        self.apps = {
+            'main': create_app(
+                app_ready=ready,
+                routers=(
+                    create_merge_router(
+                        catalog,
+                        tasks=MergeTasksApi(
+                            repository=self.repository, service=self.service, auto_status=self.auto.status
+                        ),
+                        mutation_auth=make_mutation_auth(api_token),
+                        cache=cache,
+                    ),
+                ),
+                api_token=api_token,
+            ),
+            'transcode': create_transcode_app(
+                create_transcode_router(self.service, token=args.get('transcode_token')),
+            ),
+        }
 
     async def close(self) -> None:
         await self.service.aclose()
         await self.cloud._inner.aclose()  # noqa: SLF001
         await self.database.aclose()
+
+
+async def _request(world: _World, args: dict[str, Any]) -> dict[str, Any]:
+    """One request to one of the world's apps, as `TestClient` sends it."""
+    transport = httpx.ASGITransport(app=world.apps[args.get('app', 'main')])
+    sent: dict[str, Any] = {'headers': args.get('headers', {})}
+    if 'json' in args:
+        sent['json'] = args['json']
+    elif 'text' in args:
+        sent['content'] = args['text'].encode()
+    async with httpx.AsyncClient(transport=transport, base_url='http://testserver') as client:
+        response = await client.request(args['method'], args['path'], **sent)
+    reported: dict[str, Any] = {'status': response.status_code}
+    reported['headers'] = {name: response.headers[name] for name in REPORTED_HEADERS if name in response.headers}
+    if response.headers.get('content-type') == 'application/json':
+        reported['body'] = response.json()
+    else:
+        reported['body'] = response.text
+    return reported
 
 
 def _resolve(ctx: Context, spec_path: str) -> Any:
@@ -282,6 +340,8 @@ async def _run(world: _World, ctx: Context, op: str, args: dict[str, Any]) -> An
                 'reserved_bytes': service.reserved_bytes(tasks),
                 'online': service.presence.online(),
             }
+        case 'request':
+            return await _request(world, args)
         case 'auto':
             await world.auto.step()
             return world.auto.status().model_dump(mode='json')
@@ -325,7 +385,7 @@ async def run_steps(ctx: Context, steps: list[dict[str, Any]], now: datetime) ->
     _Clock.current = now.astimezone(UTC)
     reported = []
     with ExitStack() as stack:
-        for module in (service_module, tasks_module, transcode_module, auto_module, api_module):
+        for module in (service_module, tasks_module, transcode_module, auto_module, api_module, transcode_api_module):
             stack.enter_context(mock.patch.object(module, 'datetime', _Clock))
         world = _World(ctx)
         try:

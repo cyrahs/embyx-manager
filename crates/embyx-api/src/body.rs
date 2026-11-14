@@ -11,9 +11,12 @@
 //! missing one. A JSON syntax error is FastAPI's 422 `invalid_request`; bytes that are not
 //! text in the detected encoding, or nesting past Python's recursion limit, are its 400.
 
+use chrono::{DateTime, Utc};
 use embyx_core::config::lax::{Refusal, lax_int};
 use embyx_core::pyjson::{self, Dict, JsonEncoding, LoadError, Value};
 use embyx_core::pytext::py_strip;
+use embyx_merge::catalog::MergeRequest;
+use embyx_merge::transcode::{PartProgress, WorkerReport};
 use http::StatusCode;
 
 use crate::http::{Request, Response, body_parse_error, error_envelope, json};
@@ -220,6 +223,90 @@ impl TestConnectionRequest {
         };
         Some(Self { values })
     }
+}
+
+/// A `str` field with `max_length` (and `min_length`), counted in characters as pydantic
+/// counts them.
+fn bounded_str(value: &Value, min: usize, max: usize) -> Option<String> {
+    let text = embyx_core::config::lax::lax_str(value).ok()?;
+    let length = text.chars().count();
+    (min..=max).contains(&length).then_some(text)
+}
+
+/// A field of an `extra='ignore'` model: the default when absent, `None` when invalid.
+fn field_or<T>(dict: &Dict, name: &str, default: T, parse: impl Fn(&Value) -> Option<T>) -> Option<T> {
+    match dict.get(name) {
+        None => Some(default),
+        Some(value) => parse(value),
+    }
+}
+
+fn lax_float(value: &Value) -> Option<f64> {
+    embyx_core::config::lax::lax_float(value).ok()
+}
+
+fn lax_i64(value: &Value) -> Option<i64> {
+    lax_int(value).ok()
+}
+
+/// `PartProgress` (`extra='ignore'`): `index: int`, `fps: float = 0.0`,
+/// `position: float = 0.0`.
+fn part_progress(value: &Value) -> Option<PartProgress> {
+    let Value::Dict(dict) = value else {
+        return None;
+    };
+    Some(PartProgress {
+        index: lax_i64(dict.get("index")?)?,
+        fps: field_or(dict, "fps", 0.0, lax_float)?,
+        position: field_or(dict, "position", 0.0, lax_float)?,
+    })
+}
+
+/// `ReportIn` of `merge/transcode_api.py` (`extra='ignore'`), what the home worker says about
+/// itself on a claim or a heartbeat, made into the `WorkerReport` it becomes (`to_report`)
+/// with `seen_at`. `None` is the 422. An integer beyond `i64` is refused (D106).
+pub fn report_in(body: &JsonBody, seen_at: DateTime<Utc>) -> Option<WorkerReport> {
+    let Some(Value::Dict(dict)) = body.value() else {
+        return None;
+    };
+    let text = |name: &str, default: &str, max: usize| {
+        field_or(dict, name, default.to_owned(), |value| bounded_str(value, 0, max))
+    };
+    let parts = field_or(dict, "parts", Vec::new(), |value| {
+        let Value::List(items) = value else {
+            return None;
+        };
+        if items.len() > 16 {
+            return None;
+        }
+        items.iter().map(part_progress).collect()
+    })?;
+    Some(WorkerReport {
+        seen_at,
+        name: text("name", "", 128)?,
+        version: text("version", "", 64)?,
+        task_id: field_or(dict, "task_id", None, |value| match value {
+            Value::Null => Some(None),
+            value => lax_i64(value).map(Some),
+        })?,
+        state: text("state", "idle", 32)?,
+        parts,
+        upload_bps: field_or(dict, "upload_bps", 0.0, lax_float)?,
+        queue_chunks: field_or(dict, "queue_chunks", 0, lax_i64)?,
+        queue_bytes: field_or(dict, "queue_bytes", 0, lax_i64)?,
+    })
+}
+
+/// `MergeRequest` of `merge/api.py` (`extra='forbid'`): `avid: str` of 1 to 64 characters,
+/// `source: str | None = None` of at most 64.
+pub fn merge_request(body: &JsonBody) -> Option<MergeRequest> {
+    let dict = fields(body, &["avid", "source"])?;
+    let avid = bounded_str(dict.get("avid")?, 1, 64)?;
+    let source = match dict.get("source") {
+        None | Some(Value::Null) => None,
+        Some(value) => Some(bounded_str(value, 0, 64)?),
+    };
+    Some(MergeRequest { avid, source })
 }
 
 #[cfg(test)]

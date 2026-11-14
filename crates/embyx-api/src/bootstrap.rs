@@ -6,7 +6,9 @@
 //! the config router, health and the transcode listener's empty app; WP9 the monitor
 //! ([`monitor`]: its scheduler, started after the store loads and closed before the clients,
 //! and the monitor and playlists routers); WP12 the fill actor ([`fill_actor`]: the service on
-//! the shared clients, its job manager, router, health block and lifespan). Merge joins in WP14.
+//! the shared clients, its job manager, router, health block and lifespan); WP14 the merge
+//! ([`merge`]: the service, auto-merge and the title scan warming up, started after the
+//! scheduler and closed before it, the merge router and the transcode listener's routes).
 
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
@@ -24,9 +26,10 @@ use crate::app::{AppParts, Lifespan, ReadyProbe, create_app, create_transcode_ap
 use crate::auth::MutationAuth;
 use crate::config_api::{ConfigApiOptions, create_config_router};
 use crate::http::Internal;
-use crate::routing::{ApiRouter, App};
+use crate::routing::App;
 
 mod fill_actor;
+mod merge;
 mod monitor;
 
 pub use fill_actor::{FillActorRuntimeHandle, build_fill_actor_runtime};
@@ -144,25 +147,45 @@ impl std::fmt::Debug for Assembled {
     }
 }
 
-/// `runtime_lifespan`: the config store loaded first, then the scheduler started; at the
-/// end the scheduler closed, then the clients and the database last.
+/// `runtime_lifespan`: the config store loaded first, then the scheduler, the merge service,
+/// the title scan warming up in the background and auto-merge started; at the end the warm-up
+/// cancelled, auto-merge, the merge service and the scheduler closed, then the clients and the
+/// database last.
 struct RuntimeLifespan {
     store: Arc<ConfigStore>,
     database: Database,
     cloud: Arc<CloudDriveHandle>,
     scheduler: embyx_monitor::scheduler::MonitorScheduler,
+    merge: merge::MergeParts,
+    warming: Mutex<Option<tokio::task::JoinHandle<()>>>,
 }
 
 impl Lifespan for RuntimeLifespan {
     fn start(&self) -> BoxFuture<'_, Result<(), Internal>> {
         Box::pin(async move {
             self.store.load().await.map_err(Internal::new)?;
-            self.scheduler.start().await.map_err(Internal::new)
+            self.scheduler.start().await.map_err(Internal::new)?;
+            self.merge.service.start();
+            let (catalog, cache) = (self.merge.catalog.clone(), self.merge.cache.clone());
+            let warming = tokio::spawn(async move { embyx_merge::catalog::warm_title_cache(&catalog, &cache).await });
+            *self.warming.lock().unwrap_or_else(std::sync::PoisonError::into_inner) = Some(warming);
+            self.merge.auto.start();
+            Ok(())
         })
     }
 
     fn stop(&self) -> BoxFuture<'_, Result<(), Internal>> {
         Box::pin(async move {
+            let warming = self
+                .warming
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .take();
+            if let Some(warming) = warming {
+                warming.abort();
+            }
+            self.merge.auto.aclose().await;
+            self.merge.service.aclose().await;
             self.scheduler.aclose().await;
             self.cloud.close(CLOUD_CLOSE_LIMIT).await;
             self.database.close().await;
@@ -195,23 +218,39 @@ pub fn build_app(settings: &Settings, frontend_dist: Option<PathBuf>) -> Result<
     let config_router = create_config_router(Arc::clone(&store), auth.clone(), ConfigApiOptions::default());
     let monitor = monitor::assemble(&store, &database, &cloud, &auth).map_err(BuildError::Client)?;
     let fill_actor = fill_actor::assemble(settings, &store, &database, &cloud, &auth, monitor.fill_actor);
+    let merge = merge::assemble(
+        &store,
+        &database,
+        &cloud,
+        &auth,
+        &monitor.scheduler,
+        settings.transcode_token.as_deref(),
+    )
+    .map_err(BuildError::Client)?;
     let app = create_app(AppParts {
         app_ready,
-        routers: vec![fill_actor.router, config_router, monitor.monitor, monitor.playlists],
+        routers: vec![
+            fill_actor.router,
+            config_router,
+            monitor.monitor,
+            monitor.playlists,
+            merge.router.clone(),
+        ],
         feature_health: vec![("fill_actor".to_owned(), fill_actor.health)],
         api_token: settings.api_token.clone(),
         max_request_bytes: usize::try_from(settings.max_request_bytes).unwrap_or(usize::MAX),
         frontend_dist,
     })
     .expect("no feature reports under a reserved health key");
-    // Served on a port of its own when EMBYX_MANAGER_TRANSCODE_PORT is set; its routes
-    // arrive with WP14.
-    let transcode_app = create_transcode_app(ApiRouter::new("/api/transcode"));
+    // Served on a port of its own when EMBYX_MANAGER_TRANSCODE_PORT is set.
+    let transcode_app = create_transcode_app(merge.transcode.clone());
     let runtime: Arc<dyn Lifespan> = Arc::new(RuntimeLifespan {
         store: Arc::clone(&store),
         database: database.clone(),
         cloud: Arc::clone(&cloud),
         scheduler: monitor.scheduler.clone(),
+        merge,
+        warming: Mutex::new(None),
     });
     Ok(Assembled {
         app,

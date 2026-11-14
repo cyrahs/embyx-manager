@@ -24,8 +24,9 @@ import { chromium } from 'playwright'
 
 const TOKEN = 'smoke-token'
 const EMBY_KEY = 'smoke-key'
-// API prefixes whose routes arrive with a later work package; their pages may get 404 until then.
-const NOT_YET_PORTED = ['/api/merge/'] // WP14
+// API prefixes whose routes arrive with a later work package; their pages may get 404 until
+// then. Every page's routes are ported now (WP14 brought the merge page's).
+const NOT_YET_PORTED = []
 
 const PAGES = [
   ['/dashboard', '监控看板'],

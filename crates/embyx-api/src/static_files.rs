@@ -19,6 +19,7 @@ use chrono::DateTime;
 use embyx_core::posixpath;
 use embyx_core::pyjson::float_repr;
 use embyx_core::pytext::{is_py_digit, py_int, py_split, py_strip};
+use futures_util::StreamExt as _;
 use http::header::{
     ACCEPT_RANGES, CONTENT_LENGTH, CONTENT_RANGE, CONTENT_TYPE, ETAG, HeaderName, HeaderValue, LAST_MODIFIED,
 };
@@ -245,7 +246,7 @@ impl SpaStaticFiles {
         };
         if let Some((full_path, stat)) = &found {
             if stat.is_file {
-                return file_response(full_path, *stat, request, StatusCode::OK, true)
+                return file_response(full_path, *stat, request, StatusCode::OK, true, None)
                     .await
                     .map(Ok);
             }
@@ -265,7 +266,7 @@ impl SpaStaticFiles {
                         let url = absolute_url(request, &request.path);
                         return Ok(Ok(redirect(&insert_trailing_slash(&url))));
                     }
-                    return file_response(&index_path, index_stat, request, StatusCode::OK, true)
+                    return file_response(&index_path, index_stat, request, StatusCode::OK, true, None)
                         .await
                         .map(Ok);
                 }
@@ -274,7 +275,7 @@ impl SpaStaticFiles {
         // HTML mode: a `404.html` is served with status 404 (and no validator check).
         match self.lookup_path("404.html") {
             Ok(Some((full_path, stat))) if stat.is_file => {
-                file_response(&full_path, stat, request, StatusCode::NOT_FOUND, false)
+                file_response(&full_path, stat, request, StatusCode::NOT_FOUND, false, None)
                     .await
                     .map(Ok)
             }
@@ -584,20 +585,28 @@ fn is_not_modified(request: &RequestHead, etag: &str, last_modified: &str) -> bo
     }
 }
 
-/// Read `length` bytes of a file from `start`.
-async fn read_range(path: &Path, start: u64, length: u64) -> Result<Vec<u8>, Internal> {
+/// `FileResponse.chunk_size`: the file is sent in pieces of this size.
+const CHUNK_SIZE: usize = 64 * 1024;
+
+/// The pieces of a file body.
+type Pieces = futures_util::stream::BoxStream<'static, std::io::Result<Bytes>>;
+
+/// `length` bytes of a file from `start`, read in [`CHUNK_SIZE`] pieces as they are sent (a
+/// transcode part runs to tens of gigabytes). The file is opened before the answer starts,
+/// so a file that cannot be opened is still a plain 500.
+async fn range_pieces(path: &Path, start: u64, length: u64) -> Result<Pieces, Internal> {
     let mut file = tokio::fs::File::open(path)
         .await
         .map_err(|error| Internal(format!("OSError: {error}")))?;
     file.seek(std::io::SeekFrom::Start(start))
         .await
         .map_err(|error| Internal(format!("OSError: {error}")))?;
-    let mut buffer = Vec::new();
-    file.take(length)
-        .read_to_end(&mut buffer)
-        .await
-        .map_err(|error| Internal(format!("OSError: {error}")))?;
-    Ok(buffer)
+    Ok(tokio_util::io::ReaderStream::with_capacity(file.take(length), CHUNK_SIZE).boxed())
+}
+
+/// A body of fixed bytes as pieces.
+fn fixed_piece(bytes: Vec<u8>) -> Pieces {
+    futures_util::stream::once(std::future::ready(Ok(Bytes::from(bytes)))).boxed()
 }
 
 /// `secrets.token_hex(13)`.
@@ -619,6 +628,7 @@ async fn file_response(
     request: &RequestHead,
     status: StatusCode,
     check_modified: bool,
+    media_type: Option<&str>,
 ) -> Result<Response, Internal> {
     let (content_length, last_modified, etag) = stat_headers(stat);
     if check_modified && is_not_modified(request, &etag, &last_modified) {
@@ -627,7 +637,7 @@ async fn file_response(
         response.headers_mut().insert(ETAG, header(&etag));
         return Ok(response);
     }
-    let media_type = content_type(path);
+    let media_type = media_type.map_or_else(|| content_type(path), str::to_owned);
     let file_headers: [(HeaderName, String); 5] = [
         (CONTENT_TYPE, media_type.clone()),
         (ACCEPT_RANGES, "bytes".to_owned()),
@@ -670,7 +680,7 @@ async fn file_response(
             let body = if head {
                 Body::empty()
             } else {
-                Body::from(read_range(path, 0, stat.size).await?)
+                Body::from_stream(range_pieces(path, 0, stat.size).await?)
             };
             Ok(build(status, body, &[]))
         }
@@ -678,7 +688,7 @@ async fn file_response(
             let body = if head {
                 Body::empty()
             } else {
-                Body::from(read_range(path, to_u64(*first), to_u64(end - *first)).await?)
+                Body::from_stream(range_pieces(path, to_u64(*first), to_u64(end - *first)).await?)
             };
             Ok(build(
                 StatusCode::PARTIAL_CONTENT,
@@ -703,20 +713,20 @@ async fn file_response(
             let body = if head {
                 Body::empty()
             } else {
-                let mut body = Vec::new();
+                let mut pieces = Vec::new();
                 for (start, end) in ranges {
-                    body.extend_from_slice(
+                    pieces.push(fixed_piece(
                         format!(
                             "--{boundary}\r\nContent-Type: {media_type}\r\nContent-Range: bytes {start}-{}/{size}\r\n\r\n",
                             end - 1
                         )
-                        .as_bytes(),
-                    );
-                    body.extend(read_range(path, to_u64(*start), to_u64(end - start)).await?);
-                    body.extend_from_slice(b"\r\n");
+                        .into_bytes(),
+                    ));
+                    pieces.push(range_pieces(path, to_u64(*start), to_u64(end - start)).await?);
+                    pieces.push(fixed_piece(b"\r\n".to_vec()));
                 }
-                body.extend_from_slice(format!("--{boundary}--").as_bytes());
-                Body::from(body)
+                pieces.push(fixed_piece(format!("--{boundary}--").into_bytes()));
+                Body::from_stream(futures_util::stream::iter(pieces).flatten())
             };
             Ok(build(
                 StatusCode::PARTIAL_CONTENT,
@@ -728,6 +738,37 @@ async fn file_response(
             ))
         }
     }
+}
+
+/// `FileResponse(path, media_type=...)` as an endpoint returns it: `os.stat` when it is sent
+/// (a missing path or one that is not a regular file is Starlette's `RuntimeError`, a 500),
+/// no `If-None-Match` / `If-Modified-Since` check, byte ranges as asked for, and the file
+/// streamed in 64 KiB pieces. `media_type` is given as is (`text/*` would get
+/// `; charset=utf-8`, which the transcode route's `application/octet-stream` never does).
+pub async fn serve_file(path: &Path, request: &RequestHead, media_type: &str) -> Answer {
+    let metadata = match tokio::fs::metadata(path).await {
+        Ok(metadata) => metadata,
+        Err(error) if error.kind() == ErrorKind::NotFound => {
+            return Err(Internal(format!(
+                "RuntimeError: File at path {} does not exist.",
+                path.display()
+            )));
+        }
+        Err(error) => return Err(Internal(format!("OSError: {error}"))),
+    };
+    let stat = Stat::of(&metadata);
+    if !stat.is_file {
+        return Err(Internal(format!(
+            "RuntimeError: File at path {} is not a file.",
+            path.display()
+        )));
+    }
+    let media_type = if media_type.starts_with("text/") && !media_type.to_lowercase().contains("charset=") {
+        format!("{media_type}; charset=utf-8")
+    } else {
+        media_type.to_owned()
+    };
+    file_response(path, stat, request, StatusCode::OK, false, Some(&media_type)).await
 }
 
 #[cfg(test)]

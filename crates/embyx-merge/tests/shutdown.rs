@@ -70,7 +70,7 @@ impl Harness {
             ..CloudDriveConfig::default()
         };
         let source = cloud.clone();
-        let trigger: Trigger = Arc::new(|_| Box::pin(async {}));
+        let trigger: Trigger = Arc::new(|_| Box::pin(async { Ok(()) }));
         let service = MergeService::new(ServiceParts::new(
             repository.clone(),
             Arc::new(move || Some(Arc::new(source.clone()) as Arc<dyn MergeCloud>)),

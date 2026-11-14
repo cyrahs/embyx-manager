@@ -37,6 +37,12 @@ rustix.workspace = true
 
 [dev-dependencies]
 embyx-merge = { path = ".", features = ["test-support"] }
+# The merge.service scenarios send their `request` steps through the API's merge router and
+# transcode listener (a dev-dependency cycle Cargo allows: the tests link one embyx-merge).
+axum.workspace = true
+embyx-api.workspace = true
+http.workspace = true
+http-body-util.workspace = true
 embyx-clients = { workspace = true, features = ["clouddrive", "test-support"] }
 embyx-db = { workspace = true, features = ["test-support"] }
 sha2.workspace = true
