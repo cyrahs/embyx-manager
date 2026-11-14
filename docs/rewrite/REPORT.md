@@ -1,8 +1,9 @@
 # embyx-manager Rust rewrite: final report data
 
 The data behind the final report of the rewrite (`docs/rewrite/PLAN.md`), written at the end of WP16 on
-2026-11-14; the level 2 results were added the same day, after Max allowed the export. The rewrite ran from Max's approval on 2026-11-13 18:22Z to WP16's last merge, about 16 hours
-of wall-clock time, in 17 work packages and 21 pull requests into `rust` (#81-#101). Nothing was deployed.
+2026-11-14; the level 2 results were added the same day (#102), after Max allowed the export. The
+rewrite ran from Max's approval on 2026-11-13 18:22Z to WP16's last merge, about 16 hours of wall-clock
+time, in 17 work packages and 21 pull requests into `rust` (#81-#101). Nothing was deployed.
 A copy of this file is at `/mnt/project-files/embyx-rust/report-data.md`.
 
 ## Where it stands
@@ -32,11 +33,33 @@ A copy of this file is at `/mnt/project-files/embyx-rust/report-data.md`.
     independent check found none of the 4 known secret values (the API token, the database password and
     the two above) in the 39 MB written. Only the masked export left the cluster; the host's staging
     folder was deleted right after the transfer.
-  - **GET differ.** Every GET route, with the item routes for every stored row (4,712 acquisitions, 8,383
-    runs, 70 playlists, 18 apply jobs): 18,005 of 18,005 answers equal in status, content type and body.
-    Python answered 17,927 with 200, 75 with 404, 1 with 422 and 2 with 500; the two 500s are the
-    CloudDrive directory listing, which has no CloudDrive to reach here, in both builds. No row these
-    routes read was refused by the Rust build (D62, D92, D112).
+  - **GET differ.** The GET routes of the main API, with the item routes for every stored acquisition
+    (4,712, each also as a replace plan), run (8,383), playlist (70, `missing` and `fill`) and apply job
+    (18): 18,005 requests, 18,005 answered alike in status, content type and body. Not requested:
+    `/openapi.json` (level 1 compares it), the page `/` (skipped: this build had no front end beside the
+    binary) and the transcode listener's GET. Six keys that hold the time of the request are dropped
+    before comparing (`get_diff.py` `DEFAULT_IGNORED`).
+    - *Rows read through both builds:* the 9 config sections, the 4,712 acquisitions with their 9,514
+      magnet attempts, the 8,383 runs, the 292 subscriptions, the 265 merge tasks, the 70 playlists and
+      the 18 apply jobs with their job rows. None was refused by the Rust build (D62, D92).
+    - *Rows not read:* the 38 `fill_actor_jobs` rows that no apply job points to (plan jobs). The tool asked the plan route for the
+      ids in `fill_actor_plans`, which held none (plans expire); a plan job's row, with the
+      `actor_ids_json` that D112 is about, is served by the same route under its job id. The tool asks
+      for those now, but the export was already deleted. Eight tables were empty.
+    - *Answers that say little about the row:* the 4,712 replace plans look for the title in a library
+      the replay machine does not have, the 70 `fill` answers are the 404 of a server that has run no
+      fill, and `/api/merge/titles` scanned roots that are not there.
+    - *Statuses (Python):* 17,927 with 200; 75 with 404 (the 70 `fill` answers and 5 requests built to
+      miss); 2 with 500, the CloudDrive directory listing, which has no CloudDrive to reach here; 1 with
+      422, whose request was not noted before the reports were deleted. Rust answered each alike.
+    - *Clock values:* 37 values in 19 answers depend on when the request ran (`scanned_at` of the merge
+      titles, `elapsed_seconds` and `last_progress_seconds` of the 18 apply jobs). A first run of 158
+      requests, which held all 19, compared them exactly: on every one Rust was 4 or 5 seconds later,
+      in the same format, which is the time between the two runs. The full run then took them as equal
+      within 327.6 seconds, the span of both runs: looser than it should have been (#102's review). The
+      tool now takes them as equal only when the Rust value is later by the time between the two
+      requests, give or take 2 seconds, in one type and one text shape; that rule ran on synthetic data
+      only.
   - **Decision replay.** AVID, brand and archive routing of every name the export holds: 16,572 of 16,572
     decided alike.
   - **Not done.** The plan's second half of level 2, a pass of each pipeline over a tree rebuilt from
@@ -99,7 +122,7 @@ The goldens and transcripts that pin this behaviour come from the Python tree, n
 | React front end, unmodified: lint, tests, build; page smoke against the Rust server | lint clean, 121 tests in 11 files pass (the plan counted 117), build passes; page smoke passes (six pages, settings round trip, SPA fallback, exit 0 on SIGTERM) |
 | Schema: both builds migrate an empty database, `pg_dump --schema-only` diff | empty (720 lines each) |
 | Cross-version: Python worker against the Rust listener, Rust worker against the Python listener and Rust against Rust (contract 5); Rust and Python merge workers on the same parts (real ffmpeg) | pass (part of the workspace tests) |
-| Tool self-tests (`tools/tests`) | CI: 44 passed and 1 skipped in the python-tools job; the skipped Rust replay comparison runs in the rust job (6 passed there). Locally on cd657f6: 43 passed, 1 skipped |
+| Tool self-tests (`tools/tests`) | CI: 44 passed and 1 skipped in the python-tools job; the skipped Rust replay comparison runs in the rust job (6 passed there). Locally on cd657f6: 43 passed, 1 skipped. #102 added three differ tests |
 | Tree check: Python tree byte-identical to the baseline, no ignored test, `unsafe` confined | pass |
 
 ## Verification level per pipeline
@@ -120,11 +143,11 @@ means live reads of the anonymous sites.
 | Tracker, 换版, manual intake, RSS intake | tests, transcripts | GET differ (acquisitions, replace) | n/a |
 | `.strm` mapping, playlists, playlist sync | tests, transcripts (full and incremental) | GET differ (playlists, missing, fill) | n/a |
 | Scheduler, monitor API | tests, transcripts of the API | GET differ (status, tracker, runs) | n/a |
-| Fill actor: plans, apply (local and cloud), recovery, jobs, API | tests, transcripts from every journal state | GET differ (plans, apply jobs) | n/a |
+| Fill actor: plans, apply (local and cloud), recovery, jobs, API | tests, transcripts from every journal state | GET differ (apply jobs; no plan was stored, and the plan jobs were not asked for) | n/a |
 | Merge worker | tests, goldens of every ffmpeg/ffprobe argument list, real-ffmpeg cross-check against the Python worker (CI's 6.1, the image's 7.1.5) | n/a | n/a |
 | Merge service, auto-merge, merge API | tests, transcripts with cancel and retry at each state | GET differ (tasks, titles) | n/a |
 | Transcode listener and home worker | tests, protocol tests in every pairing with real ffmpeg, Windows job with real ffmpeg | n/a | not allowed (no live worker) |
-| HTTP shell and front end | contract-8 transcript, OpenAPI diff, front-end tests, page smoke | GET differ | n/a |
+| HTTP shell and front end | contract-8 transcript, OpenAPI diff, front-end tests, page smoke | GET differ (the API routes; the page was skipped) | n/a |
 | Database schema | catalog transcript and `pg_dump` diff | load of an export | n/a |
 
 What no level covers: CloudDrive, Emby and Kubernetes behaviour beyond what the fakes record; the real 115
@@ -375,12 +398,19 @@ The full rows are in PLAN.md "Experiment log".
   - The Chocolatey ffmpeg shim (WP15 CI).
   - The AVBase connection-reuse resend (WP16 level 3, D175).
   - The level 2 differ showing D62's refusal on out-of-shape rows.
-  - On production rows the level 2 differ itself failed twice before it compared anything real: playlist
-    keys hold spaces and CJK text, which it put into the URL unencoded, and three values are read off the
-    server's clock (`scanned_at`, an unfinished apply job's `elapsed_seconds` and
-    `last_progress_seconds`), which differed by the seconds between the two runs. Both are fixed in the
-    tool, with a relative `--binary` path that the server's scratch directory broke; none is a difference
-    between the builds.
+  - On production rows the level 2 differ itself had three defects, none a difference between the
+    builds: playlist keys hold spaces and CJK text, which it put into the URL unencoded; three values
+    are read off the server's clock when the request runs, which differed by the seconds between the
+    two runs; and a relative `--binary` path broke in the server's scratch directory. All three are
+    fixed in #102.
+  - #102's review found the first clock fix too loose (any value within
+    the span of both runs, either way round, in any time format), the report claiming more than the
+    run covered (which rows were read, which routes were asked) and a row that neither build can serve
+    hidden in the 404 count. The clock rule is tightened, the report lists every non-200 answer and the
+    plan route is asked by job id; this section says what the run did and did not cover.
+  - #102's CI: `heartbeat_retries_transient_repository_failure` failed once in the `rust` job and
+    passed on the re-run. Its 450 ms lease left a renewal 300 ms to spare, which a loaded runner
+    overran; the test now uses twice the lease. No product code changed.
 - **WP16.**
   - #99: parity audit and cleanup notes. Its review found 0 blocker, 0 major, 3 minor and 4 nits, all
     answered.
@@ -391,7 +421,7 @@ The full rows are in PLAN.md "Experiment log".
 
 1. **Level 2 on listings.** The database half of level 2 is done (above). A pass of each pipeline over a
    tree rebuilt from production listings would need new tooling and a walk of the library through
-   CloudDrive, which costs 115 API calls. The paused deployment's manual round checks the same paths on
+   CloudDrive, which spends calls to the 115 API. The paused deployment's manual round checks the same paths on
    the real tree, one pipeline at a time, so this is not recommended.
 2. **Pod memory.** Keep 256Mi / 768Mi, or lower the request (for example to 128Mi) after a week of
    watching the pod's working set (DEPLOY.md).
@@ -405,10 +435,11 @@ The full rows are in PLAN.md "Experiment log".
 - **No live coverage.** CloudDrive, Emby and Kubernetes were never reached live; their fakes follow the
   Python tests and transcripts. A behaviour of the real services that the Python tests never pinned
   could differ (contract 6 is the most delicate: mutations always awaited).
-- **Production data, writes.** Level 2 read every stored row through both builds and found no row the
-  Rust build refuses (D62, D92, D112) and no differing answer. It did not run a pipeline: what a run
-  writes on production data is first seen in the deployment's manual round. D172 (the home worker's local
-  sidecars) is outside the database and was not covered.
+- **Production data, writes.** Level 2 read the stored acquisitions, attempts, runs, subscriptions,
+  merge tasks, playlists and apply jobs through both builds and found no row the Rust build refuses
+  (D62, D92) and no differing answer. It did not read the 38 plan-job rows (D112), and D172 (the home
+  worker's local sidecars) is outside the database. It did not run a pipeline: what a run writes on
+  production data is first seen in the deployment's manual round.
 - **AVBase fingerprint.** The AVBase client impersonates Chrome through `wreq`/BoringSSL. It passed from
   the production network (nas-us-2, WP0's probe, #82) and from this container (level 3). A Cloudflare
   change can break either build, but the two may not break the same way.

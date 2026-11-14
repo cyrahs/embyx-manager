@@ -88,47 +88,111 @@ def test_get_diff_reports_json_paths_and_drops_ignored_keys() -> None:
     ]
 
 
-def test_get_diff_takes_clock_values_within_the_window_as_equal() -> None:
+def _answer(body: object, sent: float, done: float, status: int = 200) -> dict[str, object]:
+    return {'status': status, 'content_type': 'application/json', 'body': body, 'sent': sent, 'done': done}
+
+
+def test_get_diff_takes_a_clock_value_as_equal_only_when_rust_is_later_by_the_time_between_requests() -> None:
     import get_diff  # noqa: PLC0415 - imports the benchmark's server helpers
 
-    left = {'scanned_at': '2026-11-14T17:34:24.640766Z', 'job': {'progress': {'elapsed_seconds': 2554974, 'done': 3}}}
-    right = {'scanned_at': '2026-11-14T17:34:29.338770Z', 'job': {'progress': {'elapsed_seconds': 2554979, 'done': 3}}}
-    assert get_diff.differences(left, right, window=10.0) == []
-    # Without a window, and beyond it, a clock value is compared like any other.
-    assert [item['path'] for item in get_diff.differences(left, right)] == [
+    # The Python build answered at 100.0-100.2, the Rust build at 130.0-130.1: its clock is
+    # 29.8 to 30.1 seconds ahead, give or take the slack.
+    gap = get_diff.clock_gap(_answer(None, 100.0, 100.2), _answer(None, 130.0, 130.1))
+    assert gap == (130.0 - 100.2 - get_diff.CLOCK_SLACK, 130.1 - 100.0 + get_diff.CLOCK_SLACK)
+
+    left = {'scanned_at': '2031-02-03T04:05:06.100000Z', 'jobs': [{'progress': {'elapsed_seconds': 700, 'last_progress_seconds': 650, 'done': 3}}]}  # fmt: skip
+    right = {'scanned_at': '2031-02-03T04:05:36.150000Z', 'jobs': [{'progress': {'elapsed_seconds': 730, 'last_progress_seconds': 681, 'done': 3}}]}  # fmt: skip
+    tolerated: list[str] = []
+    assert get_diff.differences(left, right, gap=gap, tolerated=tolerated) == []
+    assert tolerated == [
         '$.scanned_at',
-        '$.job.progress.elapsed_seconds',
+        '$.jobs[0].progress.elapsed_seconds',
+        '$.jobs[0].progress.last_progress_seconds',
     ]
-    assert [item['path'] for item in get_diff.differences(left, right, window=4.0)] == [
-        '$.scanned_at',
-        '$.job.progress.elapsed_seconds',
-    ]
-    # Only the clock keys, only values of one type, and never a missing key.
-    assert get_diff.differences({'done': 3}, {'done': 4}, window=10.0) == [
-        {'path': '$.done', 'python': '3', 'rust': '4'}
-    ]
-    assert get_diff.differences({'elapsed_seconds': 5}, {'elapsed_seconds': 5.0}, window=10.0) == [
-        {'path': '$.elapsed_seconds', 'python': '5', 'rust': '5.0'},
-    ]
-    assert get_diff.differences({'elapsed_seconds': None}, {'elapsed_seconds': 3}, window=10.0) == [
-        {'path': '$.elapsed_seconds', 'python': 'null', 'rust': '3'},
-    ]
-    assert get_diff.differences({'scanned_at': 'then'}, {'scanned_at': 'now'}, window=10.0) == [
-        {'path': '$.scanned_at', 'python': '"then"', 'rust': '"now"'},
-    ]
-    assert get_diff.differences({'scanned_at': 'x'}, {}, window=10.0) == [{'path': '$.scanned_at', 'only': 'python'}]
+    # Without a gap a clock value is compared like any other.
+    assert [item['path'] for item in get_diff.differences(left, right)] == tolerated
+
+    def differs(python: object, rust: object, key: str = 'elapsed_seconds') -> bool:
+        return bool(get_diff.differences({key: python}, {key: rust}, gap=gap))
+
+    # Too little, too much, earlier, clamped to zero: none is the time between the requests.
+    assert all(differs(700, value) for value in (726, 734, 670, 0))
+    assert not differs(700, 728)
+    assert not differs(700, 732)
+    # Two values swapped between the keys are each off by more than the slack.
+    assert (
+        get_diff.differences(
+            {'elapsed_seconds': 700, 'last_progress_seconds': 650},
+            {'elapsed_seconds': 680, 'last_progress_seconds': 730},
+            gap=gap,
+        )
+        != []
+    )
+    # One type on both sides, and never a missing key or a null.
+    assert differs(700, 730.0)
+    assert differs(None, 730)
+    assert get_diff.differences({'scanned_at': 'x'}, {}, gap=gap) == [{'path': '$.scanned_at', 'only': 'python'}]
+    # A time must be written the same way on both sides.
+    python_time = '2031-02-03T04:05:06.100000Z'
+    for rust_time in (
+        '2031-02-03T04:05:36.150000+00:00',
+        '2031-02-03T04:05:36Z',
+        '2031-02-03T04:05:36.150000',
+        '2031-02-03T12:05:36.150000+08:00',
+        '2031-02-03',
+        'soon',
+    ):
+        assert differs(python_time, rust_time, 'scanned_at'), rust_time
+    assert not differs(python_time, '2031-02-03T04:05:36.150000Z', 'scanned_at')
+    # Only the clock keys.
+    assert get_diff.differences({'done': 3}, {'done': 33}, gap=gap) == [{'path': '$.done', 'python': '3', 'rust': '33'}]
+
+
+def test_get_diff_compare_counts_what_the_clock_rule_let_pass_and_lists_every_non_200() -> None:
+    import get_diff  # noqa: PLC0415 - imports the benchmark's server helpers
+
+    paths = ['/a', '/b', '/c']
+    python = {
+        '/a': _answer({'elapsed_seconds': 10, 'n': 1}, 100.0, 100.1),
+        '/b': _answer({'elapsed_seconds': 10}, 101.0, 101.1),
+        '/c': _answer({'error': 'gone'}, 102.0, 102.1, status=404),
+    }
+    rust = {
+        '/a': _answer({'elapsed_seconds': 30, 'n': 1}, 120.0, 120.1),
+        # Answered 25 seconds after the Python build, yet 300 seconds ahead.
+        '/b': _answer({'elapsed_seconds': 310}, 126.0, 126.1),
+        '/c': _answer({'error': 'gone'}, 127.0, 127.1, status=404),
+    }
+    report = get_diff.compare(paths, python, rust, frozenset())
+    assert report['equal'] == 2
+    assert [item['request'] for item in report['different']] == ['/b']
+    assert report['clock_values_tolerated'] == 1
+    assert report['clock_gap_seconds'] == [20.0, 20.0]
+    assert report['python_statuses'] == {'200': 2, '404': 1}
+    assert report['python_non_200'] == [{'request': '/c', 'status': 404}]
 
 
 def test_get_diff_percent_encodes_stored_ids() -> None:
     import get_diff  # noqa: PLC0415 - imports the benchmark's server helpers
 
-    paths = get_diff.item_paths({'playlist': ['k4:第一届 奖/2021'], 'avid': ['ABC-123'], 'run': ['a b']})
-    assert paths == [
+    found = {
+        'playlist': ['k4:第一届 奖 2021'],
+        'avid': ['ABC-123', 'A&B=1%41?#'],
+        'run': ['a b'],
+        'plan': ['p1'],
+        'job': ['p1', 'j2'],
+    }
+    assert get_diff.item_paths(found) == [
         '/api/monitor/acquisitions/ABC-123',
         '/api/monitor/replace?avid=ABC-123',
+        '/api/monitor/acquisitions/A%26B%3D1%2541%3F%23',
+        '/api/monitor/replace?avid=A%26B%3D1%2541%3F%23',
         '/api/monitor/runs/a%20b',
-        '/api/playlists/k4%3A%E7%AC%AC%E4%B8%80%E5%B1%8A%20%E5%A5%96%2F2021/missing',
-        '/api/playlists/k4%3A%E7%AC%AC%E4%B8%80%E5%B1%8A%20%E5%A5%96%2F2021/fill',
+        # A plan id and the job ids, each once.
+        '/api/fill-actor/plans/p1',
+        '/api/fill-actor/plans/j2',
+        '/api/playlists/k4%3A%E7%AC%AC%E4%B8%80%E5%B1%8A%20%E5%A5%96%202021/missing',
+        '/api/playlists/k4%3A%E7%AC%AC%E4%B8%80%E5%B1%8A%20%E5%A5%96%202021/fill',
     ]
 
 
