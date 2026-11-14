@@ -7,7 +7,7 @@
 //! documentation-only keys (`title`, `description`, `summary`, `operationId`) dropped.
 //! Every operation of the baseline's two apps (`goldens/api/openapi_main.json`,
 //! `openapi_transcode.json`) is either served here with the same structure or listed in
-//! [`PENDING`] until its work package ports it; WP14 empties the list.
+//! [`PENDING`] until its work package ports it.
 
 use embyx_core::pyjson::{self, Dict, DumpOptions, Value};
 
@@ -15,30 +15,7 @@ use crate::routing::Route;
 
 /// The operations of the baseline not ported yet: `(app, method, path)`, by the work
 /// package that ports them.
-pub const PENDING: &[(&str, &str, &str)] = &[
-    // WP14: merge and the transcode listener.
-    ("main", "get", "/api/merge/titles"),
-    ("main", "get", "/api/merge/tasks"),
-    ("main", "post", "/api/merge/tasks"),
-    ("main", "post", "/api/merge/tasks/{task_id}/pause"),
-    ("main", "post", "/api/merge/tasks/{task_id}/resume"),
-    ("main", "post", "/api/merge/tasks/{task_id}/use-cpu"),
-    ("main", "post", "/api/merge/tasks/{task_id}/cancel"),
-    ("main", "post", "/api/merge/tasks/{task_id}/retry"),
-    ("transcode", "post", "/api/transcode/claim"),
-    ("transcode", "post", "/api/transcode/heartbeat"),
-    ("transcode", "get", "/api/transcode/tasks/{task_id}/parts/{part_index}"),
-    (
-        "transcode",
-        "put",
-        "/api/transcode/tasks/{task_id}/parts/{part_index}/chunks/{chunk_index}",
-    ),
-    (
-        "transcode",
-        "post",
-        "/api/transcode/tasks/{task_id}/parts/{part_index}/finish",
-    ),
-];
+pub const PENDING: &[(&str, &str, &str)] = &[];
 
 /// FastAPI's 422 response, which every operation with a parameter or a body lists.
 const VALIDATION_ERROR: &str = r#"{

@@ -224,6 +224,7 @@ impl Pipeline {
     }
 }
 
-/// `trigger(pipeline)`: start a run now; the application logs and swallows a busy or
-/// unconfigured pipeline, so nothing comes back.
-pub type Trigger = Arc<dyn Fn(Pipeline) -> BoxFuture<'static, ()> + Send + Sync>;
+/// `trigger(pipeline)`: start a run now. The application logs and swallows a busy or
+/// unconfigured pipeline; any other failure (the run's start could not be recorded) raises
+/// into the merge step, as Python's does.
+pub type Trigger = Arc<dyn Fn(Pipeline) -> BoxFuture<'static, Result<(), crate::service::StepError>> + Send + Sync>;

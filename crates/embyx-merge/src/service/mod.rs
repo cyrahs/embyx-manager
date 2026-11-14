@@ -544,7 +544,9 @@ impl MergeService {
         &self.inner.repository
     }
 
-    pub(crate) fn now(&self) -> chrono::DateTime<chrono::Utc> {
+    /// The service's clock (the wall clock but in tests); the transcode listener stamps a
+    /// worker's report with it.
+    pub fn now(&self) -> chrono::DateTime<chrono::Utc> {
         (self.inner.clock)()
     }
 
@@ -1299,7 +1301,7 @@ impl MergeService {
             )
             .await?;
         if moved.is_some() {
-            (self.inner.trigger)(Pipeline::Archive).await;
+            (self.inner.trigger)(Pipeline::Archive).await?;
         }
         Ok(())
     }
@@ -1321,7 +1323,7 @@ impl MergeService {
                     vec![TaskField::FinishedAt(Some(self.now())), TaskField::Notice(None)],
                 )
                 .await?;
-            (self.inner.trigger)(Pipeline::Mapping).await;
+            (self.inner.trigger)(Pipeline::Mapping).await?;
             return Ok(());
         }
         let now = self.now();
@@ -1338,7 +1340,7 @@ impl MergeService {
             )));
         }
         if now - task.updated_at > archive_nudge_interval() {
-            (self.inner.trigger)(Pipeline::Archive).await;
+            (self.inner.trigger)(Pipeline::Archive).await?;
             self.inner
                 .repository
                 .update(

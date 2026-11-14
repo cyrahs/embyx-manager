@@ -216,16 +216,18 @@ the runner does and `dump()` gives the transcript's `fakes`.
   CloudDrive fake has `edit(op, args)` on both sides (`add_file`, `add_directory`, `remove`,
   `update_copy_tasks`, `drop_copy_tasks`, `set_uploads`, and `fail` for a scripted failure of the next calls of an RPC): CloudDrive changing on its own, unrecorded. The
   runner's `Context.fakes` hands an operation the running fakes for such steps. `merge/*` (walk,
-  merge_failures, upload, cancel, replace_archive, home, home_muxers, over115_cpu, auto) run `merge.service`
+  merge_failures, upload, cancel, replace_archive, home, home_muxers, over115_cpu, auto, api) run `merge.service`
   (`tools/scenarios/operations/merge_service.py`, `crates/embyx-merge/tests/service_scenarios.rs`): one
   world of `MergeService`, `AutoMerger` and the transcode bookkeeping over the scenario database, the fakes,
   a `work` root (the merge volume, status files and `.transcode/<id>/`), a `mapping` root (strm tree) and a
   `secrets` root (Job template and token). Steps: `create`, `tick`, `cancel`, `retry`, `use_cpu`,
   `set_paused`, `claim`, `heartbeat`, `chunk` (as the transcode PUT stores one), `finish_part`,
-  `transcode_view`, `home`, `auto`, `restart`, and the unrecorded `write`, `remove`, `advance`,
+  `transcode_view`, `home`, `auto`, `request` (one HTTP request to the merge router in `create_app` or to
+  the transcode listener over this world, tokens `args.api_token` / `args.transcode_token`; reported with
+  status, `content-type`, `cache-control`, `www-authenticate` and the body; `merge/api`), `restart`, and the unrecorded `write`, `remove`, `advance`,
   `job_status`, `cloud`, `free_space`; each reports the task listing after it. `cancel_after = "<method>"`
-  cancels the step once that `AsyncCloudDrive` method answered. Python pins `datetime` in the five merge
-  modules; Rust hands one clock to every repository, the presence, the title cache, the service and
+  cancels the step once that `AsyncCloudDrive` method answered. Python pins `datetime` in the six merge
+  modules (the transcode API's included); Rust hands one clock to every repository, the presence, the title cache, the service and
   auto-merge. **Resume matrix:** `tools/scenarios/segment.py` runs `steps[from:to]` of a spec on the Python
   baseline against a given database, roots, clock and fake states (a dump's `routes_left` become routes
   again) and prints the steps, clock, calls and fake dumps. The Rust test splits a spec at its `restart`

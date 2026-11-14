@@ -144,8 +144,37 @@ async fn build_app_loads_the_store_and_serves_config() {
     let (status, tracker) = call(&assembled.app, Method::GET, "/api/monitor/tracker", &[], None).await;
     assert_eq!(status, StatusCode::OK);
     assert_eq!(tracker.get("reason"), Some(&Value::from("archive is disabled")));
-    // The transcode listener's app has no routes yet (WP14).
-    let (status, _) = call(&assembled.transcode_app, Method::GET, "/api/transcode/jobs", &[], None).await;
+    // The merge (WP14): without the Job template merging is unavailable, and without the
+    // mapping and library directories there are no titles to scan.
+    let (status, tasks) = call(&assembled.app, Method::GET, "/api/merge/tasks", &[], None).await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(
+        tasks.get("unavailable"),
+        Some(&Value::from(embyx_merge::service::NO_JOB_TEMPLATE))
+    );
+    // Auto-merge reports (off until its first round, then unavailable).
+    assert!(
+        tasks.get("auto").and_then(|auto| auto.get("state")).is_some(),
+        "{tasks:?}"
+    );
+    let (status, titles) = call(&assembled.app, Method::GET, "/api/merge/titles", &[], None).await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(
+        titles.get("reason"),
+        Some(&Value::from("mapping.dst_dir and archive.dst_dir must be configured"))
+    );
+    // The transcode listener serves the worker's routes and nothing else.
+    let (status, claimed) = call(
+        &assembled.transcode_app,
+        Method::POST,
+        "/api/transcode/claim",
+        &[],
+        Some(r#"{"name": "pc"}"#),
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK, "{claimed:?}");
+    assert_eq!(claimed.get("task"), Some(&Value::Null));
+    let (status, _) = call(&assembled.transcode_app, Method::GET, "/api/merge/tasks", &[], None).await;
     assert_eq!(status, StatusCode::NOT_FOUND);
 
     for lifespan in assembled.lifespans.iter().rev() {

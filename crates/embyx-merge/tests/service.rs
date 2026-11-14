@@ -9,12 +9,13 @@ use std::sync::{Arc, Mutex, PoisonError};
 
 use chrono::{Duration, TimeZone as _, Utc};
 use embyx_clients::clouddrive::CopyStatus;
+use embyx_clients::pyvalue::Raised;
 use embyx_core::config::models::{ArchiveConfig, CloudDriveConfig, MergeConfig};
 use embyx_core::pyjson::Dict;
 use embyx_db::testdb::TestDatabase;
 use embyx_merge::fakes::{FakeCloud, FakeKube};
 use embyx_merge::ports::{MergeCloud, MergeKube, Pipeline, Trigger};
-use embyx_merge::service::{ActionError, MergeService, ServiceParts, api_path};
+use embyx_merge::service::{ActionError, MergeService, ServiceParts, StepError, api_path};
 use embyx_merge::tasks::{MergeState, MergeTask, MergeTaskRepository, NewTask, TaskField};
 
 const LIBRARY: &str = "/mnt/cd2/115/embyx";
@@ -56,6 +57,8 @@ struct Harness {
     cloud: FakeCloud,
     kube: FakeKube,
     triggered: Arc<Mutex<Vec<Pipeline>>>,
+    /// When set, a run the service asks for cannot be started: its start fails with this.
+    refuse_runs: Arc<Mutex<Option<&'static str>>>,
     archive: Arc<Mutex<ArchiveConfig>>,
     repository: MergeTaskRepository,
     service: MergeService,
@@ -80,9 +83,17 @@ impl Harness {
         };
         let archive_config = Arc::new(Mutex::new(archive()));
         let seen = Arc::clone(&triggered);
+        let refuse_runs = Arc::new(Mutex::new(None));
+        let refusal = Arc::clone(&refuse_runs);
         let trigger: Trigger = Arc::new(move |pipeline| {
             seen.lock().unwrap_or_else(PoisonError::into_inner).push(pipeline);
-            Box::pin(async {})
+            let refused = *refusal.lock().unwrap_or_else(PoisonError::into_inner);
+            Box::pin(async move {
+                match refused {
+                    None => Ok(()),
+                    Some(message) => Err(StepError::from(Raised::new("InterfaceError", message))),
+                }
+            })
         });
         let source = cloud.clone();
         let shared_archive = Arc::clone(&archive_config);
@@ -102,6 +113,7 @@ impl Harness {
             cloud,
             kube,
             triggered,
+            refuse_runs,
             archive: archive_config,
             repository,
             service,
@@ -940,7 +952,7 @@ async fn unavailable_without_a_job_template() {
         Arc::new(MergeConfig::default),
         Arc::new(archive),
         Arc::new(clouddrive),
-        Arc::new(|_| Box::pin(async {})),
+        Arc::new(|_| Box::pin(async { Ok(()) })),
     ));
     assert_eq!(
         service.unavailable().as_deref(),
@@ -974,6 +986,34 @@ async fn archiving_gives_up_after_the_archive_never_files_the_title() {
         (task.state, task.failed_state),
         (MergeState::Failed, Some(MergeState::Archiving))
     );
+    harness.close().await;
+}
+
+/// A run the service asks for that cannot be started (its start could not be recorded)
+/// raises into the step, as `_trigger_after_merge` lets anything but a busy or unconfigured
+/// pipeline escape: the step stops there and the task carries the error as its notice.
+#[tokio::test]
+async fn a_run_that_cannot_be_started_leaves_the_error_as_the_notice() {
+    let harness = Harness::new().await;
+    let task = harness.create().await;
+    let task = harness.walk(task, &ALL_THE_WAY).await;
+    {
+        let mut cloud = harness.cloud.state();
+        cloud.directories.insert("/115/embyx_in/vr".to_owned());
+        cloud.directories.insert("/115/embyx_in/vr/SQTEVR-009".to_owned());
+    }
+    // Due for a nudge of the archive, not yet past the wait.
+    harness.age(&task, Duration::hours(1)).await;
+    *harness.refuse_runs.lock().unwrap_or_else(PoisonError::into_inner) = Some("connection is closed");
+
+    harness.tick().await;
+
+    let task = harness.state(&task).await;
+    assert_eq!(
+        (task.state, task.notice.as_deref()),
+        (MergeState::Archiving, Some("connection is closed"))
+    );
+    assert_eq!(harness.triggered().last(), Some(&Pipeline::Archive));
     harness.close().await;
 }
 

@@ -270,7 +270,7 @@ feed. Where the TLS fingerprint matters the probe runs from the production netwo
 | WP11 | 4 fill actor | done (#93) | Service: scan, plan, local moves with journal and recovery, cloud moves | 2,100 | WP10 |
 | WP12 | 4 fill actor | done (#96) | Job manager, API, health, lifespan | 1,200 | WP11, WP4 |
 | WP13 | 5 merge | done (#86) | Detect, task repository, the `merge-worker` command (probe, checks, concat, remux, AV1 re-encode, home prepare and assemble) | 1,650 | WP1 |
-| WP14 | 5 merge | in progress (PR 1: service, auto-merge, transcode bookkeeping) | Merge service, auto-merge, transcode bookkeeping, merge API, transcode listener. May be split into "service" and "API + transcode" | 2,300 | WP13, WP3, WP9 |
+| WP14 | 5 merge | done (#95, part 2) | Merge service, auto-merge, transcode bookkeeping, merge API, transcode listener. May be split into "service" and "API + transcode" | 2,300 | WP13, WP3, WP9 |
 | WP15 | 5 merge | pending | Home transcode worker, Windows build and a Windows CI job, protocol tests both ways | 1,150 | WP14 |
 | WP16 | 6 wrap-up | pending | `Dockerfile.rust` (build only), memory benchmark, parity audit, catch-up with `main`, level 2 and level 3 as far as Max allowed, final report data | new | all |
 
@@ -548,7 +548,7 @@ or says why one stays.
   SchedulerParts::new(..))` takes `timings` and `clock` for tests. `tools/scenarios/operations/api.py` mounts the
   monitor and playlists routers with `args.monitor = true` and masks clock-taken times with `args.mask_keys`;
   the page smoke now fails on any 404/405/5xx a page's API call gets, except the prefixes in `NOT_YET_PORTED`
-  (`/api/merge/`, which WP14 removes from the list).
+  (empty since WP14 ported `/api/merge/`).
 
 - WP12 left these for later packages. `embyx_fill_actor::jobs::FillActorJobManager` takes `JobService` and
   `JobRepository` trait objects (the service and the PostgreSQL repository implement them; D132), and its stops

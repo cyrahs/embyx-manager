@@ -44,7 +44,7 @@ pub fn bearer_credentials(request: &Request) -> Option<String> {
 
 /// `secrets.compare_digest(a, b)` on two `str`: constant time in the length of `b`; text
 /// with a character outside ASCII raises `TypeError`, which nothing handles (a 500).
-fn compare_digest(a: &str, b: &str) -> Result<bool, Internal> {
+pub(crate) fn compare_digest(a: &str, b: &str) -> Result<bool, Internal> {
     if !a.is_ascii() || !b.is_ascii() {
         return Err(Internal(
             "TypeError: comparing strings with non-ASCII characters is not supported".to_owned(),

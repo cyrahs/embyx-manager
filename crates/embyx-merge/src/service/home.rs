@@ -34,7 +34,7 @@ pub struct ChunkRefusedError {
 }
 
 impl ChunkRefusedError {
-    fn new(code: &'static str, status: u16) -> Self {
+    pub fn new(code: &'static str, status: u16) -> Self {
         Self {
             code,
             status,
@@ -42,7 +42,8 @@ impl ChunkRefusedError {
         }
     }
 
-    fn with(mut self, key: &str, value: Value) -> Self {
+    #[must_use]
+    pub fn with(mut self, key: &str, value: Value) -> Self {
         self.details.insert(key, value);
         self
     }

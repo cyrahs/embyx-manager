@@ -1,0 +1,281 @@
+# The merge page's API and the transcode listener over the service (cross-version contract 5,
+# the listener's half): the titles a scan finds, queueing them (refusals by code, FastAPI's order
+# of body, token and validation), the task listing with auto-merge's status, the worker's claim,
+# heartbeats, chunk uploads with their headers (kept, repeated, conflicting, out of order, with a
+# SHA-256 that is not the bytes', with headers missing, for a task that does not exist), part
+# finishes, pause and resume, the CPU refused, cancel and retry through the routes, and the
+# listing once the cluster assembles the chunks. Its `restart` step splits it for the resume
+# matrix (`crates/embyx-merge/tests/service_scenarios.rs`).
+description = "merge API and transcode listener: titles, queueing, the worker protocol, task actions"
+operation = "merge.service"
+clock = "2026-11-14T08:00:00+00:00"
+
+[roots]
+names = ["work", "mapping", "secrets"]
+
+[database]
+schema = "app"
+
+[args]
+api_token = "api-secret"
+transcode_token = "worker-secret"
+
+[args.archive]
+src_dir = "/mnt/cd2/115/embyx_in"
+dst_dir = "/mnt/cd2/115/embyx"
+mapping = { rank = "rank" }
+priority_mapping = { vr = "type/vr" }
+
+[args.merge]
+home_transcode_enabled = true
+
+[args.part_sizes]
+"/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4" = 60000000000
+"/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4" = 60000000000
+"/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd1.mp4" = 300
+"/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd2.mp4" = 300
+
+[[args.steps]]
+op = "write"
+args = { path = "mapping/type/vr/GIANT/GIANT-001/GIANT-001-cd1.strm", text = "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4\n" }
+
+[[args.steps]]
+op = "write"
+args = { path = "mapping/type/vr/GIANT/GIANT-001/GIANT-001-cd2.strm", text = "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4\n" }
+
+[[args.steps]]
+op = "write"
+args = { path = "mapping/type/x/SMALL/SMALL-001/SMALL-001-cd1.strm", text = "/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd1.mp4\n" }
+
+[[args.steps]]
+op = "write"
+args = { path = "mapping/type/x/SMALL/SMALL-001/SMALL-001-cd2.strm", text = "/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd2.mp4\n" }
+
+[[args.steps]]
+op = "write"
+args = { path = "mapping/rank/BROKEN/BROKEN-001/BROKEN-001-cd1.strm", text = "/mnt/cd2/115/embyx/rank/BROKEN/BROKEN-001-cd1.mp4\n" }
+
+[[args.steps]]
+op = "write"
+args = { path = "mapping/rank/BROKEN/BROKEN-001/BROKEN-001-cd3.strm", text = "/mnt/cd2/115/embyx/rank/BROKEN/BROKEN-001-cd3.mp4\n" }
+
+# The scan: three titles, one incomplete, one whose route only a choice can tell.
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "GET", path = "/api/merge/titles" }
+
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "GET", path = "/api/merge/titles?refresh=maybe" }
+
+# Queueing: the body, the token, then the fields; refusals by code.
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "POST", path = "/api/merge/tasks", json = { avid = "giant-001" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "POST", path = "/api/merge/tasks", json = { avid = "giant-001" }, headers = { Authorization = "Bearer api-secret" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "POST", path = "/api/merge/tasks", json = { avid = "GIANT-001" }, headers = { Authorization = "Bearer api-secret" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "POST", path = "/api/merge/tasks", json = { avid = "SMALL-001" }, headers = { Authorization = "Bearer api-secret" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "POST", path = "/api/merge/tasks", json = { avid = "SMALL-001", source = "nope" }, headers = { Authorization = "Bearer api-secret" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "POST", path = "/api/merge/tasks", json = { avid = "BROKEN-001" }, headers = { Authorization = "Bearer api-secret" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "POST", path = "/api/merge/tasks", json = { avid = "NONE-001" }, headers = { Authorization = "Bearer api-secret" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "POST", path = "/api/merge/tasks", json = { avid = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" }, headers = { Authorization = "Bearer api-secret" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "POST", path = "/api/merge/tasks", json = { source = "rank" }, headers = { Authorization = "Bearer api-secret" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "POST", path = "/api/merge/tasks", text = "{", headers = { "Content-Type" = "application/json" } }
+
+# Too big for 115: the title waits for the home worker.
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "GET", path = "/api/merge/tasks" }
+
+# The worker: the token, then the report; the first claim starts the audio Job.
+[[args.steps]]
+op = "request"
+args = { app = "transcode", method = "POST", path = "/api/transcode/claim", json = { name = "home-5090", version = "1.0.0", state = "idle" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "transcode", method = "POST", path = "/api/transcode/claim", json = { name = "home-5090", state = 5 }, headers = { Authorization = "Bearer worker-secret" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "transcode", method = "POST", path = "/api/transcode/claim", json = { name = "home-5090", version = "1.0.0", state = "idle" }, headers = { Authorization = "Bearer worker-secret" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "transcode", method = "GET", path = "/api/transcode/tasks/1/parts/0" }
+
+# The audio Job has probed the parts: the next claim hands the task over.
+[[args.steps]]
+op = "write"
+args = { path = "work/.transcode/1/audio.json", json = { state = "done", parts = [{ size = 60000000000, duration = 120.0 }, { size = 60000000000, duration = 90.5 }], video_bitrate = 80000000, duration = 210.5, audio_done = 2 } }
+
+[[args.steps]]
+op = "request"
+args = { app = "transcode", method = "POST", path = "/api/transcode/claim", json = { name = "home-5090", version = "1.0.0", state = "idle" }, headers = { Authorization = "Bearer worker-secret" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "transcode", method = "POST", path = "/api/transcode/heartbeat", json = { name = "home-5090", version = "1.0.0", task_id = 1, state = "encoding", parts = [{ index = 0, fps = 41.5, position = 12.0 }], upload_bps = 30000000.0, queue_chunks = 1, queue_bytes = 11 }, headers = { Authorization = "Bearer worker-secret" } }
+
+# Chunks: kept, repeated, conflicting, out of order, corrupt, headers missing, no such task.
+[[args.steps]]
+op = "request"
+args = { app = "transcode", method = "PUT", path = "/api/transcode/tasks/1/parts/0/chunks/0", text = "cd1-chunk-0", headers = { "Authorization" = "Bearer worker-secret", "Content-Type" = "application/octet-stream", "X-Chunk-Start" = "0.000000", "X-Chunk-Duration" = "120.000000", "X-Chunk-Frames" = "3600", "X-Chunk-Sha256" = "211d6129ea0a0d6431e96654c1c117400f064143112131247901a77158c8b08a" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "transcode", method = "PUT", path = "/api/transcode/tasks/1/parts/0/chunks/0", text = "cd1-chunk-0", headers = { "Authorization" = "Bearer worker-secret", "Content-Type" = "application/octet-stream", "X-Chunk-Start" = "0", "X-Chunk-Duration" = "120", "X-Chunk-Frames" = "3600", "X-Chunk-Sha256" = "211d6129ea0a0d6431e96654c1c117400f064143112131247901a77158c8b08a" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "transcode", method = "PUT", path = "/api/transcode/tasks/1/parts/0/chunks/0", text = "other bytes", headers = { "Authorization" = "Bearer worker-secret", "Content-Type" = "application/octet-stream", "X-Chunk-Start" = "0.000000", "X-Chunk-Duration" = "120.000000", "X-Chunk-Frames" = "3600", "X-Chunk-Sha256" = "a3ead5eedad5df82318c51685dbc1c147a36d1ff8584fc82de6b08d0bf63a795" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "transcode", method = "PUT", path = "/api/transcode/tasks/1/parts/0/chunks/2", text = "other bytes", headers = { "Authorization" = "Bearer worker-secret", "Content-Type" = "application/octet-stream", "X-Chunk-Start" = "130.000000", "X-Chunk-Duration" = "2.000000", "X-Chunk-Frames" = "3600", "X-Chunk-Sha256" = "a3ead5eedad5df82318c51685dbc1c147a36d1ff8584fc82de6b08d0bf63a795" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "transcode", method = "PUT", path = "/api/transcode/tasks/1/parts/1/chunks/0", text = "cd2-chunk-0", headers = { "Authorization" = "Bearer worker-secret", "Content-Type" = "application/octet-stream", "X-Chunk-Start" = "0.000000", "X-Chunk-Duration" = "90.500000", "X-Chunk-Frames" = "3600", "X-Chunk-Sha256" = "211d6129ea0a0d6431e96654c1c117400f064143112131247901a77158c8b08a" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "transcode", method = "PUT", path = "/api/transcode/tasks/1/parts/1/chunks/0", text = "cd2-chunk-0", headers = { "Authorization" = "Bearer worker-secret", "X-Chunk-Start" = "0", "X-Chunk-Sha256" = "f0e0d3189d6cb4c6a1a9a006ce88d5437349b6cfd33a2cc94f6eddcf32a14036" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "transcode", method = "PUT", path = "/api/transcode/tasks/1/parts/1/chunks/0", text = "cd2-chunk-0", headers = { "Authorization" = "Bearer worker-secret", "X-Chunk-Start" = "0", "X-Chunk-Duration" = "-1", "X-Chunk-Frames" = "3600", "X-Chunk-Sha256" = "f0e0d3189d6cb4c6a1a9a006ce88d5437349b6cfd33a2cc94f6eddcf32a14036" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "transcode", method = "PUT", path = "/api/transcode/tasks/9/parts/1/chunks/0", text = "cd2-chunk-0", headers = { "Authorization" = "Bearer worker-secret", "Content-Type" = "application/octet-stream", "X-Chunk-Start" = "0.000000", "X-Chunk-Duration" = "90.500000", "X-Chunk-Frames" = "3600", "X-Chunk-Sha256" = "f0e0d3189d6cb4c6a1a9a006ce88d5437349b6cfd33a2cc94f6eddcf32a14036" } }
+
+# Finishing: part 2 has no chunk yet; part 1 is covered.
+[[args.steps]]
+op = "request"
+args = { app = "transcode", method = "POST", path = "/api/transcode/tasks/1/parts/1/finish", headers = { Authorization = "Bearer worker-secret" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "transcode", method = "POST", path = "/api/transcode/tasks/1/parts/0/finish", headers = { Authorization = "Bearer worker-secret" } }
+
+# The page pauses the worker, which hears it on its next heartbeat, then resumes it.
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "POST", path = "/api/merge/tasks/1/pause", headers = { Authorization = "Bearer api-secret" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "transcode", method = "POST", path = "/api/transcode/heartbeat", json = { name = "home-5090", version = "1.0.0", task_id = 1, state = "encoding" }, headers = { Authorization = "Bearer worker-secret" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "POST", path = "/api/merge/tasks/1/pause" }
+
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "POST", path = "/api/merge/tasks/1/resume", headers = { Authorization = "Bearer api-secret" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "GET", path = "/api/merge/tasks" }
+
+# A new process (the other build, in the matrix).
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "request"
+args = { app = "transcode", method = "PUT", path = "/api/transcode/tasks/1/parts/1/chunks/0", text = "cd2-chunk-0", headers = { "Authorization" = "Bearer worker-secret", "Content-Type" = "application/octet-stream", "X-Chunk-Start" = "0.000000", "X-Chunk-Duration" = "90.500000", "X-Chunk-Frames" = "3600", "X-Chunk-Sha256" = "f0e0d3189d6cb4c6a1a9a006ce88d5437349b6cfd33a2cc94f6eddcf32a14036" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "transcode", method = "POST", path = "/api/transcode/tasks/1/parts/1/finish", headers = { Authorization = "Bearer worker-secret" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "transcode", method = "POST", path = "/api/transcode/claim", json = { name = "home-5090", version = "1.0.0", state = "idle" }, headers = { Authorization = "Bearer worker-secret" } }
+
+# A small title queued with its route; actions through the routes, refusals by code.
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "POST", path = "/api/merge/tasks", json = { avid = "SMALL-001", source = "rank" }, headers = { Authorization = "Bearer api-secret" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "POST", path = "/api/merge/tasks/3/use-cpu", headers = { Authorization = "Bearer api-secret" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "POST", path = "/api/merge/tasks/3/retry", headers = { Authorization = "Bearer api-secret" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "POST", path = "/api/merge/tasks/99/cancel", headers = { Authorization = "Bearer api-secret" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "POST", path = "/api/merge/tasks/x/cancel", headers = { Authorization = "Bearer api-secret" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "POST", path = "/api/merge/tasks/3/cancel", headers = { Authorization = "Bearer api-secret" } }
+
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "GET", path = "/api/merge/titles?refresh=true" }
+
+# Every part is in: the merge Job assembles them.
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "request"
+args = { app = "main", method = "GET", path = "/api/merge/tasks" }
+
+[kubernetes]
+jobs = {}
+
+[[kubernetes.routes]]
+method = "GET"
+path = "/api/v1/namespaces/media/pods/embyx-manager-0"
+body = { spec = { containers = [{ image = "ghcr.io/cyrahs/embyx-manager:latest" }] }, status = { containerStatuses = [{ imageID = "ghcr.io/cyrahs/embyx-manager@sha256:abc123" }] } }
+
+[clouddrive]
+directories = ["/115/upload", "/115/embyx_in"]
+files = [
+    { path = "/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4", size = 10 },
+    { path = "/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4", size = 10 },
+    { path = "/115/embyx/type/x/SMALL/SMALL-001-cd1.mp4", size = 10 },
+    { path = "/115/embyx/type/x/SMALL/SMALL-001-cd2.mp4", size = 10 },
+]

@@ -149,7 +149,7 @@ async fn answer(app: App, server: SocketAddr, client: SocketAddr, request: AxumR
     response
 }
 
-fn router(app: App, server: SocketAddr) -> Router {
+pub(crate) fn router(app: App, server: SocketAddr) -> Router {
     Router::new().fallback(
         move |ConnectInfo(client): ConnectInfo<SocketAddr>, request: AxumRequest| {
             let app = app.clone();

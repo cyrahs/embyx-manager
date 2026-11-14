@@ -17,6 +17,7 @@ test-support = [
     "embyx-db/test-support",
     "embyx-core/test-support",
     "embyx-monitor/test-support",
+    "embyx-merge/test-support",
 ]
 
 [dependencies]
@@ -26,6 +27,7 @@ chrono.workspace = true
 embyx-clients = { workspace = true, features = ["clouddrive"] }
 embyx-core.workspace = true
 embyx-db.workspace = true
+embyx-merge = { workspace = true, features = ["db"] }
 embyx-monitor.workspace = true
 embyx-fill-actor.workspace = true
 futures-util = { workspace = true, features = ["std"] }
@@ -36,6 +38,7 @@ http-body-util.workspace = true
 hyper.workspace = true
 indexmap.workspace = true
 md-5.workspace = true
+sha2.workspace = true
 thiserror.workspace = true
 tokio = { workspace = true, features = ["fs", "io-util", "net", "rt", "signal", "sync", "time"] }
 tokio-util = { workspace = true, features = ["io", "rt"] }

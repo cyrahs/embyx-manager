@@ -16,6 +16,7 @@ pub mod config_api;
 pub mod fill_actor_api;
 pub mod http;
 pub mod logging;
+pub mod merge_api;
 pub mod mimetypes;
 pub mod monitor_api;
 pub mod openapi;
@@ -26,3 +27,4 @@ pub mod serve;
 pub mod static_files;
 #[cfg(test)]
 mod testing;
+pub mod transcode_api;

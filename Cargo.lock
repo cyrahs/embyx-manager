@@ -993,6 +993,7 @@ dependencies = [
  "embyx-core",
  "embyx-db",
  "embyx-fill-actor",
+ "embyx-merge",
  "embyx-monitor",
  "futures-util",
  "getrandom 0.4.3",
@@ -1002,6 +1003,7 @@ dependencies = [
  "hyper",
  "indexmap",
  "md-5",
+ "sha2 0.11.1",
  "sqlx",
  "tempfile",
  "thiserror 2.0.21",
@@ -1132,11 +1134,15 @@ dependencies = [
 name = "embyx-merge"
 version = "0.1.0"
 dependencies = [
+ "axum",
  "chrono",
+ "embyx-api",
  "embyx-clients",
  "embyx-core",
  "embyx-db",
  "embyx-merge",
+ "http",
+ "http-body-util",
  "regex",
  "rustix",
  "sha1",

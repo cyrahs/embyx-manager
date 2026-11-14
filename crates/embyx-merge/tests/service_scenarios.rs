@@ -7,7 +7,9 @@
 //! The Python operation pins `datetime` in the merge modules; here one shared clock is handed
 //! to every repository, the presence, the title cache, the service and auto-merge.
 //! `cancel_after` aborts the step's task once that CloudDrive call answered, as `task.cancel()`
-//! cancels the Python one right after the call returned.
+//! cancels the Python one right after the call returned. A `request` step goes through
+//! `embyx-api`'s merge router (in `create_app`) or transcode listener over this world, as
+//! `build_app` wires them.
 
 mod common;
 
@@ -15,7 +17,13 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex, PoisonError};
 use std::time::Duration;
 
+use axum::body::Body;
 use chrono::{DateTime, TimeDelta, Utc};
+use embyx_api::app::{AppParts, create_app, create_transcode_app};
+use embyx_api::auth::MutationAuth;
+use embyx_api::merge_api::{MergeTasksApi, create_merge_router};
+use embyx_api::routing::App;
+use embyx_api::transcode_api::create_transcode_router;
 use embyx_clients::clouddrive::aio::{EnsureResult, MoveResult, OperationResult};
 use embyx_clients::clouddrive::fake::FakeCloudDrive;
 use embyx_clients::clouddrive::{AsyncCloudDrive, ClientOptions, CloudDriveError, CloudFile, CopyTask, UploadState};
@@ -34,6 +42,7 @@ use embyx_merge::ports::{BoxFuture, Clock, MergeCloud, MergeKube, Pipeline, Trig
 use embyx_merge::service::{ActionError, MergeService, ServiceParts, StepError, WorkerCallError};
 use embyx_merge::tasks::{MergeTask, MergeTaskRepository, NewTask};
 use embyx_merge::transcode::{Chunk, TranscodeRepository, WorkerPresence, WorkerReport};
+use http_body_util::BodyExt as _;
 use sha2::{Digest as _, Sha256};
 use tokio::task::AbortHandle;
 
@@ -43,6 +52,8 @@ use common::task;
 const TOKEN: &str = "scenario-token";
 /// `auto.GIB`.
 const GIB: i128 = 1 << 30;
+/// `merge_service.REPORTED_HEADERS`.
+const REPORTED_HEADERS: [&str; 3] = ["content-type", "cache-control", "www-authenticate"];
 
 fn lock<T>(value: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
     value.lock().unwrap_or_else(PoisonError::into_inner)
@@ -313,6 +324,8 @@ struct World {
     service: MergeService,
     auto: AutoMerger,
     triggered: Arc<Mutex<Vec<Pipeline>>>,
+    /// `main` and `transcode`.
+    apps: Arc<HashMap<String, App>>,
 }
 
 fn path_text(path: &std::path::Path) -> String {
@@ -375,7 +388,7 @@ impl Ground {
         let seen = Arc::clone(&triggered);
         let trigger: Trigger = Arc::new(move |pipeline| {
             lock(&seen).push(pipeline);
-            Box::pin(async {})
+            Box::pin(async { Ok(()) })
         });
         let sizes: HashMap<String, i64> = match args.get("part_sizes") {
             Some(Value::Dict(sizes)) => sizes
@@ -446,14 +459,16 @@ impl Ground {
         let catalog_archive = archive;
         let auto_merge = merge;
         let source = Arc::clone(&wrapped);
+        let catalog = MergeCatalog {
+            archive: Arc::new(move || catalog_archive.clone()),
+            mapping: Arc::new(move || mapping.clone()),
+            task_dirs_for,
+        };
+        let cache = TitleScanCache::new(Arc::clone(&clock));
         let mut auto_parts = AutoParts::new(
             repository.clone(),
-            MergeCatalog {
-                archive: Arc::new(move || catalog_archive.clone()),
-                mapping: Arc::new(move || mapping.clone()),
-                task_dirs_for,
-            },
-            TitleScanCache::new(Arc::clone(&clock)),
+            catalog.clone(),
+            cache.clone(),
             service.clone(),
             Arc::new(move || auto_merge.clone()),
             Arc::new(move || Some(Arc::clone(&source))),
@@ -461,15 +476,107 @@ impl Ground {
         let free_gib = Arc::clone(&self.free_gib);
         auto_parts.free_space = Arc::new(move |_path| Ok(i128::from(*lock(&free_gib)) * GIB));
         auto_parts.clock = clock;
+        let auto = AutoMerger::new(auto_parts);
+        let apps = self.apps(&service, &auto, catalog, cache);
         World {
             database,
             repository,
             cloud,
             service,
-            auto: AutoMerger::new(auto_parts),
+            auto,
             triggered,
+            apps: Arc::new(apps),
         }
     }
+}
+
+impl Ground {
+    /// The merge router in `create_app` and the transcode listener, as `build_app` wires them.
+    fn apps(
+        &self,
+        service: &MergeService,
+        auto: &AutoMerger,
+        catalog: MergeCatalog,
+        cache: TitleScanCache,
+    ) -> HashMap<String, App> {
+        let token = |key: &str| self.args.get(key).and_then(Value::as_str).map(str::to_owned);
+        let api_token = token("api_token");
+        let status = auto.clone();
+        let router = create_merge_router(
+            catalog,
+            Some(MergeTasksApi {
+                service: service.clone(),
+                auto_status: Some(Arc::new(move || status.status())),
+            }),
+            MutationAuth::new(api_token.as_deref()),
+            Some(cache),
+        );
+        let main = create_app(AppParts {
+            app_ready: Arc::new(|| Box::pin(async { Ok(true) })),
+            routers: vec![router],
+            feature_health: Vec::new(),
+            api_token,
+            max_request_bytes: 65_536,
+            frontend_dist: None,
+        })
+        .expect("an app");
+        let transcode = create_transcode_app(create_transcode_router(
+            service.clone(),
+            token("transcode_token").as_deref(),
+        ));
+        HashMap::from([("main".to_owned(), main), ("transcode".to_owned(), transcode)])
+    }
+}
+
+/// `_request`: one request to one of the world's apps, as `TestClient` sends it.
+async fn request(apps: &HashMap<String, App>, args: &Value) -> Value {
+    let app = &apps[args.get("app").and_then(Value::as_str).unwrap_or("main")];
+    let mut builder = http::Request::builder()
+        .method(text(args, "method"))
+        .uri(text(args, "path"))
+        .header("host", "testserver");
+    if let Some(Value::Dict(headers)) = args.get("headers") {
+        for (name, value) in headers.iter() {
+            builder = builder.header(name.as_str().expect("a name"), value.as_str().expect("a value"));
+        }
+    }
+    let body = if let Some(json) = args.get("json") {
+        builder = builder.header("content-type", "application/json");
+        pyjson::dumps(json, &DumpOptions::compact())
+            .expect("dumps")
+            .into_bytes()
+    } else if let Some(Value::Str(sent)) = args.get("text") {
+        sent.clone().into_bytes()
+    } else {
+        Vec::new()
+    };
+    if !body.is_empty() {
+        builder = builder.header("content-length", body.len().to_string());
+    }
+    let response = app.call(builder.body(Body::from(body)).expect("a request"), None).await;
+    let (parts, answer) = response.into_parts();
+    let bytes = answer.collect().await.expect("the body").to_bytes();
+    let mut headers = Dict::new();
+    for name in REPORTED_HEADERS {
+        if let Some(value) = parts.headers.get(name) {
+            headers.insert(name, Value::from(value.to_str().expect("a text header")));
+        }
+    }
+    let text = String::from_utf8(bytes.to_vec()).expect("UTF-8");
+    let body = if parts
+        .headers
+        .get("content-type")
+        .is_some_and(|kind| kind == "application/json")
+    {
+        pyjson::loads(&text).expect("JSON")
+    } else {
+        Value::Str(text)
+    };
+    let mut reported = Dict::new();
+    reported.insert("status", Value::Int(parts.status.as_u16().into()));
+    reported.insert("headers", Value::Dict(headers));
+    reported.insert("body", body);
+    Value::Dict(reported)
 }
 
 impl World {
@@ -624,6 +731,7 @@ struct Actors {
     auto: AutoMerger,
     triggered: Arc<Mutex<Vec<Pipeline>>>,
     now: Arc<Mutex<DateTime<Utc>>>,
+    apps: Arc<HashMap<String, App>>,
 }
 
 impl Actors {
@@ -717,6 +825,7 @@ impl Actors {
                 fields.insert("online", Value::Bool(service.presence().online()));
                 Value::Dict(fields)
             }
+            "request" => request(&self.apps, &args).await,
             "auto" => {
                 self.auto.step().await?;
                 auto_status(&self.auto.status())
@@ -794,6 +903,7 @@ async fn run_steps(ground: &Ground, steps: &[Value]) -> Vec<Value> {
                 auto: world.auto.clone(),
                 triggered: Arc::clone(&world.triggered),
                 now: Arc::clone(&ground.now),
+                apps: Arc::clone(&world.apps),
             };
             let running = tokio::spawn(actors.run(op.clone(), args.clone()));
             *lock(&ground.control.step) = Some(running.abort_handle());
@@ -1049,6 +1159,11 @@ async fn home_matches_the_python_transcript() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn api_matches_the_python_transcript() {
+    service_steps("merge/api").await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn auto_matches_the_python_transcript() {
     service_steps("merge/auto").await;
 }
@@ -1096,4 +1211,9 @@ async fn merge_failures_resumes_across_the_builds() {
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn auto_resumes_across_the_builds() {
     resume_matrix("merge/auto").await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn api_resumes_across_the_builds() {
+    resume_matrix("merge/api").await;
 }
