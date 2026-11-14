@@ -351,7 +351,8 @@ async fn tracker_steps(name: &str) {
         .iter()
         .map(|dir| dir.as_str().expect("a directory").to_owned())
         .collect();
-    let mount = seeded.resolve(text(&args, "mount"));
+    // `resolve(ctx.roots, "mount")` is the root itself, with no trailing separator.
+    let mount = PathBuf::from(path_text(&seeded.resolve(text(&args, "mount"))).trim_end_matches('/'));
     let archive_config = config(&seeded, args.get("config").expect("a config"));
     let fs = recording_fs(&seeded, &args, &recorder);
     let clock = ScenarioClock::new(&spec);
@@ -402,15 +403,17 @@ async fn tracker_steps(name: &str) {
             let cloud = Arc::clone(&cloud);
             let first = first.clone();
             Box::pin(async move {
-                let record = ledger.get(&avid).await.expect("the ledger");
+                let record = ledger.get(&avid).await?;
                 let task_dir = record.and_then(|record| record.task_dir_path).unwrap_or(first);
-                match OfflineFiles::add_offline_files(&*cloud, &[magnet], &task_dir).await {
-                    Ok(result) => result.success,
-                    Err(SourceError::CloudDrive(error)) => {
-                        error.details().is_some_and(|details| details.contains("任务已存在"))
-                    }
-                    Err(_) => false,
-                }
+                Ok(
+                    match OfflineFiles::add_offline_files(&*cloud, &[magnet], &task_dir).await {
+                        Ok(result) => result.success,
+                        Err(SourceError::CloudDrive(error)) => {
+                            error.details().is_some_and(|details| details.contains("任务已存在"))
+                        }
+                        Err(_) => false,
+                    },
+                )
             })
         })
     };
@@ -550,6 +553,16 @@ async fn replace_cancel_matches_the_python_transcript() {
 }
 
 #[tokio::test]
+async fn replace_failures_match_the_python_transcript() {
+    tracker_steps("replace/failures").await;
+}
+
+#[tokio::test]
+async fn replace_outside_matches_the_python_transcript() {
+    tracker_steps("replace/outside").await;
+}
+
+#[tokio::test]
 async fn replace_start_matches_the_python_transcript() {
     tracker_steps("replace/start").await;
 }
@@ -579,7 +592,7 @@ async fn a_dropped_poll_leaves_its_delete_running_and_settle_waits_for_it() {
     let mount = seeded.resolve("mount");
     let client = AsyncCloudDrive::connect(&ClientOptions::new(fakes.clouddrive.address(), TOKEN, false));
     let ledger: Arc<dyn Ledger> = Arc::new(AcquisitionRepository::new(database.database()));
-    let submit: SubmitMagnet = Arc::new(|_, _| Box::pin(std::future::ready(false)));
+    let submit: SubmitMagnet = Arc::new(|_, _| Box::pin(std::future::ready(Ok(false))));
     let tracker = AcquisitionTracker::new(TrackerParts {
         ledger: Arc::clone(&ledger),
         cloud: Arc::new(client.scoped()),

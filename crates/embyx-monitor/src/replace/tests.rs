@@ -32,7 +32,7 @@ fn make_replacer(root: &Path, ledger: Option<FakeLedger>, magnet: Option<&str>) 
     let recorder = Arc::clone(&submitted);
     let submit: SubmitMagnet = Arc::new(move |avid, link| {
         recorder.lock().expect("submitted").push((avid, link));
-        Box::pin(std::future::ready(true))
+        Box::pin(std::future::ready(Ok(true)))
     });
     let root = root.to_path_buf();
     let source = ReplacementSource::new(

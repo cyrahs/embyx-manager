@@ -50,8 +50,10 @@ use crate::support::{BoxFuture, Clock, OverflowError, py_timedelta_seconds, syst
 /// `CLEAR_BATCH`: how many archived tasks one `RemoveOfflineFiles` call clears.
 pub const CLEAR_BATCH: usize = 100;
 
-/// `submit_magnet(avid, magnet)`: adds one offline task; true when accepted.
-pub type SubmitMagnet = Arc<dyn Fn(String, String) -> BoxFuture<'static, bool> + Send + Sync>;
+/// `submit_magnet(avid, magnet)`: adds one offline task; true when accepted. The
+/// application's own (`_submit_magnet_at_cloud`) turns every CloudDrive failure into `false`
+/// but lets a ledger failure escape, which ends the caller as it does in Python.
+pub type SubmitMagnet = Arc<dyn Fn(String, String) -> BoxFuture<'static, Result<bool, LedgerError>> + Send + Sync>;
 
 /// `TrackerRoute`: one archive route, resolved to the local directory it covers.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -186,25 +188,16 @@ fn posix_parts(text: &str) -> Vec<String> {
         .collect()
 }
 
-/// Why `_api_path` gives no API path.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum NoApiPath {
-    /// `relative_to` raised: the path is not under the mount.
-    Outside,
-    /// The local name is not UTF-8, so no CloudDrive path can be named for it without a lossy
-    /// decode (DIVERGENCES.md D81).
-    NotUtf8,
-}
-
-/// `_api_path(path, mount_prefix)`: the CloudDrive API path of a file seen through the mount.
-fn api_path(path: &Path, mount_prefix: &str) -> Result<String, NoApiPath> {
-    let text = path.to_str().ok_or(NoApiPath::NotUtf8)?;
+/// `_api_path(path, mount_prefix)`: the CloudDrive API path of a file seen through the mount;
+/// `None` outside it (`relative_to` raised). Takes the path's text: a name that is not UTF-8
+/// reaches here only as a copy CloudDrive can never list (D81).
+fn api_path(text: &str, mount_prefix: &str) -> Option<String> {
     let parts = posix_parts(text);
     let prefix = posix_parts(mount_prefix);
     if prefix.is_empty() || parts.len() < prefix.len() || parts[..prefix.len()] != prefix[..] {
-        return Err(NoApiPath::Outside);
+        return None;
     }
-    Ok(format!("/{}", parts[prefix.len()..].join("/")))
+    Some(format!("/{}", parts[prefix.len()..].join("/")))
 }
 
 /// `str(PurePosixPath(path).parent)` of an absolute API path.
@@ -314,7 +307,10 @@ impl AcquisitionTracker {
         self.release_date_lookup = lookup;
     }
 
-    /// Wait for every CloudDrive call a poll started, also one whose poll was dropped.
+    /// Wait for every CloudDrive call a poll started through the tracker's own handle, also
+    /// one whose poll was dropped. `submit_magnet` sends `AddOfflineFiles` through whatever
+    /// handle it captured: build it on a clone of the same `scoped()` handle (clones share the
+    /// scope) and this covers it too.
     pub async fn settle(&self) {
         self.cloud.settle().await;
     }
@@ -607,31 +603,33 @@ impl AcquisitionTracker {
                 "a replacement needs merge.cloud_mount_prefix to delete the old copy".to_owned(),
             )));
         }
-        let present = blocking(|| self.archiver.replaced_copies(avid, replacing))?;
+        let present = blocking(|| self.archiver.replaced_copies_present(avid, replacing))?;
         if present.is_empty() {
             return Ok(None);
         }
         let mut api_paths: Vec<String> = Vec::new();
-        for path in &present {
-            match api_path(path, prefix) {
-                Ok(api) => api_paths.push(api),
-                Err(NoApiPath::Outside) => {
-                    return Ok(Some(failed(
-                        Outcome::NeedsAttention,
-                        avid,
-                        format!("{} is outside the CloudDrive mount {prefix}", path_text(path)),
-                    )));
-                }
-                Err(NoApiPath::NotUtf8) => {
-                    return Ok(Some(failed(
-                        Outcome::NeedsAttention,
-                        avid,
-                        format!("{} is not a UTF-8 name", path_text(path)),
-                    )));
-                }
+        let mut unlistable: Vec<String> = Vec::new();
+        for (path, readable) in &present {
+            let text = path_text(path);
+            let Some(api) = api_path(&text, prefix) else {
+                return Ok(Some(failed(
+                    Outcome::NeedsAttention,
+                    avid,
+                    format!("{text} is outside the CloudDrive mount {prefix}"),
+                )));
+            };
+            if !readable {
+                // Python's surrogate-escaped name is never in a listing; this one stands for it.
+                unlistable.push(api.clone());
             }
+            api_paths.push(api);
         }
-        let listed = self.cloud_listed(&api_paths).await?;
+        let listed: Vec<String> = self
+            .cloud_listed(&api_paths)
+            .await?
+            .into_iter()
+            .filter(|path| !unlistable.contains(path))
+            .collect();
         if !listed.is_empty() {
             ctx.info(&format!("{avid}: deleting the replaced copy {}", listed.join(", ")));
             self.cloud.delete_files(&listed).await?;
@@ -642,7 +640,7 @@ impl AcquisitionTracker {
         }
         // Re-reading each directory is what makes the mount drop the deleted files.
         self.cloud_listed(&api_paths).await?;
-        if !blocking(|| self.archiver.replaced_copies(avid, replacing))?.is_empty() {
+        if !blocking(|| self.archiver.replaced_copies_present(avid, replacing))?.is_empty() {
             return Ok(Some(failed(
                 Outcome::Failed,
                 avid,
@@ -816,7 +814,7 @@ impl AcquisitionTracker {
             let Some(claimed) = self.ledger.claim_next_pending(avid, now).await? else {
                 return self.exhaust(avid, ctx).await;
             };
-            if (self.submit)(avid.to_owned(), claimed.magnet.clone()).await {
+            if (self.submit)(avid.to_owned(), claimed.magnet.clone()).await? {
                 ctx.info(&format!("{avid}: trying magnet {}", claimed.attempt_no));
                 ctx.add("retried", 1);
                 return Ok(());

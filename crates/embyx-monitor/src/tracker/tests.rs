@@ -192,14 +192,16 @@ fn recording_submit(ok: bool) -> (SubmitMagnet, Submitted) {
     let sink = Arc::clone(&submitted);
     let submit: SubmitMagnet = Arc::new(move |avid, magnet| {
         sink.lock().expect("submitted").push((avid, magnet));
-        Box::pin(std::future::ready(ok))
+        Box::pin(std::future::ready(Ok(ok)))
     });
     (submit, submitted)
 }
 
 /// `submit` that fails the test: nothing should retry.
 fn no_submit() -> SubmitMagnet {
-    Arc::new(|_avid, _magnet| -> BoxFuture<'static, bool> { panic!("no magnet should be submitted") })
+    Arc::new(|_avid, _magnet| -> BoxFuture<'static, Result<bool, LedgerError>> {
+        panic!("no magnet should be submitted")
+    })
 }
 
 struct Built {
@@ -926,6 +928,48 @@ async fn a_replacement_deletes_the_old_copy_before_filing_the_new_one() {
     assert_eq!(ctx.stats().get("replaced_copies_deleted"), Some(1));
 }
 
+/// Rust only (D81): an old copy whose name is not UTF-8 was recorded lossily (U+FFFD), as
+/// Python records it with surrogate escapes. Python finds it again, cannot have CloudDrive list
+/// or delete it, and reports it still on the mount every poll; so does Rust, instead of filing
+/// the new copy beside it.
+#[cfg(unix)]
+#[tokio::test]
+async fn a_replaced_copy_whose_name_is_not_utf8_is_never_deleted_or_doubled() {
+    use std::os::unix::ffi::OsStrExt as _;
+
+    let built = build_replacing(vec![finished("ABC-123 proper", HASH_A)], true, None);
+    let brand = built.path("library/sorted/ABC");
+    let old = brand.join(std::ffi::OsStr::from_bytes(b"ABC-123-\xff.mp4"));
+    write_video(&old, 3);
+    seed_replacement(
+        &built.ledger,
+        "ABC-123",
+        &["sorted/ABC/ABC-123-\u{FFFD}.mp4"],
+        &[HASH_A],
+    )
+    .await;
+    let new = built.path("task/downloads/ABC-123 proper/ABC-123.mp4");
+    write_video(&new, 20);
+
+    for _ in 0..2 {
+        let ctx = built.poll().await;
+        assert!(built.cloud.log().deleted.is_empty());
+        assert_eq!(ctx.stats().get("replaced_copies_deleted"), None);
+        assert_eq!(built.state("ABC-123"), Some(AcquisitionState::Downloading));
+        assert_eq!(
+            built.ledger.attempt_states("ABC-123"),
+            vec![AttemptState::Archived, AttemptState::Finished]
+        );
+    }
+    assert!(old.exists());
+    assert!(new.exists());
+    assert!(!brand.join("ABC-123.mp4").exists());
+    assert_eq!(
+        built.ledger.state().replace_paths["ABC-123"],
+        vec!["sorted/ABC/ABC-123-\u{FFFD}.mp4".to_owned()]
+    );
+}
+
 // py: tests/test_monitor_tracker.py::test_a_replacement_into_parts_drops_the_single_old_file
 #[tokio::test]
 async fn a_replacement_into_parts_drops_the_single_old_file() {
@@ -1059,25 +1103,13 @@ async fn a_replacement_counts_only_its_own_attempts_against_the_cap() {
 #[test]
 fn api_paths_are_taken_relative_to_the_mount_by_parts() {
     assert_eq!(
-        api_path(Path::new("/mnt/cd2/115/library/A/x.mp4"), "/mnt/cd2"),
-        Ok("/115/library/A/x.mp4".to_owned())
+        api_path("/mnt/cd2/115/library/A/x.mp4", "/mnt/cd2"),
+        Some("/115/library/A/x.mp4".to_owned())
     );
-    assert_eq!(api_path(Path::new("/mnt/cd2"), "/mnt/cd2/"), Ok("/".to_owned()));
+    assert_eq!(api_path("/mnt/cd2", "/mnt/cd2/"), Some("/".to_owned()));
     // `relative_to` compares parts, not text.
-    assert_eq!(
-        api_path(Path::new("/mnt/cd20/x.mp4"), "/mnt/cd2"),
-        Err(NoApiPath::Outside)
-    );
-    assert_eq!(
-        api_path(Path::new("/elsewhere/x.mp4"), "/mnt/cd2"),
-        Err(NoApiPath::Outside)
-    );
-    #[cfg(unix)]
-    {
-        use std::os::unix::ffi::OsStrExt as _;
-        let name = std::ffi::OsStr::from_bytes(b"/mnt/cd2/ABC-123-\xff.mp4");
-        assert_eq!(api_path(Path::new(name), "/mnt/cd2"), Err(NoApiPath::NotUtf8));
-    }
+    assert_eq!(api_path("/mnt/cd20/x.mp4", "/mnt/cd2"), None);
+    assert_eq!(api_path("/elsewhere/x.mp4", "/mnt/cd2"), None);
     assert_eq!(api_parent("/library/sorted/ABC/x.mp4"), "/library/sorted/ABC");
     assert_eq!(api_parent("/x.mp4"), "/");
 }

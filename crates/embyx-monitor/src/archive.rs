@@ -723,6 +723,44 @@ impl ArchivePipeline {
         ArchiveResult::archived(&selection.avid, archived)
     }
 
+    /// `replaced_copies` as the tracker needs it: each copy still in the library, and whether
+    /// its name can be read (is UTF-8). A recorded path that was read lossily (it holds U+FFFD)
+    /// and names no file exactly stands for a video of this AVID in that directory whose name
+    /// is not UTF-8: Python records such a name with surrogate escapes and finds it again, and
+    /// a lossy name cannot be matched, so every such file counts as the copy (D81). Nothing is
+    /// compared through the lossy text.
+    pub fn replaced_copies_present(
+        &self,
+        avid: &str,
+        library_paths: &[String],
+    ) -> Result<Vec<(PathBuf, bool)>, PyOsError> {
+        let mut found: Vec<(PathBuf, bool)> = Vec::new();
+        for relative in library_paths {
+            let parts = PyPath::new(relative);
+            if parts.as_str().starts_with('/') || parts.as_str().split('/').any(|part| part == "..") {
+                continue;
+            }
+            let path = join(&self.dst_dir, relative);
+            let parent = path.parent().map_or_else(|| path.clone(), Path::to_path_buf);
+            let matching = self.matching_archived(avid, &parent)?;
+            if matching.contains(&path) {
+                if !found.iter().any(|(seen, _)| *seen == path) {
+                    found.push((path, true));
+                }
+            } else if relative.contains('\u{FFFD}') {
+                for unreadable in matching
+                    .into_iter()
+                    .filter(|entry| entry.file_name().is_some_and(|name| name.to_str().is_none()))
+                {
+                    if !found.iter().any(|(seen, _)| *seen == unreadable) {
+                        found.push((unreadable, false));
+                    }
+                }
+            }
+        }
+        Ok(found)
+    }
+
     /// `replaced_copies(avid, library_paths)`: the files of a copy being replaced that are
     /// still in the library; a path that does not name one of this AVID's videos inside the
     /// library (absolute, `..`, another title) is left out.

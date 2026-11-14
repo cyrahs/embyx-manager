@@ -305,7 +305,7 @@ impl ReplacementSource {
         let Some(attempt) = attempt else {
             return Ok(ReplaceOutcome::SubmitFailed);
         };
-        if !(self.submit_magnet)(avid.to_owned(), attempt.magnet.clone()).await {
+        if !(self.submit_magnet)(avid.to_owned(), attempt.magnet.clone()).await? {
             self.ledger
                 .transition_attempt(
                     avid,

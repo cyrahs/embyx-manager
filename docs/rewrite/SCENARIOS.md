@@ -140,7 +140,7 @@ the runner does and `dump()` gives the transcript's `fakes`.
   log tail and errors; the transcript adds the final `tree` and the ledger `rows`. Ordered calls
   rather than `lanes`, because the order of renames and deletions is the contract. The runner's TOML is read
   in insertion order on both sides (`toml`'s `preserve_order`), so a spec's mapping tables keep their order.
-- **WP7 (done):** `tracker/*` (outcomes, failures, cancel), `replace/*` (filing, cancel, start) and
+- **WP7 (done):** `tracker/*` (outcomes, failures, cancel), `replace/*` (filing, failures, outside, cancel, start) and
   `manual/submit` run `tracker.steps` (`tools/scenarios/operations/tracker.py`, `tracker/scenarios.rs`): one
   world of the tracker, the replacement source and the manual source over the ledger, `AsyncCloudDrive`
   against the fake and a root standing for the CloudDrive mount (`args.mount`, the tracker's
@@ -153,7 +153,9 @@ the runner does and `dump()` gives the transcript's `fakes`.
   middle of a 换版 or a batch is reproduced. Magnets are submitted as the application's
   `_submit_magnet_at_cloud` does. Two harness rules: the baseline's live attempts are taken in info-hash order
   (D80), and grpcio's `debug_error_string` (peer address, time) is scrubbed from error texts on both sides.
-  All timestamps come from the scenario clock; nothing is `volatile`.
+  All timestamps come from the scenario clock; nothing is `volatile`. `plan`, `start`, `browse` and `submit`
+  make their own `RunContext`, so the replacement and manual sources' log lines are not in the transcripts
+  (the ported unit tests and review cover them).
 - **WP9 (scheduler):** fires come from `clock`; a scenario runs one tick, not a loop.
 - **WP11 (fill-actor service):** one scenario per journal state to recover from; seed the journal
   rows and the half-done tree, and let the transcript show the recovered end state.
