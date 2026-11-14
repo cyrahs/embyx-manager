@@ -2,7 +2,7 @@
 
 Python tools that run on the baseline tree (`BASELINE`) for the Rust rewrite (`docs/rewrite/PLAN.md`). They
 use the repository's uv environment with Python 3.13.18 (`UV_PYTHON=3.13.18`) and never talk to a real
-service. CI runs every `--check` in `.github/workflows/rust.yml`. Lint them with `uv run ruff check tools`
+service, except the level 3 live run, which only a person starts. CI runs every `--check` in `.github/workflows/rust.yml`. Lint them with `uv run ruff check tools`
 (`tools/ruff.toml`).
 
 | Tool | Run it |
@@ -15,5 +15,10 @@ service. CI runs every `--check` in `.github/workflows/rust.yml`. Lint them with
 | Merge worker cross-check: the baseline's `worker.run` on real ffmpeg, printing every status write; `crates/embyx-merge/tests/ffmpeg_parity.rs` runs it beside the Rust worker on copies of the same parts (needs ffmpeg) | `uv run python tools/merge_ffmpeg/python_worker.py '<command as JSON>'` (the Rust test calls it) |
 | Home worker cross-check: the baseline's `home_worker` (claim, `TaskRun` with ffmpeg, a refusal) against a transcode listener; `crates/embyx-api/src/transcode_api/tests/protocol.rs` serves the Rust one on a local port and runs it (needs ffmpeg) | `uv run python tools/home_worker/python_worker.py '<run as JSON>'` (the Rust test calls it) |
 | Page smoke: the unmodified front end, built in a copy of `frontend/`, against the Rust server on a scratch database, in headless Chromium with the Playwright pinned in `tools/smoke/package.json` (needs node, npm, `psql` and a Chromium for that Playwright) | `EMBYX_MANAGER_TEST_DATABASE_URL=... tools/smoke/run.sh` (`SMOKE_SCREENSHOTS=<dir>` keeps a screenshot) |
+| Memory benchmark: both builds as real server processes with every service wired over fakes (CloudDrive, Emby, an outbound proxy that refuses everything), RSS / PSS / peak per phase (idle, request mix, mapping, archive, fill-actor job, chunk upload); needs `EMBYX_MANAGER_TEST_DATABASE_URL` | `uv run python tools/bench/memory.py --side python --out py.json`, `--side rust --binary target/release/embyx-manager --out rust.json` |
+| Level 3 live run: a capped, anonymous, read-only set of reads against the real sites, the Python clients here and the Rust ones in `crates/embyx-monitor/examples/level3.rs`, then a comparison of the parsed results; never in CI | `uv run python tools/live/level3.py --side python --out py.json`, `cargo run -p embyx-monitor --example level3 -- --out rust.json`, `uv run python tools/live/level3.py --compare py.json rust.json` |
+| Level 2 export: masks a database into `<table>.jsonl` (secrets by model, by key name, in URLs, auth headers and literal values), checks an export, loads one into a scratch database; built and tested on synthetic data only | `EMBYX_EXPORT_DSN=... uv run python tools/level2/mask.py export --out DIR`, `mask.py check DIR`, `EMBYX_MANAGER_TEST_DATABASE_URL=... mask.py load DIR --name NAME` |
+| Level 2 GET differ: every GET route of both builds on their own copy of one export, schedulers switched off, outbound requests refused | `EMBYX_MANAGER_TEST_DATABASE_URL=... uv run python tools/level2/get_diff.py DIR --binary target/release/embyx-manager --out diff.json` |
+| Level 2 decision replay: AVID, brand and archive routing of every name an export holds, Python here against `crates/embyx-monitor/examples/replay.rs` | `cargo build -p embyx-monitor --example replay`, `uv run python tools/level2/replay.py DIR --binary target/debug/examples/replay --out replay.json` |
 | Tree check: baseline files unchanged, no ignored Rust tests, `unsafe` only where allowed | `tools/check_tree.sh` |
 | Tool self-tests | `uv run pytest tools/tests -q -p no:cacheprovider` |
