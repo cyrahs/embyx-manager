@@ -837,3 +837,130 @@ async fn status_hides_the_next_time_of_a_pipeline_that_cannot_run() {
         4
     );
 }
+
+/// The steps a `try`/`finally` runner took, in order.
+#[derive(Clone, Default)]
+struct Steps(Arc<Mutex<Vec<&'static str>>>);
+
+impl Steps {
+    fn push(&self, step: &'static str) {
+        self.0.lock().expect("steps").push(step);
+    }
+
+    fn taken(&self) -> Vec<&'static str> {
+        self.0.lock().expect("steps").clone()
+    }
+}
+
+fn shutdown_error(name: &str) -> RunFailure {
+    RunFailure::raised(Raised::new("RuntimeError", name.to_owned()))
+}
+
+/// bootstrap's `tracker_poll`: `try: await tracker.poll(ctx)` / `finally: await
+/// intake.retry_due(...)`. Cancelling the task during the poll unwinds through the
+/// `finally`, whose awaits run to their end; the sent calls settle first.
+#[tokio::test]
+async fn a_shutdown_during_the_work_still_runs_the_finally_leg_to_its_end() {
+    let shutdown = CancellationToken::new();
+    let steps = Steps::default();
+    let (started_tx, started_rx) = oneshot::channel();
+    let work = {
+        let steps = steps.clone();
+        async move {
+            steps.push("work");
+            let _ = started_tx.send(());
+            std::future::pending::<()>().await;
+            unreachable!("the work is dropped")
+        }
+    };
+    let finally_leg = {
+        let steps = steps.clone();
+        async move {
+            tokio::task::yield_now().await;
+            steps.push("finally");
+            Ok(())
+        }
+    };
+    let settle_steps = steps.clone();
+    let settle = move || {
+        let steps = settle_steps.clone();
+        async move { steps.push("settle") }
+    };
+    let token = shutdown.clone();
+    let canceller = tokio::spawn(async move {
+        started_rx.await.expect("started");
+        token.cancel();
+    });
+    let outcome = until_shutdown_finally(&shutdown, work, finally_leg, settle).await;
+    canceller.await.expect("canceller");
+    assert!(matches!(outcome, Err(RunFailure::Shutdown)), "{outcome:?}");
+    assert_eq!(steps.taken(), ["work", "settle", "finally", "settle"]);
+}
+
+#[tokio::test]
+async fn an_error_of_the_finally_leg_replaces_the_shutdown() {
+    let shutdown = CancellationToken::new();
+    shutdown.cancel();
+    let outcome = until_shutdown_finally(
+        &shutdown,
+        std::future::pending(),
+        async { Err(shutdown_error("retry failed")) },
+        || async {},
+    )
+    .await;
+    assert_eq!(
+        format!("{outcome:?}"),
+        format!("{:?}", Err::<(), _>(shutdown_error("retry failed")))
+    );
+}
+
+#[tokio::test]
+async fn a_shutdown_during_the_finally_leg_drops_it_and_settles() {
+    let shutdown = CancellationToken::new();
+    let steps = Steps::default();
+    let token = shutdown.clone();
+    let finally_steps = steps.clone();
+    let finally_leg = async move {
+        finally_steps.push("finally");
+        token.cancel();
+        std::future::pending::<()>().await;
+        unreachable!("the leg is dropped")
+    };
+    let settle_steps = steps.clone();
+    let outcome = until_shutdown_finally(&shutdown, async { Ok(()) }, finally_leg, move || {
+        let steps = settle_steps.clone();
+        async move { steps.push("settle") }
+    })
+    .await;
+    assert!(matches!(outcome, Err(RunFailure::Shutdown)), "{outcome:?}");
+    assert_eq!(steps.taken(), ["finally", "settle"]);
+}
+
+#[tokio::test]
+async fn without_shutdown_the_finally_error_wins_and_the_work_error_stays_otherwise() {
+    let shutdown = CancellationToken::new();
+    let both = until_shutdown_finally(
+        &shutdown,
+        async { Err(shutdown_error("poll failed")) },
+        async { Err(shutdown_error("retry failed")) },
+        || async {},
+    )
+    .await;
+    assert_eq!(
+        format!("{both:?}"),
+        format!("{:?}", Err::<(), _>(shutdown_error("retry failed")))
+    );
+    let work_only = until_shutdown_finally(
+        &shutdown,
+        async { Err(shutdown_error("poll failed")) },
+        async { Ok(()) },
+        || async {},
+    )
+    .await;
+    assert_eq!(
+        format!("{work_only:?}"),
+        format!("{:?}", Err::<(), _>(shutdown_error("poll failed")))
+    );
+    let clean = until_shutdown_finally(&shutdown, async { Ok(()) }, async { Ok(()) }, || async {}).await;
+    assert!(clean.is_ok(), "{clean:?}");
+}

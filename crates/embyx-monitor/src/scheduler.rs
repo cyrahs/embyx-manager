@@ -254,6 +254,50 @@ where
     Err(RunFailure::Shutdown)
 }
 
+/// `try: await work` / `finally: await finally_leg`, under the shutdown token.
+///
+/// Shutdown during `work` drops it and awaits `settle()` (a cancelled await waits for the
+/// RPC it sent), then runs `finally_leg` to its end, since Python's `CancelledError` unwinds
+/// through the `finally` and nothing cancels the task a second time; `settle()` is awaited
+/// again and the answer is the leg's error, else [`RunFailure::Shutdown`]. Shutdown during
+/// `finally_leg` drops it, settles and answers `Shutdown`. Otherwise the leg's error replaces
+/// the work's, as an exception raised in a `finally` does.
+pub async fn until_shutdown_finally<W, F, S, SF>(
+    shutdown: &CancellationToken,
+    work: W,
+    finally_leg: F,
+    settle: S,
+) -> Result<(), RunFailure>
+where
+    W: Future<Output = Result<(), RunFailure>>,
+    F: Future<Output = Result<(), RunFailure>>,
+    S: Fn() -> SF,
+    SF: Future<Output = ()>,
+{
+    let worked = tokio::select! {
+        biased;
+        () = shutdown.cancelled() => None,
+        outcome = work => Some(outcome),
+    };
+    let Some(outcome) = worked else {
+        settle().await;
+        let finished = finally_leg.await;
+        settle().await;
+        finished?;
+        return Err(RunFailure::Shutdown);
+    };
+    tokio::select! {
+        biased;
+        () = shutdown.cancelled() => {}
+        finished = finally_leg => {
+            finished?;
+            return outcome;
+        }
+    }
+    settle().await;
+    Err(RunFailure::Shutdown)
+}
+
 /// The live sections the scheduler decides on, and `store.refresh()`.
 pub trait SchedulerConfig: Send + Sync {
     fn rss(&self) -> RssConfig;
@@ -814,13 +858,14 @@ impl MonitorScheduler {
 
     /// A mapping pass on a blocking thread (`asyncio.to_thread`). On shutdown the answer is
     /// `CancelledError` at once while the thread finishes on its stop token, as in Python;
-    /// the thread is tracked, so `aclose` waits for it.
+    /// `aclose` does not wait for the thread (Python's does not either), so the clients and
+    /// the database close behind it and only the runtime's end waits for it (D101).
     async fn on_thread<T, F>(&self, scope: &RunScope, work: F) -> Result<T, RunFailure>
     where
         T: Send + 'static,
         F: FnOnce() -> Result<T, RunFailure> + Send + 'static,
     {
-        let handle = self.inner.tasks.spawn_blocking(work);
+        let handle = tokio::task::spawn_blocking(work);
         tokio::select! {
             biased;
             () = scope.shutdown.cancelled() => Err(RunFailure::Shutdown),

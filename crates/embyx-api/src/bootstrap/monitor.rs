@@ -44,7 +44,7 @@ use embyx_monitor::rss::{CastLookup, CreditedWork, LookupError, RssParts, RssPip
 use embyx_monitor::runs::PipelineRunRepository;
 use embyx_monitor::scheduler::{
     MappingFactory, MappingRun, MonitorScheduler, Ready, RunFailure, RunScope, Runner, SchedulerParts,
-    TrackerSubmissions, until_shutdown,
+    TrackerSubmissions, until_shutdown, until_shutdown_finally,
 };
 use embyx_monitor::subscriptions::SubscriptionRepository;
 use embyx_monitor::support::BoxFuture;
@@ -384,15 +384,11 @@ impl Shared {
 
     /// `_refresh_move_in_listing(cloud, api_root, ctx)`: ask CloudDrive to re-check the
     /// staging tree so the mount sees fresh moves.
+    ///
+    /// Python then lists every subdirectory whose entry has a `path`, but CloudDrive's
+    /// entries carry `full_path`, so it never does: only the root is listed, here too (D104).
     async fn refresh_move_in_listing(cloud: &AsyncCloudDrive, api_root: &str, ctx: &RunContext) {
-        let refreshed = async {
-            let entries = CloudListing::list_directory(cloud, api_root).await?;
-            for entry in entries.iter().filter(|entry| entry.is_directory) {
-                CloudListing::list_directory(cloud, &entry.full_path).await?;
-            }
-            Ok::<(), embyx_monitor::intake::SourceError>(())
-        };
-        if let Err(error) = refreshed.await {
+        if let Err(error) = CloudListing::list_directory(cloud, api_root).await {
             ctx.exception(
                 &format!("failed to refresh the CloudDrive move-in directory {api_root}"),
                 Some(&error),
@@ -457,13 +453,14 @@ impl Shared {
         let Some(cloud) = self.cloud.current().map(|cloud| cloud.scoped()) else {
             return Ok(());
         };
-        let work = async {
-            let ctx = &scope.ctx;
+        let ctx = &scope.ctx;
+        // Before the `try`: a shutdown here skips the retry leg, as in Python.
+        let setup = async {
             let archive_config = self.store.get::<ArchiveConfig>();
             let task_dirs = polled_task_dirs(&self.store, self.ledger.as_ref())
                 .await
                 .map_err(failure)?;
-            let tracker = AcquisitionTracker::new(TrackerParts {
+            Ok::<_, RunFailure>(AcquisitionTracker::new(TrackerParts {
                 ledger: self.ledger(),
                 cloud: Arc::new(cloud.clone()) as Arc<dyn TrackerCloud>,
                 settings: TrackerSettings::from_config(
@@ -476,13 +473,20 @@ impl Shared {
                 archiver: ArchivePipeline::new(archive_config, self.avid.current()),
                 submit_magnet: self.submit_magnet(Some(cloud.clone())),
                 release_date_lookup: Some(Arc::clone(&self.release_dates) as Arc<dyn ReleaseDateLookup>),
-            });
-            let polled = tracker.poll(ctx).await;
-            // The resolver leg of the pass: parked acquisitions whose cooldown expired get a
-            // fresh resolve-and-submit, whether or not the listing above worked. Records
-            // without a pinned directory fall back to the first configured one, as
-            // `submit_magnet` does.
-            let retried = match self.intake(cloud.clone()) {
+            }))
+        };
+        let tracker = tokio::select! {
+            biased;
+            () = scope.shutdown.cancelled() => return Err(RunFailure::Shutdown),
+            built = setup => built?,
+        };
+        let poll = async { tracker.poll(ctx).await.map_err(failure) };
+        // `finally`, the resolver leg of the pass: parked acquisitions whose cooldown expired
+        // get a fresh resolve-and-submit, whether or not the listing above worked, and also
+        // when shutdown cancelled the poll. Records without a pinned directory fall back to
+        // the first configured one, as `submit_magnet` does.
+        let retry = async {
+            match self.intake(cloud.clone()) {
                 Some(intake) => {
                     let dirs = offline_task_dirs(&self.store);
                     intake
@@ -492,12 +496,9 @@ impl Shared {
                         .map_err(failure)
                 }
                 None => Ok(()),
-            };
-            // `finally`: an error of the retry pass replaces the poll's.
-            retried?;
-            polled.map_err(failure)
+            }
         };
-        until_shutdown(&scope.shutdown, work, settle(Some(&cloud))).await
+        until_shutdown_finally(&scope.shutdown, poll, retry, || settle(Some(&cloud))).await
     }
 
     async fn playlists_run(self: Arc<Self>, scope: RunScope) -> Result<(), RunFailure> {
