@@ -648,6 +648,36 @@
     {
       "fake": "kubernetes",
       "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/api/v1/namespaces/media/pods/embyx-manager-0",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "spec": {
+            "containers": [
+              {
+                "image": "ghcr.io/cyrahs/embyx-manager:latest"
+              }
+            ]
+          },
+          "status": {
+            "containerStatuses": [
+              {
+                "imageID": "ghcr.io/cyrahs/embyx-manager@sha256:abc123"
+              }
+            ]
+          }
+        },
+        "status": 200
+      },
+      "seq": 11
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
       "method": "POST",
       "request": {
         "body": {
@@ -747,7 +777,7 @@
         },
         "status": 201
       },
-      "seq": 11
+      "seq": 12
     },
     {
       "fake": "kubernetes",
@@ -766,7 +796,7 @@
         },
         "status": 200
       },
-      "seq": 12
+      "seq": 13
     },
     {
       "fake": "kubernetes",
@@ -864,7 +894,7 @@
         },
         "status": 201
       },
-      "seq": 13
+      "seq": 14
     },
     {
       "fake": "kubernetes",
@@ -883,7 +913,7 @@
         },
         "status": 404
       },
-      "seq": 14
+      "seq": 15
     },
     {
       "fake": "kubernetes",
@@ -940,7 +970,7 @@
         },
         "status": 200
       },
-      "seq": 15
+      "seq": 16
     },
     {
       "fake": "kubernetes",
@@ -959,7 +989,7 @@
         },
         "status": 200
       },
-      "seq": 16
+      "seq": 17
     },
     {
       "fake": "kubernetes",
@@ -978,7 +1008,7 @@
         },
         "status": 404
       },
-      "seq": 17
+      "seq": 18
     },
     {
       "fake": "kubernetes",
@@ -997,7 +1027,7 @@
         },
         "status": 404
       },
-      "seq": 18
+      "seq": 19
     },
     {
       "fake": "clouddrive",
@@ -1007,7 +1037,7 @@
       "response": {
         "copyTasks": []
       },
-      "seq": 19
+      "seq": 20
     },
     {
       "fake": "clouddrive",
@@ -1023,7 +1053,7 @@
         "resultFilePaths": [],
         "success": false
       },
-      "seq": 20
+      "seq": 21
     },
     {
       "fake": "kubernetes",
@@ -1042,7 +1072,7 @@
         },
         "status": 404
       },
-      "seq": 21
+      "seq": 22
     },
     {
       "fake": "kubernetes",
@@ -1061,7 +1091,7 @@
         },
         "status": 404
       },
-      "seq": 22
+      "seq": 23
     },
     {
       "fake": "clouddrive",
@@ -1269,7 +1299,37 @@
           ]
         }
       ],
-      "seq": 23
+      "seq": 24
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/api/v1/namespaces/media/pods/embyx-manager-0",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "spec": {
+            "containers": [
+              {
+                "image": "ghcr.io/cyrahs/embyx-manager:latest"
+              }
+            ]
+          },
+          "status": {
+            "containerStatuses": [
+              {
+                "imageID": "ghcr.io/cyrahs/embyx-manager@sha256:abc123"
+              }
+            ]
+          }
+        },
+        "status": 200
+      },
+      "seq": 25
     },
     {
       "fake": "kubernetes",
@@ -1369,7 +1429,7 @@
         },
         "status": 201
       },
-      "seq": 24
+      "seq": 26
     },
     {
       "fake": "kubernetes",
@@ -1388,7 +1448,7 @@
         },
         "status": 200
       },
-      "seq": 25
+      "seq": 27
     },
     {
       "fake": "kubernetes",
@@ -1407,7 +1467,7 @@
         },
         "status": 404
       },
-      "seq": 26
+      "seq": 28
     },
     {
       "fake": "clouddrive",
@@ -1647,7 +1707,7 @@
           ]
         }
       ],
-      "seq": 27
+      "seq": 29
     },
     {
       "fake": "kubernetes",
@@ -1666,7 +1726,7 @@
         },
         "status": 404
       },
-      "seq": 28
+      "seq": 30
     }
   ],
   "fakes": {
@@ -2065,6 +2125,40 @@
             "task_id": 1,
             "wait": "probing"
           },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "restart",
+          "result": null,
           "tasks": [
             {
               "avid": "GIANT-001",
@@ -2512,6 +2606,40 @@
           ]
         },
         {
+          "op": "restart",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
           "op": "finish_part",
           "result": {
             "finished": true
@@ -2779,6 +2907,40 @@
           ]
         },
         {
+          "op": "restart",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
           "op": "tick",
           "result": {
             "triggered": []
@@ -2796,7 +2958,7 @@
               "merged_bytes": null,
               "merged_name": "GIANT-001.mp4",
               "merged_sha1": null,
-              "notice": null,
+              "notice": "waiting for the home transcode worker",
               "parts": [
                 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
                 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
@@ -2840,7 +3002,7 @@
               "merged_bytes": null,
               "merged_name": "GIANT-001.mp4",
               "merged_sha1": null,
-              "notice": null,
+              "notice": "waiting for the home transcode worker",
               "parts": [
                 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
                 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
@@ -2872,7 +3034,7 @@
             "merged_bytes": null,
             "merged_name": "GIANT-001.mp4",
             "merged_sha1": null,
-            "notice": null,
+            "notice": "waiting for the home transcode worker",
             "parts": [
               "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
               "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
@@ -2901,7 +3063,7 @@
               "merged_bytes": null,
               "merged_name": "GIANT-001.mp4",
               "merged_sha1": null,
-              "notice": null,
+              "notice": "waiting for the home transcode worker",
               "parts": [
                 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
                 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
@@ -2938,7 +3100,7 @@
               "merged_bytes": null,
               "merged_name": "GIANT-001.mp4",
               "merged_sha1": null,
-              "notice": null,
+              "notice": "waiting for the home transcode worker",
               "parts": [
                 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
                 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
@@ -3011,7 +3173,7 @@
               "merged_bytes": null,
               "merged_name": "GIANT-001.mp4",
               "merged_sha1": null,
-              "notice": null,
+              "notice": "waiting for the home transcode worker",
               "parts": [
                 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
                 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
@@ -3043,7 +3205,7 @@
             "merged_bytes": null,
             "merged_name": "GIANT-001.mp4",
             "merged_sha1": null,
-            "notice": null,
+            "notice": "waiting for the home transcode worker",
             "parts": [
               "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
               "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
@@ -3072,7 +3234,7 @@
               "merged_bytes": null,
               "merged_name": "GIANT-001.mp4",
               "merged_sha1": null,
-              "notice": null,
+              "notice": "waiting for the home transcode worker",
               "parts": [
                 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
                 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
@@ -3108,7 +3270,7 @@
               "merged_bytes": null,
               "merged_name": "GIANT-001.mp4",
               "merged_sha1": null,
-              "notice": null,
+              "notice": "waiting for the home transcode worker",
               "parts": [
                 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
                 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
@@ -3146,7 +3308,7 @@
               "merged_bytes": null,
               "merged_name": "GIANT-001.mp4",
               "merged_sha1": null,
-              "notice": null,
+              "notice": "waiting for the home transcode worker",
               "parts": [
                 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
                 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
@@ -3180,7 +3342,7 @@
               "merged_bytes": null,
               "merged_name": "GIANT-001.mp4",
               "merged_sha1": null,
-              "notice": null,
+              "notice": "waiting for the home transcode worker",
               "parts": [
                 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
                 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
@@ -3208,7 +3370,7 @@
             "parked": [
               1
             ],
-            "reserved_bytes": 120000000000
+            "reserved_bytes": 115000000000
           },
           "tasks": [
             {
@@ -3223,7 +3385,7 @@
               "merged_bytes": null,
               "merged_name": "GIANT-001.mp4",
               "merged_sha1": null,
-              "notice": null,
+              "notice": "waiting for the home transcode worker",
               "parts": [
                 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
                 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
@@ -3377,6 +3539,40 @@
             "upload_attempts": 0,
             "uploaded_bytes": null
           },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": false,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "restart",
+          "result": null,
           "tasks": [
             {
               "avid": "GIANT-001",
@@ -3683,12 +3879,46 @@
           ]
         },
         {
+          "op": "restart",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-giant-001",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": false,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
           "op": "home",
           "result": {
             "home_bound": [
               1
             ],
-            "online": true,
+            "online": false,
             "parked": [],
             "reserved_bytes": 0
           },
@@ -3866,6 +4096,40 @@
           "result": {
             "triggered": []
           },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-giant-001",
+              "library_dir": "type/vr",
+              "merged_bytes": 19,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": "AA",
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "uploading",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": false,
+              "upload_attempts": 0,
+              "uploaded_bytes": 0
+            }
+          ]
+        },
+        {
+          "op": "restart",
+          "result": null,
           "tasks": [
             {
               "avid": "GIANT-001",
@@ -4093,7 +4357,7 @@
               "merged_bytes": null,
               "merged_name": "GIANT-002.mp4",
               "merged_sha1": null,
-              "notice": null,
+              "notice": "waiting for the home transcode worker",
               "parts": [
                 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-002-cd1.mp4",
                 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-002-cd2.mp4"
@@ -4204,7 +4468,7 @@
           "op": "home",
           "result": {
             "home_bound": [],
-            "online": true,
+            "online": false,
             "parked": [],
             "reserved_bytes": 0
           },

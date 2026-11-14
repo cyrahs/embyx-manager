@@ -4,6 +4,8 @@
 # passing fatal error is restarted, a paused copy says so, a copy CloudDrive forgot is issued
 # again after the grace; the check then finds no file, the wrong size, no SHA-1 and the wrong
 # SHA-1, each retried, and the task is cancelled from verifying.
+# Its `restart` steps split it for the resume matrix (`crates/embyx-merge/tests/service_resume.rs`):
+# a new process each, and in the matrix the other build.
 description = "merge service: upload back-off, fatal uploads and failed checks, each retried"
 operation = "merge.service"
 clock = "2026-11-14T08:00:00+00:00"
@@ -90,6 +92,9 @@ args = { seconds = 120 }
 op = "tick"
 
 [[args.steps]]
+op = "restart"
+
+[[args.steps]]
 op = "tick"
 
 [[args.steps]]
@@ -147,6 +152,9 @@ args = { seconds = 120 }
 op = "tick"
 
 [[args.steps]]
+op = "restart"
+
+[[args.steps]]
 op = "advance"
 args = { seconds = 10800 }
 
@@ -187,6 +195,9 @@ args = { edit = "set_uploads", args = { uploads = [{ dest_path = "/115/upload/me
 
 [[args.steps]]
 op = "tick"
+
+[[args.steps]]
+op = "restart"
 
 [[args.steps]]
 op = "cloud"
@@ -237,6 +248,9 @@ op = "tick"
 op = "tick"
 
 [[args.steps]]
+op = "restart"
+
+[[args.steps]]
 op = "advance"
 args = { seconds = 600 }
 
@@ -270,6 +284,9 @@ args = { edit = "add_file", args = { path = "/115/upload/merge-1/SQTEVR-009.mp4"
 
 [[args.steps]]
 op = "tick"
+
+[[args.steps]]
+op = "restart"
 
 [[args.steps]]
 op = "advance"

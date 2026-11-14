@@ -36,6 +36,7 @@ use embyx_clients::pyvalue::{self, Raised};
 use embyx_core::config::models::{ArchiveConfig, CloudDriveConfig, MergeConfig};
 use embyx_core::pyjson::Value;
 use embyx_core::pypath;
+use embyx_db::database::DatabaseError;
 use tokio::sync::Notify;
 use tokio_util::sync::CancellationToken;
 
@@ -209,13 +210,43 @@ impl From<KubeJobsError> for StepError {
 
 impl From<TaskError> for StepError {
     fn from(error: TaskError) -> Self {
-        let class = match &error {
-            TaskError::Conflict(_) => "MergeTaskConflictError",
-            TaskError::Corrupt(_) => "ValueError",
-            TaskError::Database(_) | TaskError::Sqlx(_) => "PostgresError",
-        };
-        Self::raised(class, error.to_string())
+        match error {
+            TaskError::Conflict(message) => Self::raised("MergeTaskConflictError", message),
+            TaskError::Corrupt(message) => Self::raised("ValueError", message),
+            TaskError::Sqlx(error) | TaskError::Database(DatabaseError::Sqlx(error)) => database_error(&error),
+            TaskError::Database(error @ DatabaseError::UnsupportedSchemaVersion(_)) => {
+                Self::raised("UnsupportedSchemaVersionError", error.to_string())
+            }
+            TaskError::Database(error) => Self::raised("ClientConfigurationError", error.to_string()),
+        }
     }
+}
+
+/// A database failure as asyncpg raises it (DIVERGENCES.md D61, as the monitor words it): the
+/// class by SQLSTATE where asyncpg has one, and the server's own message for a statement
+/// PostgreSQL refused.
+fn database_error(error: &sqlx::Error) -> StepError {
+    let class = match error {
+        sqlx::Error::Database(database) => match database.code().as_deref() {
+            Some("23505") => "UniqueViolationError",
+            Some("23503") => "ForeignKeyViolationError",
+            Some("23514") => "CheckViolationError",
+            Some("23502") => "NotNullViolationError",
+            Some("22003") => "NumericValueOutOfRangeError",
+            Some("57014") => "QueryCanceledError",
+            Some("40001") => "SerializationError",
+            Some("40P01") => "DeadlockDetectedError",
+            _ => "PostgresError",
+        },
+        sqlx::Error::Io(_) | sqlx::Error::Tls(_) => "ConnectionError",
+        sqlx::Error::PoolTimedOut => "TimeoutError",
+        _ => "InterfaceError",
+    };
+    let message = match error {
+        sqlx::Error::Database(database) => database.message().to_owned(),
+        other => other.to_string(),
+    };
+    StepError::raised(class, message)
 }
 
 impl From<crate::PyException> for StepError {

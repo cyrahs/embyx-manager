@@ -4,6 +4,8 @@
 # report, and the report says done but the file is not there. A retry deletes the old Job, whose name the new
 # one is started under. Last the library gains a whole copy, so the next start refuses the
 # title (failed while queued), and the operator cancels it.
+# Its `restart` steps split it for the resume matrix (`crates/embyx-merge/tests/service_resume.rs`):
+# a new process each, and in the matrix the other build.
 description = "merge service: merge Job failures, retried, then a whole copy refuses the title"
 operation = "merge.service"
 clock = "2026-11-14T08:00:00+00:00"
@@ -29,6 +31,9 @@ op = "tick"
 
 [[args.steps]]
 op = "tick"
+
+[[args.steps]]
+op = "restart"
 
 [[args.steps]]
 op = "tick"
@@ -72,6 +77,9 @@ args = { name = "embyx-merge-1-sqtevr-009", status = { failed = 1, conditions = 
 op = "tick"
 
 [[args.steps]]
+op = "restart"
+
+[[args.steps]]
 op = "retry"
 args = { id = 1 }
 
@@ -112,6 +120,9 @@ args = { edit = "add_file", args = { path = "/115/embyx/type/vr/SQTEVR/SQTEVR-00
 
 [[args.steps]]
 op = "tick"
+
+[[args.steps]]
+op = "restart"
 
 [[args.steps]]
 op = "retry"

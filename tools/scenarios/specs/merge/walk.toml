@@ -4,6 +4,8 @@
 # SHA-1 are checked once 115 reports them, the parts go, the merged file moves into
 # `{intake}/vr/SQTEVR-009/`, the archive is asked for a run and nudged again while the folder
 # waits, and the task is done once the folder is filed.
+# Its `restart` steps split it for the resume matrix (`crates/embyx-merge/tests/service_resume.rs`):
+# a new process each, and in the matrix the other build.
 description = "merge service: queued to done, one step per tick"
 operation = "merge.service"
 clock = "2026-11-14T08:00:00+00:00"
@@ -25,6 +27,9 @@ args = { avid = "SQTEVR-009", source = "vr", library_dir = "type/vr", brand = "S
 
 [[args.steps]]
 op = "tick"
+
+[[args.steps]]
+op = "restart"
 
 [[args.steps]]
 op = "tick"
@@ -52,6 +57,9 @@ args = { path = "work/.merge/1.json", json = { state = "done", size = 25, sha1 =
 op = "tick"
 
 [[args.steps]]
+op = "restart"
+
+[[args.steps]]
 op = "tick"
 
 [[args.steps]]
@@ -74,6 +82,9 @@ op = "cloud"
 args = { edit = "set_uploads", args = { uploads = [] } }
 
 [[args.steps]]
+op = "restart"
+
+[[args.steps]]
 op = "cloud"
 args = { edit = "add_file", args = { path = "/115/upload/merge-1/SQTEVR-009.mp4", size = 25 } }
 
@@ -88,6 +99,9 @@ op = "cloud"
 args = { edit = "add_file", args = { path = "/115/upload/merge-1/SQTEVR-009.mp4", size = 25, hashes = { "2" = "4A5E2BB31DE0D4C9C3C1A5A4B8A5A6C7D8E9F0A1" } } }
 
 [[args.steps]]
+op = "restart"
+
+[[args.steps]]
 op = "advance"
 args = { seconds = 600 }
 
@@ -99,6 +113,9 @@ op = "tick"
 
 [[args.steps]]
 op = "tick"
+
+[[args.steps]]
+op = "restart"
 
 [[args.steps]]
 op = "advance"

@@ -3,6 +3,8 @@
 # cancelled, the staging folder deleted, the merged file dropped) and failed while merging.
 # Two shutdowns land in the middle (cross-version contract 6): one right after a tick issued
 # the copy, one in the middle of a cancel; each build continues from what the other left.
+# Its `restart` steps split it for the resume matrix (`crates/embyx-merge/tests/service_resume.rs`):
+# a new process each, and in the matrix the other build.
 description = "merge service: cancel at each state, with shutdowns mid-step"
 operation = "merge.service"
 clock = "2026-11-14T08:00:00+00:00"
@@ -85,12 +87,18 @@ op = "tick"
 args = { cancel_after = "copy_file" }
 
 [[args.steps]]
+op = "restart"
+
+[[args.steps]]
 op = "tick"
 
 # A shutdown in the middle of the cancel leaves the task uploading; the next cancel ends it.
 [[args.steps]]
 op = "cancel"
 args = { id = 3, cancel_after = "cancel_copy_task" }
+
+[[args.steps]]
+op = "restart"
 
 [[args.steps]]
 op = "cancel"

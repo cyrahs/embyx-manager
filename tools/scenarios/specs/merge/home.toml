@@ -5,6 +5,8 @@
 # finished (one too early), the worker pauses and goes away, the audio Job fails twice and is
 # retried, and the merge Job assembles the chunks. Then a task sent to the CPU, and one a whole
 # copy makes the claim refuse.
+# Its `restart` steps split it for the resume matrix (`crates/embyx-merge/tests/service_resume.rs`):
+# a new process each, and in the matrix the other build.
 description = "merge service: the home transcode path, chunk refusals, audio Job failures, CPU fallback"
 operation = "merge.service"
 clock = "2026-11-14T08:00:00+00:00"
@@ -59,6 +61,9 @@ op = "claim"
 args = { name = "home-5090", version = "1.0.0", state = "idle" }
 
 [[args.steps]]
+op = "restart"
+
+[[args.steps]]
 op = "heartbeat"
 args = { name = "home-5090", version = "1.0.0", state = "waiting", task_id = 1 }
 
@@ -98,6 +103,9 @@ op = "chunk"
 args = { task_id = 1, part_index = 0, chunk_index = 1, start = 60.1, duration = 60, frames = 1440, text = "p0c1" }
 
 [[args.steps]]
+op = "restart"
+
+[[args.steps]]
 op = "finish_part"
 args = { task_id = 1, part_index = 0 }
 
@@ -124,6 +132,9 @@ args = { task_id = 9, part_index = 0, chunk_index = 0, start = 0, duration = 60,
 [[args.steps]]
 op = "chunk"
 args = { task_id = 1, part_index = 1, chunk_index = 1, start = 60, duration = 30.5, frames = 1440, text = "p1c1", sha256 = "0123" }
+
+[[args.steps]]
+op = "restart"
 
 [[args.steps]]
 op = "tick"
@@ -179,6 +190,9 @@ op = "retry"
 args = { id = 1 }
 
 [[args.steps]]
+op = "restart"
+
+[[args.steps]]
 op = "tick"
 
 [[args.steps]]
@@ -205,6 +219,9 @@ args = { name = "home-5090", version = "1.0.0", state = "idle" }
 op = "tick"
 
 [[args.steps]]
+op = "restart"
+
+[[args.steps]]
 op = "home"
 
 [[args.steps]]
@@ -224,6 +241,9 @@ args = { path = "work/.merge/1.json", json = { state = "done", size = 19, sha1 =
 
 [[args.steps]]
 op = "tick"
+
+[[args.steps]]
+op = "restart"
 
 [[args.steps]]
 op = "cancel"

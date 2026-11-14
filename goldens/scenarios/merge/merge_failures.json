@@ -346,6 +346,36 @@
     {
       "fake": "kubernetes",
       "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/api/v1/namespaces/media/pods/embyx-manager-0",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "spec": {
+            "containers": [
+              {
+                "image": "ghcr.io/cyrahs/embyx-manager:latest"
+              }
+            ]
+          },
+          "status": {
+            "containerStatuses": [
+              {
+                "imageID": "ghcr.io/cyrahs/embyx-manager@sha256:abc123"
+              }
+            ]
+          }
+        },
+        "status": 200
+      },
+      "seq": 8
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
       "method": "POST",
       "request": {
         "body": {
@@ -441,7 +471,7 @@
         },
         "status": 201
       },
-      "seq": 8
+      "seq": 9
     },
     {
       "fake": "kubernetes",
@@ -460,7 +490,7 @@
         },
         "status": 200
       },
-      "seq": 9
+      "seq": 10
     },
     {
       "fake": "clouddrive",
@@ -540,7 +570,7 @@
           ]
         }
       ],
-      "seq": 10
+      "seq": 11
     },
     {
       "fake": "kubernetes",
@@ -640,7 +670,7 @@
         },
         "status": 201
       },
-      "seq": 11
+      "seq": 12
     },
     {
       "fake": "kubernetes",
@@ -708,7 +738,7 @@
         },
         "status": 200
       },
-      "seq": 12
+      "seq": 13
     },
     {
       "fake": "kubernetes",
@@ -735,7 +765,7 @@
         },
         "status": 200
       },
-      "seq": 13
+      "seq": 14
     },
     {
       "fake": "kubernetes",
@@ -754,7 +784,7 @@
         "body": "ffmpeg: Killed",
         "status": 200
       },
-      "seq": 14
+      "seq": 15
     },
     {
       "fake": "kubernetes",
@@ -773,7 +803,7 @@
         },
         "status": 200
       },
-      "seq": 15
+      "seq": 16
     },
     {
       "fake": "clouddrive",
@@ -853,7 +883,37 @@
           ]
         }
       ],
-      "seq": 16
+      "seq": 17
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/api/v1/namespaces/media/pods/embyx-manager-0",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "spec": {
+            "containers": [
+              {
+                "image": "ghcr.io/cyrahs/embyx-manager:latest"
+              }
+            ]
+          },
+          "status": {
+            "containerStatuses": [
+              {
+                "imageID": "ghcr.io/cyrahs/embyx-manager@sha256:abc123"
+              }
+            ]
+          }
+        },
+        "status": 200
+      },
+      "seq": 18
     },
     {
       "fake": "kubernetes",
@@ -953,7 +1013,7 @@
         },
         "status": 201
       },
-      "seq": 17
+      "seq": 19
     },
     {
       "fake": "kubernetes",
@@ -1019,7 +1079,7 @@
         },
         "status": 200
       },
-      "seq": 18
+      "seq": 20
     },
     {
       "fake": "kubernetes",
@@ -1038,7 +1098,7 @@
         },
         "status": 200
       },
-      "seq": 19
+      "seq": 21
     },
     {
       "fake": "clouddrive",
@@ -1118,7 +1178,7 @@
           ]
         }
       ],
-      "seq": 20
+      "seq": 22
     },
     {
       "fake": "kubernetes",
@@ -1218,7 +1278,7 @@
         },
         "status": 201
       },
-      "seq": 21
+      "seq": 23
     },
     {
       "fake": "kubernetes",
@@ -1237,7 +1297,7 @@
         },
         "status": 200
       },
-      "seq": 22
+      "seq": 24
     },
     {
       "fake": "clouddrive",
@@ -1349,7 +1409,7 @@
           ]
         }
       ],
-      "seq": 23
+      "seq": 25
     }
   ],
   "fakes": {
@@ -1522,6 +1582,40 @@
           "result": {
             "triggered": []
           },
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-sqtevr-009",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": "Kubernetes API GET /apis/batch/v1/namespaces/media/jobs/embyx-merge-1-sqtevr-009 answered 500: {\"message\": \"etcdserver: request timed out\"}",
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "restart",
+          "result": null,
           "tasks": [
             {
               "avid": "SQTEVR-009",
@@ -1992,6 +2086,40 @@
           ]
         },
         {
+          "op": "restart",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": "the merge Job failed: Job was active longer than specified deadline | \"ffmpeg: Killed\"",
+              "failed_state": "merging",
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-sqtevr-009",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "failed",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
           "op": "retry",
           "result": {
             "avid": "SQTEVR-009",
@@ -2425,6 +2553,40 @@
           "result": {
             "triggered": []
           },
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": "the library already holds SQTEVR-009.mp4, a whole copy of SQTEVR-009; merging its parts would only duplicate it",
+              "failed_state": "queued",
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "failed",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "restart",
+          "result": null,
           "tasks": [
             {
               "avid": "SQTEVR-009",

@@ -1966,6 +1966,40 @@
           ]
         },
         {
+          "op": "restart",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "ABC-005",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-abc-005",
+              "library_dir": "type/vr",
+              "merged_bytes": 14,
+              "merged_name": "ABC-005.mp4",
+              "merged_sha1": "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709",
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-005-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-005-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "replacing",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 1,
+              "uploaded_bytes": 14
+            }
+          ]
+        },
+        {
           "error": {
             "code": "merge_task_not_cancellable",
             "type": "MergeActionError"
@@ -2041,6 +2075,40 @@
           "result": {
             "triggered": []
           },
+          "tasks": [
+            {
+              "avid": "ABC-005",
+              "brand": "ABC",
+              "error": "the merged file is neither in /115/upload/merge-1 nor in /115/embyx_in/vr/ABC-005",
+              "failed_state": "replacing",
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-abc-005",
+              "library_dir": "type/vr",
+              "merged_bytes": 14,
+              "merged_name": "ABC-005.mp4",
+              "merged_sha1": "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709",
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-005-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-005-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "failed",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 1,
+              "uploaded_bytes": 14
+            }
+          ]
+        },
+        {
+          "op": "restart",
+          "result": null,
           "tasks": [
             {
               "avid": "ABC-005",
@@ -2283,6 +2351,40 @@
               "archive"
             ]
           },
+          "tasks": [
+            {
+              "avid": "ABC-005",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-abc-005",
+              "library_dir": "type/vr",
+              "merged_bytes": 14,
+              "merged_name": "ABC-005.mp4",
+              "merged_sha1": "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709",
+              "notice": "waiting for the archive run to file it",
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-005-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-005-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "archiving",
+              "state_changed_at_is_updated_at": false,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": false,
+              "upload_attempts": 1,
+              "uploaded_bytes": 14
+            }
+          ]
+        },
+        {
+          "op": "restart",
+          "result": null,
           "tasks": [
             {
               "avid": "ABC-005",
@@ -2592,6 +2694,40 @@
             "type": "CancelledError"
           },
           "op": "cancel",
+          "tasks": [
+            {
+              "avid": "ABC-005",
+              "brand": "ABC",
+              "error": "the library already holds ABC-005.mp4, so the archive leaves /115/embyx_in/vr/ABC-005 alone; remove the task to delete the merged copy",
+              "failed_state": "archiving",
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-abc-005",
+              "library_dir": "type/vr",
+              "merged_bytes": 14,
+              "merged_name": "ABC-005.mp4",
+              "merged_sha1": "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709",
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-005-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-005-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "failed",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": false,
+              "upload_attempts": 1,
+              "uploaded_bytes": 14
+            }
+          ]
+        },
+        {
+          "op": "restart",
+          "result": null,
           "tasks": [
             {
               "avid": "ABC-005",

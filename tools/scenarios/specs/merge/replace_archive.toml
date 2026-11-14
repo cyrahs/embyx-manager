@@ -4,6 +4,8 @@
 # takes it and the task fails while archiving; with no whole copy in the library the cancel is
 # refused; once a whole copy is there, the archive's refusal is a duplicate and the cancel
 # deletes the merged copy (a shutdown first lands right after that delete).
+# Its `restart` steps split it for the resume matrix (`crates/embyx-merge/tests/service_resume.rs`):
+# a new process each, and in the matrix the other build.
 description = "merge service: replacing and archiving failures, refused and discarding cancels"
 operation = "merge.service"
 clock = "2026-11-14T08:00:00+00:00"
@@ -56,6 +58,9 @@ op = "tick"
 [[args.steps]]
 op = "tick"
 
+[[args.steps]]
+op = "restart"
+
 # Replacing: the parts may be going, so a cancel is refused.
 [[args.steps]]
 op = "cancel"
@@ -68,6 +73,9 @@ args = { edit = "remove", args = { path = "/115/upload/merge-1/ABC-005.mp4" } }
 
 [[args.steps]]
 op = "tick"
+
+[[args.steps]]
+op = "restart"
 
 [[args.steps]]
 op = "cancel"
@@ -91,6 +99,9 @@ args = { seconds = 301 }
 
 [[args.steps]]
 op = "tick"
+
+[[args.steps]]
+op = "restart"
 
 [[args.steps]]
 op = "advance"
@@ -123,6 +134,9 @@ op = "tick"
 [[args.steps]]
 op = "cancel"
 args = { id = 1, cancel_after = "delete_files" }
+
+[[args.steps]]
+op = "restart"
 
 [[args.steps]]
 op = "cancel"

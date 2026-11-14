@@ -229,7 +229,13 @@ fn reason(status: u16) -> &'static str {
         .unwrap_or("")
 }
 
-async fn handle(mut stream: TcpStream, name: &str, routes: &Mutex<Vec<Value>>, jobs: &Mutex<Option<Dict>>, recorder: &Recorder) {
+async fn handle(
+    mut stream: TcpStream,
+    name: &str,
+    routes: &Mutex<Vec<Value>>,
+    jobs: &Mutex<Option<Dict>>,
+    recorder: &Recorder,
+) {
     let mut buffer = Vec::new();
     let mut chunk = [0_u8; 8192];
     let head_end = loop {

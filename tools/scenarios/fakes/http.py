@@ -95,7 +95,7 @@ class FakeHttpServer:
         self.url = f'http://127.0.0.1:{self._server.server_address[1]}'
         self._thread = threading.Thread(target=self._server.serve_forever, daemon=True)
 
-    def _model(self, method: str, path: str, body: Any) -> tuple[int, Any]:
+    def _model(self, method: str, path: str, body: Any) -> tuple[int, Any]:  # noqa: PLR0911 - one answer per request
         """The answer of the Jobs model, or the 404 of a request nothing answers."""
         match = _JOBS.fullmatch(path) if self.jobs is not None else None
         if match is None or self.jobs is None:

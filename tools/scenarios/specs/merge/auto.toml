@@ -3,6 +3,8 @@
 # whole copy in the library, a part CloudDrive does not list and a title no intake route takes
 # are skipped, nine parts are left to Emby's stacking, a failed title is skipped, more room lets
 # the big one in, cancelled titles are settled, and a day later the tree is scanned again.
+# Its `restart` steps split it for the resume matrix (`crates/embyx-merge/tests/service_resume.rs`):
+# a new process each, and in the matrix the other build.
 description = "merge service: auto-merge rounds, skips and the serial queue"
 operation = "merge.service"
 clock = "2026-11-14T08:00:00+00:00"
@@ -27,6 +29,9 @@ priority_mapping = { vr = "type/vr" }
 # Round one: the title too big, the one with a whole copy, the one missing a part and the one routed nowhere are skipped; the ten-part title is queued.
 [[args.steps]]
 op = "auto"
+
+[[args.steps]]
+op = "restart"
 
 [[args.steps]]
 op = "auto"
@@ -57,6 +62,9 @@ args = { gib = 200 }
 op = "auto"
 
 [[args.steps]]
+op = "restart"
+
+[[args.steps]]
 op = "cancel"
 args = { id = 2 }
 
@@ -71,6 +79,9 @@ args = { edit = "add_file", args = { path = "/115/embyx/type/vr/GONE/GONE-012.mp
 
 [[args.steps]]
 op = "auto"
+
+[[args.steps]]
+op = "restart"
 
 [[args.steps]]
 op = "cloud"
