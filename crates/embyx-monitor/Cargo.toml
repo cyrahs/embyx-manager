@@ -19,6 +19,7 @@ chrono.workspace = true
 embyx-clients = { workspace = true, features = ["clouddrive"] }
 embyx-core.workspace = true
 embyx-db.workspace = true
+futures-util = { workspace = true, features = ["std"] }
 getrandom.workspace = true
 indexmap.workspace = true
 caseless.workspace = true
@@ -34,6 +35,7 @@ croner.workspace = true
 embyx-clients = { workspace = true, features = ["clouddrive", "test-support"] }
 embyx-core = { workspace = true, features = ["test-support"] }
 embyx-db = { workspace = true, features = ["test-support"] }
+hex.workspace = true
 notify.workspace = true
 tempfile.workspace = true
 tokio = { workspace = true, features = ["macros", "rt", "rt-multi-thread", "sync", "time"] }

@@ -92,7 +92,7 @@ tests = [
 
 [WP8]
 title = "RSS, mapping, playlists"
-status = "pending"
+status = "done"
 tests = [
   "tests/test_monitor_rss.py",
   "tests/test_monitor_mapping.py",

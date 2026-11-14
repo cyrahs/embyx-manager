@@ -1,0 +1,563 @@
+{
+  "calls": [
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-101"
+      },
+      "response": null,
+      "seq": 1
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-102"
+      },
+      "response": null,
+      "seq": 2
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "copy2",
+      "request": {
+        "dst": "{emby}/a/ABC-102/ABC-102-cd1.strm",
+        "src": "{flat}/a/ABC-102-cd1.strm"
+      },
+      "response": null,
+      "seq": 3
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-102"
+      },
+      "response": null,
+      "seq": 4
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "copy2",
+      "request": {
+        "dst": "{emby}/a/ABC-102/ABC-102-cd2.strm",
+        "src": "{flat}/a/ABC-102-cd2.strm"
+      },
+      "response": null,
+      "seq": 5
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/b/c/DEF-201"
+      },
+      "response": null,
+      "seq": 6
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "copy2",
+      "request": {
+        "dst": "{emby}/b/c/DEF-201/DEF-201.strm",
+        "src": "{flat}/b/c/DEF-201.strm"
+      },
+      "response": null,
+      "seq": 7
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{emby}/old/XYZ-999/XYZ-999.strm"
+      },
+      "response": null,
+      "seq": 8
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{emby}/a/ABC-102/ABC-102-cd3.strm"
+      },
+      "response": null,
+      "seq": 9
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{emby}/a/OLD/ABC-101.strm"
+      },
+      "response": null,
+      "seq": 10
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{emby}/old/XYZ-999/XYZ-999.nfo"
+      },
+      "response": null,
+      "seq": 11
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{emby}/a/ABC-102/ABC-102-cd3.nfo"
+      },
+      "response": null,
+      "seq": 12
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{emby}/a/ABC-102/ABC-102-cd4-poster.jpg"
+      },
+      "response": null,
+      "seq": 13
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{emby}/a/OLD/ABC-101.nfo"
+      },
+      "response": null,
+      "seq": 14
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{emby}/old/XYZ-999"
+      },
+      "response": null,
+      "seq": 15
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{emby}/old"
+      },
+      "response": null,
+      "seq": 16
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{emby}/empty/deeper"
+      },
+      "response": null,
+      "seq": 17
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{emby}/empty"
+      },
+      "response": null,
+      "seq": 18
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{emby}/a/OLD"
+      },
+      "response": null,
+      "seq": 19
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-101"
+      },
+      "response": null,
+      "seq": 20
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-102"
+      },
+      "response": null,
+      "seq": 21
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-102"
+      },
+      "response": null,
+      "seq": 22
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/b/c/DEF-201"
+      },
+      "response": null,
+      "seq": 23
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-101"
+      },
+      "response": null,
+      "seq": 24
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "copy2",
+      "request": {
+        "dst": "{emby}/a/ABC-101/ABC-101.strm",
+        "src": "{flat}/a/ABC-101.strm"
+      },
+      "response": null,
+      "seq": 25
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-102"
+      },
+      "response": null,
+      "seq": 26
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-102"
+      },
+      "response": null,
+      "seq": 27
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{emby}/b/c/DEF-201/DEF-201.strm"
+      },
+      "response": null,
+      "seq": 28
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{emby}/b/c/DEF-201"
+      },
+      "response": null,
+      "seq": 29
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{emby}/b/c"
+      },
+      "response": null,
+      "seq": 30
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{emby}/b"
+      },
+      "response": null,
+      "seq": 31
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-101"
+      },
+      "response": null,
+      "seq": 32
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-102"
+      },
+      "response": null,
+      "seq": 33
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-102"
+      },
+      "response": null,
+      "seq": 34
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "mapping.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "errors": [],
+          "log": [
+            "starting mapping from {flat} to {emby}",
+            "WARNING: failed to get avid for {flat}/no title.strm, skipping",
+            "updated a/ABC-102-cd1.strm -> a/ABC-102/ABC-102-cd1.strm",
+            "updated a/ABC-102-cd2.strm -> a/ABC-102/ABC-102-cd2.strm",
+            "updated b/c/DEF-201.strm -> b/c/DEF-201/DEF-201.strm",
+            "deleted old/XYZ-999/XYZ-999.strm",
+            "deleted a/ABC-102/ABC-102-cd3.strm",
+            "deleted a/OLD/ABC-101.strm",
+            "deleted old/XYZ-999/XYZ-999.nfo",
+            "deleted a/ABC-102/ABC-102-cd3.nfo",
+            "deleted a/ABC-102/ABC-102-cd4-poster.jpg",
+            "deleted a/OLD/ABC-101.nfo",
+            "deleted empty directory: old/XYZ-999",
+            "deleted empty directory: old",
+            "deleted empty directory: empty/deeper",
+            "deleted empty directory: empty",
+            "deleted empty directory: a/OLD"
+          ],
+          "op": "full",
+          "result": null,
+          "stats": {
+            "dirs_deleted": 5,
+            "files_deleted": 3,
+            "files_skipped": 1,
+            "files_updated": 3,
+            "sidecars_deleted": 4
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "starting mapping from {flat} to {emby}",
+            "WARNING: failed to get avid for {flat}/no title.strm, skipping"
+          ],
+          "op": "full",
+          "result": null,
+          "stats": {
+            "files_skipped": 4
+          }
+        },
+        {
+          "op": "write"
+        },
+        {
+          "op": "remove"
+        },
+        {
+          "errors": [],
+          "log": [
+            "starting mapping from {flat} to {emby}",
+            "WARNING: failed to get avid for {flat}/no title.strm, skipping",
+            "updated a/ABC-101.strm -> a/ABC-101/ABC-101.strm",
+            "deleted b/c/DEF-201/DEF-201.strm",
+            "deleted empty directory: b/c/DEF-201",
+            "deleted empty directory: b/c",
+            "deleted empty directory: b"
+          ],
+          "op": "full",
+          "result": null,
+          "stats": {
+            "dirs_deleted": 3,
+            "files_deleted": 1,
+            "files_skipped": 2,
+            "files_updated": 1
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "starting mapping from {flat} to {emby}",
+            "WARNING: failed to get avid for {flat}/no title.strm, skipping"
+          ],
+          "op": "full",
+          "result": null,
+          "stats": {
+            "files_skipped": 3
+          }
+        }
+      ]
+    }
+  },
+  "rows": {},
+  "scenario": "mapping/full",
+  "tree": {
+    "emby": [
+      {
+        "kind": "dir",
+        "path": "a"
+      },
+      {
+        "kind": "dir",
+        "path": "a/ABC-101"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "a/ABC-101/ABC-101.nfo",
+        "sha256": "87d3be25624a99ae",
+        "size": 8
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "a/ABC-101/ABC-101.strm",
+        "sha256": "6290065677d48156",
+        "size": 23
+      },
+      {
+        "kind": "dir",
+        "path": "a/ABC-102"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "a/ABC-102/ABC-102-cd1.strm",
+        "sha256": "62612f38c56641bc",
+        "size": 24
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "a/ABC-102/ABC-102-cd2.strm",
+        "sha256": "24630250bc51a581",
+        "size": 24
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "a/ABC-102/poster.jpg",
+        "sha256": "2481a63c85a62cf8",
+        "size": 4
+      }
+    ],
+    "flat": [
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "GHI-301.STRM",
+        "sha256": "ff202bd84f42cda4",
+        "size": 18
+      },
+      {
+        "kind": "dir",
+        "path": "a"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "a/ABC-101.strm",
+        "sha256": "6290065677d48156",
+        "size": 23
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "a/ABC-102-cd1.strm",
+        "sha256": "62612f38c56641bc",
+        "size": 24
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "a/ABC-102-cd2.strm",
+        "sha256": "24630250bc51a581",
+        "size": 24
+      },
+      {
+        "kind": "dir",
+        "path": "b"
+      },
+      {
+        "kind": "dir",
+        "path": "b/c"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "no title.strm",
+        "sha256": "7d5be60904130be9",
+        "size": 19
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "notes.txt",
+        "sha256": "da947091b711faa0",
+        "size": 10
+      }
+    ]
+  }
+}

@@ -18,6 +18,11 @@ use crate::acquisitions::{
 };
 use crate::support::BoxFuture;
 
+mod subscriptions;
+pub use subscriptions::{
+    FakeSubscriptions, FakeSubscriptionsState, Poll, SubscriptionSpec, feed_url, make_subscription,
+};
+
 /// `now_stub()`: the fake's `created_at` / `updated_at`.
 pub fn now_stub() -> DateTime<Utc> {
     Utc.with_ymd_and_hms(2026, 8, 13, 0, 0, 0).single().expect("valid")

@@ -5,7 +5,9 @@
 //! `unlink`, the outermost `mkdir`, `rmtree`) as an `fs` call record; it fails a call the
 //! spec names with the `OSError` the spec asks for (before the call runs, so a faulted call
 //! changes nothing), and it asks the current run to stop right after a named mutation. Reads
-//! (`stat`, `iterdir`, `rglob`) can be faulted but are not recorded.
+//! (`stat`, `iterdir`, `rglob`) can be faulted but are not recorded. The mapping scenarios
+//! (`operations/mapping.py`) add `rmdir` and `copy2` as mutations and list directories in
+//! name order ([`RecordingFs::sort_listings`]).
 
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
@@ -67,6 +69,8 @@ struct State {
     faults: Vec<Fault>,
     stops: Vec<(String, PathBuf)>,
     run: Option<Arc<RunContext>>,
+    /// List directories in name order (bytes), as `operations/mapping.py` patches `os.scandir`.
+    sorted: bool,
 }
 
 /// The recording, failing file system.
@@ -117,6 +121,12 @@ impl RecordingFs {
     /// `args.stops[]`: ask the current run to stop right after `op` on `path`.
     pub fn add_stop(&self, op: &str, path: impl Into<PathBuf>) {
         self.state().stops.push((op.to_owned(), path.into()));
+    }
+
+    /// List every directory in name order (`operations/mapping.py`'s sorted `os.scandir`), so
+    /// a walk's order does not depend on the file system the scenario runs on.
+    pub fn sort_listings(&self) {
+        self.state().sorted = true;
     }
 
     /// The run a stop is sent to (`fs.run_ctx`).
@@ -201,7 +211,15 @@ impl Fs for RecordingFs {
     }
 
     fn scandir(&self, path: &Path) -> Result<Vec<ScanEntry>, PyOsError> {
-        self.inner.scandir(path)
+        let mut entries = self.inner.scandir(path)?;
+        if self.state().sorted {
+            use std::os::unix::ffi::OsStrExt as _;
+            entries.sort_by(|a, b| {
+                let name = |entry: &ScanEntry| entry.path.file_name().map(|name| name.as_bytes().to_vec());
+                name(a).cmp(&name(b))
+            });
+        }
+        Ok(entries)
     }
 
     fn mkdir(&self, path: &Path) -> Result<(), PyOsError> {
@@ -223,6 +241,21 @@ impl Fs for RecordingFs {
         self.mutation("rmtree", path_request(path), path, None, || self.inner.rmtree(path))
     }
 
+    fn rmdir(&self, path: &Path) -> Result<(), PyOsError> {
+        self.mutation("rmdir", path_request(path), path, None, || self.inner.rmdir(path))
+    }
+
+    fn copy2(&self, src: &Path, dst: &Path) -> Result<(), PyOsError> {
+        let mut request = Dict::new();
+        request.insert("src", Value::Str(path_text(src)));
+        request.insert("dst", Value::Str(path_text(dst)));
+        self.mutation("copy2", request, src, Some(dst), || self.inner.copy2(src, dst))
+    }
+
+    fn cmp_files(&self, a: &Path, b: &Path) -> Result<bool, PyOsError> {
+        self.inner.cmp_files(a, b)
+    }
+
     fn iterdir(&self, path: &Path) -> Result<Vec<PathBuf>, PyOsError> {
         if let Some(error) = self.fault("iterdir", path, None) {
             return Err(error);
@@ -241,6 +274,13 @@ impl Fs for RecordingFs {
     fn mkdir_parents(&self, path: &Path) -> Result<(), PyOsError> {
         self.mutation("mkdir", path_request(path), path, None, || {
             super::mkdir_parents(self, path)
+        })
+    }
+
+    /// Recorded as `mkdir` too: the patched `Path.mkdir` records every outermost call.
+    fn mkdir_parents_new(&self, path: &Path) -> Result<(), PyOsError> {
+        self.mutation("mkdir", path_request(path), path, None, || {
+            super::mkdir_parents_new(self, path)
         })
     }
 }
