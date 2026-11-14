@@ -406,6 +406,11 @@ or says why one stays.
   `embyx_transcode_worker::process` (D165), which needs what neither offers on Windows: a process group it can
   suspend and resume (NtSuspendProcess), a console-event-proof child and a live stderr reader. WP16 checks
   whether `SystemExec` can sit on it and drops what nothing uses.
+- A launcher shim in front of ffmpeg (Chocolatey's and Scoop's `bin\ffmpeg.exe` start the real one as
+  their child) defeats the home worker's kill and suspend in both builds: the real ffmpeg runs on and holds
+  the output pipes, so a stop only lands when the part is fully encoded. `rust.yml` puts the real ffmpeg
+  first on PATH. WP16's README tells Max to point `ffmpeg`/`ffprobe` at the real executables (winget's
+  Gyan.FFmpeg links them directly); a Job Object around the child would make shims harmless if wanted.
 - `embyx_transcode_worker::py` repeats a few of `embyx_merge::py`'s helpers (float formatting, `splitlines`)
   so the worker crate stays free of `embyx-merge` outside its tests; WP16's move into `embyx-core` covers it.
 - `embyx-merge`'s database half sits behind its default `db` feature and the binary leaves it out, so the
