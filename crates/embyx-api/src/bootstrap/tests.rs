@@ -102,6 +102,7 @@ async fn build_app_loads_the_store_and_serves_config() {
     let database = TestDatabase::create().await;
     let settings = Settings {
         database_url: dsn(database.name()),
+        transcode_token: Some("worker-secret".to_owned()),
         ..Settings::default()
     };
     let assembled = build_app(&settings, None).expect("assembled");
@@ -163,12 +164,22 @@ async fn build_app_loads_the_store_and_serves_config() {
         titles.get("reason"),
         Some(&Value::from("mapping.dst_dir and archive.dst_dir must be configured"))
     );
-    // The transcode listener serves the worker's routes and nothing else.
-    let (status, claimed) = call(
+    // The transcode listener serves the worker's routes and nothing else, behind
+    // `transcode_token`.
+    let (status, refused) = call(
         &assembled.transcode_app,
         Method::POST,
         "/api/transcode/claim",
         &[],
+        Some(r#"{"name": "pc"}"#),
+    )
+    .await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED, "{refused:?}");
+    let (status, claimed) = call(
+        &assembled.transcode_app,
+        Method::POST,
+        "/api/transcode/claim",
+        &[("authorization", "Bearer worker-secret")],
         Some(r#"{"name": "pc"}"#),
     )
     .await;

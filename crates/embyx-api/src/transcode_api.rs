@@ -248,12 +248,38 @@ fn chunk_headers(request: &Request) -> Option<ChunkHeaders> {
     })
 }
 
+/// `PUT .../chunks/{chunk_index}`. A refusal answered before the body is read (the token, the
+/// headers, the task, the part, a negative index) leaves the rest of the body to the server:
+/// uvicorn reads it and throws it away, keeping the connection, where hyper would close it
+/// with the bytes unread, which a Windows client can see as a reset before it reads the
+/// answer. So what is left of the body is read and dropped here, up to a chunk's size (D154).
 async fn put_chunk(state: Shared, mut request: Request) -> Answer {
-    let (task_id, part_index) = match task_and_part(&state, &request) {
+    let answer = upload_chunk(&state, &mut request).await;
+    discard_body(&mut request).await;
+    answer
+}
+
+/// Read what is left of the request body and drop it, stopping past [`MAX_CHUNK_BYTES`] or
+/// at a client that went away.
+async fn discard_body(request: &mut Request) {
+    let mut body = std::mem::replace(&mut request.body, axum::body::Body::empty());
+    let mut size: u64 = 0;
+    while let Some(Ok(frame)) = body.frame().await {
+        if let Ok(piece) = frame.into_data() {
+            size = size.saturating_add(piece.len() as u64);
+            if size > MAX_CHUNK_BYTES.unsigned_abs() {
+                break;
+            }
+        }
+    }
+}
+
+async fn upload_chunk(state: &Shared, request: &mut Request) -> Answer {
+    let (task_id, part_index) = match task_and_part(state, request) {
         Ok(found) => found,
         Err(answer) => return answer,
     };
-    let (Some(chunk_index), Some(headers)) = (int_param(request.param("chunk_index")), chunk_headers(&request)) else {
+    let (Some(chunk_index), Some(headers)) = (int_param(request.param("chunk_index")), chunk_headers(request)) else {
         return Ok(invalid_request());
     };
     let task = match state.service.transcoding_task(task_id, part_index).await {
@@ -264,7 +290,7 @@ async fn put_chunk(state: Shared, mut request: Request) -> Answer {
         return Ok(refusal(&ChunkRefusedError::new("transcode_chunk_out_of_order", 409)));
     }
     let staging = state.service.staging_chunk(&task, part_index, chunk_index);
-    let (size, digest) = receive(&mut request, &staging, headers.content_length).await?;
+    let (size, digest) = receive(request, &staging, headers.content_length).await?;
     if size != headers.content_length || digest != headers.sha256.to_lowercase() {
         match tokio::fs::remove_file(&staging).await {
             Ok(()) => {}

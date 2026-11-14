@@ -711,6 +711,7 @@ async fn a_failed_audio_job_fails_the_task_and_a_retry_keeps_the_chunks() {
 
 // py: tests/test_merge_transcode.py::test_the_worker_reads_parts_with_range_requests
 #[tokio::test]
+#[allow(clippy::too_many_lines, reason = "one part read every way ffmpeg reads it")]
 async fn the_worker_reads_parts_with_range_requests() {
     let harness = Harness::new().await;
     let mut task_parts = parts();
@@ -752,6 +753,55 @@ async fn the_worker_reads_parts_with_range_requests() {
             .get("content-type")
             .map(|value| value.to_str().expect("text")),
         Some("application/octet-stream")
+    );
+    assert_eq!(
+        response
+            .headers
+            .get("content-length")
+            .map(|value| value.to_str().expect("text")),
+        Some("10")
+    );
+    // Past the end: Starlette's 416 with the size; two ranges: one multipart answer.
+    let past = harness
+        .request(
+            Method::GET,
+            &format!("/api/transcode/tasks/{}/parts/0", task.id),
+            &[("range", "bytes=20000-".to_owned())],
+            Vec::new(),
+        )
+        .await;
+    assert_eq!(past.status, StatusCode::RANGE_NOT_SATISFIABLE);
+    assert_eq!(
+        past.headers
+            .get("content-range")
+            .map(|value| value.to_str().expect("text")),
+        Some("bytes */16384")
+    );
+    let two = harness
+        .request(
+            Method::GET,
+            &format!("/api/transcode/tasks/{}/parts/0", task.id),
+            &[("range", "bytes=0-1, 100-101".to_owned())],
+            Vec::new(),
+        )
+        .await;
+    assert_eq!(two.status, StatusCode::PARTIAL_CONTENT);
+    let content_type = two
+        .headers
+        .get("content-type")
+        .map(|value| value.to_str().expect("text").to_owned())
+        .unwrap_or_default();
+    assert!(
+        content_type.starts_with("multipart/byteranges; boundary="),
+        "{content_type}"
+    );
+    assert_eq!(
+        two.headers.get("content-length").map(|value| value
+            .to_str()
+            .expect("text")
+            .parse::<usize>()
+            .expect("a length")),
+        Some(two.bytes.len())
     );
     let missing = harness
         .request(
@@ -887,6 +937,74 @@ async fn reports_are_validated_after_the_token_as_fastapi_orders_it() {
 
 /// The chunk route: the token, then the path and headers (422), then the task and part, then a
 /// negative index, then the body.
+/// A refusal sent before the body is read leaves the connection open, as uvicorn does: the
+/// rest of the body is read and dropped, so a worker streaming a large chunk to a task that
+/// is gone reads the refusal instead of a reset, and the next request uses the same
+/// connection. Over a real socket: a wrong token, an unknown task, then one with
+/// `Connection: close`, all on one connection.
+#[tokio::test]
+async fn a_refused_upload_reads_the_rest_of_the_body_and_keeps_the_connection() {
+    use tokio::io::{AsyncReadExt as _, AsyncWriteExt as _};
+
+    let harness = Harness::new().await;
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.expect("bind");
+    let address = listener.local_addr().expect("an address");
+    let routes = crate::serve::router(harness.app.clone(), address)
+        .into_make_service_with_connect_info::<std::net::SocketAddr>();
+    let server = tokio::spawn(async move { axum::serve(listener, routes).await });
+
+    let body = vec![7_u8; 8 * 1024 * 1024];
+    let digest = sha256(&body);
+    let upload = |token: &str, close: bool| {
+        let mut head = format!(
+            "PUT /api/transcode/tasks/999/parts/0/chunks/0 HTTP/1.1\r\nhost: worker\r\n\
+             authorization: Bearer {token}\r\nx-chunk-start: 0.0\r\nx-chunk-duration: 2.0\r\n\
+             x-chunk-frames: 60\r\nx-chunk-sha256: {digest}\r\ncontent-length: {}\r\n",
+            body.len()
+        )
+        .into_bytes();
+        if close {
+            head.extend_from_slice(b"connection: close\r\n");
+        }
+        head.extend_from_slice(b"\r\n");
+        head.extend_from_slice(&body);
+        head
+    };
+    let mut requests = upload("wrong", false);
+    requests.extend(upload("secret", false));
+    requests.extend(upload("secret", true));
+
+    let stream = tokio::net::TcpStream::connect(address).await.expect("connect");
+    let (mut reader, mut writer) = stream.into_split();
+    // The write half is handed back, not dropped: a FIN would read as the client gone to
+    // hyper, which does not keep half-closed connections; a worker never half-closes.
+    let sending = tokio::spawn(async move { writer.write_all(&requests).await.map(|()| writer) });
+    let mut answers = Vec::new();
+    tokio::time::timeout(std::time::Duration::from_mins(1), reader.read_to_end(&mut answers))
+        .await
+        .expect("the server closes after the third request")
+        .expect("read");
+    let _writer = sending.await.expect("the writer").expect("every byte is taken");
+    let answers = String::from_utf8_lossy(&answers);
+    // Each answer's status, in order (a JSON body runs into the next status line).
+    let statuses: Vec<&str> = answers
+        .split("HTTP/1.1 ")
+        .skip(1)
+        .map(|answer| answer.get(..3).unwrap_or(answer))
+        .collect();
+    assert_eq!(statuses, ["401", "404", "404"], "{answers}");
+    assert_eq!(
+        answers
+            .matches(r#"{"error":{"code":"transcode_task_not_found"}}"#)
+            .count(),
+        2,
+        "{answers}"
+    );
+
+    server.abort();
+    harness.close().await;
+}
+
 #[tokio::test]
 async fn chunk_uploads_are_checked_in_fastapis_order() {
     let harness = Harness::new().await;

@@ -243,6 +243,8 @@ async fn a_python_worker_transcodes_a_title_through_the_rust_listener() {
             ("chunk_seconds", Value::Int(2)),
             ("stop_after", stop_after),
             ("refuse", Value::Bool(refuse)),
+            // The worker's 15 s, shortened so these short runs send heartbeats.
+            ("heartbeat_seconds", Value::Float(0.5)),
         ])
     };
 
@@ -292,6 +294,16 @@ async fn a_python_worker_transcodes_a_title_through_the_rust_listener() {
         panic!("parts in {resumed:?}");
     };
     assert_eq!(views[0].get("next_chunk"), Some(&Value::Int(*next)));
+    // Heartbeats went through while it encoded, each answered active and not paused.
+    assert_eq!(field(&done, "heartbeat_failures"), &Value::List(Vec::new()));
+    let Value::List(heartbeats) = field(&done, "heartbeats") else {
+        panic!("heartbeats in {done:?}");
+    };
+    assert!(!heartbeats.is_empty(), "no heartbeat was sent: {done:?}");
+    for answer in heartbeats {
+        assert_eq!(answer.get("active"), Some(&Value::Bool(true)), "{answer:?}");
+        assert_eq!(answer.get("paused"), Some(&Value::Bool(false)), "{answer:?}");
+    }
 
     // The service assembles once every part is in, with the Rust merge worker.
     service.tick().await.expect("tick");
