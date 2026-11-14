@@ -10,6 +10,10 @@ publish.workspace = true
 [lints]
 workspace = true
 
+[features]
+# The recording, failing and crashing file system (`fs::recording`), for other crates' tests.
+test-support = []
+
 [dependencies]
 chrono.workspace = true
 embyx-clients = { workspace = true, features = ["clouddrive"] }
@@ -21,14 +25,19 @@ indexmap.workspace = true
 sha2.workspace = true
 sqlx.workspace = true
 thiserror.workspace = true
-tokio = { workspace = true, features = ["sync"] }
+rustix.workspace = true
+tokio = { workspace = true, features = ["sync", "rt", "time"] }
+tokio-util.workspace = true
 tracing.workspace = true
+regex.workspace = true
+futures-util.workspace = true
+getrandom.workspace = true
 
 [dev-dependencies]
 embyx-clients = { workspace = true, features = ["clouddrive", "test-support"] }
 embyx-core = { workspace = true, features = ["test-support"] }
 embyx-db = { workspace = true, features = ["test-support"] }
 embyx-monitor = { workspace = true, features = ["test-support"] }
-rustix.workspace = true
 tempfile.workspace = true
+tracing-subscriber.workspace = true
 tokio = { workspace = true, features = ["macros", "rt", "rt-multi-thread", "sync", "time"] }

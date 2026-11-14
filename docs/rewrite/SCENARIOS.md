@@ -91,7 +91,9 @@ which is what makes the transcripts comparable. A port copies a fake rule for ru
   server serving the 14 RPCs the client uses, over a socket, so the scenario exercises the real
   client stack. State: directories, files with sizes and hashes, offline tasks, copy tasks, the
   upload queue; scripted errors fail the next `times` calls of a method. The Rust fake serves
-  all 14 RPCs rule for rule (WP3).
+  all 14 RPCs rule for rule (WP3). A seeded file may carry an `id` (default: its path) and a
+  `write_time` in nanoseconds since the epoch (default: none); both stay with the file when it
+  moves and are dumped when seeded (WP11: a moved file keeps its identity, as CloudDrive's do).
 - **Kubernetes and Emby** (`fakes/http.py`; Rust `embyx_clients::fakehttp`): a scripted route
   table (first matching route answers, matched on method and path without the query, used up
   after `times`; anything else is 404 `{"error": "no route"}`). Answers are JSON (`json.dumps`
@@ -170,8 +172,24 @@ the runner does and `dump()` gives the transcript's `fakes`.
   recording file system, and stubs recording `feed` fetches (a body or an HTTP status per URL) and `avbase`
   cast and talent lookups; `stop_after_fetch` asks the run to stop once a URL has been fetched.
 - **WP9 (scheduler):** fires come from `clock`; a scenario runs one tick, not a loop.
-- **WP11 (fill-actor service):** one scenario per journal state to recover from; seed the journal
-  rows and the half-done tree, and let the transcript show the recovered end state.
+- **WP11 (done):** `fill_actor/*` (apply_local, crash_rename, crash_hardlink, cancel, recovery, offline,
+  cloud_apply, cloud_crash) run `fill_actor.service` (`tools/scenarios/operations/fill_actor_service.py`,
+  `crates/embyx-fill-actor/src/service/tests/scenarios.rs`): the service over the seeded library (`args.library`:
+  actor, additional and move-in roots), the repository on the scenario database and, with `args.cloud`, the
+  mover on `AsyncCloudDrive` against the fake. Steps: `scan`, `apply` (`files` of the last plan), `reconcile`,
+  `restart` (a new service on a new pool, as a process restart), `journal` (journal states written through the
+  repository for a candidate, as either build writes them), `faults`, `cloud_move` (someone else's `MoveFile`)
+  and the unrecorded `write`/`remove`/`link`/`rename`. File mutations are `fs` calls (Python patches
+  `_rename_no_replace`, `os.link`, `os.rename`, `os.unlink`, `os.mkdir`; Rust wraps `LocalMoveFs` in
+  `fs::recording::RecordingMoveFs`) and the repository's writes are `repository` calls, recorded once they
+  returned. A step's `crash` (`{fs = <op>, path?, nth?}`, `{repository = <method>, state?}`, `{mover =
+  <method>}`) stops the service in front of that call as a dying process would (Python raises a
+  `BaseException` nothing catches; Rust panics in the step's task), and `cancel_after` (`{fs = <op>}`, `{mover =
+  <method>}`) cancels the step's task once that call returned. After every step the operation waits for the
+  moves still running (`aclose()`). The rows (`fill_actor_plans`, `_move_results`, `_move_journal`,
+  `_cloud_move_operations`) after each crash, restart and recovery are equal on both sides, which is what lets
+  either build resume a journal the other left. Candidate rows are not dumped: their fingerprints (device,
+  inode, times) differ from run to run.
 - **WP13 (done):** `merge/tasks` runs `MergeTaskRepository` step by step (`merge.tasks`, the same
   `{op, args}` shape); its rows pin the `parts_json` bytes. Timestamps the repository takes from the wall
   clock are `rows.merge_tasks.*` selectors; a WP14 spec can add steps without new operation code.

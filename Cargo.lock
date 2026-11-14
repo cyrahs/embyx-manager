@@ -1101,15 +1101,20 @@ dependencies = [
  "embyx-core",
  "embyx-db",
  "embyx-monitor",
+ "futures-util",
+ "getrandom 0.4.3",
  "hex",
  "indexmap",
+ "regex",
  "rustix",
  "sha2 0.11.1",
  "sqlx",
  "tempfile",
  "thiserror 2.0.21",
  "tokio",
+ "tokio-util",
  "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]

@@ -70,6 +70,10 @@ struct FileEntry {
     size: i64,
     /// As seeded: TOML keys are strings, `fileHashes` keys are `uint32`.
     hashes: Dict,
+    /// A seeded `id` (default: the path); it stays with the file when it moves.
+    id: Option<String>,
+    /// A seeded `write_time` in nanoseconds since the epoch (default: none); it moves too.
+    write_time: Option<i64>,
 }
 
 #[derive(Debug)]
@@ -158,7 +162,23 @@ impl State {
                 .and_then(Value::as_dict)
                 .cloned()
                 .unwrap_or_default();
-            files.insert(path, FileEntry { size, hashes });
+            let id = entry
+                .get("id")
+                .map(|id| id.as_str().expect("an id is a string").to_owned());
+            let write_time = match entry.get("write_time") {
+                Some(Value::Int(time)) => Some(i64::try_from(*time).expect("write_time fits i64")),
+                None => None,
+                Some(other) => panic!("write_time must be an integer, not {other:?}"),
+            };
+            files.insert(
+                path,
+                FileEntry {
+                    size,
+                    hashes,
+                    id,
+                    write_time,
+                },
+            );
         }
         let errors = list_of(seed, "errors")
             .into_iter()
@@ -217,11 +237,15 @@ impl State {
             })
             .collect();
         proto::CloudDriveFile {
-            id: path.to_owned(),
+            id: file.id.clone().unwrap_or_else(|| path.to_owned()),
             name,
             full_path_name: path.to_owned(),
             size: file.size,
             file_hashes,
+            write_time: file.write_time.map(|time| prost_types::Timestamp {
+                seconds: time.div_euclid(1_000_000_000),
+                nanos: i32::try_from(time.rem_euclid(1_000_000_000)).expect("nanos fit i32"),
+            }),
             ..Default::default()
         }
     }
@@ -273,6 +297,12 @@ impl State {
                 entry.insert("path", Value::from(path.as_str()));
                 entry.insert("size", Value::Int(i128::from(file.size)));
                 entry.insert("hashes", Value::Dict(file.hashes.clone()));
+                if let Some(id) = &file.id {
+                    entry.insert("id", Value::from(id.as_str()));
+                }
+                if let Some(time) = file.write_time {
+                    entry.insert("write_time", Value::Int(i128::from(time)));
+                }
                 Value::Dict(entry)
             })
             .collect();

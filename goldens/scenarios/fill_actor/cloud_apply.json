@@ -1,0 +1,3667 @@
+{
+  "calls": [
+    {
+      "error": {
+        "code": "NOT_FOUND",
+        "details": "path not found: /lib/movein/ABC"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/ABC"
+      },
+      "seq": 1
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-601"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-601.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-601",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-601.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1001",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456790Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-603"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-603.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-603",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-603.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1003",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456792Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-604-cd1"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-604-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-604-cd1",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-604-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1040",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456829Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-604"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-604.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-604",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-604.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1004",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456793Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-605"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-605.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-605",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-605.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1005",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456794Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-660"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-660.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-660",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-660.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1006",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456795Z"
+            }
+          ]
+        }
+      ],
+      "seq": 2
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/DEF"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-DEF-602"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/movein/DEF/DEF-602.mp4",
+              "hasDetailProperties": false,
+              "id": "file-other",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "DEF-602.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1020",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456809Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-DEF-609"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/movein/DEF/DEF-609.mp4",
+              "hasDetailProperties": false,
+              "id": "file-DEF-609",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "DEF-609.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1009",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456798Z"
+            }
+          ]
+        }
+      ],
+      "seq": 3
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/DEF"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-DEF-602"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/DEF/DEF-602.mp4",
+              "hasDetailProperties": false,
+              "id": "file-DEF-602",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "DEF-602.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1002",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456791Z"
+            }
+          ]
+        }
+      ],
+      "seq": 4
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-601"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-601.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-601",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-601.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1001",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456790Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-603"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-603.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-603",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-603.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1003",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456792Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-604-cd1"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-604-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-604-cd1",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-604-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1040",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456829Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-604"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-604.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-604",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-604.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1004",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456793Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-605"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-605.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-605",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-605.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1005",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456794Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-660"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-660.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-660",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-660.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1006",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456795Z"
+            }
+          ]
+        }
+      ],
+      "seq": 5
+    },
+    {
+      "error": {
+        "code": "NOT_FOUND",
+        "details": "path not found: /lib/movein/ABC"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/ABC"
+      },
+      "seq": 6
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/lib/movein/DEF",
+              "hasDetailProperties": false,
+              "id": "/lib/movein/DEF",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "DEF",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 7
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "CreateFolder",
+      "request": {
+        "folderName": "ABC",
+        "parentPath": "/lib/movein"
+      },
+      "response": {
+        "folderCreated": {
+          "CanCreateEncryptedFolder": false,
+          "CanLock": false,
+          "CanSyncFileChangesFromCloud": false,
+          "canAddShareLink": false,
+          "canDeletePermanently": false,
+          "canDirectAccessThumbnailURL": false,
+          "canMount": false,
+          "canOfflineDownload": false,
+          "canSearch": false,
+          "canUnmount": false,
+          "fileEncryptionType": "None",
+          "fileHashes": {},
+          "fileType": "Directory",
+          "fullPathName": "/lib/movein/ABC",
+          "hasDetailProperties": false,
+          "id": "/lib/movein/ABC",
+          "isCloudDirectory": false,
+          "isCloudFile": false,
+          "isCloudRoot": false,
+          "isDirectory": true,
+          "isForbidden": false,
+          "isLocal": false,
+          "isRoot": false,
+          "isSearchResult": false,
+          "name": "ABC",
+          "originalPath": "",
+          "previewUrl": "",
+          "size": "0",
+          "supportOfflineDownloadManagement": false,
+          "thumbnailUrl": ""
+        },
+        "result": {
+          "errorMessage": "",
+          "resultFilePaths": [
+            "/lib/movein/ABC"
+          ],
+          "success": true
+        }
+      },
+      "seq": 8
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/lib/movein/ABC",
+              "hasDetailProperties": false,
+              "id": "/lib/movein/ABC",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/lib/movein/DEF",
+              "hasDetailProperties": false,
+              "id": "/lib/movein/DEF",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "DEF",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 9
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/ABC"
+      },
+      "response": [
+        {
+          "subFiles": []
+        }
+      ],
+      "seq": 10
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-601"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-601.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-601",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-601.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1001",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456790Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-603"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-603.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-603",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-603.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1003",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456792Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-604-cd1"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-604-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-604-cd1",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-604-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1040",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456829Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-604"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-604.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-604",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-604.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1004",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456793Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-605"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-605.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-605",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-605.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1005",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456794Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-660"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-660.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-660",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-660.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1006",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456795Z"
+            }
+          ]
+        }
+      ],
+      "seq": 11
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/ABC"
+      },
+      "response": [
+        {
+          "subFiles": []
+        }
+      ],
+      "seq": 12
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_cloud_move_operation",
+      "request": {
+        "attempt_id": "token-8",
+        "candidate_id": "token-4",
+        "error_code": null,
+        "plan_id": "token-6",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 13
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_cloud_move_operation",
+      "request": {
+        "attempt_id": "token-8",
+        "candidate_id": "token-4",
+        "error_code": null,
+        "plan_id": "token-6",
+        "state": "submitting"
+      },
+      "response": null,
+      "seq": 14
+    },
+    {
+      "error": {
+        "code": "UNAVAILABLE",
+        "details": "connection reset"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "MoveFile",
+      "request": {
+        "conflictPolicy": "Skip",
+        "destPath": "/lib/movein/ABC",
+        "theFilePaths": [
+          "/lib/src/ABC/ABC-605.mp4"
+        ]
+      },
+      "seq": 15
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_cloud_move_operation",
+      "request": {
+        "attempt_id": "token-8",
+        "candidate_id": "token-4",
+        "error_code": "cloud_move_transport_unknown",
+        "plan_id": "token-6",
+        "state": "unknown"
+      },
+      "response": null,
+      "seq": 16
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-601"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-601.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-601",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-601.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1001",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456790Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-603"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-603.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-603",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-603.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1003",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456792Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-604-cd1"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-604-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-604-cd1",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-604-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1040",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456829Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-604"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-604.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-604",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-604.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1004",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456793Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-605"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-605.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-605",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-605.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1005",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456794Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-660"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-660.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-660",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-660.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1006",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456795Z"
+            }
+          ]
+        }
+      ],
+      "seq": 17
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/ABC"
+      },
+      "response": [
+        {
+          "subFiles": []
+        }
+      ],
+      "seq": 18
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "MoveFile",
+      "request": {
+        "conflictPolicy": "Skip",
+        "destPath": "/lib/elsewhere",
+        "theFilePaths": [
+          "/lib/src/ABC/ABC-603.mp4"
+        ]
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [
+          "/lib/elsewhere/ABC-603.mp4"
+        ],
+        "success": true
+      },
+      "seq": 19
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-601"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-601.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-601",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-601.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1001",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456790Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-604-cd1"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-604-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-604-cd1",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-604-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1040",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456829Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-604"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-604.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-604",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-604.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1004",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456793Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-605"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-605.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-605",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-605.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1005",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456794Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-660"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-660.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-660",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-660.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1006",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456795Z"
+            }
+          ]
+        }
+      ],
+      "seq": 20
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/ABC"
+      },
+      "response": [
+        {
+          "subFiles": []
+        }
+      ],
+      "seq": 21
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-601"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-601.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-601",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-601.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1001",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456790Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-604-cd1"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-604-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-604-cd1",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-604-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1040",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456829Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-604"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-604.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-604",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-604.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1004",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456793Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-605"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-605.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-605",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-605.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1005",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456794Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-660"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-660.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-660",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-660.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1006",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456795Z"
+            }
+          ]
+        }
+      ],
+      "seq": 22
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/ABC"
+      },
+      "response": [
+        {
+          "subFiles": []
+        }
+      ],
+      "seq": 23
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_cloud_move_operation",
+      "request": {
+        "attempt_id": "token-9",
+        "candidate_id": "token-1",
+        "error_code": null,
+        "plan_id": "token-6",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 24
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_cloud_move_operation",
+      "request": {
+        "attempt_id": "token-9",
+        "candidate_id": "token-1",
+        "error_code": null,
+        "plan_id": "token-6",
+        "state": "submitting"
+      },
+      "response": null,
+      "seq": 25
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "MoveFile",
+      "request": {
+        "conflictPolicy": "Skip",
+        "destPath": "/lib/movein/ABC",
+        "theFilePaths": [
+          "/lib/src/ABC/ABC-601.mp4"
+        ]
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [
+          "/lib/movein/ABC/ABC-601.mp4"
+        ],
+        "success": true
+      },
+      "seq": 26
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_cloud_move_operation",
+      "request": {
+        "attempt_id": "token-9",
+        "candidate_id": "token-1",
+        "error_code": null,
+        "plan_id": "token-6",
+        "state": "verifying"
+      },
+      "response": null,
+      "seq": 27
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-604-cd1"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-604-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-604-cd1",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-604-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1040",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456829Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-604"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-604.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-604",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-604.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1004",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456793Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-605"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-605.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-605",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-605.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1005",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456794Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-660"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-660.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-660",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-660.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1006",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456795Z"
+            }
+          ]
+        }
+      ],
+      "seq": 28
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-601"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/movein/ABC/ABC-601.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-601",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-601.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1001",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456790Z"
+            }
+          ]
+        }
+      ],
+      "seq": 29
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "finalize_cloud_move",
+      "request": {
+        "attempt_id": "token-9",
+        "candidate_id": "token-1",
+        "error_code": null,
+        "plan_id": "token-6",
+        "result_error_code": null,
+        "result_state": "moved",
+        "state": "succeeded"
+      },
+      "response": null,
+      "seq": 30
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-604-cd1"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-604-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-604-cd1",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-604-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1040",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456829Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-604"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-604.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-604",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-604.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1004",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456793Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-605"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-605.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-605",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-605.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1005",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456794Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-660"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-660.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-660",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-660.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1006",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456795Z"
+            }
+          ]
+        }
+      ],
+      "seq": 31
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-601"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/movein/ABC/ABC-601.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-601",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-601.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1001",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456790Z"
+            }
+          ]
+        }
+      ],
+      "seq": 32
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-2",
+        "error_code": "cloud_source_missing",
+        "plan_id": "token-6",
+        "state": "stale"
+      },
+      "response": null,
+      "seq": 33
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-3",
+        "error_code": "source_changed",
+        "plan_id": "token-6",
+        "state": "stale"
+      },
+      "response": null,
+      "seq": 34
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-604-cd1"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-604-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-604-cd1",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-604-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1040",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456829Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-604"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-604.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-604",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-604.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1004",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456793Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-605"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-605.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-605",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-605.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1005",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456794Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-660"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-660.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-660",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-660.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1006",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456795Z"
+            }
+          ]
+        }
+      ],
+      "seq": 35
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-601"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/movein/ABC/ABC-601.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-601",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-601.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1001",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456790Z"
+            }
+          ]
+        }
+      ],
+      "seq": 36
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/DEF"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-DEF-602"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/DEF/DEF-602.mp4",
+              "hasDetailProperties": false,
+              "id": "file-DEF-602",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "DEF-602.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1002",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456791Z"
+            }
+          ]
+        }
+      ],
+      "seq": 37
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/DEF"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-DEF-602"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/movein/DEF/DEF-602.mp4",
+              "hasDetailProperties": false,
+              "id": "file-other",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "DEF-602.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1020",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456809Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-DEF-609"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/movein/DEF/DEF-609.mp4",
+              "hasDetailProperties": false,
+              "id": "file-DEF-609",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "DEF-609.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1009",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456798Z"
+            }
+          ]
+        }
+      ],
+      "seq": 38
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-5",
+        "error_code": "cloud_destination_exists",
+        "plan_id": "token-6",
+        "state": "conflict"
+      },
+      "response": null,
+      "seq": 39
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-604-cd1"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-604-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-604-cd1",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-604-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1040",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456829Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-604"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-604.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-604",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-604.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1004",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456793Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-605"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-605.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-605",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-605.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1005",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456794Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-660"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-660.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-660",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-660.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1006",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456795Z"
+            }
+          ]
+        }
+      ],
+      "seq": 40
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-601"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/movein/ABC/ABC-601.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-601",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-601.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1001",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456790Z"
+            }
+          ]
+        }
+      ],
+      "seq": 41
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-604-cd1"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-604-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-604-cd1",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-604-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1040",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456829Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-604"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-604.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-604",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-604.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1004",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456793Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-605"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-605.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-605",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-605.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1005",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456794Z"
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-660"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-660.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-660",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-660.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1006",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456795Z"
+            }
+          ]
+        }
+      ],
+      "seq": 42
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-601"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/movein/ABC/ABC-601.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-601",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-601.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1001",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456790Z"
+            }
+          ]
+        }
+      ],
+      "seq": 43
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "finalize_cloud_move",
+      "request": {
+        "attempt_id": "token-8",
+        "candidate_id": "token-4",
+        "error_code": "cloud_move_not_observed",
+        "plan_id": "token-6",
+        "result_error_code": "cloud_move_not_observed",
+        "result_state": "failed",
+        "state": "failed"
+      },
+      "response": null,
+      "seq": 44
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/",
+        "/lib",
+        "/lib/elsewhere",
+        "/lib/movein",
+        "/lib/movein/ABC",
+        "/lib/movein/DEF",
+        "/lib/src",
+        "/lib/src/ABC",
+        "/lib/src/DEF"
+      ],
+      "files": [
+        {
+          "hashes": {
+            "2": "sha1-ABC-603"
+          },
+          "id": "file-ABC-603",
+          "path": "/lib/elsewhere/ABC-603.mp4",
+          "size": 1003,
+          "write_time": 1788000000123456792
+        },
+        {
+          "hashes": {
+            "2": "sha1-ABC-601"
+          },
+          "id": "file-ABC-601",
+          "path": "/lib/movein/ABC/ABC-601.mp4",
+          "size": 1001,
+          "write_time": 1788000000123456790
+        },
+        {
+          "hashes": {
+            "2": "sha1-DEF-602"
+          },
+          "id": "file-other",
+          "path": "/lib/movein/DEF/DEF-602.mp4",
+          "size": 1020,
+          "write_time": 1788000000123456809
+        },
+        {
+          "hashes": {
+            "2": "sha1-DEF-609"
+          },
+          "id": "file-DEF-609",
+          "path": "/lib/movein/DEF/DEF-609.mp4",
+          "size": 1009,
+          "write_time": 1788000000123456798
+        },
+        {
+          "hashes": {
+            "2": "sha1-ABC-604-cd1"
+          },
+          "id": "file-ABC-604-cd1",
+          "path": "/lib/src/ABC/ABC-604-cd1.mp4",
+          "size": 1040,
+          "write_time": 1788000000123456829
+        },
+        {
+          "hashes": {
+            "2": "sha1-ABC-604"
+          },
+          "id": "file-ABC-604",
+          "path": "/lib/src/ABC/ABC-604.mp4",
+          "size": 1004,
+          "write_time": 1788000000123456793
+        },
+        {
+          "hashes": {
+            "2": "sha1-ABC-605"
+          },
+          "id": "file-ABC-605",
+          "path": "/lib/src/ABC/ABC-605.mp4",
+          "size": 1005,
+          "write_time": 1788000000123456794
+        },
+        {
+          "hashes": {
+            "2": "sha1-ABC-660"
+          },
+          "id": "file-ABC-660",
+          "path": "/lib/src/ABC/ABC-660.mp4",
+          "size": 1006,
+          "write_time": 1788000000123456795
+        },
+        {
+          "hashes": {
+            "2": "sha1-DEF-602"
+          },
+          "id": "file-DEF-602",
+          "path": "/lib/src/DEF/DEF-602.mp4",
+          "size": 1002,
+          "write_time": 1788000000123456791
+        }
+      ],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "fill_actor.service",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "op": "scan",
+          "result": {
+            "actors": [
+              {
+                "actor_id": "actor",
+                "actor_name": null,
+                "aliases": [],
+                "error_code": null,
+                "error_message": null,
+                "scraped_count": 9,
+                "talent_id": null,
+                "video_ids": [
+                  "ABC-601",
+                  "ABC-603",
+                  "ABC-604",
+                  "ABC-605",
+                  "ABC-606",
+                  "ABC-607",
+                  "ABC-608",
+                  "DEF-602",
+                  "DEF-609"
+                ]
+              }
+            ],
+            "created_at": "2026-09-16T03:00:00Z",
+            "expires_at": "2026-09-16T04:00:00Z",
+            "plan_id": "token-6",
+            "revision": "token-7",
+            "videos": [
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-1",
+                    "destination_conflict": false,
+                    "file_name": "ABC-601.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-601"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-601",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-2",
+                    "destination_conflict": false,
+                    "file_name": "ABC-603.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-603"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-603",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-3",
+                    "destination_conflict": false,
+                    "file_name": "ABC-604.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-604"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-604",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-4",
+                    "destination_conflict": false,
+                    "file_name": "ABC-605.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-605"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-605",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [],
+                "release_date": null,
+                "state": "scan_failed",
+                "video_id": "ABC-606",
+                "warnings": [
+                  "cloud_source_name_mismatch"
+                ]
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [],
+                "release_date": null,
+                "state": "scan_failed",
+                "video_id": "ABC-607",
+                "warnings": [
+                  "cloud_mapping_not_strm"
+                ]
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [],
+                "release_date": null,
+                "state": "scan_failed",
+                "video_id": "ABC-608",
+                "warnings": [
+                  "invalid_strm_target"
+                ]
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-5",
+                    "destination_conflict": true,
+                    "file_name": "DEF-602.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "DEF-602"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "DEF-602",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [
+                  "DEF-609.mp4"
+                ],
+                "move_candidates": [],
+                "release_date": null,
+                "state": "exists",
+                "video_id": "DEF-609",
+                "warnings": [
+                  "mapping_convergence_pending"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "op": "apply",
+          "result": {
+            "plan_id": "token-6",
+            "results": [
+              {
+                "candidate_id": "token-4",
+                "error_code": "cloud_move_status_unknown",
+                "file_name": "ABC-605.mp4",
+                "state": "failed",
+                "video_id": "ABC-605"
+              }
+            ],
+            "revision": "token-7",
+            "state": "failed"
+          }
+        },
+        {
+          "op": "cloud_move"
+        },
+        {
+          "op": "write"
+        },
+        {
+          "op": "apply",
+          "result": {
+            "plan_id": "token-6",
+            "results": [
+              {
+                "candidate_id": "token-1",
+                "error_code": null,
+                "file_name": "ABC-601.mp4",
+                "state": "moved",
+                "video_id": "ABC-601"
+              },
+              {
+                "candidate_id": "token-2",
+                "error_code": "cloud_source_missing",
+                "file_name": "ABC-603.mp4",
+                "state": "stale",
+                "video_id": "ABC-603"
+              },
+              {
+                "candidate_id": "token-3",
+                "error_code": "source_changed",
+                "file_name": "ABC-604.mp4",
+                "state": "stale",
+                "video_id": "ABC-604"
+              },
+              {
+                "candidate_id": "token-4",
+                "error_code": "cloud_move_status_unknown",
+                "file_name": "ABC-605.mp4",
+                "state": "failed",
+                "video_id": "ABC-605"
+              },
+              {
+                "candidate_id": "token-5",
+                "error_code": "cloud_destination_exists",
+                "file_name": "DEF-602.mp4",
+                "state": "conflict",
+                "video_id": "DEF-602"
+              }
+            ],
+            "revision": "token-7",
+            "state": "partial_failed"
+          }
+        },
+        {
+          "op": "reconcile",
+          "result": [
+            {
+              "candidate_id": "token-4",
+              "error_code": "cloud_move_status_unknown",
+              "file_name": "ABC-605.mp4",
+              "state": "failed",
+              "video_id": "ABC-605"
+            }
+          ]
+        },
+        {
+          "op": "reconcile",
+          "result": [
+            {
+              "candidate_id": "token-4",
+              "error_code": "cloud_move_not_observed",
+              "file_name": "ABC-605.mp4",
+              "state": "failed",
+              "video_id": "ABC-605"
+            }
+          ]
+        },
+        {
+          "op": "apply",
+          "result": {
+            "plan_id": "token-6",
+            "results": [
+              {
+                "candidate_id": "token-1",
+                "error_code": null,
+                "file_name": "ABC-601.mp4",
+                "state": "moved",
+                "video_id": "ABC-601"
+              },
+              {
+                "candidate_id": "token-2",
+                "error_code": "cloud_source_missing",
+                "file_name": "ABC-603.mp4",
+                "state": "stale",
+                "video_id": "ABC-603"
+              },
+              {
+                "candidate_id": "token-3",
+                "error_code": "source_changed",
+                "file_name": "ABC-604.mp4",
+                "state": "stale",
+                "video_id": "ABC-604"
+              },
+              {
+                "candidate_id": "token-4",
+                "error_code": "cloud_move_not_observed",
+                "file_name": "ABC-605.mp4",
+                "state": "failed",
+                "video_id": "ABC-605"
+              },
+              {
+                "candidate_id": "token-5",
+                "error_code": "cloud_destination_exists",
+                "file_name": "DEF-602.mp4",
+                "state": "conflict",
+                "video_id": "DEF-602"
+              }
+            ],
+            "revision": "token-7",
+            "state": "partial_failed"
+          }
+        }
+      ]
+    }
+  },
+  "rows": {
+    "fill_actor_cloud_move_operations": [
+      {
+        "attempt_id": "token-8",
+        "candidate_id": "token-4",
+        "destination_dir": "/lib/movein/ABC",
+        "error_code": "cloud_move_not_observed",
+        "plan_id": "token-6",
+        "source_path": "/lib/src/ABC/ABC-605.mp4",
+        "state": "failed",
+        "updated_at": "2026-09-16T03:17:00+00:00"
+      },
+      {
+        "attempt_id": "token-9",
+        "candidate_id": "token-1",
+        "destination_dir": "/lib/movein/ABC",
+        "error_code": null,
+        "plan_id": "token-6",
+        "source_path": "/lib/src/ABC/ABC-601.mp4",
+        "state": "succeeded",
+        "updated_at": "2026-09-16T03:02:00+00:00"
+      }
+    ],
+    "fill_actor_move_journal": [],
+    "fill_actor_move_results": [
+      {
+        "candidate_id": "token-1",
+        "plan_id": "token-6",
+        "result_json": "{\"candidate_id\":\"token-1\",\"video_id\":\"ABC-601\",\"file_name\":\"ABC-601.mp4\",\"state\":\"moved\",\"error_code\":null}"
+      },
+      {
+        "candidate_id": "token-2",
+        "plan_id": "token-6",
+        "result_json": "{\"candidate_id\":\"token-2\",\"video_id\":\"ABC-603\",\"file_name\":\"ABC-603.mp4\",\"state\":\"stale\",\"error_code\":\"cloud_source_missing\"}"
+      },
+      {
+        "candidate_id": "token-3",
+        "plan_id": "token-6",
+        "result_json": "{\"candidate_id\":\"token-3\",\"video_id\":\"ABC-604\",\"file_name\":\"ABC-604.mp4\",\"state\":\"stale\",\"error_code\":\"source_changed\"}"
+      },
+      {
+        "candidate_id": "token-4",
+        "plan_id": "token-6",
+        "result_json": "{\"candidate_id\":\"token-4\",\"video_id\":\"ABC-605\",\"file_name\":\"ABC-605.mp4\",\"state\":\"failed\",\"error_code\":\"cloud_move_not_observed\"}"
+      },
+      {
+        "candidate_id": "token-5",
+        "plan_id": "token-6",
+        "result_json": "{\"candidate_id\":\"token-5\",\"video_id\":\"DEF-602\",\"file_name\":\"DEF-602.mp4\",\"state\":\"conflict\",\"error_code\":\"cloud_destination_exists\"}"
+      }
+    ],
+    "fill_actor_plans": [
+      {
+        "config_version": 0,
+        "created_at": "2026-09-16T03:00:00+00:00",
+        "expires_at": "2026-09-16T04:00:00+00:00",
+        "plan_id": "token-6",
+        "public_json": "{\"plan_id\":\"token-6\",\"revision\":\"token-7\",\"created_at\":\"2026-09-16T03:00:00Z\",\"expires_at\":\"2026-09-16T04:00:00Z\",\"actors\":[{\"actor_id\":\"actor\",\"scraped_count\":9,\"video_ids\":[\"ABC-601\",\"ABC-603\",\"ABC-604\",\"ABC-605\",\"ABC-606\",\"ABC-607\",\"ABC-608\",\"DEF-602\",\"DEF-609\"],\"error_code\":null,\"actor_name\":null,\"talent_id\":null,\"aliases\":[],\"error_message\":null}],\"videos\":[{\"video_id\":\"ABC-601\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-1\",\"video_id\":\"ABC-601\",\"file_name\":\"ABC-601.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-603\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-2\",\"video_id\":\"ABC-603\",\"file_name\":\"ABC-603.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-604\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-3\",\"video_id\":\"ABC-604\",\"file_name\":\"ABC-604.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-605\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-4\",\"video_id\":\"ABC-605\",\"file_name\":\"ABC-605.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-606\",\"actor_ids\":[\"actor\"],\"state\":\"scan_failed\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[],\"warnings\":[\"cloud_source_name_mismatch\"]},{\"video_id\":\"ABC-607\",\"actor_ids\":[\"actor\"],\"state\":\"scan_failed\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[],\"warnings\":[\"cloud_mapping_not_strm\"]},{\"video_id\":\"ABC-608\",\"actor_ids\":[\"actor\"],\"state\":\"scan_failed\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[],\"warnings\":[\"invalid_strm_target\"]},{\"video_id\":\"DEF-602\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-5\",\"video_id\":\"DEF-602\",\"file_name\":\"DEF-602.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":true}],\"warnings\":[]},{\"video_id\":\"DEF-609\",\"actor_ids\":[\"actor\"],\"state\":\"exists\",\"release_date\":null,\"existing_files\":[\"DEF-609.mp4\"],\"move_candidates\":[],\"warnings\":[\"mapping_convergence_pending\"]}]}",
+        "revision": "token-7"
+      }
+    ]
+  },
+  "scenario": "fill_actor/cloud_apply",
+  "tree": {
+    "actor": [],
+    "additional": [
+      {
+        "kind": "dir",
+        "path": "ABC"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC/ABC-601.strm",
+        "sha256": "e20596c0e21f99a0",
+        "size": 32
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC/ABC-603.strm",
+        "sha256": "0cd3dd659a47354a",
+        "size": 32
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC/ABC-604.strm",
+        "sha256": "2a7201bf265d96ec",
+        "size": 36
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC/ABC-605.strm",
+        "sha256": "117db6424155529c",
+        "size": 32
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC/ABC-606.strm",
+        "sha256": "a7b1733031c549c1",
+        "size": 32
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC/ABC-607.mp4",
+        "sha256": "7b70d3ab4c764154",
+        "size": 7
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC/ABC-608.strm",
+        "sha256": "200d20d8a1f29023",
+        "size": 22
+      },
+      {
+        "kind": "dir",
+        "path": "DEF"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "DEF/DEF-602.strm",
+        "sha256": "155a7f8fff875655",
+        "size": 32
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "DEF/DEF-609.strm",
+        "sha256": "7febbe76614288c4",
+        "size": 32
+      }
+    ],
+    "movein": []
+  }
+}

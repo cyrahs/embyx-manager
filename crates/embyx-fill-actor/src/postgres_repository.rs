@@ -26,6 +26,7 @@ use sqlx::{PgConnection, Row as _};
 
 use crate::cloud_moves::{CheckError, CloudFileMetadata};
 use crate::models::{ApplyResult, FillActorPlan, MoveResult};
+use crate::pystr::{PyChar, encode_error_what, normalized_path_bytes, surrogateescape};
 use crate::records::{
     ApplyJobRecord, CancelJobOutcome, CancelJobResult, CandidateKind, CandidateRecord, CloudMoveOperationRecord,
     CloudMoveOperationState, EnqueueApplyJobOutcome, EnqueueApplyJobResult, FileFingerprint, JOB_CANCELLED_ERROR_CODE,
@@ -1288,58 +1289,6 @@ fn path_text(path: &Path, position: usize) -> Result<String> {
     ))))
 }
 
-/// One code point of a surrogate-escaped `str`: a character, or an undecodable byte
-/// (`U+DC80`..`U+DCFF`).
-#[derive(Clone, Copy, PartialEq, Eq)]
-enum PyChar {
-    Char(char),
-    Escaped(u8),
-}
-
-/// `bytes.decode('utf-8', 'surrogateescape')`.
-fn surrogateescape(mut bytes: &[u8]) -> Vec<PyChar> {
-    let mut chars = Vec::with_capacity(bytes.len());
-    while !bytes.is_empty() {
-        match std::str::from_utf8(bytes) {
-            Ok(text) => {
-                chars.extend(text.chars().map(PyChar::Char));
-                break;
-            }
-            Err(error) => {
-                let (valid, rest) = bytes.split_at(error.valid_up_to());
-                // `valid_up_to` bytes are UTF-8 by the error's own word.
-                chars.extend(String::from_utf8_lossy(valid).chars().map(PyChar::Char));
-                let bad = error.error_len().unwrap_or(rest.len());
-                chars.extend(rest[..bad].iter().map(|&byte| PyChar::Escaped(byte)));
-                bytes = &rest[bad..];
-            }
-        }
-    }
-    chars
-}
-
-/// `str(Path(text))` on the bytes: `/` and `.` are ASCII, so pathlib's normalisation does
-/// not depend on the decoding.
-fn normalized_path_bytes(bytes: &[u8]) -> Vec<u8> {
-    let root: &[u8] = if bytes.starts_with(b"//") && !bytes.starts_with(b"///") {
-        b"//"
-    } else if bytes.starts_with(b"/") {
-        b"/"
-    } else {
-        b""
-    };
-    let parts: Vec<&[u8]> = bytes
-        .split(|&byte| byte == b'/')
-        .filter(|part| !part.is_empty() && *part != b".")
-        .collect();
-    let mut out = root.to_vec();
-    out.extend(parts.join(&b'/'));
-    if out.is_empty() {
-        out.push(b'.');
-    }
-    out
-}
-
 /// `repr(text)` of a surrogate-escaped `str`.
 fn surrogate_repr(chars: &[PyChar]) -> String {
     use std::fmt::Write as _;
@@ -1383,20 +1332,7 @@ fn unencodable_path(path: &Path, position: usize) -> String {
         repr = repr.chars().take(40).collect::<String>() + "...";
     }
     // The UTF-8 encoder reports the first run of consecutive surrogates.
-    let start = chars
-        .iter()
-        .position(|ch| matches!(ch, PyChar::Escaped(_)))
-        .unwrap_or_default();
-    let run = chars[start..]
-        .iter()
-        .take_while(|ch| matches!(ch, PyChar::Escaped(_)))
-        .count();
-    let what = match chars.get(start) {
-        Some(PyChar::Escaped(byte)) if run == 1 => {
-            format!("character '\\u{:04x}' in position {start}", 0xdc00 | u32::from(*byte))
-        }
-        _ => format!("characters in position {start}-{}", start + run.max(1) - 1),
-    };
+    let what = encode_error_what(&chars).unwrap_or_default();
     format!(
         "invalid input for query argument ${position}: {repr} ('utf-8' codec can't encode {what}: surrogates not allowed)"
     )

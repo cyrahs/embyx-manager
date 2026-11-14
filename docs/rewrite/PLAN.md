@@ -267,7 +267,7 @@ feed. Where the TLS fingerprint matters the probe runs from the production netwo
 | WP8 | 3 monitor | done (#92) | RSS pipeline, mapping pipeline, playlists and playlist sync | 1,150 | WP5 |
 | WP9 | 3 monitor | done (#94) | Scheduler (cron, watcher, tracker bursts), monitor API, playlists API, wiring | 1,700 | WP7, WP8, WP4 |
 | WP10 | 4 fill actor | done (#90) | PostgreSQL repository, models, cloud moves, adapters | 1,850 | WP3, WP5 |
-| WP11 | 4 fill actor | pending | Service: scan, plan, local moves with journal and recovery, cloud moves | 2,100 | WP10 |
+| WP11 | 4 fill actor | in review | Service: scan, plan, local moves with journal and recovery, cloud moves | 2,100 | WP10 |
 | WP12 | 4 fill actor | pending | Job manager, API, health, lifespan | 1,200 | WP11, WP4 |
 | WP13 | 5 merge | done (#86) | Detect, task repository, the `merge-worker` command (probe, checks, concat, remux, AV1 re-encode, home prepare and assemble) | 1,650 | WP1 |
 | WP14 | 5 merge | pending | Merge service, auto-merge, transcode bookkeeping, merge API, transcode listener. May be split into "service" and "API + transcode" | 2,300 | WP13, WP3, WP9 |
@@ -507,6 +507,23 @@ or says why one stays.
   moves should take WP6's `Arc<dyn Fs>`. `FillActorError` (`errors.rs`) carries the API codes for WP12. The
   `fill_actor/repository` scenario (`tools/scenarios/operations/fill_actor.py`) takes `{op, args}` steps named
   after the repository methods; WP11's recovery scenarios can seed rows through `database.sql` the way it does.
+- WP11 left these for later packages. `embyx_fill_actor::service::FillActorService` is built from
+  `ServiceParts` (runtime provider, catalog, gateway, brand resolver, repository: required, D110) and
+  `ServiceOptions` (Python's keyword defaults, plus `fs: Arc<dyn MoveFs>` and the cloud verification `sleeper`).
+  Errors it lets through are `ServiceError` (`FillActor` with the API code, or `Raised { class, message }`);
+  `class_name()` and `as_fill_actor()` are what WP12's job manager maps. WP12 must await `settle_scans()` after
+  cancelling a scan job (D123; `test_job_cancel_does_not_return_before_managed_scan_worker_exits` is WP12's
+  now), call `aclose()` at shutdown, pass the `AsyncFileLock` as `mutation_lock`, and give a progress callback
+  that cannot fail (D124). Moves survive a dropped `apply` (D121); a cancelled reconcile drops its persistence,
+  as Python's does. `crates/embyx-fill-actor/src/service/tests/scenarios.rs` is the `fill_actor.service`
+  operation; a WP12 scenario can drive the job manager over the same world.
+- Shared edits WP11 made: `embyx_core::scenario::Seeded::resolve` gives a bare root without a trailing slash,
+  as `operations/archive.py` `resolve` does; the CloudDrive fake (both sides) takes an optional seeded `id` and
+  `write_time` per file, kept through moves and dumped only when seeded (no existing transcript changed).
+- WP16: `embyx_fill_actor::fs::MoveFs` (inodes, links, `renameat2`, `realpath`) and WP6's
+  `embyx_monitor::fs::Fs` overlap in `stat`/`iterdir`/`mkdir`/`rename`/`unlink`; one trait with the fill-actor
+  primitives as extra methods would serve both. `embyx_fill_actor::pystr` (surrogate-escaped names, sort keys,
+  `normalized_path_bytes`, the codec error text) may repeat helpers WP6/WP7 wrote for D72/D81.
 - Copies WP16 should fold together: `embyx_fill_actor::cloud_moves::splitlines` is a copy of
   `embyx_merge::py::splitlines`; `embyx_fill_actor::models::str_enum!` repeats `embyx_monitor`'s `str_enum!`
   (with `ALL` and `parse` returning `Option`). `embyx_fill_actor::pydatetime` (pydantic's `datetime`/`date` in

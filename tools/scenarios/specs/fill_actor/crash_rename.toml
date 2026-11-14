@@ -1,0 +1,139 @@
+# The fill-actor service stops (a crash, as a process that dies) in front of each step of a
+# move on the rename path (WP11): the journal's prepared, the rename, the journal's linked and
+# source_removed, the stored result and the journal's reconciled, one title each. A new
+# service then reconciles what the journal left and applies the plan again: the file ends in
+# the move-in directory once, with one stored result.
+description = "fill_actor: a crash before each step of a rename move, then recovery"
+operation = "fill_actor.service"
+clock = "2026-09-11T03:00:00+00:00"
+
+[roots]
+names = ["actor", "additional", "movein"]
+
+[args]
+catalog = { actor = ["ABC-101", "ABC-102", "ABC-103", "ABC-104", "ABC-105", "ABC-106"] }
+
+[[args.steps]]
+op = "scan"
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-101.mp4"], crash = { repository = "save_move_journal", state = "prepared" }, advance_seconds = 60 }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-101.mp4"] }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-102.mp4"], crash = { fs = "rename_noreplace" }, advance_seconds = 60 }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-102.mp4"] }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-103.mp4"], crash = { repository = "save_move_journal", state = "linked" }, advance_seconds = 60 }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-103.mp4"] }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-104.mp4"], crash = { repository = "save_move_journal", state = "source_removed" }, advance_seconds = 60 }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-104.mp4"] }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-105.mp4"], crash = { repository = "save_move_result" }, advance_seconds = 60 }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-105.mp4"] }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-106.mp4"], crash = { repository = "save_move_journal", state = "reconciled" }, advance_seconds = 60 }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-106.mp4"] }
+
+[[tree]]
+path = "additional/ABC/ABC-101.mp4"
+size = 2
+
+[[tree]]
+path = "additional/ABC/ABC-102.mp4"
+size = 3
+
+[[tree]]
+path = "additional/ABC/ABC-103.mp4"
+size = 4
+
+[[tree]]
+path = "additional/ABC/ABC-104.mp4"
+size = 5
+
+[[tree]]
+path = "additional/ABC/ABC-105.mp4"
+size = 6
+
+[[tree]]
+path = "additional/ABC/ABC-106.mp4"
+size = 7
+
+[database]
+schema = "app"
+tables = [
+    "fill_actor_plans",
+    "fill_actor_move_results",
+    "fill_actor_move_journal",
+]

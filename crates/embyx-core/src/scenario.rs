@@ -135,10 +135,14 @@ impl Seeded {
             .map_or_else(|| panic!("no root {name:?}"), |(_, path)| path.as_path())
     }
 
-    /// `<root>/<relative>` from a `root/relative` spec path.
+    /// `<root>/<relative>` from a `root/relative` spec path; the root itself (no trailing
+    /// slash) for a bare root name, as `operations/archive.py` `resolve` reads it.
     pub fn resolve(&self, spec_path: &str) -> PathBuf {
-        let (root, relative) = spec_path.split_once('/').unwrap_or((spec_path, ""));
-        self.root(root).join(relative)
+        match spec_path.split_once('/') {
+            Some((root, relative)) if !relative.is_empty() => self.root(root).join(relative),
+            Some((root, _)) => self.root(root).to_path_buf(),
+            None => self.root(spec_path).to_path_buf(),
+        }
     }
 
     fn create(&self, entry: &Value) {
