@@ -99,7 +99,15 @@ pub(crate) fn returncode(status: ExitStatus) -> i64 {
             return -i64::from(signal);
         }
     }
-    status.code().map_or(-1, i64::from)
+    // Windows' exit code is a DWORD, which Python reports unsigned (0xC0000005 is 3221225477).
+    #[cfg(windows)]
+    {
+        status.code().map_or(-1, |code| i64::from(code.cast_unsigned()))
+    }
+    #[cfg(not(windows))]
+    {
+        status.code().map_or(-1, i64::from)
+    }
 }
 
 fn read_all(mut pipe: impl Read + Send + 'static) -> thread::JoinHandle<Vec<u8>> {
@@ -312,6 +320,26 @@ mod tests {
             .run(&argv(&["embyx-no-such-program-here"]), None)
             .expect_err("missing");
         assert!(matches!(error, RunError::Io(_)), "{error:?}");
+    }
+
+    // `Popen.returncode`: the exit status as the system gives it, minus the signal on POSIX.
+    #[test]
+    fn exit_codes_are_reported_as_python_reports_them() {
+        #[cfg(unix)]
+        let cases = [
+            (argv(&["sh", "-c", "exit 3"]), 3),
+            (argv(&["sh", "-c", "kill -9 $$"]), -9),
+        ];
+        #[cfg(windows)]
+        let cases = [
+            (argv(&["cmd", "/c", "exit 3"]), 3),
+            // An access violation's 0xC0000005, unsigned as Python shows it.
+            (argv(&["cmd", "/c", "exit -1073741819"]), 3_221_225_477),
+        ];
+        for (command, code) in cases {
+            let captured = SystemRunner.run(&command, None).expect("runs");
+            assert_eq!(captured.returncode, code, "{command:?}");
+        }
     }
 
     #[test]

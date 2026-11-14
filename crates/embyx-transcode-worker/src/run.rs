@@ -202,7 +202,7 @@ impl Worker {
             for entry in std::fs::read_dir(&self.config.cache_dir)? {
                 let entry = entry?;
                 if entry.path().is_dir() && entry.file_name().to_string_lossy() != keep {
-                    let _ = std::fs::remove_dir_all(entry.path());
+                    py::rmtree(&entry.path());
                 }
             }
             let left = task.parts.iter().filter(|part| !part.done).count();

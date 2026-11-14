@@ -111,6 +111,8 @@ impl HttpServer {
     pub fn with_timeouts(config: &WorkerConfig, connect: Duration, io: Duration) -> Self {
         let agent = ureq::Agent::config_builder()
             .http_status_as_error(false)
+            // httpx's client follows no redirect: a 3xx is the cluster's answer.
+            .max_redirects(0)
             .timeout_connect(Some(connect))
             .timeout_per_read(Some(io))
             .timeout_per_write(Some(io))
@@ -332,6 +334,28 @@ mod tests {
                 panic!("{body}: {result:?}");
             };
             assert!(message.ends_with(shown), "{message}");
+        }
+    }
+
+    // httpx follows no redirect, so a 3xx is a `ServerError` named by its reason phrase.
+    #[test]
+    fn a_redirect_is_an_answer_not_followed() {
+        for status in [301, 307] {
+            let fake = FakeHttp::start(move |_| Reply::Redirect(status, "/elsewhere".to_owned()));
+            let result = server(&fake.base()).claim(&idle_report(&WorkerConfig::new("x")));
+            let Err(CallError::Server(error)) = result else {
+                panic!("{status}: {result:?}");
+            };
+            assert_eq!(error.status, status);
+            assert_eq!(
+                error.code,
+                if status == 301 {
+                    "Moved Permanently"
+                } else {
+                    "Temporary Redirect"
+                }
+            );
+            assert_eq!(fake.requests().len(), 1, "{status}: the redirect was followed");
         }
     }
 

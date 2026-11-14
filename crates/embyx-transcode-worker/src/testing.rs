@@ -46,6 +46,8 @@ pub(crate) enum Reply {
     CutShort,
     /// Say nothing for this long, then close.
     Stall(Duration),
+    /// A redirect with this status to this location, no body.
+    Redirect(u16, String),
 }
 
 impl Reply {
@@ -114,6 +116,15 @@ fn serve(stream: TcpStream, handler: &Handler, seen: &Mutex<Vec<Recorded>>) {
                     return;
                 }
             }
+            Reply::Redirect(status, location) => {
+                let head = format!(
+                    "HTTP/1.1 {status} {}\r\nlocation: {location}\r\ncontent-length: 0\r\n\r\n",
+                    reason(status)
+                );
+                if writer.write_all(head.as_bytes()).is_err() {
+                    return;
+                }
+            }
             Reply::HangUp => return,
             Reply::CutShort => {
                 let _ = writer.write_all(
@@ -133,6 +144,8 @@ fn reason(status: u16) -> &'static str {
     match status {
         200 => "OK",
         201 => "Created",
+        301 => "Moved Permanently",
+        307 => "Temporary Redirect",
         400 => "Bad Request",
         401 => "Unauthorized",
         404 => "Not Found",

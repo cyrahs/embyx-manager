@@ -20,7 +20,7 @@ use embyx_core::pyjson::{self, Dict, DumpOptions, Value};
 use embyx_merge::transcode::audio_status_path;
 use embyx_merge::worker::{self, Command, Environment, StatusFile, Worker as MergeWorker};
 use embyx_transcode_worker::WorkerConfig;
-use embyx_transcode_worker::chunks::{LocalChunk, RateLimiter, RateMeter};
+use embyx_transcode_worker::chunks::{Clock, LocalChunk, RateLimiter, RateMeter, SystemClock, sha256_of};
 use embyx_transcode_worker::console::MemoryLog;
 use embyx_transcode_worker::process::SystemRunner;
 use embyx_transcode_worker::run::{Worker, idle_report};
@@ -190,10 +190,21 @@ fn run_job(args: &[Value]) {
     assert_eq!(code, 0, "{}", String::from_utf8_lossy(&stderr));
 }
 
-/// The HTTP client, counting the chunks the cluster took.
+/// The HTTP client, counting the chunks the cluster took and keeping its heartbeat answers.
 struct Counted {
     server: HttpServer,
     stored: AtomicUsize,
+    heartbeats: Mutex<Vec<Dict>>,
+}
+
+impl Counted {
+    fn new(config: &WorkerConfig) -> Arc<Self> {
+        Arc::new(Self {
+            server: HttpServer::new(config),
+            stored: AtomicUsize::new(0),
+            heartbeats: Mutex::new(Vec::new()),
+        })
+    }
 }
 
 impl Cluster for Counted {
@@ -206,7 +217,11 @@ impl Cluster for Counted {
     }
 
     fn heartbeat(&self, report: &Value) -> Result<Dict, CallError> {
-        self.server.heartbeat(report)
+        let answer = self.server.heartbeat(report);
+        if let Ok(answer) = &answer {
+            self.heartbeats.lock().expect("heartbeats").push(answer.clone());
+        }
+        answer
     }
 
     fn upload(
@@ -239,7 +254,11 @@ fn worker(
         cluster,
         runner: Arc::new(SystemRunner),
         log,
-        timing: Timing::default(),
+        timing: Timing {
+            // The worker's 15 s, shortened so these short runs send heartbeats.
+            heartbeat: Duration::from_millis(500),
+            ..Timing::default()
+        },
         stop: Arc::new(stop),
         sleep: Some(Arc::new(|_| std::thread::sleep(Duration::from_millis(50)))),
     }
@@ -317,10 +336,7 @@ fn the_rust_worker_transcodes_for_the_python_listener() {
     run_job(&prepare);
 
     // Ctrl+C once the cluster holds a chunk: the run finishes the chunk under way and stops.
-    let first = Arc::new(Counted {
-        server: HttpServer::new(&config),
-        stored: AtomicUsize::new(0),
-    });
+    let first = Counted::new(&config);
     let held = Arc::clone(&first);
     let log = Arc::new(MemoryLog::default());
     worker(&config, first, log.clone(), move || {
@@ -345,10 +361,38 @@ fn the_rust_worker_transcodes_for_the_python_listener() {
     );
 
     // Started again, it carries on from the last chunk the cluster has.
-    let second = Arc::new(Counted {
-        server: HttpServer::new(&config),
-        stored: AtomicUsize::new(0),
-    });
+    // A chunk with a wrong token, and one far past the next the cluster expects, are refused.
+    let body = tmp.join("refused.mkv");
+    std::fs::write(&body, vec![7_u8; 4 << 20]).expect("a chunk's bytes");
+    let chunk = LocalChunk {
+        part_index: 0,
+        index: 99,
+        start: 5940.0,
+        duration: 60.0,
+        frames: 1798,
+        bytes: 4 << 20,
+        sha256: sha256_of(&body).expect("sha256"),
+        path: body,
+    };
+    for (client, status, code) in [
+        (HttpServer::new(&wrong), 401, "unauthorized"),
+        (HttpServer::new(&config), 409, "transcode_chunk_out_of_order"),
+    ] {
+        let clock: Arc<dyn Clock> = Arc::new(SystemClock::default());
+        let answer = client.upload(
+            id,
+            &chunk,
+            &RateLimiter::new(0.0, Arc::clone(&clock)),
+            &RateMeter::new(clock),
+        );
+        let Err(CallError::Server(refused)) = answer else {
+            panic!("not refused: {answer:?}");
+        };
+        assert_eq!((refused.status, refused.code.as_str()), (status, code), "{refused:?}");
+    }
+
+    let second = Counted::new(&config);
+    let beats = Arc::clone(&second);
     let log = Arc::new(MemoryLog::default());
     let watched = Arc::clone(&log);
     let seen = Arc::new(Mutex::new(false));
@@ -370,6 +414,12 @@ fn the_rust_worker_transcodes_for_the_python_listener() {
         "{events:?}"
     );
     assert!(!events.iter().any(|line| line.contains("被拒")), "{events:?}");
+    let heartbeats = beats.heartbeats.lock().expect("heartbeats").clone();
+    assert!(!heartbeats.is_empty(), "no heartbeat was sent: {events:?}");
+    for answer in &heartbeats {
+        assert_eq!(answer.get("active"), Some(&Value::Bool(true)), "{answer:?}");
+        assert_eq!(answer.get("paused"), Some(&Value::Bool(false)), "{answer:?}");
+    }
     let answer = server.claim(&idle_report(&config)).expect("claim");
     assert_eq!(
         answer.get("wait").and_then(Value::as_str),

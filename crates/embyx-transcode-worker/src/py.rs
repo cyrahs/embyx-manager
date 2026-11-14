@@ -282,6 +282,15 @@ fn strip_zeros(text: &str) -> &str {
     }
 }
 
+/// `shutil.rmtree(path, ignore_errors=True)`: a symbolic link is refused (and the refusal
+/// ignored), so the link and what it points at are both left.
+pub(crate) fn rmtree(path: &std::path::Path) {
+    if std::fs::symlink_metadata(path).is_ok_and(|meta| meta.file_type().is_symlink()) {
+        return;
+    }
+    let _ = std::fs::remove_dir_all(path);
+}
+
 #[cfg(test)]
 mod tests {
     use embyx_core::pyjson::{Dict, Value};
@@ -328,5 +337,21 @@ mod tests {
             repr(&Value::Dict(dict)),
             "{'code': 'transcode_chunk_out_of_order', 'next_chunk': 1, 'resume_at': 20.0, 'flags': [True, None]}"
         );
+    }
+
+    // `shutil.rmtree(link, ignore_errors=True)` leaves a link to a folder alone.
+    #[cfg(unix)]
+    #[test]
+    fn a_link_to_a_folder_is_left_alone() {
+        let tmp = tempfile::tempdir().expect("tempdir");
+        let target = tmp.path().join("target");
+        std::fs::create_dir(&target).expect("target");
+        std::fs::write(target.join("kept"), b"x").expect("file");
+        let link = tmp.path().join("link");
+        std::os::unix::fs::symlink(&target, &link).expect("link");
+        super::rmtree(&link);
+        assert!(link.exists() && target.join("kept").exists());
+        super::rmtree(&target);
+        assert!(!target.exists());
     }
 }

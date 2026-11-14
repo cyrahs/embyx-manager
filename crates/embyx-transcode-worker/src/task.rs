@@ -25,6 +25,8 @@ use crate::py::{self, PyError};
 use crate::server::{CallError, Cluster};
 
 #[cfg(test)]
+mod encoder_tests;
+#[cfg(test)]
 mod tests;
 #[cfg(test)]
 mod thread_tests;
@@ -349,7 +351,7 @@ fn folder(index: i128) -> String {
 
 /// `shutil.rmtree(path, ignore_errors=True)`.
 fn rmtree(path: &Path) {
-    let _ = std::fs::remove_dir_all(path);
+    py::rmtree(path);
 }
 
 impl TaskRun {
