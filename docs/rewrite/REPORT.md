@@ -9,11 +9,14 @@ A copy of this file is at `/mnt/project-files/embyx-rust/report-data.md`.
 
 - **Scope.** Full parity with the baseline (`5a3c083`, `main` and the deployed commit): `serve` (API, every
   pipeline, the fill actor, the merge service and its transcode listener), `merge-worker` and
-  `transcode-worker`, in one binary. The decided drops are listed under D50 and D110: `import-config`, the
-  in-memory fill-actor repository and `/docs` with `/redoc`.
+  `transcode-worker`, in one binary. The decided drops: the
+  in-memory fill-actor repository (D110), `/docs` with `/redoc` (D50), and the one-off `import-config`
+  command (no D row; named in the introduction of `docs/DIVERGENCES.md` and in PLAN.md).
 - **`main` catch-up.** `main` is still at the baseline (rechecked 2026-11-14 10:17Z, before the last PR), so there is nothing to
   port.
-- **Level 1.** Complete and green on the final code head: locally on cd657f6, and in CI on 6c5120b, merged as cf10954. #101 adds only this report and PLAN.md.
+- **Level 1.** Complete and green: locally on cd657f6, the last commit that changed crate code, and in CI
+  on 6c5120b (#100's review fixes: tools, `Dockerfile.rust`, `rust.yml` and docs, no crate code), merged as
+  cf10954. #101 adds only this report and PLAN.md.
   - parity 747 of 747 Python test functions and 1,754 of 1,754 cases, 0 waived;
   - `openapi::PENDING` and the smoke's `NOT_YET_PORTED` empty;
   - goldens and transcripts equal byte for byte;
@@ -26,7 +29,8 @@ A copy of this file is at `/mnt/project-files/embyx-rust/report-data.md`.
   - a masked export (`mask.py`);
   - a GET differ over every read route of the main API (101 of 101 equal on a synthetic export, status and content type included);
   - a decision replay of AVID, brand and archive routing (77 of 77 and 52 of 52 names equal).
-- **Level 3.** One capped, anonymous, read-only run against the real sites:
+- **Level 3.** One capped, anonymous, read-only run against the real sites from this cloud container
+  (besides WP0's AVBase fingerprint probe, run once from nas-us-2 on Max's approval, #82):
   - 8 of 11 reads were equal;
   - sukebei differed only in live seeder and leecher counts;
   - an AVBase work read exposed a connection-reuse difference, now fixed (D175);
@@ -41,18 +45,19 @@ A copy of this file is at `/mnt/project-files/embyx-rust/report-data.md`.
 
 Lines, comments and docs included. Rust test code is everything under `tests/`, in `tests.rs` files and in
 trailing `#[cfg(test)]` modules. Python's 9,370 lines of generated protobuf code are left out; tonic's
-generated code is not in the tree.
+generated code is not in the tree. Each Python file is counted in one row. The Rust counts leave out the
+crates' `examples/` and `build.rs` (810 lines: the level 2 and 3 tools and the proto build).
 
 | Crate | Rust source | Rust tests | Python counterpart (source lines) |
 | --- | --- | --- | --- |
-| embyx-core (settings, config models, AVID, magnets, Python-semantics helpers) | 6,599 | 2,022 | `config/`, `core/`, `settings.py`, `errors.py` (1,322) |
+| embyx-core (settings, config models, AVID, magnets, Python-semantics helpers) | 6,599 | 2,022 | `config/` without its API, `core/`, `settings.py`, `errors.py` (1,157) |
 | embyx-db (pool, migrations, locks, health) | 1,942 | 1,145 | `db.py`, `locking.py` (763) |
 | embyx-clients (JavBus, sukebei, AVBase, jinjier, feeds, Emby, CloudDrive, Kubernetes) | 10,537 | 6,661 | `clients/` without generated code, `merge/kube.py` (2,132) |
-| embyx-monitor (archive, reconcile, move-in, tracker, intake, RSS, mapping, playlists, scheduler) | 15,634 | 12,758 | `monitor/` without its API (5,947) |
-| embyx-fill-actor (plans, apply, cloud moves, recovery, jobs) | 10,413 | 9,135 | `fill_actor/` (5,837) |
-| embyx-merge (merge worker, detect, tasks, merge service, auto-merge) | 7,486 | 5,379 | `merge/` without the API, home worker and kube (3,014) |
+| embyx-monitor (archive, reconcile, move-in, tracker, intake, RSS, mapping, playlists, scheduler) | 15,634 | 12,758 | `monitor/` without `api.py` and `playlists_api.py` (6,126) |
+| embyx-fill-actor (plans, apply, cloud moves, recovery, jobs) | 10,413 | 9,135 | `fill_actor/` without `api.py` (5,427) |
+| embyx-merge (merge worker, detect, tasks, merge service, auto-merge) | 7,486 | 5,379 | `merge/` without `api.py`, `transcode_api.py`, `home_worker.py` and `kube.py` (3,125) |
 | embyx-transcode-worker (home worker) | 5,562 | 1,654 | `merge/home_worker.py` (1,141) |
-| embyx-api (HTTP shell, every router, bootstrap, transcode listener) | 14,885 | 8,401 | `api.py`, `bootstrap.py`, `adapters.py`, the API modules (3,622) |
+| embyx-api (HTTP shell, every router, bootstrap, transcode listener) | 14,885 | 8,401 | `api.py`, `bootstrap.py`, `adapters.py` and the six API modules of `config/`, `monitor/`, `fill_actor/` and `merge/` (3,424) |
 | embyx-manager (the binary) | 204 | 156 | `__main__.py` (175) |
 | Total | 73,262 | 47,311 | 23,470 (tests: 18,715) |
 
@@ -67,19 +72,19 @@ The goldens and transcripts that pin this behaviour come from the Python tree, n
 
 ## Tests, parity, goldens and transcripts
 
-| Check | Result on the final code head (cd657f6 locally, 6c5120b in CI) |
+| Check | Result (cd657f6 locally, 6c5120b in CI) |
 | --- | --- |
 | Rust tests (workspace, Linux) | 1,231 passed, 0 failed, 0 ignored |
-| Rust tests (Windows job: worker crate and binary, real ffmpeg) | pass: the worker crate and the binary, with real ffmpeg (CI, Windows job) |
+| Rust tests (Windows job: worker crate and binary, real ffmpeg) | pass (CI) |
 | Python tests (baseline suite, unchanged) | 1,745 passed, 9 xfailed (1,754 cases) |
 | Test parity (`tools/parity/parity.py`, crate-aware listing) | 747 / 747 functions, 1,754 / 1,754 cases, 0 waived |
 | Goldens (`tools/goldens/generate.py --check`, outputs of the baseline's own code) | 82 golden files equal |
 | Effect transcripts (`tools/scenarios/runner.py --check`, Python first, then Rust byte for byte, with the resume matrix) | 63 scenarios, 0 problems |
 | `/openapi.json`, main and transcode listeners, structural diff against FastAPI's | equal; `openapi::PENDING` empty |
-| React front end, unmodified: lint, 117 tests, build; page smoke against the Rust server | lint clean, 121 tests in 11 files pass (the plan counted 117), build passes; page smoke passes (six pages, settings round trip, SPA fallback, exit 0 on SIGTERM) |
+| React front end, unmodified: lint, tests, build; page smoke against the Rust server | lint clean, 121 tests in 11 files pass (the plan counted 117), build passes; page smoke passes (six pages, settings round trip, SPA fallback, exit 0 on SIGTERM) |
 | Schema: both builds migrate an empty database, `pg_dump --schema-only` diff | empty (720 lines each) |
 | Cross-version: Python worker against the Rust listener, Rust worker against the Python listener and Rust against Rust (contract 5); Rust and Python merge workers on the same parts (real ffmpeg) | pass (part of the workspace tests) |
-| Tool self-tests (`tools/tests`) | 45 passed, the Rust replay comparison included |
+| Tool self-tests (`tools/tests`) | CI: 44 passed and 1 skipped in the python-tools job; the skipped Rust replay comparison runs in the rust job (6 passed there). Locally on cd657f6: 43 passed, 1 skipped |
 | Tree check: Python tree byte-identical to the baseline, no ignored test, `unsafe` confined | pass |
 
 ## Verification level per pipeline
@@ -91,7 +96,7 @@ data). Level 3 means live reads of the anonymous sites.
 | --- | --- | --- | --- |
 | Settings, config sections, validation, masking | tests, goldens for all 9 sections | GET differ (`/api/config/*`) | n/a |
 | AVID parsing, brands, magnets | tests, goldens (the corpus TSVs) | decision replay | n/a |
-| JavBus, sukebei, AVBase, jinjier, RSS/Atom parsers | tests, goldens over recorded pages, TLS fingerprint probe (AVBase) | n/a | JavBus 3/3 equal; sukebei equal except live counts; AVBase build id and talent equal, work read fixed (D175); jinjier 3/3 equal; RSSHub inconclusive |
+| JavBus, sukebei, AVBase, jinjier, RSS/Atom parsers | tests, goldens over recorded pages, TLS fingerprint probe (AVBase, also run live from nas-us-2 in WP0, #82) | n/a | JavBus 3/3 equal; sukebei equal except live counts; AVBase build id and talent equal, work read fixed (D175); jinjier 3/3 equal; RSSHub inconclusive |
 | CloudDrive (gRPC) | tests against fakes, transcripts of every mutation | n/a | not allowed (no live CloudDrive) |
 | Emby (playlists) | tests, transcripts against a stand-in | n/a | not allowed |
 | Kubernetes Jobs | tests, goldens of the built Job | n/a | not allowed |
@@ -125,7 +130,8 @@ normal use:
 
 - The server exits 0 after SIGTERM (D57).
 - `/docs` and `/redoc` are gone (D50).
-- Log lines have no Python tracebacks (D52, D60, D127, D141).
+- Log lines carry no Python traceback frames (D52, D60, D127); the merge worker's unhandled errors print
+  only the traceback's header and last line (D141).
 - AVBase resends a GET once when a reused connection dropped, as libcurl does (D175).
 - At shutdown the server waits up to 45 s for CloudDrive calls in flight instead of cancelling them
   (D41, D56).
@@ -192,7 +198,7 @@ normal use:
 | D101 | WP9 | mechanism | internal | Shutdown stops loops at await points, as cancellation does in Python |
 | D102 | WP9 | observable | visible (logs) | A scheduler loop whose next run leaves the date range logs an ERROR line before it stops |
 | D103 | WP9 | observable | visible (timing) | The `.strm` watcher walks a moved-in directory itself (notify reports only the directory) |
-| D104 | WP9 | python-bug | copied | Move-in listing refreshes only the root, as Python does |
+| D104 | WP9 | python-bug | visible (copied from Python) | Move-in listing refreshes only the root, as Python does |
 | D105 | WP9 | mechanism | internal | Routers take scheduler traits |
 | D106 | WP9 | observable | visible (edge input) | Integer query parameters beyond i64 are refused (Python clamped or accepted any size) |
 | D107 | WP9 | mechanism | internal | Playlist fills tracked in a task map |
@@ -207,7 +213,7 @@ normal use:
 | D116 | WP10 | mechanism | internal | Cancelled CloudDrive calls finish under `settle()` instead of `asyncio.shield` |
 | D120 | WP11 | mechanism | internal | Fill-actor file work through `MoveFs` (links, `renameat2`) |
 | D121 | WP11 | mechanism | internal | Moves in tracked tasks instead of an `_in_flight` dict |
-| D122 | WP11 | observable | visible (cancel timing) | A cancelled fill-actor file mutation holds its lock until the thread ends, then returns |
+| D122 | WP11 | observable | visible (cancel timing) | A cancelled fill-actor file mutation returns at once while its thread keeps the lock until it ends (Python's caller waited for the thread) |
 | D123 | WP11 | observable | visible (cancel timing) | A dropped scan stops its thread through a flag at the next check |
 | D124 | WP11 | mechanism | internal | Progress callbacks as a trait |
 | D125 | WP11 | mechanism | internal | Non-UTF-8 names as bytes in the fill actor |
@@ -291,7 +297,8 @@ RSS is shown in MiB.
   - Python: 40.6 MiB;
   - the plan's goal was under 15 MiB.
 
-  Both wrote byte-identical outputs.
+  Both wrote byte-identical outputs. Only the sampler (`mw/sample.py`) was kept, not its raw output. The
+  plan's Python baseline for this figure was 63 MiB, measured another way.
 - **Production context.** The deployment requests 256Mi and limits at 768Mi. Python's 30-day median in
   production is 192 MiB, above the 106-123 MiB measured here. That figure comes from the pod's metrics,
   which count more than one process's RSS (page cache from the file work, for one).
@@ -323,7 +330,7 @@ These are from the last runs on #100. The Rust image job's first run is cold; la
 | `rust.yml` python-tools: goldens, transcripts, tool tests, ruff | 1 min 35 s |
 | `rust.yml` parity, tree | 13 s, 4 s |
 | `ci.yml` (the Python tree's): backend, frontend, image (not pushed from a PR) | 1 min 14 s, 1 min 7 s, 1 min 7 s |
-| Wall clock of `rust.yml` per push | about 8 min 40 s, set by the image job (6 min 20 s before it) |
+| Wall clock of `rust.yml` per push | about 8 min 40 s, set by the image job; without it, rust and parity together took 6 min 32 s on 6c5120b |
 
 ## Experiment log summary
 
@@ -339,12 +346,14 @@ The full rows are in PLAN.md "Experiment log".
 
   In WP16, the `rust` job was red on #99's first push and green from the second.
 - **Independent reviews.**
-  - Severity counts: 0 blockers, 9 major, 52 minor and 59 nits. WP0 used another scale: 0 high,
-    3 medium, 7 low.
+  - Severity counts over the whole rewrite (WP1-WP16, #83-#100): 0 blockers, 15 major, 58 minor and
+    63 nits, plus WP7's uncounted D82 wording nits. #100 alone had 6 of the majors. WP0 used another
+    scale: 0 high, 3 medium, 7 low.
   - **All addressed.** Every finding was fixed or explicitly answered on its PR before the merge.
-  - **Major findings.** Each was a real behaviour gap the tests had missed. Examples include a dropped
-    lock wait that never cancelled, a CloudDrive call abandoned on drop, lossy non-UTF-8 names matching
-    the wrong file, and a missing `ENOENT`-only `is_file`.
+  - **Major findings.** Most were behaviour gaps the tests had missed; WP11's was a missing test.
+    Examples: a dropped lock wait that never cancelled; a dropped caller returning before its CloudDrive
+    call finished, where Python waits (the call kept running); a lossy non-UTF-8 name that matched no
+    file; an `is_file` that read every `stat` error as "no"; and #100's masking gaps.
 - **Found by running for real rather than by review.**
   - The Chocolatey ffmpeg shim (WP15 CI).
   - The AVBase connection-reuse resend (WP16 level 3, D175).
@@ -376,7 +385,8 @@ The full rows are in PLAN.md "Experiment log".
 - **No production data.** Level 2 was not run, so rows in production that no test imagined (hand edits,
   very old shapes) are untested; D62, D92, D112 and D172 refuse out-of-shape rows where Python passed
   them through.
-- **AVBase fingerprint.** The AVBase client impersonates Chrome through `wreq`/BoringSSL. A Cloudflare
+- **AVBase fingerprint.** The AVBase client impersonates Chrome through `wreq`/BoringSSL. It passed from
+  the production network (nas-us-2, WP0's probe, #82) and from this container (level 3). A Cloudflare
   change can break either build, but the two may not break the same way.
 - **Windows exe.** It was built and tested in CI only, never on the 5090, and its `crt-static` release
   build is untried.
