@@ -3,7 +3,7 @@
 # cancelled, the staging folder deleted, the merged file dropped) and failed while merging.
 # Two shutdowns land in the middle (cross-version contract 6): one right after a tick issued
 # the copy, one in the middle of a cancel; each build continues from what the other left.
-# Its `restart` steps split it for the resume matrix (`crates/embyx-merge/tests/service_resume.rs`):
+# Its `restart` steps split it for the resume matrix (`crates/embyx-merge/tests/service_scenarios.rs`):
 # a new process each, and in the matrix the other build.
 description = "merge service: cancel at each state, with shutdowns mid-step"
 operation = "merge.service"

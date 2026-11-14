@@ -3,8 +3,9 @@
 # cancelled; the merged file is put in place by hand and the retry files it. The archive never
 # takes it and the task fails while archiving; with no whole copy in the library the cancel is
 # refused; once a whole copy is there, the archive's refusal is a duplicate and the cancel
-# deletes the merged copy (a shutdown first lands right after that delete).
-# Its `restart` steps split it for the resume matrix (`crates/embyx-merge/tests/service_resume.rs`):
+# deletes the merged copy (CloudDrive failing refuses it twice first, then a shutdown lands
+# right after that delete).
+# Its `restart` steps split it for the resume matrix (`crates/embyx-merge/tests/service_scenarios.rs`):
 # a new process each, and in the matrix the other build.
 description = "merge service: replacing and archiving failures, refused and discarding cancels"
 operation = "merge.service"
@@ -130,6 +131,24 @@ args = { seconds = 7201 }
 
 [[args.steps]]
 op = "tick"
+
+# CloudDrive fails while the cancel looks for the whole copy, then while it deletes the merged
+# copy: the cancel is refused both times and the task stays as it was.
+[[args.steps]]
+op = "cloud"
+args = { edit = "fail", args = { method = "GetSubFiles", code = "UNAVAILABLE", details = "connection reset" } }
+
+[[args.steps]]
+op = "cancel"
+args = { id = 1 }
+
+[[args.steps]]
+op = "cloud"
+args = { edit = "fail", args = { method = "DeleteFiles", code = "UNAVAILABLE", details = "connection reset" } }
+
+[[args.steps]]
+op = "cancel"
+args = { id = 1 }
 
 [[args.steps]]
 op = "cancel"

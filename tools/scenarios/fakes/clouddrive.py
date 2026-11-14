@@ -126,7 +126,8 @@ class FakeCloudDrive(pb_grpc.CloudDriveFileSrvServicer):
         `add_file` (`path`, `size`, `hashes`), `add_directory` and `remove` (`path`),
         `update_copy_tasks` (the `fields` of every task copying into `dest_path`, e.g. a
         finished copy), `drop_copy_tasks` (those tasks leave the list) and `set_uploads` (the
-        upload queue becomes `uploads`).
+        upload queue becomes `uploads`) and `fail` (a scripted failure as the seed's `errors`
+        hold them: the next `times` calls of `method` fail with `code` and `details`).
         """
         with self._lock:
             match op:
@@ -149,6 +150,8 @@ class FakeCloudDrive(pb_grpc.CloudDriveFileSrvServicer):
                     self.copy_tasks = [task for task in self.copy_tasks if task['dest_path'] != args['dest_path']]
                 case 'set_uploads':
                     self.uploads = [dict(upload) for upload in args['uploads']]
+                case 'fail':
+                    self.errors.append(dict(args))
                 case _:
                     msg = f'unknown CloudDrive edit {op!r}'
                     raise ValueError(msg)

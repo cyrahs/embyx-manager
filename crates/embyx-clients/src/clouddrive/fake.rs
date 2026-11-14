@@ -499,7 +499,7 @@ impl FakeCloudDrive {
 
     /// `FakeCloudDrive.edit(op, args)`: change the state without a call, as CloudDrive itself
     /// does (WP14): `add_file`, `add_directory`, `remove`, `update_copy_tasks`,
-    /// `drop_copy_tasks`, `set_uploads`.
+    /// `drop_copy_tasks`, `set_uploads`, `fail` (a scripted failure as the seed's `errors`).
     pub fn edit(&self, op: &str, args: &Value) {
         let mut state = self.state.lock().expect("fake state");
         let path = || text(args, "path").to_owned();
@@ -553,6 +553,10 @@ impl FakeCloudDrive {
             }
             "set_uploads" => {
                 state.uploads = list_of(args, "uploads");
+            }
+            "fail" => {
+                let error = args.as_dict().expect("a scripted error is a table").clone();
+                state.errors.push(error);
             }
             other => panic!("unknown CloudDrive edit {other:?}"),
         }

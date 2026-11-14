@@ -4,7 +4,7 @@
 # SHA-1 are checked once 115 reports them, the parts go, the merged file moves into
 # `{intake}/vr/SQTEVR-009/`, the archive is asked for a run and nudged again while the folder
 # waits, and the task is done once the folder is filed.
-# Its `restart` steps split it for the resume matrix (`crates/embyx-merge/tests/service_resume.rs`):
+# Its `restart` steps split it for the resume matrix (`crates/embyx-merge/tests/service_scenarios.rs`):
 # a new process each, and in the matrix the other build.
 description = "merge service: queued to done, one step per tick"
 operation = "merge.service"

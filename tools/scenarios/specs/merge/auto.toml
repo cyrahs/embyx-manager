@@ -3,7 +3,7 @@
 # whole copy in the library, a part CloudDrive does not list and a title no intake route takes
 # are skipped, nine parts are left to Emby's stacking, a failed title is skipped, more room lets
 # the big one in, cancelled titles are settled, and a day later the tree is scanned again.
-# Its `restart` steps split it for the resume matrix (`crates/embyx-merge/tests/service_resume.rs`):
+# Its `restart` steps split it for the resume matrix (`crates/embyx-merge/tests/service_scenarios.rs`):
 # a new process each, and in the matrix the other build.
 description = "merge service: auto-merge rounds, skips and the serial queue"
 operation = "merge.service"

@@ -202,7 +202,7 @@ the runner does and `dump()` gives the transcript's `fakes`.
   `NotFound` when absent) or deletes a Job, kept by name with an empty `status`; the dump adds `jobs`.
   Routes still answer first, so a `times = 1` route scripts a 500 or a vanished Job for one read. The
   CloudDrive fake has `edit(op, args)` on both sides (`add_file`, `add_directory`, `remove`,
-  `update_copy_tasks`, `drop_copy_tasks`, `set_uploads`): CloudDrive changing on its own, unrecorded. The
+  `update_copy_tasks`, `drop_copy_tasks`, `set_uploads`, and `fail` for a scripted failure of the next calls of an RPC): CloudDrive changing on its own, unrecorded. The
   runner's `Context.fakes` hands an operation the running fakes for such steps. `merge/*` (walk,
   merge_failures, upload, cancel, replace_archive, home, home_muxers, over115_cpu, auto) run `merge.service`
   (`tools/scenarios/operations/merge_service.py`, `crates/embyx-merge/tests/service_scenarios.rs`): one

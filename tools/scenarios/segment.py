@@ -1,6 +1,6 @@
 """Run one segment of a `merge.service` scenario on the Python baseline, for the resume matrix.
 
-The Rust test `crates/embyx-merge/tests/service_resume.rs` splits a spec's steps at its
+The Rust test `crates/embyx-merge/tests/service_scenarios.rs` splits a spec's steps at its
 `restart` steps and runs the segments in turn, alternating the builds: what one build left in
 the database, the roots and the fakes, the other continues. This script is the Python half.
 It reads one JSON object on stdin:

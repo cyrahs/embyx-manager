@@ -2,10 +2,11 @@
 # 115 waits for the home worker, the worker claims it, the audio Job probes the parts and copies
 # their audio, chunks come in (kept, repeated, conflicting, out of order, for a finished part,
 # for a part or task that does not exist, with a SHA-256 that is not the bytes'), parts are
-# finished (one too early), the worker pauses and goes away, the audio Job fails twice and is
-# retried, and the merge Job assembles the chunks. Then a task sent to the CPU, and one a whole
-# copy makes the claim refuse.
-# Its `restart` steps split it for the resume matrix (`crates/embyx-merge/tests/service_resume.rs`):
+# finished (one too early), the worker pauses and goes away, the audio Job fails three times and
+# is retried, a small title holds the merge Job slot (the assembly waits; the worker's chunk
+# for it is refused) and the merge Job assembles the chunks. Then a task sent to the CPU, and
+# one a whole copy makes the claim refuse.
+# Its `restart` steps split it for the resume matrix (`crates/embyx-merge/tests/service_scenarios.rs`):
 # a new process each, and in the matrix the other build.
 description = "merge service: the home transcode path, chunk refusals, audio Job failures, CPU fallback"
 operation = "merge.service"
@@ -32,6 +33,8 @@ home_transcode_enabled = true
 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-002-cd2.mp4" = 60000000000
 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-003-cd1.mp4" = 60000000000
 "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-003-cd2.mp4" = 60000000000
+"/mnt/cd2/115/embyx/type/vr/SMALL/SMALL-001-cd1.mp4" = 300
+"/mnt/cd2/115/embyx/type/vr/SMALL/SMALL-001-cd2.mp4" = 300
 
 [[args.steps]]
 op = "create"
@@ -206,6 +209,37 @@ op = "tick"
 op = "retry"
 args = { id = 1 }
 
+# The audio Job itself fails: the task fails while transcoding, and a retry keeps the chunks
+# and starts the Job again.
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "job_status"
+args = { name = "embyx-audio-1-giant-001", status = { failed = 1, conditions = [{ type = "Failed", status = "True" }] } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "retry"
+args = { id = 1 }
+
+[[args.steps]]
+op = "tick"
+
+# A small title takes the merge Job slot meanwhile; the worker cannot send it chunks.
+[[args.steps]]
+op = "create"
+args = { avid = "SMALL-001", source = "vr", library_dir = "type/vr", brand = "SMALL", merged_name = "SMALL-001.mp4", parts = ["/mnt/cd2/115/embyx/type/vr/SMALL/SMALL-001-cd1.mp4", "/mnt/cd2/115/embyx/type/vr/SMALL/SMALL-001-cd2.mp4"] }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "chunk"
+args = { task_id = 2, part_index = 0, chunk_index = 0, start = 0, duration = 60, frames = 1440, text = "nope" }
+
 [[args.steps]]
 op = "write"
 args = { path = "work/.transcode/1/audio.json", json = { state = "done", parts = [{ size = 60000000000, duration = 120.0 }, { size = 60000000000, duration = 90.5 }], video_bitrate = 80000000, duration = 210.5, audio_done = 1 } }
@@ -213,6 +247,14 @@ args = { path = "work/.transcode/1/audio.json", json = { state = "done", parts =
 [[args.steps]]
 op = "heartbeat"
 args = { name = "home-5090", version = "1.0.0", state = "idle" }
+
+# Everything is encoded, but the assembly waits for the slot until the small title is gone.
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "cancel"
+args = { id = 2 }
 
 # Audio and video are done: the merge Job assembles the chunks.
 [[args.steps]]
@@ -259,7 +301,7 @@ op = "tick"
 
 [[args.steps]]
 op = "use_cpu"
-args = { id = 2 }
+args = { id = 3 }
 
 [[args.steps]]
 op = "home"
@@ -269,11 +311,11 @@ op = "tick"
 
 [[args.steps]]
 op = "set_paused"
-args = { id = 2, paused = true }
+args = { id = 3, paused = true }
 
 [[args.steps]]
 op = "cancel"
-args = { id = 2 }
+args = { id = 3 }
 
 [[args.steps]]
 op = "create"
@@ -290,11 +332,11 @@ args = { name = "home-5090", version = "1.0.0", state = "idle" }
 
 [[args.steps]]
 op = "use_cpu"
-args = { id = 3 }
+args = { id = 4 }
 
 [[args.steps]]
 op = "cancel"
-args = { id = 3 }
+args = { id = 4 }
 
 [kubernetes]
 jobs = {}
@@ -313,4 +355,6 @@ files = [
     { path = "/115/embyx/type/vr/GIANT/GIANT-002-cd2.mp4", size = 10 },
     { path = "/115/embyx/type/vr/GIANT/GIANT-003-cd1.mp4", size = 10 },
     { path = "/115/embyx/type/vr/GIANT/GIANT-003-cd2.mp4", size = 10 },
+    { path = "/115/embyx/type/vr/SMALL/SMALL-001-cd1.mp4", size = 10 },
+    { path = "/115/embyx/type/vr/SMALL/SMALL-001-cd2.mp4", size = 10 },
 ]

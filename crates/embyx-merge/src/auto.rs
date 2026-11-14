@@ -31,6 +31,30 @@ use crate::tasks::{MergeState, MergeTask, MergeTaskRepository};
 
 const LOGGER: &str = "embyx_manager.merge.auto";
 
+/// `MergeRequest.avid`'s `max_length`.
+const MAX_AVID_CHARS: usize = 64;
+
+/// pydantic's `ValidationError` for an AVID longer than [`MAX_AVID_CHARS`]: the input's
+/// `repr` cut to its first 25 and last 24 characters when longer than 50.
+fn too_long(avid: &str) -> StepError {
+    let repr: Vec<char> = embyx_core::pytext::py_repr(avid).chars().collect();
+    let shown: String = if repr.len() > 50 {
+        let head: String = repr[..25].iter().collect();
+        let tail: String = repr[repr.len() - 24..].iter().collect();
+        format!("{head}...{tail}")
+    } else {
+        repr.into_iter().collect()
+    };
+    StepError::from(embyx_clients::pyvalue::Raised::new(
+        "ValidationError",
+        format!(
+            "1 validation error for MergeRequest\navid\n  String should have at most {MAX_AVID_CHARS} characters \
+             [type=string_too_long, input_value={shown}, input_type=str]\n    \
+             For further information visit https://errors.pydantic.dev/2.13/v/string_too_long"
+        ),
+    ))
+}
+
 /// `POLL_SECONDS`.
 pub const POLL_SECONDS: f64 = 60.0;
 /// `RESCAN_INTERVAL`: scan the library again at least this often, for titles that arrived
@@ -327,6 +351,11 @@ impl AutoMerger {
             return Ok(false);
         }
         let current = current_title(&inner.catalog, &inner.cache, &title.avid).await?;
+        // `MergeRequest(avid=title.avid)` is validated where it is built: an AVID over 64
+        // characters (a strm stem has no limit) raises, and the round ends there each time.
+        if title.avid.chars().count() > MAX_AVID_CHARS {
+            return Err(too_long(&title.avid));
+        }
         let request = MergeRequest {
             avid: title.avid.clone(),
             source: None,
@@ -488,5 +517,22 @@ impl AutoMerger {
         } else {
             Some(WHOLE_COPY)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    /// Read off Python: `MergeRequest(avid='A' * 70)`.
+    #[test]
+    fn an_avid_over_64_characters_is_pydantics_validation_error() {
+        let error = super::too_long(&"A".repeat(70));
+        assert_eq!(error.class_name(), "ValidationError");
+        assert_eq!(
+            error.to_string(),
+            "1 validation error for MergeRequest\navid\n  String should have at most 64 characters \
+             [type=string_too_long, input_value='AAAAAAAAAAAAAAAAAAAAAAAA...AAAAAAAAAAAAAAAAAAAAAAA', \
+             input_type=str]\n    For further information visit \
+             https://errors.pydantic.dev/2.13/v/string_too_long"
+        );
     }
 }

@@ -4,7 +4,7 @@
 # report, and the report says done but the file is not there. A retry deletes the old Job, whose name the new
 # one is started under. Last the library gains a whole copy, so the next start refuses the
 # title (failed while queued), and the operator cancels it.
-# Its `restart` steps split it for the resume matrix (`crates/embyx-merge/tests/service_resume.rs`):
+# Its `restart` steps split it for the resume matrix (`crates/embyx-merge/tests/service_scenarios.rs`):
 # a new process each, and in the matrix the other build.
 description = "merge service: merge Job failures, retried, then a whole copy refuses the title"
 operation = "merge.service"

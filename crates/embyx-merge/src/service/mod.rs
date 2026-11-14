@@ -302,9 +302,14 @@ pub(crate) fn rmtree_ignore_errors(path: &Path) {
     }
 }
 
-/// `path.is_file()`: follows links, `false` on any error.
-pub(crate) fn is_file(path: &Path) -> bool {
-    std::fs::metadata(path).is_ok_and(|meta| meta.is_file())
+/// `path.is_file()` as Python 3.13 has it: links followed; `ENOENT`, `ENOTDIR`, `EBADF` and
+/// `ELOOP` read as "no", any other `OSError` raised (as `embyx_monitor::fs`, D70).
+pub(crate) fn is_file(path: &Path) -> Result<bool, StepError> {
+    match std::fs::metadata(path) {
+        Ok(meta) => Ok(meta.is_file()),
+        Err(error) if matches!(error.raw_os_error(), Some(2 | 20 | 9 | 40)) => Ok(false),
+        Err(error) => Err(os_error(&error, path)),
+    }
 }
 
 /// `str(path)` of a path built from text.
@@ -872,7 +877,7 @@ impl MergeService {
         status: &embyx_core::pyjson::Dict,
     ) -> Result<(), StepError> {
         let size = status.get("size").cloned().unwrap_or(Value::Null);
-        let on_disk = if is_file(&paths.output) {
+        let on_disk = if is_file(&paths.output)? {
             let meta = std::fs::metadata(&paths.output).map_err(|error| os_error(&error, &paths.output))?;
             Some(meta.len())
         } else {
@@ -925,7 +930,7 @@ impl MergeService {
             self.to_verifying(task).await?;
             return Ok(());
         }
-        if !is_file(&paths.output) {
+        if !is_file(&paths.output)? {
             // Accepted for now: a redeploy can take the work volume's file with it.
             self.inner
                 .repository
@@ -1458,5 +1463,30 @@ impl MergeService {
             tracing::warn!(logger = LOGGER, "could not read the part sizes of {}", task.avid);
             Ok(None)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::is_file;
+
+    /// Python 3.13: `Path('/tmp/' + 'a' * 300).is_file()` raises `OSError(36, ...)`; a missing
+    /// file or a file in place of a directory is only "no".
+    #[test]
+    fn is_file_raises_what_pathlib_raises() {
+        let directory = tempfile::tempdir().expect("tempdir");
+        let file = directory.path().join("file");
+        std::fs::write(&file, b"x").expect("write");
+        assert_eq!(is_file(&file), Ok(true));
+        assert_eq!(is_file(directory.path()), Ok(false));
+        assert_eq!(is_file(&directory.path().join("missing")), Ok(false));
+        assert_eq!(is_file(&file.join("below")), Ok(false));
+        let long = directory.path().join("a".repeat(300));
+        let error = is_file(&long).expect_err("a name too long is raised");
+        assert_eq!(error.class_name(), "OSError");
+        assert!(
+            error.to_string().starts_with("[Errno 36] File name too long: '"),
+            "{error}"
+        );
     }
 }
