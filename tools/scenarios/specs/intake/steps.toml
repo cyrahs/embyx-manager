@@ -1,0 +1,65 @@
+# The intake (WP5) end to end against the ledger in PostgreSQL and the fake CloudDrive: a
+# submission retried past one RPC failure, a refused candidate (CloudDrive already holds its
+# hash) falling through to the next, an AVID with no magnet parked on the cooldown, a queued
+# discovery with a release date, a repeat sighting, a destination CloudDrive does not have,
+# and the background pass two hours later (JavBus's 404 for a work not out yet). The run's
+# counters, errors and log tail land in `pipeline_runs`.
+description = "intake: resolve, submit, park and retry against the ledger and CloudDrive"
+operation = "intake.steps"
+clock = "2026-09-03T05:30:00+00:00"
+# `uuid4().hex`: no dashes, so not caught by the UUID normalization.
+volatile = ["rows.pipeline_runs.run_id"]
+
+[args]
+failed_cooldown_seconds = 3600
+
+[args.sukebei]
+"ABC-001" = "magnet:?xt=urn:btih:1111111111111111111111111111111111111111&dn=ABC-001"
+"ABC-004" = "magnet:?xt=urn:btih:4444444444444444444444444444444444444444&dn=ABC-004"
+
+[args.javbus]
+"ABC-002" = [
+    ["magnet:?xt=urn:btih:dddddddddddddddddddddddddddddddddddddddd&dn=ABC-002", 7000000000],
+    ["magnet:?xt=urn:btih:2222222222222222222222222222222222222222&dn=ABC-002", 3000000000],
+]
+"ABC-004" = 404
+
+[[args.steps]]
+op = "enqueue"
+args = { avid = "ABC-001", source = "rss:Actor", task_dir = "/115/task" }
+
+[[args.steps]]
+op = "enqueue"
+args = { avid = "ABC-002", source = "fill_actor", task_dir = "/115/task" }
+
+[[args.steps]]
+op = "enqueue"
+args = { avid = "ABC-003", source = "rss:Actor", task_dir = "/115/task" }
+
+[[args.steps]]
+op = "queue"
+args = { avid = "ABC-004", source = "fill_actor", task_dir = "/115/task", release_date = "2026-08-28" }
+
+[[args.steps]]
+op = "enqueue"
+args = { avid = "ABC-001", source = "manual", task_dir = "/115/task" }
+
+[[args.steps]]
+op = "enqueue"
+args = { avid = "ABC-005", source = "manual", task_dir = "/115/nowhere", item_magnet = "magnet:?xt=urn:btih:5555555555555555555555555555555555555555&dn=ABC-005" }
+
+[[args.steps]]
+op = "retry_due"
+args = { advance_seconds = 7200, fallback_task_dir = "/115/task" }
+
+[database]
+schema = "app"
+
+[clouddrive]
+directories = ["/115/task"]
+offline_tasks = [
+    { name = "OLD-002", url = "magnet:?xt=urn:btih:dddddddddddddddddddddddddddddddddddddddd", folder = "/115/task", info_hash = "dddddddddddddddddddddddddddddddddddddddd", status = "OFFLINE_DOWNLOADING", size = 7, progress = 50.0 },
+]
+errors = [
+    { method = "AddOfflineFiles", code = "UNAVAILABLE", details = "connection reset" },
+]

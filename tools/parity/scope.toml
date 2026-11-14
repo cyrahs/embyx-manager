@@ -62,7 +62,7 @@ tests = [
 
 [WP5]
 title = "Acquisition ledger, runs, reports, cadence, intake"
-status = "pending"
+status = "done"
 tests = [
   "tests/test_monitor_acquisitions.py",
   "tests/test_monitor_runs.py",
