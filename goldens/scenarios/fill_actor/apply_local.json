@@ -791,6 +791,146 @@
           }
         },
         {
+          "op": "candidates",
+          "result": [
+            {
+              "candidate_id": "token-1",
+              "cloud_destination_dir": null,
+              "cloud_file": null,
+              "cloud_source_path": null,
+              "destination": "{movein}/ABC-001-cd1.mp4",
+              "fingerprint": {
+                "size": 11
+              },
+              "kind": "local_file",
+              "mapping_sha256": null,
+              "source": "{additional}/ABC/ABC-001-cd1.mp4",
+              "source_root": "{additional}",
+              "video_id": "ABC-001"
+            },
+            {
+              "candidate_id": "token-2",
+              "cloud_destination_dir": null,
+              "cloud_file": null,
+              "cloud_source_path": null,
+              "destination": "{movein}/ABC-001-cd2.mp4",
+              "fingerprint": {
+                "size": 12
+              },
+              "kind": "local_file",
+              "mapping_sha256": null,
+              "source": "{additional}/ABC/ABC-001-cd2.mp4",
+              "source_root": "{additional}",
+              "video_id": "ABC-001"
+            },
+            {
+              "candidate_id": "token-3",
+              "cloud_destination_dir": null,
+              "cloud_file": null,
+              "cloud_source_path": null,
+              "destination": "{movein}/ABC-002.mp4",
+              "fingerprint": {
+                "size": 2
+              },
+              "kind": "local_file",
+              "mapping_sha256": null,
+              "source": "{additional}/ABC/ABC-002.mp4",
+              "source_root": "{additional}",
+              "video_id": "ABC-002"
+            },
+            {
+              "candidate_id": "token-4",
+              "cloud_destination_dir": null,
+              "cloud_file": null,
+              "cloud_source_path": null,
+              "destination": "{movein}/ABC-003.mp4",
+              "fingerprint": {
+                "size": 3
+              },
+              "kind": "local_file",
+              "mapping_sha256": null,
+              "source": "{additional}/ABC/ABC-003.mp4",
+              "source_root": "{additional}",
+              "video_id": "ABC-003"
+            },
+            {
+              "candidate_id": "token-5",
+              "cloud_destination_dir": null,
+              "cloud_file": null,
+              "cloud_source_path": null,
+              "destination": "{movein}/ABC-004.mp4",
+              "fingerprint": {
+                "size": 4
+              },
+              "kind": "local_file",
+              "mapping_sha256": null,
+              "source": "{additional}/ABC/ABC-004.mp4",
+              "source_root": "{additional}",
+              "video_id": "ABC-004"
+            },
+            {
+              "candidate_id": "token-6",
+              "cloud_destination_dir": null,
+              "cloud_file": null,
+              "cloud_source_path": null,
+              "destination": "{movein}/ABC-007.mp4",
+              "fingerprint": {
+                "size": 7
+              },
+              "kind": "local_file",
+              "mapping_sha256": null,
+              "source": "{additional2}/ABC/ABC-007.mp4",
+              "source_root": "{additional2}",
+              "video_id": "ABC-007"
+            },
+            {
+              "candidate_id": "token-7",
+              "cloud_destination_dir": null,
+              "cloud_file": null,
+              "cloud_source_path": null,
+              "destination": "{movein}/ABC-008.mp4",
+              "fingerprint": {
+                "size": 8
+              },
+              "kind": "local_file",
+              "mapping_sha256": null,
+              "source": "{additional}/ABC/ABC-008.mp4",
+              "source_root": "{additional}",
+              "video_id": "ABC-008"
+            },
+            {
+              "candidate_id": "token-8",
+              "cloud_destination_dir": null,
+              "cloud_file": null,
+              "cloud_source_path": null,
+              "destination": "{movein}/ABC-009.mp4",
+              "fingerprint": {
+                "size": 9
+              },
+              "kind": "local_file",
+              "mapping_sha256": null,
+              "source": "{additional}/ABC/ABC-009.mp4",
+              "source_root": "{additional}",
+              "video_id": "ABC-009"
+            },
+            {
+              "candidate_id": "token-9",
+              "cloud_destination_dir": null,
+              "cloud_file": null,
+              "cloud_source_path": null,
+              "destination": "{movein}/ABC-010.mkv",
+              "fingerprint": {
+                "size": 10
+              },
+              "kind": "local_file",
+              "mapping_sha256": null,
+              "source": "{additional2}/ABC/ABC-010.mkv",
+              "source_root": "{additional2}",
+              "video_id": "ABC-010"
+            }
+          ]
+        },
+        {
           "op": "write"
         },
         {

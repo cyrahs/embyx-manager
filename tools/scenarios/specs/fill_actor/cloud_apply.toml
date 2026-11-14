@@ -24,6 +24,9 @@ brands = { DEF-602 = "DEF", DEF-609 = "DEF" }
 op = "scan"
 
 [[args.steps]]
+op = "candidates"
+
+[[args.steps]]
 op = "apply"
 args = { files = ["ABC-605.mp4"], advance_seconds = 60 }
 

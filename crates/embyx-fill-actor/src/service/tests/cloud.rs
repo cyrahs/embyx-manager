@@ -6,7 +6,10 @@ use std::sync::{Arc, Mutex, PoisonError};
 use embyx_clients::clouddrive::CloudDriveError;
 use indexmap::IndexMap;
 
-use super::{Db, FakeCatalog, MappingBrands, MutableClock, Setup, strings};
+use embyx_db::locking::AsyncFileLock;
+use tokio_util::task::TaskTracker;
+
+use super::{Db, Event, FakeCatalog, MappingBrands, MutableClock, Setup, strings};
 use crate::cloud_moves::{
     BoxFuture, CheckError, CloudFileMetadata, CloudFileMover, CloudMovePaths, CloudMoveResponse, MoverError,
 };
@@ -186,6 +189,70 @@ impl CloudFileMover for FakeCloudMover {
     }
 }
 
+/// Holds the next `list_directory` call (once armed) in a task of its own until released, as
+/// a scoped CloudDrive call outlives a dropped caller; `settle()` waits for such calls (D116).
+#[derive(Clone, Default)]
+struct Gate {
+    armed: Arc<std::sync::atomic::AtomicBool>,
+    entered: Event,
+    release: Event,
+    calls: TaskTracker,
+}
+
+struct GatedMover {
+    inner: FakeCloudMover,
+    gate: Gate,
+}
+
+impl CloudFileMover for GatedMover {
+    fn list_directory<'a>(
+        &'a self,
+        api_directory: &'a str,
+    ) -> BoxFuture<'a, Result<Vec<CloudFileMetadata>, MoverError>> {
+        if !self.gate.armed.swap(false, std::sync::atomic::Ordering::SeqCst) {
+            return self.inner.list_directory(api_directory);
+        }
+        let (inner, gate, directory) = (self.inner.clone(), self.gate.clone(), api_directory.to_owned());
+        let call = self.gate.calls.spawn(async move {
+            gate.entered.set();
+            assert!(gate.release.wait_async(5).await, "the held call was never released");
+            inner.list_directory(&directory).await
+        });
+        Box::pin(async move { call.await.expect("the held call") })
+    }
+
+    fn ensure_directory<'a>(
+        &'a self,
+        parent_api_directory: &'a str,
+        folder_name: &'a str,
+    ) -> BoxFuture<'a, Result<bool, MoverError>> {
+        self.inner.ensure_directory(parent_api_directory, folder_name)
+    }
+
+    fn move_file<'a>(
+        &'a self,
+        source_api_path: &'a str,
+        destination_api_directory: &'a str,
+    ) -> BoxFuture<'a, Result<CloudMoveResponse, MoverError>> {
+        self.inner.move_file(source_api_path, destination_api_directory)
+    }
+
+    fn scoped(&self) -> Arc<dyn CloudFileMover> {
+        Arc::new(Self {
+            inner: self.inner.clone(),
+            gate: self.gate.clone(),
+        })
+    }
+
+    fn settle(&self) -> BoxFuture<'_, ()> {
+        Box::pin(async {
+            self.gate.calls.close();
+            self.gate.calls.wait().await;
+            self.gate.calls.reopen();
+        })
+    }
+}
+
 /// The `cloud_file` fixture.
 fn cloud_file() -> CloudFileMetadata {
     CloudFileMetadata {
@@ -213,6 +280,11 @@ struct Made {
 
 #[derive(Default)]
 struct Options {
+    /// Run the mover's calls through this gate (a call that can be held while its caller is
+    /// dropped, and that `settle()` waits for).
+    gate: Option<Gate>,
+    /// Pass a mutation lock (`move.lock` in the fixture's root).
+    locked: bool,
     repository: Option<Arc<PostgresFillActorRepository>>,
     apply_disabled: bool,
     brand: Option<&'static str>,
@@ -261,7 +333,16 @@ impl Fixture {
             .unwrap(),
         );
         setup.options.token_factory = None;
-        setup.options.cloud_file_mover = Some(Arc::new(mover.clone()));
+        setup.options.cloud_file_mover = Some(match options.gate {
+            Some(gate) => Arc::new(GatedMover {
+                inner: mover.clone(),
+                gate,
+            }),
+            None => Arc::new(mover.clone()),
+        });
+        if options.locked {
+            setup.options.mutation_lock = Some(AsyncFileLock::new(self.root.join("move.lock")));
+        }
         setup.options.clock = options.clock.map(|clock| clock.clock());
         // `asyncio.sleep(0.5)` between verification rounds, without the wait.
         setup.options.sleeper = Arc::new(|_| Box::pin(async {}));
@@ -607,5 +688,46 @@ async fn disabled_apply_does_not_reconcile_unknown_cloud_operation() {
 
     assert!(disabled.service.reconcile_moves().await.unwrap().is_empty());
     assert!(disabled.mover.move_calls().is_empty());
+    fixture.finish().await;
+}
+
+/// Contract 6 (D128): a CloudDrive reconciliation dropped in the middle of a call keeps the
+/// mutation lock until that call has ended (`settle()`), so no other mover can take the lock
+/// while an observation or a `MoveFile` it guarded may still land.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn a_dropped_cloud_reconcile_keeps_the_lock_until_its_call_settles() {
+    let fixture = Fixture::new().await;
+    let gate = Gate::default();
+    let made = fixture.make_service(Options {
+        gate: Some(gate.clone()),
+        locked: true,
+        ..Options::default()
+    });
+    made.mover.set_behavior(Behavior::RaiseBeforeMove);
+    let (plan, candidate) = create_candidate(&made.service).await;
+    let first = apply(&made.service, &plan, &candidate).await;
+    assert_eq!(first.error_code.as_deref(), Some("cloud_move_status_unknown"));
+
+    gate.armed.store(true, std::sync::atomic::Ordering::SeqCst);
+    let service = made.service.clone();
+    let reconcile = tokio::spawn(async move { service.reconcile_moves().await });
+    assert!(gate.entered.wait_async(5).await, "the reconcile never observed");
+    reconcile.abort();
+    assert!(reconcile.await.unwrap_err().is_cancelled());
+
+    let lock = AsyncFileLock::new(fixture.root.join("move.lock"));
+    let acquire = tokio::spawn(async move { lock.acquire().await.map(drop) });
+    tokio::time::sleep(std::time::Duration::from_millis(200)).await;
+    assert!(
+        !acquire.is_finished(),
+        "the lock was free while the dropped reconcile's call still ran"
+    );
+    gate.release.set();
+    tokio::time::timeout(std::time::Duration::from_secs(5), acquire)
+        .await
+        .expect("the lock is released once the call settled")
+        .unwrap()
+        .unwrap();
+    made.service.aclose().await;
     fixture.finish().await;
 }

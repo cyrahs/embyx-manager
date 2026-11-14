@@ -1,0 +1,105 @@
+# CloudDrive moves stopped while they are recovered (WP11): a MoveFile that failed in transport
+# and crashed in front of its unknown write (left submitting), a reconcile of it cancelled right
+# after its first listing answered (the execution's CloudDrive calls settle before the lock is
+# let go), a crash in front of creating a missing brand directory, and a crash in front of the
+# final write that concludes the never-observed move after the grace; each followed by a
+# restart and another pass.
+description = "fill_actor: crashes and cancels while CloudDrive moves are recovered"
+operation = "fill_actor.service"
+clock = "2026-09-18T03:00:00+00:00"
+
+[roots]
+names = ["actor", "additional", "movein"]
+
+[args]
+catalog = { actor = ["DEF-901", "ABC-902"] }
+cloud = { strm_mount_prefix = "/mnt/cd2", source_api_roots = ["/lib/src"], move_in_api_root = "/lib/movein" }
+brands = { DEF-901 = "DEF" }
+
+[[args.steps]]
+op = "scan"
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-902.mp4"], crash = { repository = "save_cloud_move_operation", state = "unknown" }, advance_seconds = 60 }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { cancel_after = { mover = "list_directory" }, advance_seconds = 60 }
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["DEF-901.mp4"], crash = { mover = "ensure_directory" }, advance_seconds = 60 }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["DEF-901.mp4"] }
+
+[[args.steps]]
+op = "reconcile"
+args = { crash = { repository = "finalize_cloud_move" }, advance_seconds = 900 }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { advance_seconds = 60 }
+
+[[tree]]
+path = "additional/DEF/DEF-901.strm"
+text = "/mnt/cd2/lib/src/DEF/DEF-901.mp4"
+
+[[tree]]
+path = "additional/ABC/ABC-902.strm"
+text = "/mnt/cd2/lib/src/ABC/ABC-902.mp4"
+
+[clouddrive]
+directories = ["/lib/movein"]
+
+[[clouddrive.files]]
+path = "/lib/src/DEF/DEF-901.mp4"
+id = "file-DEF-901"
+size = 1001
+write_time = 1788000000123456790
+hashes = { 2 = "sha1-DEF-901" }
+
+[[clouddrive.files]]
+path = "/lib/src/ABC/ABC-902.mp4"
+id = "file-ABC-902"
+size = 1002
+write_time = 1788000000123456791
+hashes = { 2 = "sha1-ABC-902" }
+
+[[clouddrive.errors]]
+method = "MoveFile"
+code = "UNAVAILABLE"
+details = "connection reset"
+times = 1
+
+[database]
+schema = "app"
+tables = [
+    "fill_actor_plans",
+    "fill_actor_move_results",
+    "fill_actor_move_journal",
+    "fill_actor_cloud_move_operations",
+]

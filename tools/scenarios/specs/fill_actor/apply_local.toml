@@ -1,9 +1,10 @@
 # The fill-actor service on a local library (WP11): a scan finds a title the actor directory
 # holds, one nobody holds and the additional directories' copies (a cd1/cd2 set, one per
-# directory); apply then moves what still matches, reports a destination that appeared, a
-# source removed or rewritten since the scan, a rename the file system refuses (EXDEV, EACCES)
-# and, with renameat2 flags unsupported (EINVAL), moves with a hard link and drops the source
-# through the quarantine name. A second apply of the same plan returns the stored results.
+# directory), and the candidate records it stored are read back; apply then moves what still
+# matches, reports a destination that appeared, a source removed or rewritten since the scan,
+# a rename the file system refuses (EXDEV, EACCES) and, with renameat2 flags unsupported
+# (EINVAL), moves with a hard link and drops the source through the quarantine name. A second
+# apply of the same plan returns the stored results.
 description = "fill_actor: scan and apply on a local library, every apply outcome"
 operation = "fill_actor.service"
 clock = "2026-09-10T03:00:00+00:00"
@@ -37,6 +38,9 @@ errno = 22
 
 [[args.steps]]
 op = "scan"
+
+[[args.steps]]
+op = "candidates"
 
 [[args.steps]]
 op = "write"

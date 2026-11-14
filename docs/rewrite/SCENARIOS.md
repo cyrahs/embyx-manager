@@ -172,12 +172,13 @@ the runner does and `dump()` gives the transcript's `fakes`.
   recording file system, and stubs recording `feed` fetches (a body or an HTTP status per URL) and `avbase`
   cast and talent lookups; `stop_after_fetch` asks the run to stop once a URL has been fetched.
 - **WP9 (scheduler):** fires come from `clock`; a scenario runs one tick, not a loop.
-- **WP11 (done):** `fill_actor/*` (apply_local, crash_rename, crash_hardlink, cancel, recovery, offline,
-  cloud_apply, cloud_crash) run `fill_actor.service` (`tools/scenarios/operations/fill_actor_service.py`,
+- **WP11 (done):** `fill_actor/*` (apply_local, crash_rename, crash_hardlink, crash_reconcile, cancel,
+  recovery, offline, cloud_apply, cloud_crash, cloud_recovery) run `fill_actor.service` (`tools/scenarios/operations/fill_actor_service.py`,
   `crates/embyx-fill-actor/src/service/tests/scenarios.rs`): the service over the seeded library (`args.library`:
   actor, additional and move-in roots), the repository on the scenario database and, with `args.cloud`, the
   mover on `AsyncCloudDrive` against the fake. Steps: `scan`, `apply` (`files` of the last plan), `reconcile`,
-  `restart` (a new service on a new pool, as a process restart), `journal` (journal states written through the
+  `candidates` (the repository's record of each candidate of the last plan), `restart` (a new service
+  on a new pool, as a process restart), `journal` (journal states written through the
   repository for a candidate, as either build writes them), `faults`, `cloud_move` (someone else's `MoveFile`)
   and the unrecorded `write`/`remove`/`link`/`rename`. File mutations are `fs` calls (Python patches
   `_rename_no_replace`, `os.link`, `os.rename`, `os.unlink`, `os.mkdir`; Rust wraps `LocalMoveFs` in
@@ -185,11 +186,13 @@ the runner does and `dump()` gives the transcript's `fakes`.
   returned. A step's `crash` (`{fs = <op>, path?, nth?}`, `{repository = <method>, state?}`, `{mover =
   <method>}`) stops the service in front of that call as a dying process would (Python raises a
   `BaseException` nothing catches; Rust panics in the step's task), and `cancel_after` (`{fs = <op>}`, `{mover =
-  <method>}`) cancels the step's task once that call returned. After every step the operation waits for the
+  <method>}`) cancels the step's task once that call returned (Python awaits a future that never ends right
+  after the cancel, since the operation patches `asyncio.sleep` not to wait). After every step the operation waits for the
   moves still running (`aclose()`). The rows (`fill_actor_plans`, `_move_results`, `_move_journal`,
   `_cloud_move_operations`) after each crash, restart and recovery are equal on both sides, which is what lets
-  either build resume a journal the other left. Candidate rows are not dumped: their fingerprints (device,
-  inode, times) differ from run to run.
+  either build resume a journal the other left. Candidate rows are not dumped as tables, since their
+  fingerprints (device, inode, times) differ from run to run; the `candidates` step compares them with the
+  fingerprint cut to its size.
 - **WP13 (done):** `merge/tasks` runs `MergeTaskRepository` step by step (`merge.tasks`, the same
   `{op, args}` shape); its rows pin the `parts_json` bytes. Timestamps the repository takes from the wall
   clock are `rows.merge_tasks.*` selectors; a WP14 spec can add steps without new operation code.

@@ -1,0 +1,1614 @@
+{
+  "calls": [
+    {
+      "error": {
+        "code": "NOT_FOUND",
+        "details": "path not found: /lib/movein/ABC"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/ABC"
+      },
+      "seq": 1
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-902"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-902.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-902",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-902.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1002",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456791Z"
+            }
+          ]
+        }
+      ],
+      "seq": 2
+    },
+    {
+      "error": {
+        "code": "NOT_FOUND",
+        "details": "path not found: /lib/movein/DEF"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/DEF"
+      },
+      "seq": 3
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/DEF"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-DEF-901"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/DEF/DEF-901.mp4",
+              "hasDetailProperties": false,
+              "id": "file-DEF-901",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "DEF-901.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1001",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456790Z"
+            }
+          ]
+        }
+      ],
+      "seq": 4
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-902"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-902.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-902",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-902.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1002",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456791Z"
+            }
+          ]
+        }
+      ],
+      "seq": 5
+    },
+    {
+      "error": {
+        "code": "NOT_FOUND",
+        "details": "path not found: /lib/movein/ABC"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/ABC"
+      },
+      "seq": 6
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein"
+      },
+      "response": [
+        {
+          "subFiles": []
+        }
+      ],
+      "seq": 7
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "CreateFolder",
+      "request": {
+        "folderName": "ABC",
+        "parentPath": "/lib/movein"
+      },
+      "response": {
+        "folderCreated": {
+          "CanCreateEncryptedFolder": false,
+          "CanLock": false,
+          "CanSyncFileChangesFromCloud": false,
+          "canAddShareLink": false,
+          "canDeletePermanently": false,
+          "canDirectAccessThumbnailURL": false,
+          "canMount": false,
+          "canOfflineDownload": false,
+          "canSearch": false,
+          "canUnmount": false,
+          "fileEncryptionType": "None",
+          "fileHashes": {},
+          "fileType": "Directory",
+          "fullPathName": "/lib/movein/ABC",
+          "hasDetailProperties": false,
+          "id": "/lib/movein/ABC",
+          "isCloudDirectory": false,
+          "isCloudFile": false,
+          "isCloudRoot": false,
+          "isDirectory": true,
+          "isForbidden": false,
+          "isLocal": false,
+          "isRoot": false,
+          "isSearchResult": false,
+          "name": "ABC",
+          "originalPath": "",
+          "previewUrl": "",
+          "size": "0",
+          "supportOfflineDownloadManagement": false,
+          "thumbnailUrl": ""
+        },
+        "result": {
+          "errorMessage": "",
+          "resultFilePaths": [
+            "/lib/movein/ABC"
+          ],
+          "success": true
+        }
+      },
+      "seq": 8
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/lib/movein/ABC",
+              "hasDetailProperties": false,
+              "id": "/lib/movein/ABC",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 9
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/ABC"
+      },
+      "response": [
+        {
+          "subFiles": []
+        }
+      ],
+      "seq": 10
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-902"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-902.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-902",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-902.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1002",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456791Z"
+            }
+          ]
+        }
+      ],
+      "seq": 11
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/ABC"
+      },
+      "response": [
+        {
+          "subFiles": []
+        }
+      ],
+      "seq": 12
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_cloud_move_operation",
+      "request": {
+        "attempt_id": "token-5",
+        "candidate_id": "token-1",
+        "error_code": null,
+        "plan_id": "token-3",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 13
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_cloud_move_operation",
+      "request": {
+        "attempt_id": "token-5",
+        "candidate_id": "token-1",
+        "error_code": null,
+        "plan_id": "token-3",
+        "state": "submitting"
+      },
+      "response": null,
+      "seq": 14
+    },
+    {
+      "error": {
+        "code": "UNAVAILABLE",
+        "details": "connection reset"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "MoveFile",
+      "request": {
+        "conflictPolicy": "Skip",
+        "destPath": "/lib/movein/ABC",
+        "theFilePaths": [
+          "/lib/src/ABC/ABC-902.mp4"
+        ]
+      },
+      "seq": 15
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_cloud_move_operation",
+      "request": {
+        "attempt_id": "token-5",
+        "candidate_id": "token-1",
+        "error_code": "cloud_move_interrupted",
+        "plan_id": "token-3",
+        "state": "unknown"
+      },
+      "response": null,
+      "seq": 16
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-902"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-902.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-902",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-902.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1002",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456791Z"
+            }
+          ]
+        }
+      ],
+      "seq": 17
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-902"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-902.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-902",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-902.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1002",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456791Z"
+            }
+          ]
+        }
+      ],
+      "seq": 18
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/ABC"
+      },
+      "response": [
+        {
+          "subFiles": []
+        }
+      ],
+      "seq": 19
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/DEF"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-DEF-901"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/DEF/DEF-901.mp4",
+              "hasDetailProperties": false,
+              "id": "file-DEF-901",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "DEF-901.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1001",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456790Z"
+            }
+          ]
+        }
+      ],
+      "seq": 20
+    },
+    {
+      "error": {
+        "code": "NOT_FOUND",
+        "details": "path not found: /lib/movein/DEF"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/DEF"
+      },
+      "seq": 21
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-902"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-902.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-902",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-902.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1002",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456791Z"
+            }
+          ]
+        }
+      ],
+      "seq": 22
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/ABC"
+      },
+      "response": [
+        {
+          "subFiles": []
+        }
+      ],
+      "seq": 23
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/DEF"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-DEF-901"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/DEF/DEF-901.mp4",
+              "hasDetailProperties": false,
+              "id": "file-DEF-901",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "DEF-901.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1001",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456790Z"
+            }
+          ]
+        }
+      ],
+      "seq": 24
+    },
+    {
+      "error": {
+        "code": "NOT_FOUND",
+        "details": "path not found: /lib/movein/DEF"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/DEF"
+      },
+      "seq": 25
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/lib/movein/ABC",
+              "hasDetailProperties": false,
+              "id": "/lib/movein/ABC",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 26
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "CreateFolder",
+      "request": {
+        "folderName": "DEF",
+        "parentPath": "/lib/movein"
+      },
+      "response": {
+        "folderCreated": {
+          "CanCreateEncryptedFolder": false,
+          "CanLock": false,
+          "CanSyncFileChangesFromCloud": false,
+          "canAddShareLink": false,
+          "canDeletePermanently": false,
+          "canDirectAccessThumbnailURL": false,
+          "canMount": false,
+          "canOfflineDownload": false,
+          "canSearch": false,
+          "canUnmount": false,
+          "fileEncryptionType": "None",
+          "fileHashes": {},
+          "fileType": "Directory",
+          "fullPathName": "/lib/movein/DEF",
+          "hasDetailProperties": false,
+          "id": "/lib/movein/DEF",
+          "isCloudDirectory": false,
+          "isCloudFile": false,
+          "isCloudRoot": false,
+          "isDirectory": true,
+          "isForbidden": false,
+          "isLocal": false,
+          "isRoot": false,
+          "isSearchResult": false,
+          "name": "DEF",
+          "originalPath": "",
+          "previewUrl": "",
+          "size": "0",
+          "supportOfflineDownloadManagement": false,
+          "thumbnailUrl": ""
+        },
+        "result": {
+          "errorMessage": "",
+          "resultFilePaths": [
+            "/lib/movein/DEF"
+          ],
+          "success": true
+        }
+      },
+      "seq": 27
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/lib/movein/ABC",
+              "hasDetailProperties": false,
+              "id": "/lib/movein/ABC",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/lib/movein/DEF",
+              "hasDetailProperties": false,
+              "id": "/lib/movein/DEF",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "DEF",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 28
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/DEF"
+      },
+      "response": [
+        {
+          "subFiles": []
+        }
+      ],
+      "seq": 29
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/DEF"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-DEF-901"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/DEF/DEF-901.mp4",
+              "hasDetailProperties": false,
+              "id": "file-DEF-901",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "DEF-901.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1001",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456790Z"
+            }
+          ]
+        }
+      ],
+      "seq": 30
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/DEF"
+      },
+      "response": [
+        {
+          "subFiles": []
+        }
+      ],
+      "seq": 31
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_cloud_move_operation",
+      "request": {
+        "attempt_id": "token-6",
+        "candidate_id": "token-2",
+        "error_code": null,
+        "plan_id": "token-3",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 32
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_cloud_move_operation",
+      "request": {
+        "attempt_id": "token-6",
+        "candidate_id": "token-2",
+        "error_code": null,
+        "plan_id": "token-3",
+        "state": "submitting"
+      },
+      "response": null,
+      "seq": 33
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "MoveFile",
+      "request": {
+        "conflictPolicy": "Skip",
+        "destPath": "/lib/movein/DEF",
+        "theFilePaths": [
+          "/lib/src/DEF/DEF-901.mp4"
+        ]
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [
+          "/lib/movein/DEF/DEF-901.mp4"
+        ],
+        "success": true
+      },
+      "seq": 34
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_cloud_move_operation",
+      "request": {
+        "attempt_id": "token-6",
+        "candidate_id": "token-2",
+        "error_code": null,
+        "plan_id": "token-3",
+        "state": "verifying"
+      },
+      "response": null,
+      "seq": 35
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/DEF"
+      },
+      "response": [
+        {
+          "subFiles": []
+        }
+      ],
+      "seq": 36
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/DEF"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-DEF-901"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/movein/DEF/DEF-901.mp4",
+              "hasDetailProperties": false,
+              "id": "file-DEF-901",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "DEF-901.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1001",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456790Z"
+            }
+          ]
+        }
+      ],
+      "seq": 37
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "finalize_cloud_move",
+      "request": {
+        "attempt_id": "token-6",
+        "candidate_id": "token-2",
+        "error_code": null,
+        "plan_id": "token-3",
+        "result_error_code": null,
+        "result_state": "moved",
+        "state": "succeeded"
+      },
+      "response": null,
+      "seq": 38
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-902"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-902.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-902",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-902.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1002",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456791Z"
+            }
+          ]
+        }
+      ],
+      "seq": 39
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/ABC"
+      },
+      "response": [
+        {
+          "subFiles": []
+        }
+      ],
+      "seq": 40
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/src/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "sha1-ABC-902"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/lib/src/ABC/ABC-902.mp4",
+              "hasDetailProperties": false,
+              "id": "file-ABC-902",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-902.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1002",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": "",
+              "writeTime": "2026-08-29T10:40:00.123456791Z"
+            }
+          ]
+        }
+      ],
+      "seq": 41
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/lib/movein/ABC"
+      },
+      "response": [
+        {
+          "subFiles": []
+        }
+      ],
+      "seq": 42
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "finalize_cloud_move",
+      "request": {
+        "attempt_id": "token-5",
+        "candidate_id": "token-1",
+        "error_code": "cloud_move_not_observed",
+        "plan_id": "token-3",
+        "result_error_code": "cloud_move_not_observed",
+        "result_state": "failed",
+        "state": "failed"
+      },
+      "response": null,
+      "seq": 43
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/",
+        "/lib",
+        "/lib/movein",
+        "/lib/movein/ABC",
+        "/lib/movein/DEF",
+        "/lib/src",
+        "/lib/src/ABC",
+        "/lib/src/DEF"
+      ],
+      "files": [
+        {
+          "hashes": {
+            "2": "sha1-DEF-901"
+          },
+          "id": "file-DEF-901",
+          "path": "/lib/movein/DEF/DEF-901.mp4",
+          "size": 1001,
+          "write_time": 1788000000123456790
+        },
+        {
+          "hashes": {
+            "2": "sha1-ABC-902"
+          },
+          "id": "file-ABC-902",
+          "path": "/lib/src/ABC/ABC-902.mp4",
+          "size": 1002,
+          "write_time": 1788000000123456791
+        }
+      ],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "fill_actor.service",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "op": "scan",
+          "result": {
+            "actors": [
+              {
+                "actor_id": "actor",
+                "actor_name": null,
+                "aliases": [],
+                "error_code": null,
+                "error_message": null,
+                "scraped_count": 2,
+                "talent_id": null,
+                "video_ids": [
+                  "ABC-902",
+                  "DEF-901"
+                ]
+              }
+            ],
+            "created_at": "2026-09-18T03:00:00Z",
+            "expires_at": "2026-09-18T04:00:00Z",
+            "plan_id": "token-3",
+            "revision": "token-4",
+            "videos": [
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-1",
+                    "destination_conflict": false,
+                    "file_name": "ABC-902.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-902"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-902",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-2",
+                    "destination_conflict": false,
+                    "file_name": "DEF-901.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "DEF-901"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "DEF-901",
+                "warnings": []
+              }
+            ]
+          }
+        },
+        {
+          "crashed": true,
+          "op": "apply"
+        },
+        {
+          "op": "restart"
+        },
+        {
+          "error": {
+            "message": "",
+            "type": "CancelledError"
+          },
+          "op": "reconcile"
+        },
+        {
+          "op": "reconcile",
+          "result": [
+            {
+              "candidate_id": "token-1",
+              "error_code": "cloud_move_status_unknown",
+              "file_name": "ABC-902.mp4",
+              "state": "failed",
+              "video_id": "ABC-902"
+            }
+          ]
+        },
+        {
+          "crashed": true,
+          "op": "apply"
+        },
+        {
+          "op": "restart"
+        },
+        {
+          "op": "reconcile",
+          "result": [
+            {
+              "candidate_id": "token-1",
+              "error_code": "cloud_move_status_unknown",
+              "file_name": "ABC-902.mp4",
+              "state": "failed",
+              "video_id": "ABC-902"
+            }
+          ]
+        },
+        {
+          "op": "apply",
+          "result": {
+            "plan_id": "token-3",
+            "results": [
+              {
+                "candidate_id": "token-2",
+                "error_code": null,
+                "file_name": "DEF-901.mp4",
+                "state": "moved",
+                "video_id": "DEF-901"
+              }
+            ],
+            "revision": "token-4",
+            "state": "succeeded"
+          }
+        },
+        {
+          "crashed": true,
+          "op": "reconcile"
+        },
+        {
+          "op": "restart"
+        },
+        {
+          "op": "reconcile",
+          "result": [
+            {
+              "candidate_id": "token-1",
+              "error_code": "cloud_move_not_observed",
+              "file_name": "ABC-902.mp4",
+              "state": "failed",
+              "video_id": "ABC-902"
+            }
+          ]
+        },
+        {
+          "op": "apply",
+          "result": {
+            "plan_id": "token-3",
+            "results": [
+              {
+                "candidate_id": "token-1",
+                "error_code": "cloud_move_not_observed",
+                "file_name": "ABC-902.mp4",
+                "state": "failed",
+                "video_id": "ABC-902"
+              },
+              {
+                "candidate_id": "token-2",
+                "error_code": null,
+                "file_name": "DEF-901.mp4",
+                "state": "moved",
+                "video_id": "DEF-901"
+              }
+            ],
+            "revision": "token-4",
+            "state": "partial_failed"
+          }
+        }
+      ]
+    }
+  },
+  "rows": {
+    "fill_actor_cloud_move_operations": [
+      {
+        "attempt_id": "token-5",
+        "candidate_id": "token-1",
+        "destination_dir": "/lib/movein/ABC",
+        "error_code": "cloud_move_not_observed",
+        "plan_id": "token-3",
+        "source_path": "/lib/src/ABC/ABC-902.mp4",
+        "state": "failed",
+        "updated_at": "2026-09-18T03:21:00+00:00"
+      },
+      {
+        "attempt_id": "token-6",
+        "candidate_id": "token-2",
+        "destination_dir": "/lib/movein/DEF",
+        "error_code": null,
+        "plan_id": "token-3",
+        "source_path": "/lib/src/DEF/DEF-901.mp4",
+        "state": "succeeded",
+        "updated_at": "2026-09-18T03:05:00+00:00"
+      }
+    ],
+    "fill_actor_move_journal": [],
+    "fill_actor_move_results": [
+      {
+        "candidate_id": "token-1",
+        "plan_id": "token-3",
+        "result_json": "{\"candidate_id\":\"token-1\",\"video_id\":\"ABC-902\",\"file_name\":\"ABC-902.mp4\",\"state\":\"failed\",\"error_code\":\"cloud_move_not_observed\"}"
+      },
+      {
+        "candidate_id": "token-2",
+        "plan_id": "token-3",
+        "result_json": "{\"candidate_id\":\"token-2\",\"video_id\":\"DEF-901\",\"file_name\":\"DEF-901.mp4\",\"state\":\"moved\",\"error_code\":null}"
+      }
+    ],
+    "fill_actor_plans": [
+      {
+        "config_version": 0,
+        "created_at": "2026-09-18T03:00:00+00:00",
+        "expires_at": "2026-09-18T04:00:00+00:00",
+        "plan_id": "token-3",
+        "public_json": "{\"plan_id\":\"token-3\",\"revision\":\"token-4\",\"created_at\":\"2026-09-18T03:00:00Z\",\"expires_at\":\"2026-09-18T04:00:00Z\",\"actors\":[{\"actor_id\":\"actor\",\"scraped_count\":2,\"video_ids\":[\"ABC-902\",\"DEF-901\"],\"error_code\":null,\"actor_name\":null,\"talent_id\":null,\"aliases\":[],\"error_message\":null}],\"videos\":[{\"video_id\":\"ABC-902\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-1\",\"video_id\":\"ABC-902\",\"file_name\":\"ABC-902.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"DEF-901\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-2\",\"video_id\":\"DEF-901\",\"file_name\":\"DEF-901.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]}]}",
+        "revision": "token-4"
+      }
+    ]
+  },
+  "scenario": "fill_actor/cloud_recovery",
+  "tree": {
+    "actor": [],
+    "additional": [
+      {
+        "kind": "dir",
+        "path": "ABC"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC/ABC-902.strm",
+        "sha256": "7a1b38b8de5ddc62",
+        "size": 32
+      },
+      {
+        "kind": "dir",
+        "path": "DEF"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "DEF/DEF-901.strm",
+        "sha256": "8b31c80f5f8e675a",
+        "size": 32
+      }
+    ],
+    "movein": []
+  }
+}

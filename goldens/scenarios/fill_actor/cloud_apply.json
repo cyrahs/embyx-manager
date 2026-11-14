@@ -3385,6 +3385,146 @@
           }
         },
         {
+          "op": "candidates",
+          "result": [
+            {
+              "candidate_id": "token-1",
+              "cloud_destination_dir": "/lib/movein/ABC",
+              "cloud_file": {
+                "file_id": "file-ABC-601",
+                "hashes": [
+                  [
+                    "2",
+                    "sha1-ABC-601"
+                  ]
+                ],
+                "name": "ABC-601.mp4",
+                "path": "/lib/src/ABC/ABC-601.mp4",
+                "size": 1001,
+                "write_time": 1788000000123456790
+              },
+              "cloud_source_path": "/lib/src/ABC/ABC-601.mp4",
+              "destination": "{movein}/ABC-601.strm",
+              "fingerprint": {
+                "size": 32
+              },
+              "kind": "cloud_strm",
+              "mapping_sha256": "e20596c0e21f99a08d43ffb125a416b4db9fae74b6245a4c157c94ffc168e62f",
+              "source": "{additional}/ABC/ABC-601.strm",
+              "source_root": "{additional}",
+              "video_id": "ABC-601"
+            },
+            {
+              "candidate_id": "token-2",
+              "cloud_destination_dir": "/lib/movein/ABC",
+              "cloud_file": {
+                "file_id": "file-ABC-603",
+                "hashes": [
+                  [
+                    "2",
+                    "sha1-ABC-603"
+                  ]
+                ],
+                "name": "ABC-603.mp4",
+                "path": "/lib/src/ABC/ABC-603.mp4",
+                "size": 1003,
+                "write_time": 1788000000123456792
+              },
+              "cloud_source_path": "/lib/src/ABC/ABC-603.mp4",
+              "destination": "{movein}/ABC-603.strm",
+              "fingerprint": {
+                "size": 32
+              },
+              "kind": "cloud_strm",
+              "mapping_sha256": "0cd3dd659a47354a5b0aafd64b0bbf9834e3df29dbeca9bd5fbbd8bbe0557cc5",
+              "source": "{additional}/ABC/ABC-603.strm",
+              "source_root": "{additional}",
+              "video_id": "ABC-603"
+            },
+            {
+              "candidate_id": "token-3",
+              "cloud_destination_dir": "/lib/movein/ABC",
+              "cloud_file": {
+                "file_id": "file-ABC-604",
+                "hashes": [
+                  [
+                    "2",
+                    "sha1-ABC-604"
+                  ]
+                ],
+                "name": "ABC-604.mp4",
+                "path": "/lib/src/ABC/ABC-604.mp4",
+                "size": 1004,
+                "write_time": 1788000000123456793
+              },
+              "cloud_source_path": "/lib/src/ABC/ABC-604.mp4",
+              "destination": "{movein}/ABC-604.strm",
+              "fingerprint": {
+                "size": 32
+              },
+              "kind": "cloud_strm",
+              "mapping_sha256": "b35504af6bee83ce2dbfa931ccd0d85fe7e469692117e34edbcb56b3f90c5ed9",
+              "source": "{additional}/ABC/ABC-604.strm",
+              "source_root": "{additional}",
+              "video_id": "ABC-604"
+            },
+            {
+              "candidate_id": "token-4",
+              "cloud_destination_dir": "/lib/movein/ABC",
+              "cloud_file": {
+                "file_id": "file-ABC-605",
+                "hashes": [
+                  [
+                    "2",
+                    "sha1-ABC-605"
+                  ]
+                ],
+                "name": "ABC-605.mp4",
+                "path": "/lib/src/ABC/ABC-605.mp4",
+                "size": 1005,
+                "write_time": 1788000000123456794
+              },
+              "cloud_source_path": "/lib/src/ABC/ABC-605.mp4",
+              "destination": "{movein}/ABC-605.strm",
+              "fingerprint": {
+                "size": 32
+              },
+              "kind": "cloud_strm",
+              "mapping_sha256": "117db6424155529c3c4eaeec1c9c2745e92c150f9674152b834d32ffb19acc87",
+              "source": "{additional}/ABC/ABC-605.strm",
+              "source_root": "{additional}",
+              "video_id": "ABC-605"
+            },
+            {
+              "candidate_id": "token-5",
+              "cloud_destination_dir": "/lib/movein/DEF",
+              "cloud_file": {
+                "file_id": "file-DEF-602",
+                "hashes": [
+                  [
+                    "2",
+                    "sha1-DEF-602"
+                  ]
+                ],
+                "name": "DEF-602.mp4",
+                "path": "/lib/src/DEF/DEF-602.mp4",
+                "size": 1002,
+                "write_time": 1788000000123456791
+              },
+              "cloud_source_path": "/lib/src/DEF/DEF-602.mp4",
+              "destination": "{movein}/DEF-602.strm",
+              "fingerprint": {
+                "size": 32
+              },
+              "kind": "cloud_strm",
+              "mapping_sha256": "155a7f8fff8756558ec8a4abd8c7038ee13c298c1b0083d615a8f2a71d78f1d8",
+              "source": "{additional}/DEF/DEF-602.strm",
+              "source_root": "{additional}",
+              "video_id": "DEF-602"
+            }
+          ]
+        },
+        {
           "op": "apply",
           "result": {
             "plan_id": "token-6",

@@ -1,0 +1,539 @@
+{
+  "calls": [
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-1",
+        "plan_id": "token-4",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 1
+    },
+    {
+      "error": {
+        "message": "[Errno 22] Invalid argument: '{additional}/ABC/ABC-801.mp4' -> '{movein}/ABC-801.mp4'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{movein}/ABC-801.mp4",
+        "src": "{additional}/ABC/ABC-801.mp4"
+      },
+      "seq": 2
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "link",
+      "request": {
+        "dst": "{movein}/ABC-801.mp4",
+        "src": "{additional}/ABC/ABC-801.mp4"
+      },
+      "response": null,
+      "seq": 3
+    },
+    {
+      "error": {
+        "message": "[Errno 22] Invalid argument: '{additional}/ABC/ABC-801.mp4' -> '{movein}/.embyx-reconcile-3f08aace122ee2368432c1ca23a049bc640bafbf00fdf33a52429f38ba12dbf9'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{movein}/.embyx-reconcile-3f08aace122ee2368432c1ca23a049bc640bafbf00fdf33a52429f38ba12dbf9",
+        "src": "{additional}/ABC/ABC-801.mp4"
+      },
+      "seq": 4
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{movein}/.embyx-reconcile-3f08aace122ee2368432c1ca23a049bc640bafbf00fdf33a52429f38ba12dbf9",
+        "src": "{additional}/ABC/ABC-801.mp4"
+      },
+      "response": null,
+      "seq": 5
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{movein}/.embyx-reconcile-3f08aace122ee2368432c1ca23a049bc640bafbf00fdf33a52429f38ba12dbf9"
+      },
+      "response": null,
+      "seq": 6
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-1",
+        "plan_id": "token-4",
+        "state": "linked"
+      },
+      "response": null,
+      "seq": 7
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-1",
+        "plan_id": "token-4",
+        "state": "source_removed"
+      },
+      "response": null,
+      "seq": 8
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-1",
+        "error_code": null,
+        "plan_id": "token-4",
+        "state": "moved"
+      },
+      "response": null,
+      "seq": 9
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-1",
+        "plan_id": "token-4",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 10
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-2",
+        "plan_id": "token-4",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 11
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{additional}/ABC/ABC-802.mp4",
+        "src": "{movein}/ABC-802.mp4"
+      },
+      "response": null,
+      "seq": 12
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-2",
+        "error_code": "source_changed_during_move",
+        "plan_id": "token-4",
+        "state": "stale"
+      },
+      "response": null,
+      "seq": 13
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-2",
+        "plan_id": "token-4",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 14
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-3",
+        "plan_id": "token-4",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 15
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-3",
+        "plan_id": "token-4",
+        "state": "linked"
+      },
+      "response": null,
+      "seq": 16
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{additional}/ABC/ABC-803.mp4",
+        "src": "{movein}/.embyx-reconcile-a2f2b0b588bcc84fbf4d2ac8cc086b6f84de3e00fa3c1ba11e38ac078eb03192"
+      },
+      "response": null,
+      "seq": 17
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-3",
+        "error_code": "source_changed_during_reconcile",
+        "plan_id": "token-4",
+        "state": "stale"
+      },
+      "response": null,
+      "seq": 18
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-3",
+        "plan_id": "token-4",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 19
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "fill_actor.service",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "op": "scan",
+          "result": {
+            "actors": [
+              {
+                "actor_id": "actor",
+                "actor_name": null,
+                "aliases": [],
+                "error_code": null,
+                "error_message": null,
+                "scraped_count": 3,
+                "talent_id": null,
+                "video_ids": [
+                  "ABC-801",
+                  "ABC-802",
+                  "ABC-803"
+                ]
+              }
+            ],
+            "created_at": "2026-09-19T03:00:00Z",
+            "expires_at": "2026-09-19T04:00:00Z",
+            "plan_id": "token-4",
+            "revision": "token-5",
+            "videos": [
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-1",
+                    "destination_conflict": false,
+                    "file_name": "ABC-801.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-801"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-801",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-2",
+                    "destination_conflict": false,
+                    "file_name": "ABC-802.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-802"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-802",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-3",
+                    "destination_conflict": false,
+                    "file_name": "ABC-803.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-803"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-803",
+                "warnings": []
+              }
+            ]
+          }
+        },
+        {
+          "crashed": true,
+          "op": "apply"
+        },
+        {
+          "op": "restart"
+        },
+        {
+          "crashed": true,
+          "op": "reconcile"
+        },
+        {
+          "op": "restart"
+        },
+        {
+          "op": "reconcile",
+          "result": [
+            {
+              "candidate_id": "token-1",
+              "error_code": null,
+              "file_name": "ABC-801.mp4",
+              "state": "moved",
+              "video_id": "ABC-801"
+            }
+          ]
+        },
+        {
+          "op": "journal",
+          "result": null
+        },
+        {
+          "op": "rename"
+        },
+        {
+          "op": "remove"
+        },
+        {
+          "op": "write"
+        },
+        {
+          "crashed": true,
+          "op": "reconcile"
+        },
+        {
+          "op": "restart"
+        },
+        {
+          "op": "reconcile",
+          "result": [
+            {
+              "candidate_id": "token-2",
+              "error_code": "source_changed_during_move",
+              "file_name": "ABC-802.mp4",
+              "state": "stale",
+              "video_id": "ABC-802"
+            }
+          ]
+        },
+        {
+          "op": "journal",
+          "result": null
+        },
+        {
+          "op": "rename"
+        },
+        {
+          "crashed": true,
+          "op": "reconcile"
+        },
+        {
+          "op": "restart"
+        },
+        {
+          "op": "reconcile",
+          "result": [
+            {
+              "candidate_id": "token-3",
+              "error_code": "source_changed_during_reconcile",
+              "file_name": "ABC-803.mp4",
+              "state": "stale",
+              "video_id": "ABC-803"
+            }
+          ]
+        },
+        {
+          "op": "apply",
+          "result": {
+            "plan_id": "token-4",
+            "results": [
+              {
+                "candidate_id": "token-1",
+                "error_code": null,
+                "file_name": "ABC-801.mp4",
+                "state": "moved",
+                "video_id": "ABC-801"
+              },
+              {
+                "candidate_id": "token-2",
+                "error_code": "source_changed_during_move",
+                "file_name": "ABC-802.mp4",
+                "state": "stale",
+                "video_id": "ABC-802"
+              },
+              {
+                "candidate_id": "token-3",
+                "error_code": "source_changed_during_reconcile",
+                "file_name": "ABC-803.mp4",
+                "state": "stale",
+                "video_id": "ABC-803"
+              }
+            ],
+            "revision": "token-5",
+            "state": "partial_failed"
+          }
+        }
+      ]
+    }
+  },
+  "rows": {
+    "fill_actor_move_journal": [
+      {
+        "candidate_id": "token-1",
+        "plan_id": "token-4",
+        "state": "reconciled",
+        "updated_at": "2026-09-19T03:03:00+00:00"
+      },
+      {
+        "candidate_id": "token-2",
+        "plan_id": "token-4",
+        "state": "reconciled",
+        "updated_at": "2026-09-19T03:05:00+00:00"
+      },
+      {
+        "candidate_id": "token-3",
+        "plan_id": "token-4",
+        "state": "reconciled",
+        "updated_at": "2026-09-19T03:07:00+00:00"
+      }
+    ],
+    "fill_actor_move_results": [
+      {
+        "candidate_id": "token-1",
+        "plan_id": "token-4",
+        "result_json": "{\"candidate_id\":\"token-1\",\"video_id\":\"ABC-801\",\"file_name\":\"ABC-801.mp4\",\"state\":\"moved\",\"error_code\":null}"
+      },
+      {
+        "candidate_id": "token-2",
+        "plan_id": "token-4",
+        "result_json": "{\"candidate_id\":\"token-2\",\"video_id\":\"ABC-802\",\"file_name\":\"ABC-802.mp4\",\"state\":\"stale\",\"error_code\":\"source_changed_during_move\"}"
+      },
+      {
+        "candidate_id": "token-3",
+        "plan_id": "token-4",
+        "result_json": "{\"candidate_id\":\"token-3\",\"video_id\":\"ABC-803\",\"file_name\":\"ABC-803.mp4\",\"state\":\"stale\",\"error_code\":\"source_changed_during_reconcile\"}"
+      }
+    ],
+    "fill_actor_plans": [
+      {
+        "config_version": 0,
+        "created_at": "2026-09-19T03:00:00+00:00",
+        "expires_at": "2026-09-19T04:00:00+00:00",
+        "plan_id": "token-4",
+        "public_json": "{\"plan_id\":\"token-4\",\"revision\":\"token-5\",\"created_at\":\"2026-09-19T03:00:00Z\",\"expires_at\":\"2026-09-19T04:00:00Z\",\"actors\":[{\"actor_id\":\"actor\",\"scraped_count\":3,\"video_ids\":[\"ABC-801\",\"ABC-802\",\"ABC-803\"],\"error_code\":null,\"actor_name\":null,\"talent_id\":null,\"aliases\":[],\"error_message\":null}],\"videos\":[{\"video_id\":\"ABC-801\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-1\",\"video_id\":\"ABC-801\",\"file_name\":\"ABC-801.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-802\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-2\",\"video_id\":\"ABC-802\",\"file_name\":\"ABC-802.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-803\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-3\",\"video_id\":\"ABC-803\",\"file_name\":\"ABC-803.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]}]}",
+        "revision": "token-5"
+      }
+    ]
+  },
+  "scenario": "fill_actor/crash_reconcile",
+  "tree": {
+    "actor": [],
+    "additional": [
+      {
+        "kind": "dir",
+        "path": "ABC"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC/ABC-802.mp4",
+        "sha256": "8e5966554908cc04",
+        "size": 12
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC/ABC-803.mp4",
+        "sha256": "2481a63c85a62cf8",
+        "size": 4
+      }
+    ],
+    "movein": [
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC-801.mp4",
+        "sha256": "5dde896887f6754c",
+        "size": 2
+      }
+    ]
+  }
+}

@@ -10,6 +10,9 @@ crashed}`:
 - `apply` (`args.files`: candidate file names of the last scan, default all): `apply`; the
   result's `model_dump_json()` as JSON.
 - `reconcile`: `reconcile_moves()`, each result as JSON.
+- `candidates`: the repository's record of each candidate of the last scan, as
+  `operations/fill_actor.py` reports it, the fingerprint cut to its size (device, inode and
+  times differ from run to run).
 - `restart`: a new service on a new repository (a new connection pool), as a process
   restart; the file system, the clock and the token counter carry on.
 - `journal` (`args.file`, `args.states`): the repository saves those journal states, in
@@ -63,6 +66,7 @@ from embyx_manager.fill_actor.ports import AcquisitionOutcome, CatalogListing
 from embyx_manager.fill_actor.postgres_repository import PostgresFillActorRepository
 from embyx_manager.fill_actor.service import FillActorPaths, FillActorService, static_runtime
 from operations.archive import resolve
+from operations.fill_actor import _report
 from operations.intake import TOKEN
 
 if TYPE_CHECKING:
@@ -296,7 +300,11 @@ class ControlledMover:
         if self.cancel_after is not None and self.cancel_after.get('mover') == method and self.task is not None:
             self.cancel_after = None
             self.task.cancel()
-            await asyncio.sleep(0)
+            if asyncio.current_task() is self.task:
+                # A future that never ends: the cancel lands here, right after the call (the
+                # operation patches `asyncio.sleep` not to wait, so `sleep(0)` would not
+                # suspend). A move's own task runs on; the step's `await` of it is cancelled.
+                await asyncio.get_running_loop().create_future()
 
     async def list_directory(self, api_directory: str) -> Any:
         self._before('list_directory')
@@ -517,6 +525,15 @@ async def _run(
         return _json(result), plan
     if op == 'reconcile':
         return [_json(result) for result in await service.reconcile_moves()], plan
+    if op == 'candidates':
+        reported = []
+        for video in plan.videos:
+            for candidate in video.move_candidates:
+                record = _report(await repository.get_candidate(plan.plan_id, candidate.candidate_id))
+                # Device, inode and times differ from run to run; the size is the file's.
+                record['fingerprint'] = {'size': record['fingerprint']['size']}
+                reported.append(record)
+        return reported, plan
     if op == 'journal':
         candidate = next(
             candidate

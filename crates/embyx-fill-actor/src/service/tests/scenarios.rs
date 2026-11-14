@@ -443,6 +443,43 @@ fn shape(seeded: &Seeded, op: &str, args: &Value) -> bool {
     true
 }
 
+/// `operations/fill_actor.py` `_report` of a candidate record, the fingerprint cut to its size
+/// (device, inode and times differ from run to run).
+fn report_candidate(record: &CandidateRecord) -> Value {
+    let path = |path: &Path| Value::from(path.to_str().expect("UTF-8 paths in the scenarios"));
+    let optional = |value: Option<&String>| value.map_or(Value::Null, |value| Value::from(value.as_str()));
+    let mut fingerprint = Dict::new();
+    fingerprint.insert("size", Value::Int(record.fingerprint.size.into()));
+    let cloud_file = record.cloud_file.as_ref().map_or(Value::Null, |file| {
+        let mut entry = Dict::new();
+        entry.insert("path", Value::from(file.path.as_str()));
+        entry.insert("file_id", Value::from(file.file_id.as_str()));
+        entry.insert("name", Value::from(file.name.as_str()));
+        entry.insert("size", Value::Int(file.size));
+        entry.insert("write_time", Value::Int(file.write_time));
+        let hashes = file
+            .hashes
+            .iter()
+            .map(|(kind, hash)| Value::List(vec![Value::from(kind.as_str()), Value::from(hash.as_str())]))
+            .collect();
+        entry.insert("hashes", Value::List(hashes));
+        Value::Dict(entry)
+    });
+    let mut entry = Dict::new();
+    entry.insert("candidate_id", Value::from(record.candidate_id.as_str()));
+    entry.insert("video_id", Value::from(record.video_id.as_str()));
+    entry.insert("source", path(&record.source));
+    entry.insert("source_root", path(&record.source_root));
+    entry.insert("destination", path(&record.destination));
+    entry.insert("fingerprint", Value::Dict(fingerprint));
+    entry.insert("kind", Value::from(record.kind.as_str()));
+    entry.insert("mapping_sha256", optional(record.mapping_sha256.as_ref()));
+    entry.insert("cloud_source_path", optional(record.cloud_source_path.as_ref()));
+    entry.insert("cloud_destination_dir", optional(record.cloud_destination_dir.as_ref()));
+    entry.insert("cloud_file", cloud_file);
+    Value::Dict(entry)
+}
+
 /// One step's outcome: its value and the plan the next steps use.
 type StepOutcome = Result<(Value, Option<Arc<FillActorPlan>>), Value>;
 
@@ -486,6 +523,18 @@ async fn run_step(
                 Value::List(results.iter().map(|result| json(&result.dump_json())).collect()),
                 plan,
             ))
+        }
+        "candidates" => {
+            let current = plan.as_ref().expect("a scan before candidates");
+            let mut reported = Vec::new();
+            for candidate in current.videos.iter().flat_map(|video| &video.move_candidates) {
+                let record = repository
+                    .get_candidate(&current.plan_id, &candidate.candidate_id)
+                    .await
+                    .map_err(|error| error_value(error.class_name(), error.to_string()))?;
+                reported.push(record.as_ref().map_or(Value::Null, report_candidate));
+            }
+            Ok((Value::List(reported), plan))
         }
         "journal" => {
             let current = plan.as_ref().expect("a scan before journal");
@@ -882,4 +931,14 @@ async fn cloud_apply_matches_the_python_transcript() {
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn cloud_crash_matches_the_python_transcript() {
     service_steps("fill_actor/cloud_crash").await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn crash_reconcile_matches_the_python_transcript() {
+    service_steps("fill_actor/crash_reconcile").await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn cloud_recovery_matches_the_python_transcript() {
+    service_steps("fill_actor/cloud_recovery").await;
 }
