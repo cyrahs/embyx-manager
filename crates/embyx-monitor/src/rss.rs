@@ -881,4 +881,6 @@ impl RssPipeline {
 }
 
 #[cfg(test)]
+mod scenarios;
+#[cfg(test)]
 mod tests;

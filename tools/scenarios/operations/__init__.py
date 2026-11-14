@@ -22,6 +22,7 @@ from operations import (
     mapping,
     merge,
     playlists,
+    rss,
     tracker,
 )
 
@@ -39,4 +40,5 @@ OPERATIONS: dict[str, Any] = {
     **tracker.OPERATIONS,
     **mapping.OPERATIONS,
     **playlists.OPERATIONS,
+    **rss.OPERATIONS,
 }

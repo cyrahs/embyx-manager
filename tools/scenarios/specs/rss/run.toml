@@ -1,0 +1,132 @@
+# The RSS pipeline (WP8) over two runs against the subscriptions and the ledger in PostgreSQL,
+# the fake CloudDrive and the library on disk.
+#
+# Run 1: an actor feed with a seen item, a new work (CloudDrive drops the first submission, the
+# retry lands), a work the library already holds (settled as archived) and an item with no
+# AVID; a talent whose feed answers 404 and whose name AVBase now lists under a new id (the
+# subscription follows it, its work has no magnet and is parked); a feed answering 503; a
+# disabled subscription; a chart re-listing the actor's work (already tracked), a work credited
+# on the moved talent (filed under the actor) and a work the catalog cannot be asked about
+# (filed as itself, magnet from JavBus); a page that is not a feed; a subscription seeded on
+# its first poll; and one in a category the configuration no longer has.
+#
+# Run 2, an hour later: the talent's next work is submitted; the actor feed's new work carries
+# its magnet in the item, and the library cannot be read for it (submitted anyway); the run is
+# asked to stop while the 503 feed is fetched, so that failure is still recorded and the
+# chart behind it keeps its state.
+description = "rss: polling, relinking, filing by cast, library hits and failures midway"
+operation = "rss.steps"
+clock = "2026-09-10T03:00:00+00:00"
+
+[roots]
+names = ["mount"]
+
+[args.rss]
+enabled = true
+failed_avid_cooldown_seconds = 3600
+categories = [
+    { label = "Actor", task_dir_path = "/115/task/actor" },
+    { label = "Rank", task_dir_path = "/115/task/rank" },
+]
+
+[args.config]
+src_dir = "mount/115/task"
+dst_dir = "mount/library"
+mapping = { actor = "actor", rank = "rank" }
+min_size_mb = 0
+
+[args.sukebei]
+"ABC-001" = "magnet:?xt=urn:btih:1111111111111111111111111111111111111111&dn=ABC-001"
+"RNK-004" = "magnet:?xt=urn:btih:4444444444444444444444444444444444444444&dn=RNK-004"
+"TAL-008" = "magnet:?xt=urn:btih:8888888888888888888888888888888888888888&dn=TAL-008"
+
+[args.javbus]
+"RNK-005" = [["magnet:?xt=urn:btih:5555555555555555555555555555555555555555&dn=RNK-005", 2000000000]]
+
+[args.cast]
+"RNK-004" = [200]
+"RNK-005" = "error"
+
+[args.talents]
+"香水じゅん" = { talent_id = 200, name = "香水じゅん", aliases = [] }
+
+[args.feeds]
+"https://feeds.test/actor-a" = """<rss><channel><title>Actor A</title>
+<item><guid>old-1</guid><title>OLD-001 seen before</title></item>
+<item><guid>a-1</guid><title>ABC-001 new work</title><link>https://example.test/works/ABC-001</link></item>
+<item><guid>a-2</guid><title>HLD-002 already held</title></item>
+<item><guid>a-3</guid><title>Behind the scenes</title><link>https://example.test/blog/</link></item>
+</channel></rss>"""
+"https://www.avbase.net/talents/100/feed" = 404
+"https://www.avbase.net/talents/200/feed" = """<rss><channel><title>香水じゅん</title>
+<item><guid>t-1</guid><title>TAL-003 香水じゅん</title></item>
+</channel></rss>"""
+"https://feeds.test/broken" = 503
+"https://feeds.test/rank" = """<rss><channel><title>Rank</title>
+<item><guid>r-1</guid><title>ABC-001 charting</title></item>
+<item><guid>r-2</guid><title>RNK-004 credited on the talent</title></item>
+<item><guid>r-3</guid><title>RNK-005 unknown cast</title></item>
+</channel></rss>"""
+"https://feeds.test/garbage" = "<html><body>gone</body></html>"
+"https://feeds.test/seed" = """<rss><channel><title>Seed</title>
+<item><guid>s-1</guid><title>SEE-007 backlog</title></item>
+</channel></rss>"""
+
+[[args.steps]]
+op = "run"
+
+[[args.steps]]
+op = "run"
+[args.steps.args]
+advance_seconds = 3600
+stop_after_fetch = "https://feeds.test/broken"
+[args.steps.args.feeds]
+"https://feeds.test/actor-a" = """<rss><channel><title>Actor A</title>
+<item><guid>a-1</guid><title>ABC-001 new work</title></item>
+<item><guid>a-4</guid><title>NEW-006 with its magnet</title><description><![CDATA[<table><tbody><tr>
+<td><a href="magnet:?xt=urn:btih:6666666666666666666666666666666666666666&dn=x">x</a></td><td>3 GiB</td>
+</tr></tbody></table>]]></description></item>
+</channel></rss>"""
+"https://www.avbase.net/talents/200/feed" = """<rss><channel><title>香水じゅん</title>
+<item><guid>t-1</guid><title>TAL-003 香水じゅん</title></item>
+<item><guid>t-2</guid><title>TAL-008 next work</title></item>
+</channel></rss>"""
+"https://feeds.test/broken" = 503
+"https://feeds.test/rank" = """<rss><channel><title>Rank</title>
+<item><guid>r-4</guid><title>RNK-009 after the stop</title></item>
+</channel></rss>"""
+
+[[args.faults]]
+op = "iterdir"
+path = "mount/library/actor/NEW"
+message = "library detached"
+times = 1
+
+[[tree]]
+path = "mount/library/actor/HLD/HLD-002.mp4"
+size = 4
+
+[[tree]]
+path = "mount/library/actor/NEW/NEW-005.mp4"
+size = 4
+
+[database]
+schema = "app"
+tables = ["feed_subscriptions", "archive_acquisitions", "archive_magnet_attempts"]
+sql = [
+    "INSERT INTO feed_subscriptions (kind, category, enabled, url, name, cursor_json, created_at, updated_at) VALUES ('rss', 'Actor', TRUE, 'https://feeds.test/actor-a', 'Actor A', '[\"old-1\"]', '2026-09-01T00:00:00Z', '2026-09-01T00:00:00Z')",
+    "INSERT INTO feed_subscriptions (kind, category, enabled, talent_id, name, aliases_json, created_at, updated_at) VALUES ('avbase_talent', 'Actor', TRUE, 100, '香水じゅん', '[\"Jun\"]', '2026-09-01T00:00:00Z', '2026-09-01T00:00:00Z')",
+    "INSERT INTO feed_subscriptions (kind, category, enabled, url, created_at, updated_at) VALUES ('rss', 'Actor', TRUE, 'https://feeds.test/broken', '2026-09-01T00:00:00Z', '2026-09-01T00:00:00Z')",
+    "INSERT INTO feed_subscriptions (kind, category, enabled, url, created_at, updated_at) VALUES ('rss', 'Actor', FALSE, 'https://feeds.test/off', '2026-09-01T00:00:00Z', '2026-09-01T00:00:00Z')",
+    "INSERT INTO feed_subscriptions (kind, category, enabled, url, created_at, updated_at) VALUES ('rss', 'Rank', TRUE, 'https://feeds.test/rank', '2026-09-01T00:00:00Z', '2026-09-01T00:00:00Z')",
+    "INSERT INTO feed_subscriptions (kind, category, enabled, url, created_at, updated_at) VALUES ('rss', 'Rank', TRUE, 'https://feeds.test/garbage', '2026-09-01T00:00:00Z', '2026-09-01T00:00:00Z')",
+    "INSERT INTO feed_subscriptions (kind, category, enabled, url, seed_pending, created_at, updated_at) VALUES ('rss', 'Rank', TRUE, 'https://feeds.test/seed', TRUE, '2026-09-01T00:00:00Z', '2026-09-01T00:00:00Z')",
+    "INSERT INTO feed_subscriptions (kind, category, enabled, url, created_at, updated_at) VALUES ('rss', 'Gone', TRUE, 'https://feeds.test/gone', '2026-09-01T00:00:00Z', '2026-09-01T00:00:00Z')",
+    "INSERT INTO archive_acquisitions (avid, state, source, task_dir_path, release_date, created_at, updated_at) VALUES ('HLD-002', 'discovered', 'rss:Actor', '/115/task/actor', NULL, '2026-09-01T00:00:00Z', '2026-09-01T00:00:00Z')",
+]
+
+[clouddrive]
+directories = ["/115/task/actor", "/115/task/rank"]
+errors = [
+    { method = "AddOfflineFiles", code = "UNAVAILABLE", details = "connection reset" },
+]
