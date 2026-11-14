@@ -529,6 +529,104 @@ async fn tracker_outcomes_match_the_python_transcript() {
     tracker_steps("tracker/outcomes").await;
 }
 
+#[tokio::test]
+async fn tracker_failures_match_the_python_transcript() {
+    tracker_steps("tracker/failures").await;
+}
+
+#[tokio::test]
+async fn tracker_cancel_matches_the_python_transcript() {
+    tracker_steps("tracker/cancel").await;
+}
+
+#[tokio::test]
+async fn replace_filing_matches_the_python_transcript() {
+    tracker_steps("replace/filing").await;
+}
+
+#[tokio::test]
+async fn replace_cancel_matches_the_python_transcript() {
+    tracker_steps("replace/cancel").await;
+}
+
+#[tokio::test]
+async fn replace_start_matches_the_python_transcript() {
+    tracker_steps("replace/start").await;
+}
+
+#[tokio::test]
+async fn manual_submit_matches_the_python_transcript() {
+    tracker_steps("manual/submit").await;
+}
+
+/// Rust only: the cancel-safety `replace/cancel` cannot show (Python's thread finishes a sent
+/// call on its own). The poll is dropped while CloudDrive still holds the old copy's
+/// `DeleteFiles`; the call still completes, and `settle()` on the tracker's scoped handle
+/// returns only once it has.
+#[tokio::test]
+async fn a_dropped_poll_leaves_its_delete_running_and_settle_waits_for_it() {
+    use std::time::Duration;
+
+    let spec = Spec::load("replace/cancel");
+    let seeded = Seeded::new(&spec);
+    let database = TestDatabase::create().await;
+    embyx_db::scenario::seed(database.pool(), &spec).await;
+    let recorder = Recorder::new();
+    let fakes = ScenarioFakes::start(&spec, &recorder).await;
+    let hold = fakes.clouddrive.fake.hold("DeleteFiles");
+    let args = spec.section("args");
+    let archive_config = config(&seeded, args.get("config").expect("a config"));
+    let mount = seeded.resolve("mount");
+    let client = AsyncCloudDrive::connect(&ClientOptions::new(fakes.clouddrive.address(), TOKEN, false));
+    let ledger: Arc<dyn Ledger> = Arc::new(AcquisitionRepository::new(database.database()));
+    let submit: SubmitMagnet = Arc::new(|_, _| Box::pin(std::future::ready(false)));
+    let tracker = AcquisitionTracker::new(TrackerParts {
+        ledger: Arc::clone(&ledger),
+        cloud: Arc::new(client.scoped()),
+        archiver: ArchivePipeline::new(archive_config.clone(), AvidParser::default()),
+        settings: TrackerSettings::from_config(&archive_config, vec!["/115/task/inbox".to_owned()], &path_text(&mount)),
+        submit_magnet: submit,
+        release_date_lookup: None,
+    });
+    let run = RunContext::new("test-tracker");
+    {
+        let poll = tracker.poll(&run);
+        tokio::pin!(poll);
+        tokio::select! {
+            () = hold.arrived() => {}
+            outcome = &mut poll => panic!("the poll ended before deleting: {outcome:?}"),
+        }
+        // Dropped here, with DeleteFiles held at CloudDrive.
+    }
+    assert!(
+        tokio::time::timeout(Duration::from_millis(100), tracker.settle())
+            .await
+            .is_err(),
+        "settle waits for the held delete"
+    );
+    hold.release();
+    tokio::time::timeout(Duration::from_secs(5), tracker.settle())
+        .await
+        .expect("the delete ends");
+    let deleted = recorder
+        .calls()
+        .iter()
+        .filter(|call| call.get("method") == Some(&Value::from("DeleteFiles")))
+        .filter(|call| call.get("response").is_some())
+        .count();
+    assert_eq!(deleted, 1);
+    let dump = fakes.clouddrive.fake.dump();
+    let files = dump.get("files").and_then(Value::as_list).expect("files");
+    assert!(
+        files
+            .iter()
+            .all(|file| file.get("path") != Some(&Value::from("/library/sorted/RPX/RPX-311.mp4")))
+    );
+    client.close().await;
+    drop(fakes);
+    database.drop_database().await;
+}
+
 #[test]
 fn scrub_replaces_only_the_debug_string() {
     let text = "<_InactiveRpcError of RPC that terminated with:\n\tstatus = StatusCode.INTERNAL\n\tdetails = \"x\"\n\tdebug_error_string = \"INTERNAL:x {a:\"b\"}\"\n>: tail";

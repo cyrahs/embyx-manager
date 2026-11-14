@@ -266,7 +266,9 @@ async def steps(ctx: Context) -> Any:  # noqa: C901, PLR0915 - one world, one br
                         return await manual.check_target(step['task_dir'])
                     case 'submit':
                         return _submission(
-                            await manual.submit(step['lines'], task_dir_path=step['task_dir'], queue=step.get('queue', False))
+                            await manual.submit(
+                                step['lines'], task_dir_path=step['task_dir'], queue=step.get('queue', False)
+                            )
                         )
                 msg = f'unknown step {op!r}'
                 raise ValueError(msg)

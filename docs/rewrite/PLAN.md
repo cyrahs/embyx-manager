@@ -263,7 +263,7 @@ feed. Where the TLS fingerprint matters the probe runs from the production netwo
 | WP4 | 2 API | done (#88) | axum shell: auth, health, size limit, SPA hosting, config API with the two connection tests, OpenAPI check, page smoke. Checkpoint A (note only) | 900 | WP2, WP3 |
 | WP5 | 3 monitor | done (#87) | Ledger, runs, reports, cadence, release dates, intake, subscriptions | 2,000 | WP2, WP3 |
 | WP6 | 3 monitor | done (#89) | Archive, reconcile, move-in (filesystem effects) | 1,100 | WP1 |
-| WP7 | 3 monitor | pending | Tracker, 换版, manual intake | 1,250 | WP5, WP6 |
+| WP7 | 3 monitor | in review | Tracker, 换版, manual intake | 1,250 | WP5, WP6 |
 | WP8 | 3 monitor | pending | RSS pipeline, mapping pipeline, playlists and playlist sync | 1,150 | WP5 |
 | WP9 | 3 monitor | pending | Scheduler (cron, watcher, tracker bursts), monitor API, playlists API, wiring | 1,700 | WP7, WP8, WP4 |
 | WP10 | 4 fill actor | done (#90) | PostgreSQL repository, models, cloud moves, adapters | 1,850 | WP3, WP5 |
@@ -439,6 +439,21 @@ or says why one stays.
   behaviour change for Max to decide after the rewrite. The scenario operation
   (`tools/scenarios/operations/archive.py`, `archive/scenarios.rs`) runs `{op, args}` steps over a seeded
   tree through `RecordingFs` (faults, stops, `advance_seconds`); WP7 can add tracker steps to it.
+- WP7 left these for later packages. `tracker::AcquisitionTracker::new(TrackerParts { .. })` with
+  `TrackerSettings::from_config(config, task_dir_paths, library_mount_prefix)`; WP9 rebuilds the settings for
+  each poll from the ledger's active directories (`settings_mut` or a new tracker), wires `submit_magnet` as
+  bootstrap's `_submit_magnet_at_cloud` (a faithful copy is in `tracker/scenarios.rs`: the row's directory or
+  the first configured one, `任务已存在` counted as accepted), and builds the tracker on
+  `AsyncCloudDrive::scoped()`: after cancelling a poll (a burst cut short, shutdown) it awaits
+  `AcquisitionTracker::settle()` before it touches the ledger, so a sent `DeleteFiles` or `RemoveOfflineFiles`
+  has ended (D82). CloudDrive goes through `cloud::CloudListing` and `cloud::TrackerCloud`
+  (`AsyncCloudDrive` implements both, and `intake::OfflineFiles`); `cloud::is_file_not_found` is Python's
+  `except FileNotFoundError`. `manual::ManualIntakeSource` and `replace::ReplacementSource` are Python's
+  dataclasses of factories; their errors carry `code()` (the API's answer) and Python's class names for the
+  monitor API (WP9). WP8's playlists call `ManualIntakeSource::submit` with `SubmitOptions { source, limit:
+  None, queue: true, on_entry }`. The `tracker.steps` operation (`operations/tracker.py`) holds the whole
+  acquisition world (ledger, CloudDrive fake, mount, tracker, 换版, manual); WP8 and WP9 can add their steps to
+  it rather than build another.
 
 - WP4 left these for later packages. The request models (`UpdateSectionRequest`, `TestConnectionRequest`) are
   validated in `embyx_api::body` against pydantic goldens (`goldens/api/request_models.json`) rather than through
