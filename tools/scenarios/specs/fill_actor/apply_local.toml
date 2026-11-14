@@ -1,0 +1,115 @@
+# The fill-actor service on a local library (WP11): a scan finds a title the actor directory
+# holds, one nobody holds and the additional directories' copies (a cd1/cd2 set, one per
+# directory), and the candidate records it stored are read back; apply then moves what still
+# matches, reports a destination that appeared, a source removed or rewritten since the scan,
+# a rename the file system refuses (EXDEV, EACCES) and, with renameat2 flags unsupported
+# (EINVAL), moves with a hard link and drops the source through the quarantine name. A second
+# apply of the same plan returns the stored results.
+description = "fill_actor: scan and apply on a local library, every apply outcome"
+operation = "fill_actor.service"
+clock = "2026-09-10T03:00:00+00:00"
+
+[roots]
+names = ["actor", "additional", "additional2", "movein"]
+
+[args]
+library = { actor = "actor", additional = ["additional", "additional2"], move_in = "movein" }
+catalog = { actor = ["ABC-001", "ABC-002", "ABC-003", "ABC-004", "ABC-005", "ABC-006", "ABC-007", "ABC-008", "ABC-009", "ABC-010"] }
+
+[[args.faults]]
+op = "rename_noreplace"
+path = "additional/ABC/ABC-008.mp4"
+errno = 18
+
+[[args.faults]]
+op = "rename_noreplace"
+path = "additional/ABC/ABC-009.mp4"
+errno = 13
+
+[[args.faults]]
+op = "rename_noreplace"
+path = "additional2/ABC/ABC-010.mkv"
+errno = 22
+
+[[args.faults]]
+op = "rename_noreplace"
+path = "additional2/ABC/ABC-010.mkv"
+errno = 22
+
+[[args.steps]]
+op = "scan"
+
+[[args.steps]]
+op = "candidates"
+
+[[args.steps]]
+op = "write"
+args = { path = "movein/ABC-002.mp4", text = "arrived after the scan" }
+
+[[args.steps]]
+op = "remove"
+args = { path = "additional/ABC/ABC-003.mp4" }
+
+[[args.steps]]
+op = "write"
+args = { path = "additional/ABC/ABC-004.mp4", text = "rewritten" }
+
+[[args.steps]]
+op = "apply"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { advance_seconds = 60 }
+
+[[tree]]
+path = "actor/ABC/ABC-005.mp4"
+size = 5
+
+[[tree]]
+path = "additional/ABC/ABC-001-cd1.mp4"
+size = 11
+
+[[tree]]
+path = "additional/ABC/ABC-001-cd2.mp4"
+size = 12
+
+[[tree]]
+path = "additional/ABC/ABC-002.mp4"
+size = 2
+
+[[tree]]
+path = "additional/ABC/ABC-003.mp4"
+size = 3
+
+[[tree]]
+path = "additional/ABC/ABC-004.mp4"
+size = 4
+
+[[tree]]
+path = "additional2/ABC/ABC-007.mp4"
+size = 7
+
+[[tree]]
+path = "additional/ABC/ABC-008.mp4"
+size = 8
+
+[[tree]]
+path = "additional/ABC/ABC-009.mp4"
+size = 9
+
+[[tree]]
+path = "additional2/ABC/ABC-010.mkv"
+size = 10
+
+[[tree]]
+path = "additional/ABC/ABC-005.mp4"
+size = 55
+
+[database]
+schema = "app"
+tables = [
+    "fill_actor_plans",
+    "fill_actor_move_results",
+    "fill_actor_move_journal",
+]

@@ -1,0 +1,397 @@
+{
+  "calls": [
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-1",
+        "plan_id": "token-3",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 1
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{movein}/ABC-501.mp4",
+        "src": "{additional}/ABC/ABC-501.mp4"
+      },
+      "response": null,
+      "seq": 2
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-1",
+        "plan_id": "token-3",
+        "state": "linked"
+      },
+      "response": null,
+      "seq": 3
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-1",
+        "plan_id": "token-3",
+        "state": "source_removed"
+      },
+      "response": null,
+      "seq": 4
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-1",
+        "error_code": null,
+        "plan_id": "token-3",
+        "state": "moved"
+      },
+      "response": null,
+      "seq": 5
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-1",
+        "plan_id": "token-3",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 6
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-2",
+        "plan_id": "token-3",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 7
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{movein}/ABC-502.mp4",
+        "src": "{additional}/ABC/ABC-502.mp4"
+      },
+      "response": null,
+      "seq": 8
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-2",
+        "plan_id": "token-3",
+        "state": "linked"
+      },
+      "response": null,
+      "seq": 9
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-2",
+        "plan_id": "token-3",
+        "state": "source_removed"
+      },
+      "response": null,
+      "seq": 10
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-2",
+        "error_code": null,
+        "plan_id": "token-3",
+        "state": "moved"
+      },
+      "response": null,
+      "seq": 11
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-2",
+        "plan_id": "token-3",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 12
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "fill_actor.service",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "op": "scan",
+          "result": {
+            "actors": [
+              {
+                "actor_id": "actor",
+                "actor_name": null,
+                "aliases": [],
+                "error_code": null,
+                "error_message": null,
+                "scraped_count": 2,
+                "talent_id": null,
+                "video_ids": [
+                  "ABC-501",
+                  "ABC-502"
+                ]
+              }
+            ],
+            "created_at": "2026-09-15T03:00:00Z",
+            "expires_at": "2026-09-15T04:00:00Z",
+            "plan_id": "token-3",
+            "revision": "token-4",
+            "videos": [
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-1",
+                    "destination_conflict": false,
+                    "file_name": "ABC-501.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-501"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-501",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-2",
+                    "destination_conflict": false,
+                    "file_name": "ABC-502.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-502"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-502",
+                "warnings": []
+              }
+            ]
+          }
+        },
+        {
+          "op": "journal",
+          "result": null
+        },
+        {
+          "op": "remove"
+        },
+        {
+          "op": "reconcile",
+          "result": []
+        },
+        {
+          "op": "apply",
+          "result": {
+            "plan_id": "token-3",
+            "results": [
+              {
+                "candidate_id": "token-1",
+                "error_code": "roots_unavailable",
+                "file_name": "ABC-501.mp4",
+                "state": "failed",
+                "video_id": "ABC-501"
+              },
+              {
+                "candidate_id": "token-2",
+                "error_code": "roots_unavailable",
+                "file_name": "ABC-502.mp4",
+                "state": "failed",
+                "video_id": "ABC-502"
+              }
+            ],
+            "revision": "token-4",
+            "state": "failed"
+          }
+        },
+        {
+          "op": "write"
+        },
+        {
+          "op": "reconcile",
+          "result": [
+            {
+              "candidate_id": "token-1",
+              "error_code": null,
+              "file_name": "ABC-501.mp4",
+              "state": "moved",
+              "video_id": "ABC-501"
+            }
+          ]
+        },
+        {
+          "op": "apply",
+          "result": {
+            "plan_id": "token-3",
+            "results": [
+              {
+                "candidate_id": "token-1",
+                "error_code": null,
+                "file_name": "ABC-501.mp4",
+                "state": "moved",
+                "video_id": "ABC-501"
+              },
+              {
+                "candidate_id": "token-2",
+                "error_code": null,
+                "file_name": "ABC-502.mp4",
+                "state": "moved",
+                "video_id": "ABC-502"
+              }
+            ],
+            "revision": "token-4",
+            "state": "succeeded"
+          }
+        }
+      ]
+    }
+  },
+  "rows": {
+    "fill_actor_move_journal": [
+      {
+        "candidate_id": "token-1",
+        "plan_id": "token-3",
+        "state": "reconciled",
+        "updated_at": "2026-09-15T03:02:00+00:00"
+      },
+      {
+        "candidate_id": "token-2",
+        "plan_id": "token-3",
+        "state": "reconciled",
+        "updated_at": "2026-09-15T03:02:00+00:00"
+      }
+    ],
+    "fill_actor_move_results": [
+      {
+        "candidate_id": "token-1",
+        "plan_id": "token-3",
+        "result_json": "{\"candidate_id\":\"token-1\",\"video_id\":\"ABC-501\",\"file_name\":\"ABC-501.mp4\",\"state\":\"moved\",\"error_code\":null}"
+      },
+      {
+        "candidate_id": "token-2",
+        "plan_id": "token-3",
+        "result_json": "{\"candidate_id\":\"token-2\",\"video_id\":\"ABC-502\",\"file_name\":\"ABC-502.mp4\",\"state\":\"moved\",\"error_code\":null}"
+      }
+    ],
+    "fill_actor_plans": [
+      {
+        "config_version": 0,
+        "created_at": "2026-09-15T03:00:00+00:00",
+        "expires_at": "2026-09-15T04:00:00+00:00",
+        "plan_id": "token-3",
+        "public_json": "{\"plan_id\":\"token-3\",\"revision\":\"token-4\",\"created_at\":\"2026-09-15T03:00:00Z\",\"expires_at\":\"2026-09-15T04:00:00Z\",\"actors\":[{\"actor_id\":\"actor\",\"scraped_count\":2,\"video_ids\":[\"ABC-501\",\"ABC-502\"],\"error_code\":null,\"actor_name\":null,\"talent_id\":null,\"aliases\":[],\"error_message\":null}],\"videos\":[{\"video_id\":\"ABC-501\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-1\",\"video_id\":\"ABC-501\",\"file_name\":\"ABC-501.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-502\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-2\",\"video_id\":\"ABC-502\",\"file_name\":\"ABC-502.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]}]}",
+        "revision": "token-4"
+      }
+    ]
+  },
+  "scenario": "fill_actor/offline",
+  "tree": {
+    "actor": [
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": ".online",
+        "sha256": "e3b0c44298fc1c14",
+        "size": 0
+      }
+    ],
+    "additional": [
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": ".online",
+        "sha256": "e3b0c44298fc1c14",
+        "size": 0
+      },
+      {
+        "kind": "dir",
+        "path": "ABC"
+      }
+    ],
+    "movein": [
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": ".online",
+        "sha256": "e3b0c44298fc1c14",
+        "size": 0
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC-501.mp4",
+        "sha256": "5dde896887f6754c",
+        "size": 2
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC-502.mp4",
+        "sha256": "cd2eb0837c9b4c96",
+        "size": 3
+      }
+    ]
+  }
+}

@@ -1,0 +1,172 @@
+# The fill-actor service in CloudDrive mode (WP11): the additional directory holds .strm mappings
+# whose targets live in CloudDrive, and a move is a CloudDrive MoveFile into the move-in tree,
+# journaled as an operation (prepared, submitting, verifying, then final). The scan reads each
+# directory once; apply moves a title whose brand directory does not exist yet (created first),
+# reports a destination already there, a source someone moved away and a mapping rewritten since
+# the scan. The scan skips a mapping whose target has another title's name, a video file that is
+# not a mapping, a mapping outside the mount, and reports a title already moved (the mapping not
+# yet converged) as existing. A MoveFile that fails in transport
+# leaves the operation unknown while source and destination are observed; reconcile keeps
+# observing until the 15-minute grace has passed, then concludes the move never happened.
+description = "fill_actor: scan and apply in CloudDrive mode, every outcome"
+operation = "fill_actor.service"
+clock = "2026-09-16T03:00:00+00:00"
+
+[roots]
+names = ["actor", "additional", "movein"]
+
+[args]
+catalog = { actor = ["ABC-601", "DEF-602", "ABC-603", "ABC-604", "ABC-605", "ABC-606", "ABC-607", "ABC-608", "DEF-609"] }
+cloud = { strm_mount_prefix = "/mnt/cd2", source_api_roots = ["/lib/src"], move_in_api_root = "/lib/movein" }
+brands = { DEF-602 = "DEF", DEF-609 = "DEF" }
+
+[[args.steps]]
+op = "scan"
+
+[[args.steps]]
+op = "candidates"
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-605.mp4"], advance_seconds = 60 }
+
+[[args.steps]]
+op = "cloud_move"
+args = { src = "/lib/src/ABC/ABC-603.mp4", dst = "/lib/elsewhere" }
+
+[[args.steps]]
+op = "write"
+args = { path = "additional/ABC/ABC-604.strm", text = "/mnt/cd2/lib/src/ABC/ABC-604-cd1.mp4" }
+
+[[args.steps]]
+op = "apply"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 600 }
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 300 }
+
+[[args.steps]]
+op = "apply"
+args = { advance_seconds = 60 }
+
+[[tree]]
+path = "additional/ABC/ABC-601.strm"
+text = "/mnt/cd2/lib/src/ABC/ABC-601.mp4"
+
+[[tree]]
+path = "additional/DEF/DEF-602.strm"
+text = "/mnt/cd2/lib/src/DEF/DEF-602.mp4"
+
+[[tree]]
+path = "additional/ABC/ABC-603.strm"
+text = "/mnt/cd2/lib/src/ABC/ABC-603.mp4"
+
+[[tree]]
+path = "additional/ABC/ABC-604.strm"
+text = "/mnt/cd2/lib/src/ABC/ABC-604.mp4"
+
+[[tree]]
+path = "additional/ABC/ABC-605.strm"
+text = "/mnt/cd2/lib/src/ABC/ABC-605.mp4"
+
+[[tree]]
+path = "additional/ABC/ABC-606.strm"
+text = "/mnt/cd2/lib/src/ABC/ABC-660.mp4"
+
+[[tree]]
+path = "additional/ABC/ABC-607.mp4"
+size = 7
+
+[[tree]]
+path = "additional/ABC/ABC-608.strm"
+text = "/elsewhere/ABC-608.mp4"
+
+[[tree]]
+path = "additional/DEF/DEF-609.strm"
+text = "/mnt/cd2/lib/src/DEF/DEF-609.mp4"
+
+[clouddrive]
+directories = ["/lib/elsewhere"]
+
+[[clouddrive.files]]
+path = "/lib/src/ABC/ABC-601.mp4"
+id = "file-ABC-601"
+size = 1001
+write_time = 1788000000123456790
+hashes = { 2 = "sha1-ABC-601" }
+
+[[clouddrive.files]]
+path = "/lib/src/DEF/DEF-602.mp4"
+id = "file-DEF-602"
+size = 1002
+write_time = 1788000000123456791
+hashes = { 2 = "sha1-DEF-602" }
+
+[[clouddrive.files]]
+path = "/lib/movein/DEF/DEF-602.mp4"
+id = "file-other"
+size = 1020
+write_time = 1788000000123456809
+hashes = { 2 = "sha1-DEF-602" }
+
+[[clouddrive.files]]
+path = "/lib/src/ABC/ABC-603.mp4"
+id = "file-ABC-603"
+size = 1003
+write_time = 1788000000123456792
+hashes = { 2 = "sha1-ABC-603" }
+
+[[clouddrive.files]]
+path = "/lib/src/ABC/ABC-604.mp4"
+id = "file-ABC-604"
+size = 1004
+write_time = 1788000000123456793
+hashes = { 2 = "sha1-ABC-604" }
+
+[[clouddrive.files]]
+path = "/lib/src/ABC/ABC-604-cd1.mp4"
+id = "file-ABC-604-cd1"
+size = 1040
+write_time = 1788000000123456829
+hashes = { 2 = "sha1-ABC-604-cd1" }
+
+[[clouddrive.files]]
+path = "/lib/src/ABC/ABC-605.mp4"
+id = "file-ABC-605"
+size = 1005
+write_time = 1788000000123456794
+hashes = { 2 = "sha1-ABC-605" }
+
+[[clouddrive.files]]
+path = "/lib/src/ABC/ABC-660.mp4"
+id = "file-ABC-660"
+size = 1006
+write_time = 1788000000123456795
+hashes = { 2 = "sha1-ABC-660" }
+
+[[clouddrive.files]]
+path = "/lib/movein/DEF/DEF-609.mp4"
+id = "file-DEF-609"
+size = 1009
+write_time = 1788000000123456798
+hashes = { 2 = "sha1-DEF-609" }
+
+[[clouddrive.errors]]
+method = "MoveFile"
+code = "UNAVAILABLE"
+details = "connection reset"
+times = 1
+
+[database]
+schema = "app"
+tables = [
+    "fill_actor_plans",
+    "fill_actor_move_results",
+    "fill_actor_move_journal",
+    "fill_actor_cloud_move_operations",
+]

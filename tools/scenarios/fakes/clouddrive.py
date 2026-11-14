@@ -54,8 +54,14 @@ class FakeCloudDrive(pb_grpc.CloudDriveFileSrvServicer):
         self._lock = threading.Lock()
         self._record = record
         self.directories: set[str] = {'/', *seed.get('directories', [])}
+        # A seeded `id` (default: the path) and `write_time` (nanoseconds since the epoch, default:
+        # none) stay with the file when it moves, as CloudDrive's do; both are dumped when seeded.
         self.files: dict[str, dict[str, Any]] = {
-            entry['path']: {'size': int(entry.get('size', 0)), 'hashes': dict(entry.get('hashes', {}))}
+            entry['path']: {
+                'size': int(entry.get('size', 0)),
+                'hashes': dict(entry.get('hashes', {})),
+                **{key: entry[key] for key in ('id', 'write_time') if key in entry},
+            }
             for entry in seed.get('files', [])
         }
         for path in list(self.files):
@@ -81,7 +87,14 @@ class FakeCloudDrive(pb_grpc.CloudDriveFileSrvServicer):
         file = self.files[path]
         # TOML keys are strings; `fileHashes` is map<uint32, string>.
         hashes = {int(kind): value for kind, value in file['hashes'].items()}
-        return pb.CloudDriveFile(id=path, name=name, fullPathName=path, size=file['size'], fileHashes=hashes)
+        entry = pb.CloudDriveFile(
+            id=file.get('id', path), name=name, fullPathName=path, size=file['size'], fileHashes=hashes
+        )
+        if 'write_time' in file:
+            seconds, nanos = divmod(int(file['write_time']), 1_000_000_000)
+            entry.writeTime.seconds = seconds
+            entry.writeTime.nanos = nanos
+        return entry
 
     def _exists(self, path: str) -> bool:
         return path in self.directories or path in self.files

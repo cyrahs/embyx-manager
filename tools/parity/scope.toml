@@ -122,7 +122,7 @@ tests = [
 
 [WP11]
 title = "Fill-actor service and recovery"
-status = "pending"
+status = "done"
 tests = [
   "tests/test_fill_actor_service.py",
   "tests/test_fill_actor_recovery.py",
@@ -146,6 +146,8 @@ tests = [
   # Its assertions are the fill-actor health block and routes; WP4's bootstrap tests cover
   # the store load, the config router and the shutdown order on their own.
   "tests/test_bootstrap.py::test_bootstrap_wires_repository_api_and_shutdown",
+  # A job-manager test in the service file: it cancels a `FillActorJobManager` job.
+  "tests/test_fill_actor_service.py::test_job_cancel_does_not_return_before_managed_scan_worker_exits",
 ]
 
 [WP13]

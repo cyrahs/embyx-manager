@@ -212,6 +212,11 @@ pub enum MoverError {
 pub const CLOUDDRIVE_UNCONFIGURED: &str = "CloudDrive connection is not configured";
 
 impl MoverError {
+    /// `isinstance(exc, FileNotFoundError)`: the directory a listing asked for is not there.
+    pub fn is_file_not_found(&self) -> bool {
+        matches!(self, Self::CloudDrive(error) if error.is_file_not_found())
+    }
+
     /// `type(exc).__name__`.
     pub fn class_name(&self) -> &'static str {
         match self {
@@ -409,6 +414,18 @@ impl CloudMovePaths {
     /// file points at, which must lie under the source's own root. A negative index counts
     /// from the end, as a Python index does.
     pub fn parse_mapping(&self, mapping_path: &Path, source_index: isize) -> Result<ParsedStrmTarget, CheckError> {
+        self.parse_mapping_from(|| read_mapping(mapping_path), source_index)
+    }
+
+    /// [`Self::parse_mapping`] with the mapping's bytes from `read` (the service reads them
+    /// through its file system), which is called only once the index has been checked and
+    /// needs to return no more than one byte past [`MAX_STRM_BYTES`]; any error it returns
+    /// is Python's `OSError` while reading.
+    pub fn parse_mapping_from<E>(
+        &self,
+        read: impl FnOnce() -> Result<Vec<u8>, E>,
+        source_index: isize,
+    ) -> Result<ParsedStrmTarget, CheckError> {
         let index = if source_index < 0 {
             source_index.checked_add_unsigned(self.source_api_roots.len())
         } else {
@@ -418,7 +435,7 @@ impl CloudMovePaths {
             .and_then(|index| usize::try_from(index).ok())
             .and_then(|index| self.source_api_roots.get(index))
             .ok_or_else(|| CheckError::strm("CloudDrive source root mapping is incomplete"))?;
-        let payload = read_mapping(mapping_path).map_err(|_| CheckError::strm("STRM mapping is unavailable"))?;
+        let payload = read().map_err(|_| CheckError::strm("STRM mapping is unavailable"))?;
         if payload.is_empty() || payload.len() > MAX_STRM_BYTES || payload.contains(&0) {
             return Err(CheckError::strm("STRM mapping size is invalid"));
         }

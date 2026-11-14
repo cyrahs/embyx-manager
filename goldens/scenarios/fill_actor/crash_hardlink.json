@@ -1,0 +1,1084 @@
+{
+  "calls": [
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-1",
+        "plan_id": "token-6",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 1
+    },
+    {
+      "error": {
+        "message": "[Errno 22] Invalid argument: '{additional}/ABC/ABC-201.mp4' -> '{movein}/ABC-201.mp4'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{movein}/ABC-201.mp4",
+        "src": "{additional}/ABC/ABC-201.mp4"
+      },
+      "seq": 2
+    },
+    {
+      "error": {
+        "message": "[Errno 22] Invalid argument: '{additional}/ABC/ABC-201.mp4' -> '{movein}/ABC-201.mp4'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{movein}/ABC-201.mp4",
+        "src": "{additional}/ABC/ABC-201.mp4"
+      },
+      "seq": 3
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "link",
+      "request": {
+        "dst": "{movein}/ABC-201.mp4",
+        "src": "{additional}/ABC/ABC-201.mp4"
+      },
+      "response": null,
+      "seq": 4
+    },
+    {
+      "error": {
+        "message": "[Errno 22] Invalid argument: '{additional}/ABC/ABC-201.mp4' -> '{movein}/.embyx-reconcile-3f08aace122ee2368432c1ca23a049bc640bafbf00fdf33a52429f38ba12dbf9'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{movein}/.embyx-reconcile-3f08aace122ee2368432c1ca23a049bc640bafbf00fdf33a52429f38ba12dbf9",
+        "src": "{additional}/ABC/ABC-201.mp4"
+      },
+      "seq": 5
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{movein}/.embyx-reconcile-3f08aace122ee2368432c1ca23a049bc640bafbf00fdf33a52429f38ba12dbf9",
+        "src": "{additional}/ABC/ABC-201.mp4"
+      },
+      "response": null,
+      "seq": 6
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{movein}/.embyx-reconcile-3f08aace122ee2368432c1ca23a049bc640bafbf00fdf33a52429f38ba12dbf9"
+      },
+      "response": null,
+      "seq": 7
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-1",
+        "plan_id": "token-6",
+        "state": "linked"
+      },
+      "response": null,
+      "seq": 8
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-1",
+        "plan_id": "token-6",
+        "state": "source_removed"
+      },
+      "response": null,
+      "seq": 9
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-1",
+        "error_code": null,
+        "plan_id": "token-6",
+        "state": "moved"
+      },
+      "response": null,
+      "seq": 10
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-1",
+        "plan_id": "token-6",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 11
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-2",
+        "plan_id": "token-6",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 12
+    },
+    {
+      "error": {
+        "message": "[Errno 22] Invalid argument: '{additional}/ABC/ABC-202.mp4' -> '{movein}/ABC-202.mp4'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{movein}/ABC-202.mp4",
+        "src": "{additional}/ABC/ABC-202.mp4"
+      },
+      "seq": 13
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "link",
+      "request": {
+        "dst": "{movein}/ABC-202.mp4",
+        "src": "{additional}/ABC/ABC-202.mp4"
+      },
+      "response": null,
+      "seq": 14
+    },
+    {
+      "error": {
+        "message": "[Errno 22] Invalid argument: '{additional}/ABC/ABC-202.mp4' -> '{movein}/.embyx-reconcile-0f6bffa9661cb5dd2f3f7b2929f33061f58a7ba7fdd689530b1a306f8ed8f3ec'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{movein}/.embyx-reconcile-0f6bffa9661cb5dd2f3f7b2929f33061f58a7ba7fdd689530b1a306f8ed8f3ec",
+        "src": "{additional}/ABC/ABC-202.mp4"
+      },
+      "seq": 15
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{movein}/.embyx-reconcile-0f6bffa9661cb5dd2f3f7b2929f33061f58a7ba7fdd689530b1a306f8ed8f3ec",
+        "src": "{additional}/ABC/ABC-202.mp4"
+      },
+      "response": null,
+      "seq": 16
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{movein}/.embyx-reconcile-0f6bffa9661cb5dd2f3f7b2929f33061f58a7ba7fdd689530b1a306f8ed8f3ec"
+      },
+      "response": null,
+      "seq": 17
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-2",
+        "plan_id": "token-6",
+        "state": "linked"
+      },
+      "response": null,
+      "seq": 18
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-2",
+        "plan_id": "token-6",
+        "state": "source_removed"
+      },
+      "response": null,
+      "seq": 19
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-2",
+        "error_code": null,
+        "plan_id": "token-6",
+        "state": "moved"
+      },
+      "response": null,
+      "seq": 20
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-2",
+        "plan_id": "token-6",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 21
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-3",
+        "plan_id": "token-6",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 22
+    },
+    {
+      "error": {
+        "message": "[Errno 22] Invalid argument: '{additional}/ABC/ABC-203.mp4' -> '{movein}/ABC-203.mp4'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{movein}/ABC-203.mp4",
+        "src": "{additional}/ABC/ABC-203.mp4"
+      },
+      "seq": 23
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "link",
+      "request": {
+        "dst": "{movein}/ABC-203.mp4",
+        "src": "{additional}/ABC/ABC-203.mp4"
+      },
+      "response": null,
+      "seq": 24
+    },
+    {
+      "error": {
+        "message": "[Errno 22] Invalid argument: '{additional}/ABC/ABC-203.mp4' -> '{movein}/.embyx-reconcile-a2f2b0b588bcc84fbf4d2ac8cc086b6f84de3e00fa3c1ba11e38ac078eb03192'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{movein}/.embyx-reconcile-a2f2b0b588bcc84fbf4d2ac8cc086b6f84de3e00fa3c1ba11e38ac078eb03192",
+        "src": "{additional}/ABC/ABC-203.mp4"
+      },
+      "seq": 25
+    },
+    {
+      "error": {
+        "message": "[Errno 22] Invalid argument: '{additional}/ABC/ABC-203.mp4' -> '{movein}/.embyx-reconcile-a2f2b0b588bcc84fbf4d2ac8cc086b6f84de3e00fa3c1ba11e38ac078eb03192'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{movein}/.embyx-reconcile-a2f2b0b588bcc84fbf4d2ac8cc086b6f84de3e00fa3c1ba11e38ac078eb03192",
+        "src": "{additional}/ABC/ABC-203.mp4"
+      },
+      "seq": 26
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{movein}/.embyx-reconcile-a2f2b0b588bcc84fbf4d2ac8cc086b6f84de3e00fa3c1ba11e38ac078eb03192",
+        "src": "{additional}/ABC/ABC-203.mp4"
+      },
+      "response": null,
+      "seq": 27
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{movein}/.embyx-reconcile-a2f2b0b588bcc84fbf4d2ac8cc086b6f84de3e00fa3c1ba11e38ac078eb03192"
+      },
+      "response": null,
+      "seq": 28
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-3",
+        "plan_id": "token-6",
+        "state": "linked"
+      },
+      "response": null,
+      "seq": 29
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-3",
+        "plan_id": "token-6",
+        "state": "source_removed"
+      },
+      "response": null,
+      "seq": 30
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-3",
+        "error_code": null,
+        "plan_id": "token-6",
+        "state": "moved"
+      },
+      "response": null,
+      "seq": 31
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-3",
+        "plan_id": "token-6",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 32
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-4",
+        "plan_id": "token-6",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 33
+    },
+    {
+      "error": {
+        "message": "[Errno 22] Invalid argument: '{additional}/ABC/ABC-204.mp4' -> '{movein}/ABC-204.mp4'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{movein}/ABC-204.mp4",
+        "src": "{additional}/ABC/ABC-204.mp4"
+      },
+      "seq": 34
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "link",
+      "request": {
+        "dst": "{movein}/ABC-204.mp4",
+        "src": "{additional}/ABC/ABC-204.mp4"
+      },
+      "response": null,
+      "seq": 35
+    },
+    {
+      "error": {
+        "message": "[Errno 22] Invalid argument: '{additional}/ABC/ABC-204.mp4' -> '{movein}/.embyx-reconcile-0d59e266304dee1d75ac34fa01986a53b8097398a4e7e87b54b8b9732691dc98'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{movein}/.embyx-reconcile-0d59e266304dee1d75ac34fa01986a53b8097398a4e7e87b54b8b9732691dc98",
+        "src": "{additional}/ABC/ABC-204.mp4"
+      },
+      "seq": 36
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{movein}/.embyx-reconcile-0d59e266304dee1d75ac34fa01986a53b8097398a4e7e87b54b8b9732691dc98",
+        "src": "{additional}/ABC/ABC-204.mp4"
+      },
+      "response": null,
+      "seq": 37
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{movein}/.embyx-reconcile-0d59e266304dee1d75ac34fa01986a53b8097398a4e7e87b54b8b9732691dc98"
+      },
+      "response": null,
+      "seq": 38
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-4",
+        "plan_id": "token-6",
+        "state": "linked"
+      },
+      "response": null,
+      "seq": 39
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-4",
+        "plan_id": "token-6",
+        "state": "source_removed"
+      },
+      "response": null,
+      "seq": 40
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-4",
+        "error_code": null,
+        "plan_id": "token-6",
+        "state": "moved"
+      },
+      "response": null,
+      "seq": 41
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-4",
+        "plan_id": "token-6",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 42
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-5",
+        "plan_id": "token-6",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 43
+    },
+    {
+      "error": {
+        "message": "[Errno 22] Invalid argument: '{additional}/ABC/ABC-205.mp4' -> '{movein}/ABC-205.mp4'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{movein}/ABC-205.mp4",
+        "src": "{additional}/ABC/ABC-205.mp4"
+      },
+      "seq": 44
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "link",
+      "request": {
+        "dst": "{movein}/ABC-205.mp4",
+        "src": "{additional}/ABC/ABC-205.mp4"
+      },
+      "response": null,
+      "seq": 45
+    },
+    {
+      "error": {
+        "message": "[Errno 22] Invalid argument: '{additional}/ABC/ABC-205.mp4' -> '{movein}/.embyx-reconcile-6fcb1cf1b113a341db0fa49dc95fcb841140e6ef6e05ac4cf9b0a5b22a0f056c'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{movein}/.embyx-reconcile-6fcb1cf1b113a341db0fa49dc95fcb841140e6ef6e05ac4cf9b0a5b22a0f056c",
+        "src": "{additional}/ABC/ABC-205.mp4"
+      },
+      "seq": 46
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{movein}/.embyx-reconcile-6fcb1cf1b113a341db0fa49dc95fcb841140e6ef6e05ac4cf9b0a5b22a0f056c",
+        "src": "{additional}/ABC/ABC-205.mp4"
+      },
+      "response": null,
+      "seq": 47
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{movein}/.embyx-reconcile-6fcb1cf1b113a341db0fa49dc95fcb841140e6ef6e05ac4cf9b0a5b22a0f056c"
+      },
+      "response": null,
+      "seq": 48
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-5",
+        "plan_id": "token-6",
+        "state": "linked"
+      },
+      "response": null,
+      "seq": 49
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-5",
+        "plan_id": "token-6",
+        "state": "source_removed"
+      },
+      "response": null,
+      "seq": 50
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-5",
+        "error_code": null,
+        "plan_id": "token-6",
+        "state": "moved"
+      },
+      "response": null,
+      "seq": 51
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-5",
+        "plan_id": "token-6",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 52
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "fill_actor.service",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "op": "scan",
+          "result": {
+            "actors": [
+              {
+                "actor_id": "actor",
+                "actor_name": null,
+                "aliases": [],
+                "error_code": null,
+                "error_message": null,
+                "scraped_count": 5,
+                "talent_id": null,
+                "video_ids": [
+                  "ABC-201",
+                  "ABC-202",
+                  "ABC-203",
+                  "ABC-204",
+                  "ABC-205"
+                ]
+              }
+            ],
+            "created_at": "2026-09-12T03:00:00Z",
+            "expires_at": "2026-09-12T04:00:00Z",
+            "plan_id": "token-6",
+            "revision": "token-7",
+            "videos": [
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-1",
+                    "destination_conflict": false,
+                    "file_name": "ABC-201.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-201"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-201",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-2",
+                    "destination_conflict": false,
+                    "file_name": "ABC-202.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-202"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-202",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-3",
+                    "destination_conflict": false,
+                    "file_name": "ABC-203.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-203"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-203",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-4",
+                    "destination_conflict": false,
+                    "file_name": "ABC-204.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-204"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-204",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-5",
+                    "destination_conflict": false,
+                    "file_name": "ABC-205.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-205"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-205",
+                "warnings": []
+              }
+            ]
+          }
+        },
+        {
+          "crashed": true,
+          "op": "apply"
+        },
+        {
+          "op": "restart"
+        },
+        {
+          "op": "reconcile",
+          "result": [
+            {
+              "candidate_id": "token-1",
+              "error_code": null,
+              "file_name": "ABC-201.mp4",
+              "state": "moved",
+              "video_id": "ABC-201"
+            }
+          ]
+        },
+        {
+          "op": "apply",
+          "result": {
+            "plan_id": "token-6",
+            "results": [
+              {
+                "candidate_id": "token-1",
+                "error_code": null,
+                "file_name": "ABC-201.mp4",
+                "state": "moved",
+                "video_id": "ABC-201"
+              }
+            ],
+            "revision": "token-7",
+            "state": "succeeded"
+          }
+        },
+        {
+          "crashed": true,
+          "op": "apply"
+        },
+        {
+          "op": "restart"
+        },
+        {
+          "op": "reconcile",
+          "result": [
+            {
+              "candidate_id": "token-2",
+              "error_code": null,
+              "file_name": "ABC-202.mp4",
+              "state": "moved",
+              "video_id": "ABC-202"
+            }
+          ]
+        },
+        {
+          "op": "apply",
+          "result": {
+            "plan_id": "token-6",
+            "results": [
+              {
+                "candidate_id": "token-2",
+                "error_code": null,
+                "file_name": "ABC-202.mp4",
+                "state": "moved",
+                "video_id": "ABC-202"
+              }
+            ],
+            "revision": "token-7",
+            "state": "succeeded"
+          }
+        },
+        {
+          "crashed": true,
+          "op": "apply"
+        },
+        {
+          "op": "restart"
+        },
+        {
+          "op": "reconcile",
+          "result": [
+            {
+              "candidate_id": "token-3",
+              "error_code": null,
+              "file_name": "ABC-203.mp4",
+              "state": "moved",
+              "video_id": "ABC-203"
+            }
+          ]
+        },
+        {
+          "op": "apply",
+          "result": {
+            "plan_id": "token-6",
+            "results": [
+              {
+                "candidate_id": "token-3",
+                "error_code": null,
+                "file_name": "ABC-203.mp4",
+                "state": "moved",
+                "video_id": "ABC-203"
+              }
+            ],
+            "revision": "token-7",
+            "state": "succeeded"
+          }
+        },
+        {
+          "crashed": true,
+          "op": "apply"
+        },
+        {
+          "op": "restart"
+        },
+        {
+          "op": "reconcile",
+          "result": [
+            {
+              "candidate_id": "token-4",
+              "error_code": null,
+              "file_name": "ABC-204.mp4",
+              "state": "moved",
+              "video_id": "ABC-204"
+            }
+          ]
+        },
+        {
+          "op": "apply",
+          "result": {
+            "plan_id": "token-6",
+            "results": [
+              {
+                "candidate_id": "token-4",
+                "error_code": null,
+                "file_name": "ABC-204.mp4",
+                "state": "moved",
+                "video_id": "ABC-204"
+              }
+            ],
+            "revision": "token-7",
+            "state": "succeeded"
+          }
+        },
+        {
+          "crashed": true,
+          "op": "apply"
+        },
+        {
+          "op": "restart"
+        },
+        {
+          "op": "reconcile",
+          "result": [
+            {
+              "candidate_id": "token-5",
+              "error_code": null,
+              "file_name": "ABC-205.mp4",
+              "state": "moved",
+              "video_id": "ABC-205"
+            }
+          ]
+        },
+        {
+          "op": "apply",
+          "result": {
+            "plan_id": "token-6",
+            "results": [
+              {
+                "candidate_id": "token-5",
+                "error_code": null,
+                "file_name": "ABC-205.mp4",
+                "state": "moved",
+                "video_id": "ABC-205"
+              }
+            ],
+            "revision": "token-7",
+            "state": "succeeded"
+          }
+        }
+      ]
+    }
+  },
+  "rows": {
+    "fill_actor_move_journal": [
+      {
+        "candidate_id": "token-1",
+        "plan_id": "token-6",
+        "state": "reconciled",
+        "updated_at": "2026-09-12T03:02:00+00:00"
+      },
+      {
+        "candidate_id": "token-2",
+        "plan_id": "token-6",
+        "state": "reconciled",
+        "updated_at": "2026-09-12T03:04:00+00:00"
+      },
+      {
+        "candidate_id": "token-3",
+        "plan_id": "token-6",
+        "state": "reconciled",
+        "updated_at": "2026-09-12T03:06:00+00:00"
+      },
+      {
+        "candidate_id": "token-4",
+        "plan_id": "token-6",
+        "state": "reconciled",
+        "updated_at": "2026-09-12T03:08:00+00:00"
+      },
+      {
+        "candidate_id": "token-5",
+        "plan_id": "token-6",
+        "state": "reconciled",
+        "updated_at": "2026-09-12T03:10:00+00:00"
+      }
+    ],
+    "fill_actor_move_results": [
+      {
+        "candidate_id": "token-1",
+        "plan_id": "token-6",
+        "result_json": "{\"candidate_id\":\"token-1\",\"video_id\":\"ABC-201\",\"file_name\":\"ABC-201.mp4\",\"state\":\"moved\",\"error_code\":null}"
+      },
+      {
+        "candidate_id": "token-2",
+        "plan_id": "token-6",
+        "result_json": "{\"candidate_id\":\"token-2\",\"video_id\":\"ABC-202\",\"file_name\":\"ABC-202.mp4\",\"state\":\"moved\",\"error_code\":null}"
+      },
+      {
+        "candidate_id": "token-3",
+        "plan_id": "token-6",
+        "result_json": "{\"candidate_id\":\"token-3\",\"video_id\":\"ABC-203\",\"file_name\":\"ABC-203.mp4\",\"state\":\"moved\",\"error_code\":null}"
+      },
+      {
+        "candidate_id": "token-4",
+        "plan_id": "token-6",
+        "result_json": "{\"candidate_id\":\"token-4\",\"video_id\":\"ABC-204\",\"file_name\":\"ABC-204.mp4\",\"state\":\"moved\",\"error_code\":null}"
+      },
+      {
+        "candidate_id": "token-5",
+        "plan_id": "token-6",
+        "result_json": "{\"candidate_id\":\"token-5\",\"video_id\":\"ABC-205\",\"file_name\":\"ABC-205.mp4\",\"state\":\"moved\",\"error_code\":null}"
+      }
+    ],
+    "fill_actor_plans": [
+      {
+        "config_version": 0,
+        "created_at": "2026-09-12T03:00:00+00:00",
+        "expires_at": "2026-09-12T04:00:00+00:00",
+        "plan_id": "token-6",
+        "public_json": "{\"plan_id\":\"token-6\",\"revision\":\"token-7\",\"created_at\":\"2026-09-12T03:00:00Z\",\"expires_at\":\"2026-09-12T04:00:00Z\",\"actors\":[{\"actor_id\":\"actor\",\"scraped_count\":5,\"video_ids\":[\"ABC-201\",\"ABC-202\",\"ABC-203\",\"ABC-204\",\"ABC-205\"],\"error_code\":null,\"actor_name\":null,\"talent_id\":null,\"aliases\":[],\"error_message\":null}],\"videos\":[{\"video_id\":\"ABC-201\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-1\",\"video_id\":\"ABC-201\",\"file_name\":\"ABC-201.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-202\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-2\",\"video_id\":\"ABC-202\",\"file_name\":\"ABC-202.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-203\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-3\",\"video_id\":\"ABC-203\",\"file_name\":\"ABC-203.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-204\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-4\",\"video_id\":\"ABC-204\",\"file_name\":\"ABC-204.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-205\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-5\",\"video_id\":\"ABC-205\",\"file_name\":\"ABC-205.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]}]}",
+        "revision": "token-7"
+      }
+    ]
+  },
+  "scenario": "fill_actor/crash_hardlink",
+  "tree": {
+    "actor": [],
+    "additional": [
+      {
+        "kind": "dir",
+        "path": "ABC"
+      }
+    ],
+    "movein": [
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC-201.mp4",
+        "sha256": "5dde896887f6754c",
+        "size": 2
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC-202.mp4",
+        "sha256": "cd2eb0837c9b4c96",
+        "size": 3
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC-203.mp4",
+        "sha256": "2481a63c85a62cf8",
+        "size": 4
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC-204.mp4",
+        "sha256": "eaf16bc07968e013",
+        "size": 5
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC-205.mp4",
+        "sha256": "b7fb217694ae2d30",
+        "size": 6
+      }
+    ]
+  }
+}
