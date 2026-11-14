@@ -7,8 +7,8 @@
 //! listener binds and stop after both drained. SIGTERM or SIGINT starts the graceful
 //! shutdown: no new connections, the requests in flight answered, then the lifespans.
 //!
-//! Exit codes: 0 after a shutdown, 3 when startup fails (uvicorn's `STARTUP_FAILURE`), also
-//! with the transcode listener (D57).
+//! Exit codes: 0 after a shutdown (D57), 3 when startup fails (uvicorn's `STARTUP_FAILURE`,
+//! also with the transcode listener), 1 for a port past 65535 (`OverflowError`).
 
 use std::convert::Infallible;
 use std::net::SocketAddr;
@@ -19,7 +19,7 @@ use axum::extract::{ConnectInfo, Request as AxumRequest};
 use embyx_core::pyurl::quote;
 use embyx_core::settings::Settings;
 use tokio::net::TcpListener;
-use tokio::sync::watch;
+use tokio::sync::{mpsc, watch};
 
 use crate::app::Lifespan;
 use crate::bootstrap::Assembled;
@@ -204,20 +204,28 @@ async fn shutdown_lifespans(lifespans: &[Arc<dyn Lifespan>]) {
     }
 }
 
-/// Resolve when SIGTERM or SIGINT arrives.
-async fn shutdown_signal() {
-    let terminate = async {
-        match tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate()) {
+/// SIGTERM and SIGINT, one message each, caught from now on (uvicorn installs its
+/// handlers before the lifespans start). The first starts the graceful shutdown; a second
+/// stops waiting for the requests in flight (`force_exit`).
+pub fn install_signals() -> mpsc::UnboundedReceiver<()> {
+    use tokio::signal::unix::{SignalKind, signal};
+    let (sender, receiver) = mpsc::unbounded_channel();
+    for kind in [SignalKind::terminate(), SignalKind::interrupt()] {
+        match signal(kind) {
             Ok(mut stream) => {
-                stream.recv().await;
+                let sender = sender.clone();
+                tokio::spawn(async move {
+                    while stream.recv().await.is_some() {
+                        if sender.send(()).is_err() {
+                            break;
+                        }
+                    }
+                });
             }
-            Err(_) => std::future::pending::<()>().await,
+            Err(error) => tracing::error!(target: SERVER_TARGET, "cannot catch a signal: {error}"),
         }
-    };
-    tokio::select! {
-        () = terminate => {}
-        _ = tokio::signal::ctrl_c() => {}
     }
+    receiver
 }
 
 /// What `serve` runs: the assembled apps, or the reason startup cannot begin.
@@ -240,15 +248,13 @@ async fn bind(host: &str, port: u16) -> Result<TcpListener, String> {
 
 /// `_serve()`: the server until a signal, then its shutdown. Returns the exit code.
 pub async fn serve(settings: &Settings, startup: Startup) -> u8 {
-    serve_until(settings, startup, shutdown_signal()).await
+    let signals = install_signals();
+    serve_until(settings, startup, signals).await
 }
 
-/// [`serve`] with the shutdown trigger given (tests send it themselves).
-pub async fn serve_until(
-    settings: &Settings,
-    startup: Startup,
-    shutdown: impl std::future::Future<Output = ()> + Send,
-) -> u8 {
+/// [`serve`] with the signals given (tests send them themselves): the first message shuts
+/// down gracefully, a second one stops waiting for the requests in flight.
+pub async fn serve_until(settings: &Settings, startup: Startup, mut signals: mpsc::UnboundedReceiver<()>) -> u8 {
     tracing::info!(target: SERVER_TARGET, "Started server process [{}]", std::process::id());
     tracing::info!(target: SERVER_TARGET, "Waiting for application startup.");
     let assembled = match startup {
@@ -266,12 +272,22 @@ pub async fn serve_until(
     }
     tracing::info!(target: SERVER_TARGET, "Application startup complete.");
 
-    let port = u16::try_from(settings.port).unwrap_or(0);
-    let transcode_port = settings.transcode_port.map(|port| u16::try_from(port).unwrap_or(0));
     let mut listeners = Vec::new();
-    for (app, port) in std::iter::once((assembled.app.clone(), port))
-        .chain(transcode_port.map(|port| (assembled.transcode_app.clone(), port)))
-    {
+    for (app, port) in std::iter::once((assembled.app.clone(), settings.port)).chain(
+        settings
+            .transcode_port
+            .map(|port| (assembled.transcode_app.clone(), port)),
+    ) {
+        // `socket.bind` raises `OverflowError`, which uvicorn does not catch: a traceback
+        // and exit 1 (D57).
+        let Ok(port) = u16::try_from(port) else {
+            tracing::error!(
+                target: SERVER_TARGET,
+                "Traceback (most recent call last):\nOverflowError: bind(): port must be 0-65535."
+            );
+            shutdown_lifespans(&assembled.lifespans).await;
+            return 1;
+        };
         match bind(&settings.host, port).await {
             Ok(listener) => listeners.push((app, listener, port)),
             Err(error) => {
@@ -299,16 +315,32 @@ pub async fn serve_until(
                 .await
         }));
     }
-    shutdown.await;
+    // A closed channel (no signal source left) also ends the server.
+    let _ = signals.recv().await;
     for _ in &servers {
         tracing::info!(target: SERVER_TARGET, "Shutting down");
     }
     let _ = stop.send(true);
-    for server in servers {
-        match server.await {
-            Ok(Ok(())) => {}
-            Ok(Err(error)) => tracing::error!(target: SERVER_TARGET, "{error}"),
-            Err(error) => tracing::error!(target: SERVER_TARGET, "{error}"),
+    let aborts: Vec<_> = servers.iter().map(tokio::task::JoinHandle::abort_handle).collect();
+    let drained = async {
+        for server in servers {
+            match server.await {
+                Ok(Ok(())) => {}
+                Ok(Err(error)) => tracing::error!(target: SERVER_TARGET, "{error}"),
+                Err(error) if error.is_cancelled() => {}
+                Err(error) => tracing::error!(target: SERVER_TARGET, "{error}"),
+            }
+        }
+    };
+    tokio::pin!(drained);
+    tokio::select! {
+        () = &mut drained => {}
+        Some(()) = signals.recv() => {
+            // `force_exit`: the requests still in flight are dropped.
+            for abort in &aborts {
+                abort.abort();
+            }
+            drained.await;
         }
     }
     shutdown_lifespans(&assembled.lifespans).await;

@@ -95,7 +95,7 @@ fn dsn(name: &str) -> String {
 }
 
 #[tokio::test]
-async fn build_app_loads_the_store_serves_config_and_closes_in_order() {
+async fn build_app_loads_the_store_and_serves_config() {
     let database = TestDatabase::create().await;
     let settings = Settings {
         database_url: dsn(database.name()),

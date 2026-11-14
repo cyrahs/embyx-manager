@@ -140,6 +140,7 @@ async fn clouddrive_test_endpoint_uses_form_values_and_stored_secret() {
     let served = FakeCloudDrive::new(&Value::Dict(Dict::new()), Recorder::new())
         .serve()
         .await;
+    let (proxy, mut closed) = closing_proxy(served.address()).await;
 
     call(
         &app,
@@ -149,8 +150,9 @@ async fn clouddrive_test_endpoint_uses_form_values_and_stored_secret() {
         Some(r#"{"values": {"address": "cd.internal:19798", "api_token": "stored-secret", "secure": false}}"#),
     )
     .await;
-    // The form names the fake's address; the token is the stored one.
-    let form = format!(r#"{{"values": {{"address": "{}"}}}}"#, served.address());
+    // The form names the fake's address (through a proxy that sees the connection end);
+    // the token is the stored one.
+    let form = format!(r#"{{"values": {{"address": "{proxy}"}}}}"#);
     let (status, body) = call(&app, Method::POST, "/api/config/clouddrive/test", &[], Some(&form)).await;
 
     assert_eq!(status, StatusCode::OK);
@@ -160,6 +162,11 @@ async fn clouddrive_test_endpoint_uses_form_values_and_stored_secret() {
     assert_eq!(methods, ["GetSystemInfo", "GetSubFiles"]);
     // GetSystemInfo is the unauthenticated ping; the listing carries the stored secret.
     assert_eq!(seen[1].authorization.as_deref(), Some("Bearer stored-secret"));
+    // `captured['closed'] is True`: the throwaway client let its connection go.
+    tokio::time::timeout(Duration::from_secs(5), closed.recv())
+        .await
+        .expect("the test's client closes its connection")
+        .expect("the proxy reports it");
     database.drop_database().await;
 }
 
@@ -203,8 +210,34 @@ async fn clouddrive_test_endpoint_requires_connection_values() {
     database.drop_database().await;
 }
 
-/// One HTTP exchange of a stand-in Emby: the request head it got, answered with `answer`.
-async fn emby_once(status: u16, answer: &'static str) -> (String, tokio::task::JoinHandle<String>) {
+/// A TCP proxy in front of `upstream` that reports each connection the client ends.
+async fn closing_proxy(upstream: String) -> (String, tokio::sync::mpsc::UnboundedReceiver<()>) {
+    let listener = TcpListener::bind("127.0.0.1:0").await.expect("bind");
+    let address = listener.local_addr().expect("address").to_string();
+    let (sender, receiver) = tokio::sync::mpsc::unbounded_channel();
+    tokio::spawn(async move {
+        while let Ok((mut client, _)) = listener.accept().await {
+            let (upstream, sender) = (upstream.clone(), sender.clone());
+            tokio::spawn(async move {
+                let mut server = tokio::net::TcpStream::connect(upstream).await.expect("upstream");
+                let _ = tokio::io::copy_bidirectional(&mut client, &mut server).await;
+                let _ = sender.send(());
+            });
+        }
+    });
+    (address, receiver)
+}
+
+/// What the stand-in Emby saw: the request head as sent, and whether the client then
+/// closed the kept-alive connection.
+struct EmbySaw {
+    head: String,
+    closed: bool,
+}
+
+/// One HTTP exchange of a stand-in Emby: the request head it got, answered with `answer`
+/// on a connection kept alive, then a wait for the client to close it.
+async fn emby_once(status: u16, answer: &'static str) -> (String, tokio::task::JoinHandle<EmbySaw>) {
     let listener = TcpListener::bind("127.0.0.1:0").await.expect("bind");
     let address = format!("http://{}/", listener.local_addr().expect("address"));
     let task = tokio::spawn(async move {
@@ -219,11 +252,18 @@ async fn emby_once(status: u16, answer: &'static str) -> (String, tokio::task::J
             head.extend_from_slice(&chunk[..read]);
         }
         let reply = format!(
-            "HTTP/1.1 {status} X\r\ncontent-type: application/json\r\ncontent-length: {}\r\nconnection: close\r\n\r\n{answer}",
+            "HTTP/1.1 {status} X\r\ncontent-type: application/json\r\ncontent-length: {}\r\n\r\n{answer}",
             answer.len()
         );
         stream.write_all(reply.as_bytes()).await.expect("write");
-        String::from_utf8_lossy(&head).to_lowercase()
+        let closed = matches!(
+            tokio::time::timeout(Duration::from_secs(5), stream.read(&mut chunk)).await,
+            Ok(Ok(0) | Err(_))
+        );
+        EmbySaw {
+            head: String::from_utf8_lossy(&head).into_owned(),
+            closed,
+        }
     });
     (address, task)
 }
@@ -248,9 +288,20 @@ async fn emby_test_endpoint_uses_form_values_and_stored_secret() {
 
     assert_eq!(status, StatusCode::OK);
     assert_eq!(body, json(r#"{"ok": true, "detail": "embyx 4.10.0.40"}"#));
-    let head = emby.await.expect("the stand-in");
-    assert!(head.starts_with("get /emby/system/info http/1.1"), "{head}");
-    assert!(head.contains("x-emby-token: stored-key"), "{head}");
+    let saw = emby.await.expect("the stand-in");
+    assert!(
+        saw.head.starts_with("GET /emby/System/Info HTTP/1.1\r\n"),
+        "{}",
+        saw.head
+    );
+    let token = saw.head.lines().find_map(|line| {
+        let (name, value) = line.split_once(':')?;
+        name.eq_ignore_ascii_case("x-emby-token")
+            .then(|| value.trim().to_owned())
+    });
+    assert_eq!(token.as_deref(), Some("stored-key"), "{}", saw.head);
+    // `captured['closed'] is True`.
+    assert!(saw.closed, "the test's client closes its connection");
     database.drop_database().await;
 }
 

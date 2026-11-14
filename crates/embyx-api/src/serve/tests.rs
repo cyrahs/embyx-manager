@@ -8,6 +8,7 @@ use embyx_core::settings::Settings;
 use futures_util::future::BoxFuture;
 use tokio::io::{AsyncReadExt as _, AsyncWriteExt as _};
 use tokio::net::{TcpListener, TcpStream};
+use tokio::sync::mpsc;
 
 use super::{STARTUP_FAILURE, Startup, access_line, running_line, serve_until, status_phrase};
 use crate::app::Lifespan;
@@ -88,13 +89,8 @@ async fn both_listeners_answer_between_the_lifespans() {
     let settings = settings(port, Some(transcode_port));
     let log = Arc::new(Mutex::new(Vec::new()));
     let startup = startup(&settings, &[("one", false), ("two", false)], &log);
-    let (trigger, shutdown) = tokio::sync::oneshot::channel::<()>();
-    let server = tokio::spawn(async move {
-        serve_until(&settings, startup, async {
-            let _ = shutdown.await;
-        })
-        .await
-    });
+    let (trigger, signals) = mpsc::unbounded_channel();
+    let server = tokio::spawn(async move { serve_until(&settings, startup, signals).await });
 
     let mut session = String::new();
     for _ in 0..200 {
@@ -131,7 +127,8 @@ async fn a_failed_lifespan_stops_those_started_and_exits_3() {
     let settings = settings(free_port().await, None);
     let log = Arc::new(Mutex::new(Vec::new()));
     let startup = startup(&settings, &[("one", false), ("two", true), ("three", false)], &log);
-    let code = serve_until(&settings, startup, std::future::pending()).await;
+    let (_trigger, signals) = mpsc::unbounded_channel();
+    let code = serve_until(&settings, startup, signals).await;
     assert_eq!(code, STARTUP_FAILURE);
     assert_eq!(*log.lock().expect("log"), ["start one", "start two", "stop one"]);
 }
@@ -139,12 +136,8 @@ async fn a_failed_lifespan_stops_those_started_and_exits_3() {
 #[tokio::test]
 async fn a_failed_build_exits_3_before_any_lifespan() {
     let settings = settings(free_port().await, None);
-    let code = serve_until(
-        &settings,
-        Startup::Failed("Traceback".to_owned()),
-        std::future::pending(),
-    )
-    .await;
+    let (_trigger, signals) = mpsc::unbounded_channel();
+    let code = serve_until(&settings, Startup::Failed("Traceback".to_owned()), signals).await;
     assert_eq!(code, STARTUP_FAILURE);
 }
 
@@ -152,11 +145,12 @@ async fn a_failed_build_exits_3_before_any_lifespan() {
 async fn a_port_in_use_stops_the_lifespans_and_exits_3() {
     let taken = TcpListener::bind("127.0.0.1:0").await.expect("bind");
     let taken_port = taken.local_addr().expect("address").port();
-    // The transcode listener cannot bind (D57: Python's second server would keep the first).
+    // The transcode listener cannot bind: uvicorn's `sys.exit(3)`, the main listener closed.
     let settings = settings(free_port().await, Some(taken_port));
     let log = Arc::new(Mutex::new(Vec::new()));
     let startup = startup(&settings, &[("one", false)], &log);
-    let code = serve_until(&settings, startup, std::future::pending()).await;
+    let (_trigger, signals) = mpsc::unbounded_channel();
+    let code = serve_until(&settings, startup, signals).await;
     assert_eq!(code, STARTUP_FAILURE);
     assert_eq!(*log.lock().expect("log"), ["start one", "stop one"]);
     drop(taken);
@@ -189,4 +183,49 @@ fn the_running_line_brackets_ipv6_hosts() {
         running_line("::", 8000),
         "Uvicorn running on http://[::]:8000 (Press CTRL+C to quit)"
     );
+}
+
+#[tokio::test]
+async fn a_port_past_65535_is_python_s_overflow_error() {
+    let mut settings = settings(free_port().await, None);
+    settings.port = 70_000;
+    let log = Arc::new(Mutex::new(Vec::new()));
+    let startup = startup(&settings, &[("one", false)], &log);
+    let (_trigger, signals) = mpsc::unbounded_channel();
+    let code = serve_until(&settings, startup, signals).await;
+    assert_eq!(code, 1);
+    assert_eq!(*log.lock().expect("log"), ["start one", "stop one"]);
+}
+
+/// A second signal stops waiting for a request still in flight; the lifespans still stop.
+#[tokio::test]
+async fn a_second_signal_drops_the_requests_in_flight() {
+    let port = free_port().await;
+    let settings = settings(port, None);
+    let log = Arc::new(Mutex::new(Vec::new()));
+    let startup = startup(&settings, &[("one", false)], &log);
+    let (trigger, signals) = mpsc::unbounded_channel();
+    let server = tokio::spawn(async move { serve_until(&settings, startup, signals).await });
+    // A connection that sends half a request keeps the graceful drain waiting.
+    let mut stream = loop {
+        if let Ok(stream) = TcpStream::connect(("127.0.0.1", port)).await {
+            break stream;
+        }
+        tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+    };
+    stream
+        .write_all(b"POST /api/config/emby HTTP/1.1\r\nhost: x\r\ncontent-length: 10\r\n\r\n{")
+        .await
+        .expect("write");
+    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+    trigger.send(()).expect("the server waits");
+    tokio::time::sleep(std::time::Duration::from_millis(200)).await;
+    assert!(!server.is_finished(), "the drain waits for the request in flight");
+    trigger.send(()).expect("the server waits");
+    let code = tokio::time::timeout(std::time::Duration::from_secs(5), server)
+        .await
+        .expect("a second signal ends the drain")
+        .expect("the server");
+    assert_eq!(code, 0);
+    assert_eq!(*log.lock().expect("log"), ["start one", "stop one"]);
 }

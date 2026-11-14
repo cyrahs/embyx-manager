@@ -286,6 +286,44 @@
             "location": "http://testserver/api/config?x=1"
           },
           "status": 307
+        },
+        {
+          "body": {
+            "auth_required": false,
+            "database": true,
+            "status": "ok"
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "53",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unknown_config_section"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "43",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": {
+            "detail": "Method Not Allowed"
+          },
+          "headers": {
+            "allow": "GET",
+            "cache-control": "no-store",
+            "content-length": "31",
+            "content-type": "application/json"
+          },
+          "status": 405
         }
       ],
       "transcode_responses": []

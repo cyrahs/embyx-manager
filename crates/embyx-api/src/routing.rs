@@ -64,9 +64,14 @@ impl std::fmt::Debug for Route {
 }
 
 impl Route {
-    /// `Route.matches` on the path alone: the parameters when it matches.
+    /// `Route.matches` on the path alone: the parameters when it matches. Starlette's
+    /// pattern is `^...$`, and `$` also matches before a final newline, so `/api/health\n`
+    /// is `/api/health` (a parameter at the end takes the newline into its value first).
     pub fn match_path(&self, path: &str) -> Option<Vec<(&'static str, String)>> {
-        match_template(&self.path, path)
+        match_template(&self.path, path).or_else(|| {
+            path.strip_suffix('\n')
+                .and_then(|trimmed| match_template(&self.path, trimmed))
+        })
     }
 
     /// The `Allow` header of the 405 a method mismatch gets: `', '.join(methods)`.
@@ -388,7 +393,10 @@ pub fn redirect(url: &str) -> Response {
 
 #[cfg(test)]
 mod tests {
-    use super::{match_template, url_path, valid_host};
+    use http::Method;
+
+    use super::{Route, handler, match_template, url_path, valid_host};
+    use crate::http::json;
 
     #[test]
     fn templates_match_whole_segments() {
@@ -404,6 +412,25 @@ mod tests {
             match_template("/api/config/{section}", "/api/config/\u{fffd}"),
             Some(vec![("section", "\u{fffd}".to_owned())])
         );
+    }
+
+    /// `^/api/health$` matches `/api/health\n` in Python's `re`; a final parameter keeps
+    /// the newline in its value (`[^/]+` takes it before `$` is tried).
+    #[test]
+    fn a_final_newline_matches_as_dollar_does() {
+        let route = |path: &str| Route {
+            path: path.to_owned(),
+            methods: vec![Method::GET],
+            handler: handler(|_request| async { Ok(json(http::StatusCode::OK, &embyx_core::pyjson::Value::Null)) }),
+            openapi: None,
+        };
+        assert_eq!(route("/api/health").match_path("/api/health\n"), Some(vec![]));
+        assert_eq!(route("/api/health").match_path("/api/health\n\n"), None);
+        assert_eq!(
+            route("/api/config/{section}").match_path("/api/config/emby\n"),
+            Some(vec![("section", "emby\n".to_owned())])
+        );
+        assert_eq!(route("/api/config").match_path("/api/config/\n"), None);
     }
 
     #[test]

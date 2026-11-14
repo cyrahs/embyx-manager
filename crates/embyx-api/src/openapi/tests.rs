@@ -95,3 +95,21 @@ async fn the_diff_reports_drift_and_stale_pending_entries() {
             .any(|problem| problem.contains("is not in the baseline"))
     );
 }
+
+/// A field called `title` or `description` is structure, not documentation.
+#[test]
+fn property_names_survive_normalization() {
+    let schema = pyjson::loads(
+        r#"{"title": "MissingEntryView", "type": "object",
+            "properties": {"title": {"title": "Title", "type": "string"}, "description": {"type": "integer"}}}"#,
+    )
+    .expect("JSON");
+    let normalized = super::normalize(&schema, &pyjson::Dict::new());
+    assert_eq!(
+        normalized,
+        pyjson::loads(
+            r#"{"type": "object", "properties": {"title": {"type": "string"}, "description": {"type": "integer"}}}"#
+        )
+        .expect("JSON")
+    );
+}

@@ -352,8 +352,10 @@ async fn test_emby(
     run_emby_test(&config, options.test_timeout).await
 }
 
-/// `_run_emby_test`: `system_info()` with the form's key; an answer of the wrong shape is
-/// an exception nothing handles, as in Python.
+/// `_run_emby_test`: `system_info()` with the form's key, the client closed afterwards (it
+/// is dropped here). The client's own errors (a refused key, a transport failure, an answer
+/// that is not a JSON object) are the test's result; anything else is unhandled, as in
+/// Python.
 async fn run_emby_test(config: &EmbyConfig, timeout: Duration) -> Answer {
     let client = EmbyClient::with_client(&config.address, &EmbyClient::client_options(&config.api_key, timeout))
         .map_err(Internal::new)?;

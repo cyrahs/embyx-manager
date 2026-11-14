@@ -24,8 +24,9 @@ use crate::config_api::{ConfigApiOptions, create_config_router};
 use crate::http::Internal;
 use crate::routing::{ApiRouter, App};
 
-/// How long shutdown waits for CloudDrive calls still running: under the pod's 60 s
-/// termination grace period, so the database still closes in time (D41, D56).
+/// How long shutdown waits for CloudDrive calls still running, after the requests in flight
+/// drained: under the pod's 60 s termination grace period, so the database usually still
+/// closes in time (D41, D56).
 pub const CLOUD_CLOSE_LIMIT: Duration = Duration::from_secs(45);
 
 #[derive(Debug, Default)]

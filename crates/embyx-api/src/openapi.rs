@@ -166,13 +166,33 @@ pub fn normalize(value: &Value, components: &Dict) -> Value {
             let mut kept = Dict::new();
             for (key, item) in fields.iter() {
                 if !key.as_str().is_some_and(|key| DOCUMENTATION_KEYS.contains(&key)) {
-                    kept.insert(key.clone(), normalize(item, components));
+                    let item = if key.as_str() == Some("properties") {
+                        normalize_properties(item, components)
+                    } else {
+                        normalize(item, components)
+                    };
+                    kept.insert(key.clone(), item);
                 }
             }
             Value::Dict(kept)
         }
         Value::List(items) => Value::List(items.iter().map(|item| normalize(item, components)).collect()),
         other => other.clone(),
+    }
+}
+
+/// A schema's `properties` map: its keys are field names (a field may be called `title`
+/// or `description`), so only the schemas under them are normalized.
+fn normalize_properties(value: &Value, components: &Dict) -> Value {
+    match value {
+        Value::Dict(fields) => {
+            let mut kept = Dict::new();
+            for (name, schema) in fields.iter() {
+                kept.insert(name.clone(), normalize(schema, components));
+            }
+            Value::Dict(kept)
+        }
+        other => normalize(other, components),
     }
 }
 

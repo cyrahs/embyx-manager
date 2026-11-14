@@ -100,3 +100,16 @@ path = "/api/config/clouddrive?x=1"
 [[args.requests]]
 method = "GET"
 path = "/api/config/?x=1"
+
+# `$` in Starlette's route patterns also matches before a final newline.
+[[args.requests]]
+method = "GET"
+path = "/api/health%0A"
+
+[[args.requests]]
+method = "GET"
+path = "/api/config/emby%0A"
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config%0A"
