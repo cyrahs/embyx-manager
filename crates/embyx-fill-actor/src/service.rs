@@ -40,7 +40,7 @@ use embyx_clients::net::retry::{Sleeper, tokio_sleeper};
 use embyx_core::avid::AvidParser;
 use embyx_core::pyre;
 use embyx_core::pytext::py_strip;
-use embyx_db::locking::{AsyncFileLock, FileLockGuard};
+use embyx_db::locking::{AdvisoryLockError, AdvisoryLockGuard, AsyncFileLock, FileLockGuard, PostgresAdvisoryLock};
 use embyx_monitor::reports::PyException as _;
 use indexmap::IndexMap;
 use tokio::sync::{Semaphore, watch};
@@ -246,7 +246,7 @@ pub struct ServiceOptions {
     pub plan_ttl: TimeDelta,
     pub clock: Option<Clock>,
     pub token_factory: Option<TokenFactory>,
-    pub mutation_lock: Option<AsyncFileLock>,
+    pub mutation_lock: Option<MutationLock>,
     pub cloud_file_mover: Option<Arc<dyn CloudFileMover>>,
     pub on_moved: Option<OnMoved>,
     /// The file system (the real one by default).
@@ -302,7 +302,7 @@ struct Inner {
     plan_ttl: TimeDelta,
     clock: Clock,
     token_factory: TokenFactory,
-    mutation_lock: Option<AsyncFileLock>,
+    mutation_lock: Option<MutationLock>,
     mover: Option<Arc<dyn CloudFileMover>>,
     on_moved: Option<OnMoved>,
     fs: Arc<dyn MoveFs>,
@@ -333,7 +333,7 @@ impl std::fmt::Debug for FillActorService {
 }
 
 /// `secrets.token_urlsafe(18)`: 18 random bytes, URL-safe base64 without padding.
-fn token_urlsafe() -> String {
+pub(crate) fn token_urlsafe() -> String {
     const ALPHABET: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
     let mut bytes = [0_u8; 18];
     getrandom::fill(&mut bytes).expect("the operating system's random source");
@@ -460,6 +460,47 @@ impl Drop for StopOnDrop {
     }
 }
 
+tokio::task_local! {
+    /// The scope the scans of the future being polled count in (see [`ScanScope`]).
+    static SCAN_SCOPE: TaskTracker;
+}
+
+/// The scan threads one caller's work started: what a job that cancelled its scan awaits
+/// before it reports the job stopped (D123, D130).
+///
+/// Python's cancelled scan waits for its own thread (`cancellation_wins=True`); a dropped
+/// Rust scan future returns at once and its thread finishes on its own. A job runs its
+/// `create_plan` inside [`ScanScope::run`] and, once the future is dropped, awaits
+/// [`ScanScope::settle`], which waits for the threads of that plan only, so another job's
+/// scan running beside it is neither stopped nor waited for ([`FillActorService::settle_scans`]
+/// stops and waits for every scan, as `aclose()` does).
+#[derive(Debug, Clone, Default)]
+pub struct ScanScope(TaskTracker);
+
+impl ScanScope {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Poll `work` with its scans counted in this scope.
+    pub async fn run<F: std::future::Future>(&self, work: F) -> F::Output {
+        SCAN_SCOPE.scope(self.0.clone(), work).await
+    }
+
+    /// Wait until every scan thread started in this scope has finished. A dropped scan
+    /// future has set its thread's stop flag already.
+    pub async fn settle(&self) {
+        self.0.close();
+        self.0.wait().await;
+        self.0.reopen();
+    }
+
+    /// How many scan threads of this scope are still running.
+    pub fn running(&self) -> usize {
+        self.0.len()
+    }
+}
+
 /// Re-raise a panic that ended a blocking call or a move task (a crash point in a test).
 fn resume(message: String) -> ! {
     std::panic::resume_unwind(Box::new(message))
@@ -473,6 +514,25 @@ fn panic_text(payload: &(dyn std::any::Any + Send)) -> String {
         .unwrap_or_else(|| "a fill-actor task panicked".to_owned())
 }
 
+/// What asyncpg raises when the advisory lock cannot be taken, named as the repositories
+/// name database failures (D61).
+fn advisory_lock_error(error: AdvisoryLockError) -> ServiceError {
+    let store = match error {
+        AdvisoryLockError::Database(error) => embyx_monitor::support::StoreError::Database(error),
+        AdvisoryLockError::Sqlx(error) => embyx_monitor::support::StoreError::from(error),
+        AdvisoryLockError::WaitAborted => {
+            return ServiceError::Raised {
+                class: "RuntimeError".to_owned(),
+                message: "the advisory lock wait ended unexpectedly".to_owned(),
+            };
+        }
+    };
+    ServiceError::Raised {
+        class: store.class_name().to_owned(),
+        message: store.to_string(),
+    }
+}
+
 fn join_error_text(error: tokio::task::JoinError) -> String {
     match error.try_into_panic() {
         Ok(payload) => panic_text(&*payload),
@@ -480,8 +540,41 @@ fn join_error_text(error: tokio::task::JoinError) -> String {
     }
 }
 
+/// `mutation_lock`: what serializes moves across processes. The app passes the PostgreSQL
+/// advisory lock, as Python's `build_app` does, so a Rust and a Python process exclude each
+/// other; the tests a file lock.
+#[derive(Debug, Clone)]
+pub enum MutationLock {
+    /// `AsyncFileLock(path)`.
+    File(AsyncFileLock),
+    /// `PostgresAdvisoryLock(database.get_pool)`.
+    Postgres(PostgresAdvisoryLock),
+}
+
+impl From<AsyncFileLock> for MutationLock {
+    fn from(lock: AsyncFileLock) -> Self {
+        Self::File(lock)
+    }
+}
+
+impl From<PostgresAdvisoryLock> for MutationLock {
+    fn from(lock: PostgresAdvisoryLock) -> Self {
+        Self::Postgres(lock)
+    }
+}
+
+/// A held [`MutationLock`]. The advisory lock's guard, dropped, closes its connection, which
+/// ends the session and the lock with it (D17); a blocking call that outlives its caller
+/// keeps it until it returns.
+#[derive(Debug)]
+#[allow(dead_code, reason = "held for its drop")]
+enum HeldGuard {
+    File(FileLockGuard),
+    Postgres(AdvisoryLockGuard),
+}
+
 /// The mutation lock as held: by the future that took it and by every blocking call it starts.
-type HeldLock = Option<Arc<FileLockGuard>>;
+type HeldLock = Option<Arc<HeldGuard>>;
 
 impl FillActorService {
     /// `FillActorService(...)`: `ValueError` for a non-positive limit or TTL.
@@ -608,9 +701,12 @@ impl FillActorService {
             .insert(id, Arc::clone(&stop));
         let _stop_on_drop = StopOnDrop(Arc::clone(&stop));
         let inner = Arc::clone(&self.inner);
+        // A scan started inside a [`ScanScope`] counts in it until its thread has finished.
+        let scope_token = SCAN_SCOPE.try_with(TaskTracker::token).ok();
         let handle = self.inner.scan_tasks.spawn_blocking(move || {
             let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| work(&stop)));
             inner.scans.lock().unwrap_or_else(PoisonError::into_inner).remove(&id);
+            drop(scope_token);
             match result {
                 Ok(value) => value,
                 Err(payload) => std::panic::resume_unwind(payload),
@@ -620,6 +716,17 @@ impl FillActorService {
             Ok(value) => value,
             Err(error) => resume(join_error_text(error)),
         }
+    }
+
+    /// Whether a running scan has been asked to stop (what a test's blocked scan waits for).
+    #[cfg(test)]
+    pub(crate) fn scan_stop_requested(&self) -> bool {
+        self.inner
+            .scans
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .values()
+            .any(|stop| stop.load(Ordering::SeqCst))
     }
 
     /// How many scan threads are still running (`len(service._scan_futures)`).
@@ -656,11 +763,16 @@ impl FillActorService {
     async fn acquire_lock(&self) -> Result<HeldLock, ServiceError> {
         match &self.inner.mutation_lock {
             None => Ok(None),
-            Some(lock) => lock
+            Some(MutationLock::File(lock)) => lock
                 .acquire()
                 .await
-                .map(|guard| Some(Arc::new(guard)))
+                .map(|guard| Some(Arc::new(HeldGuard::File(guard))))
                 .map_err(|error| ServiceError::from(PyOsError::from_io(&error, Some(lock.path()), None))),
+            Some(MutationLock::Postgres(lock)) => lock
+                .acquire()
+                .await
+                .map(|guard| Some(Arc::new(HeldGuard::Postgres(guard))))
+                .map_err(advisory_lock_error),
         }
     }
 

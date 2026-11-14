@@ -50,7 +50,10 @@ use embyx_monitor::subscriptions::SubscriptionRepository;
 use embyx_monitor::support::BoxFuture;
 use embyx_monitor::tracker::{AcquisitionTracker, SubmitMagnet, TrackerParts, TrackerSettings};
 
+use embyx_fill_actor::adapters::Intake;
+
 use super::CloudDriveHandle;
+use super::fill_actor::FillActorInputs;
 use crate::auth::MutationAuth;
 use crate::monitor_api::{
     AcquisitionApi, ManualIntake, Replacement, SubscriptionsApi, TalentResolver, create_monitor_router,
@@ -66,6 +69,8 @@ pub(crate) struct MonitorParts {
     pub scheduler: MonitorScheduler,
     pub monitor: ApiRouter,
     pub playlists: ApiRouter,
+    /// The clients and the intake the fill actor shares.
+    pub fill_actor: FillActorInputs,
 }
 
 /// A client the assembly could not build: Python's constructor would have raised.
@@ -548,10 +553,21 @@ pub(crate) fn assemble(
     let shared = Arc::new(build_shared(store, database, cloud)?);
     let scheduler = build_scheduler(&shared, database);
     let (monitor, playlists) = build_routers(&shared, &scheduler, database, auth);
+    let intake_shared = Arc::clone(&shared);
+    let fill_actor = FillActorInputs {
+        avbase: Arc::clone(&shared.avbase),
+        javbus: Arc::clone(&shared.javbus),
+        intake: Arc::new(move || {
+            let cloud = intake_shared.cloud.current()?;
+            intake_shared.intake(cloud).map(|intake| intake as Arc<dyn Intake>)
+        }),
+        scheduler: scheduler.clone(),
+    };
     Ok(MonitorParts {
         scheduler,
         monitor,
         playlists,
+        fill_actor,
     })
 }
 

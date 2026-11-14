@@ -341,7 +341,7 @@ impl Fixture {
             None => Arc::new(mover.clone()),
         });
         if options.locked {
-            setup.options.mutation_lock = Some(AsyncFileLock::new(self.root.join("move.lock")));
+            setup.options.mutation_lock = Some(AsyncFileLock::new(self.root.join("move.lock")).into());
         }
         setup.options.clock = options.clock.map(|clock| clock.clock());
         // `asyncio.sleep(0.5)` between verification rounds, without the wait.

@@ -131,7 +131,7 @@ tests = [
 
 [WP12]
 title = "Fill-actor jobs, API, wiring"
-status = "pending"
+status = "done"
 tests = [
   # The fill-actor part of the file; the shell tests are WP4's.
   "tests/test_api.py",

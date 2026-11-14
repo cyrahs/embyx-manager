@@ -16,14 +16,6 @@ use crate::routing::Route;
 /// The operations of the baseline not ported yet: `(app, method, path)`, by the work
 /// package that ports them.
 pub const PENDING: &[(&str, &str, &str)] = &[
-    // WP12: fill actor.
-    ("main", "post", "/api/fill-actor/avid-actors"),
-    ("main", "post", "/api/fill-actor/plans"),
-    ("main", "get", "/api/fill-actor/plans/{plan_id}"),
-    ("main", "post", "/api/fill-actor/plans/{plan_id}/cancel"),
-    ("main", "post", "/api/fill-actor/plans/{plan_id}/apply-jobs"),
-    ("main", "get", "/api/fill-actor/apply-jobs/{job_id}"),
-    ("main", "post", "/api/fill-actor/plans/{plan_id}/apply"),
     // WP14: merge and the transcode listener.
     ("main", "get", "/api/merge/titles"),
     ("main", "get", "/api/merge/tasks"),

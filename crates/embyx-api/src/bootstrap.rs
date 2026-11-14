@@ -5,7 +5,8 @@
 //! lifespan's store load and client close). WP4 assembles what the shell needs: the store,
 //! the config router, health and the transcode listener's empty app; WP9 the monitor
 //! ([`monitor`]: its scheduler, started after the store loads and closed before the clients,
-//! and the monitor and playlists routers). The fill actor and merge join in WP12 and WP14.
+//! and the monitor and playlists routers); WP12 the fill actor ([`fill_actor`]: the service on
+//! the shared clients, its job manager, router, health block and lifespan). Merge joins in WP14.
 
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
@@ -25,7 +26,10 @@ use crate::config_api::{ConfigApiOptions, create_config_router};
 use crate::http::Internal;
 use crate::routing::{ApiRouter, App};
 
+mod fill_actor;
 mod monitor;
+
+pub use fill_actor::{FillActorRuntimeHandle, build_fill_actor_runtime};
 
 pub use monitor::ClientBuildError;
 
@@ -190,10 +194,11 @@ pub fn build_app(settings: &Settings, frontend_dist: Option<PathBuf>) -> Result<
     let auth = MutationAuth::new(settings.api_token.as_deref());
     let config_router = create_config_router(Arc::clone(&store), auth.clone(), ConfigApiOptions::default());
     let monitor = monitor::assemble(&store, &database, &cloud, &auth).map_err(BuildError::Client)?;
+    let fill_actor = fill_actor::assemble(settings, &store, &database, &cloud, &auth, monitor.fill_actor);
     let app = create_app(AppParts {
         app_ready,
-        routers: vec![config_router, monitor.monitor, monitor.playlists],
-        feature_health: Vec::new(),
+        routers: vec![fill_actor.router, config_router, monitor.monitor, monitor.playlists],
+        feature_health: vec![("fill_actor".to_owned(), fill_actor.health)],
         api_token: settings.api_token.clone(),
         max_request_bytes: usize::try_from(settings.max_request_bytes).unwrap_or(usize::MAX),
         frontend_dist,
@@ -211,7 +216,8 @@ pub fn build_app(settings: &Settings, frontend_dist: Option<PathBuf>) -> Result<
     Ok(Assembled {
         app,
         transcode_app,
-        lifespans: vec![runtime],
+        // The runtime comes up first and goes down last; features stack on top of it.
+        lifespans: vec![runtime, fill_actor.lifespan],
         store,
         database,
         cloud,

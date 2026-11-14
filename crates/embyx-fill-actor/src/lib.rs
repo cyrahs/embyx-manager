@@ -4,12 +4,14 @@
 //! `persistence.py`, which is not ported: D110) and `src/embyx_manager/adapters.py`. WP10
 //! ports the models, records, the PostgreSQL repository, the cloud-move paths and the port
 //! adapters; WP11 the service (scan, plan, journaled local moves, CloudDrive moves and their
-//! recovery: [`service`], over the file system of [`fs`]); WP12 the jobs and the API on top.
+//! recovery: [`service`], over the file system of [`fs`]); WP12 the durable job queue
+//! ([`jobs`]), whose API lives in `embyx_api::fill_actor_api`.
 
 pub mod adapters;
 pub mod cloud_moves;
 pub mod errors;
 pub mod fs;
+pub mod jobs;
 pub mod models;
 pub mod ports;
 pub mod postgres_repository;

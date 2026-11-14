@@ -3,7 +3,7 @@
 //! Python origin: `src/embyx_manager/fill_actor/errors.py`: a `FillActorError` subclass per
 //! failure, each with the `code` the API puts in its error envelope. The codes are part of
 //! the HTTP surface (cross-version contract 8; `goldens/fill_actor/records.json` pins them).
-//! WP12 maps them to status codes.
+//! `embyx_api::fill_actor_api::service_error_status` maps them to status codes (WP12).
 
 use std::fmt;
 
