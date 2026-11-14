@@ -264,7 +264,7 @@ feed. Where the TLS fingerprint matters the probe runs from the production netwo
 | WP5 | 3 monitor | done (#87) | Ledger, runs, reports, cadence, release dates, intake, subscriptions | 2,000 | WP2, WP3 |
 | WP6 | 3 monitor | done (#89) | Archive, reconcile, move-in (filesystem effects) | 1,100 | WP1 |
 | WP7 | 3 monitor | done (#91) | Tracker, 换版, manual intake | 1,250 | WP5, WP6 |
-| WP8 | 3 monitor | pending | RSS pipeline, mapping pipeline, playlists and playlist sync | 1,150 | WP5 |
+| WP8 | 3 monitor | done (#PR) | RSS pipeline, mapping pipeline, playlists and playlist sync | 1,150 | WP5 |
 | WP9 | 3 monitor | pending | Scheduler (cron, watcher, tracker bursts), monitor API, playlists API, wiring | 1,700 | WP7, WP8, WP4 |
 | WP10 | 4 fill actor | done (#90) | PostgreSQL repository, models, cloud moves, adapters | 1,850 | WP3, WP5 |
 | WP11 | 4 fill actor | pending | Service: scan, plan, local moves with journal and recovery, cloud moves | 2,100 | WP10 |
@@ -368,9 +368,9 @@ or says why one stays.
 - The Rust fake CloudDrive (`embyx-clients/src/clouddrive/fake.rs`) serves all 14 RPCs rule for rule from
   `tools/scenarios/fakes/clouddrive.py` (WP3), with test hooks the Python fake lacks (`seen()` for headers and
   deadlines, `hold(method)` to keep a call in flight). The HTTP fakes are `embyx_clients::fakehttp` (a port of
-  `fakes/http.py`); `embyx_clients::scenario::ScenarioFakes` starts all three as the runner does. WP8 (Emby
-  playlists) and WP14 (Jobs) replace a route table with a state model in both fakes at once, keeping the record
-  shape.
+  `fakes/http.py`); `embyx_clients::scenario::ScenarioFakes` starts all three as the runner does. WP14 (Jobs)
+  replaces a route table with a state model in both fakes at once if it needs one, keeping the record shape
+  (WP8's Emby playlists did not: scripted routes were enough).
 - `embyx_core::posixpath` (WP3) is Python's `posixpath` (`normpath`, `split`, `dirname`, `basename`, `join`) for
   CloudDrive API paths, next to fav's `pypath` (`pathlib` semantics for local paths). Use `posixpath` where
   Python calls `posixpath`, `pypath` where it uses `PurePosixPath`; they differ on `..`, `//` and trailing
@@ -456,6 +456,26 @@ or says why one stays.
   None, queue: true, on_entry }`. The `tracker.steps` operation (`operations/tracker.py`) holds the whole
   acquisition world (ledger, CloudDrive fake, mount, tracker, 换版, manual); WP8 and WP9 can add their steps to
   it rather than build another.
+
+- WP8 left these for later packages. `rss::RssPipeline::new(RssParts { .. })` keeps the catalog answers
+  (`cast_lookup`) on the pipeline as Python's object does, and bootstrap's `rss_runner` builds a new pipeline
+  for every run: WP9 must do the same, or the answers outlive the run. `HttpFeedFetcher` implements
+  `rss::FeedFetcher` and `SubscriptionRepository` implements `rss::SubscriptionStore`; WP9 implements
+  `rss::CastLookup` and `rss::TalentLookup` over the AVBase client as bootstrap's lookups do, and reuses
+  `testing::{FakeSubscriptions, SubscriptionSpec, make_subscription, feed_url}` (the Python tests' fake, under
+  `test-support`) for `test_monitor_api.py` and `test_rss_category_routing.py`.
+  `mapping::MappingPipeline::{new, with_fs}` is synchronous (`run_full`, `run_incremental(ctx, changed,
+  deleted)` returning the failed paths): the watcher and the scheduler call it in `archive::blocking`.
+  `playlist_sync::PlaylistSyncPipeline::new(store, source, emby, avid_of).with_clock(..)` takes
+  `playlists::PlaylistStore`, `RankingSource` (implemented by `JinjierClient`) and `PlaylistServer` (implemented
+  by `EmbyClient`); the playlists API (WP9's `playlists_api.py`, which also owns the `ManualIntakeSource::submit`
+  call WP7 described) reads and toggles lists through `PlaylistRepository`. `EmbyClient::movie_index` now takes
+  `&(dyn Fn(&str) -> String + Sync)`; `embyx_clients::jinjier::fixtures::make_database` builds the ranking
+  database for tests (`test-support`). `fs::Fs` gained `rmdir`, `copy2` (`shutil.copy2`), `cmp_files`
+  (`filecmp.cmp(shallow=False)`, no cache, D90), `mkdir_parents_new` and `glob_recursive`, and `RecordingFs`
+  records `copy2` and `rmdir` and can list directories in name order; `PyOsError::classed` builds an `OSError`
+  subclass from a message and `strerror()` is an accessor now (the error had to shrink under clippy's size
+  limit). The Emby fake needed no state model: scripted `times = 1` routes give a run's listings in order.
 
 - WP4 left these for later packages. The request models (`UpdateSectionRequest`, `TestConnectionRequest`) are
   validated in `embyx_api::body` against pydantic goldens (`goldens/api/request_models.json`) rather than through

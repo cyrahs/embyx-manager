@@ -156,6 +156,19 @@ the runner does and `dump()` gives the transcript's `fakes`.
   All timestamps come from the scenario clock; nothing is `volatile`. `plan`, `start`, `browse` and `submit`
   make their own `RunContext`, so the replacement and manual sources' log lines are not in the transcripts
   (the ported unit tests and review cover them).
+- **WP8 (done):** `mapping/*` (full, incremental, failures) run `mapping.steps`
+  (`tools/scenarios/operations/mapping.py`, `mapping/scenarios.rs`) over flat and mirror roots through
+  WP6's recording file system with `copy2` and `rmdir` recorded too; every directory is listed in name order
+  (bytes) on both sides, because `Path.glob` and `iterdir` follow the file system's order, and the seeded files'
+  times are pinned to the clock. Steps: `full`, `incremental` (`changed`/`deleted`), `configure`, and the
+  unrecorded `write` (`text`, `mtime`), `remove`, `mkdir`. `playlists/sync` runs `playlists.steps`
+  (`operations/playlists.py`, `playlist_sync/scenarios.rs`): the real repository, the real `EmbyClient`
+  against the scripted Emby fake (one `times = 1` route per answer, so a run's two `GET /emby/Items` listings
+  come in order; no state model was needed) and a ranking-source stub recording `jinjier` calls. `rss/run`
+  runs `rss.steps` (`operations/rss.py`, `rss/scenarios.rs`): the real subscription and acquisition
+  repositories, `AsyncCloudDrive` against the fake, an `ArchivePipeline` over the spec's library through the
+  recording file system, and stubs recording `feed` fetches (a body or an HTTP status per URL) and `avbase`
+  cast and talent lookups; `stop_after_fetch` asks the run to stop once a URL has been fetched.
 - **WP9 (scheduler):** fires come from `clock`; a scenario runs one tick, not a loop.
 - **WP11 (fill-actor service):** one scenario per journal state to recover from; seed the journal
   rows and the half-done tree, and let the transcript show the recovered end state.

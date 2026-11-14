@@ -739,3 +739,33 @@ fn the_mirrored_strm_holds_the_source_bytes() {
         b"/cloud/\xff\x00video.mp4\r\n"
     );
 }
+
+/// D90: a source rewritten with other bytes of the same size and the same modification time is
+/// copied once; with no `filecmp` cache the next full run compares the mirror equal and leaves
+/// it alone (Python's cache keeps the first `False` and copies it on every full run).
+#[test]
+fn a_same_size_same_mtime_rewrite_is_copied_once() {
+    let tree = Tree::new();
+    let pipeline = make_pipeline(&tree);
+    let source = write_strm(&pipeline.src_dir.join("ABC-123.strm"), "aaaa");
+    pipeline.run_full(&make_ctx()).expect("first run");
+    let mapped = pipeline.dst_dir.join("ABC-123/ABC-123.strm");
+    let modified = stdfs::metadata(&source).expect("stat").modified().expect("mtime");
+    stdfs::write(&source, "bbbb").expect("write");
+    stdfs::File::options()
+        .write(true)
+        .open(&source)
+        .expect("open")
+        .set_times(stdfs::FileTimes::new().set_modified(modified))
+        .expect("utime");
+
+    let ctx = make_ctx();
+    pipeline.run_full(&ctx).expect("second run");
+    assert_eq!(ctx.stats().get("files_updated"), Some(1));
+    assert_eq!(stdfs::read_to_string(&mapped).expect("read"), "bbbb");
+
+    let ctx = make_ctx();
+    pipeline.run_full(&ctx).expect("third run");
+    assert_eq!(ctx.stats().get("files_updated"), None);
+    assert_eq!(ctx.stats().get("files_skipped"), Some(1));
+}
