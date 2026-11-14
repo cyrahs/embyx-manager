@@ -11,7 +11,24 @@ publish.workspace = true
 workspace = true
 
 [dependencies]
+chrono.workspace = true
+embyx-clients = { workspace = true, features = ["clouddrive"] }
+embyx-core.workspace = true
+embyx-db.workspace = true
+embyx-monitor.workspace = true
+hex.workspace = true
+indexmap.workspace = true
+sha2.workspace = true
+sqlx.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["sync"] }
+tracing.workspace = true
 
 [dev-dependencies]
+embyx-clients = { workspace = true, features = ["clouddrive", "test-support"] }
+embyx-core = { workspace = true, features = ["test-support"] }
+embyx-db = { workspace = true, features = ["test-support"] }
+embyx-monitor = { workspace = true, features = ["test-support"] }
 rustix.workspace = true
 tempfile.workspace = true
+tokio = { workspace = true, features = ["macros", "rt", "rt-multi-thread", "sync", "time"] }

@@ -1,0 +1,268 @@
+# The fill-actor repository (fill_actor/postgres_repository.py) step by step: the rows a plan,
+# its local and CloudDrive candidates, move results, the job queue with its leases and
+# progress, apply jobs, the move journal and the CloudDrive move operations store, and the
+# rows seeded below as the Python build wrote them (a plan dated in +09:00 from before the
+# optional fields, a job with the pre-progress defaults, a CloudDrive candidate and its
+# unresolved operation), read back and carried on. Every timestamp comes from the steps, so
+# nothing is volatile; the rows pin the `public_json`, `result_json`, `cloud_file_json`,
+# `actor_ids_json` and `candidate_ids_json` bytes.
+description = "fill_actor: plans, jobs, journals and cloud moves through the repository"
+operation = "fill_actor.repository"
+clock = "2026-07-13T10:00:00+00:00"
+
+[database]
+schema = "app"
+tables = [
+    "fill_actor_plans",
+    "fill_actor_candidates",
+    "fill_actor_move_results",
+    "fill_actor_jobs",
+    "fill_actor_apply_jobs",
+    "fill_actor_move_journal",
+    "fill_actor_cloud_move_operations",
+]
+sql = [
+    '''INSERT INTO fill_actor_plans (plan_id, revision, public_json, created_at, expires_at) VALUES ('legacy', 'legacy-r', '{"plan_id":"legacy","revision":"legacy-r","created_at":"2026-07-13T19:00:00+09:00","expires_at":"2026-07-13T20:00:00+09:00","actors":[{"actor_id":"old","scraped_count":1,"video_ids":["OLD-001"],"error_code":null}],"videos":[{"video_id":"OLD-001","actor_ids":["old"],"state":"magnet_found","existing_files":[],"move_candidates":[{"candidate_id":"legacy-c","video_id":"OLD-001","file_name":"OLD-001.strm","source_label":"additional-1","destination_conflict":false}],"warnings":[]}]}', '2026-07-13T10:00:00+00:00', '2026-07-13T11:00:00+00:00')''',
+    '''INSERT INTO fill_actor_candidates (plan_id, candidate_id, video_id, source_path, source_root, destination_path, fingerprint_device, fingerprint_inode, fingerprint_size, fingerprint_mtime_ns, fingerprint_ctime_ns, candidate_kind, mapping_sha256, cloud_source_path, cloud_destination_dir, cloud_file_json) VALUES ('legacy', 'legacy-c', 'OLD-001', '/mapping/OLD/OLD-001.strm', '/mapping', '/move-in/OLD/OLD-001.strm', 66306, 1234567, 52, 1783936800123456789, 1783936800123456789, 'cloud_strm', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', '/cloud/library/source-b/OLD/OLD-001.mp4', '/cloud/library/destination/OLD', '{"hashes":{"2":"SHA1","中":"é"},"id":"old-file","name":"OLD-001.mp4","path":"/cloud/library/source-b/OLD/OLD-001.mp4","size":1073741824000,"write_time":1783936800123456789}')''',
+    '''INSERT INTO fill_actor_cloud_move_operations (plan_id, candidate_id, attempt_id, source_path, destination_dir, state, updated_at, error_code) VALUES ('legacy', 'legacy-c', 'legacy-attempt', '/cloud/library/source-b/OLD/OLD-001.mp4', '/cloud/library/destination/OLD', 'unknown', '2026-07-13T10:30:00.5+00:00', 'cloud_move_interrupted')''',
+    '''INSERT INTO fill_actor_jobs (job_id, operation, state, created_at, updated_at, plan_id) VALUES ('legacy-job', 'create_plan', 'running', '2026-07-13T09:00:00+00:00', '2026-07-13T09:00:00+00:00', 'legacy')''',
+]
+
+# ---------- what the Python build left behind ----------
+
+[[args.steps]]
+op = "get_plan"
+args = { plan_id = "legacy" }
+
+[[args.steps]]
+op = "list_unresolved_cloud_moves"
+
+[[args.steps]]
+op = "get_job"
+args = { job_id = "legacy-job" }
+
+[[args.steps]]
+op = "fail_expired_jobs"
+args = { now = "2026-07-13T10:00:00+00:00", error_code = "lease_expired" }
+
+[[args.steps]]
+op = "delete_plan"
+args = { plan_id = "legacy" }
+
+[[args.steps]]
+op = "finalize_cloud_move"
+args = { operation = { plan_id = "legacy", candidate_id = "legacy-c", attempt_id = "legacy-attempt", source_path = "/cloud/library/source-b/OLD/OLD-001.mp4", destination_dir = "/cloud/library/destination/OLD", state = "succeeded", updated_at = "2026-07-13T19:45:00.000001+09:00" }, result = '{"candidate_id":"legacy-c","video_id":"OLD-001","file_name":"OLD-001.strm","state":"moved","error_code":null}' }
+
+[[args.steps]]
+op = "list_move_results"
+args = { plan_id = "legacy" }
+
+# ---------- a plan with a local and a CloudDrive candidate ----------
+
+[[args.steps]]
+op = "save_plan"
+args.plan.config_version = 7
+args.plan.public = '{"plan_id": "plan-1", "revision": "rev-1", "created_at": "2026-07-13T10:00:00.123456Z", "expires_at": "2026-07-13T12:00:00+02:00", "actors": [{"actor_id": "actor-1", "scraped_count": 2, "video_ids": ["ABC-001", "ABC-002"], "actor_name": "河北彩花", "talent_id": 5022, "aliases": ["河北彩伽"]}], "videos": [{"video_id": "ABC-001", "actor_ids": ["actor-1"], "state": "additional_found", "release_date": "2026-01-01", "move_candidates": [{"candidate_id": "c-local", "video_id": "ABC-001", "file_name": "ABC-001 [演员] \"x\".mp4", "source_label": "additional-1", "destination_conflict": false}], "warnings": ["不同 行"]}, {"video_id": "ABC-002", "actor_ids": ["actor-1"], "state": "additional_found", "move_candidates": [{"candidate_id": "c-cloud", "video_id": "ABC-002", "file_name": "ABC-002.strm", "source_label": "additional-2", "destination_conflict": true}]}]}'
+args.plan.candidates = [
+    { candidate_id = "c-local", video_id = "ABC-001", source = "/additional/ABC/ABC-001 [演员] \"x\".mp4", source_root = "/additional", destination = "/move-in/ABC/ABC-001 [演员] \"x\".mp4", fingerprint = { device = 64769, inode = 9007199254740993, size = 0, mtime_ns = -1, ctime_ns = 1783936800000000000 } },
+    { candidate_id = "c-cloud", video_id = "ABC-002", source = "/mapping/ABC/ABC-002.strm", source_root = "/mapping", destination = "/move-in/ABC/ABC-002.strm", fingerprint = { device = 1, inode = 2, size = 3, mtime_ns = 4, ctime_ns = 5 }, kind = "cloud_strm", mapping_sha256 = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef", cloud_source_path = "/cloud/library/source-b/ABC/ABC-002.mp4", cloud_destination_dir = "/cloud/library/destination/ABC", cloud_file = { path = "/cloud/library/source-b/ABC/ABC-002.mp4", id = "file-2", name = "ABC-002.mp4", size = 123, write_time = 456, hashes = { sha1 = "abcd", "2" = "Z", "中" = "é" } } },
+]
+
+[[args.steps]]
+op = "get_plan"
+args = { plan_id = "plan-1" }
+
+[[args.steps]]
+op = "get_candidate"
+args = { plan_id = "plan-1", candidate_id = "c-cloud" }
+
+[[args.steps]]
+op = "get_candidate"
+args = { plan_id = "plan-1", candidate_id = "missing" }
+
+[[args.steps]]
+op = "save_plan"
+args.plan.public = '{"plan_id": "plan-bad", "revision": "r", "created_at": "2026-07-13T10:00:00Z", "expires_at": "2026-07-13T11:00:00Z", "actors": [], "videos": []}'
+args.plan.candidates = [{ candidate_id = "c-1", video_id = "V-1", source = "/a", source_root = "/", destination = "/b", fingerprint = { device = 1, inode = 2, size = 3, mtime_ns = 4, ctime_ns = 5 } }]
+
+[[args.steps]]
+op = "save_move_result"
+args = { plan_id = "plan-1", result = '{"candidate_id": "c-local", "video_id": "ABC-001", "file_name": "ABC-001 [演员] \"x\".mp4", "state": "conflict", "error_code": "destination_exists"}' }
+
+[[args.steps]]
+op = "save_move_result"
+args = { plan_id = "plan-1", result = '{"candidate_id": "c-local", "video_id": "ABC-001", "file_name": "ABC-001.mp4", "state": "moved"}' }
+
+[[args.steps]]
+op = "save_move_result"
+args = { plan_id = "plan-1", result = '{"candidate_id": "missing", "video_id": "ABC-001", "file_name": "x.mp4", "state": "moved"}' }
+
+[[args.steps]]
+op = "get_move_result"
+args = { plan_id = "plan-1", candidate_id = "c-local" }
+
+# ---------- the move journal ----------
+
+[[args.steps]]
+op = "save_move_journal"
+args.journal = { plan_id = "plan-1", candidate_id = "c-local", state = "linked", updated_at = "2026-07-13T10:01:00+00:00" }
+
+[[args.steps]]
+op = "save_move_journal"
+args.journal = { plan_id = "plan-1", candidate_id = "c-local", state = "prepared", updated_at = "2026-07-13T10:01:00.654321+00:00" }
+
+[[args.steps]]
+op = "save_move_journal"
+args.journal = { plan_id = "plan-1", candidate_id = "c-local", state = "linked", updated_at = "2026-07-13T19:02:00+09:00" }
+
+[[args.steps]]
+op = "save_move_journal"
+args.journal = { plan_id = "plan-1", candidate_id = "c-local", state = "prepared", updated_at = "2026-07-13T10:03:00+00:00" }
+
+[[args.steps]]
+op = "list_unreconciled_moves"
+
+[[args.steps]]
+op = "delete_plan"
+args = { plan_id = "plan-1" }
+
+# ---------- the CloudDrive move ----------
+
+[[args.steps]]
+op = "save_cloud_move_operation"
+args.operation = { plan_id = "plan-1", candidate_id = "c-cloud", attempt_id = "attempt-1", source_path = "/cloud/library/source-b/ABC/ABC-002.mp4", destination_dir = "/cloud/library/destination/ABC", state = "submitting", updated_at = "2026-07-13T10:04:00+00:00" }
+
+[[args.steps]]
+op = "save_cloud_move_operation"
+args.operation = { plan_id = "plan-1", candidate_id = "c-cloud", attempt_id = "attempt-1", source_path = "/cloud/library/source-b/ABC/ABC-002.mp4", destination_dir = "/cloud/library/destination/ABC", state = "prepared", updated_at = "2026-07-13T10:04:00+00:00" }
+
+[[args.steps]]
+op = "save_cloud_move_operation"
+args.operation = { plan_id = "plan-1", candidate_id = "c-cloud", attempt_id = "attempt-1", source_path = "/cloud/library/source-b/ABC/ABC-002.mp4", destination_dir = "/cloud/library/destination/ABC", state = "verifying", updated_at = "2026-07-13T10:05:00+00:00" }
+
+[[args.steps]]
+op = "save_cloud_move_operation"
+args.operation = { plan_id = "plan-1", candidate_id = "c-cloud", attempt_id = "attempt-1", source_path = "/cloud/library/source-b/ABC/ABC-002.mp4", destination_dir = "/cloud/library/destination/ABC", state = "failed", updated_at = "2026-07-13T10:05:00+00:00", error_code = "cloud_move_failed" }
+
+[[args.steps]]
+op = "get_cloud_move_operation"
+args = { plan_id = "plan-1", candidate_id = "c-cloud" }
+
+[[args.steps]]
+op = "finalize_cloud_move"
+args = { operation = { plan_id = "plan-1", candidate_id = "c-cloud", attempt_id = "attempt-1", source_path = "/cloud/library/source-b/ABC/ABC-002.mp4", destination_dir = "/cloud/library/destination/ABC", state = "conflict", updated_at = "2026-07-13T10:06:00+00:00", error_code = "destination_exists" }, result = '{"candidate_id": "c-cloud", "video_id": "ABC-002", "file_name": "ABC-002.strm", "state": "conflict", "error_code": "destination_exists"}' }
+
+[[args.steps]]
+op = "list_unresolved_cloud_moves"
+
+# ---------- the job queue ----------
+
+[[args.steps]]
+op = "enqueue_job"
+args = { max_active = 2, job = { job_id = "scan-1", operation = "create_plan", state = "queued", created_at = "2026-07-13T10:10:00+00:00", updated_at = "2026-07-13T10:10:00+00:00", plan_id = "scan-1", actor_ids = ["actor-1", "演员"] } }
+
+[[args.steps]]
+op = "enqueue_job"
+args = { max_active = 2, job = { job_id = "scan-2", operation = "create_plan", state = "queued", created_at = "2026-07-13T10:10:01+00:00", updated_at = "2026-07-13T10:10:01+00:00" } }
+
+[[args.steps]]
+op = "enqueue_job"
+args = { max_active = 2, job = { job_id = "scan-3", operation = "create_plan", state = "queued", created_at = "2026-07-13T10:10:02+00:00", updated_at = "2026-07-13T10:10:02+00:00" } }
+
+[[args.steps]]
+op = "claim_next_job"
+args = { owner_id = "worker-a", now = "2026-07-13T10:11:00+00:00", lease_expires_at = "2026-07-13T10:11:30+00:00" }
+
+[[args.steps]]
+op = "renew_owned_job_lease"
+args = { job_id = "scan-1", owner_id = "worker-a", now = "2026-07-13T10:11:20+00:00", lease_expires_at = "2026-07-13T19:11:50.000001+09:00" }
+
+[[args.steps]]
+op = "renew_owned_job_lease"
+args = { job_id = "scan-1", owner_id = "worker-b", now = "2026-07-13T10:11:20+00:00", lease_expires_at = "2026-07-13T10:12:00+00:00" }
+
+[[args.steps]]
+op = "update_owned_job_progress"
+args = { job_id = "scan-1", owner_id = "worker-a", now = "2026-07-13T10:11:25+00:00", progress = { stage = "library_scan", completed = 4, total = 10, unit = "videos", current = "ABC-004 \"演员\"", stage_started_at = "2026-07-13T10:11:21+00:00", updated_at = "2026-07-13T10:11:25.5+00:00" } }
+
+[[args.steps]]
+op = "update_owned_job_progress"
+args = { job_id = "scan-1", owner_id = "worker-a", now = "2026-07-13T10:11:25+00:00", progress = { stage = "library_scan", completed = 3000000000, total = 3000000000, unit = "videos", current = "", stage_started_at = "2026-07-13T10:11:21+00:00", updated_at = "2026-07-13T10:11:25+00:00" } }
+
+[[args.steps]]
+op = "get_job"
+args = { job_id = "scan-1" }
+
+[[args.steps]]
+op = "cancel_job"
+args = { job_id = "scan-2", now = "2026-07-13T10:12:00+00:00" }
+
+[[args.steps]]
+op = "cancel_job"
+args = { job_id = "scan-2", now = "2026-07-13T10:12:01+00:00" }
+
+[[args.steps]]
+op = "cancel_job"
+args = { job_id = "scan-1", now = "2026-07-13T10:11:40+00:00" }
+
+[[args.steps]]
+op = "finish_owned_job"
+args = { job_id = "scan-1", owner_id = "worker-a", state = "completed", now = "2026-07-13T10:11:41+00:00", progress = { stage = "done", completed = 1, total = 1, unit = "steps", current = "x", stage_started_at = "2026-07-13T10:11:41+00:00", updated_at = "2026-07-13T10:11:41+00:00" } }
+
+[[args.steps]]
+op = "fail_expired_jobs"
+args = { now = "2026-07-13T10:13:00+00:00", error_code = "lease_expired" }
+
+[[args.steps]]
+op = "list_jobs"
+args = { states = ["failed", "queued"] }
+
+# ---------- apply jobs ----------
+
+[[args.steps]]
+op = "save_plan"
+args.plan.public = '{"plan_id": "plan-2", "revision": "rev-2", "created_at": "2026-07-13T10:20:00Z", "expires_at": "2026-07-13T10:50:00Z", "actors": [], "videos": [{"video_id": "XYZ-001", "actor_ids": [], "state": "additional_found", "move_candidates": [{"candidate_id": "c-1", "video_id": "XYZ-001", "file_name": "XYZ-001.mp4", "source_label": "additional-1", "destination_conflict": false}]}]}'
+args.plan.candidates = [{ candidate_id = "c-1", video_id = "XYZ-001", source = "/additional/XYZ-001.mp4", source_root = "/additional", destination = "/move-in/XYZ/XYZ-001.mp4", fingerprint = { device = 1, inode = 2, size = 3, mtime_ns = 4, ctime_ns = 5 } }]
+
+[[args.steps]]
+op = "enqueue_apply_job"
+args = { max_active = 1, record = { revision = "rev-2", candidate_ids = ["c-1", "演员"], job = { job_id = "apply-1", operation = "apply", state = "queued", created_at = "2026-07-13T10:21:00+00:00", updated_at = "2026-07-13T10:21:00+00:00", plan_id = "plan-2", progress = { stage = "queued", completed = 0, total = 2, unit = "items", current = "", stage_started_at = "2026-07-13T10:21:00+00:00", updated_at = "2026-07-13T10:21:00+00:00" } } } }
+
+[[args.steps]]
+op = "enqueue_apply_job"
+args = { max_active = 1, record = { revision = "rev-2", candidate_ids = ["c-1", "演员"], job = { job_id = "apply-1", operation = "apply", state = "queued", created_at = "2026-07-13T10:22:00+00:00", updated_at = "2026-07-13T10:22:00+00:00", plan_id = "plan-2" } } }
+
+[[args.steps]]
+op = "enqueue_apply_job"
+args = { max_active = 1, record = { revision = "other", candidate_ids = ["c-1"], job = { job_id = "apply-1", operation = "apply", state = "queued", created_at = "2026-07-13T10:22:00+00:00", updated_at = "2026-07-13T10:22:00+00:00", plan_id = "plan-2" } } }
+
+[[args.steps]]
+op = "enqueue_apply_job"
+args = { max_active = 1, record = { revision = "rev-2", candidate_ids = ["c-1"], job = { job_id = "apply-2", operation = "apply", state = "queued", created_at = "2026-07-13T10:22:00+00:00", updated_at = "2026-07-13T10:22:00+00:00", plan_id = "plan-2" } } }
+
+[[args.steps]]
+op = "claim_next_job"
+args = { owner_id = "worker-a", now = "2026-07-13T10:23:00+00:00", lease_expires_at = "2026-07-13T10:23:30+00:00" }
+
+[[args.steps]]
+op = "finish_owned_job"
+args = { job_id = "apply-1", owner_id = "worker-a", state = "partial_failed", error_code = "one_or_more_moves_failed", now = "2026-07-13T10:23:10+00:00", progress = { stage = "done", completed = 2, total = 2, unit = "items", current = "c-1", stage_started_at = "2026-07-13T10:23:10+00:00", updated_at = "2026-07-13T10:23:10+00:00" }, apply_result = '{"plan_id": "plan-2", "revision": "rev-2", "state": "partial_failed", "results": [{"candidate_id": "c-1", "video_id": "XYZ-001", "file_name": "XYZ-001.mp4", "state": "failed", "error_code": "source_changed"}]}' }
+
+[[args.steps]]
+op = "finish_owned_job"
+args = { job_id = "apply-1", owner_id = "worker-a", state = "completed", now = "2026-07-13T10:23:11+00:00", progress = { stage = "done", completed = 2, total = 2, unit = "items", current = "c-1", stage_started_at = "2026-07-13T10:23:10+00:00", updated_at = "2026-07-13T10:23:11+00:00" }, apply_result = '{"plan_id": "plan-2", "revision": "rev-2", "state": "partial_failed", "results": [{"candidate_id": "c-1", "video_id": "XYZ-001", "file_name": "XYZ-001.mp4", "state": "failed", "error_code": "source_changed"}]}' }
+
+[[args.steps]]
+op = "get_apply_job"
+args = { job_id = "apply-1" }
+
+[[args.steps]]
+op = "purge_expired_plans"
+args = { now = "2026-07-13T10:50:00+00:00" }
+
+[[args.steps]]
+op = "get_apply_job"
+args = { job_id = "apply-1" }
+
+[[args.steps]]
+op = "list_jobs"

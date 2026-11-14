@@ -266,7 +266,7 @@ feed. Where the TLS fingerprint matters the probe runs from the production netwo
 | WP7 | 3 monitor | pending | Tracker, 换版, manual intake | 1,250 | WP5, WP6 |
 | WP8 | 3 monitor | pending | RSS pipeline, mapping pipeline, playlists and playlist sync | 1,150 | WP5 |
 | WP9 | 3 monitor | pending | Scheduler (cron, watcher, tracker bursts), monitor API, playlists API, wiring | 1,700 | WP7, WP8, WP4 |
-| WP10 | 4 fill actor | pending | PostgreSQL repository, models, cloud moves, adapters | 1,850 | WP3, WP5 |
+| WP10 | 4 fill actor | done (#PR) | PostgreSQL repository, models, cloud moves, adapters | 1,850 | WP3, WP5 |
 | WP11 | 4 fill actor | pending | Service: scan, plan, local moves with journal and recovery, cloud moves | 2,100 | WP10 |
 | WP12 | 4 fill actor | pending | Job manager, API, health, lifespan | 1,200 | WP11, WP4 |
 | WP13 | 5 merge | done (#86) | Detect, task repository, the `merge-worker` command (probe, checks, concat, remux, AV1 re-encode, home prepare and assemble) | 1,650 | WP1 |
@@ -457,6 +457,26 @@ or says why one stays.
   request lists through both apps; later API packages add specs under `specs/api/` rather than a new operation.
   `tools/smoke/run.sh` is the page smoke (CI, after the parity check); it seeds through the API only, so a page
   whose API arrives later shows its own error state and the smoke only checks that nothing throws.
+
+- WP10 left these for later packages. `embyx_fill_actor::postgres_repository::PostgresFillActorRepository` is
+  the only repository (D110): every Python method with its SQL, compare-and-set and lease rule copied, records
+  validated on save and on read as `__post_init__` does, `RepositoryError::class_name()` and `is_value_error()`
+  for the service's `except ValueError` (a `ValidationError` and the transition errors are ones). Its
+  `health_check` is `embyx_db::health::health_check`. The ports (`ports.rs`) are object-safe traits returning
+  `BoxFuture`; `adapters.rs` implements them over traits the clients implement (`AvbaseCatalog`,
+  `JavBusCatalog`, `Intake`, `CloudDriveApi`), so WP11's service tests can use the same small fakes as
+  `tests/adapters.rs`. `CloudFileMover` gained `scoped()` / `settle()` (D116): WP11 runs each execution's cloud
+  work on `mover.scoped()` and awaits `settle()` after cancelling it, before it releases the lease. WP11's local
+  moves should take WP6's `Arc<dyn Fs>`. `FillActorError` (`errors.rs`) carries the API codes for WP12. The
+  `fill_actor/repository` scenario (`tools/scenarios/operations/fill_actor.py`) takes `{op, args}` steps named
+  after the repository methods; WP11's recovery scenarios can seed rows through `database.sql` the way it does.
+- Copies WP16 should fold together: `embyx_fill_actor::cloud_moves::splitlines` is a copy of
+  `embyx_merge::py::splitlines`; `embyx_fill_actor::models::str_enum!` repeats `embyx_monitor`'s `str_enum!`
+  (with `ALL` and `parse` returning `Option`). `embyx_fill_actor::pydatetime` (pydantic's `datetime`/`date` in
+  JSON mode, D111) stays in the crate until a second crate needs it (WP12's request models, if any carry a
+  datetime). `embyx_core::config::lax::Validator::finish_ignoring_extras` is the `extra='ignore'` end of a model
+  validation, next to `finish` (`extra='forbid'`). `embyx_monitor::support::StoreError::is_unique_violation` is
+  public now for the fill-actor repository.
 
 ## Checkpoint notes
 

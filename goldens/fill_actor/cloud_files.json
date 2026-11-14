@@ -1,0 +1,1132 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "fill_actor",
+  "cases": [
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "result": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "file_id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": [
+          [
+            "2",
+            "Z"
+          ],
+          [
+            "md5",
+            ""
+          ],
+          [
+            "sha1",
+            "abcd"
+          ],
+          [
+            "中",
+            "é"
+          ]
+        ],
+        "stored": "{\"hashes\":{\"2\":\"Z\",\"md5\":\"\",\"sha1\":\"abcd\",\"\\u4e2d\":\"\\u00e9\"},\"id\":\"file-id\",\"name\":\"ABC-001.mp4\",\"path\":\"/cloud/library/source-b/ABC/ABC-001.mp4\",\"size\":12,\"write_time\":34}"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34
+      },
+      "result": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "file_id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": [],
+        "stored": "{\"hashes\":{},\"id\":\"file-id\",\"name\":\"ABC-001.mp4\",\"path\":\"/cloud/library/source-b/ABC/ABC-001.mp4\",\"size\":12,\"write_time\":34}"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {}
+      },
+      "result": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "file_id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": [],
+        "stored": "{\"hashes\":{},\"id\":\"file-id\",\"name\":\"ABC-001.mp4\",\"path\":\"/cloud/library/source-b/ABC/ABC-001.mp4\",\"size\":12,\"write_time\":34}"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud/library/source-b/ABC/not-the-name.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "invalid CloudDrive file identity"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "invalid CloudDrive file identity"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": null,
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "invalid CloudDrive file metadata"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": -1,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "invalid CloudDrive file metadata"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 0,
+        "write_time": 0,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "result": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "file_id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 0,
+        "write_time": 0,
+        "hashes": [
+          [
+            "2",
+            "Z"
+          ],
+          [
+            "md5",
+            ""
+          ],
+          [
+            "sha1",
+            "abcd"
+          ],
+          [
+            "中",
+            "é"
+          ]
+        ],
+        "stored": "{\"hashes\":{\"2\":\"Z\",\"md5\":\"\",\"sha1\":\"abcd\",\"\\u4e2d\":\"\\u00e9\"},\"id\":\"file-id\",\"name\":\"ABC-001.mp4\",\"path\":\"/cloud/library/source-b/ABC/ABC-001.mp4\",\"size\":0,\"write_time\":0}"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12.0,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "invalid CloudDrive file metadata"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": true,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "invalid CloudDrive file metadata"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": "12",
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "invalid CloudDrive file metadata"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 100000000000000000000,
+        "write_time": 10000000000000000000000000,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "result": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "file_id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 100000000000000000000,
+        "write_time": 10000000000000000000000000,
+        "hashes": [
+          [
+            "2",
+            "Z"
+          ],
+          [
+            "md5",
+            ""
+          ],
+          [
+            "sha1",
+            "abcd"
+          ],
+          [
+            "中",
+            "é"
+          ]
+        ],
+        "stored": "{\"hashes\":{\"2\":\"Z\",\"md5\":\"\",\"sha1\":\"abcd\",\"\\u4e2d\":\"\\u00e9\"},\"id\":\"file-id\",\"name\":\"ABC-001.mp4\",\"path\":\"/cloud/library/source-b/ABC/ABC-001.mp4\",\"size\":100000000000000000000,\"write_time\":10000000000000000000000000}"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": -1,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "invalid CloudDrive file metadata"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": false,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "invalid CloudDrive file metadata"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "invalid CloudDrive file metadata"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "invalid CloudDrive file metadata"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "invalid CloudDrive file metadata"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": []
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "invalid CloudDrive file metadata"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": 1
+        }
+      },
+      "error": {
+        "type": "TypeError",
+        "message": "invalid CloudDrive file hashes"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": null
+        }
+      },
+      "error": {
+        "type": "TypeError",
+        "message": "invalid CloudDrive file hashes"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "cloud/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "CloudDrive metadata path must be a normalized absolute POSIX path"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud//ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "CloudDrive metadata path must be a normalized absolute POSIX path"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "//cloud/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "result": {
+        "path": "//cloud/ABC-001.mp4",
+        "file_id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": [
+          [
+            "2",
+            "Z"
+          ],
+          [
+            "md5",
+            ""
+          ],
+          [
+            "sha1",
+            "abcd"
+          ],
+          [
+            "中",
+            "é"
+          ]
+        ],
+        "stored": "{\"hashes\":{\"2\":\"Z\",\"md5\":\"\",\"sha1\":\"abcd\",\"\\u4e2d\":\"\\u00e9\"},\"id\":\"file-id\",\"name\":\"ABC-001.mp4\",\"path\":\"//cloud/ABC-001.mp4\",\"size\":12,\"write_time\":34}"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud/./ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "CloudDrive metadata path must be a normalized absolute POSIX path"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud/../ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "CloudDrive metadata path must be a normalized absolute POSIX path"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud/ABC-001.mp4/",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "result": {
+        "path": "/cloud/ABC-001.mp4",
+        "file_id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": [
+          [
+            "2",
+            "Z"
+          ],
+          [
+            "md5",
+            ""
+          ],
+          [
+            "sha1",
+            "abcd"
+          ],
+          [
+            "中",
+            "é"
+          ]
+        ],
+        "stored": "{\"hashes\":{\"2\":\"Z\",\"md5\":\"\",\"sha1\":\"abcd\",\"\\u4e2d\":\"\\u00e9\"},\"id\":\"file-id\",\"name\":\"ABC-001.mp4\",\"path\":\"/cloud/ABC-001.mp4\",\"size\":12,\"write_time\":34}"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud\\x/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "CloudDrive metadata path must be an absolute POSIX path"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/cloud/\u0000/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "CloudDrive metadata path must be an absolute POSIX path"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "s3://cloud/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "CloudDrive metadata path must be an absolute POSIX path"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "",
+        "id": "file-id",
+        "name": "",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "CloudDrive metadata path must be an absolute POSIX path"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/",
+        "id": "file-id",
+        "name": "",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "CloudDrive metadata path must be a normalized absolute POSIX path"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "result": {
+        "path": "/ABC-001.mp4",
+        "file_id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": [
+          [
+            "2",
+            "Z"
+          ],
+          [
+            "md5",
+            ""
+          ],
+          [
+            "sha1",
+            "abcd"
+          ],
+          [
+            "中",
+            "é"
+          ]
+        ],
+        "stored": "{\"hashes\":{\"2\":\"Z\",\"md5\":\"\",\"sha1\":\"abcd\",\"\\u4e2d\":\"\\u00e9\"},\"id\":\"file-id\",\"name\":\"ABC-001.mp4\",\"path\":\"/ABC-001.mp4\",\"size\":12,\"write_time\":34}"
+      }
+    },
+    {
+      "kind": "metadata",
+      "input": {
+        "path": "/a/b.mp4",
+        "id": "i",
+        "name": "b.mp4",
+        "size": 1,
+        "write_time": 2,
+        "extra": "ignored"
+      },
+      "result": {
+        "path": "/a/b.mp4",
+        "file_id": "i",
+        "name": "b.mp4",
+        "size": 1,
+        "write_time": 2,
+        "hashes": [],
+        "stored": "{\"hashes\":{},\"id\":\"i\",\"name\":\"b.mp4\",\"path\":\"/a/b.mp4\",\"size\":1,\"write_time\":2}"
+      }
+    },
+    {
+      "kind": "identity",
+      "label": "same",
+      "left": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "right": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "matches": true
+    },
+    {
+      "kind": "identity",
+      "label": "other_path",
+      "left": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "right": {
+        "path": "/elsewhere/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "matches": true
+    },
+    {
+      "kind": "identity",
+      "label": "other_id",
+      "left": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "right": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "other",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "matches": false
+    },
+    {
+      "kind": "identity",
+      "label": "other_size",
+      "left": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "right": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 13,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "matches": false
+    },
+    {
+      "kind": "identity",
+      "label": "other_write_time",
+      "left": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "right": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 35,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "matches": false
+    },
+    {
+      "kind": "identity",
+      "label": "other_hashes",
+      "left": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "right": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd"
+        }
+      },
+      "matches": false
+    },
+    {
+      "kind": "identity",
+      "label": "no_hashes",
+      "left": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34,
+        "hashes": {
+          "sha1": "abcd",
+          "2": "Z",
+          "md5": "",
+          "中": "é"
+        }
+      },
+      "right": {
+        "path": "/cloud/library/source-b/ABC/ABC-001.mp4",
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "size": 12,
+        "write_time": 34
+      },
+      "matches": false
+    },
+    {
+      "kind": "response",
+      "input": {
+        "success": true,
+        "error_message": "",
+        "result_paths": [
+          "/cloud/library/destination/ABC/ABC-001.mp4"
+        ]
+      },
+      "result": {
+        "success": true,
+        "error_message": null,
+        "result_paths": [
+          "/cloud/library/destination/ABC/ABC-001.mp4"
+        ]
+      }
+    },
+    {
+      "kind": "response",
+      "input": {
+        "success": false,
+        "error_message": "任务已存在",
+        "result_paths": []
+      },
+      "result": {
+        "success": false,
+        "error_message": "任务已存在",
+        "result_paths": []
+      }
+    },
+    {
+      "kind": "response",
+      "input": {
+        "success": false,
+        "error_message": null
+      },
+      "result": {
+        "success": false,
+        "error_message": null,
+        "result_paths": []
+      }
+    },
+    {
+      "kind": "response",
+      "input": {
+        "success": true
+      },
+      "result": {
+        "success": true,
+        "error_message": null,
+        "result_paths": []
+      }
+    },
+    {
+      "kind": "response",
+      "input": {
+        "success": 1
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "invalid CloudDrive move response"
+      }
+    },
+    {
+      "kind": "response",
+      "input": {
+        "success": null
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "invalid CloudDrive move response"
+      }
+    },
+    {
+      "kind": "response",
+      "input": {},
+      "error": {
+        "type": "ValueError",
+        "message": "invalid CloudDrive move response"
+      }
+    },
+    {
+      "kind": "response",
+      "input": {
+        "success": true,
+        "error_message": 3
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "invalid CloudDrive move response"
+      }
+    },
+    {
+      "kind": "response",
+      "input": {
+        "success": true,
+        "result_paths": "/x"
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "invalid CloudDrive move response"
+      }
+    },
+    {
+      "kind": "response",
+      "input": {
+        "success": true,
+        "result_paths": [
+          "/x",
+          2
+        ]
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "invalid CloudDrive move response"
+      }
+    },
+    {
+      "kind": "response",
+      "input": {
+        "success": true,
+        "result_paths": null
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "invalid CloudDrive move response"
+      }
+    },
+    {
+      "kind": "response",
+      "input": {
+        "success": true,
+        "result_paths": {}
+      },
+      "error": {
+        "type": "ValueError",
+        "message": "invalid CloudDrive move response"
+      }
+    }
+  ]
+}
