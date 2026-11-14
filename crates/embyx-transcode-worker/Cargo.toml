@@ -11,13 +11,31 @@ publish.workspace = true
 workspace = true
 
 [dependencies]
+chrono.workspace = true
+# Ctrl+C (and Ctrl+Break on Windows) counted instead of ending the worker (`StopSignal`).
+ctrlc = "3.5"
+embyx-core.workspace = true
+hex.workspace = true
+sha2.workspace = true
+# The status line is cut to the terminal's width (`shutil.get_terminal_size`).
+terminal_size = "0.4"
+thiserror.workspace = true
+toml.workspace = true
+# The worker's HTTP client (httpx's `Client` in Python): blocking, so the worker keeps
+# Python's thread layout; per-read and per-write timeouts as httpx has them, proxies from
+# the environment, rustls on ring for an https endpoint.
+ureq = { version = "3.5", default-features = false, features = ["rustls"] }
+
+[target.'cfg(unix)'.dependencies]
+nix = { workspace = true, features = ["hostname"] }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { workspace = true, features = ["Win32_System_SystemInformation"] }
+windows-link = "0.2"
 
 [dev-dependencies]
+embyx-core = { workspace = true, features = ["test-support"] }
+# The merge worker's home prepare and assemble runs around the ported end-to-end test.
+embyx-merge.workspace = true
+tempfile.workspace = true
 tokio = { workspace = true, features = ["rt", "time", "signal", "macros"] }
-
-[target.'cfg(unix)'.dev-dependencies]
-nix.workspace = true
-
-[target.'cfg(windows)'.dev-dependencies]
-windows-sys.workspace = true
-windows-link = "0.2"

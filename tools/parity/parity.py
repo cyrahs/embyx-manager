@@ -15,13 +15,17 @@ cases the Rust test covers, and the claims of one Python test must add up to pyt
     fn avid_corpus() { ... }
 
 One Rust test may claim several Python tests (stack the comments), and one Python test may be
-claimed by several Rust tests. Waivers live in `tools/parity/waivers.toml`, and
+claimed by several Rust tests. With `--rust-tests` (given once per listing: the Linux job's and
+the Windows job's), a claimed function must be listed under its own module path: the file's
+path in its crate (`src/task/tests.rs` is `task::tests`, a file under `tests/` is its test
+binary's root), then any of the inline `mod` blocks of that file. Waivers live in `tools/parity/waivers.toml`, and
 `tools/parity/scope.toml` assigns every Python test to exactly one work package. When a work
 package is marked done, every test in its scope must be ported or waived.
 
     uv run pytest --collect-only -q > collected.txt
     python3 tools/parity/parity.py --write --pytest-collected collected.txt   # regenerate PARITY.md
-    python3 tools/parity/parity.py --check --pytest-collected collected.txt   # what CI runs
+    python3 tools/parity/parity.py --check --pytest-collected collected.txt \
+        --rust-tests linux-tests.txt --rust-tests windows-tests.txt         # what CI runs
 
 The baseline's numbers (747 test functions, 1,754 cases) are asserted, so a test that
 disappears from either side is noticed. Standard library only; it never imports the code
@@ -54,6 +58,7 @@ ANNOTATION = re.compile(r'^\s*//\s*py:\s*(?P<id>\S+)(?:\s+cases=(?P<cases>\d+))?
 LOOSE_ANNOTATION = re.compile(r'^\s*//\s*py:')
 TEST_ATTRIBUTE = re.compile(r'^\s*#\[\s*(?:[\w:]+::)?test\b')
 FN_LINE = re.compile(r'^\s*(?:pub(?:\([^)]*\))?\s+)?(?:async\s+)?fn\s+(?P<name>\w+)')
+INLINE_MOD = re.compile(r'^\s*(?:pub(?:\([^)]*\))?\s+)?mod\s+(?P<name>\w+)\s*\{')
 MIN_REASON_CHARS = 20
 STATUSES = ('pending', 'in-progress', 'done')
 # The plan's work packages and nothing else, so tests cannot be parked in an invented one.
@@ -67,6 +72,21 @@ class RustTest:
     line: int
     name: str
     cases: int | None
+    #: The file's module path in its test binary.
+    module: tuple[str, ...] = ()
+    #: The names of the file's inline `mod` blocks, any of which may sit between the two.
+    inline: frozenset[str] = frozenset()
+
+    def listed_as(self, entry: str) -> bool:
+        """Whether `entry` (a path in cargo's test listing) can be this function."""
+        parts = entry.split('::')
+        size = len(self.module)
+        return (
+            len(parts) > size
+            and tuple(parts[:size]) == self.module
+            and parts[-1] == self.name
+            and all(part in self.inline for part in parts[size:-1])
+        )
 
 
 @dataclass(slots=True)
@@ -117,11 +137,34 @@ def rust_sources(root: Path | None = None) -> list[Path]:
     return sorted(path for path in root.rglob('*.rs') if 'target' not in path.relative_to(root).parts)
 
 
+def module_path(path: Path, root: Path | None = None) -> tuple[str, ...]:
+    """A source file's module path in its test binary: `<crate>/src/a/b.rs` is `a::b`, `src/a/mod.rs`
+    is `a`, `src/lib.rs`, `src/main.rs`, `src/bin/x.rs` and `tests/x.rs` are a binary's root, and a file
+    in a folder under `tests/` is a module of the test that declares it."""
+    parts = path.relative_to(root or RUST_DIR).parts[1:]
+    kind, rest = parts[0], list(parts[1:])
+    if kind == 'src' and rest[:1] == ['bin']:
+        rest = rest[2:] if len(rest) > 2 else []  # noqa: PLR2004 - `bin/<name>/<module>.rs`
+    if kind == 'tests' and len(rest) == 1:
+        return ()
+    if not rest:
+        return ()
+    stem = rest[-1].removesuffix('.rs')
+    folders = rest[:-1]
+    if stem == 'mod' or (stem in {'lib', 'main'} and not folders):
+        return tuple(folders)
+    if stem == 'main' and kind == 'tests' and len(folders) == 1:
+        return ()
+    return (*folders, stem)
+
+
 def rust_annotations(report: Report, root: Path | None = None) -> dict[str, list[RustTest]]:
     claims: dict[str, list[RustTest]] = defaultdict(list)
     for path in rust_sources(root):
         lines = path.read_text(encoding='utf-8').splitlines()
         relative = path.relative_to(REPO_ROOT).as_posix()
+        module = module_path(path, root)
+        inline = frozenset(match.group('name') for line in lines if (match := INLINE_MOD.match(line)))
         index = 0
         while index < len(lines):
             match = ANNOTATION.match(lines[index])
@@ -152,17 +195,18 @@ def rust_annotations(report: Report, root: Path | None = None) -> dict[str, list
                 report.error(f'{relative}:{start + 1}: {message}')
                 continue
             for test_id, cases in found:
-                claims[test_id].append(RustTest(relative, start + 1, fn.group('name'), cases))
+                claims[test_id].append(RustTest(relative, start + 1, fn.group('name'), cases, module, inline))
     return claims
 
 
-def rust_test_names(listing: Path) -> set[str]:
-    """Function names from `cargo test -- --list --format terse` (`path::to::name: test`)."""
-    names = set()
-    for line in listing.read_text(encoding='utf-8').splitlines():
-        if line.endswith(': test'):
-            names.add(line.removesuffix(': test').rsplit('::', 1)[-1])
-    return names
+def rust_test_paths(listings: list[Path]) -> set[str]:
+    """Test paths from `cargo test -- --list --format terse` (`path::to::name: test`), all listings."""
+    paths = set()
+    for listing in listings:
+        for line in listing.read_text(encoding='utf-8').splitlines():
+            if line.endswith(': test'):
+                paths.add(line.removesuffix(': test'))
+    return paths
 
 
 # ---------- scope and waivers ----------
@@ -388,7 +432,9 @@ def _check_baseline_counts(report: Report, known: list[str], cases: Counter[str]
         report.error(f'the baseline has {EXPECTED_CASES} Python test cases, pytest collects {total}')
 
 
-def _check_claims(report: Report, claims: dict[str, list[RustTest]], cases: Counter[str], listing: Path | None) -> None:
+def _check_claims(
+    report: Report, claims: dict[str, list[RustTest]], cases: Counter[str], listings: list[Path] | None
+) -> None:
     for test_id, rust in sorted(claims.items()):
         if test_id not in cases:
             for claim in rust:
@@ -409,18 +455,25 @@ def _check_claims(report: Report, claims: dict[str, list[RustTest]], cases: Coun
         have = sum(claim.cases or 0 for claim in rust)
         if not unnumbered and have != want:
             report.error(f'{first.path}:{first.line}: {test_id} has {want} cases, its claims cover {have}')
-    if listing is None:
-        return
-    compiled = rust_test_names(listing)
+    if listings:
+        _check_compiled(report, claims, listings)
+
+
+def _check_compiled(report: Report, claims: dict[str, list[RustTest]], listings: list[Path]) -> None:
+    compiled = rust_test_paths(listings)
+    by_name: dict[str, list[str]] = defaultdict(list)
+    for entry in compiled:
+        by_name[entry.rsplit('::', 1)[-1]].append(entry)
     for rust in claims.values():
         for claim in rust:
-            if claim.name not in compiled:
-                message = f'{claim.name} carries a `// py:` claim but cargo does not list it as a test'
+            if not any(claim.listed_as(entry) for entry in by_name.get(claim.name, [])):
+                where = '::'.join((*claim.module, claim.name))
+                message = f'{claim.name} carries a `// py:` claim but cargo does not list it as a test ({where})'
                 report.error(f'{claim.path}:{claim.line}: {message}')
 
 
 def collect(
-    report: Report, *, pytest_listing: Path, rust_listing: Path | None, base_scope: Path | None = None
+    report: Report, *, pytest_listing: Path, rust_listing: Path | list[Path] | None, base_scope: Path | None = None
 ) -> Parity:
     known = python_tests()
     known_set = set(known)
@@ -431,7 +484,8 @@ def collect(
     _check_baseline_counts(report, known, cases)
 
     claims = rust_annotations(report)
-    _check_claims(report, claims, cases, rust_listing)
+    listings = [rust_listing] if isinstance(rust_listing, Path) else rust_listing
+    _check_claims(report, claims, cases, listings)
 
     waivers = load_waivers(report, known_set)
     for test_id in sorted(set(waivers) & set(claims)):
@@ -451,7 +505,9 @@ def collect(
     return parity
 
 
-def run(*, write: bool, pytest_listing: Path, rust_listing: Path | None, base_scope: Path | None = None) -> int:
+def run(
+    *, write: bool, pytest_listing: Path, rust_listing: Path | list[Path] | None, base_scope: Path | None = None
+) -> int:
     report = Report()
     parity = collect(report, pytest_listing=pytest_listing, rust_listing=rust_listing, base_scope=base_scope)
     text = render(parity)
@@ -483,7 +539,10 @@ def main() -> int:
         '--pytest-collected', type=Path, required=True, help='output of `pytest --collect-only -q`: the case counts'
     )
     parser.add_argument(
-        '--rust-tests', type=Path, help='output of `cargo test -- --list --format terse`, to check claims compile'
+        '--rust-tests',
+        type=Path,
+        action='append',
+        help='output of `cargo test -- --list --format terse`, to check claims compile; once per platform',
     )
     parser.add_argument(
         '--base-scope',

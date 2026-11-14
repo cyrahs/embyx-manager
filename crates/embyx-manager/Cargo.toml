@@ -16,10 +16,13 @@ path = "src/main.rs"
 
 [dependencies]
 clap.workspace = true
+embyx-core.workspace = true
 embyx-merge.workspace = true
+embyx-transcode-worker.workspace = true
 
 # The server runs on Linux only; the Windows build is the home transcode worker's (D58).
 [target.'cfg(unix)'.dependencies]
 embyx-api.workspace = true
 
 [dev-dependencies]
+embyx-core = { workspace = true, features = ["test-support"] }

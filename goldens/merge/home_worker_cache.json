@@ -1,0 +1,430 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "home_worker",
+  "cases": [
+    {
+      "kind": "save",
+      "chunk": {
+        "part_index": 0,
+        "index": 0,
+        "start": 0.0,
+        "duration": 60.06,
+        "frames": 3600,
+        "bytes": 3,
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "end": 60.06,
+      "files": [
+        {
+          "name": "chunk-00000.json",
+          "text": "{\"part_index\": 0, \"index\": 0, \"start\": 0.0, \"duration\": 60.06, \"frames\": 3600, \"bytes\": 3, \"sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}"
+        }
+      ]
+    },
+    {
+      "kind": "save",
+      "chunk": {
+        "part_index": 2,
+        "index": 17,
+        "start": 1021.0210000001,
+        "duration": 0.30000000000000004,
+        "frames": 18,
+        "bytes": 1,
+        "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "end": 1021.3210000001,
+      "files": [
+        {
+          "name": "chunk-00017.json",
+          "text": "{\"part_index\": 2, \"index\": 17, \"start\": 1021.0210000001, \"duration\": 0.30000000000000004, \"frames\": 18, \"bytes\": 1, \"sha256\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"}"
+        }
+      ]
+    },
+    {
+      "kind": "save",
+      "chunk": {
+        "part_index": 0,
+        "index": 99999,
+        "start": 1e+16,
+        "duration": 1e-07,
+        "frames": 1,
+        "bytes": 0,
+        "sha256": ""
+      },
+      "end": 1e+16,
+      "files": [
+        {
+          "name": "chunk-99999.json",
+          "text": "{\"part_index\": 0, \"index\": 99999, \"start\": 1e+16, \"duration\": 1e-07, \"frames\": 1, \"bytes\": 0, \"sha256\": \"\"}"
+        }
+      ]
+    },
+    {
+      "kind": "load",
+      "title": "a valid sidecar",
+      "text": "{\"part_index\": 0, \"index\": 0, \"start\": 0.0, \"duration\": 60.06, \"frames\": 3600, \"bytes\": 3, \"sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}",
+      "size": 3,
+      "value": {
+        "part_index": 0,
+        "index": 0,
+        "start": 0.0,
+        "duration": 60.06,
+        "frames": 3600,
+        "bytes": 3,
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "path": "<root>/load0/chunk-00000.mkv"
+      }
+    },
+    {
+      "kind": "load",
+      "title": "the chunk is missing",
+      "text": "{\"part_index\": 0, \"index\": 0, \"start\": 0.0, \"duration\": 60.06, \"frames\": 3600, \"bytes\": 3, \"sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}",
+      "size": null,
+      "value": null
+    },
+    {
+      "kind": "load",
+      "title": "the chunk has another size",
+      "text": "{\"part_index\": 0, \"index\": 0, \"start\": 0.0, \"duration\": 60.06, \"frames\": 3600, \"bytes\": 3, \"sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}",
+      "size": 4,
+      "value": null
+    },
+    {
+      "kind": "load",
+      "title": "an extra key",
+      "text": "{\"part_index\": 0, \"index\": 0, \"start\": 0.0, \"duration\": 60.06, \"frames\": 3600, \"bytes\": 3, \"sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"path\": \"x\"}",
+      "size": 3,
+      "value": null
+    },
+    {
+      "kind": "load",
+      "title": "a missing key",
+      "text": "{\"part_index\": 0, \"index\": 0, \"start\": 0.0, \"duration\": 60.06, \"bytes\": 3, \"sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}",
+      "size": 3,
+      "value": null
+    },
+    {
+      "kind": "load",
+      "title": "not JSON",
+      "text": "{\"part_index\": 0,",
+      "size": 3,
+      "value": null
+    },
+    {
+      "kind": "load",
+      "title": "a JSON list",
+      "text": "[1, 2]",
+      "size": 3,
+      "value": null
+    },
+    {
+      "kind": "load",
+      "title": "an int start",
+      "text": "{\"part_index\": 0, \"index\": 0, \"start\": 6, \"duration\": 60.06, \"frames\": 3600, \"bytes\": 3, \"sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}",
+      "size": 3,
+      "value": {
+        "part_index": 0,
+        "index": 0,
+        "start": 6,
+        "duration": 60.06,
+        "frames": 3600,
+        "bytes": 3,
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "path": "<root>/load7/chunk-00000.mkv"
+      }
+    },
+    {
+      "kind": "load",
+      "title": "empty",
+      "text": "",
+      "size": 3,
+      "value": null
+    },
+    {
+      "kind": "kept",
+      "title": "a contiguous run, then a gap",
+      "next_index": 3,
+      "resume_at": 6.0,
+      "files": [
+        {
+          "name": "chunk-00003.mkv",
+          "chunk": {
+            "part_index": 0,
+            "index": 3,
+            "start": 6.0,
+            "duration": 2.0,
+            "frames": 60,
+            "bytes": 1,
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "name": "chunk-00004.mkv",
+          "chunk": {
+            "part_index": 0,
+            "index": 4,
+            "start": 8.0,
+            "duration": 2.0,
+            "frames": 60,
+            "bytes": 1,
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "name": "chunk-00006.mkv",
+          "chunk": {
+            "part_index": 0,
+            "index": 6,
+            "start": 12.0,
+            "duration": 2.0,
+            "frames": 60,
+            "bytes": 1,
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        }
+      ],
+      "kept": [
+        3,
+        4
+      ],
+      "left": [
+        "chunk-00003.json",
+        "chunk-00003.mkv",
+        "chunk-00004.json",
+        "chunk-00004.mkv"
+      ]
+    },
+    {
+      "kind": "kept",
+      "title": "the first chunk starts within a quarter second",
+      "next_index": 0,
+      "resume_at": 0.0,
+      "files": [
+        {
+          "name": "chunk-00000.mkv",
+          "chunk": {
+            "part_index": 0,
+            "index": 0,
+            "start": 0.25,
+            "duration": 2.0,
+            "frames": 60,
+            "bytes": 1,
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "name": "chunk-00001.mkv",
+          "chunk": {
+            "part_index": 0,
+            "index": 1,
+            "start": 2.25,
+            "duration": 1.75,
+            "frames": 60,
+            "bytes": 1,
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "name": "chunk-00002.mkv",
+          "chunk": {
+            "part_index": 0,
+            "index": 2,
+            "start": 4.0,
+            "duration": 2.0,
+            "frames": 60,
+            "bytes": 1,
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        }
+      ],
+      "kept": [
+        0,
+        1,
+        2
+      ],
+      "left": [
+        "chunk-00000.json",
+        "chunk-00000.mkv",
+        "chunk-00001.json",
+        "chunk-00001.mkv",
+        "chunk-00002.json",
+        "chunk-00002.mkv"
+      ]
+    },
+    {
+      "kind": "kept",
+      "title": "the first chunk starts too late",
+      "next_index": 0,
+      "resume_at": 0.0,
+      "files": [
+        {
+          "name": "chunk-00000.mkv",
+          "chunk": {
+            "part_index": 0,
+            "index": 0,
+            "start": 0.2500001,
+            "duration": 2.0,
+            "frames": 60,
+            "bytes": 1,
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "name": "chunk-00001.mkv",
+          "chunk": {
+            "part_index": 0,
+            "index": 1,
+            "start": 2.25,
+            "duration": 2.0,
+            "frames": 60,
+            "bytes": 1,
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        }
+      ],
+      "kept": [],
+      "left": []
+    },
+    {
+      "kind": "kept",
+      "title": "the cluster is already past them",
+      "next_index": 5,
+      "resume_at": 10.0,
+      "files": [
+        {
+          "name": "chunk-00003.mkv",
+          "chunk": {
+            "part_index": 0,
+            "index": 3,
+            "start": 6.0,
+            "duration": 2.0,
+            "frames": 60,
+            "bytes": 1,
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "name": "chunk-00004.mkv",
+          "chunk": {
+            "part_index": 0,
+            "index": 4,
+            "start": 8.0,
+            "duration": 2.0,
+            "frames": 60,
+            "bytes": 1,
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        }
+      ],
+      "kept": [],
+      "left": []
+    },
+    {
+      "kind": "kept",
+      "title": "leftovers: a half-written chunk, a listing, a temporary sidecar, a folder",
+      "next_index": 0,
+      "resume_at": 0.0,
+      "files": [
+        {
+          "name": "chunk-00000.mkv",
+          "chunk": {
+            "part_index": 0,
+            "index": 0,
+            "start": 0.0,
+            "duration": 2.0,
+            "frames": 60,
+            "bytes": 1,
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "name": "chunk-00001.mkv",
+          "text": "partial"
+        },
+        {
+          "name": "list-00000.csv",
+          "text": "chunk-00000.mkv,0.0,2.0\n"
+        },
+        {
+          "name": ".chunk-00002.json.tmp",
+          "text": "{}"
+        },
+        {
+          "name": "notes.txt",
+          "text": "x"
+        },
+        {
+          "name": "sub",
+          "dir": true
+        }
+      ],
+      "kept": [
+        0
+      ],
+      "left": [
+        "chunk-00000.json",
+        "chunk-00000.mkv",
+        "sub"
+      ]
+    },
+    {
+      "kind": "kept",
+      "title": "a sidecar whose chunk is gone breaks the run",
+      "next_index": 0,
+      "resume_at": 0.0,
+      "files": [
+        {
+          "name": "chunk-00000.mkv",
+          "chunk": {
+            "part_index": 0,
+            "index": 0,
+            "start": 0.0,
+            "duration": 2.0,
+            "frames": 60,
+            "bytes": 1,
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "name": "chunk-00001.json",
+          "text": "{\"part_index\": 0, \"index\": 1, \"start\": 2.0, \"duration\": 2.0, \"frames\": 60, \"bytes\": 1, \"sha256\": \"0000000000000000000000000000000000000000000000000000000000000000\"}"
+        },
+        {
+          "name": "chunk-00002.mkv",
+          "chunk": {
+            "part_index": 0,
+            "index": 2,
+            "start": 4.0,
+            "duration": 2.0,
+            "frames": 60,
+            "bytes": 1,
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        }
+      ],
+      "kept": [
+        0
+      ],
+      "left": [
+        "chunk-00000.json",
+        "chunk-00000.mkv"
+      ]
+    },
+    {
+      "kind": "kept",
+      "title": "empty",
+      "next_index": 0,
+      "resume_at": 0.0,
+      "files": [],
+      "kept": [],
+      "left": []
+    },
+    {
+      "kind": "kept",
+      "title": "no directory",
+      "kept": []
+    }
+  ]
+}

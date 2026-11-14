@@ -7,7 +7,7 @@
 //! the AVID parser, magnets and media helpers; WP3 `posixpath` ([`posixpath`]).
 //!
 //! Behind the `test-support` feature: [`golden`] reads the Python-generated goldens and
-//! [`scenario`] is the Rust side of the effect transcripts (docs/rewrite/SCENARIOS.md).
+//! [`scenario`] (Unix only) is the Rust side of the effect transcripts (docs/rewrite/SCENARIOS.md).
 
 pub mod avid;
 pub mod config;
@@ -23,6 +23,7 @@ pub mod pypath;
 pub mod pyre;
 pub mod pytext;
 pub mod pyurl;
-#[cfg(any(test, feature = "test-support"))]
+// The transcripts record Unix file metadata (links, symlinks); the scenarios run on Linux only.
+#[cfg(all(unix, any(test, feature = "test-support")))]
 pub mod scenario;
 pub mod settings;

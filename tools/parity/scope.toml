@@ -174,7 +174,7 @@ tests = [
 
 [WP15]
 title = "Home transcode worker"
-status = "pending"
+status = "done"
 tests = [
   "tests/test_home_worker.py",
 ]

@@ -3,10 +3,13 @@
 //!
 //! Python origin: `src/embyx_manager/__main__.py`. The three commands and their flags are
 //! declared here as Python declares them; their bodies arrive with their work packages
-//! (`docs/rewrite/PLAN.md`): `serve` in WP4 (done: `embyx_api::serve::run`, Unix only,
-//! D58), `merge-worker` in WP13 (done: `embyx_merge::worker::run`), `transcode-worker` in
-//! WP15. Until then `transcode-worker` stops with "not implemented yet", the one
-//! placeholder WP0 is allowed. `import-config` is not ported (PLAN.md, decision 1).
+//! (`docs/rewrite/PLAN.md`): `serve` in WP4 (`embyx_api::serve::run`, Unix only, D58),
+//! `merge-worker` in WP13 (`embyx_merge::worker::run`), `transcode-worker` in WP15
+//! (`embyx_transcode_worker::main`). `import-config` is not ported (PLAN.md, decision 1).
+//!
+//! The Windows build carries `merge-worker` and `transcode-worker` only: the server's crates
+//! are Unix-only dependencies, and `embyx-merge` comes without its `db` feature (D144), so
+//! `embyx-manager.exe` needs no database, gRPC or TLS stack beyond the worker's HTTP client.
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -56,9 +59,12 @@ struct MergeWorkerArgs {
     parts: Vec<String>,
 }
 
-/// `transcode-worker`'s arguments (`merge/home_worker.py`, `add_arguments`). `Debug` is
-/// written by hand so the bearer token never reaches a log.
+/// `transcode-worker`'s arguments (`merge/home_worker.py`, `add_arguments`), with argparse's
+/// habits as `merge-worker` has them (D145): a unique prefix of a long option, the last of a
+/// repeated option, a negative number as a value. `Debug` is written by hand so the bearer
+/// token never reaches a log.
 #[derive(Args)]
+#[command(infer_long_args = true, args_override_self = true)]
 struct TranscodeWorkerArgs {
     /// TOML settings file
     #[arg(long)]
@@ -72,13 +78,13 @@ struct TranscodeWorkerArgs {
     #[arg(long = "cache-dir")]
     cache_dir: Option<PathBuf>,
     /// upload speed cap in Mbit/s (default 30)
-    #[arg(long = "upload-mbps")]
+    #[arg(long = "upload-mbps", value_parser = parse_float, allow_negative_numbers = true)]
     upload_mbps: Option<f64>,
     /// parts encoded at once (default 3)
-    #[arg(long)]
-    jobs: Option<i64>,
+    #[arg(long, value_parser = parse_int, allow_negative_numbers = true)]
+    jobs: Option<i128>,
     /// chunks kept waiting before encoding pauses
-    #[arg(long = "max-queue-gb")]
+    #[arg(long = "max-queue-gb", value_parser = parse_float, allow_negative_numbers = true)]
     max_queue_gb: Option<f64>,
     /// ffmpeg executable
     #[arg(long)]
@@ -109,7 +115,35 @@ fn parse_float(text: &str) -> Result<f64, String> {
     embyx_merge::parse_float(text).ok_or_else(|| format!("invalid float value: {text:?}"))
 }
 
-/// The command a parsed command line runs, and the work package that implements it.
+/// `argparse`'s `type=int`: Python's `int()` of the text.
+fn parse_int(text: &str) -> Result<i128, String> {
+    embyx_core::pytext::py_int(text).map_err(|_| format!("invalid int value: {text:?}"))
+}
+
+impl TranscodeWorkerArgs {
+    fn into_worker_args(self) -> embyx_transcode_worker::Args {
+        embyx_transcode_worker::Args {
+            config: self.config,
+            server: self.server,
+            token: self.token,
+            cache_dir: self.cache_dir,
+            upload_mbps: self.upload_mbps,
+            jobs: self.jobs,
+            max_queue_gb: self.max_queue_gb,
+            ffmpeg: self.ffmpeg,
+            ffprobe: self.ffprobe,
+        }
+    }
+}
+
+/// `transcode-worker`: `raise SystemExit(home_worker.main(args))`.
+fn transcode_worker(args: TranscodeWorkerArgs) -> ExitCode {
+    let code = embyx_transcode_worker::main(&args.into_worker_args());
+    ExitCode::from(u8::try_from(code).unwrap_or(1))
+}
+
+/// The command a parsed command line runs, and the work package that ported it.
+#[cfg(test)]
 fn planned(command: Option<&Command>) -> (&'static str, &'static str) {
     match command {
         None | Some(Command::Serve) => ("serve", "WP4"),
@@ -161,20 +195,11 @@ fn serve() -> ExitCode {
 
 fn main() -> ExitCode {
     let cli = Cli::parse();
-    let command = match cli.command {
-        None | Some(Command::Serve) => return serve(),
-        Some(Command::MergeWorker(args)) => return merge_worker(args),
-        Some(command @ Command::TranscodeWorker(_)) => command,
-    };
-    let (name, package) = planned(Some(&command));
-    #[allow(
-        clippy::print_stderr,
-        reason = "the placeholder's only output, until WP15 replaces it"
-    )]
-    {
-        eprintln!("embyx-manager {name}: not implemented yet ({package}, docs/rewrite/PLAN.md)");
+    match cli.command {
+        None | Some(Command::Serve) => serve(),
+        Some(Command::MergeWorker(args)) => merge_worker(args),
+        Some(Command::TranscodeWorker(args)) => transcode_worker(args),
     }
-    ExitCode::FAILURE
 }
 
 #[cfg(test)]
@@ -276,6 +301,56 @@ mod tests {
         let shown = format!("{:?}", cli.command);
         assert!(!shown.contains("s3cret-token"), "{shown}");
         assert!(shown.contains("<redacted>"), "{shown}");
+    }
+
+    /// `home_worker_settings.json`'s `argv` cases: argparse's reading of the worker's options.
+    #[test]
+    fn transcode_worker_options_parse_as_argparse_parses_them() {
+        use embyx_core::golden;
+        use embyx_core::pyjson::{Dict, Value};
+
+        let document = golden::load("merge/home_worker_settings.json");
+        let mut checked = 0;
+        for case in golden::cases(&document) {
+            if golden::string(golden::get(case, "kind")) != "argv" {
+                continue;
+            }
+            let argv: Vec<String> = golden::list(golden::get(case, "argv"))
+                .iter()
+                .map(golden::string)
+                .collect();
+            let parsed = Cli::try_parse_from(
+                ["embyx-manager", "transcode-worker"]
+                    .into_iter()
+                    .map(str::to_owned)
+                    .chain(argv.iter().cloned()),
+            );
+            if case.get("refused").is_some() {
+                assert!(parsed.is_err(), "{argv:?} is refused");
+                checked += 1;
+                continue;
+            }
+            let Some(Command::TranscodeWorker(options)) = parsed.expect("parses").command else {
+                panic!("transcode-worker");
+            };
+            let text = |value: Option<String>| value.map_or(Value::Null, Value::Str);
+            let path = |value: Option<std::path::PathBuf>| {
+                value.map_or(Value::Null, |path| Value::Str(path.to_string_lossy().into_owned()))
+            };
+            let mut got = Dict::new();
+            got.insert("config", path(options.config));
+            got.insert("server", text(options.server));
+            got.insert("token", text(options.token));
+            got.insert("cache_dir", path(options.cache_dir));
+            got.insert("upload_mbps", options.upload_mbps.map_or(Value::Null, Value::Float));
+            got.insert("jobs", options.jobs.map_or(Value::Null, Value::Int));
+            got.insert("max_queue_gb", options.max_queue_gb.map_or(Value::Null, Value::Float));
+            got.insert("ffmpeg", text(options.ffmpeg));
+            got.insert("ffprobe", text(options.ffprobe));
+            assert_eq!(&Value::Dict(got), golden::get(case, "value"), "{argv:?}");
+            checked += 1;
+        }
+        assert_eq!(checked, 12);
     }
 
     #[test]
