@@ -271,14 +271,7 @@ pub(crate) fn os_error(error: &std::io::Error, path: &Path) -> StepError {
 
 /// The `OSError` subclass Python raises for an errno.
 pub(crate) fn os_class(error: &std::io::Error) -> &'static str {
-    match error.raw_os_error() {
-        Some(2) => "FileNotFoundError",
-        Some(1 | 13) => "PermissionError",
-        Some(17) => "FileExistsError",
-        Some(20) => "NotADirectoryError",
-        Some(21) => "IsADirectoryError",
-        _ => "OSError",
-    }
+    embyx_core::pyos::class_name(error)
 }
 
 /// `path.unlink(missing_ok=True)`.

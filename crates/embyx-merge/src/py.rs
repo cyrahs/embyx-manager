@@ -29,18 +29,7 @@ impl PyException {
     }
 }
 
-/// Python's `type(value).__name__` for a JSON value.
-pub(crate) fn type_name(value: &Value) -> &'static str {
-    match value {
-        Value::Null => "NoneType",
-        Value::Bool(_) => "bool",
-        Value::Int(_) => "int",
-        Value::Float(_) => "float",
-        Value::Str(_) => "str",
-        Value::List(_) => "list",
-        Value::Dict(_) => "dict",
-    }
-}
+pub(crate) use embyx_core::pyjson::type_name;
 
 /// Python `float(value)` for a JSON value.
 pub(crate) fn float(value: &Value) -> Result<f64, PyException> {

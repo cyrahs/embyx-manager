@@ -556,7 +556,8 @@ def main() -> int:
         '--rust-tests',
         type=Path,
         action='append',
-        help='output of `cargo test -- --list --format terse`, to check claims compile; once per platform',
+        help='output of tools/parity/list_rust_tests.py (crate, tab, `cargo test -- --list --format terse` line), '
+        'to check claims compile; once per platform',
     )
     parser.add_argument(
         '--base-scope',

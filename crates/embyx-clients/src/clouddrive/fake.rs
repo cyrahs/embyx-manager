@@ -641,11 +641,12 @@ impl FakeCloudDrive {
             method: method.to_owned(),
             authorization: header("authorization"),
             timeout: header("grpc-timeout").as_deref().and_then(parse_grpc_timeout),
+            // Every entry, so a repeated key shows twice (Python compares the metadata list).
             application_metadata: metadata
-                .keys()
-                .map(|key| match key {
-                    tonic::metadata::KeyRef::Ascii(key) => key.as_str().to_owned(),
-                    tonic::metadata::KeyRef::Binary(key) => key.as_str().to_owned(),
+                .iter()
+                .map(|entry| match entry {
+                    tonic::metadata::KeyAndValueRef::Ascii(key, _) => key.as_str().to_owned(),
+                    tonic::metadata::KeyAndValueRef::Binary(key, _) => key.as_str().to_owned(),
                 })
                 .filter(|key| !TRANSPORT_HEADERS.contains(&key.as_str()))
                 .collect(),

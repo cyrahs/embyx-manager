@@ -600,6 +600,80 @@ async fn the_impersonating_session_sends_curl_cffi_headers_and_reads_the_routes(
     assert_ne!(position("referer"), usize::MAX);
 }
 
+/// A keep-alive server that answers the first request on each connection and drops the second
+/// unanswered, the way a server or proxy closes a pooled connection just as it is reused. The
+/// request lines it read, by connection.
+async fn dropping_keep_alive_server() -> (String, Arc<Mutex<Vec<(usize, String)>>>) {
+    use tokio::io::{AsyncReadExt as _, AsyncWriteExt as _};
+
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.expect("bind");
+    let address = listener.local_addr().expect("address");
+    let seen = Arc::new(Mutex::new(Vec::new()));
+    let recorded = Arc::clone(&seen);
+    tokio::spawn(async move {
+        let mut connection = 0;
+        while let Ok((mut stream, _)) = listener.accept().await {
+            connection += 1;
+            let recorded = Arc::clone(&recorded);
+            tokio::spawn(async move {
+                let mut buffer = Vec::new();
+                let mut chunk = [0_u8; 4096];
+                for answered in [true, false] {
+                    let end = loop {
+                        if let Some(end) = buffer.windows(4).position(|window| window == b"\r\n\r\n") {
+                            break end;
+                        }
+                        match stream.read(&mut chunk).await {
+                            Ok(0) | Err(_) => return,
+                            Ok(read) => buffer.extend_from_slice(&chunk[..read]),
+                        }
+                    };
+                    let head = String::from_utf8_lossy(&buffer[..end]).into_owned();
+                    buffer.drain(..end + 4);
+                    let line = head.lines().next().unwrap_or_default().to_owned();
+                    recorded.lock().expect("lock").push((connection, line));
+                    if !answered {
+                        return;
+                    }
+                    let reply = b"HTTP/1.1 200 OK\r\ncontent-type: text/plain\r\ncontent-length: 2\r\n\r\nok";
+                    if stream.write_all(reply).await.is_err() {
+                        return;
+                    }
+                }
+            });
+        }
+    });
+    (format!("http://{address}"), seen)
+}
+
+/// What `curl_cffi` 0.16.3 did against the same server: each dropped request was sent again on a
+/// new connection and answered, so every read succeeded (conn1 /one /two, conn2 /two /three,
+/// conn3 /three).
+#[tokio::test]
+async fn the_impersonating_session_resends_a_request_its_reused_connection_dropped_like_curl() {
+    let (host, seen) = dropping_keep_alive_server().await;
+    let options = AvbaseOptions {
+        host: host.clone(),
+        timeout: Duration::from_secs(5),
+        ..AvbaseOptions::default()
+    };
+    let session = session::ImpersonatingSession::new(&AvbaseClient::session_options(&options)).expect("session");
+    for path in ["/one", "/two", "/three"] {
+        let response = session.get(&format!("{host}{path}"), &[]).await.expect(path);
+        assert_eq!(
+            (response.status, response.text().expect("text")),
+            (200, "ok".to_owned()),
+            "{path}"
+        );
+    }
+    let lines: Vec<(usize, String)> = seen.lock().expect("lock").clone();
+    let expected: Vec<(usize, String)> = [(1, "/one"), (1, "/two"), (2, "/two"), (2, "/three"), (3, "/three")]
+        .into_iter()
+        .map(|(connection, path)| (connection, format!("GET {path} HTTP/1.1")))
+        .collect();
+    assert_eq!(lines, expected);
+}
+
 #[tokio::test]
 async fn the_impersonating_session_reports_transport_failures_by_curl_cffi_class() {
     let web = FakeWeb::start(|_: &Seen| Reply::Stall(Duration::from_secs(5))).await;

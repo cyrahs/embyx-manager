@@ -3,10 +3,11 @@
 //! `exc.strerror`.
 //!
 //! Python origin: `CPython` 3.13 `Objects/exceptions.c` (`OSError_str`, the errno-to-subclass
-//! map). One copy for the crates that report I/O errors as plain text: the clients (the
-//! Kubernetes token, response bodies) and the merge worker. The monitor's and the fill
-//! actor's file systems keep their own structured error (`embyx_monitor::fs::PyOsError`),
-//! which also carries the errno and both file names for `repr()`.
+//! map). One copy for the crates that report I/O errors as plain text: the Kubernetes client
+//! (the service-account token and the Job template) and the merge service. The monitor's and
+//! the fill actor's file systems keep their own structured error
+//! (`embyx_monitor::fs::PyOsError`), which also carries the errno and both file names for
+//! `repr()`, and takes its subclass from [`errno_class`].
 
 use std::fmt::Write as _;
 use std::io;
@@ -41,12 +42,38 @@ impl std::fmt::Display for PyOsError {
 /// without an errno: `tempfile` wraps the OS error in its own (`io::Error::new(kind, ..)`),
 /// where Python still raises the subclass.
 pub fn class_name(error: &io::Error) -> &'static str {
+    if let Some(code) = error.raw_os_error() {
+        return errno_class(code);
+    }
+    // An error that lost its errno (wrapped by a library) keeps the subclass of its kind.
     match error.kind() {
         io::ErrorKind::NotFound => "FileNotFoundError",
         io::ErrorKind::AlreadyExists => "FileExistsError",
         io::ErrorKind::PermissionDenied => "PermissionError",
         io::ErrorKind::IsADirectory => "IsADirectoryError",
         io::ErrorKind::NotADirectory => "NotADirectoryError",
+        _ => "OSError",
+    }
+}
+
+/// The `OSError` subclass `CPython` picks for an errno (`Objects/exceptions.c`'s map, Linux
+/// numbers); `OSError` itself for any other.
+pub fn errno_class(errno: i32) -> &'static str {
+    match errno {
+        11 | 114 | 115 => "BlockingIOError",
+        10 => "ChildProcessError",
+        32 | 108 => "BrokenPipeError",
+        103 => "ConnectionAbortedError",
+        111 => "ConnectionRefusedError",
+        104 => "ConnectionResetError",
+        17 => "FileExistsError",
+        2 => "FileNotFoundError",
+        21 => "IsADirectoryError",
+        20 => "NotADirectoryError",
+        4 => "InterruptedError",
+        1 | 13 => "PermissionError",
+        3 => "ProcessLookupError",
+        110 => "TimeoutError",
         _ => "OSError",
     }
 }
@@ -120,6 +147,39 @@ mod tests {
         assert_eq!(error.message, wrapped.to_string());
         let error = PyOsError::from_io(&io::Error::other("boom"), None);
         assert_eq!(error.class, "OSError");
+    }
+
+    #[test]
+    fn an_errno_picks_cpythons_subclass() {
+        // `type(OSError(code, 'x')).__name__` on Python 3.13 (Linux).
+        for (code, class) in [
+            (1, "PermissionError"),
+            (2, "FileNotFoundError"),
+            (3, "ProcessLookupError"),
+            (4, "InterruptedError"),
+            (10, "ChildProcessError"),
+            (11, "BlockingIOError"),
+            (13, "PermissionError"),
+            (17, "FileExistsError"),
+            (20, "NotADirectoryError"),
+            (21, "IsADirectoryError"),
+            (28, "OSError"),
+            (32, "BrokenPipeError"),
+            (103, "ConnectionAbortedError"),
+            (104, "ConnectionResetError"),
+            (108, "BrokenPipeError"),
+            (110, "TimeoutError"),
+            (111, "ConnectionRefusedError"),
+            (114, "BlockingIOError"),
+            (115, "BlockingIOError"),
+        ] {
+            assert_eq!(super::errno_class(code), class, "{code}");
+            assert_eq!(
+                PyOsError::from_io(&io::Error::from_raw_os_error(code), None).class,
+                class,
+                "{code}"
+            );
+        }
     }
 
     #[test]

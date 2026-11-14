@@ -28,17 +28,7 @@ impl Raised {
 pub static EMPTY_STR: Value = Value::Str(String::new());
 
 /// `type(x).__name__`.
-pub fn type_name(value: &Value) -> &'static str {
-    match value {
-        Value::Null => "NoneType",
-        Value::Bool(_) => "bool",
-        Value::Int(_) => "int",
-        Value::Float(_) => "float",
-        Value::Str(_) => "str",
-        Value::List(_) => "list",
-        Value::Dict(_) => "dict",
-    }
-}
+pub use embyx_core::pyjson::type_name;
 
 /// `x.get(key)` (`None` for a missing key); `AttributeError` when `x` is not a dict.
 pub fn get<'a>(value: &'a Value, key: &str) -> Result<&'a Value, Raised> {

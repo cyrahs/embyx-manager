@@ -2,9 +2,10 @@
 
 `cargo test -- --list` prints `path::to::name: test` per test binary but never names the crate,
 so two crates with a test at the same module path would satisfy each other's `// py:` claims.
-This builds the test binaries once (`cargo test <args> --no-run --message-format=json`, the
-same compile as `cargo test <args>`), runs each with `--list --format terse` and prefixes every
-line with the crate's directory under `crates/` and a tab:
+This builds the test binaries once (`cargo test <args> --no-run` with JSON messages and
+rendered diagnostics, the same compile as `cargo test <args>`), runs each with
+`--list --format terse` and prefixes every line with the crate's directory under `crates/`
+and a tab:
 
     embyx-core\tavid::tests::get_avid: test
 
@@ -25,10 +26,11 @@ from pathlib import Path
 def test_binaries(cargo_args: list[str]) -> list[tuple[str, str]]:
     """`(crate directory, executable)` for every test binary the arguments build, in cargo's order."""
     built = subprocess.run(
-        ['cargo', 'test', *cargo_args, '--no-run', '--message-format=json'],
+        ['cargo', 'test', *cargo_args, '--no-run', '--message-format=json-render-diagnostics'],
         check=True,
         stdout=subprocess.PIPE,
         text=True,
+        encoding='utf-8',
     )
     binaries = []
     for line in built.stdout.splitlines():
@@ -50,7 +52,11 @@ def main() -> int:
         return 1
     for crate, executable in binaries:
         listed = subprocess.run(
-            [executable, '--list', '--format', 'terse'], check=True, stdout=subprocess.PIPE, text=True
+            [executable, '--list', '--format', 'terse'],
+            check=True,
+            stdout=subprocess.PIPE,
+            text=True,
+            encoding='utf-8',
         )
         for line in listed.stdout.splitlines():
             if line.endswith(': test'):

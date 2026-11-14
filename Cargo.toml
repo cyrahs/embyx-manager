@@ -120,6 +120,8 @@ windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_System_
 nix = { version = "0.31", default-features = false, features = ["signal", "process"] }
 # The impersonating client for AVBase (curl_cffi impersonate='chrome' in Python), BoringSSL.
 wreq = { version = "=6.0.0-rc.31", default-features = false, features = ["webpki-roots", "tokio-rt", "gzip", "deflate", "brotli", "zstd", "charset", "cookies", "socks"] }
+# wreq's HTTP/1 and HTTP/2 core, named only to read its error kind (the AVBase session's resend).
+wreq-proto = { version = "=0.2.6", default-features = false }
 wreq-util = { version = "=3.0.0-rc.14", default-features = false, features = ["emulation"] }
 
 [workspace.lints.rust]

@@ -1093,6 +1093,7 @@ dependencies = [
  "tracing",
  "url",
  "wreq",
+ "wreq-proto",
  "wreq-util",
  "zip",
 ]

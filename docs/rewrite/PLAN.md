@@ -580,7 +580,8 @@ or says why one stays.
 
 ### WP16: how each note ended
 
-Closed (behaviour unchanged: goldens and transcripts byte for byte, the full suite green):
+Closed (goldens and transcripts byte for byte, the full suite green; behaviour unchanged except where
+an item says it changed: the kube template text, the `OSError` subclasses and the AVBase resend):
 
 - Unused fav code removed: `embyx_clients::net::{download, httpx, proxy, subprocess}` (fav's downloads,
   streaming, proxy rule and async subprocess runner; nothing here called them), fav's text helpers in
@@ -591,20 +592,29 @@ Closed (behaviour unchanged: goldens and transcripts byte for byte, the full sui
   with both file names, `strerror`). `embyx-clients` (kube) and `embyx_merge::py` use it; the merge
   module re-exports it under its old names. `embyx_monitor::fs::PyOsError` stays: it is the structured
   error (errno, both file names, `repr()`) the archive, tracker and fill-actor file systems need, and the
-  fill actor re-exports it, so there is one copy of each shape.
+  fill actor re-exports it. The errno-to-subclass map is one copy, `pyos::errno_class` (CPython's whole
+  map): the monitor's error and the merge service's `os_class` call it, where each had a shorter copy
+  (the merge service now names `ProcessLookupError`, `BlockingIOError` and the rest as Python does).
 - Float builtins: `embyx_core::pyfloat` (`sum`, `min`, `max`, `float()`, `.Nf`) replaces the identical
   copies in `embyx_merge::py` and `embyx_transcode_worker::py`; `str.splitlines()` is
   `embyx_core::pytext::splitlines` (the copies in the merge worker, the home worker's `ffmpeg.rs` and
-  `fill_actor::cloud_moves` are gone). The two `py` modules keep only what differs: each crate's exception
-  type and the conversions that raise it.
+  `fill_actor::cloud_moves` are gone), and `type(x).__name__` of a JSON value is
+  `embyx_core::pyjson::type_name` (four copies gone). The two `py` modules keep only what differs: each
+  crate's exception type and the conversions that raise it.
 - kube's template `UnicodeDecodeError` text is `http::utf8_error_message` (it only knew "invalid start
   byte"); a new test pins three cases to Python's text.
 - pydantic's datetime text: `embyx_api::params::{py_datetime, py_date}` call `embyx_fill_actor::pydatetime`.
 - The parity gap: `tools/parity/list_rust_tests.py` lists every compiled test with its crate (it builds
-  the test binaries with `--message-format=json` and runs each with `--list`), and `parity.py` matches a
+  the test binaries with JSON messages and runs each with `--list`), and `parity.py` matches a
   claim only in its own crate; a listing line without a crate is an error. Both CI jobs use it.
 - The probes: `tools/probes/live_fingerprint.py`, `live_probe_pod.sh` and their test removed (the pod
   approval is used up).
+- httpx's reason-phrase table and `raise_for_status` goldens went with `net::httpx`, their only reader:
+  `StatusError` takes the phrase from the status line, which hyper keeps whenever it is not the
+  canonical one (h11 hands httpx the same text), and the clients speak HTTP/1.1 only.
+- AVBase: the level 3 run found that a pooled connection dropped as it was reused failed the read,
+  where libcurl sends the request again on a new connection; the session now resends such a GET once
+  (D175, a test against a server that drops every second request, as `curl_cffi` was run against it).
 - cron: `embyx_core::cron::CronSpec` (cronsim's parser) validates first and croner only computes fires;
   the `croner_accepts_what_cronsim_accepts` probe lists every expression where the two differ, so they
   agree on what reaches croner.

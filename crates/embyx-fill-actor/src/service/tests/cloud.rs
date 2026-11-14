@@ -746,7 +746,8 @@ async fn a_dropped_cloud_reconcile_keeps_the_lock_until_its_call_settles() {
 
 /// Contract 6 on the mutating path (WP16 audit): an apply dropped while its `MoveFile` is in
 /// flight keeps the mutation lock until that call has ended, and the move it sent still lands
-/// (the source leaves, the destination holds the file), so a later reconciliation finds it.
+/// (the source leaves, the destination holds the file) for a later reconciliation to find; no
+/// reconciliation runs here.
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn a_dropped_cloud_apply_keeps_the_lock_until_its_move_settles() {
     let fixture = Fixture::new().await;

@@ -12,7 +12,7 @@ are in the workspace `Cargo.toml`.
 | grpcio 1.83 + generated `clouddrive_pb2*.py` | `tonic` / `tonic-prost` / `prost` **0.14**, code from the baseline's descriptor | Sufficient | `embyx-clients/src/probes.rs` (`grpc`) |
 | `MessageToDict` (the scenario fake's records) | `prost-reflect` **0.16** (serde) | Byte-identical on the golden cases | `embyx-clients/src/probes.rs` |
 | pyquery 2.1 / lxml 5.4, nyaapy 0.7 | `scraper` **0.29** (html5ever) | Sufficient with three known tree differences | `embyx-clients/src/probes.rs` (`html`) |
-| curl_cffi 0.16.3 `impersonate='chrome'` | `wreq` **=6.0.0-rc.31** + `wreq-util` **=3.0.0-rc.14** (BoringSSL) | `wreq-tuned` chosen; both wreq candidates got AVBase live, a plain client (`httpx-rs`) was challenged | `embyx-clients/src/probes.rs` (`impersonation`), `tools/probes/tls_fingerprint.py`, `tools/probes/live_fingerprint.py` |
+| curl_cffi 0.16.3 `impersonate='chrome'` | `wreq` **=6.0.0-rc.31** + `wreq-util` **=3.0.0-rc.14** (BoringSSL) | `wreq-tuned` chosen; both wreq candidates got AVBase live, a plain client (`httpx-rs`) was challenged | `embyx-clients/src/probes.rs` (`impersonation`), `tools/probes/tls_fingerprint.py`, `tools/probes/live_fingerprint.py` (removed in WP16 with the probe pod) |
 | cronsim 2.7 | `croner` **4** + `chrono-tz` | Sufficient for fires; validation needs a pre-check | `embyx-monitor/src/probes.rs` |
 | watchdog 6.0 (inotify) | `notify` **8** | Sufficient; directories that arrive must be walked by us | `embyx-monitor/src/probes.rs` (`watcher`) |
 | ctypes `renameat2`, `os.link`, `fcntl.flock` | `rustix` **1** (fs) and std | Sufficient | `embyx-fill-actor/src/probes.rs` |

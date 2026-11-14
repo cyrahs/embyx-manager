@@ -117,7 +117,8 @@ depended on (no Git dependency on fav):
 - Copied: `fav-core` `pyjson`, `pytext`, `pyurl`, `pypath` (with `PyPath` from `validate.rs`), `golden`;
   `fav-sources` `pyre` and the fake web (`testutil.rs`, here `net/fakeweb.rs`); `fav-net` `lib.rs`,
   `client.rs` (httpx-shaped client), `httpx.rs` (error classes and texts), `retry.rs` (ladders and the
-  recording sleeper), `proxy.rs`, `download.rs`, `subprocess.rs`; `fav-db` `testdb.rs` (adapted). The
+  recording sleeper), `proxy.rs`, `download.rs`, `subprocess.rs` (`httpx.rs`, `proxy.rs`, `download.rs` and `subprocess.rs`
+  removed in WP16: nothing used them); `fav-db` `testdb.rs` (adapted). The
   parity script and its self-tests, and `tools/ruff.toml`, are adapted from fav's tooling.
 - Changes on copy: names and environment variables renamed to embyx's, `pyjson` moved to Python 3.13's
   decoder messages (trailing commas) and given the `sorted_compact_ascii` format; otherwise copied whole,
@@ -141,7 +142,7 @@ EMBYX_MANAGER_TEST_DATABASE_URL=postgresql://... CARGO_INCREMENTAL=0 cargo test 
 tools/check_tree.sh
 uv run python tools/parity/parity.py --check \
   --pytest-collected <(uv run pytest --collect-only -q) \
-  --rust-tests <(cargo test --workspace --locked -- --list --format terse)
+  --rust-tests <(python3 tools/parity/list_rust_tests.py --workspace --locked)
 uv run ruff check . && uv run ruff format --check .
 ```
 

@@ -1,9 +1,12 @@
-"""`urllib.parse`, `pathlib`, `json.loads` errors and httpx's status texts (the helpers copied from fav).
+"""`urllib.parse`, `pathlib` and `json.loads` errors (the helpers copied from fav).
 
 Copied from fav's golden generator (`tools/goldens/areas/pyweb.py` at the commit named in
 docs/CONVENTIONS.md) without its HTML-parser cases: embyx-manager parses HTML with lxml, not
 `html.parser`, so those helpers were not copied. The cases feed the tests of `embyx_core::pyurl`,
-`pypath`, `pyjson` and `embyx_clients::net::httpx`.
+`pypath` and `pyjson`. httpx's reason-phrase table and `raise_for_status` texts were dropped in
+WP16 with `embyx_clients::net::httpx`, their only reader: the live `StatusError` takes the phrase
+from the status line, which hyper keeps whenever it is not the canonical one, as h11 hands it to
+httpx (the clients speak HTTP/1.1 only, so a status line always carries one).
 """
 
 from __future__ import annotations
@@ -12,8 +15,6 @@ import json
 from pathlib import PurePosixPath
 from typing import Any
 from urllib.parse import unquote, urljoin, urlsplit
-
-import httpx
 
 UNQUOTE_CASES: list[str] = [
     'File:Disc_Good_Night.png',
@@ -145,46 +146,6 @@ def _paths() -> list[dict[str, Any]]:
     return [{'parts': parts, 'joins': joins}]
 
 
-def _reason_phrases() -> list[list[Any]]:
-    # `raise_for_status()` names the status with httpx's table (no status line to read it from).
-    return [[code, httpx.codes.get_reason_phrase(code)] for code in range(100, 600)]
-
-
-STATUS_ERROR_CASES: list[tuple[int, str, str | None]] = [
-    (200, 'https://example.com/ok', None),
-    (204, 'https://example.com/empty', None),
-    (101, 'https://example.com/upgrade', None),
-    (301, 'https://example.com/old', 'https://example.com/new'),
-    (302, 'https://example.com/a?b=1', '/relative'),
-    (304, 'https://example.com/cached', 'https://example.com/elsewhere'),
-    (307, 'https://example.com/tmp', None),
-    (400, 'https://www.pixiv.net/ajax/user/1/illusts/bookmarks?tag=&offset=0&limit=48&rest=show', None),
-    (403, 'https://i.pximg.net/img-original/img/x/1_p0.jpg', None),
-    (404, 'https://stellasora.miraheze.org/wiki/Characters', None),
-    (418, 'https://example.com/teapot', None),
-    (429, 'https://example.com/slow', 'https://example.com/ignored'),
-    (499, 'https://example.com/odd', None),
-    (500, 'https://example.com/boom', None),
-    (503, 'https://example.com/busy', None),
-    (599, 'https://example.com/unknown', None),
-]
-
-
-def _status_errors() -> list[dict[str, Any]]:
-    # `str(exc)` of `raise_for_status()`; `None` when the status passes.
-    cases = []
-    for status, url, location in STATUS_ERROR_CASES:
-        headers = {'location': location} if location is not None else {}
-        response = httpx.Response(status, headers=headers, request=httpx.Request('GET', url))
-        try:
-            response.raise_for_status()
-            message = None
-        except httpx.HTTPStatusError as exc:
-            message = str(exc)
-        cases.append({'status': status, 'url': url, 'location': location, 'message': message})
-    return cases
-
-
 JSON_ERROR_CASES: list[str] = [
     '',
     '<!DOCTYPE html><html>challenge</html>',
@@ -216,8 +177,6 @@ def _json_errors() -> list[dict[str, Any]]:
 
 GOLDENS = {
     'pyweb/json_errors.json': _json_errors,
-    'pyweb/httpx_reason_phrases.json': _reason_phrases,
-    'pyweb/httpx_status_errors.json': _status_errors,
     'pyweb/unquote.json': _unquote,
     'pyweb/urljoin.json': _urljoin,
     'pyweb/urlsplit.json': _urlsplit,

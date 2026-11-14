@@ -18,7 +18,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Duration;
 
-use embyx_core::pyjson::{self, DumpOptions, Value};
+use embyx_core::pyjson::{self, DumpOptions, Value, type_name};
 use embyx_core::pytext::{py_repr, py_strip};
 use embyx_core::pyurl;
 use reqwest::Method;
@@ -93,19 +93,6 @@ impl KubeJobsError {
             "TypeError",
             format!("'{}' object is not subscriptable", type_name(value)),
         )
-    }
-}
-
-/// Python's type name of a JSON value.
-fn type_name(value: &Value) -> &'static str {
-    match value {
-        Value::Null => "NoneType",
-        Value::Bool(_) => "bool",
-        Value::Int(_) => "int",
-        Value::Float(_) => "float",
-        Value::Str(_) => "str",
-        Value::List(_) => "list",
-        Value::Dict(_) => "dict",
     }
 }
 
