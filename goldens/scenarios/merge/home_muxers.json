@@ -1,0 +1,1125 @@
+{
+  "calls": [
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/embyx/type/vr/BIG"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/BIG/BIG-002-cd1.avi",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/BIG/BIG-002-cd1.avi",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "BIG-002-cd1.avi",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/BIG/BIG-002-cd2.avi",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/BIG/BIG-002-cd2.avi",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "BIG-002-cd2.avi",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/BIG/BIG-003-cd1.mkv",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/BIG/BIG-003-cd1.mkv",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "BIG-003-cd1.mkv",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/BIG/BIG-003-cd2.mkv",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/BIG/BIG-003-cd2.mkv",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "BIG-003-cd2.mkv",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 1
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/api/v1/namespaces/media/pods/embyx-manager-0",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "spec": {
+            "containers": [
+              {
+                "image": "ghcr.io/cyrahs/embyx-manager:latest"
+              }
+            ]
+          },
+          "status": {
+            "containerStatuses": [
+              {
+                "imageID": "ghcr.io/cyrahs/embyx-manager@sha256:abc123"
+              }
+            ]
+          }
+        },
+        "status": 200
+      },
+      "seq": 2
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "POST",
+      "request": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "1"
+            },
+            "name": "embyx-merge-1-big-002"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "1"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/BIG-002.avi",
+                      "--status",
+                      "{work}/.merge/1.json",
+                      "--reserve-gib",
+                      "20",
+                      "--",
+                      "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd1.avi",
+                      "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd2.avi"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "1"
+            },
+            "name": "embyx-merge-1-big-002"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "1"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/BIG-002.avi",
+                      "--status",
+                      "{work}/.merge/1.json",
+                      "--reserve-gib",
+                      "20",
+                      "--",
+                      "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd1.avi",
+                      "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd2.avi"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          },
+          "status": {}
+        },
+        "status": 201
+      },
+      "seq": 3
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "DELETE",
+      "request": {
+        "body": {
+          "propagationPolicy": "Background"
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs/embyx-merge-1-big-002",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "status": "Success"
+        },
+        "status": 200
+      },
+      "seq": 4
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/",
+        "/115",
+        "/115/embyx",
+        "/115/embyx/type",
+        "/115/embyx/type/vr",
+        "/115/embyx/type/vr/BIG",
+        "/115/embyx_in",
+        "/115/upload"
+      ],
+      "files": [
+        {
+          "hashes": {},
+          "path": "/115/embyx/type/vr/BIG/BIG-002-cd1.avi",
+          "size": 10
+        },
+        {
+          "hashes": {},
+          "path": "/115/embyx/type/vr/BIG/BIG-002-cd2.avi",
+          "size": 10
+        },
+        {
+          "hashes": {},
+          "path": "/115/embyx/type/vr/BIG/BIG-003-cd1.mkv",
+          "size": 10
+        },
+        {
+          "hashes": {},
+          "path": "/115/embyx/type/vr/BIG/BIG-003-cd2.mkv",
+          "size": 10
+        }
+      ],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "jobs": {},
+      "routes_left": [
+        {
+          "body": {
+            "spec": {
+              "containers": [
+                {
+                  "image": "ghcr.io/cyrahs/embyx-manager:latest"
+                }
+              ]
+            },
+            "status": {
+              "containerStatuses": [
+                {
+                  "imageID": "ghcr.io/cyrahs/embyx-manager@sha256:abc123"
+                }
+              ]
+            }
+          },
+          "method": "GET",
+          "path": "/api/v1/namespaces/media/pods/embyx-manager-0"
+        }
+      ]
+    }
+  },
+  "format": 1,
+  "operation": "merge.service",
+  "outcome": {
+    "result": {
+      "clock": "2026-11-14T08:00:00+00:00",
+      "steps": [
+        {
+          "op": "create",
+          "result": {
+            "avid": "BIG-002",
+            "brand": "BIG",
+            "error": null,
+            "failed_state": null,
+            "finished_at": null,
+            "id": 1,
+            "job_name": null,
+            "library_dir": "type/vr",
+            "merged_bytes": null,
+            "merged_name": "BIG-002.avi",
+            "merged_sha1": null,
+            "notice": null,
+            "parts": [
+              "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd1.avi",
+              "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd2.avi"
+            ],
+            "phase": null,
+            "progress": null,
+            "source": "vr",
+            "state": "queued",
+            "state_changed_at_is_updated_at": true,
+            "transcode_paused": false,
+            "transcoder": null,
+            "updated_at_is_created_at": true,
+            "upload_attempts": 0,
+            "uploaded_bytes": null
+          },
+          "tasks": [
+            {
+              "avid": "BIG-002",
+              "brand": "BIG",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "BIG-002.avi",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd1.avi",
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd2.avi"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "create",
+          "result": {
+            "avid": "BIG-003",
+            "brand": "BIG",
+            "error": null,
+            "failed_state": null,
+            "finished_at": null,
+            "id": 2,
+            "job_name": null,
+            "library_dir": "type/vr",
+            "merged_bytes": null,
+            "merged_name": "BIG-003.mkv",
+            "merged_sha1": null,
+            "notice": null,
+            "parts": [
+              "/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd1.mkv",
+              "/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd2.mkv"
+            ],
+            "phase": null,
+            "progress": null,
+            "source": "vr",
+            "state": "queued",
+            "state_changed_at_is_updated_at": true,
+            "transcode_paused": false,
+            "transcoder": null,
+            "updated_at_is_created_at": true,
+            "upload_attempts": 0,
+            "uploaded_bytes": null
+          },
+          "tasks": [
+            {
+              "avid": "BIG-002",
+              "brand": "BIG",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "BIG-002.avi",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd1.avi",
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd2.avi"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "BIG-003",
+              "brand": "BIG",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 2,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "BIG-003.mkv",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd1.mkv",
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd2.mkv"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "tick",
+          "result": {
+            "triggered": []
+          },
+          "tasks": [
+            {
+              "avid": "BIG-002",
+              "brand": "BIG",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-big-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "BIG-002.avi",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd1.avi",
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd2.avi"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "BIG-003",
+              "brand": "BIG",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 2,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "BIG-003.mkv",
+              "merged_sha1": null,
+              "notice": "waiting for the home transcode worker",
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd1.mkv",
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd2.mkv"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "home",
+          "result": {
+            "home_bound": [
+              2
+            ],
+            "online": false,
+            "parked": [
+              2
+            ],
+            "reserved_bytes": 120000000000
+          },
+          "tasks": [
+            {
+              "avid": "BIG-002",
+              "brand": "BIG",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-big-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "BIG-002.avi",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd1.avi",
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd2.avi"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "BIG-003",
+              "brand": "BIG",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 2,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "BIG-003.mkv",
+              "merged_sha1": null,
+              "notice": "waiting for the home transcode worker",
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd1.mkv",
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd2.mkv"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "error": {
+            "code": "merge_task_not_transcoding",
+            "type": "MergeActionError"
+          },
+          "op": "set_paused",
+          "tasks": [
+            {
+              "avid": "BIG-002",
+              "brand": "BIG",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-big-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "BIG-002.avi",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd1.avi",
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd2.avi"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "BIG-003",
+              "brand": "BIG",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 2,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "BIG-003.mkv",
+              "merged_sha1": null,
+              "notice": "waiting for the home transcode worker",
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd1.mkv",
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd2.mkv"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "error": {
+            "code": "merge_task_not_transcoding",
+            "type": "MergeActionError"
+          },
+          "op": "use_cpu",
+          "tasks": [
+            {
+              "avid": "BIG-002",
+              "brand": "BIG",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-big-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "BIG-002.avi",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd1.avi",
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd2.avi"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "BIG-003",
+              "brand": "BIG",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 2,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "BIG-003.mkv",
+              "merged_sha1": null,
+              "notice": "waiting for the home transcode worker",
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd1.mkv",
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd2.mkv"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "claim",
+          "result": {
+            "task": null,
+            "wait": "busy"
+          },
+          "tasks": [
+            {
+              "avid": "BIG-002",
+              "brand": "BIG",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-big-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "BIG-002.avi",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd1.avi",
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd2.avi"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "BIG-003",
+              "brand": "BIG",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 2,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "BIG-003.mkv",
+              "merged_sha1": null,
+              "notice": "waiting for the home transcode worker",
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd1.mkv",
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd2.mkv"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "cancel",
+          "result": {
+            "avid": "BIG-002",
+            "brand": "BIG",
+            "error": null,
+            "failed_state": null,
+            "finished_at": "2026-11-14T08:00:00+00:00",
+            "id": 1,
+            "job_name": "embyx-merge-1-big-002",
+            "library_dir": "type/vr",
+            "merged_bytes": null,
+            "merged_name": "BIG-002.avi",
+            "merged_sha1": null,
+            "notice": null,
+            "parts": [
+              "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd1.avi",
+              "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd2.avi"
+            ],
+            "phase": "starting",
+            "progress": 0.0,
+            "source": "vr",
+            "state": "cancelled",
+            "state_changed_at_is_updated_at": true,
+            "transcode_paused": false,
+            "transcoder": null,
+            "updated_at_is_created_at": true,
+            "upload_attempts": 0,
+            "uploaded_bytes": null
+          },
+          "tasks": [
+            {
+              "avid": "BIG-002",
+              "brand": "BIG",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": "embyx-merge-1-big-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "BIG-002.avi",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd1.avi",
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd2.avi"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "BIG-003",
+              "brand": "BIG",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 2,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "BIG-003.mkv",
+              "merged_sha1": null,
+              "notice": "waiting for the home transcode worker",
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd1.mkv",
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd2.mkv"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "cancel",
+          "result": {
+            "avid": "BIG-003",
+            "brand": "BIG",
+            "error": null,
+            "failed_state": null,
+            "finished_at": "2026-11-14T08:00:00+00:00",
+            "id": 2,
+            "job_name": null,
+            "library_dir": "type/vr",
+            "merged_bytes": null,
+            "merged_name": "BIG-003.mkv",
+            "merged_sha1": null,
+            "notice": null,
+            "parts": [
+              "/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd1.mkv",
+              "/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd2.mkv"
+            ],
+            "phase": null,
+            "progress": null,
+            "source": "vr",
+            "state": "cancelled",
+            "state_changed_at_is_updated_at": true,
+            "transcode_paused": false,
+            "transcoder": null,
+            "updated_at_is_created_at": true,
+            "upload_attempts": 0,
+            "uploaded_bytes": null
+          },
+          "tasks": [
+            {
+              "avid": "BIG-002",
+              "brand": "BIG",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": "embyx-merge-1-big-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "BIG-002.avi",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd1.avi",
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd2.avi"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "BIG-003",
+              "brand": "BIG",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 2,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "BIG-003.mkv",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd1.mkv",
+                "/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd2.mkv"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "rows": {
+    "app_config": [],
+    "archive_acquisitions": [],
+    "archive_magnet_attempts": [],
+    "feed_subscriptions": [],
+    "fill_actor_apply_jobs": [],
+    "fill_actor_candidates": [],
+    "fill_actor_cloud_move_operations": [],
+    "fill_actor_jobs": [],
+    "fill_actor_move_journal": [],
+    "fill_actor_move_results": [],
+    "fill_actor_plans": [],
+    "health_probe": [],
+    "merge_tasks": [
+      {
+        "avid": "BIG-002",
+        "brand": "BIG",
+        "created_at": "2026-11-14T08:00:00+00:00",
+        "error": null,
+        "failed_state": null,
+        "finished_at": "2026-11-14T08:00:00+00:00",
+        "id": 1,
+        "job_name": "embyx-merge-1-big-002",
+        "library_dir": "type/vr",
+        "merged_bytes": null,
+        "merged_name": "BIG-002.avi",
+        "merged_sha1": null,
+        "notice": null,
+        "parts_json": "[\"/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd1.avi\", \"/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd2.avi\"]",
+        "phase": "starting",
+        "progress": 0,
+        "source": "vr",
+        "state": "cancelled",
+        "state_changed_at": "2026-11-14T08:00:00+00:00",
+        "transcode_paused": false,
+        "transcoder": null,
+        "updated_at": "2026-11-14T08:00:00+00:00",
+        "upload_attempts": 0,
+        "uploaded_bytes": null
+      },
+      {
+        "avid": "BIG-003",
+        "brand": "BIG",
+        "created_at": "2026-11-14T08:00:00+00:00",
+        "error": null,
+        "failed_state": null,
+        "finished_at": "2026-11-14T08:00:00+00:00",
+        "id": 2,
+        "job_name": null,
+        "library_dir": "type/vr",
+        "merged_bytes": null,
+        "merged_name": "BIG-003.mkv",
+        "merged_sha1": null,
+        "notice": null,
+        "parts_json": "[\"/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd1.mkv\", \"/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd2.mkv\"]",
+        "phase": null,
+        "progress": null,
+        "source": "vr",
+        "state": "cancelled",
+        "state_changed_at": "2026-11-14T08:00:00+00:00",
+        "transcode_paused": false,
+        "transcoder": null,
+        "updated_at": "2026-11-14T08:00:00+00:00",
+        "upload_attempts": 0,
+        "uploaded_bytes": null
+      }
+    ],
+    "merge_transcode_chunks": [],
+    "merge_transcode_parts": [],
+    "pipeline_runs": [],
+    "playlist_source": [],
+    "playlists": []
+  },
+  "scenario": "merge/home_muxers",
+  "tree": {
+    "mapping": [],
+    "secrets": [
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "job.json",
+        "sha256": "8c299e50567ce0e6",
+        "size": 204
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "token",
+        "sha256": "52713805db90269f",
+        "size": 15
+      }
+    ],
+    "work": []
+  }
+}

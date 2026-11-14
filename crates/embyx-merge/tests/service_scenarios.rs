@@ -887,3 +887,23 @@ async fn cancel_matches_the_python_transcript() {
 async fn replace_archive_matches_the_python_transcript() {
     service_steps("merge/replace_archive").await;
 }
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn home_matches_the_python_transcript() {
+    service_steps("merge/home").await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn auto_matches_the_python_transcript() {
+    service_steps("merge/auto").await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn over115_cpu_matches_the_python_transcript() {
+    service_steps("merge/over115_cpu").await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn home_muxers_match_the_python_transcript() {
+    service_steps("merge/home_muxers").await;
+}

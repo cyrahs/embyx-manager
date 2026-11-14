@@ -1,0 +1,450 @@
+# Automatic merging (serial, titles of ten parts or more): each round queues the first title
+# that fits while nothing else is under way. Too big for the room left on the work volume, a
+# whole copy in the library, a part CloudDrive does not list and a title no intake route takes
+# are skipped, nine parts are left to Emby's stacking, a failed title is skipped, more room lets
+# the big one in, cancelled titles are settled, and a day later the tree is scanned again.
+description = "merge service: auto-merge rounds, skips and the serial queue"
+operation = "merge.service"
+clock = "2026-11-14T08:00:00+00:00"
+
+[roots]
+names = ["work", "mapping", "secrets"]
+
+[database]
+schema = "app"
+
+[args]
+free_gib = 100
+
+[args.merge]
+auto_enabled = true
+
+[args.archive]
+src_dir = "/mnt/cd2/115/embyx_in"
+dst_dir = "/mnt/cd2/115/embyx"
+priority_mapping = { vr = "type/vr" }
+
+# Round one: the title too big, the one with a whole copy, the one missing a part and the one routed nowhere are skipped; the ten-part title is queued.
+[[args.steps]]
+op = "auto"
+
+[[args.steps]]
+op = "auto"
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "auto"
+
+# It fails: skipped from then on, and nothing else fits.
+[[args.steps]]
+op = "write"
+args = { path = "work/.merge/1.json", json = { state = "failed", error = "the parts' streams differ" } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "auto"
+
+# More room: the big title fits now.
+[[args.steps]]
+op = "free_space"
+args = { gib = 200 }
+
+[[args.steps]]
+op = "auto"
+
+[[args.steps]]
+op = "cancel"
+args = { id = 2 }
+
+[[args.steps]]
+op = "cancel"
+args = { id = 1 }
+
+# The missing part is still missing (a stray file is not it); then it turns up.
+[[args.steps]]
+op = "cloud"
+args = { edit = "add_file", args = { path = "/115/embyx/type/vr/GONE/GONE-012.mp4", size = 1 } }
+
+[[args.steps]]
+op = "auto"
+
+[[args.steps]]
+op = "cloud"
+args = { edit = "add_file", args = { path = "/115/embyx/type/vr/GONE/GONE-001-cd12.mp4", size = 1000 } }
+
+[[args.steps]]
+op = "auto"
+
+[[args.steps]]
+op = "cancel"
+args = { id = 3 }
+
+# A day on, the tree is scanned again and the refusals are forgotten.
+[[args.steps]]
+op = "advance"
+args = { seconds = 86401 }
+
+[[args.steps]]
+op = "auto"
+
+[[tree]]
+path = "mapping/type/vr/HUGE/HUGE-001-cd1.strm"
+text = "/mnt/cd2/115/embyx/type/vr/HUGE/HUGE-001-cd1.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/HUGE/HUGE-001-cd2.strm"
+text = "/mnt/cd2/115/embyx/type/vr/HUGE/HUGE-001-cd2.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/HUGE/HUGE-001-cd3.strm"
+text = "/mnt/cd2/115/embyx/type/vr/HUGE/HUGE-001-cd3.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/HUGE/HUGE-001-cd4.strm"
+text = "/mnt/cd2/115/embyx/type/vr/HUGE/HUGE-001-cd4.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/HUGE/HUGE-001-cd5.strm"
+text = "/mnt/cd2/115/embyx/type/vr/HUGE/HUGE-001-cd5.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/HUGE/HUGE-001-cd6.strm"
+text = "/mnt/cd2/115/embyx/type/vr/HUGE/HUGE-001-cd6.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/HUGE/HUGE-001-cd7.strm"
+text = "/mnt/cd2/115/embyx/type/vr/HUGE/HUGE-001-cd7.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/HUGE/HUGE-001-cd8.strm"
+text = "/mnt/cd2/115/embyx/type/vr/HUGE/HUGE-001-cd8.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/HUGE/HUGE-001-cd9.strm"
+text = "/mnt/cd2/115/embyx/type/vr/HUGE/HUGE-001-cd9.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/HUGE/HUGE-001-cd10.strm"
+text = "/mnt/cd2/115/embyx/type/vr/HUGE/HUGE-001-cd10.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/HUGE/HUGE-001-cd11.strm"
+text = "/mnt/cd2/115/embyx/type/vr/HUGE/HUGE-001-cd11.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/HUGE/HUGE-001-cd12.strm"
+text = "/mnt/cd2/115/embyx/type/vr/HUGE/HUGE-001-cd12.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/HUGE/HUGE-001-cd13.strm"
+text = "/mnt/cd2/115/embyx/type/vr/HUGE/HUGE-001-cd13.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/HUGE/HUGE-001-cd14.strm"
+text = "/mnt/cd2/115/embyx/type/vr/HUGE/HUGE-001-cd14.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/DUP/DUP-001-cd1.strm"
+text = "/mnt/cd2/115/embyx/type/vr/DUP/DUP-001-cd1.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/DUP/DUP-001-cd2.strm"
+text = "/mnt/cd2/115/embyx/type/vr/DUP/DUP-001-cd2.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/DUP/DUP-001-cd3.strm"
+text = "/mnt/cd2/115/embyx/type/vr/DUP/DUP-001-cd3.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/DUP/DUP-001-cd4.strm"
+text = "/mnt/cd2/115/embyx/type/vr/DUP/DUP-001-cd4.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/DUP/DUP-001-cd5.strm"
+text = "/mnt/cd2/115/embyx/type/vr/DUP/DUP-001-cd5.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/DUP/DUP-001-cd6.strm"
+text = "/mnt/cd2/115/embyx/type/vr/DUP/DUP-001-cd6.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/DUP/DUP-001-cd7.strm"
+text = "/mnt/cd2/115/embyx/type/vr/DUP/DUP-001-cd7.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/DUP/DUP-001-cd8.strm"
+text = "/mnt/cd2/115/embyx/type/vr/DUP/DUP-001-cd8.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/DUP/DUP-001-cd9.strm"
+text = "/mnt/cd2/115/embyx/type/vr/DUP/DUP-001-cd9.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/DUP/DUP-001-cd10.strm"
+text = "/mnt/cd2/115/embyx/type/vr/DUP/DUP-001-cd10.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/DUP/DUP-001-cd11.strm"
+text = "/mnt/cd2/115/embyx/type/vr/DUP/DUP-001-cd11.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/DUP/DUP-001-cd12.strm"
+text = "/mnt/cd2/115/embyx/type/vr/DUP/DUP-001-cd12.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/DUP/DUP-001-cd13.strm"
+text = "/mnt/cd2/115/embyx/type/vr/DUP/DUP-001-cd13.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/GONE/GONE-001-cd1.strm"
+text = "/mnt/cd2/115/embyx/type/vr/GONE/GONE-001-cd1.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/GONE/GONE-001-cd2.strm"
+text = "/mnt/cd2/115/embyx/type/vr/GONE/GONE-001-cd2.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/GONE/GONE-001-cd3.strm"
+text = "/mnt/cd2/115/embyx/type/vr/GONE/GONE-001-cd3.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/GONE/GONE-001-cd4.strm"
+text = "/mnt/cd2/115/embyx/type/vr/GONE/GONE-001-cd4.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/GONE/GONE-001-cd5.strm"
+text = "/mnt/cd2/115/embyx/type/vr/GONE/GONE-001-cd5.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/GONE/GONE-001-cd6.strm"
+text = "/mnt/cd2/115/embyx/type/vr/GONE/GONE-001-cd6.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/GONE/GONE-001-cd7.strm"
+text = "/mnt/cd2/115/embyx/type/vr/GONE/GONE-001-cd7.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/GONE/GONE-001-cd8.strm"
+text = "/mnt/cd2/115/embyx/type/vr/GONE/GONE-001-cd8.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/GONE/GONE-001-cd9.strm"
+text = "/mnt/cd2/115/embyx/type/vr/GONE/GONE-001-cd9.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/GONE/GONE-001-cd10.strm"
+text = "/mnt/cd2/115/embyx/type/vr/GONE/GONE-001-cd10.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/GONE/GONE-001-cd11.strm"
+text = "/mnt/cd2/115/embyx/type/vr/GONE/GONE-001-cd11.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/GONE/GONE-001-cd12.strm"
+text = "/mnt/cd2/115/embyx/type/vr/GONE/GONE-001-cd12.mp4\n"
+
+[[tree]]
+path = "mapping/type/other/OTH/OTH-001-cd1.strm"
+text = "/mnt/cd2/115/embyx/type/other/OTH/OTH-001-cd1.mp4\n"
+
+[[tree]]
+path = "mapping/type/other/OTH/OTH-001-cd2.strm"
+text = "/mnt/cd2/115/embyx/type/other/OTH/OTH-001-cd2.mp4\n"
+
+[[tree]]
+path = "mapping/type/other/OTH/OTH-001-cd3.strm"
+text = "/mnt/cd2/115/embyx/type/other/OTH/OTH-001-cd3.mp4\n"
+
+[[tree]]
+path = "mapping/type/other/OTH/OTH-001-cd4.strm"
+text = "/mnt/cd2/115/embyx/type/other/OTH/OTH-001-cd4.mp4\n"
+
+[[tree]]
+path = "mapping/type/other/OTH/OTH-001-cd5.strm"
+text = "/mnt/cd2/115/embyx/type/other/OTH/OTH-001-cd5.mp4\n"
+
+[[tree]]
+path = "mapping/type/other/OTH/OTH-001-cd6.strm"
+text = "/mnt/cd2/115/embyx/type/other/OTH/OTH-001-cd6.mp4\n"
+
+[[tree]]
+path = "mapping/type/other/OTH/OTH-001-cd7.strm"
+text = "/mnt/cd2/115/embyx/type/other/OTH/OTH-001-cd7.mp4\n"
+
+[[tree]]
+path = "mapping/type/other/OTH/OTH-001-cd8.strm"
+text = "/mnt/cd2/115/embyx/type/other/OTH/OTH-001-cd8.mp4\n"
+
+[[tree]]
+path = "mapping/type/other/OTH/OTH-001-cd9.strm"
+text = "/mnt/cd2/115/embyx/type/other/OTH/OTH-001-cd9.mp4\n"
+
+[[tree]]
+path = "mapping/type/other/OTH/OTH-001-cd10.strm"
+text = "/mnt/cd2/115/embyx/type/other/OTH/OTH-001-cd10.mp4\n"
+
+[[tree]]
+path = "mapping/type/other/OTH/OTH-001-cd11.strm"
+text = "/mnt/cd2/115/embyx/type/other/OTH/OTH-001-cd11.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/TEN/TEN-001-cd1.strm"
+text = "/mnt/cd2/115/embyx/type/vr/TEN/TEN-001-cd1.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/TEN/TEN-001-cd2.strm"
+text = "/mnt/cd2/115/embyx/type/vr/TEN/TEN-001-cd2.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/TEN/TEN-001-cd3.strm"
+text = "/mnt/cd2/115/embyx/type/vr/TEN/TEN-001-cd3.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/TEN/TEN-001-cd4.strm"
+text = "/mnt/cd2/115/embyx/type/vr/TEN/TEN-001-cd4.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/TEN/TEN-001-cd5.strm"
+text = "/mnt/cd2/115/embyx/type/vr/TEN/TEN-001-cd5.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/TEN/TEN-001-cd6.strm"
+text = "/mnt/cd2/115/embyx/type/vr/TEN/TEN-001-cd6.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/TEN/TEN-001-cd7.strm"
+text = "/mnt/cd2/115/embyx/type/vr/TEN/TEN-001-cd7.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/TEN/TEN-001-cd8.strm"
+text = "/mnt/cd2/115/embyx/type/vr/TEN/TEN-001-cd8.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/TEN/TEN-001-cd9.strm"
+text = "/mnt/cd2/115/embyx/type/vr/TEN/TEN-001-cd9.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/TEN/TEN-001-cd10.strm"
+text = "/mnt/cd2/115/embyx/type/vr/TEN/TEN-001-cd10.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/NINE/NINE-001-cd1.strm"
+text = "/mnt/cd2/115/embyx/type/vr/NINE/NINE-001-cd1.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/NINE/NINE-001-cd2.strm"
+text = "/mnt/cd2/115/embyx/type/vr/NINE/NINE-001-cd2.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/NINE/NINE-001-cd3.strm"
+text = "/mnt/cd2/115/embyx/type/vr/NINE/NINE-001-cd3.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/NINE/NINE-001-cd4.strm"
+text = "/mnt/cd2/115/embyx/type/vr/NINE/NINE-001-cd4.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/NINE/NINE-001-cd5.strm"
+text = "/mnt/cd2/115/embyx/type/vr/NINE/NINE-001-cd5.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/NINE/NINE-001-cd6.strm"
+text = "/mnt/cd2/115/embyx/type/vr/NINE/NINE-001-cd6.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/NINE/NINE-001-cd7.strm"
+text = "/mnt/cd2/115/embyx/type/vr/NINE/NINE-001-cd7.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/NINE/NINE-001-cd8.strm"
+text = "/mnt/cd2/115/embyx/type/vr/NINE/NINE-001-cd8.mp4\n"
+
+[[tree]]
+path = "mapping/type/vr/NINE/NINE-001-cd9.strm"
+text = "/mnt/cd2/115/embyx/type/vr/NINE/NINE-001-cd9.mp4\n"
+
+[kubernetes]
+jobs = {}
+
+[[kubernetes.routes]]
+method = "GET"
+path = "/api/v1/namespaces/media/pods/embyx-manager-0"
+body = { spec = { containers = [{ image = "ghcr.io/cyrahs/embyx-manager:latest" }] }, status = { containerStatuses = [{ imageID = "ghcr.io/cyrahs/embyx-manager@sha256:abc123" }] } }
+
+[clouddrive]
+directories = ["/115/upload", "/115/embyx_in"]
+files = [
+    { path = "/115/embyx/type/vr/HUGE/HUGE-001-cd1.mp4", size = 10737418240 },
+    { path = "/115/embyx/type/vr/HUGE/HUGE-001-cd2.mp4", size = 10737418240 },
+    { path = "/115/embyx/type/vr/HUGE/HUGE-001-cd3.mp4", size = 10737418240 },
+    { path = "/115/embyx/type/vr/HUGE/HUGE-001-cd4.mp4", size = 10737418240 },
+    { path = "/115/embyx/type/vr/HUGE/HUGE-001-cd5.mp4", size = 10737418240 },
+    { path = "/115/embyx/type/vr/HUGE/HUGE-001-cd6.mp4", size = 10737418240 },
+    { path = "/115/embyx/type/vr/HUGE/HUGE-001-cd7.mp4", size = 10737418240 },
+    { path = "/115/embyx/type/vr/HUGE/HUGE-001-cd8.mp4", size = 10737418240 },
+    { path = "/115/embyx/type/vr/HUGE/HUGE-001-cd9.mp4", size = 10737418240 },
+    { path = "/115/embyx/type/vr/HUGE/HUGE-001-cd10.mp4", size = 10737418240 },
+    { path = "/115/embyx/type/vr/HUGE/HUGE-001-cd11.mp4", size = 10737418240 },
+    { path = "/115/embyx/type/vr/HUGE/HUGE-001-cd12.mp4", size = 10737418240 },
+    { path = "/115/embyx/type/vr/HUGE/HUGE-001-cd13.mp4", size = 10737418240 },
+    { path = "/115/embyx/type/vr/HUGE/HUGE-001-cd14.mp4", size = 10737418240 },
+    { path = "/115/embyx/type/vr/DUP/DUP-001-cd1.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/DUP/DUP-001-cd2.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/DUP/DUP-001-cd3.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/DUP/DUP-001-cd4.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/DUP/DUP-001-cd5.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/DUP/DUP-001-cd6.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/DUP/DUP-001-cd7.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/DUP/DUP-001-cd8.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/DUP/DUP-001-cd9.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/DUP/DUP-001-cd10.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/DUP/DUP-001-cd11.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/DUP/DUP-001-cd12.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/DUP/DUP-001-cd13.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/DUP/DUP-001.mp4", size = 13000 },
+    { path = "/115/embyx/type/vr/GONE/GONE-001-cd1.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/GONE/GONE-001-cd2.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/GONE/GONE-001-cd3.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/GONE/GONE-001-cd4.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/GONE/GONE-001-cd5.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/GONE/GONE-001-cd6.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/GONE/GONE-001-cd7.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/GONE/GONE-001-cd8.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/GONE/GONE-001-cd9.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/GONE/GONE-001-cd10.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/GONE/GONE-001-cd11.mp4", size = 1000 },
+    { path = "/115/embyx/type/other/OTH/OTH-001-cd1.mp4", size = 1000 },
+    { path = "/115/embyx/type/other/OTH/OTH-001-cd2.mp4", size = 1000 },
+    { path = "/115/embyx/type/other/OTH/OTH-001-cd3.mp4", size = 1000 },
+    { path = "/115/embyx/type/other/OTH/OTH-001-cd4.mp4", size = 1000 },
+    { path = "/115/embyx/type/other/OTH/OTH-001-cd5.mp4", size = 1000 },
+    { path = "/115/embyx/type/other/OTH/OTH-001-cd6.mp4", size = 1000 },
+    { path = "/115/embyx/type/other/OTH/OTH-001-cd7.mp4", size = 1000 },
+    { path = "/115/embyx/type/other/OTH/OTH-001-cd8.mp4", size = 1000 },
+    { path = "/115/embyx/type/other/OTH/OTH-001-cd9.mp4", size = 1000 },
+    { path = "/115/embyx/type/other/OTH/OTH-001-cd10.mp4", size = 1000 },
+    { path = "/115/embyx/type/other/OTH/OTH-001-cd11.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/TEN/TEN-001-cd1.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/TEN/TEN-001-cd2.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/TEN/TEN-001-cd3.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/TEN/TEN-001-cd4.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/TEN/TEN-001-cd5.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/TEN/TEN-001-cd6.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/TEN/TEN-001-cd7.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/TEN/TEN-001-cd8.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/TEN/TEN-001-cd9.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/TEN/TEN-001-cd10.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/NINE/NINE-001-cd1.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/NINE/NINE-001-cd2.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/NINE/NINE-001-cd3.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/NINE/NINE-001-cd4.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/NINE/NINE-001-cd5.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/NINE/NINE-001-cd6.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/NINE/NINE-001-cd7.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/NINE/NINE-001-cd8.mp4", size = 1000 },
+    { path = "/115/embyx/type/vr/NINE/NINE-001-cd9.mp4", size = 1000 },
+]

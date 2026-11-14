@@ -1,0 +1,68 @@
+# A title too big for 115 with the home worker turned off: it goes to the merge Job like any
+# other (the Job re-encodes it to fit, reporting an `encode` phase), with the same Job and
+# arguments (cross-version contract 3), and uploads as usual.
+description = "merge service: over 115 GB with the home worker off, re-encoded by the merge Job"
+operation = "merge.service"
+clock = "2026-11-14T08:00:00+00:00"
+
+[roots]
+names = ["work", "mapping", "secrets"]
+
+[database]
+schema = "app"
+
+[args.archive]
+src_dir = "/mnt/cd2/115/embyx_in"
+dst_dir = "/mnt/cd2/115/embyx"
+priority_mapping = { vr = "type/vr" }
+
+[args.part_sizes]
+"/mnt/cd2/115/embyx/type/vr/BIG/BIG-001-cd1.mp4" = 60000000000
+"/mnt/cd2/115/embyx/type/vr/BIG/BIG-001-cd2.mp4" = 60000000000
+
+[[args.steps]]
+op = "create"
+args = { avid = "BIG-001", source = "vr", library_dir = "type/vr", brand = "BIG", merged_name = "BIG-001.mp4", parts = ["/mnt/cd2/115/embyx/type/vr/BIG/BIG-001-cd1.mp4", "/mnt/cd2/115/embyx/type/vr/BIG/BIG-001-cd2.mp4"] }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "home"
+
+[[args.steps]]
+op = "write"
+args = { path = "work/.merge/1.json", json = { state = "running", phase = "encode", progress = 0.25 } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "write"
+args = { path = "work/BIG-001.mp4", text = "re-encoded-big-001" }
+
+[[args.steps]]
+op = "write"
+args = { path = "work/.merge/1.json", json = { state = "done", size = 18, sha1 = "0beec7b5ea3f0fdbc95d0dd47f3c5bc275da8a33" } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "cancel"
+args = { id = 1 }
+
+[kubernetes]
+jobs = {}
+
+[[kubernetes.routes]]
+method = "GET"
+path = "/api/v1/namespaces/media/pods/embyx-manager-0"
+body = { spec = { containers = [{ image = "ghcr.io/cyrahs/embyx-manager:latest" }] }, status = { containerStatuses = [{ imageID = "ghcr.io/cyrahs/embyx-manager@sha256:abc123" }] } }
+
+[clouddrive]
+directories = ["/115/upload", "/115/embyx_in"]
+files = [
+    { path = "/115/embyx/type/vr/BIG/BIG-001-cd1.mp4", size = 10 },
+    { path = "/115/embyx/type/vr/BIG/BIG-001-cd2.mp4", size = 10 },
+]

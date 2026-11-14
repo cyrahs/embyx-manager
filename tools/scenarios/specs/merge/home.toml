@@ -1,0 +1,296 @@
+# The home transcode path (cross-version contract 5, the service's half): a task too big for
+# 115 waits for the home worker, the worker claims it, the audio Job probes the parts and copies
+# their audio, chunks come in (kept, repeated, conflicting, out of order, for a finished part,
+# for a part or task that does not exist, with a SHA-256 that is not the bytes'), parts are
+# finished (one too early), the worker pauses and goes away, the audio Job fails twice and is
+# retried, and the merge Job assembles the chunks. Then a task sent to the CPU, and one a whole
+# copy makes the claim refuse.
+description = "merge service: the home transcode path, chunk refusals, audio Job failures, CPU fallback"
+operation = "merge.service"
+clock = "2026-11-14T08:00:00+00:00"
+
+[roots]
+names = ["work", "mapping", "secrets"]
+
+[database]
+schema = "app"
+
+[args.archive]
+src_dir = "/mnt/cd2/115/embyx_in"
+dst_dir = "/mnt/cd2/115/embyx"
+priority_mapping = { vr = "type/vr" }
+
+[args.merge]
+home_transcode_enabled = true
+
+[args.part_sizes]
+"/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4" = 60000000000
+"/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4" = 60000000000
+"/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-002-cd1.mp4" = 60000000000
+"/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-002-cd2.mp4" = 60000000000
+"/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-003-cd1.mp4" = 60000000000
+"/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-003-cd2.mp4" = 60000000000
+
+[[args.steps]]
+op = "create"
+args = { avid = "GIANT-001", source = "vr", library_dir = "type/vr", brand = "GIANT", merged_name = "GIANT-001.mp4", parts = ["/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4", "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"] }
+
+# The parts are too big for 115 together: the task waits for the home worker, which is away.
+[[args.steps]]
+op = "home"
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "home"
+
+[[args.steps]]
+op = "set_paused"
+args = { id = 1, paused = true }
+
+[[args.steps]]
+op = "set_paused"
+args = { id = 1, paused = false }
+
+# The worker claims it: the audio Job starts, the worker waits for the probe.
+[[args.steps]]
+op = "claim"
+args = { name = "home-5090", version = "1.0.0", state = "idle" }
+
+[[args.steps]]
+op = "heartbeat"
+args = { name = "home-5090", version = "1.0.0", state = "waiting", task_id = 1 }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "transcode_view"
+args = { id = 1 }
+
+[[args.steps]]
+op = "write"
+args = { path = "work/.transcode/1/audio.json", json = { state = "running", parts = [{ size = 60000000000, duration = 120.0 }, { size = 60000000000, duration = 90.5 }], video_bitrate = 80000000, duration = 210.5, audio_done = 0 } }
+
+[[args.steps]]
+op = "claim"
+args = { name = "home-5090", version = "1.0.0", state = "idle" }
+
+[[args.steps]]
+op = "chunk"
+args = { task_id = 1, part_index = 0, chunk_index = 0, start = 0, duration = 60, frames = 1440, text = "p0c0" }
+
+[[args.steps]]
+op = "chunk"
+args = { task_id = 1, part_index = 0, chunk_index = 0, start = 0, duration = 60, frames = 1440, text = "p0c0" }
+
+[[args.steps]]
+op = "chunk"
+args = { task_id = 1, part_index = 0, chunk_index = 0, start = 0, duration = 60, frames = 1440, text = "other" }
+
+[[args.steps]]
+op = "chunk"
+args = { task_id = 1, part_index = 0, chunk_index = 2, start = 120, duration = 60, frames = 1440, text = "p0c2" }
+
+[[args.steps]]
+op = "chunk"
+args = { task_id = 1, part_index = 0, chunk_index = 1, start = 60.1, duration = 60, frames = 1440, text = "p0c1" }
+
+[[args.steps]]
+op = "finish_part"
+args = { task_id = 1, part_index = 0 }
+
+[[args.steps]]
+op = "chunk"
+args = { task_id = 1, part_index = 0, chunk_index = 2, start = 120, duration = 60, frames = 1440, text = "p0c2" }
+
+[[args.steps]]
+op = "chunk"
+args = { task_id = 1, part_index = 1, chunk_index = 0, start = 0, duration = 60, frames = 1440, text = "p1c0" }
+
+[[args.steps]]
+op = "finish_part"
+args = { task_id = 1, part_index = 1 }
+
+[[args.steps]]
+op = "chunk"
+args = { task_id = 1, part_index = 5, chunk_index = 0, start = 0, duration = 60, frames = 1440, text = "nope" }
+
+[[args.steps]]
+op = "chunk"
+args = { task_id = 9, part_index = 0, chunk_index = 0, start = 0, duration = 60, frames = 1440, text = "nope" }
+
+[[args.steps]]
+op = "chunk"
+args = { task_id = 1, part_index = 1, chunk_index = 1, start = 60, duration = 30.5, frames = 1440, text = "p1c1", sha256 = "0123" }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "transcode_view"
+args = { id = 1 }
+
+[[args.steps]]
+op = "set_paused"
+args = { id = 1, paused = true }
+
+[[args.steps]]
+op = "heartbeat"
+args = { name = "home-5090", version = "1.0.0", state = "encoding", task_id = 1 }
+
+[[args.steps]]
+op = "claim"
+args = { name = "home-5090", version = "1.0.0", state = "paused", task_id = 1 }
+
+[[args.steps]]
+op = "set_paused"
+args = { id = 1, paused = false }
+
+[[args.steps]]
+op = "finish_part"
+args = { task_id = 1, part_index = 1 }
+
+[[args.steps]]
+op = "claim"
+args = { name = "home-5090", version = "1.0.0", state = "idle" }
+
+[[args.steps]]
+op = "advance"
+args = { seconds = 91 }
+
+[[args.steps]]
+op = "home"
+
+[[args.steps]]
+op = "tick"
+
+# The audio Job ends without a report; retried, it is started again; its report then says failed.
+[[args.steps]]
+op = "job_status"
+args = { name = "embyx-audio-1-giant-001", status = { succeeded = 1, conditions = [{ type = "Complete", status = "True" }] } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "retry"
+args = { id = 1 }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "write"
+args = { path = "work/.transcode/1/audio.json", json = { state = "failed", error = "ffmpeg: no audio stream in cd2" } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "retry"
+args = { id = 1 }
+
+[[args.steps]]
+op = "write"
+args = { path = "work/.transcode/1/audio.json", json = { state = "done", parts = [{ size = 60000000000, duration = 120.0 }, { size = 60000000000, duration = 90.5 }], video_bitrate = 80000000, duration = 210.5, audio_done = 1 } }
+
+[[args.steps]]
+op = "heartbeat"
+args = { name = "home-5090", version = "1.0.0", state = "idle" }
+
+# Audio and video are done: the merge Job assembles the chunks.
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "home"
+
+[[args.steps]]
+op = "write"
+args = { path = "work/.merge/1.json", json = { state = "running", phase = "assemble", progress = 0.5 } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "write"
+args = { path = "work/GIANT-001.mp4", text = "assembled-giant-001" }
+
+[[args.steps]]
+op = "write"
+args = { path = "work/.merge/1.json", json = { state = "done", size = 19, sha1 = "aa" } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "cancel"
+args = { id = 1 }
+
+[[args.steps]]
+op = "create"
+args = { avid = "GIANT-002", source = "vr", library_dir = "type/vr", brand = "GIANT", merged_name = "GIANT-002.mp4", parts = ["/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-002-cd1.mp4", "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-002-cd2.mp4"] }
+
+# Sent back to the merge Job's own encoder.
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "use_cpu"
+args = { id = 2 }
+
+[[args.steps]]
+op = "home"
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "set_paused"
+args = { id = 2, paused = true }
+
+[[args.steps]]
+op = "cancel"
+args = { id = 2 }
+
+[[args.steps]]
+op = "create"
+args = { avid = "GIANT-003", source = "vr", library_dir = "type/vr", brand = "GIANT", merged_name = "GIANT-003.mp4", parts = ["/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-003-cd1.mp4", "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-003-cd2.mp4"] }
+
+# A whole copy: the claim fails the task, which the operator sends to the CPU.
+[[args.steps]]
+op = "cloud"
+args = { edit = "add_file", args = { path = "/115/embyx/type/vr/GIANT/GIANT-003.mp4", size = 30 } }
+
+[[args.steps]]
+op = "claim"
+args = { name = "home-5090", version = "1.0.0", state = "idle" }
+
+[[args.steps]]
+op = "use_cpu"
+args = { id = 3 }
+
+[[args.steps]]
+op = "cancel"
+args = { id = 3 }
+
+[kubernetes]
+jobs = {}
+
+[[kubernetes.routes]]
+method = "GET"
+path = "/api/v1/namespaces/media/pods/embyx-manager-0"
+body = { spec = { containers = [{ image = "ghcr.io/cyrahs/embyx-manager:latest" }] }, status = { containerStatuses = [{ imageID = "ghcr.io/cyrahs/embyx-manager@sha256:abc123" }] } }
+
+[clouddrive]
+directories = ["/115/upload", "/115/embyx_in"]
+files = [
+    { path = "/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4", size = 10 },
+    { path = "/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4", size = 10 },
+    { path = "/115/embyx/type/vr/GIANT/GIANT-002-cd1.mp4", size = 10 },
+    { path = "/115/embyx/type/vr/GIANT/GIANT-002-cd2.mp4", size = 10 },
+    { path = "/115/embyx/type/vr/GIANT/GIANT-003-cd1.mp4", size = 10 },
+    { path = "/115/embyx/type/vr/GIANT/GIANT-003-cd2.mp4", size = 10 },
+]
