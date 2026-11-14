@@ -18,7 +18,8 @@ COPY frontend/ ./
 RUN npm run build
 
 # ---- Rust toolchain with cargo-chef ----
-FROM rust:1.97-slim-trixie AS chef
+# The same toolchain as rust-toolchain.toml, so rustup has nothing to download in later stages.
+FROM rust:1.97.0-slim-trixie AS chef
 # BoringSSL (the AVBase client, wreq) needs cmake, clang and libclang; perl and make for its build,
 # git for the patches btls-sys applies to its source.
 RUN apt-get update \

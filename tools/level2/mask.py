@@ -11,22 +11,27 @@ writes an unmasked value: rows are masked in memory and only then written.
 
 What is masked:
 
-* `app_config`: every section's `SECRET_FIELDS` (the baseline's models: `clouddrive.api_token`,
-  `emby.api_key`, any added later) and, at any depth, any key that names a secret (token, key,
-  secret, password, passkey, cookie, authorization, signature). A non-empty value becomes
+* `app_config` and every JSON column: every section's `SECRET_FIELDS` (the baseline's models:
+  `clouddrive.api_token`, `emby.api_key`, any added later) and, at any depth, any key that names
+  a secret (token, key, secret, password, passkey, cookie, authorization, signature; snake_case,
+  camelCase or with dashes). A non-empty value of any type (text, number, list, object) becomes
   `MASKED`, so "configured" stays true; an empty one stays empty.
-* Every text value of every table: URL credentials (`user:pass@`), query parameters that name
-  a secret, and `Bearer` / `Basic` credentials.
+* Every text value of every table: URL credentials (`user:pass@`, up to the last `@`), query
+  parameters that name a secret (also in a URL nested in a parameter, plain or percent-encoded,
+  as a magnet's `tr=` carries a tracker passkey), `Bearer` / `Basic` / `token` credentials, and
+  header or attribute fields (`X-Emby-Token: ...`, `Token="..."`).
 * The literal value of every secret seen in `app_config` and of every environment variable named
   by `--secret-env` (by default the API and transcode tokens), wherever it appears as a
   substring. Values are read from the environment, never from the command line, and never
   printed.
 
 The manifest holds table names, row counts, the schema version and how many values each rule
-masked, nothing else. `check` re-reads the export: a literal secret still present, a secret-named
-JSON key with an unmasked value, or a secret-named URL parameter fails it.
+masked, nothing else. An export is written to `.<DIR>.partial` and moved to DIR only when
+`check` finds nothing; otherwise it is deleted. `check` re-reads the export with the same rules: a
+literal secret still present, a secret-named JSON key with an unmasked value, a secret-named URL
+parameter (plain or encoded) or an unmasked credential field fails it.
 
-    EMBYX_EXPORT_DSN=postgresql://... uv run python tools/level2/mask.py export --out DIR
+    EMBYX_EXPORT_DSN=postgresql://... uv run python tools/level2/mask.py export --out DIR   (DIR must not exist)
     uv run python tools/level2/mask.py check DIR
     EMBYX_MANAGER_TEST_DATABASE_URL=postgresql://... uv run python tools/level2/mask.py load DIR --name copy
 """
@@ -42,10 +47,12 @@ import decimal
 import json
 import os
 import re
+import shutil
 import sys
 import uuid
 from pathlib import Path
 from typing import Any
+from urllib.parse import unquote
 
 MASKED = 'MASKED'
 DEFAULT_SECRET_ENVS = ('EMBYX_MANAGER_API_TOKEN', 'EMBYX_MANAGER_TRANSCODE_TOKEN')
@@ -53,20 +60,65 @@ SECRET_KEY = re.compile(
     r'(?:^|[_\-.])(?:api[_\-]?)?(?:token|key|secret|password|passwd|passkey|cookie|authorization|auth|signature|sig)s?$',
     re.IGNORECASE,
 )
-URL_USERINFO = re.compile(r'(?P<scheme>[a-z][a-z0-9+.\-]*://)(?P<userinfo>[^/@\s"\'?#]+)@', re.IGNORECASE)
-URL_PARAM = re.compile(r'(?P<lead>[?&;])(?P<name>[^=&#\s"\'<>]+)=(?P<value>[^&#\s"\'<>]*)')
-AUTH_HEADER = re.compile(r'\b(?P<kind>Bearer|Basic)\s+(?P<value>[A-Za-z0-9._~+/=\-]{8,})', re.IGNORECASE)
+# Greedy up to the last `@` of the authority, so a password holding `@` is masked whole.
+URL_USERINFO = re.compile(r'(?P<scheme>[a-z][a-z0-9+.\-]*://)(?P<userinfo>[^/\s"\'?#]+)@', re.IGNORECASE)
+# A value ends at `?` too, so a URL inside a parameter (a magnet's `tr=`) has its own parameters read.
+URL_PARAM = re.compile(r'(?P<lead>[?&;])(?P<name>[^=&#?\s"\'<>]+)=(?P<value>[^&#?\s"\'<>]*)')
+# The same inside a percent-encoded URL (`tr=https%3A%2F%2Fh%2Fa%3Fpasskey%3D...`).
+ENCODED_PARAM = re.compile(
+    r'(?P<lead>%3F|%26|%3B)(?P<name>(?:[A-Za-z0-9_.~\-]|%5F|%2D|%2E)+)%3D'
+    r'(?P<value>(?:[^&#?%\s"\'<>]|%(?!26|3F|3B)[0-9A-F]{2})*)',
+    re.IGNORECASE,
+)
+AUTH_HEADER = re.compile(r'\b(?P<kind>Bearer|Basic|token)\s+(?P<value>[A-Za-z0-9._~+/=\-]{8,})', re.IGNORECASE)
+# Header or attribute style: `X-Emby-Token: ...`, `Token="..."` (Emby's MediaBrowser authorization).
+TOKEN_FIELD = re.compile(
+    r'(?<![?&;=/%])(?P<name>\b(?:[A-Za-z]+-)*(?:token|api[_-]?key|passkey|secret))(?P<sep>\s*[:=]\s*"?)(?P<value>[A-Za-z0-9._~+/=\-]{8,})',
+    re.IGNORECASE,
+)
 #: Keys that name a secret but hold none: config fields whose name ends like one.
 NOT_SECRET_KEYS = frozenset({'brand_mapping', 'key', 'playlist_key', 'sort_key', 'request_key', 'item_key'})
 
 
+def _snake(name: str) -> str:
+    """`accessToken` and `AccessToken` as `access_token`, so camelCase keys meet the same rule."""
+    return re.sub(r'(?<=[a-z0-9])(?=[A-Z])', '_', name).lower()
+
+
 def secret_key(name: str) -> bool:
-    return name not in NOT_SECRET_KEYS and SECRET_KEY.search(name) is not None
+    snake = _snake(name)
+    return name not in NOT_SECRET_KEYS and snake not in NOT_SECRET_KEYS and SECRET_KEY.search(snake) is not None
+
+
+def secret_value(value: Any) -> bool:
+    """Whether a secret-named key's value holds something to mask (an empty one says "not configured")."""
+    return value not in (None, '', [], {}, MASKED) and not isinstance(value, bool)
 
 
 def secret_param(name: str) -> bool:
     """A URL query parameter that carries a credential (`?key=` does, unlike a JSON `key`)."""
+    name = unquote(name)
     return name.lower() in {'key', 'k'} or secret_key(name)
+
+
+def _secret_param_value(match: re.Match[str], separator: str) -> str:
+    if not secret_param(match['name']) or match['value'] in {'', MASKED}:
+        return match.group(0)
+    return f'{match["lead"]}{match["name"]}{separator}{MASKED}'
+
+
+def _unless_masked(match: re.Match[str], replacement: str) -> str:
+    return match.group(0) if match['value'] == MASKED else replacement
+
+
+#: The text rules in the order they apply: (pattern, rule name for the counts, replacement).
+_TEXT_RULES: tuple[tuple[re.Pattern[str], str, Any], ...] = (
+    (URL_USERINFO, 'url_userinfo', lambda match: f'{match["scheme"]}{MASKED}@'),
+    (URL_PARAM, 'url_param', lambda match: _secret_param_value(match, '=')),
+    (ENCODED_PARAM, 'url_param', lambda match: _secret_param_value(match, '%3D')),
+    (AUTH_HEADER, 'auth_header', lambda match: _unless_masked(match, f'{match["kind"]} {MASKED}')),
+    (TOKEN_FIELD, 'token_field', lambda match: _unless_masked(match, f'{match["name"]}{match["sep"]}{MASKED}')),
+)
 
 
 def model_secret_fields() -> dict[str, frozenset[str]]:
@@ -95,51 +147,40 @@ class Masker:
             fields = self.secret_fields.get(str(row.get('section')), frozenset())
             self._collect(value, fields)
 
-    def _collect(self, value: Any, fields: frozenset[str]) -> None:
+    def _collect(self, value: Any, fields: frozenset[str], *, secret: bool = False) -> None:
         if isinstance(value, dict):
             for key, item in value.items():
-                if (key in fields or secret_key(key)) and isinstance(item, str) and item:
-                    self.literals.add(item)
-                else:
-                    self._collect(item, frozenset())
+                self._collect(item, frozenset(), secret=secret or key in fields or secret_key(key))
         elif isinstance(value, list):
             for item in value:
-                self._collect(item, frozenset())
+                self._collect(item, frozenset(), secret=secret)
+        elif secret and isinstance(value, str) and value:
+            self.literals.add(value)
 
     def text(self, value: str) -> str:
         for literal in sorted(self.literals, key=len, reverse=True):
             if literal in value:
                 value = value.replace(literal, MASKED)
                 self._count('literal')
+        for pattern, rule, masked in _TEXT_RULES:
 
-        def userinfo(match: re.Match[str]) -> str:
-            self._count('url_userinfo')
-            return f'{match["scheme"]}{MASKED}@'
+            def replace(match: re.Match[str], rule: str = rule, masked: Any = masked) -> str:
+                text = masked(match)
+                if text != match.group(0):
+                    self._count(rule)
+                return text
 
-        def param(match: re.Match[str]) -> str:
-            if not secret_param(match['name']) or not match['value'] or match['value'] == MASKED:
-                return match.group(0)
-            self._count('url_param')
-            return f'{match["lead"]}{match["name"]}={MASKED}'
-
-        def header(match: re.Match[str]) -> str:
-            if match['value'] == MASKED:
-                return match.group(0)
-            self._count('auth_header')
-            return f'{match["kind"]} {MASKED}'
-
-        value = URL_USERINFO.sub(userinfo, value)
-        value = URL_PARAM.sub(param, value)
-        return AUTH_HEADER.sub(header, value)
+            value = pattern.sub(replace, value)
+        return value
 
     def json_value(self, value: Any, fields: frozenset[str] = frozenset()) -> Any:
         if isinstance(value, dict):
             out = {}
             for key, item in value.items():
-                if (key in fields or secret_key(key)) and isinstance(item, str):
-                    if item:
+                if (key in fields or secret_key(key)) and (isinstance(item, str) or secret_value(item)):
+                    if secret_value(item):
                         self._count('secret_key')
-                    out[key] = MASKED if item else item
+                    out[key] = MASKED if secret_value(item) else item
                 else:
                     out[key] = self.json_value(item)
             return out
@@ -205,7 +246,7 @@ async def export(dsn: str, out: Path, secret_envs: list[str]) -> dict[str, Any]:
 
     literals = {os.environ[name] for name in secret_envs if os.environ.get(name)}
     masker = Masker(literals, model_secret_fields())
-    out.mkdir(parents=True, exist_ok=True)  # noqa: ASYNC240 - a command-line tool; nothing else runs
+    out.mkdir(parents=True)  # noqa: ASYNC240 - a command-line tool; nothing else runs
     connection = await asyncpg.connect(dsn)
     manifest: dict[str, Any] = {'tables': {}}
     try:
@@ -237,7 +278,13 @@ def _text_problems(value: str, literals: set[str]) -> list[str]:
         for match in URL_PARAM.finditer(value)
         if secret_param(match['name']) and match['value'] not in {'', MASKED}
     ]
+    problems += [
+        f'URL parameter {unquote(match["name"])!r}'
+        for match in ENCODED_PARAM.finditer(value)
+        if secret_param(unquote(match['name'])) and match['value'] not in {'', MASKED}
+    ]
     problems += [f'{match["kind"]} credentials' for match in AUTH_HEADER.finditer(value) if match['value'] != MASKED]
+    problems += [f'{match["name"]} field' for match in TOKEN_FIELD.finditer(value) if match['value'] != MASKED]
     return problems
 
 
@@ -246,7 +293,7 @@ def _walk(value: Any, literals: set[str]) -> list[str]:
         problems = [
             f'secret-named key {key!r} is not masked'
             for key, item in value.items()
-            if secret_key(key) and isinstance(item, str) and item not in {'', MASKED}
+            if secret_key(key) and secret_value(item)
         ]
         for item in value.values():
             problems += _walk(item, literals)
@@ -333,10 +380,27 @@ def main() -> int:
     args = parser.parse_args()
     secret_envs = args.secret_env if getattr(args, 'secret_env', None) else list(DEFAULT_SECRET_ENVS)
     if args.command == 'export':
-        manifest = asyncio.run(export(os.environ[args.dsn_env], args.out, secret_envs))
-        problems = check(args.out, secret_envs)
+        # Written beside the target and moved into place only once `check` finds nothing, so an
+        # export that still holds something secret-looking never stays on disk.
+        if args.out.exists():
+            parser.error(f'{args.out} exists')
+        staging = args.out.with_name(f'.{args.out.name}.partial')
+        shutil.rmtree(staging, ignore_errors=True)
+        try:
+            manifest = asyncio.run(export(os.environ[args.dsn_env], staging, secret_envs))
+            problems = check(staging, secret_envs)
+        except BaseException:
+            shutil.rmtree(staging, ignore_errors=True)
+            raise
         print(json.dumps({'tables': len(manifest['tables']), 'masked': manifest['masked'], 'problems': len(problems)}))
-        return 1 if problems else 0
+        if problems:
+            shutil.rmtree(staging, ignore_errors=True)
+            for problem in problems:
+                print(problem)
+            print('nothing written: extend the masking rules and export again')
+            return 1
+        staging.rename(args.out)
+        return 0
     if args.command == 'check':
         problems = check(args.directory, secret_envs)
         for problem in problems:

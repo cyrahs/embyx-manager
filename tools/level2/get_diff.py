@@ -6,10 +6,14 @@ section's `enabled`, `auto_enabled` and `home_transcode_enabled` set to false in
 so no run starts and the rows stay as exported; every outbound request goes to a local proxy that
 refuses it (as in tools/bench/memory.py), so nothing leaves the machine.
 
-The requests: every GET route of the two APIs, the list routes with a few filters and pages, and
-the item routes for the first `--per-route` ids the copy holds (acquisition AVIDs, run ids, plan
-and apply-job ids, playlist keys, replace plans). A response pair is equal when the status, the
-content type and the body (JSON parsed, keys in `--ignore-key` dropped at any depth) are equal.
+The requests: every GET route of the main listener's API and its page root, the list routes with a
+few filters and pages, and the item routes for the first `--per-route` ids the copy holds
+(acquisition AVIDs, run ids, plan and apply-job ids, playlist keys, replace plans). A query that
+finds no table or column is reported under `skipped`, not dropped silently. The transcode
+listener's GET (a part's bytes) needs a task in `transcoding`, which an export at rest does not
+hold. A response pair is equal when the status, the content type and the body are equal: JSON is
+parsed and compared with its types (`true` is not `1`, `5` is not `5.0`), keys in `--ignore-key`
+dropped at any depth; any other body is compared whole.
 
     EMBYX_MANAGER_TEST_DATABASE_URL=postgresql://... uv run python tools/level2/get_diff.py DIR \\
         --binary target/release/embyx-manager --out diff.json
@@ -30,6 +34,8 @@ import subprocess
 import sys
 import tempfile
 import time
+import urllib.error
+import urllib.request
 from pathlib import Path
 from typing import Any
 
@@ -39,6 +45,8 @@ sys.path.insert(0, str(ROOT / 'tools' / 'level2'))
 
 from mask import load  # noqa: E402
 from tools.bench.memory import API_TOKEN, TRANSCODE_TOKEN, OfflineProxy, Server, free_port, wait_healthy  # noqa: E402
+
+HTTP_TIMEOUT = 600
 
 #: Keys whose values depend on when the request ran, not on the rows.
 DEFAULT_IGNORED = ('checked_at', 'generated_at', 'now', 'server_time', 'listed_at', 'age_seconds')
@@ -67,11 +75,11 @@ async def switch_off(dsn: str) -> list[str]:
     return changed
 
 
-async def requests_for(dsn: str, per_route: int) -> list[str]:
+async def requests_for(dsn: str, per_route: int, skipped: list[str]) -> list[str]:
     import asyncpg  # noqa: PLC0415
 
     paths = [
-        '/api/health', '/api/auth/session', '/api/config', '/api/monitor/status', '/api/monitor/tracker',
+        '/', '/api/health', '/api/auth/session', '/api/config', '/api/monitor/status', '/api/monitor/tracker',
         '/api/monitor/subscriptions', '/api/playlists', '/api/merge/tasks', '/api/merge/titles',
         '/api/monitor/manual/directories', '/api/monitor/manual/directories?path=/',
     ]  # fmt: skip
@@ -88,13 +96,15 @@ async def requests_for(dsn: str, per_route: int) -> list[str]:
             'avid': 'SELECT avid FROM archive_acquisitions ORDER BY updated_at DESC, avid LIMIT $1',
             'run': 'SELECT run_id FROM pipeline_runs ORDER BY started_at DESC LIMIT $1',
             'plan': 'SELECT plan_id FROM fill_actor_plans ORDER BY created_at DESC LIMIT $1',
-            'apply': 'SELECT job_id FROM fill_actor_apply_jobs ORDER BY created_at DESC LIMIT $1',
+            'apply': 'SELECT job_id FROM fill_actor_apply_jobs ORDER BY job_id LIMIT $1',
             'playlist': 'SELECT key FROM playlists ORDER BY key LIMIT $1',
         }
         found: dict[str, list[str]] = {}
         for name, query in queries.items():
-            with contextlib.suppress(asyncpg.PostgresError):
+            try:
                 found[name] = [str(row[0]) for row in await connection.fetch(query, per_route)]
+            except asyncpg.PostgresError as error:
+                skipped.append(f'{name}: {type(error).__name__}')
     finally:
         await connection.close()
     for avid in found.get('avid', []):
@@ -128,8 +138,7 @@ def answers(command: list[str], dsn: str, paths: list[str]) -> dict[str, Any]:
         time.sleep(1.0)
         out = {}
         for path in paths:
-            status, body = server.call('GET', path)
-            out[path] = {'status': status, 'body': body}
+            out[path] = fetch(server.base, path)
         out['__proxy_hosts__'] = proxy.hosts
         return out
     finally:
@@ -139,6 +148,23 @@ def answers(command: list[str], dsn: str, paths: list[str]) -> dict[str, Any]:
         if process.poll() is None:
             process.kill()
         shutil.rmtree(work, ignore_errors=True)
+
+
+def fetch(base: str, path: str) -> dict[str, Any]:
+    """One GET with the API token: status, content type and the body (JSON parsed, else text)."""
+    request = urllib.request.Request(f'{base}{path}', method='GET')  # noqa: S310 - a local server
+    request.add_header('authorization', f'Bearer {API_TOKEN}')
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+    try:
+        with opener.open(request, timeout=HTTP_TIMEOUT) as response:
+            raw, status, kind = response.read(), response.status, response.headers.get('content-type')
+    except urllib.error.HTTPError as error:
+        raw, status, kind = error.read(), error.code, error.headers.get('content-type')
+    try:
+        body = json.loads(raw) if raw and kind and 'json' in kind else raw.decode('utf-8', 'replace')
+    except ValueError:
+        body = raw.decode('utf-8', 'replace')
+    return {'status': status, 'content_type': kind, 'body': body}
 
 
 def strip(value: Any, ignored: frozenset[str]) -> Any:
@@ -166,7 +192,8 @@ def differences(left: Any, right: Any, path: str = '$') -> list[dict[str, str]]:
             for index, pair in enumerate(zip(left, right, strict=True))
             for item in differences(*pair, f'{path}[{index}]')
         ]
-    if left == right:
+    # `type` too: Python's `True == 1 == 1.0` would hide a bool sent as a number.
+    if type(left) is type(right) and left == right:
         return []
     return [{
         'path': path,
@@ -188,6 +215,7 @@ def main() -> int:
     results: dict[str, dict[str, Any]] = {}
     switched: list[str] = []
     paths: list[str] = []
+    skipped: list[str] = []
     for side, command in (
         ('python', [str(ROOT / '.venv/bin/python'), '-m', 'embyx_manager', 'serve']),
         ('rust', [args.binary, 'serve']),
@@ -196,16 +224,27 @@ def main() -> int:
         dsn = asyncio.run(load(args.export, admin, name))
         try:
             switched = asyncio.run(switch_off(dsn))
-            paths = paths or asyncio.run(requests_for(dsn, args.per_route))
+            if not paths:
+                paths = asyncio.run(requests_for(dsn, args.per_route, skipped))
+                # Each build serves the front end from its own place (D59); compare the page
+                # only when both have one.
+                fronts = (ROOT / 'src/embyx_manager/static', Path(args.binary).resolve().parent / 'static')
+                if not all((front / 'index.html').is_file() for front in fronts):
+                    paths.remove('/')
+                    skipped.append('/: a build without its front end (npm run build; static/ beside the binary)')
             results[side] = answers(command, dsn, paths)
         finally:
             asyncio.run(_drop(admin, name))
-    report: dict[str, Any] = {'requests': len(paths), 'switched_off': switched, 'equal': 0, 'different': []}
+    report: dict[str, Any] = {
+        'requests': len(paths), 'skipped': skipped, 'switched_off': switched, 'equal': 0, 'different': [],
+    }  # fmt: skip
     for path in paths:
         left, right = results['python'][path], results['rust'][path]
-        found = []
-        if left['status'] != right['status']:
-            found.append({'path': 'status', 'python': str(left['status']), 'rust': str(right['status'])})
+        found = [
+            {'path': field, 'python': str(left[field]), 'rust': str(right[field])}
+            for field in ('status', 'content_type')
+            if left[field] != right[field]
+        ]
         found += differences(strip(left['body'], ignored), strip(right['body'], ignored))
         if found:
             report['different'].append({'request': path, 'differences': found})
@@ -214,6 +253,8 @@ def main() -> int:
     report['proxy_hosts'] = {side: results[side]['__proxy_hosts__'] for side in results}
     args.out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print(f'{report["equal"]} of {len(paths)} requests equal; {len(report["different"])} different')
+    for item in skipped:
+        print('  skipped:', item)
     for item in report['different'][:20]:
         print(' ', item['request'], [difference['path'] for difference in item['differences']][:5])
     return 1 if report['different'] else 0

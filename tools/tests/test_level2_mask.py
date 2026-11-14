@@ -9,7 +9,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
-from mask import MASKED, Masker, check, export, load, secret_key
+from mask import MASKED, Masker, _walk, check, export, load, secret_key
 
 # Synthetic stand-ins: nothing here is or resembles a real credential.
 CLOUD_TOKEN = 'synthetic-clouddrive-token-0001'  # noqa: S105
@@ -19,9 +19,11 @@ FEED_KEY = 'synthetic-feed-key-0004'
 
 
 def test_secret_names_are_recognised_and_ordinary_keys_are_not() -> None:
-    for name in ('api_token', 'api_key', 'apikey', 'token', 'passkey', 'X-Auth', 'cookie', 'password', 'sig'):
+    for name in ('api_token', 'api_key', 'apikey', 'token', 'passkey', 'X-Auth', 'cookie', 'password', 'sig',
+                 'accessToken', 'ClientSecret', 'privateKey'):  # fmt: skip
         assert secret_key(name), name
-    for name in ('key', 'playlist_key', 'brand_mapping', 'monkey', 'keyword', 'tokens_used_count', 'avid', 'title'):
+    for name in ('key', 'playlist_key', 'playlistKey', 'brand_mapping', 'monkey', 'keyword', 'tokens_used_count',
+                 'avid', 'title'):  # fmt: skip
         assert not secret_key(name), name
 
 
@@ -38,6 +40,32 @@ def test_text_masks_literals_url_credentials_parameters_and_auth_headers() -> No
     assert API_TOKEN not in masked
     assert '&limit=5' in masked
     assert masker.counts == {'auth_header': 1, 'literal': 1, 'url_param': 1, 'url_userinfo': 1}
+
+
+def test_nested_and_encoded_urls_header_fields_and_camel_case_keys_are_masked_and_checked() -> None:
+    masker = Masker(set(), {})
+    texts = [
+        f'magnet:?xt=urn:btih:00&dn=X&tr=https://t.example/announce?passkey={FEED_KEY}',
+        f'magnet:?xt=urn:btih:00&tr=https%3A%2F%2Ft.example%2Fa%3Fpasskey%3D{FEED_KEY}%26x%3D1',
+        f'https://h.example/x?api%5Fkey={FEED_KEY}',
+        f'MediaBrowser Client="x", Token="{EMBY_KEY}"',
+        f'X-Emby-Token: {EMBY_KEY}',
+        f'Authorization: token {EMBY_KEY}',
+        f'postgresql://user:pa@{CLOUD_TOKEN}@db.example/x',
+    ]
+    for text in texts:
+        assert _walk(text, set()), text
+        masked = masker.text(text)
+        assert not any(secret in masked for secret in (FEED_KEY, EMBY_KEY, CLOUD_TOKEN)), masked
+        assert _walk(masked, set()) == [], masked
+    assert masker.text('https://h.example/p?limit=5&sort=asc') == 'https://h.example/p?limit=5&sort=asc'
+    value = {'accessToken': EMBY_KEY, 'api_tokens': [EMBY_KEY], 'cookies': {'session': EMBY_KEY}, 'playlistKey': 'pl1',
+             'token_enabled': True, 'auth': None}  # fmt: skip
+    assert len(_walk(value, set())) == 3
+    assert masker.json_value(value) == {
+        'accessToken': MASKED, 'api_tokens': MASKED, 'cookies': MASKED, 'playlistKey': 'pl1',
+        'token_enabled': True, 'auth': None,
+    }  # fmt: skip
 
 
 def test_config_secrets_are_masked_by_model_and_by_name_and_learned_as_literals() -> None:

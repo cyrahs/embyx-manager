@@ -82,6 +82,10 @@ def test_get_diff_reports_json_paths_and_drops_ignored_keys() -> None:
         {'path': '$.only', 'only': 'python'},
     ]
     assert get_diff.differences([1, 2], [1]) == [{'path': '$', 'python': '[1, 2]', 'rust': '[1]'}]
+    assert get_diff.differences({'on': True, 'n': 5}, {'on': 1, 'n': 5.0}) == [
+        {'path': '$.on', 'python': 'true', 'rust': '1'},
+        {'path': '$.n', 'python': '5', 'rust': '5.0'},
+    ]
 
 
 def test_the_tools_run_as_scripts() -> None:

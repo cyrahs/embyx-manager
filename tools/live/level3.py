@@ -182,6 +182,7 @@ def compare(python: Path, rust: Path) -> int:
     left = {entry['step']: entry for entry in json.loads(python.read_text(encoding='utf-8'))['results']}
     right = {entry['step']: entry for entry in json.loads(rust.read_text(encoding='utf-8'))['results']}
     status = 0
+    compared = 0
     for step in sorted(set(left) | set(right), key=lambda name: list(left).index(name) if name in left else 99):
         a, b = left.get(step), right.get(step)
         if a is None or b is None:
@@ -189,17 +190,24 @@ def compare(python: Path, rust: Path) -> int:
             status = 1
             continue
         if 'error' in a or 'error' in b:
-            verdict = 'both refused' if 'error' in a and 'error' in b else 'ONE SIDE REFUSED'
-            if verdict != 'both refused':
+            verdict = (
+                'both refused: inconclusive from this network' if 'error' in a and 'error' in b else 'ONE SIDE REFUSED'
+            )
+            if verdict == 'ONE SIDE REFUSED':
                 status = 1
             print(f'{step}: {verdict}: python={a.get("error")} rust={b.get("error")}')
             continue
         same = a['value'] == b['value']
+        compared += 1
         status |= 0 if same else 1
         print(f'{step}: {"equal" if same else "DIFFERENT"}')
         if not same:
             print(f'  python: {json.dumps(a["value"], ensure_ascii=False)[:600]}')
             print(f'  rust:   {json.dumps(b["value"], ensure_ascii=False)[:600]}')
+    print(f'{compared} step(s) compared')
+    if not compared:
+        print('nothing was compared: every read was refused (inconclusive), or the files are empty')
+        return 1
     return status
 
 

@@ -31,17 +31,17 @@ added, and nas-gitops is unchanged. Each step is Max's to start.
 ## The image workflow for `rust` (not added)
 
 `rust.yml` builds `Dockerfile.rust` on every pull request and push but pushes nothing. Publishing the
-Rust image needs a workflow of its own, for example `.github/workflows/rust-image.yml`. It runs only
-after `rust.yml` passed on a push to `rust`, and never writes the `latest` tag, which Flux follows and
-which `ci.yml` keeps building from `main` (Python) until the plan's later steps:
+Rust image needs a workflow of its own on `rust`, for example `.github/workflows/rust-image.yml`. It
+runs on pushes to `rust`, which only happen by merging a PR whose `rust.yml` checks passed (a
+`workflow_run` trigger would be simpler to gate on `rust.yml`, but GitHub reads it only from the
+default branch, `main`). It never writes the `latest` tag, which Flux follows and which `ci.yml` keeps
+building from `main` (Python) until the plan's later steps:
 
 ```yaml
 name: Rust image
 
 on:
-  workflow_run:
-    workflows: [Rust rewrite]
-    types: [completed]
+  push:
     branches: [rust]
 
 permissions:
@@ -50,12 +50,9 @@ permissions:
 
 jobs:
   image:
-    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v5
-      with:
-        ref: ${{ github.event.workflow_run.head_sha }}
     - uses: docker/setup-buildx-action@v3
     - uses: docker/login-action@v3
       with:
@@ -69,7 +66,7 @@ jobs:
         push: true
         tags: |
           ghcr.io/cyrahs/embyx-manager:rust
-          ghcr.io/cyrahs/embyx-manager:rust-${{ github.event.workflow_run.head_sha }}
+          ghcr.io/cyrahs/embyx-manager:rust-${{ github.sha }}
         cache-from: type=gha,scope=rust-image
         cache-to: type=gha,scope=rust-image,mode=max
 ```
@@ -112,7 +109,7 @@ jobs:
       env:
         GH_TOKEN: ${{ github.token }}
       run: >
-        gh release create "$GITHUB_REF_NAME" --title "Home worker $GITHUB_REF_NAME" --notes "docs/rewrite/HOME-WORKER.md"
+        gh release create "$GITHUB_REF_NAME" --title "Home worker $GITHUB_REF_NAME" --notes-file docs/rewrite/HOME-WORKER.md
         target/release/embyx-manager.exe target/release/embyx-manager.exe.sha256
 ```
 
@@ -131,7 +128,8 @@ A way to do it with what is there today; Max decides when and whether.
 3. Point Flux at the Rust image: in nas-gitops `infra/image-automation/embyx-manager-ghcr.yaml`, set
    the ImagePolicy's `filterTags.pattern` from `'^latest$'` to `'^rust$'`. Flux then writes the `rust`
    digest into `apps/emby/embyx-manager/kustomization.yaml`; the deployment (`Recreate`) restarts.
-   Nothing else in the manifests changes.
+   The digest decides the image; `newTag: latest` beside it can be changed to `rust` in the same
+   commit so the file does not mislead. Nothing else in the manifests changes.
 4. Check: `/api/health`, every page of the dashboard, the run history, one manual mapping and archive
    run, the merge tab's task list, and the pod's memory for a few days (below).
 5. Going back: set the pattern to `'^latest$'` again (Python's image is still built from `main`).

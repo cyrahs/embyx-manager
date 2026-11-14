@@ -158,6 +158,15 @@ jobs:
           exit 1
         fi
 
+    # The level 2 decision replay's Rust side (examples/replay.rs) against the Python decisions,
+    # on the synthetic export of the tool's own tests.
+    - name: Level 2 replay, Rust example against Python
+      env:
+        EMBYX_L2_REPLAY_BINARY: target/debug/examples/replay
+      run: |
+        cargo build -p embyx-monitor --example replay --locked
+        uv run pytest tools/tests/test_level2_replay.py -q -p no:cacheprovider
+
     # Each line names its crate (cargo's own listing does not), so a claim is matched in its crate.
     - name: List compiled tests for the parity check
       run: python3 tools/parity/list_rust_tests.py --workspace --locked > "$RUNNER_TEMP/rust-tests.txt"

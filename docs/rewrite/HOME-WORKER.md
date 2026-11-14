@@ -42,7 +42,7 @@ CI run as a workflow artifact (`embyx-manager-windows`, 14 days), which is for a
    ```
 
 4. The WireGuard tunnel and `%APPDATA%\embyx-transcode\config.toml` stay as they are: the Rust
-   worker reads the same file with the same keys (`server`, `token`, `upload_mbps`, `jobs`,
+   worker reads the same file with the same keys (`server`, `token`, `name`, `upload_mbps`, `jobs`,
    `max_queue_gb`, `cache_dir`, `ffmpeg`, `ffprobe`, `[encoder]`) and the same defaults.
 
 5. Run it as before, in a terminal you leave open:
@@ -52,7 +52,7 @@ CI run as a workflow artifact (`embyx-manager-windows`, 14 days), which is for a
    ```
 
    Ctrl+C once finishes the chunk under way, uploads what is queued and exits; twice exits at
-   once. The command-line flags are the same (`--server`, `--upload-mbps`, `--jobs`,
+   once. The command-line flags are the same (`--server`, `--token`, `--upload-mbps`, `--jobs`,
    `--max-queue-gb`, `--cache-dir`, `--ffmpeg`, `--ffprobe`, `--config`).
 
 To update, download the new release's exe over the old one while the worker is not running.
@@ -79,16 +79,20 @@ executables. To check what the worker will start:
 (Get-Command ffprobe).Source
 ```
 
-If either path is under `chocolatey\bin` or `scoop\shims`, point the worker at the real files in
-`config.toml` (or with `--ffmpeg` / `--ffprobe`):
+If either path is under `chocolatey\bin` or `scoop\shims`, find the real files and point the
+worker at them in `config.toml` (or with `--ffmpeg` / `--ffprobe`). Chocolatey's folder name
+depends on the package version, so look it up (as `rust.yml`'s Windows job does):
+
+```powershell
+# Chocolatey
+(Get-ChildItem C:\ProgramData\chocolatey\lib\ffmpeg -Recurse -Filter ffmpeg.exe | Select-Object -First 1).FullName
+# Scoop
+(Get-ChildItem $env:USERPROFILE\scoop\apps\ffmpeg\current -Recurse -Filter ffmpeg.exe | Select-Object -First 1).FullName
+```
 
 ```toml
-# Chocolatey
-ffmpeg = 'C:\ProgramData\chocolatey\lib\ffmpeg\tools\ffmpeg\bin\ffmpeg.exe'
-ffprobe = 'C:\ProgramData\chocolatey\lib\ffmpeg\tools\ffmpeg\bin\ffprobe.exe'
-# Scoop
-# ffmpeg = 'C:\Users\<you>\scoop\apps\ffmpeg\current\bin\ffmpeg.exe'
-# ffprobe = 'C:\Users\<you>\scoop\apps\ffmpeg\current\bin\ffprobe.exe'
+ffmpeg = 'C:\<the folder found above>\ffmpeg.exe'
+ffprobe = 'C:\<the folder found above>\ffprobe.exe'
 ```
 
 (Single quotes: TOML takes the backslashes literally.)
