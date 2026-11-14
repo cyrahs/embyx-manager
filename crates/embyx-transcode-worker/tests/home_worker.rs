@@ -86,6 +86,9 @@ struct StandIn {
     chunks: Mutex<BTreeMap<i128, Vec<LocalChunk>>>,
     finished: Mutex<BTreeSet<i128>>,
     broken: Mutex<Vec<String>>,
+    /// When each chunk arrived, for a failure's message.
+    arrivals: Mutex<Vec<std::time::Duration>>,
+    created: std::time::Instant,
 }
 
 fn lock<T>(mutex: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
@@ -191,6 +194,7 @@ impl Cluster for StandIn {
         std::fs::create_dir_all(target.parent().expect("parent")).map_err(CallError::Io)?;
         std::fs::copy(&chunk.path, &target).map_err(CallError::Io)?;
         mine.push(chunk.clone());
+        lock(&self.arrivals).push(self.created.elapsed());
         Ok(answer("stored"))
     }
 
@@ -226,13 +230,13 @@ fn read(path: &Path) -> Value {
     pyjson::loads(&std::fs::read_to_string(path).expect("read")).expect("JSON")
 }
 
-fn task_run(config: &WorkerConfig, cluster: &Arc<StandIn>) -> TaskRun {
+fn task_run(config: &WorkerConfig, cluster: &Arc<StandIn>, log: &Arc<MemoryLog>) -> TaskRun {
     TaskRun::new(
         RunParts {
             config: config.clone(),
             cluster: cluster.clone(),
             runner: Arc::new(SystemRunner),
-            log: Arc::new(MemoryLog::default()),
+            log: log.clone(),
             timing: Timing::default(),
         },
         cluster.assignment(),
@@ -263,6 +267,8 @@ fn a_stopped_and_resumed_transcode_assembles_with_every_frame_in_sync() {
         chunks: Mutex::new((0..2).map(|index| (index, Vec::new())).collect()),
         finished: Mutex::new(BTreeSet::new()),
         broken: Mutex::new(Vec::new()),
+        arrivals: Mutex::new(Vec::new()),
+        created: std::time::Instant::now(),
     });
     let mut config = WorkerConfig::new("http://cluster");
     config.cache_dir = tmp.join("cache");
@@ -274,14 +280,23 @@ fn a_stopped_and_resumed_transcode_assembles_with_every_frame_in_sync() {
         let cluster = Arc::clone(&cluster);
         move || usize::from(cluster.held() >= 1)
     };
-    let outcome = task_run(&config, &cluster).run(&stop).expect("first run");
+    let log = Arc::new(MemoryLog::default());
+    let outcome = task_run(&config, &cluster, &log).run(&stop).expect("first run");
     assert_eq!(outcome, Outcome::Stopped);
     let held: Vec<usize> = lock(&cluster.chunks).values().map(Vec::len).collect();
-    assert!((1..6).contains(&held[0]), "{held:?}");
+    assert!(
+        (1..6).contains(&held[0]),
+        "{held:?}, arriving at {:?} of {:?}: {:?}",
+        lock(&cluster.arrivals),
+        cluster.created.elapsed(),
+        log.events()
+    );
     assert_eq!(held[1], 0);
     assert!(lock(&cluster.finished).is_empty());
 
-    let outcome = task_run(&config, &cluster).run(&|| 0).expect("second run");
+    let outcome = task_run(&config, &cluster, &Arc::new(MemoryLog::default()))
+        .run(&|| 0)
+        .expect("second run");
     assert_eq!(outcome, Outcome::Done);
     assert_eq!(*lock(&cluster.finished), BTreeSet::from([0, 1]));
     assert_eq!(*lock(&cluster.broken), Vec::<String>::new());
