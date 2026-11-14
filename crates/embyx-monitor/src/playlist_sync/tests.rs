@@ -65,7 +65,11 @@ impl PlaylistStore for FakeRepository {
         Box::pin(async move { Ok(source) })
     }
 
-    fn record_source<'a>(&'a self, database_name: &'a str, now: DateTime<Utc>) -> BoxFuture<'a, Result<(), StoreError>> {
+    fn record_source<'a>(
+        &'a self,
+        database_name: &'a str,
+        now: DateTime<Utc>,
+    ) -> BoxFuture<'a, Result<(), StoreError>> {
         *self.stored_source.lock().expect("source") = Some(PlaylistSourceState {
             database_name: database_name.to_owned(),
             fetched_at: now,
@@ -73,7 +77,11 @@ impl PlaylistStore for FakeRepository {
         Box::pin(async { Ok(()) })
     }
 
-    fn replace_lists<'a>(&'a self, lists: &'a [RankedList], now: DateTime<Utc>) -> BoxFuture<'a, Result<(), StoreError>> {
+    fn replace_lists<'a>(
+        &'a self,
+        lists: &'a [RankedList],
+        now: DateTime<Utc>,
+    ) -> BoxFuture<'a, Result<(), StoreError>> {
         self.replaced
             .lock()
             .expect("replaced")
@@ -90,8 +98,14 @@ impl PlaylistStore for FakeRepository {
                     name: ranked.name().to_owned(),
                     enabled: current.as_ref().is_none_or(|current| current.enabled),
                     entries: ranked.entries.clone(),
-                    present: current.as_ref().map(|current| current.present.clone()).unwrap_or_default(),
-                    missing: current.as_ref().map(|current| current.missing.clone()).unwrap_or_default(),
+                    present: current
+                        .as_ref()
+                        .map(|current| current.present.clone())
+                        .unwrap_or_default(),
+                    missing: current
+                        .as_ref()
+                        .map(|current| current.missing.clone())
+                        .unwrap_or_default(),
                     emby_playlist_id: current.as_ref().and_then(|current| current.emby_playlist_id.clone()),
                     last_synced_at: current.as_ref().and_then(|current| current.last_synced_at),
                     last_error: None,
@@ -241,7 +255,10 @@ impl FakeEmby {
     }
 
     fn items(&self, playlist_id: &str) -> Vec<String> {
-        self.lock().playlists[playlist_id].iter().map(|(_, item)| item.clone()).collect()
+        self.lock().playlists[playlist_id]
+            .iter()
+            .map(|(_, item)| item.clone())
+            .collect()
     }
 
     fn name(&self, playlist_id: &str) -> String {
@@ -283,12 +300,19 @@ impl PlaylistServer for FakeEmby {
         Box::pin(async move { Ok(playlists) })
     }
 
-    fn create_playlist<'a>(&'a self, name: &'a str, item_ids: &'a [String]) -> BoxFuture<'a, Result<String, EmbyError>> {
+    fn create_playlist<'a>(
+        &'a self,
+        name: &'a str,
+        item_ids: &'a [String],
+    ) -> BoxFuture<'a, Result<String, EmbyError>> {
         let result = self.create(name, item_ids);
         Box::pin(async move { result })
     }
 
-    fn playlist_entries<'a>(&'a self, playlist_id: &'a str) -> BoxFuture<'a, Result<Vec<EmbyPlaylistEntry>, EmbyError>> {
+    fn playlist_entries<'a>(
+        &'a self,
+        playlist_id: &'a str,
+    ) -> BoxFuture<'a, Result<Vec<EmbyPlaylistEntry>, EmbyError>> {
         let entries = self.lock().playlists[playlist_id]
             .iter()
             .map(|(entry_id, item_id)| EmbyPlaylistEntry {
@@ -314,7 +338,9 @@ impl PlaylistServer for FakeEmby {
     ) -> BoxFuture<'a, Result<(), EmbyError>> {
         let mut state = self.lock();
         state.playlists[playlist_id].retain(|(entry, _)| !entry_ids.contains(entry));
-        state.calls.push(Call::Remove(playlist_id.to_owned(), entry_ids.to_vec()));
+        state
+            .calls
+            .push(Call::Remove(playlist_id.to_owned(), entry_ids.to_vec()));
         Box::pin(async { Ok(()) })
     }
 
@@ -372,7 +398,11 @@ fn source_state(name: &str) -> Option<PlaylistSourceState> {
     })
 }
 
-fn make_pipeline(repository: &Arc<FakeRepository>, source: &Arc<FakeSource>, emby: &Arc<FakeEmby>) -> PlaylistSyncPipeline {
+fn make_pipeline(
+    repository: &Arc<FakeRepository>,
+    source: &Arc<FakeSource>,
+    emby: &Arc<FakeEmby>,
+) -> PlaylistSyncPipeline {
     let parser = AvidParser::default();
     PlaylistSyncPipeline::new(
         Arc::clone(repository) as Arc<dyn PlaylistStore>,
@@ -468,7 +498,10 @@ async fn new_database_name_replaces_entries_but_keeps_the_operators_flag() {
     let source = FakeSource::new(Some("20260112"));
     let emby = Arc::new(FakeEmby::new(&[("SSNI-497", "10")]));
 
-    make_pipeline(&repository, &source, &emby).run(&ctx()).await.expect("run");
+    make_pipeline(&repository, &source, &emby)
+        .run(&ctx())
+        .await
+        .expect("run");
 
     assert_eq!(source.downloads(), 1);
     let k7 = repository.record("k7");
@@ -495,7 +528,11 @@ async fn source_outage_keeps_syncing_the_stored_lists() {
         .await
         .expect("run");
 
-    assert!(run.log_tail().iter().any(|line| line.contains("ranking source unavailable")));
+    assert!(
+        run.log_tail()
+            .iter()
+            .any(|line| line.contains("ranking source unavailable"))
+    );
     assert!(run.errors().is_empty());
     let playlist_id = repository.record("k7").emby_playlist_id.expect("a playlist");
     assert_eq!(emby.items(&playlist_id), ["10"]);

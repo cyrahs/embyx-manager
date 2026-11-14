@@ -304,9 +304,7 @@ fn incremental_delete_stops_at_dir_that_is_not_empty_on_disk() {
     fs.add_fault(Fault::errno("rmdir", &title_dir, ENOTEMPTY));
 
     let ctx = make_ctx();
-    let (_, failed_deleted) = pipeline
-        .run_incremental(&ctx, &[], &[source])
-        .expect("run_incremental");
+    let (_, failed_deleted) = pipeline.run_incremental(&ctx, &[], &[source]).expect("run_incremental");
 
     assert!(failed_deleted.is_empty());
     assert!(!title_dir.join("ABC-123.strm").exists());
@@ -325,11 +323,20 @@ fn full_sync_deletes_metadata_of_parts_merged_into_one_file() {
     let title = pipeline.dst_dir.join("clt/SQTEVR/SQTEVR-009");
     touch(
         &title,
-        &["SQTEVR-009.nfo", "SQTEVR-009-mediainfo.json", "poster.jpg", "fanart.jpg"],
+        &[
+            "SQTEVR-009.nfo",
+            "SQTEVR-009-mediainfo.json",
+            "poster.jpg",
+            "fanart.jpg",
+        ],
     );
     touch(
         &title,
-        &["SQTEVR-009-cd1.nfo", "SQTEVR-009-cd1-poster.jpg", "SQTEVR-009-cd10-landscape.jpg"],
+        &[
+            "SQTEVR-009-cd1.nfo",
+            "SQTEVR-009-cd1-poster.jpg",
+            "SQTEVR-009-cd10-landscape.jpg",
+        ],
     );
 
     let ctx = make_ctx();
@@ -356,7 +363,10 @@ fn full_sync_keeps_metadata_a_live_strm_claims() {
     strm(&pipeline.src_dir.join("ABC-123-cd1-4K.strm"));
     strm(&pipeline.src_dir.join("ABC-123-cd2.strm"));
     let title = pipeline.dst_dir.join("ABC-123");
-    touch(&title, &["ABC-123-cd1-4K.nfo", "ABC-123-cd2-poster.jpg", "ABC-123-cd3.nfo"]);
+    touch(
+        &title,
+        &["ABC-123-cd1-4K.nfo", "ABC-123-cd2-poster.jpg", "ABC-123-cd3.nfo"],
+    );
 
     pipeline.run_full(&make_ctx()).expect("run_full");
 
@@ -377,7 +387,12 @@ fn incremental_delete_takes_the_strms_own_metadata_only() {
     let title = pipeline.dst_dir.join("ABC-123");
     touch(
         &title,
-        &["ABC-123.nfo", "ABC-123-poster.jpg", "ABC-123-cd1.nfo", "ABC-123-cd1-poster.jpg"],
+        &[
+            "ABC-123.nfo",
+            "ABC-123-poster.jpg",
+            "ABC-123-cd1.nfo",
+            "ABC-123-cd1-poster.jpg",
+        ],
     );
     touch(&title, &["ABC-123-cd2-poster.jpg", "fanart.jpg"]);
 
@@ -517,10 +532,7 @@ fn texts(value: &embyx_core::pyjson::Value) -> Vec<String> {
 
 /// `{type, message}` of an error with the temporary directory written as `{tmp}`, or
 /// `{result}`.
-fn outcome<T: Into<embyx_core::pyjson::Value>>(
-    result: Result<T, PyOsError>,
-    tmp: &Path,
-) -> embyx_core::pyjson::Value {
+fn outcome<T: Into<embyx_core::pyjson::Value>>(result: Result<T, PyOsError>, tmp: &Path) -> embyx_core::pyjson::Value {
     use embyx_core::pyjson::{Dict, Value};
     let mut value = Dict::new();
     match result {
@@ -618,7 +630,10 @@ fn file_system_calls_match_python() {
     let cases: Vec<(&str, Value)> = vec![
         (
             "copy_missing_source",
-            outcome(unit(local.copy2(&tmp.join("missing.strm"), &tmp.join("out/x.strm"))), &tmp),
+            outcome(
+                unit(local.copy2(&tmp.join("missing.strm"), &tmp.join("out/x.strm"))),
+                &tmp,
+            ),
         ),
         (
             "copy_missing_directory",
@@ -644,7 +659,10 @@ fn file_system_calls_match_python() {
         ("rmdir_not_empty", outcome(unit(local.rmdir(&tmp.join("full"))), &tmp)),
         ("rmdir_missing", outcome(unit(local.rmdir(&tmp.join("gone"))), &tmp)),
         ("cmp_equal", outcome(local.cmp_files(&src, &dst), &tmp)),
-        ("cmp_same_size_differs", outcome(local.cmp_files(&src, &same_size), &tmp)),
+        (
+            "cmp_same_size_differs",
+            outcome(local.cmp_files(&src, &same_size), &tmp),
+        ),
         ("cmp_directory", outcome(local.cmp_files(&src, &tmp.join("full")), &tmp)),
         (
             "cmp_missing",
@@ -672,7 +690,11 @@ fn sidecars_are_matched_on_bytes_not_on_a_lossy_decode() {
     strm(&first);
     strm(&second);
     pipeline.run_full(&make_ctx()).expect("run_full");
-    for sidecar in [&b"ABC-123 \xff.nfo"[..], b"ABC-123 \xfe.nfo", b"ABC-123 \xff-poster.jpg"] {
+    for sidecar in [
+        &b"ABC-123 \xff.nfo"[..],
+        b"ABC-123 \xfe.nfo",
+        b"ABC-123 \xff-poster.jpg",
+    ] {
         stdfs::write(title.join(name(sidecar)), "x").expect("write");
     }
 

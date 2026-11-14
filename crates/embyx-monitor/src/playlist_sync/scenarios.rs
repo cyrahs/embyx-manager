@@ -150,11 +150,7 @@ async fn steps(spec: &Spec, database: &TestDatabase, recorder: &Recorder, emby_u
                     .map_err(|error| error_value(&error))
             }
             "set_enabled" => repository
-                .set_enabled(
-                    text(&step, "key"),
-                    flag(&step, "enabled"),
-                    now(),
-                )
+                .set_enabled(text(&step, "key"), flag(&step, "enabled"), now())
                 .await
                 .map(|record| {
                     record.map_or(Value::Null, |record| {

@@ -469,9 +469,7 @@ fn owner<'a>(name: &[u8], stems: &[&'a OsString]) -> Option<&'a [u8]> {
     let mut best: Option<&'a [u8]> = None;
     for stem in stems {
         let stem = stem.as_bytes();
-        let claims = name.len() > stem.len()
-            && name.starts_with(stem)
-            && matches!(name[stem.len()], b'.' | b'-');
+        let claims = name.len() > stem.len() && name.starts_with(stem) && matches!(name[stem.len()], b'.' | b'-');
         if claims && best.is_none_or(|best| stem.len() > best.len()) {
             best = Some(stem);
         }
@@ -656,6 +654,6 @@ fn display(path: &Path, base: &Path) -> PathBuf {
 }
 
 #[cfg(test)]
-mod tests;
-#[cfg(test)]
 mod scenarios;
+#[cfg(test)]
+mod tests;

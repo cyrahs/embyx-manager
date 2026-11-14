@@ -28,6 +28,7 @@ pub mod reconcile;
 pub mod release_dates;
 pub mod replace;
 pub mod reports;
+pub mod rss;
 pub mod runs;
 pub mod subscriptions;
 pub mod support;

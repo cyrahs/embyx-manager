@@ -73,7 +73,10 @@ async fn replace_lists_inserts_updates_and_marks_the_departed() {
     assert_eq!(k7.last_error, None);
     assert_eq!(k7.created_at, now());
     assert_eq!(k7.updated_at, later());
-    assert_eq!(k5.last_error.as_deref(), Some("the source no longer publishes this list"));
+    assert_eq!(
+        k5.last_error.as_deref(),
+        Some("the source no longer publishes this list")
+    );
     assert_eq!(avids(k5), ["C-003"]);
     assert!(k5.enabled);
 
@@ -123,7 +126,10 @@ async fn sync_state_and_source_round_trip() {
     assert_eq!(record.last_error, None);
 
     assert_eq!(repository.get("missing").await.expect("get"), None);
-    assert_eq!(repository.set_enabled("missing", true, now()).await.expect("enable"), None);
+    assert_eq!(
+        repository.set_enabled("missing", true, now()).await.expect("enable"),
+        None
+    );
 
     database.close().await;
     test.drop_database().await;

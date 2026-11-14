@@ -97,8 +97,7 @@ fn copyfile(src: &Path, dst: &PathBuf, joined: bool) -> Result<(), PyOsError> {
         Err(error) => return Err(os_error(&error, dst)),
     };
     // `_fastcopy_sendfile`: its errors carry both names.
-    io::copy(&mut source, &mut target)
-        .map_err(|error| PyOsError::from_io(&error, Some(src), Some(dst)))?;
+    io::copy(&mut source, &mut target).map_err(|error| PyOsError::from_io(&error, Some(src), Some(dst)))?;
     Ok(())
 }
 
@@ -185,17 +184,15 @@ fn copy_xattrs(src: &Path, dst: &Path) -> Result<(), PyOsError> {
         Err(error) => return Err(PyOsError::errno(errno_of(&error), Some(src), None)),
     };
     for name in names {
-        let copied = get_xattr(src, &name)
-            .map_err(|error| (error, src))
-            .and_then(|value| {
-                rustix::fs::setxattr(
-                    dst,
-                    std::ffi::OsStr::from_bytes(&name),
-                    &value,
-                    rustix::fs::XattrFlags::empty(),
-                )
-                .map_err(|error| (error, dst))
-            });
+        let copied = get_xattr(src, &name).map_err(|error| (error, src)).and_then(|value| {
+            rustix::fs::setxattr(
+                dst,
+                std::ffi::OsStr::from_bytes(&name),
+                &value,
+                rustix::fs::XattrFlags::empty(),
+            )
+            .map_err(|error| (error, dst))
+        });
         match copied {
             Ok(()) => {}
             Err((error, _)) if [EPERM, ENOTSUP, ENODATA, EINVAL, EACCES].contains(&errno_of(&error)) => {}

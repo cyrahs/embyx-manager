@@ -48,11 +48,16 @@ pub trait PlaylistServer: Send + Sync {
         avid_of: &'a (dyn Fn(&str) -> String + Sync),
     ) -> BoxFuture<'a, Result<Vec<(String, String)>, EmbyError>>;
     fn list_playlists(&self) -> BoxFuture<'_, Result<Vec<EmbyPlaylist>, EmbyError>>;
-    fn create_playlist<'a>(&'a self, name: &'a str, item_ids: &'a [String]) -> BoxFuture<'a, Result<String, EmbyError>>;
-    fn playlist_entries<'a>(&'a self, playlist_id: &'a str) -> BoxFuture<'a, Result<Vec<EmbyPlaylistEntry>, EmbyError>>;
+    fn create_playlist<'a>(&'a self, name: &'a str, item_ids: &'a [String])
+    -> BoxFuture<'a, Result<String, EmbyError>>;
+    fn playlist_entries<'a>(&'a self, playlist_id: &'a str)
+    -> BoxFuture<'a, Result<Vec<EmbyPlaylistEntry>, EmbyError>>;
     fn add_entries<'a>(&'a self, playlist_id: &'a str, item_ids: &'a [String]) -> BoxFuture<'a, Result<(), EmbyError>>;
-    fn remove_entries<'a>(&'a self, playlist_id: &'a str, entry_ids: &'a [String])
-    -> BoxFuture<'a, Result<(), EmbyError>>;
+    fn remove_entries<'a>(
+        &'a self,
+        playlist_id: &'a str,
+        entry_ids: &'a [String],
+    ) -> BoxFuture<'a, Result<(), EmbyError>>;
     fn delete_playlist<'a>(&'a self, playlist_id: &'a str) -> BoxFuture<'a, Result<(), EmbyError>>;
 }
 
@@ -68,11 +73,18 @@ impl PlaylistServer for EmbyClient {
         Box::pin(Self::list_playlists(self))
     }
 
-    fn create_playlist<'a>(&'a self, name: &'a str, item_ids: &'a [String]) -> BoxFuture<'a, Result<String, EmbyError>> {
+    fn create_playlist<'a>(
+        &'a self,
+        name: &'a str,
+        item_ids: &'a [String],
+    ) -> BoxFuture<'a, Result<String, EmbyError>> {
         Box::pin(Self::create_playlist(self, name, item_ids))
     }
 
-    fn playlist_entries<'a>(&'a self, playlist_id: &'a str) -> BoxFuture<'a, Result<Vec<EmbyPlaylistEntry>, EmbyError>> {
+    fn playlist_entries<'a>(
+        &'a self,
+        playlist_id: &'a str,
+    ) -> BoxFuture<'a, Result<Vec<EmbyPlaylistEntry>, EmbyError>> {
         Box::pin(Self::playlist_entries(self, playlist_id))
     }
 
@@ -188,12 +200,7 @@ impl PlaylistSyncPipeline {
     pub async fn run(&self, ctx: &RunContext) -> Result<(), PlaylistSyncError> {
         let records = self.refresh_lists(ctx).await?;
         ctx.check_cancelled()?;
-        let index: Index = self
-            .emby
-            .movie_index(&*self.avid_of)
-            .await?
-            .into_iter()
-            .collect();
+        let index: Index = self.emby.movie_index(&*self.avid_of).await?.into_iter().collect();
         ctx.set("library_titles", i64::try_from(index.len()).unwrap_or(i64::MAX));
         let mut existing: HashSet<String> = self
             .emby
@@ -234,7 +241,9 @@ impl PlaylistSyncPipeline {
         let name = match self.source.discover_database_name().await {
             Ok(name) => Some(name),
             Err(error) => {
-                ctx.warning(&format!("ranking source unavailable, keeping the stored lists: {error}"));
+                ctx.warning(&format!(
+                    "ranking source unavailable, keeping the stored lists: {error}"
+                ));
                 None
             }
         };
@@ -296,7 +305,11 @@ impl PlaylistSyncPipeline {
                     existing.insert(created.clone());
                     playlist_id = Some(created);
                     ctx.add("lists_created", 1);
-                    ctx.info(&format!("created playlist {} with {} titles", record.name, target.len()));
+                    ctx.info(&format!(
+                        "created playlist {} with {} titles",
+                        record.name,
+                        target.len()
+                    ));
                 }
             }
             Some(current_id) => {
@@ -345,6 +358,6 @@ impl PlaylistSyncPipeline {
 }
 
 #[cfg(test)]
-mod tests;
-#[cfg(test)]
 mod scenarios;
+#[cfg(test)]
+mod tests;

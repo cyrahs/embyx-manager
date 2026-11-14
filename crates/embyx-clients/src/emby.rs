@@ -151,7 +151,10 @@ impl EmbyClient {
     /// `avid_of` reads an AVID out of a directory name: the STRM mapping keeps one directory
     /// per title named after it, so the parent directory of the item's path is the key. When
     /// two items share an AVID the first one listed wins.
-    pub async fn movie_index(&self, avid_of: &(dyn Fn(&str) -> String + Sync)) -> Result<Vec<(String, String)>, EmbyError> {
+    pub async fn movie_index(
+        &self,
+        avid_of: &(dyn Fn(&str) -> String + Sync),
+    ) -> Result<Vec<(String, String)>, EmbyError> {
         let mut index: Vec<(String, String)> = Vec::new();
         let mut known: HashSet<String> = HashSet::new();
         let mut start: i128 = 0;

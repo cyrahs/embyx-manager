@@ -56,8 +56,13 @@ pub struct PlaylistSourceState {
 pub trait PlaylistStore: Send + Sync {
     fn list(&self) -> BoxFuture<'_, Result<Vec<PlaylistRecord>, StoreError>>;
     fn source(&self) -> BoxFuture<'_, Result<Option<PlaylistSourceState>, StoreError>>;
-    fn record_source<'a>(&'a self, database_name: &'a str, now: DateTime<Utc>) -> BoxFuture<'a, Result<(), StoreError>>;
-    fn replace_lists<'a>(&'a self, lists: &'a [RankedList], now: DateTime<Utc>) -> BoxFuture<'a, Result<(), StoreError>>;
+    fn record_source<'a>(&'a self, database_name: &'a str, now: DateTime<Utc>)
+    -> BoxFuture<'a, Result<(), StoreError>>;
+    fn replace_lists<'a>(
+        &'a self,
+        lists: &'a [RankedList],
+        now: DateTime<Utc>,
+    ) -> BoxFuture<'a, Result<(), StoreError>>;
     fn record_sync<'a>(
         &'a self,
         key: &'a str,
@@ -66,8 +71,12 @@ pub trait PlaylistStore: Send + Sync {
         missing: &'a [String],
         emby_playlist_id: Option<&'a str>,
     ) -> BoxFuture<'a, Result<(), StoreError>>;
-    fn record_error<'a>(&'a self, key: &'a str, now: DateTime<Utc>, error: &'a str)
-    -> BoxFuture<'a, Result<(), StoreError>>;
+    fn record_error<'a>(
+        &'a self,
+        key: &'a str,
+        now: DateTime<Utc>,
+        error: &'a str,
+    ) -> BoxFuture<'a, Result<(), StoreError>>;
 }
 
 /// `json.dumps([[entry.rank, entry.avid, entry.title] for entry in entries], ensure_ascii=False)`.
@@ -316,11 +325,19 @@ impl PlaylistStore for PlaylistRepository {
         Box::pin(Self::source(self))
     }
 
-    fn record_source<'a>(&'a self, database_name: &'a str, now: DateTime<Utc>) -> BoxFuture<'a, Result<(), StoreError>> {
+    fn record_source<'a>(
+        &'a self,
+        database_name: &'a str,
+        now: DateTime<Utc>,
+    ) -> BoxFuture<'a, Result<(), StoreError>> {
         Box::pin(Self::record_source(self, database_name, now))
     }
 
-    fn replace_lists<'a>(&'a self, lists: &'a [RankedList], now: DateTime<Utc>) -> BoxFuture<'a, Result<(), StoreError>> {
+    fn replace_lists<'a>(
+        &'a self,
+        lists: &'a [RankedList],
+        now: DateTime<Utc>,
+    ) -> BoxFuture<'a, Result<(), StoreError>> {
         Box::pin(Self::replace_lists(self, lists, now))
     }
 

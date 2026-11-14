@@ -14,7 +14,9 @@ use embyx_core::pyjson::{Dict, Value};
 use embyx_core::scenario::{Recorder, Seeded, Spec};
 
 use super::MappingPipeline;
-use crate::archive::scenarios::{entry, error_value, finish, flag, int, only_op, recording_fs, steps_of, strings, text};
+use crate::archive::scenarios::{
+    entry, error_value, finish, flag, int, only_op, recording_fs, steps_of, strings, text,
+};
 use crate::fs::{Fs, path_text};
 use crate::reports::RunContext;
 
@@ -52,7 +54,12 @@ fn pin_times(spec: &Spec, seeded: &Seeded) {
         .section("roots")
         .get("names")
         .and_then(Value::as_list)
-        .map(|names| names.iter().map(|name| name.as_str().expect("a root name").to_owned()).collect())
+        .map(|names| {
+            names
+                .iter()
+                .map(|name| name.as_str().expect("a root name").to_owned())
+                .collect()
+        })
         .unwrap_or_else(Vec::new);
     for name in names {
         walk(seeded.root(&name), stamp);
@@ -139,7 +146,11 @@ fn mapping_steps(name: &str) {
                 .map(|()| Value::Null)
                 .map_err(|error| error_value(&error)),
             "incremental" => mapping
-                .run_incremental(&run, &paths(&seeded, &step, "changed"), &paths(&seeded, &step, "deleted"))
+                .run_incremental(
+                    &run,
+                    &paths(&seeded, &step, "changed"),
+                    &paths(&seeded, &step, "deleted"),
+                )
                 .map(|(failed_changed, failed_deleted)| {
                     let mut result = Dict::new();
                     result.insert("failed_changed", sorted_texts(&failed_changed));
