@@ -381,8 +381,11 @@ pub fn mkdir_parents_new<F: Fs + ?Sized>(fs: &F, path: &Path) -> Result<(), PyOs
 /// sub-directory it lists (not entering symbolic links) yields that directory's matching
 /// children before queueing it. A directory that cannot be listed contributes nothing; the
 /// glob itself never fails. Python lists each directory twice (once to match its children,
-/// once to walk it); here the listing taken for the match is kept for the walk, which yields
-/// the same paths in the same order.
+/// once to walk it) and walks lazily, so a directory created while the walk runs can still be
+/// found; here the listing taken for the match is kept for the walk and the paths are collected
+/// before the caller acts on them. That yields the same paths in the same order as long as the
+/// tree does not change under the walk (it does only when a mirror lies inside its own source,
+/// where Python nests copies of copies and this copies once per run; neither is supported).
 pub fn glob_recursive<F: Fs + ?Sized>(
     fs: &F,
     path: &Path,
