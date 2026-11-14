@@ -1,0 +1,78 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "api",
+  "cases": [
+    {
+      "mtime_ns": 1767225600000000000,
+      "size": 57,
+      "st_mtime": "1767225600.0",
+      "last_modified": "Thu, 01 Jan 2026 00:00:00 GMT",
+      "etag": "\"b0b21ec1c9044df99fd0528ca26a1880\""
+    },
+    {
+      "mtime_ns": 1767225600123456789,
+      "size": 0,
+      "st_mtime": "1767225600.1234567",
+      "last_modified": "Thu, 01 Jan 2026 00:00:00 GMT",
+      "etag": "\"9b9189ebb302630927e55961cba86f7a\""
+    },
+    {
+      "mtime_ns": 1767225600999999499,
+      "size": 10,
+      "st_mtime": "1767225600.9999995",
+      "last_modified": "Thu, 01 Jan 2026 00:00:01 GMT",
+      "etag": "\"b1091998b3cf6db1e27eca6c7ae34f05\""
+    },
+    {
+      "mtime_ns": 1767225600999999500,
+      "size": 10,
+      "st_mtime": "1767225600.9999995",
+      "last_modified": "Thu, 01 Jan 2026 00:00:01 GMT",
+      "etag": "\"b1091998b3cf6db1e27eca6c7ae34f05\""
+    },
+    {
+      "mtime_ns": 1767225600999999999,
+      "size": 10,
+      "st_mtime": "1767225601.0",
+      "last_modified": "Thu, 01 Jan 2026 00:00:01 GMT",
+      "etag": "\"678bd4075ae466590d3e9c20e7318354\""
+    },
+    {
+      "mtime_ns": 1000000000000000001,
+      "size": 1,
+      "st_mtime": "1000000000.0",
+      "last_modified": "Sun, 09 Sep 2001 01:46:40 GMT",
+      "etag": "\"17ae57665033222d235e7f5dddb0adb7\""
+    },
+    {
+      "mtime_ns": 0,
+      "size": 1234567890123,
+      "st_mtime": "0.0",
+      "last_modified": "Thu, 01 Jan 1970 00:00:00 GMT",
+      "etag": "\"62f96283461a672e19f247c6eb6321e5\""
+    },
+    {
+      "mtime_ns": 86399500000000,
+      "size": 5,
+      "st_mtime": "86399.5",
+      "last_modified": "Thu, 01 Jan 1970 23:59:59 GMT",
+      "etag": "\"610ac4d9ec17c7867576b4497e914ac5\""
+    },
+    {
+      "mtime_ns": 1700000000000000001,
+      "size": 5,
+      "st_mtime": "1700000000.0",
+      "last_modified": "Tue, 14 Nov 2023 22:13:20 GMT",
+      "etag": "\"566ac90eb3f60063615e7901edfbe068\""
+    },
+    {
+      "mtime_ns": 1700000000100000000,
+      "size": 5,
+      "st_mtime": "1700000000.1",
+      "last_modified": "Tue, 14 Nov 2023 22:13:20 GMT",
+      "etag": "\"1e753baa088693917f09102e60f771d1\""
+    }
+  ]
+}

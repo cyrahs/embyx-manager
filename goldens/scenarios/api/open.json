@@ -1,0 +1,323 @@
+{
+  "calls": [],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "api.exchange",
+  "outcome": {
+    "result": {
+      "responses": [
+        {
+          "body": {
+            "auth_required": false,
+            "database": true,
+            "status": "ok"
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "53",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "auth_required": false
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "23",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "auth_required": false
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "23",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "secrets": {},
+            "section": "merge",
+            "values": {
+              "auto_enabled": false,
+              "auto_include_stackable": false,
+              "auto_pause_on_failure": false,
+              "cloud_mount_prefix": "/mnt/cd2",
+              "cloud_staging_dir": "/115/upload",
+              "cloud_work_dir": "/downloads/upload",
+              "free_space_reserve_gib": 20,
+              "home_transcode_enabled": false,
+              "work_dir": "/downloads/upload"
+            },
+            "version": 1
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "330",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "request_too_large"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "38",
+            "content-type": "application/json"
+          },
+          "status": 413
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "36",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "detail": "address and api_key are required",
+            "ok": false
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "56",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "request_too_large"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "38",
+            "content-type": "application/json"
+          },
+          "status": 413
+        },
+        {
+          "body": {
+            "secrets": {},
+            "section": "merge",
+            "values": {
+              "auto_enabled": false,
+              "auto_include_stackable": false,
+              "auto_pause_on_failure": false,
+              "cloud_mount_prefix": "/mnt/cd2",
+              "cloud_staging_dir": "/115/upload",
+              "cloud_work_dir": "/downloads/upload",
+              "free_space_reserve_gib": 20,
+              "home_transcode_enabled": false,
+              "work_dir": "/downloads/upload"
+            },
+            "version": 1
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "330",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": "",
+          "headers": {
+            "allow": "GET",
+            "cache-control": "no-store",
+            "content-length": "31",
+            "content-type": "application/json"
+          },
+          "status": 405
+        },
+        {
+          "body": {
+            "detail": "Method Not Allowed"
+          },
+          "headers": {
+            "allow": "GET",
+            "cache-control": "no-store",
+            "content-length": "31",
+            "content-type": "application/json"
+          },
+          "status": 405
+        },
+        {
+          "body": {
+            "detail": "Method Not Allowed"
+          },
+          "headers": {
+            "allow": "GET",
+            "cache-control": "no-store",
+            "content-length": "31",
+            "content-type": "application/json"
+          },
+          "status": 405
+        },
+        {
+          "body": "",
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "0",
+            "location": "http://testserver/api/config"
+          },
+          "status": 307
+        },
+        {
+          "body": "",
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "0",
+            "location": "http://testserver/api/health"
+          },
+          "status": 307
+        },
+        {
+          "body": "",
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "0",
+            "location": "http://testserver/api/config/clouddrive/test"
+          },
+          "status": 307
+        },
+        {
+          "body": {
+            "detail": "Not Found"
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "22",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": {
+            "detail": "Not Found"
+          },
+          "headers": {
+            "content-length": "22",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": {
+            "detail": "Not Found"
+          },
+          "headers": {
+            "content-length": "22",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": {
+            "detail": "Not Found"
+          },
+          "headers": {
+            "content-length": "22",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": {
+            "secrets": {
+              "api_token": false
+            },
+            "section": "clouddrive",
+            "values": {
+              "address": "",
+              "api_token": "",
+              "secure": true
+            },
+            "version": 0
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "119",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": "",
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "0",
+            "location": "http://testserver/api/config?x=1"
+          },
+          "status": 307
+        }
+      ],
+      "transcode_responses": []
+    }
+  },
+  "rows": {
+    "app_config": [
+      {
+        "section": "merge",
+        "updated_at": "<volatile:1>",
+        "value_json": "{\"work_dir\":\"/downloads/upload\",\"cloud_work_dir\":\"/downloads/upload\",\"cloud_staging_dir\":\"/115/upload\",\"cloud_mount_prefix\":\"/mnt/cd2\",\"free_space_reserve_gib\":20,\"auto_enabled\":false,\"auto_include_stackable\":false,\"auto_pause_on_failure\":false,\"home_transcode_enabled\":false}",
+        "version": 1
+      }
+    ],
+    "archive_acquisitions": [],
+    "archive_magnet_attempts": [],
+    "feed_subscriptions": [],
+    "fill_actor_apply_jobs": [],
+    "fill_actor_candidates": [],
+    "fill_actor_cloud_move_operations": [],
+    "fill_actor_jobs": [],
+    "fill_actor_move_journal": [],
+    "fill_actor_move_results": [],
+    "fill_actor_plans": [],
+    "health_probe": [],
+    "merge_tasks": [],
+    "merge_transcode_chunks": [],
+    "merge_transcode_parts": [],
+    "pipeline_runs": [],
+    "playlist_source": [],
+    "playlists": []
+  },
+  "scenario": "api/open",
+  "tree": {}
+}

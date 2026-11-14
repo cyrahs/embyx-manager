@@ -1,0 +1,128 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "api",
+  "cases": [
+    {
+      "route_path": "/",
+      "path": ".",
+      "is_page_path": false
+    },
+    {
+      "route_path": "/settings",
+      "path": "settings",
+      "is_page_path": true
+    },
+    {
+      "route_path": "/settings/",
+      "path": "settings",
+      "is_page_path": true
+    },
+    {
+      "route_path": "/fill-actor/plans/abc",
+      "path": "fill-actor/plans/abc",
+      "is_page_path": true
+    },
+    {
+      "route_path": "/assets/app.js",
+      "path": "assets/app.js",
+      "is_page_path": false
+    },
+    {
+      "route_path": "/assets",
+      "path": "assets",
+      "is_page_path": true
+    },
+    {
+      "route_path": "/assets/",
+      "path": "assets",
+      "is_page_path": true
+    },
+    {
+      "route_path": "/api",
+      "path": "api",
+      "is_page_path": true
+    },
+    {
+      "route_path": "/api/",
+      "path": "api",
+      "is_page_path": true
+    },
+    {
+      "route_path": "/api/nope",
+      "path": "api/nope",
+      "is_page_path": false
+    },
+    {
+      "route_path": "/apix/nope",
+      "path": "apix/nope",
+      "is_page_path": true
+    },
+    {
+      "route_path": "/a//b",
+      "path": "a/b",
+      "is_page_path": true
+    },
+    {
+      "route_path": "/a/./b",
+      "path": "a/b",
+      "is_page_path": true
+    },
+    {
+      "route_path": "/a/../b",
+      "path": "b",
+      "is_page_path": true
+    },
+    {
+      "route_path": "/../../etc/passwd",
+      "path": "../../etc/passwd",
+      "is_page_path": true
+    },
+    {
+      "route_path": "/a/../../b",
+      "path": "../b",
+      "is_page_path": true
+    },
+    {
+      "route_path": "/./",
+      "path": ".",
+      "is_page_path": false
+    },
+    {
+      "route_path": "//double",
+      "path": "double",
+      "is_page_path": true
+    },
+    {
+      "route_path": "///triple",
+      "path": "triple",
+      "is_page_path": true
+    },
+    {
+      "route_path": "/\\etc",
+      "path": "\\etc",
+      "is_page_path": true
+    },
+    {
+      "route_path": "/v1.2/page",
+      "path": "v1.2/page",
+      "is_page_path": true
+    },
+    {
+      "route_path": "/page.",
+      "path": "page.",
+      "is_page_path": false
+    },
+    {
+      "route_path": "/a.b/c",
+      "path": "a.b/c",
+      "is_page_path": true
+    },
+    {
+      "route_path": "/�",
+      "path": "�",
+      "is_page_path": true
+    }
+  ]
+}

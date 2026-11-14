@@ -1,0 +1,102 @@
+# The app shell without a token and without the SPA (WP4): every mutation is open, the
+# login probe says so, and with nothing mounted at `/` Starlette's router answers itself:
+# 405 with `Allow` for a known path, a trailing-slash redirect, 404 for the rest.
+description = "api: no token, no front end: open mutations and the router's own answers"
+operation = "api.exchange"
+volatile = ["rows.app_config.updated_at"]
+
+[database]
+schema = "app"
+
+[args]
+max_request_bytes = 20
+
+[[args.requests]]
+method = "GET"
+path = "/api/health"
+
+[[args.requests]]
+method = "GET"
+path = "/api/auth/session"
+
+[[args.requests]]
+method = "GET"
+path = "/api/auth/session"
+headers = { authorization = "Bearer anything" }
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/merge"
+json = { values = {} }
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/merge"
+json = { values = { auto_enabled = "yes" } }
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/merge"
+json = {}
+
+[[args.requests]]
+method = "POST"
+path = "/api/config/emby/test"
+json = {}
+
+[[args.requests]]
+method = "POST"
+path = "/api/config/clouddrive/test"
+json = { values = { address = "{clouddrive}", api_token = "t", secure = false } }
+
+[[args.requests]]
+method = "GET"
+path = "/api/config/merge"
+
+[[args.requests]]
+method = "HEAD"
+path = "/api/health"
+
+[[args.requests]]
+method = "POST"
+path = "/api/health"
+
+[[args.requests]]
+method = "DELETE"
+path = "/api/config/emby"
+
+[[args.requests]]
+method = "GET"
+path = "/api/config/"
+
+[[args.requests]]
+method = "GET"
+path = "/api/health/"
+
+[[args.requests]]
+method = "GET"
+path = "/api/config/clouddrive/test/"
+
+[[args.requests]]
+method = "GET"
+path = "/api/nope"
+
+[[args.requests]]
+method = "GET"
+path = "/"
+
+[[args.requests]]
+method = "GET"
+path = "/settings"
+
+[[args.requests]]
+method = "POST"
+path = "/anything"
+
+[[args.requests]]
+method = "GET"
+path = "/api/config/clouddrive?x=1"
+
+[[args.requests]]
+method = "GET"
+path = "/api/config/?x=1"

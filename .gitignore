@@ -21,3 +21,6 @@ src/embyx_manager/static/
 
 # Rust build (docs/rewrite/PLAN.md)
 /target/
+
+# Page smoke (tools/smoke)
+/tools/smoke/node_modules/

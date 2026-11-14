@@ -48,6 +48,8 @@ chrono = { version = "0.4", default-features = false, features = ["clock", "std"
 chrono-tz = "0.10"
 clap = { version = "4.6", features = ["derive"] }
 fancy-regex = "0.20"
+# Random multipart boundaries (Starlette: `secrets.token_hex(13)`).
+getrandom = "0.4"
 futures-util = { version = "0.3", default-features = false }
 # `uuid.uuid4().hex` run ids (WP5): 16 random bytes from the OS.
 getrandom = "0.4"
@@ -58,6 +60,8 @@ http = "1"
 http-body-util = "0.1"
 hyper = { version = "1", default-features = false }
 hyper-util = { version = "0.1", default-features = false }
+# Starlette's ETag: md5 of the modification time and size.
+md-5 = "0.11"
 rcgen = { version = "0.14", default-features = false, features = ["crypto", "pem", "ring"] }
 regex = "1"
 reqwest = { version = "0.13", default-features = false }
@@ -72,6 +76,7 @@ tokio = { version = "1.54", features = ["macros", "rt-multi-thread"] }
 tokio-rustls = { version = "0.26", default-features = false, features = ["logging", "tls12"] }
 tokio-util = { version = "0.7", default-features = false, features = ["rt"] }
 toml = "0.9"
+tower = { version = "0.5", default-features = false }
 tower-http = { version = "0.6", default-features = false }
 tower-service = "0.3"
 tracing = "0.1"

@@ -1,0 +1,92 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "api",
+  "cases": [
+    {
+      "content_type": "application/json",
+      "json": true
+    },
+    {
+      "content_type": "application/json; charset=utf-8",
+      "json": true
+    },
+    {
+      "content_type": "APPLICATION/JSON",
+      "json": true
+    },
+    {
+      "content_type": "application/merge-patch+json",
+      "json": true
+    },
+    {
+      "content_type": "application/vnd.api+json;x=y",
+      "json": true
+    },
+    {
+      "content_type": "application/jsonx",
+      "json": false
+    },
+    {
+      "content_type": "application/x-json",
+      "json": false
+    },
+    {
+      "content_type": "text/json",
+      "json": false
+    },
+    {
+      "content_type": "text/plain",
+      "json": false
+    },
+    {
+      "content_type": "application/x-www-form-urlencoded",
+      "json": false
+    },
+    {
+      "content_type": " application/json ",
+      "json": true
+    },
+    {
+      "content_type": "application/json;",
+      "json": true
+    },
+    {
+      "content_type": ";application/json",
+      "json": false
+    },
+    {
+      "content_type": "application/json/x",
+      "json": false
+    },
+    {
+      "content_type": "application",
+      "json": false
+    },
+    {
+      "content_type": "json",
+      "json": false
+    },
+    {
+      "content_type": "application/+json",
+      "json": true
+    },
+    {
+      "content_type": " application/json",
+      "json": true
+    },
+    {
+      "content_type": "application/json,text/plain",
+      "json": false
+    },
+    {
+      "content_type": "application /json",
+      "json": false
+    },
+    {
+      "content_type": "Application/Json; Charset=UTF-8",
+      "json": true
+    }
+  ]
+}

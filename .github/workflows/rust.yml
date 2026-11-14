@@ -177,6 +177,17 @@ jobs:
       env:
         BASE_REV: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
 
+    # The unmodified front end, built, against the Rust server on a scratch database:
+    # sign-in, every page, the settings round trip and a clean SIGTERM (tools/smoke).
+    - uses: actions/setup-node@v5
+      with:
+        node-version: '22'
+
+    - name: Page smoke
+      run: |
+        (cd tools/smoke && npm ci --no-audit --no-fund && npx playwright install --with-deps chromium)
+        tools/smoke/run.sh
+
   # The home transcode worker runs on Windows (WP15). Its crate and the binary must build
   # there, and the process-control probe runs there.
   windows:

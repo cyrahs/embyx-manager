@@ -1,0 +1,674 @@
+# The app shell with a token and the SPA (WP4): health, the login probe, bearer parsing,
+# the config API (masking, versions, refusals, request validation before and after auth),
+# both connection tests against the fakes (success, refusals, RPC and Emby failures), the
+# 64 KiB limit, no-store, FastAPI's own 404/405 answers, and the SPA's files, fallback,
+# redirect, validators and byte ranges. The transcode listener's shell answers its own 404.
+description = "api: shell, auth, config API, connection tests, size limit, SPA hosting"
+operation = "api.exchange"
+volatile = ["rows.app_config.updated_at"]
+
+roots.names = ["static"]
+
+[[tree]]
+path = "static/index.html"
+text = "<!doctype html><title>embyx</title><div id=\"root\"></div>\n"
+
+[[tree]]
+path = "static/assets/app.js"
+text = "console.log('embyx');\n"
+
+[[tree]]
+path = "static/assets/style.css"
+text = "body { color: #0b0; }\n"
+
+[[tree]]
+path = "static/favicon.svg"
+text = "<svg xmlns=\"http://www.w3.org/2000/svg\"/>\n"
+
+[[tree]]
+path = "static/robots.txt"
+text = "0123456789"
+
+[[tree]]
+path = "static/guide/index.html"
+text = "<p>docs</p>\n"
+
+[[tree]]
+path = "static/data/blob.bin"
+text = "binary"
+
+[[tree]]
+path = "static/data/report.JSON"
+text = "{}"
+
+[[tree]]
+path = "static/data/bundle.js.gz"
+text = "zipped"
+
+[database]
+schema = "app"
+
+[args]
+api_token = "scenario-token"
+frontend = true
+
+# --- health and the login probe ---
+[[args.requests]]
+method = "GET"
+path = "/api/health"
+
+[[args.requests]]
+method = "GET"
+path = "/api/auth/session"
+
+[[args.requests]]
+method = "GET"
+path = "/api/auth/session"
+headers = { authorization = "Bearer wrong-token" }
+
+[[args.requests]]
+method = "GET"
+path = "/api/auth/session"
+headers = { authorization = "bearer scenario-token" }
+
+[[args.requests]]
+method = "GET"
+path = "/api/auth/session"
+headers = { authorization = "BEARER   scenario-token  " }
+
+[[args.requests]]
+method = "GET"
+path = "/api/auth/session"
+headers = { authorization = "Basic scenario-token" }
+
+[[args.requests]]
+method = "GET"
+path = "/api/auth/session"
+headers = { authorization = "Bearer" }
+
+[[args.requests]]
+method = "GET"
+path = "/api/auth/session"
+headers = { authorization = "Bearerscenario-token" }
+
+[[args.requests]]
+method = "GET"
+path = "/api/auth/session"
+headers = { authorization = "Bearer scenario-token extra" }
+
+[[args.requests]]
+method = "HEAD"
+path = "/api/health"
+
+[[args.requests]]
+method = "POST"
+path = "/api/health"
+json = {}
+
+[[args.requests]]
+method = "OPTIONS"
+path = "/api/auth/session"
+
+# --- reading the config ---
+[[args.requests]]
+method = "GET"
+path = "/api/config"
+
+[[args.requests]]
+method = "GET"
+path = "/api/config/clouddrive"
+
+[[args.requests]]
+method = "GET"
+path = "/api/config/%63louddrive"
+
+[[args.requests]]
+method = "GET"
+path = "/api/%63onfig/emby"
+
+[[args.requests]]
+method = "GET"
+path = "/api/config/nope"
+
+[[args.requests]]
+method = "GET"
+path = "/api/config/club%2Fx"
+
+[[args.requests]]
+method = "GET"
+path = "/api/config/%FF"
+
+[[args.requests]]
+method = "GET"
+path = "/api/config/"
+
+[[args.requests]]
+method = "GET"
+path = "/api/config?section=emby"
+
+[[args.requests]]
+method = "DELETE"
+path = "/api/config/emby"
+
+# --- writing the config: auth, body parsing and validation order ---
+[[args.requests]]
+method = "PUT"
+path = "/api/config/clouddrive"
+json = { values = { address = "{clouddrive}", api_token = "stored-secret", secure = false }, version = 0 }
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/clouddrive"
+body = "{not json"
+content_type = "application/json"
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/clouddrive"
+body_hex = "ff7b7d"
+content_type = "application/json"
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/clouddrive"
+json = { values = [] }
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/clouddrive"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { address = "{clouddrive}", api_token = "stored-secret", secure = false }, version = 0 }
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/clouddrive"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { address = "cd2.internal:19798" }, version = 0 }
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/clouddrive"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { address = "cd2.internal:19798" }, version = "zero" }
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/clouddrive"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { address = "cd2.internal:19798" }, version = -1 }
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/clouddrive"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { address = "cd2.internal:19798" }, version = 1.5 }
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/clouddrive"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { address = "cd2.internal:19798" }, extra = 1 }
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/clouddrive"
+headers = { authorization = "Bearer scenario-token" }
+json = { version = 1 }
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/clouddrive"
+headers = { authorization = "Bearer scenario-token" }
+json = []
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/clouddrive"
+headers = { authorization = "Bearer scenario-token" }
+body = "{\"values\":{}}"
+content_type = "text/plain"
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/clouddrive"
+headers = { authorization = "Bearer scenario-token" }
+body = "{\"values\":{}}"
+content_type = ""
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/clouddrive"
+headers = { authorization = "Bearer scenario-token" }
+body = "{\"values\":{}}"
+content_type = "application/merge-patch+json; charset=utf-8"
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/clouddrive"
+headers = { authorization = "Bearer scenario-token" }
+body = ""
+content_type = "application/json"
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/clouddrive"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { secure = "maybe" }, version = "2" }
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/fill_actor"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { actor_root = "not-absolute" } }
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/nope"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = {} }
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/rss"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { categories = [{ label = " Rank ", task_dir_path = "/115/rank/" }], interval_seconds = "900", failed_avid_cooldown_seconds = 1.0 } }
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/mapping"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { debounce_seconds = 0.00001, src_dir = "/mnt/strm/", dst_dir = "/srv/中文" }, version = true }
+
+[[args.requests]]
+method = "GET"
+path = "/api/config"
+
+# --- the CloudDrive connection test ---
+[[args.requests]]
+method = "POST"
+path = "/api/config/clouddrive/test"
+json = {}
+
+[[args.requests]]
+method = "POST"
+path = "/api/config/clouddrive/test"
+headers = { authorization = "Bearer scenario-token" }
+json = {}
+
+[[args.requests]]
+method = "POST"
+path = "/api/config/clouddrive/test"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { address = "{clouddrive}", api_token = "" } }
+
+[[args.requests]]
+method = "POST"
+path = "/api/config/clouddrive/test"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { api_token = "other-token" } }
+
+[[args.requests]]
+method = "POST"
+path = "/api/config/clouddrive/test"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { address = "{clouddrive}" } }
+
+[[args.requests]]
+method = "POST"
+path = "/api/config/clouddrive/test"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { address = "" } }
+
+[[args.requests]]
+method = "POST"
+path = "/api/config/clouddrive/test"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { unknown = 1 } }
+
+[[args.requests]]
+method = "POST"
+path = "/api/config/clouddrive/test"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { secure = "maybe" } }
+
+[[args.requests]]
+method = "POST"
+path = "/api/config/clouddrive/test"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = 1 }
+
+[[args.requests]]
+method = "POST"
+path = "/api/config/clouddrive/test"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = {}, version = 1 }
+
+[[args.requests]]
+method = "POST"
+path = "/api/config/clouddrive/test"
+headers = { authorization = "Bearer scenario-token" }
+body = ""
+content_type = "application/json"
+
+[[args.requests]]
+method = "POST"
+path = "/api/config/clouddrive/test"
+headers = { authorization = "Bearer scenario-token" }
+body_hex = "efbbbf7b7d"
+content_type = "application/json"
+
+[[args.requests]]
+method = "POST"
+path = "/api/config/clouddrive/test"
+headers = { authorization = "Bearer scenario-token" }
+body_hex = "fffe7b007d00"
+content_type = "application/json"
+
+# --- the Emby connection test ---
+[[args.requests]]
+method = "POST"
+path = "/api/config/emby/test"
+headers = { authorization = "Bearer scenario-token" }
+json = {}
+
+[[args.requests]]
+method = "POST"
+path = "/api/config/emby/test"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { address = "{emby}/" } }
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/emby"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { address = "http://emby.invalid:8096", api_key = "stored-key" } }
+
+[[args.requests]]
+method = "POST"
+path = "/api/config/emby/test"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { address = "{emby}/", api_key = "" } }
+
+[[args.requests]]
+method = "POST"
+path = "/api/config/emby/test"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { address = "{emby}" } }
+
+[[args.requests]]
+method = "POST"
+path = "/api/config/emby/test"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { address = "{emby}" } }
+
+[[args.requests]]
+method = "POST"
+path = "/api/config/emby/test"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { address = "{emby}" } }
+
+[[args.requests]]
+method = "POST"
+path = "/api/config/emby/test"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { address = "emby.internal:8096" } }
+
+# --- nesting: json.loads' recursion limit is a 400, below it the body is read and the
+# token checked (401) before the model refuses it ---
+[[args.requests]]
+method = "PUT"
+path = "/api/config/clouddrive"
+headers = { authorization = "Bearer wrong" }
+body_nested = 9993
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/clouddrive"
+headers = { authorization = "Bearer wrong" }
+body_nested = 9994
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/clouddrive"
+headers = { authorization = "Bearer scenario-token" }
+body_nested = 200
+
+# --- the request size limit ---
+[[args.requests]]
+method = "POST"
+path = "/api/config/clouddrive/test"
+body_size = 65537
+
+[[args.requests]]
+method = "PUT"
+path = "/api/config/clouddrive"
+headers = { authorization = "Bearer scenario-token" }
+body_size = 65536
+content_type = "application/json"
+
+[[args.requests]]
+method = "PATCH"
+path = "/settings"
+body_size = 70000
+
+[[args.requests]]
+method = "DELETE"
+path = "/api/config/emby"
+body_size = 70000
+
+# --- FastAPI's own answers under /api ---
+[[args.requests]]
+method = "GET"
+path = "/api/nope"
+
+[[args.requests]]
+method = "GET"
+path = "/api/"
+
+[[args.requests]]
+method = "GET"
+path = "/api"
+
+[[args.requests]]
+method = "POST"
+path = "/api/nope"
+json = {}
+
+# --- the SPA ---
+[[args.requests]]
+method = "GET"
+path = "/"
+
+[[args.requests]]
+method = "GET"
+path = "/settings"
+
+[[args.requests]]
+method = "GET"
+path = "/fill-actor/plans/abc"
+
+[[args.requests]]
+method = "GET"
+path = "/assets/app.js"
+
+[[args.requests]]
+method = "HEAD"
+path = "/assets/style.css"
+
+[[args.requests]]
+method = "GET"
+path = "/assets/missing.js"
+
+[[args.requests]]
+method = "GET"
+path = "/assets"
+
+[[args.requests]]
+method = "GET"
+path = "/assets/"
+
+[[args.requests]]
+method = "GET"
+path = "/guide"
+
+[[args.requests]]
+method = "GET"
+path = "/guide/"
+
+[[args.requests]]
+method = "GET"
+path = "/guide/index.html"
+
+[[args.requests]]
+method = "GET"
+path = "/favicon.svg"
+
+[[args.requests]]
+method = "GET"
+path = "/data/blob.bin"
+
+[[args.requests]]
+method = "GET"
+path = "/data/report.JSON"
+
+[[args.requests]]
+method = "GET"
+path = "/data/bundle.js.gz"
+
+[[args.requests]]
+method = "GET"
+path = "/index.html"
+
+[[args.requests]]
+method = "GET"
+path = "/%2e%2e/%2e%2e/etc/passwd"
+
+[[args.requests]]
+method = "GET"
+path = "/robots.txt"
+headers = { "if-none-match" = "\"nope\", W/\"7c6f4e2bbb1b3f8a69d2bc4d2b8f2b0c\"" }
+
+[[args.requests]]
+method = "GET"
+path = "/robots.txt"
+headers = { "if-modified-since" = "Thu, 01 Jan 2026 00:00:00 GMT" }
+
+[[args.requests]]
+method = "GET"
+path = "/robots.txt"
+headers = { "if-modified-since" = "Wed, 31 Dec 2025 23:59:59 GMT" }
+
+[[args.requests]]
+method = "GET"
+path = "/robots.txt"
+headers = { range = "bytes=2-5" }
+
+[[args.requests]]
+method = "GET"
+path = "/robots.txt"
+headers = { range = "bytes=7-" }
+
+[[args.requests]]
+method = "GET"
+path = "/robots.txt"
+headers = { range = "bytes=-3" }
+
+[[args.requests]]
+method = "GET"
+path = "/robots.txt"
+headers = { range = "bytes=0-20" }
+
+[[args.requests]]
+method = "GET"
+path = "/robots.txt"
+headers = { range = "bytes=0-1, 6-7,1-2" }
+
+[[args.requests]]
+method = "HEAD"
+path = "/robots.txt"
+headers = { range = "bytes=0-1,8-9" }
+
+[[args.requests]]
+method = "GET"
+path = "/robots.txt"
+headers = { range = "bytes=10-" }
+
+[[args.requests]]
+method = "GET"
+path = "/robots.txt"
+headers = { range = "items=0-1" }
+
+[[args.requests]]
+method = "GET"
+path = "/robots.txt"
+headers = { range = "bytes0-1" }
+
+[[args.requests]]
+method = "GET"
+path = "/robots.txt"
+headers = { range = "bytes=5-2" }
+
+[[args.requests]]
+method = "GET"
+path = "/robots.txt"
+headers = { range = "bytes=x-y" }
+
+[[args.requests]]
+method = "GET"
+path = "/robots.txt"
+headers = { range = "bytes=0-1", "if-range" = "\"stale\"" }
+
+[[args.requests]]
+method = "GET"
+path = "/robots.txt"
+headers = { range = "bytes=0-1", "if-range" = "Thu, 01 Jan 2026 00:00:00 GMT" }
+
+[[args.requests]]
+method = "POST"
+path = "/robots.txt"
+json = {}
+
+[[args.requests]]
+method = "OPTIONS"
+path = "/"
+
+# The fake's address changes from run to run: leave a fixed one stored, so the dumped row
+# is stable.
+[[args.requests]]
+method = "PUT"
+path = "/api/config/clouddrive"
+headers = { authorization = "Bearer scenario-token" }
+json = { values = { address = "cd.internal:19798" } }
+
+# --- the transcode listener's shell (its routes arrive with WP14) ---
+[[args.transcode_requests]]
+method = "GET"
+path = "/api/transcode/claim"
+
+[[args.transcode_requests]]
+method = "POST"
+path = "/api/transcode/claim"
+body_size = 70000
+
+[[args.transcode_requests]]
+method = "GET"
+path = "/openapi.json"
+
+[[args.transcode_requests]]
+method = "GET"
+path = "/"
+
+[clouddrive]
+directories = ["/115"]
+errors = [
+    { method = "GetSystemInfo", code = "UNAUTHENTICATED", details = "token rejected" },
+    { method = "GetSubFiles", code = "NOT_FOUND", details = "no such directory" },
+]
+
+[emby]
+routes = [
+    { method = "GET", path = "/emby/System/Info", status = 200, body = { ServerName = "embyx", Version = "4.10.0.40", Id = "srv" }, times = 1 },
+    { method = "GET", path = "/emby/System/Info", status = 401, body = "unauthorized", times = 1 },
+    { method = "GET", path = "/emby/System/Info", status = 500, body = { error = "boom" }, times = 1 },
+    { method = "GET", path = "/emby/System/Info", status = 200, body = { Version = "4.9" }, times = 1 },
+]
