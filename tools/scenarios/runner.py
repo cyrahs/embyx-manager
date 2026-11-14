@@ -78,6 +78,10 @@ class Context:
     #: Appends one call record to the transcript's `calls`, for a fake that lives inside the
     #: operation (the recording file system of `operations/archive.py`).
     record: Callable[[dict[str, Any]], None] = field(default=lambda _call: None)
+    #: The running fakes themselves (`clouddrive`: the `FakeCloudDrive`, `kubernetes` and
+    #: `emby`: the `FakeHttpServer`s), for a step that changes their state without a call, as
+    #: the real service would (WP14: a copy finishing, a Job failing).
+    fakes: dict[str, Any] = field(default_factory=dict)
     _connection: asyncpg.Connection | None = None
 
     async def connection(self) -> asyncpg.Connection:
@@ -222,6 +226,7 @@ async def run_one(name: str, spec: dict[str, Any], admin_dsn: str, index: int) -
                 clouddrive_address=clouddrive.address,
                 http_fakes={fake: server.url for fake, server in http_fakes.items()},
                 record=calls.append,
+                fakes={'clouddrive': clouddrive.fake, **http_fakes},
             )
             try:
                 outcome: dict[str, Any] = {'result': await operation(context)}

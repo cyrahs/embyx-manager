@@ -1138,6 +1138,7 @@ dependencies = [
  "regex",
  "rustix",
  "sha1",
+ "sha2 0.11.1",
  "sqlx",
  "tempfile",
  "thiserror 2.0.21",
