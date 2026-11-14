@@ -61,9 +61,10 @@ def _rust(root: Path, text: str) -> None:
     path.write_text(text, encoding='utf-8')
 
 
-def _collect(root: Path, **kwargs: Path) -> tuple[parity.Parity, list[str]]:
+def _collect(root: Path, **kwargs: Path | list[Path]) -> tuple[parity.Parity, list[str]]:
     report = parity.Report()
     listing = kwargs.get('pytest_listing', root / 'collected.txt')
+    assert isinstance(listing, Path)
     result = parity.collect(report, pytest_listing=listing, rust_listing=kwargs.get('rust_listing'))
     return result, report.errors
 
@@ -121,8 +122,69 @@ def test_a_claim_on_a_test_cargo_does_not_compile_is_rejected(repo: Path) -> Non
     listing.write_text('demo::tests::other: test\n', encoding='utf-8')
     _, errors = _collect(repo, rust_listing=listing)
     assert any('cargo does not list it' in error for error in errors)
-    listing.write_text('demo::tests::orphan: test\n', encoding='utf-8')
+    listing.write_text('orphan: test\n', encoding='utf-8')
     _, errors = _collect(repo, rust_listing=listing)
+    assert errors == []
+
+
+def _source(root: Path, relative: str, text: str) -> None:
+    path = root / 'crates' / relative
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding='utf-8')
+
+
+def test_a_claim_is_matched_by_its_module_path(repo: Path) -> None:
+    _source(
+        repo,
+        'demo/src/task/tests.rs',
+        'mod inner {\n    // py: tests/test_alpha.py::test_two\n    #[test]\n    fn run() {}\n}\n',
+    )
+    _source(repo, 'demo/tests/flows.rs', '// py: tests/test_beta.py::test_four\n#[test]\nfn four() {}\n')
+    listing = repo / 'cargo-tests.txt'
+    # The same names elsewhere do not count.
+    listing.write_text('other::inner::run: test\nother::four: test\n', encoding='utf-8')
+    _, errors = _collect(repo, rust_listing=listing)
+    assert any('(task::tests::run)' in error for error in errors), errors
+    assert any('(four)' in error for error in errors), errors
+    listing.write_text('task::tests::inner::run: test\nfour: test\n', encoding='utf-8')
+    _, errors = _collect(repo, rust_listing=listing)
+    assert errors == []
+
+
+@pytest.mark.parametrize(
+    ('relative', 'module'),
+    [
+        ('demo/src/lib.rs', ()),
+        ('demo/src/main.rs', ()),
+        ('demo/src/a.rs', ('a',)),
+        ('demo/src/a/mod.rs', ('a',)),
+        ('demo/src/a/b.rs', ('a', 'b')),
+        ('demo/src/bin/tool.rs', ()),
+        ('demo/src/bin/tool/main.rs', ()),
+        ('demo/src/bin/tool/part.rs', ('part',)),
+        ('demo/tests/flows.rs', ()),
+        ('demo/tests/flows/main.rs', ()),
+        ('demo/tests/common/mod.rs', ('common',)),
+        ('demo/tests/common/fakes.rs', ('common', 'fakes')),
+    ],
+)
+def test_module_paths_follow_cargos_layout(repo: Path, relative: str, module: tuple[str, ...]) -> None:
+    assert parity.module_path(repo / 'crates' / relative) == module
+
+
+def test_a_test_compiled_only_on_windows_is_found_in_the_windows_listing(repo: Path) -> None:
+    _source(
+        repo,
+        'demo/src/process.rs',
+        '#[cfg(windows)]\nmod windows {\n    // py: tests/test_alpha.py::test_two\n    #[test]\n    fn pause() {}\n}\n',
+    )
+    linux = repo / 'linux-tests.txt'
+    linux.write_text('process::tests::other: test\n', encoding='utf-8')
+    windows = repo / 'windows-tests.txt'
+    windows.write_text('process::windows::pause: test\n', encoding='utf-8')
+    _, errors = _collect(repo, rust_listing=[linux])  # type: ignore[arg-type]
+    assert any('cargo does not list it' in error for error in errors)
+    _, errors = _collect(repo, rust_listing=[linux, windows])  # type: ignore[arg-type]
     assert errors == []
 
 

@@ -1,0 +1,1302 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "home_worker",
+  "cases": [
+    {
+      "kind": "first_pts",
+      "answer": {
+        "returncode": 0,
+        "stdout": "0.083333,\n0.000000,\n0.041667,\n",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-read_intervals",
+            "%+#32",
+            "-show_entries",
+            "packet=pts_time",
+            "-of",
+            "csv=p=0",
+            "/cache/7/cd01/chunk-00003.mkv"
+          ],
+          "timeout": null
+        }
+      ],
+      "value": 0.0
+    },
+    {
+      "kind": "first_pts",
+      "answer": {
+        "returncode": 0,
+        "stdout": "0.166833\n0.100100\n",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-read_intervals",
+            "%+#32",
+            "-show_entries",
+            "packet=pts_time",
+            "-of",
+            "csv=p=0",
+            "/cache/7/cd01/chunk-00003.mkv"
+          ],
+          "timeout": null
+        }
+      ],
+      "value": 0.1001
+    },
+    {
+      "kind": "first_pts",
+      "answer": {
+        "returncode": 0,
+        "stdout": "N/A,\n1.5,\n",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-read_intervals",
+            "%+#32",
+            "-show_entries",
+            "packet=pts_time",
+            "-of",
+            "csv=p=0",
+            "/cache/7/cd01/chunk-00003.mkv"
+          ],
+          "timeout": null
+        }
+      ],
+      "value": 1.5
+    },
+    {
+      "kind": "first_pts",
+      "answer": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-read_intervals",
+            "%+#32",
+            "-show_entries",
+            "packet=pts_time",
+            "-of",
+            "csv=p=0",
+            "/cache/7/cd01/chunk-00003.mkv"
+          ],
+          "timeout": null
+        }
+      ],
+      "error": {
+        "type": "RuntimeError",
+        "message": "ffprobe cannot read the timestamps of chunk-00003.mkv: "
+      }
+    },
+    {
+      "kind": "first_pts",
+      "answer": {
+        "returncode": 0,
+        "stdout": "N/A\n",
+        "stderr": "no packets"
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-read_intervals",
+            "%+#32",
+            "-show_entries",
+            "packet=pts_time",
+            "-of",
+            "csv=p=0",
+            "/cache/7/cd01/chunk-00003.mkv"
+          ],
+          "timeout": null
+        }
+      ],
+      "error": {
+        "type": "RuntimeError",
+        "message": "ffprobe cannot read the timestamps of chunk-00003.mkv: no packets"
+      }
+    },
+    {
+      "kind": "first_pts",
+      "answer": {
+        "returncode": 1,
+        "stdout": "0.1\n",
+        "stderr": "Invalid data found when processing input"
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-read_intervals",
+            "%+#32",
+            "-show_entries",
+            "packet=pts_time",
+            "-of",
+            "csv=p=0",
+            "/cache/7/cd01/chunk-00003.mkv"
+          ],
+          "timeout": null
+        }
+      ],
+      "error": {
+        "type": "RuntimeError",
+        "message": "ffprobe cannot read the timestamps of chunk-00003.mkv: Invalid data found when processing input"
+      }
+    },
+    {
+      "kind": "first_pts",
+      "answer": {
+        "returncode": 1,
+        "stdout": "",
+        "stderr": "  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x\n"
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-read_intervals",
+            "%+#32",
+            "-show_entries",
+            "packet=pts_time",
+            "-of",
+            "csv=p=0",
+            "/cache/7/cd01/chunk-00003.mkv"
+          ],
+          "timeout": null
+        }
+      ],
+      "error": {
+        "type": "RuntimeError",
+        "message": "ffprobe cannot read the timestamps of chunk-00003.mkv:  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x"
+      }
+    },
+    {
+      "kind": "first_pts",
+      "answer": {
+        "returncode": 0,
+        "stdout": "  2.5 ,\r\n-0.5\r\n",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-read_intervals",
+            "%+#32",
+            "-show_entries",
+            "packet=pts_time",
+            "-of",
+            "csv=p=0",
+            "/cache/7/cd01/chunk-00003.mkv"
+          ],
+          "timeout": null
+        }
+      ],
+      "value": -0.5
+    },
+    {
+      "kind": "first_pts",
+      "answer": {
+        "returncode": 0,
+        "stdout": "1e-3,\n",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-read_intervals",
+            "%+#32",
+            "-show_entries",
+            "packet=pts_time",
+            "-of",
+            "csv=p=0",
+            "/cache/7/cd01/chunk-00003.mkv"
+          ],
+          "timeout": null
+        }
+      ],
+      "value": 0.001
+    },
+    {
+      "kind": "first_pts",
+      "answer": {
+        "returncode": 0,
+        "stdout": "٣,\n",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-read_intervals",
+            "%+#32",
+            "-show_entries",
+            "packet=pts_time",
+            "-of",
+            "csv=p=0",
+            "/cache/7/cd01/chunk-00003.mkv"
+          ],
+          "timeout": null
+        }
+      ],
+      "value": 3.0
+    },
+    {
+      "kind": "count_frames",
+      "answer": {
+        "returncode": 0,
+        "stdout": "120\n",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-count_packets",
+            "-show_entries",
+            "stream=nb_read_packets",
+            "-of",
+            "csv=p=0",
+            "/cache/7/cd01/chunk-00003.mkv"
+          ],
+          "timeout": null
+        }
+      ],
+      "value": 120
+    },
+    {
+      "kind": "count_frames",
+      "answer": {
+        "returncode": 0,
+        "stdout": "120,\n",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-count_packets",
+            "-show_entries",
+            "stream=nb_read_packets",
+            "-of",
+            "csv=p=0",
+            "/cache/7/cd01/chunk-00003.mkv"
+          ],
+          "timeout": null
+        }
+      ],
+      "value": 120
+    },
+    {
+      "kind": "count_frames",
+      "answer": {
+        "returncode": 0,
+        "stdout": " 61 \n",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-count_packets",
+            "-show_entries",
+            "stream=nb_read_packets",
+            "-of",
+            "csv=p=0",
+            "/cache/7/cd01/chunk-00003.mkv"
+          ],
+          "timeout": null
+        }
+      ],
+      "value": 61
+    },
+    {
+      "kind": "count_frames",
+      "answer": {
+        "returncode": 0,
+        "stdout": "N/A\n",
+        "stderr": "no frames"
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-count_packets",
+            "-show_entries",
+            "stream=nb_read_packets",
+            "-of",
+            "csv=p=0",
+            "/cache/7/cd01/chunk-00003.mkv"
+          ],
+          "timeout": null
+        }
+      ],
+      "error": {
+        "type": "RuntimeError",
+        "message": "ffprobe cannot count the frames of chunk-00003.mkv: no frames"
+      }
+    },
+    {
+      "kind": "count_frames",
+      "answer": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-count_packets",
+            "-show_entries",
+            "stream=nb_read_packets",
+            "-of",
+            "csv=p=0",
+            "/cache/7/cd01/chunk-00003.mkv"
+          ],
+          "timeout": null
+        }
+      ],
+      "error": {
+        "type": "RuntimeError",
+        "message": "ffprobe cannot count the frames of chunk-00003.mkv: "
+      }
+    },
+    {
+      "kind": "count_frames",
+      "answer": {
+        "returncode": 1,
+        "stdout": "120\n",
+        "stderr": "broken"
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-count_packets",
+            "-show_entries",
+            "stream=nb_read_packets",
+            "-of",
+            "csv=p=0",
+            "/cache/7/cd01/chunk-00003.mkv"
+          ],
+          "timeout": null
+        }
+      ],
+      "error": {
+        "type": "RuntimeError",
+        "message": "ffprobe cannot count the frames of chunk-00003.mkv: broken"
+      }
+    },
+    {
+      "kind": "count_frames",
+      "answer": {
+        "returncode": 0,
+        "stdout": "-1\n",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-count_packets",
+            "-show_entries",
+            "stream=nb_read_packets",
+            "-of",
+            "csv=p=0",
+            "/cache/7/cd01/chunk-00003.mkv"
+          ],
+          "timeout": null
+        }
+      ],
+      "error": {
+        "type": "RuntimeError",
+        "message": "ffprobe cannot count the frames of chunk-00003.mkv: "
+      }
+    },
+    {
+      "kind": "count_frames",
+      "answer": {
+        "returncode": 0,
+        "stdout": "1.5\n",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-count_packets",
+            "-show_entries",
+            "stream=nb_read_packets",
+            "-of",
+            "csv=p=0",
+            "/cache/7/cd01/chunk-00003.mkv"
+          ],
+          "timeout": null
+        }
+      ],
+      "error": {
+        "type": "RuntimeError",
+        "message": "ffprobe cannot count the frames of chunk-00003.mkv: "
+      }
+    },
+    {
+      "kind": "count_frames",
+      "answer": {
+        "returncode": 0,
+        "stdout": "٣\n",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-count_packets",
+            "-show_entries",
+            "stream=nb_read_packets",
+            "-of",
+            "csv=p=0",
+            "/cache/7/cd01/chunk-00003.mkv"
+          ],
+          "timeout": null
+        }
+      ],
+      "value": 3
+    },
+    {
+      "kind": "count_frames",
+      "answer": {
+        "returncode": 0,
+        "stdout": "²\n",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-count_packets",
+            "-show_entries",
+            "stream=nb_read_packets",
+            "-of",
+            "csv=p=0",
+            "/cache/7/cd01/chunk-00003.mkv"
+          ],
+          "timeout": null
+        }
+      ],
+      "error": {
+        "type": "ValueError",
+        "message": "invalid literal for int() with base 10: '²'"
+      }
+    },
+    {
+      "kind": "probe_fps",
+      "token": "",
+      "answer": {
+        "returncode": 0,
+        "stdout": "{\"programs\": [], \"streams\": [{\"avg_frame_rate\": \"30000/1001\", \"r_frame_rate\": \"30000/1001\"}]}",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "value": 29.97002997002997
+    },
+    {
+      "kind": "probe_fps",
+      "token": "",
+      "answer": {
+        "returncode": 0,
+        "stdout": "{\"streams\": [{\"avg_frame_rate\": \"0/0\", \"r_frame_rate\": \"60/1\"}]}",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "value": 60.0
+    },
+    {
+      "kind": "probe_fps",
+      "token": "",
+      "answer": {
+        "returncode": 0,
+        "stdout": "{\"streams\": [{\"avg_frame_rate\": \"25\", \"r_frame_rate\": \"0/0\"}]}",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "value": 25.0
+    },
+    {
+      "kind": "probe_fps",
+      "token": "",
+      "answer": {
+        "returncode": 0,
+        "stdout": "{\"streams\": [{\"avg_frame_rate\": \"0/0\", \"r_frame_rate\": \"0/0\"}]}",
+        "stderr": "no rate"
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "error": {
+        "type": "RuntimeError",
+        "message": "ffprobe found no frame rate: no rate"
+      }
+    },
+    {
+      "kind": "probe_fps",
+      "token": "",
+      "answer": {
+        "returncode": 0,
+        "stdout": "{\"streams\": []}",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "error": {
+        "type": "RuntimeError",
+        "message": "ffprobe found no frame rate: "
+      }
+    },
+    {
+      "kind": "probe_fps",
+      "token": "",
+      "answer": {
+        "returncode": 0,
+        "stdout": "{}",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "error": {
+        "type": "RuntimeError",
+        "message": "ffprobe found no frame rate: "
+      }
+    },
+    {
+      "kind": "probe_fps",
+      "token": "",
+      "answer": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": "Connection refused"
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "error": {
+        "type": "RuntimeError",
+        "message": "ffprobe found no frame rate: Connection refused"
+      }
+    },
+    {
+      "kind": "probe_fps",
+      "token": "",
+      "answer": {
+        "returncode": 1,
+        "stdout": "",
+        "stderr": "Server returned 401 Unauthorized"
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "error": {
+        "type": "RuntimeError",
+        "message": "ffprobe found no frame rate: Server returned 401 Unauthorized"
+      }
+    },
+    {
+      "kind": "probe_fps",
+      "token": "",
+      "answer": {
+        "returncode": 0,
+        "stdout": "not json",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "error": {
+        "type": "JSONDecodeError",
+        "message": "Expecting value: line 1 column 1 (char 0)"
+      }
+    },
+    {
+      "kind": "probe_fps",
+      "token": "",
+      "answer": {
+        "returncode": 0,
+        "stdout": "{\"streams\": [{\"avg_frame_rate\": \"x/y\", \"r_frame_rate\": \"24000/1001\"}]}",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "value": 23.976023976023978
+    },
+    {
+      "kind": "probe_fps",
+      "token": "",
+      "answer": {
+        "returncode": 0,
+        "stdout": "{\"streams\": [{\"avg_frame_rate\": \"-30/1\", \"r_frame_rate\": \"1/0\"}]}",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "error": {
+        "type": "RuntimeError",
+        "message": "ffprobe found no frame rate: "
+      }
+    },
+    {
+      "kind": "probe_fps",
+      "token": "",
+      "answer": {
+        "returncode": 0,
+        "stdout": "{\"streams\": [{\"avg_frame_rate\": 30, \"r_frame_rate\": null}]}",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "value": 30.0
+    },
+    {
+      "kind": "probe_fps",
+      "token": "secret-token",
+      "answer": {
+        "returncode": 0,
+        "stdout": "{\"programs\": [], \"streams\": [{\"avg_frame_rate\": \"30000/1001\", \"r_frame_rate\": \"30000/1001\"}]}",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-headers",
+            "Authorization: Bearer secret-token\r\n",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "value": 29.97002997002997
+    },
+    {
+      "kind": "probe_fps",
+      "token": "secret-token",
+      "answer": {
+        "returncode": 0,
+        "stdout": "{\"streams\": [{\"avg_frame_rate\": \"0/0\", \"r_frame_rate\": \"60/1\"}]}",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-headers",
+            "Authorization: Bearer secret-token\r\n",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "value": 60.0
+    },
+    {
+      "kind": "probe_fps",
+      "token": "secret-token",
+      "answer": {
+        "returncode": 0,
+        "stdout": "{\"streams\": [{\"avg_frame_rate\": \"25\", \"r_frame_rate\": \"0/0\"}]}",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-headers",
+            "Authorization: Bearer secret-token\r\n",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "value": 25.0
+    },
+    {
+      "kind": "probe_fps",
+      "token": "secret-token",
+      "answer": {
+        "returncode": 0,
+        "stdout": "{\"streams\": [{\"avg_frame_rate\": \"0/0\", \"r_frame_rate\": \"0/0\"}]}",
+        "stderr": "no rate"
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-headers",
+            "Authorization: Bearer secret-token\r\n",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "error": {
+        "type": "RuntimeError",
+        "message": "ffprobe found no frame rate: no rate"
+      }
+    },
+    {
+      "kind": "probe_fps",
+      "token": "secret-token",
+      "answer": {
+        "returncode": 0,
+        "stdout": "{\"streams\": []}",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-headers",
+            "Authorization: Bearer secret-token\r\n",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "error": {
+        "type": "RuntimeError",
+        "message": "ffprobe found no frame rate: "
+      }
+    },
+    {
+      "kind": "probe_fps",
+      "token": "secret-token",
+      "answer": {
+        "returncode": 0,
+        "stdout": "{}",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-headers",
+            "Authorization: Bearer secret-token\r\n",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "error": {
+        "type": "RuntimeError",
+        "message": "ffprobe found no frame rate: "
+      }
+    },
+    {
+      "kind": "probe_fps",
+      "token": "secret-token",
+      "answer": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": "Connection refused"
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-headers",
+            "Authorization: Bearer secret-token\r\n",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "error": {
+        "type": "RuntimeError",
+        "message": "ffprobe found no frame rate: Connection refused"
+      }
+    },
+    {
+      "kind": "probe_fps",
+      "token": "secret-token",
+      "answer": {
+        "returncode": 1,
+        "stdout": "",
+        "stderr": "Server returned 401 Unauthorized"
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-headers",
+            "Authorization: Bearer secret-token\r\n",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "error": {
+        "type": "RuntimeError",
+        "message": "ffprobe found no frame rate: Server returned 401 Unauthorized"
+      }
+    },
+    {
+      "kind": "probe_fps",
+      "token": "secret-token",
+      "answer": {
+        "returncode": 0,
+        "stdout": "not json",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-headers",
+            "Authorization: Bearer secret-token\r\n",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "error": {
+        "type": "JSONDecodeError",
+        "message": "Expecting value: line 1 column 1 (char 0)"
+      }
+    },
+    {
+      "kind": "probe_fps",
+      "token": "secret-token",
+      "answer": {
+        "returncode": 0,
+        "stdout": "{\"streams\": [{\"avg_frame_rate\": \"x/y\", \"r_frame_rate\": \"24000/1001\"}]}",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-headers",
+            "Authorization: Bearer secret-token\r\n",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "value": 23.976023976023978
+    },
+    {
+      "kind": "probe_fps",
+      "token": "secret-token",
+      "answer": {
+        "returncode": 0,
+        "stdout": "{\"streams\": [{\"avg_frame_rate\": \"-30/1\", \"r_frame_rate\": \"1/0\"}]}",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-headers",
+            "Authorization: Bearer secret-token\r\n",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "error": {
+        "type": "RuntimeError",
+        "message": "ffprobe found no frame rate: "
+      }
+    },
+    {
+      "kind": "probe_fps",
+      "token": "secret-token",
+      "answer": {
+        "returncode": 0,
+        "stdout": "{\"streams\": [{\"avg_frame_rate\": 30, \"r_frame_rate\": null}]}",
+        "stderr": ""
+      },
+      "calls": [
+        {
+          "argv": [
+            "/usr/bin/ffprobe",
+            "-v",
+            "error",
+            "-headers",
+            "Authorization: Bearer secret-token\r\n",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=avg_frame_rate,r_frame_rate",
+            "-of",
+            "json",
+            "http://cluster/api/transcode/tasks/7/parts/0"
+          ],
+          "timeout": 600
+        }
+      ],
+      "value": 30.0
+    }
+  ]
+}

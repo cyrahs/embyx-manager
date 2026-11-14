@@ -2,7 +2,8 @@ name: Rust rewrite
 
 # Checks for the Rust build (docs/rewrite/PLAN.md), on pull requests into `rust` and on
 # pushes to it. Read-only by design: no job here builds or publishes an image, deploys or
-# tags, and none has a token that could. The Python tree's own CI (ci.yml) runs as well.
+# tags, and none has a token that could; the only outputs are workflow artifacts (the test
+# listings and the Windows worker binary). The Python tree's own CI (ci.yml) runs as well.
 
 on:
   push:
@@ -85,8 +86,8 @@ jobs:
         uv run ruff check tools
         uv run ruff format --check tools
 
-  # Format, clippy, the tests (none may be ignored) and the parity check in one job, so
-  # they share one compile. Debug info is reduced to line tables: backtraces keep file and
+  # Format, clippy, the tests (none may be ignored) and the test listing for the parity
+  # check in one job, so they share one compile. Debug info is reduced to line tables: backtraces keep file and
   # line, and compiling and linking the test binaries gets faster (as in fav's CI).
   rust:
     runs-on: ubuntu-latest
@@ -115,9 +116,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v5
-      with:
-        # The parity check reads the base branch's scope file.
-        fetch-depth: 0
 
     - name: Install the pinned toolchain (rust-toolchain.toml)
       run: |
@@ -133,7 +131,8 @@ jobs:
       run: cargo clippy --workspace --all-targets --locked -- -D warnings
 
     # The merge worker's tests run real ffmpeg (SVT-AV1 included), and its cross-check runs
-    # the Python worker beside the Rust one (crates/embyx-merge/tests/ffmpeg_parity.rs).
+    # the Python worker beside the Rust one (crates/embyx-merge/tests/ffmpeg_parity.rs); the
+    # home worker's runs against the Python listener (crates/embyx-transcode-worker/tests).
     - name: Install ffmpeg
       run: |
         sudo apt-get update -q
@@ -161,21 +160,17 @@ jobs:
     - name: List compiled tests for the parity check
       run: cargo test --workspace --locked -- --list --format terse > "$RUNNER_TEMP/rust-tests.txt"
 
-    - name: Test parity
-      run: |
-        uv run pytest --collect-only -q > "$RUNNER_TEMP/pytest-collected.txt"
-        base_args=()
-        if [ -n "${BASE_REV}" ] && git show "${BASE_REV}:tools/parity/scope.toml" > "$RUNNER_TEMP/base-scope.toml" 2>/dev/null; then
-          base_args=(--base-scope "$RUNNER_TEMP/base-scope.toml")
-        else
-          echo "no scope file at ${BASE_REV}; skipping the base comparison"
-        fi
-        uv run python tools/parity/parity.py --check \
-          --pytest-collected "$RUNNER_TEMP/pytest-collected.txt" \
-          --rust-tests "$RUNNER_TEMP/rust-tests.txt" \
-          "${base_args[@]}"
-      env:
-        BASE_REV: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
+    - name: Collect the Python tests for the parity check
+      run: uv run pytest --collect-only -q > "$RUNNER_TEMP/pytest-collected.txt"
+
+    - name: Keep the listings for the parity check
+      uses: actions/upload-artifact@v4
+      with:
+        name: parity-linux
+        path: |
+          ${{ runner.temp }}/rust-tests.txt
+          ${{ runner.temp }}/pytest-collected.txt
+        retention-days: 7
 
     # The unmodified front end, built, against the Rust server on a scratch database:
     # sign-in, every page, the settings round trip and a clean SIGTERM (tools/smoke).
@@ -189,7 +184,8 @@ jobs:
         tools/smoke/run.sh
 
   # The home transcode worker runs on Windows (WP15). Its crate and the binary must build
-  # there, and the process-control probe runs there.
+  # there and their tests pass, real ffmpeg included. The binary is kept as a build artifact
+  # for a look; it is not a release (WP16 decides how the worker is published).
   windows:
     runs-on: windows-latest
 
@@ -208,6 +204,11 @@ jobs:
 
     - uses: Swatinem/rust-cache@v2
 
+    - name: Install ffmpeg
+      run: |
+        choco install ffmpeg -y --no-progress
+        ffmpeg -hide_banner -encoders | Select-String libx264
+
     - name: Clippy (worker crate and binary)
       run: cargo clippy -p embyx-transcode-worker -p embyx-manager --all-targets --locked -- -D warnings
 
@@ -221,5 +222,57 @@ jobs:
           exit 1
         fi
 
+    - name: List compiled tests for the parity check
+      shell: bash
+      run: cargo test -p embyx-transcode-worker -p embyx-manager --locked -- --list --format terse > "$RUNNER_TEMP/rust-tests-windows.txt"
+
+    - name: Keep the listing for the parity check
+      uses: actions/upload-artifact@v4
+      with:
+        name: parity-windows
+        path: ${{ runner.temp }}/rust-tests-windows.txt
+        retention-days: 7
+
     - name: Build the binary
-      run: cargo build -p embyx-manager --locked
+      run: cargo build -p embyx-manager --release --locked
+
+    - name: Keep the binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: embyx-manager-windows
+        path: target/release/embyx-manager.exe
+        retention-days: 14
+
+  # Every claimed Rust test must be compiled on Linux or on Windows (tools/parity/parity.py).
+  # Standard-library Python only: the listings come from the two jobs above.
+  parity:
+    needs: [ rust, windows ]
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        # The parity check reads the base branch's scope file.
+        fetch-depth: 0
+
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: parity-*
+        path: ${{ runner.temp }}/parity
+
+    - name: Test parity
+      run: |
+        listings="$RUNNER_TEMP/parity"
+        base_args=()
+        if [ -n "${BASE_REV}" ] && git show "${BASE_REV}:tools/parity/scope.toml" > "$RUNNER_TEMP/base-scope.toml" 2>/dev/null; then
+          base_args=(--base-scope "$RUNNER_TEMP/base-scope.toml")
+        else
+          echo "no scope file at ${BASE_REV}; skipping the base comparison"
+        fi
+        python3 tools/parity/parity.py --check \
+          --pytest-collected "$listings/parity-linux/pytest-collected.txt" \
+          --rust-tests "$listings/parity-linux/rust-tests.txt" \
+          --rust-tests "$listings/parity-windows/rust-tests-windows.txt" \
+          "${base_args[@]}"
+      env:
+        BASE_REV: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}

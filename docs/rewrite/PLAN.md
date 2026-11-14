@@ -271,7 +271,7 @@ feed. Where the TLS fingerprint matters the probe runs from the production netwo
 | WP12 | 4 fill actor | done (#96) | Job manager, API, health, lifespan | 1,200 | WP11, WP4 |
 | WP13 | 5 merge | done (#86) | Detect, task repository, the `merge-worker` command (probe, checks, concat, remux, AV1 re-encode, home prepare and assemble) | 1,650 | WP1 |
 | WP14 | 5 merge | done (#95, #97) | Merge service, auto-merge, transcode bookkeeping, merge API, transcode listener. May be split into "service" and "API + transcode" | 2,300 | WP13, WP3, WP9 |
-| WP15 | 5 merge | pending | Home transcode worker, Windows build and a Windows CI job, protocol tests both ways | 1,150 | WP14 |
+| WP15 | 5 merge | in progress | Home transcode worker, Windows build and a Windows CI job, protocol tests both ways | 1,150 | WP14 |
 | WP16 | 6 wrap-up | pending | `Dockerfile.rust` (build only), memory benchmark, parity audit, catch-up with `main`, level 2 and level 3 as far as Max allowed, final report data | new | all |
 
 Order: WP0, WP1; then WP2 + WP3; WP4 + WP5; WP6 + WP13; WP7 + WP8; WP9 + WP10; WP11 + WP14; WP12 + WP15; WP16
@@ -375,10 +375,10 @@ or says why one stays.
   CloudDrive API paths, next to fav's `pypath` (`pathlib` semantics for local paths). Use `posixpath` where
   Python calls `posixpath`, `pypath` where it uses `PurePosixPath`; they differ on `..`, `//` and trailing
   slashes (`goldens/text/posixpath.json`).
-- `tools/parity/parity.py` checks that a claimed Rust test is compiled by its bare function name in the Linux
-  test listing. A claim on a function that is not compiled passes if another compiled test has the same name,
-  and a Windows-only test cannot be claimed. WP15 (the first Windows-only tests) makes the check match module
-  paths and accept the Windows job's listing.
+- `tools/parity/parity.py` matches a claimed Rust test by its module path (from the file's place in the crate
+  plus the file's inline `mod` blocks) against the Linux and Windows jobs' listings (WP15). The listing carries
+  no crate name, so two crates with a test at the same module path still satisfy each other's claim; none do
+  today.
 - `examples/fetch_probe.rs`, `tools/probes/tls_fingerprint.py`, `live_fingerprint.py` and `live_probe_pod.sh`
   exist for the AVBase and JavBus client decision; WP2 reruns the comparison against its configured clients,
   WP16 removes them if nothing else needs them.
@@ -401,12 +401,18 @@ or says why one stays.
   `float()` of text, `==` across int/float/bool, `.Nf` and `{:,}` formatting, `splitlines`, the `OSError` text
   `[Errno N] strerror: 'path'`). `embyx-clients` has its own `OSError` text (`PyOsError`) and `embyx-core`'s
   `pytext` overlaps; WP16 moves what two crates use into `embyx-core`.
-- Two subprocess runners: `embyx_clients::net::subprocess::SystemRunner` (async, D3) and the merge worker's
-  blocking `embyx_merge::worker::exec::SystemExec` (D140). WP15's home worker picks one; WP16 drops the
-  other if nothing else uses it.
+- Three subprocess runners: `embyx_clients::net::subprocess::SystemRunner` (async, D3), the merge worker's
+  blocking `embyx_merge::worker::exec::SystemExec` (D140) and the home worker's own
+  `embyx_transcode_worker::process` (D165), which needs what neither offers on Windows: a process group it can
+  suspend and resume (NtSuspendProcess), a console-event-proof child and a live stderr reader. WP16 checks
+  whether `SystemExec` can sit on it and drops what nothing uses.
+- `embyx_transcode_worker::py` repeats a few of `embyx_merge::py`'s helpers (float formatting, `splitlines`)
+  so the worker crate stays free of `embyx-merge` outside its tests; WP16's move into `embyx-core` covers it.
 - `embyx-merge`'s database half sits behind its default `db` feature and the binary leaves it out, so the
-  binary still builds on Windows (D144). WP14 puts the service behind `db` too; WP4 (`serve`) and WP15 (the
-  Windows asset with only `transcode-worker`) settle the binary's features.
+  binary still builds on Windows (D144). WP14 puts the service behind `db` too. The binary has no features of
+  its own (D174): `serve` and its crates are `cfg(unix)` dependencies, so the Windows build is the same binary
+  with `merge-worker` (which refuses to run there) and `transcode-worker`. `rust.yml`'s Windows job keeps it
+  as a workflow artifact; WP16 decides how it is released and writes the README's download steps.
 - The real-ffmpeg cross-check (`crates/embyx-merge/tests/ffmpeg_parity.rs` with
   `tools/merge_ffmpeg/python_worker.py`) runs the Python worker from the Rust tests, so `rust.yml` installs
   ffmpeg and uv before `cargo test`. CI's ffmpeg is Ubuntu's (6.1), the image's Debian 13's (7.1.5); the
