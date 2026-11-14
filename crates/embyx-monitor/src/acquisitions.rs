@@ -26,7 +26,7 @@ use sqlx::Row as _;
 use sqlx::postgres::PgRow;
 
 use crate::reports::{PyException, str_enum};
-use crate::support::{BoxFuture, StoreError, out_of_range};
+use crate::support::{BoxFuture, StoreError, out_of_range_in_element};
 
 str_enum! {
     /// `AcquisitionState`.
@@ -912,7 +912,7 @@ impl AcquisitionRepository {
             let attempt_no = next_no + i32::try_from(offset).expect("a handful of candidates");
             let size_hint = candidate
                 .size_hint
-                .map(|size| i64::try_from(size).map_err(|_| out_of_range(6, size, 64)))
+                .map(|size| i64::try_from(size).map_err(|_| out_of_range_in_element(6, offset, size, 64)))
                 .transpose()?;
             sqlx::query(
                 "

@@ -86,6 +86,22 @@ impl FakeLedgerState {
     }
 }
 
+/// The range Python's `items[start:stop]` takes from a list of `len` items (negative bounds count
+/// from the end, out-of-range bounds clamp).
+fn py_slice(len: usize, start: i64, stop: i64) -> std::ops::Range<usize> {
+    let len_i = i64::try_from(len).unwrap_or(i64::MAX);
+    let bound = |index: i64| {
+        let index = if index < 0 {
+            (index + len_i).max(0)
+        } else {
+            index.min(len_i)
+        };
+        usize::try_from(index).unwrap_or(0)
+    };
+    let (start, stop) = (bound(start), bound(stop));
+    start..stop.max(start)
+}
+
 /// `FakeLedger(known=...)`.
 #[derive(Debug, Default)]
 pub struct FakeLedger {
@@ -255,7 +271,10 @@ impl FakeLedger {
                 magnet: candidate.magnet.clone(),
                 info_hash: candidate.info_hash.clone(),
                 magnet_source: candidate.source.clone(),
-                size_hint: candidate.size_hint.and_then(|size| i64::try_from(size).ok()),
+                // Python's fake keeps any int; this one holds what the record type can.
+                size_hint: candidate
+                    .size_hint
+                    .map(|size| i64::try_from(size).expect("the fake holds sizes within i64")),
                 state: AttemptState::Pending,
                 progress: None,
                 error: None,
@@ -435,10 +454,9 @@ impl Ledger for FakeLedger {
             .map(|(avid, _)| avid)
             .collect();
         due.sort();
-        let limit = usize::try_from(limit.max(0)).unwrap_or(usize::MAX);
-        let records = due
-            .into_iter()
-            .take(limit)
+        // `due[:limit]`.
+        let records = due[py_slice(due.len(), 0, limit)]
+            .iter()
             .filter_map(|avid| state.record(avid))
             .collect();
         ready(records)
@@ -595,12 +613,9 @@ impl Ledger for FakeLedger {
             .map(|(avid, _)| avid)
             .collect();
         avids.sort();
-        let offset = usize::try_from(offset.max(0)).unwrap_or(usize::MAX);
-        let limit = usize::try_from(limit.max(0)).unwrap_or(usize::MAX);
-        let records = avids
-            .into_iter()
-            .skip(offset)
-            .take(limit)
+        // `[...][offset : offset + limit]`.
+        let records = avids[py_slice(avids.len(), offset, offset.saturating_add(limit))]
+            .iter()
             .filter_map(|avid| state.record(avid))
             .collect();
         ready(records)
@@ -616,5 +631,22 @@ impl Ledger for FakeLedger {
             }
         }
         ready(counts)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::py_slice;
+
+    /// `list(range(5))[start:stop]` for the bounds the fake's queries pass.
+    #[test]
+    fn slices_follow_python() {
+        assert_eq!(py_slice(5, 0, 50), 0..5);
+        assert_eq!(py_slice(5, 0, -1), 0..4);
+        assert_eq!(py_slice(5, 0, -9), 0..0);
+        assert_eq!(py_slice(5, 3, 1), 3..3);
+        assert_eq!(py_slice(5, -2, 5), 3..5);
+        assert_eq!(py_slice(5, 9, 12), 5..5);
+        assert_eq!(py_slice(0, 0, 50), 0..0);
     }
 }

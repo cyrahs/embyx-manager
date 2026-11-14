@@ -98,7 +98,9 @@ pub fn uuid4_hex() -> String {
 /// either.
 #[derive(Debug, thiserror::Error)]
 pub enum StoreError {
-    #[error(transparent)]
+    /// The text is `str(exc)` of asyncpg's exception: PostgreSQL's own message for a refusal by
+    /// the server (sqlx would prefix it with "error returned from database: ").
+    #[error("{}", database_text(.0))]
     Database(#[from] DatabaseError),
     /// A stored value that does not decode (`ValueError` for an unknown state,
     /// `JSONDecodeError` for broken JSON), with Python's message.
@@ -130,7 +132,7 @@ impl StoreError {
         matches!(error, sqlx::Error::Database(database) if database.code().as_deref() == Some("23505"))
     }
 
-    /// `type(exc).__name__` as the Python build would raise it (DIVERGENCES.md D66: database
+    /// `type(exc).__name__` as the Python build would raise it (DIVERGENCES.md D61: database
     /// failures are named by SQLSTATE where asyncpg has a class, `PostgresError` otherwise).
     pub fn class_name(&self) -> &'static str {
         match self {
@@ -159,6 +161,24 @@ impl StoreError {
 }
 
 /// asyncpg's `DataError` text for an integer argument out of the column's range.
+/// The text of a database failure as asyncpg words it: the server's message for a statement
+/// PostgreSQL refused, the driver's text otherwise.
+fn database_text(error: &DatabaseError) -> String {
+    match error {
+        DatabaseError::Sqlx(sqlx::Error::Database(database)) => database.message().to_owned(),
+        other => other.to_string(),
+    }
+}
+
+/// asyncpg's `DataError` for an argument of an `executemany()` row the column cannot hold
+/// (`element` counts the rows from 0).
+pub(crate) fn out_of_range_in_element(position: usize, element: usize, value: i128, bits: u32) -> StoreError {
+    StoreError::Argument(format!(
+        "invalid input for query argument ${position} in element #{element} of executemany() sequence: {value} \
+         (value out of int{bits} range)"
+    ))
+}
+
 pub(crate) fn out_of_range(position: usize, value: i128, bits: u32) -> StoreError {
     StoreError::Argument(format!(
         "invalid input for query argument ${position}: {value} (value out of int{bits} range)"

@@ -445,8 +445,16 @@ async fn retry_reparks_when_no_directory_exists_at_all() {
         ..Setup::default()
     });
 
-    intake.retry_due(&make_ctx(), None, 50).await.expect("retry_due");
+    let ctx = make_ctx();
+    intake.retry_due(&ctx, None, 50).await.expect("retry_due");
 
+    assert_eq!(
+        ctx.log_tail(),
+        [
+            "WARNING: No offline directory to retry ABC-123 in",
+            "Retried 1 cooled-down avids"
+        ]
+    );
     assert!(deps.sukebei.calls.lock().expect("calls").is_empty());
     assert!(deps.cloud.calls().is_empty());
     assert_eq!(deps.state("ABC-123"), AcquisitionState::ResolveFailed);

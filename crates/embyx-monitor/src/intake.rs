@@ -102,7 +102,8 @@ impl From<Raised> for SourceError {
     }
 }
 
-/// The `OSError` family: what `CLOUD_RETRY` retries besides gRPC and httpx failures.
+/// The `OSError` family: what `CLOUD_RETRY` retries besides gRPC and httpx failures (the builtin
+/// subclasses, plus `socket` / `ssl` / `io` ones Python code can raise; DIVERGENCES.md D63).
 const OS_ERRORS: &[&str] = &[
     "OSError",
     "IOError",
@@ -122,6 +123,16 @@ const OS_ERRORS: &[&str] = &[
     "PermissionError",
     "ProcessLookupError",
     "TimeoutError",
+    "gaierror",
+    "herror",
+    "SSLError",
+    "SSLZeroReturnError",
+    "SSLWantReadError",
+    "SSLWantWriteError",
+    "SSLSyscallError",
+    "SSLEOFError",
+    "SSLCertVerificationError",
+    "UnsupportedOperation",
 ];
 
 impl SourceError {
@@ -477,7 +488,7 @@ impl AcquisitionIntake {
             .filter(|path| !path.is_empty())
             .or(fallback_task_dir);
         let Some(task_dir) = task_dir else {
-            ctx.warning(&format!("No offline directory to retry {}", record.avid));
+            ctx.warning(&format!("No offline directory to retry {} in", record.avid));
             self.repark(record, "no offline directory configured").await?;
             return Ok(IntakeOutcome::SubmitFailed);
         };

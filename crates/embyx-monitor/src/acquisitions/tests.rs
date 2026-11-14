@@ -1427,7 +1427,8 @@ async fn a_size_beyond_bigint_is_refused_and_nothing_is_written() {
         .expect_err("out of range");
     assert_eq!(
         error.to_string(),
-        "invalid input for query argument $6: 9223372036854775808 (value out of int64 range)"
+        "invalid input for query argument $6 in element #1 of executemany() sequence: 9223372036854775808 \
+         (value out of int64 range)"
     );
     assert_eq!(error.class_name(), "DataError");
     assert!(ledger.attempts_for("ABC-123").await.expect("attempts").is_empty());
@@ -1527,4 +1528,31 @@ fn the_state_machine_matches_python() {
             "{name}"
         );
     }
+}
+
+/// A refusal by PostgreSQL reaches a run log as asyncpg's exception: its class from the
+/// SQLSTATE and the server's own message (no driver prefix).
+#[tokio::test]
+async fn a_database_refusal_reads_as_asyncpg_s_exception() {
+    let fixture = Fixture::new().await;
+    let pool = fixture.test.pool();
+    sqlx::query("CREATE TABLE u (id INTEGER PRIMARY KEY)")
+        .execute(pool)
+        .await
+        .expect("create");
+    sqlx::query("INSERT INTO u VALUES (1)")
+        .execute(pool)
+        .await
+        .expect("insert");
+    let refused = sqlx::query("INSERT INTO u VALUES (1)")
+        .execute(pool)
+        .await
+        .expect_err("a duplicate");
+    let error = LedgerError::Store(StoreError::from(refused));
+    assert_eq!(error.class_name(), "UniqueViolationError");
+    assert_eq!(
+        error.py_repr(),
+        "UniqueViolationError('duplicate key value violates unique constraint \"u_pkey\"')"
+    );
+    fixture.finish().await;
 }
