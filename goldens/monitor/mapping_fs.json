@@ -1,0 +1,135 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "mapping",
+  "cases": [
+    {
+      "tree": [
+        "b.strm",
+        "a.strm",
+        "z/c.strm",
+        "z/notes.txt",
+        "z/y/d.strm",
+        "z/y/x/e.strm",
+        "a/f.strm",
+        "a/.hidden.strm",
+        "a/q/g.STRM",
+        "a/q/r/h.strm",
+        "m/i.strm",
+        "dir.strm/j.strm"
+      ],
+      "glob_strm": [
+        "a.strm",
+        "b.strm",
+        "dir.strm",
+        "a/.hidden.strm",
+        "a/f.strm",
+        "dir.strm/j.strm",
+        "m/i.strm",
+        "z/c.strm",
+        "z/y/d.strm",
+        "z/y/x/e.strm",
+        "a/q/r/h.strm"
+      ],
+      "glob_all": [
+        "a",
+        "a.strm",
+        "b.strm",
+        "dir.strm",
+        "empty",
+        "link",
+        "m",
+        "z",
+        "a/.hidden.strm",
+        "a/f.strm",
+        "a/q",
+        "dir.strm/j.strm",
+        "empty/deeper",
+        "m/i.strm",
+        "z/c.strm",
+        "z/notes.txt",
+        "z/y",
+        "z/y/d.strm",
+        "z/y/x",
+        "z/y/x/e.strm",
+        "a/q/g.STRM",
+        "a/q/r",
+        "a/q/r/h.strm"
+      ],
+      "glob_strm_in_link": [
+        "link/c.strm",
+        "link/y/d.strm",
+        "link/y/x/e.strm"
+      ],
+      "copy2": {
+        "mtime_ns": 1600000000987654321,
+        "mode": "0o640",
+        "content": "/cloud/video.mp4",
+        "into_dir": [
+          "src.strm"
+        ],
+        "st_mtime_equal": true
+      },
+      "errors": {
+        "copy_missing_source": {
+          "type": "FileNotFoundError",
+          "message": "[Errno 2] No such file or directory: '{tmp}/missing.strm'",
+          "repr": "FileNotFoundError(2, 'No such file or directory')"
+        },
+        "copy_missing_directory": {
+          "type": "FileNotFoundError",
+          "message": "[Errno 2] No such file or directory: '{tmp}/nowhere/x.strm'",
+          "repr": "FileNotFoundError(2, 'No such file or directory')"
+        },
+        "copy_source_is_directory": {
+          "type": "IsADirectoryError",
+          "message": "[Errno 21] Is a directory: '{tmp}/full'",
+          "repr": "IsADirectoryError(21, 'Is a directory')"
+        },
+        "copy_same_file": {
+          "type": "SameFileError",
+          "message": "PosixPath('{tmp}/src.strm') and PosixPath('{tmp}/src.strm') are the same file",
+          "repr": "SameFileError(\"PosixPath('{tmp}/src.strm') and PosixPath('{tmp}/src.strm') are the same file\")"
+        },
+        "mkdir_existing": {
+          "type": "FileExistsError",
+          "message": "[Errno 17] File exists: '{tmp}/exists'",
+          "repr": "FileExistsError(17, 'File exists')"
+        },
+        "mkdir_under_file": {
+          "type": "NotADirectoryError",
+          "message": "[Errno 20] Not a directory: '{tmp}/a-file/x/y'",
+          "repr": "NotADirectoryError(20, 'Not a directory')"
+        },
+        "mkdir_new": {
+          "result": null
+        },
+        "rmdir_not_empty": {
+          "type": "OSError",
+          "message": "[Errno 39] Directory not empty: '{tmp}/full'",
+          "repr": "OSError(39, 'Directory not empty')"
+        },
+        "rmdir_missing": {
+          "type": "FileNotFoundError",
+          "message": "[Errno 2] No such file or directory: '{tmp}/gone'",
+          "repr": "FileNotFoundError(2, 'No such file or directory')"
+        },
+        "cmp_equal": {
+          "result": true
+        },
+        "cmp_same_size_differs": {
+          "result": false
+        },
+        "cmp_directory": {
+          "result": false
+        },
+        "cmp_missing": {
+          "type": "FileNotFoundError",
+          "message": "[Errno 2] No such file or directory: '{tmp}/missing.strm'",
+          "repr": "FileNotFoundError(2, 'No such file or directory')"
+        }
+      }
+    }
+  ]
+}

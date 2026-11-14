@@ -127,7 +127,7 @@ pub(crate) fn shape_tree(seeded: &Seeded, op: &str, args: &Value) -> bool {
 
 /// One `_run_steps` entry for a step that ran: its result or error, then the run's
 /// counters, log tail and errors.
-fn entry(op: &str, outcome: Result<Value, Value>, run: &RunContext) -> Value {
+pub(crate) fn entry(op: &str, outcome: Result<Value, Value>, run: &RunContext) -> Value {
     let mut entry = Dict::new();
     entry.insert("op", Value::from(op));
     match outcome {
@@ -203,7 +203,7 @@ pub(crate) fn steps_of(spec: &Spec) -> Vec<(String, Value)> {
         .collect()
 }
 
-fn finish(spec: &Spec, seeded: &Seeded, reported: Vec<Value>, recorder: &Recorder, rows: Value) {
+pub(crate) fn finish(spec: &Spec, seeded: &Seeded, reported: Vec<Value>, recorder: &Recorder, rows: Value) {
     let mut result = Dict::new();
     result.insert("steps", Value::List(reported));
     scenario::assert_transcript(Parts {

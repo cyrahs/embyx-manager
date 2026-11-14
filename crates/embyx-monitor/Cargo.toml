@@ -34,6 +34,7 @@ croner.workspace = true
 embyx-clients = { workspace = true, features = ["clouddrive", "test-support"] }
 embyx-core = { workspace = true, features = ["test-support"] }
 embyx-db = { workspace = true, features = ["test-support"] }
+hex.workspace = true
 notify.workspace = true
 tempfile.workspace = true
 tokio = { workspace = true, features = ["macros", "rt", "rt-multi-thread", "sync", "time"] }

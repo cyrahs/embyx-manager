@@ -1147,6 +1147,7 @@ dependencies = [
  "embyx-core",
  "embyx-db",
  "getrandom 0.4.3",
+ "hex",
  "indexmap",
  "notify",
  "rustix",

@@ -1,0 +1,115 @@
+# Full sync (WP8): the first run mirrors every flat `.strm` into its title directory (a copy
+# whose bytes differ is replaced even with the same time), deletes strays (a source that is
+# gone, a strm left in a directory its ID no longer maps to) with the metadata they own, keeps
+# metadata no strm claims, and removes directories left without a strm. The second run over
+# the now in-sync tree changes nothing. A source written later is copied again; a source
+# removed takes its title directory with it.
+description = "mapping: run_full() mirrors, deletes strays, then an in-sync tree changes nothing"
+operation = "mapping.steps"
+
+[roots]
+names = ["flat", "emby"]
+
+[args.config]
+src_dir = "flat"
+dst_dir = "emby"
+
+[[args.steps]]
+op = "full"
+
+[[args.steps]]
+op = "full"
+
+[[args.steps]]
+op = "write"
+args = { path = "flat/a/ABC-101.strm", text = "/cloud/a/ABC-101.v2.mp4", mtime = 1767225660 }
+
+[[args.steps]]
+op = "remove"
+args = { path = "flat/b/c/DEF-201.strm" }
+
+[[args.steps]]
+op = "full"
+
+[[args.steps]]
+op = "full"
+
+[[tree]]
+path = "flat/a/ABC-101.strm"
+text = "/cloud/a/ABC-101.mp4"
+
+[[tree]]
+path = "flat/a/ABC-102-cd1.strm"
+text = "/cloud/a/ABC-102-cd1.mp4"
+
+[[tree]]
+path = "flat/a/ABC-102-cd2.strm"
+text = "/cloud/a/ABC-102-cd2.mp4"
+
+[[tree]]
+path = "flat/b/c/DEF-201.strm"
+text = "/cloud/b/c/DEF-201.mp4"
+
+[[tree]]
+path = "flat/GHI-301.STRM"
+text = "/cloud/GHI-301.mp4"
+
+[[tree]]
+path = "flat/notes.txt"
+text = "not a strm"
+
+[[tree]]
+path = "flat/no title.strm"
+text = "/cloud/no title.mp4"
+
+[[tree]]
+path = "emby/a/ABC-101/ABC-101.strm"
+text = "/cloud/a/ABC-101.mp4"
+
+[[tree]]
+path = "emby/a/ABC-101/ABC-101.nfo"
+text = "<movie/>"
+
+[[tree]]
+path = "emby/a/OLD/ABC-101.strm"
+text = "/cloud/a/ABC-101.mp4"
+
+[[tree]]
+path = "emby/a/OLD/ABC-101.nfo"
+text = "<movie/>"
+
+[[tree]]
+path = "emby/a/ABC-102/ABC-102-cd3.strm"
+text = "/cloud/a/ABC-102-cd3.mp4"
+
+[[tree]]
+path = "emby/a/ABC-102/ABC-102-cd3.nfo"
+text = "<movie/>"
+
+[[tree]]
+path = "emby/a/ABC-102/ABC-102-cd4-poster.jpg"
+size = 3
+
+[[tree]]
+path = "emby/a/ABC-102/poster.jpg"
+size = 4
+
+[[tree]]
+path = "emby/b/c/DEF-201/DEF-201.strm"
+text = "/cloud/b/c/DEF-201-old.mkv"
+
+[[tree]]
+path = "emby/old/XYZ-999/XYZ-999.strm"
+text = "/cloud/old/XYZ-999.mp4"
+
+[[tree]]
+path = "emby/old/XYZ-999/XYZ-999.nfo"
+text = "<movie/>"
+
+[[tree]]
+path = "emby/old/XYZ-999/fanart.jpg"
+size = 2
+
+[[tree]]
+path = "emby/empty/deeper"
+kind = "dir"

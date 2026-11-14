@@ -28,6 +28,7 @@ use embyx_core::pytext::py_repr;
 
 use crate::reports::PyException;
 
+mod copy;
 #[cfg(any(test, feature = "test-support"))]
 pub mod recording;
 
@@ -55,6 +56,9 @@ pub struct PyOsError {
     /// `exc.filename` and `exc.filename2`.
     pub filename: Option<Filename>,
     pub filename2: Option<Filename>,
+    /// The class when it is not the errno's (`shutil.SameFileError`, a `FileNotFoundError`
+    /// built from a message).
+    class: Option<&'static str>,
 }
 
 /// An `OSError`'s file name: the `str` an `os` call stores, or the `Path` object
@@ -89,6 +93,7 @@ impl PyOsError {
             message: None,
             filename: filename.map(Filename::of),
             filename2: filename2.map(Filename::of),
+            class: None,
         }
     }
 
@@ -100,7 +105,16 @@ impl PyOsError {
             message: Some(message.into()),
             filename: None,
             filename2: None,
+            class: None,
         }
+    }
+
+    /// `Class(message)` for an `OSError` subclass Python raises with one argument
+    /// (`FileNotFoundError('Directory does not exist: ...')`, `shutil.SameFileError`).
+    pub fn classed(class: &'static str, message: impl Into<String>) -> Self {
+        let mut built = Self::message(message);
+        built.class = Some(class);
+        built
     }
 
     /// The error an `os` call raises for this I/O error. An error without an errno (a path
@@ -156,6 +170,9 @@ impl std::error::Error for PyOsError {}
 impl PyException for PyOsError {
     /// The `OSError` subclass Python picks for the errno (Linux numbers).
     fn class_name(&self) -> &'static str {
+        if let Some(class) = self.class {
+            return class;
+        }
         match self.errno {
             Some(11 | 114 | 115) => "BlockingIOError",
             Some(10) => "ChildProcessError",
@@ -198,11 +215,20 @@ pub fn path_text(path: &Path) -> String {
     path.to_string_lossy().into_owned()
 }
 
+/// `st_mtime`: `(double)sec + (double)nsec * 1e-9`, the float CPython builds.
+#[expect(clippy::cast_precision_loss, reason = "CPython's own double arithmetic")]
+fn py_mtime(metadata: &std::fs::Metadata) -> f64 {
+    use std::os::unix::fs::MetadataExt as _;
+    metadata.mtime() as f64 + metadata.mtime_nsec() as f64 * 1e-9
+}
+
 /// What `os.stat` tells the pipelines: the kind of entry and its size.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct FileStat {
     pub kind: FileKind,
     pub size: u64,
+    /// `st_mtime`: seconds as a float, `sec + nsec * 1e-9` as CPython computes it.
+    pub mtime: f64,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -237,6 +263,13 @@ pub trait Fs: Send + Sync + fmt::Debug {
     fn unlink(&self, path: &Path) -> Result<(), PyOsError>;
     /// `shutil.rmtree(path)`.
     fn rmtree(&self, path: &Path) -> Result<(), PyOsError>;
+    /// `Path.rmdir()`: `os.rmdir`.
+    fn rmdir(&self, path: &Path) -> Result<(), PyOsError>;
+    /// `shutil.copy2(src, dst)`: the bytes, then `copystat` (times, extended attributes, mode).
+    fn copy2(&self, src: &Path, dst: &Path) -> Result<(), PyOsError>;
+    /// `filecmp.cmp(a, b, shallow=False)`: both regular files of one size and equal bytes
+    /// (its own `os.stat` calls, not `Path.stat`).
+    fn cmp_files(&self, a: &Path, b: &Path) -> Result<bool, PyOsError>;
 
     /// `list(Path.iterdir())`, unsorted.
     fn iterdir(&self, path: &Path) -> Result<Vec<PathBuf>, PyOsError> {
@@ -251,6 +284,17 @@ pub trait Fs: Send + Sync + fmt::Debug {
     /// `Path.mkdir(parents=True, exist_ok=True)`.
     fn mkdir_parents(&self, path: &Path) -> Result<(), PyOsError> {
         mkdir_parents(self, path)
+    }
+
+    /// `Path.mkdir(parents=True)` (`exist_ok=False`): an existing path is an error.
+    fn mkdir_parents_new(&self, path: &Path) -> Result<(), PyOsError> {
+        mkdir_parents_new(self, path)
+    }
+
+    /// `list(Path.glob('**/<pattern>'))` in 3.13 (`recurse_symlinks=False`), where `matches`
+    /// tests an entry's name against `<pattern>`. See [`glob_recursive`].
+    fn glob_recursive(&self, path: &Path, matches: &dyn Fn(&OsStr) -> bool) -> Vec<PathBuf> {
+        glob_recursive(self, path, matches, usize::MAX)
     }
 }
 
@@ -301,6 +345,64 @@ pub fn mkdir_parents<F: Fs + ?Sized>(fs: &F, path: &Path) -> Result<(), PyOsErro
         }
         Err(error) => exists_as_dir(fs, path, error),
     }
+}
+
+/// `Path.mkdir(parents=True, exist_ok=False)` in 3.13: `os.mkdir`; on `FileNotFoundError`
+/// the parents with `exist_ok=True`, then this one again, any error raised; any other error
+/// raised as is.
+pub fn mkdir_parents_new<F: Fs + ?Sized>(fs: &F, path: &Path) -> Result<(), PyOsError> {
+    match fs.mkdir(path) {
+        Err(error) if error.errno == Some(ENOENT) => {
+            let parent = parent_of(path);
+            if parent == path {
+                return Err(error);
+            }
+            mkdir_parents(fs, &parent)?;
+            fs.mkdir(path)
+        }
+        other => other,
+    }
+}
+
+/// `Path.glob('**/<pattern>')` in 3.13 with `recurse_symlinks=False` (`glob._Globber`'s
+/// `recursive_selector` over a `wildcard_selector`), at most `limit` paths: the matching
+/// children of the path, then a walk that pops the last pending directory, and for each
+/// sub-directory it lists (not entering symbolic links) yields that directory's matching
+/// children before queueing it. A directory that cannot be listed contributes nothing; the
+/// glob itself never fails. Python lists each directory twice (once to match its children,
+/// once to walk it); here the listing taken for the match is kept for the walk, which yields
+/// the same paths in the same order.
+pub fn glob_recursive<F: Fs + ?Sized>(
+    fs: &F,
+    path: &Path,
+    matches: &dyn Fn(&OsStr) -> bool,
+    limit: usize,
+) -> Vec<PathBuf> {
+    let mut found = Vec::new();
+    let take = |entries: &[ScanEntry], found: &mut Vec<PathBuf>| {
+        for entry in entries {
+            if found.len() == limit {
+                return;
+            }
+            if entry.path.file_name().is_some_and(matches) {
+                found.push(entry.path.clone());
+            }
+        }
+    };
+    let listing = fs.scandir(path).unwrap_or_default();
+    take(&listing, &mut found);
+    let mut stack = vec![listing];
+    while let Some(entries) = stack.pop() {
+        for entry in entries.iter().filter(|entry| entry.is_dir) {
+            if found.len() == limit {
+                return found;
+            }
+            let children = fs.scandir(&entry.path).unwrap_or_default();
+            take(&children, &mut found);
+            stack.push(children);
+        }
+    }
+    found
 }
 
 fn exists_as_dir<F: Fs + ?Sized>(fs: &F, path: &Path, error: PyOsError) -> Result<(), PyOsError> {
@@ -384,6 +486,7 @@ impl Fs for LocalFs {
         Ok(FileStat {
             kind,
             size: metadata.len(),
+            mtime: py_mtime(&metadata),
         })
     }
 
@@ -411,6 +514,18 @@ impl Fs for LocalFs {
 
     fn unlink(&self, path: &Path) -> Result<(), PyOsError> {
         std::fs::remove_file(path).map_err(|error| PyOsError::from_io(&error, Some(path), None))
+    }
+
+    fn rmdir(&self, path: &Path) -> Result<(), PyOsError> {
+        std::fs::remove_dir(path).map_err(|error| PyOsError::from_io(&error, Some(path), None))
+    }
+
+    fn copy2(&self, src: &Path, dst: &Path) -> Result<(), PyOsError> {
+        copy::copy2(src, dst)
+    }
+
+    fn cmp_files(&self, a: &Path, b: &Path) -> Result<bool, PyOsError> {
+        copy::cmp_files(a, b)
     }
 
     /// `shutil.rmtree` (3.13, `_rmtree_safe_fd`): every directory is opened and walked

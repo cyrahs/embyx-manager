@@ -20,6 +20,7 @@ pub mod feeds;
 pub mod fs;
 pub mod intake;
 pub mod manual;
+pub mod mapping;
 pub mod move_in;
 pub mod reconcile;
 pub mod release_dates;
