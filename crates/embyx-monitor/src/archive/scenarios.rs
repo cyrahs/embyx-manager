@@ -25,17 +25,17 @@ use crate::reconcile::ReconcileScanner;
 use crate::reports::{PyException, RunContext};
 use crate::support::Clock;
 
-fn text<'a>(args: &'a Value, key: &str) -> &'a str {
+pub(crate) fn text<'a>(args: &'a Value, key: &str) -> &'a str {
     args.get(key)
         .and_then(Value::as_str)
         .unwrap_or_else(|| panic!("step argument {key:?} is a string"))
 }
 
-fn flag(args: &Value, key: &str) -> bool {
+pub(crate) fn flag(args: &Value, key: &str) -> bool {
     matches!(args.get(key), Some(Value::Bool(true)))
 }
 
-fn int(value: &Value) -> i64 {
+pub(crate) fn int(value: &Value) -> i64 {
     match value {
         Value::Int(int) => i64::try_from(*int).expect("small"),
         other => panic!("expected an int, got {other:?}"),
@@ -44,7 +44,7 @@ fn int(value: &Value) -> i64 {
 
 /// `_config(ctx, values)`: the roots resolved, `enabled` defaulting to true, validated as
 /// `ArchiveConfig(**values)`.
-fn config(seeded: &Seeded, values: &Value) -> ArchiveConfig {
+pub(crate) fn config(seeded: &Seeded, values: &Value) -> ArchiveConfig {
     let mut values = values.as_dict().expect("a config table").clone();
     for key in ["src_dir", "dst_dir"] {
         let resolved = path_text(&seeded.resolve(values.get(key).and_then(Value::as_str).expect("a directory")));
@@ -57,7 +57,7 @@ fn config(seeded: &Seeded, values: &Value) -> ArchiveConfig {
 }
 
 /// `RecordingFs(ctx, args)`: the spec's faults and stops, records to the scenario recorder.
-fn recording_fs(seeded: &Seeded, args: &Value, recorder: &Recorder) -> Arc<RecordingFs> {
+pub(crate) fn recording_fs(seeded: &Seeded, args: &Value, recorder: &Recorder) -> Arc<RecordingFs> {
     let writer = recorder.clone();
     let sink: Sink = Arc::new(move |call| writer.record(call));
     let fs = RecordingFs::new(sink);
@@ -93,11 +93,11 @@ fn result_value(result: &ArchiveResult) -> Value {
     Value::Dict(value)
 }
 
-fn strings(paths: impl IntoIterator<Item = String>) -> Value {
+pub(crate) fn strings(paths: impl IntoIterator<Item = String>) -> Value {
     Value::List(paths.into_iter().map(Value::Str).collect())
 }
 
-fn error_value(error: &dyn PyException) -> Value {
+pub(crate) fn error_value(error: &dyn PyException) -> Value {
     let mut value = Dict::new();
     value.insert("type", Value::from(error.class_name()));
     value.insert("message", Value::Str(error.to_string()));
@@ -105,7 +105,7 @@ fn error_value(error: &dyn PyException) -> Value {
 }
 
 /// `_shape_tree`: the unrecorded `write` and `remove` steps; false for any other step.
-fn shape_tree(seeded: &Seeded, op: &str, args: &Value) -> bool {
+pub(crate) fn shape_tree(seeded: &Seeded, op: &str, args: &Value) -> bool {
     match op {
         "write" => {
             let path = seeded.resolve(text(args, "path"));
@@ -140,29 +140,29 @@ fn entry(op: &str, outcome: Result<Value, Value>, run: &RunContext) -> Value {
     Value::Dict(entry)
 }
 
-fn only_op(op: &str) -> Value {
+pub(crate) fn only_op(op: &str) -> Value {
     let mut entry = Dict::new();
     entry.insert("op", Value::from(op));
     Value::Dict(entry)
 }
 
 /// The scenario's clock, moved on by a step's `advance_seconds`.
-struct ScenarioClock(Arc<Mutex<DateTime<Utc>>>);
+pub(crate) struct ScenarioClock(Arc<Mutex<DateTime<Utc>>>);
 
 impl ScenarioClock {
-    fn new(spec: &Spec) -> Self {
+    pub(crate) fn new(spec: &Spec) -> Self {
         let start = DateTime::parse_from_rfc3339(spec.clock())
             .expect("an RFC 3339 clock")
             .with_timezone(&Utc);
         Self(Arc::new(Mutex::new(start)))
     }
 
-    fn clock(&self) -> Clock {
+    pub(crate) fn clock(&self) -> Clock {
         let reading = Arc::clone(&self.0);
         Arc::new(move || *reading.lock().expect("clock"))
     }
 
-    fn advance(&self, args: &Value) {
+    pub(crate) fn advance(&self, args: &Value) {
         if let Some(seconds) = args.get("advance_seconds") {
             *self.0.lock().expect("clock") += TimeDelta::seconds(int(seconds));
         }
@@ -170,12 +170,12 @@ impl ScenarioClock {
 }
 
 /// Prepares one step: moves the clock, shapes the tree, or hands out the step's run.
-enum Step {
+pub(crate) enum Step {
     Shaped,
     Run(Arc<RunContext>),
 }
 
-fn begin_step(seeded: &Seeded, fs: &RecordingFs, clock: &ScenarioClock, op: &str, args: &Value) -> Step {
+pub(crate) fn begin_step(seeded: &Seeded, fs: &RecordingFs, clock: &ScenarioClock, op: &str, args: &Value) -> Step {
     clock.advance(args);
     if shape_tree(seeded, op, args) {
         return Step::Shaped;
@@ -188,7 +188,7 @@ fn begin_step(seeded: &Seeded, fs: &RecordingFs, clock: &ScenarioClock, op: &str
     Step::Run(run)
 }
 
-fn steps_of(spec: &Spec) -> Vec<(String, Value)> {
+pub(crate) fn steps_of(spec: &Spec) -> Vec<(String, Value)> {
     spec.section("args")
         .get("steps")
         .and_then(Value::as_list)

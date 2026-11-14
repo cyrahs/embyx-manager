@@ -1,0 +1,558 @@
+{
+  "calls": [
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "AddOfflineFiles",
+      "request": {
+        "checkFolderAfterSecs": "10",
+        "toFolder": "/115/task/inbox",
+        "urls": "magnet:?xt=urn:btih:B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1&dn=IPZ-661"
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 1
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "AddOfflineFiles",
+      "request": {
+        "checkFolderAfterSecs": "10",
+        "toFolder": "/115/task/inbox",
+        "urls": "magnet:?xt=urn:btih:C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1&dn=ABC-123"
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 2
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "AddOfflineFiles",
+      "request": {
+        "checkFolderAfterSecs": "10",
+        "toFolder": "/115/task/inbox",
+        "urls": "magnet:?xt=urn:btih:D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1"
+      },
+      "response": {
+        "errorMessage": "任务已存在",
+        "resultFilePaths": [],
+        "success": false
+      },
+      "seq": 3
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "AddOfflineFiles",
+      "request": {
+        "checkFolderAfterSecs": "10",
+        "toFolder": "/115/task/inbox",
+        "urls": "magnet:?xt=urn:btih:E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1"
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 4
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "ListOfflineFilesByPath",
+      "request": {
+        "path": "/115/task/inbox"
+      },
+      "response": {
+        "offlineFiles": [
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+            "name": "IPZ-661",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 0.0,
+            "size": "0",
+            "status": "OFFLINE_INIT",
+            "url": "magnet:?xt=urn:btih:B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1&dn=IPZ-661"
+          },
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1",
+            "name": "ABC-123",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 0.0,
+            "size": "0",
+            "status": "OFFLINE_INIT",
+            "url": "magnet:?xt=urn:btih:C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1&dn=ABC-123"
+          },
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1",
+            "name": "e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 0.0,
+            "size": "0",
+            "status": "OFFLINE_INIT",
+            "url": "magnet:?xt=urn:btih:E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1"
+          }
+        ]
+      },
+      "seq": 5
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/",
+        "/115/other",
+        "/115/task/inbox",
+        "/library",
+        "/library/sorted",
+        "/library/sorted/ABC",
+        "/library/sorted/CXL",
+        "/library/sorted/DUP",
+        "/library/sorted/IPZ",
+        "/library/sorted/NOM"
+      ],
+      "files": [
+        {
+          "hashes": {},
+          "path": "/library/sorted/ABC/ABC-123.mp4",
+          "size": 4
+        },
+        {
+          "hashes": {},
+          "path": "/library/sorted/CXL/CXL-403.mp4",
+          "size": 4
+        },
+        {
+          "hashes": {},
+          "path": "/library/sorted/DUP/DUP-402.mp4",
+          "size": 4
+        },
+        {
+          "hashes": {},
+          "path": "/library/sorted/IPZ/IPZ-661.mp4",
+          "size": 4
+        },
+        {
+          "hashes": {},
+          "path": "/library/sorted/NOM/NOM-401.mp4",
+          "size": 4
+        }
+      ],
+      "offline_tasks": [
+        {
+          "folder": "/115/other",
+          "info_hash": "d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+          "name": "someone else's",
+          "progress": 10.0,
+          "size": 0,
+          "status": "OFFLINE_DOWNLOADING",
+          "url": "magnet:?xt=urn:btih:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1"
+        },
+        {
+          "folder": "/115/task/inbox",
+          "info_hash": "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+          "name": "IPZ-661",
+          "progress": 0.0,
+          "size": 0,
+          "status": "OFFLINE_INIT",
+          "url": "magnet:?xt=urn:btih:B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1&dn=IPZ-661"
+        },
+        {
+          "folder": "/115/task/inbox",
+          "info_hash": "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1",
+          "name": "ABC-123",
+          "progress": 0.0,
+          "size": 0,
+          "status": "OFFLINE_INIT",
+          "url": "magnet:?xt=urn:btih:C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1&dn=ABC-123"
+        },
+        {
+          "folder": "/115/task/inbox",
+          "info_hash": "e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1",
+          "name": "e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1",
+          "progress": 0.0,
+          "size": 0,
+          "status": "OFFLINE_INIT",
+          "url": "magnet:?xt=urn:btih:E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1"
+        }
+      ],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "tracker.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "op": "plan",
+          "result": {
+            "avid": "IPZ-661",
+            "blocked": null,
+            "holdings": [
+              "sorted/IPZ/IPZ-661.mp4"
+            ],
+            "state": null,
+            "task_dir_path": "/115/task/inbox"
+          }
+        },
+        {
+          "op": "plan",
+          "result": {
+            "avid": "XYZ-001",
+            "blocked": "not_in_library",
+            "holdings": [],
+            "state": null,
+            "task_dir_path": "/115/task/inbox"
+          }
+        },
+        {
+          "error": {
+            "message": "unreadable_avid",
+            "type": "ReplaceError"
+          },
+          "op": "plan"
+        },
+        {
+          "op": "start",
+          "result": {
+            "outcome": "submitted",
+            "state": "downloading"
+          }
+        },
+        {
+          "error": {
+            "message": "acquisition_active",
+            "type": "ReplaceError"
+          },
+          "op": "start"
+        },
+        {
+          "error": {
+            "message": "magnet_already_tried",
+            "type": "ReplaceError"
+          },
+          "op": "start"
+        },
+        {
+          "error": {
+            "message": "unusable_magnet",
+            "type": "ReplaceError"
+          },
+          "op": "start"
+        },
+        {
+          "op": "start",
+          "result": {
+            "outcome": "submitted",
+            "state": "downloading"
+          }
+        },
+        {
+          "op": "start",
+          "result": {
+            "outcome": "no_magnet",
+            "state": "resolve_failed"
+          }
+        },
+        {
+          "op": "start",
+          "result": {
+            "outcome": "submit_failed",
+            "state": "resolve_failed"
+          }
+        },
+        {
+          "error": {
+            "message": "",
+            "type": "CancelledError"
+          },
+          "op": "start"
+        },
+        {
+          "op": "plan",
+          "result": {
+            "avid": "CXL-403",
+            "blocked": "acquisition_active",
+            "holdings": [
+              "sorted/CXL/CXL-403.mp4"
+            ],
+            "state": "discovered",
+            "task_dir_path": "/115/task/inbox"
+          }
+        },
+        {
+          "errors": [],
+          "log": [],
+          "op": "poll",
+          "result": null,
+          "stats": {
+            "offline_tasks": 3
+          }
+        }
+      ]
+    }
+  },
+  "rows": {
+    "app_config": [],
+    "archive_acquisitions": [
+      {
+        "archived_paths_json": "[\"sorted/ABC/ABC-123.mp4\"]",
+        "avid": "ABC-123",
+        "created_at": "2026-09-09T00:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": 1,
+        "replace_paths_json": "[\"sorted/ABC/ABC-123.mp4\"]",
+        "source": "rss:Actor",
+        "state": "downloading",
+        "task_dir_path": "/115/task/inbox",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "CXL-403",
+        "created_at": "2026-09-10T03:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": 0,
+        "replace_paths_json": "[\"sorted/CXL/CXL-403.mp4\"]",
+        "source": "manual",
+        "state": "discovered",
+        "task_dir_path": "/115/task/inbox",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[\"sorted/DUP/DUP-402.mp4\"]",
+        "avid": "DUP-402",
+        "created_at": "2026-09-09T00:00:00+00:00",
+        "next_action_at": "2026-09-10T04:00:00+00:00",
+        "note": "no magnet found",
+        "release_date": null,
+        "replace_after_attempt": 1,
+        "replace_paths_json": "[\"sorted/DUP/DUP-402.mp4\"]",
+        "source": "rss:Actor",
+        "state": "resolve_failed",
+        "task_dir_path": "/115/task/inbox",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "IPZ-661",
+        "created_at": "2026-09-10T03:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": 0,
+        "replace_paths_json": "[\"sorted/IPZ/IPZ-661.mp4\"]",
+        "source": "manual",
+        "state": "downloading",
+        "task_dir_path": "/115/task/inbox",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "NOM-401",
+        "created_at": "2026-09-10T03:00:00+00:00",
+        "next_action_at": "2026-09-10T04:00:00+00:00",
+        "note": "no magnet found",
+        "release_date": null,
+        "replace_after_attempt": 0,
+        "replace_paths_json": "[\"sorted/NOM/NOM-401.mp4\"]",
+        "source": "manual",
+        "state": "resolve_failed",
+        "task_dir_path": "/115/task/inbox",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      }
+    ],
+    "archive_magnet_attempts": [
+      {
+        "attempt_no": 1,
+        "avid": "ABC-123",
+        "error": null,
+        "info_hash": "A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1",
+        "magnet": "magnet:?xt=urn:btih:A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1&dn=ABC-123",
+        "magnet_source": "sukebei",
+        "progress": 100,
+        "size_hint": null,
+        "state": "archived",
+        "submitted_at": "2026-09-09T00:00:00+00:00",
+        "updated_at": "2026-09-09T00:00:00+00:00"
+      },
+      {
+        "attempt_no": 2,
+        "avid": "ABC-123",
+        "error": null,
+        "info_hash": "C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1",
+        "magnet": "magnet:?xt=urn:btih:C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1&dn=ABC-123",
+        "magnet_source": "manual",
+        "progress": 0,
+        "size_hint": null,
+        "state": "downloading",
+        "submitted_at": "2026-09-10T03:00:00+00:00",
+        "updated_at": "2026-09-10T03:01:00+00:00"
+      },
+      {
+        "attempt_no": 1,
+        "avid": "CXL-403",
+        "error": null,
+        "info_hash": "E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1",
+        "magnet": "magnet:?xt=urn:btih:E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1",
+        "magnet_source": "manual",
+        "progress": 0,
+        "size_hint": null,
+        "state": "downloading",
+        "submitted_at": "2026-09-10T03:00:00+00:00",
+        "updated_at": "2026-09-10T03:01:00+00:00"
+      },
+      {
+        "attempt_no": 2,
+        "avid": "DUP-402",
+        "error": "failed to add the offline task",
+        "info_hash": "D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1",
+        "magnet": "magnet:?xt=urn:btih:D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1",
+        "magnet_source": "manual",
+        "progress": null,
+        "size_hint": null,
+        "state": "error",
+        "submitted_at": "2026-09-10T03:00:00+00:00",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      },
+      {
+        "attempt_no": 1,
+        "avid": "DUP-402",
+        "error": null,
+        "info_hash": "D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0",
+        "magnet": "magnet:?xt=urn:btih:D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0&dn=DUP-402",
+        "magnet_source": "sukebei",
+        "progress": 100,
+        "size_hint": null,
+        "state": "archived",
+        "submitted_at": "2026-09-09T00:00:00+00:00",
+        "updated_at": "2026-09-09T00:00:00+00:00"
+      },
+      {
+        "attempt_no": 1,
+        "avid": "IPZ-661",
+        "error": null,
+        "info_hash": "B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1",
+        "magnet": "magnet:?xt=urn:btih:B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1&dn=IPZ-661",
+        "magnet_source": "sukebei",
+        "progress": 0,
+        "size_hint": null,
+        "state": "downloading",
+        "submitted_at": "2026-09-10T03:00:00+00:00",
+        "updated_at": "2026-09-10T03:01:00+00:00"
+      }
+    ],
+    "feed_subscriptions": [],
+    "fill_actor_apply_jobs": [],
+    "fill_actor_candidates": [],
+    "fill_actor_cloud_move_operations": [],
+    "fill_actor_jobs": [],
+    "fill_actor_move_journal": [],
+    "fill_actor_move_results": [],
+    "fill_actor_plans": [],
+    "health_probe": [],
+    "merge_tasks": [],
+    "merge_transcode_chunks": [],
+    "merge_transcode_parts": [],
+    "pipeline_runs": [],
+    "playlist_source": [],
+    "playlists": []
+  },
+  "scenario": "replace/start",
+  "tree": {
+    "mount": [
+      {
+        "kind": "dir",
+        "path": "library"
+      },
+      {
+        "kind": "dir",
+        "path": "library/sorted"
+      },
+      {
+        "kind": "dir",
+        "path": "library/sorted/ABC"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "library/sorted/ABC/ABC-123.mp4",
+        "sha256": "2481a63c85a62cf8",
+        "size": 4
+      },
+      {
+        "kind": "dir",
+        "path": "library/sorted/CXL"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "library/sorted/CXL/CXL-403.mp4",
+        "sha256": "2481a63c85a62cf8",
+        "size": 4
+      },
+      {
+        "kind": "dir",
+        "path": "library/sorted/DUP"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "library/sorted/DUP/DUP-402.mp4",
+        "sha256": "2481a63c85a62cf8",
+        "size": 4
+      },
+      {
+        "kind": "dir",
+        "path": "library/sorted/IPZ"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "library/sorted/IPZ/IPZ-661.mp4",
+        "sha256": "2481a63c85a62cf8",
+        "size": 4
+      },
+      {
+        "kind": "dir",
+        "path": "library/sorted/NOM"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "library/sorted/NOM/NOM-401.mp4",
+        "sha256": "2481a63c85a62cf8",
+        "size": 4
+      }
+    ]
+  }
+}

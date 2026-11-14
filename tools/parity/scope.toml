@@ -83,7 +83,7 @@ tests = [
 
 [WP7]
 title = "Tracker, 换版, manual intake"
-status = "pending"
+status = "done"
 tests = [
   "tests/test_monitor_tracker.py",
   "tests/test_monitor_replace.py",

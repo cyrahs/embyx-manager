@@ -1,0 +1,1021 @@
+{
+  "calls": [
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "ListOfflineFilesByPath",
+      "request": {
+        "path": "/115/task/inbox"
+      },
+      "response": {
+        "offlineFiles": [
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "1111111111111111111111111111111111111111",
+            "name": "CAA-201",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 100.0,
+            "size": "3",
+            "status": "OFFLINE_FINISHED",
+            "url": "magnet:?xt=urn:btih:1111111111111111111111111111111111111111&dn=CAA-201"
+          },
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "2222222222222222222222222222222222222222",
+            "name": "CAB-202",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 100.0,
+            "size": "4",
+            "status": "OFFLINE_FINISHED",
+            "url": "magnet:?xt=urn:btih:2222222222222222222222222222222222222222&dn=CAB-202"
+          },
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "3333333333333333333333333333333333333333",
+            "name": "JNK-203",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 100.0,
+            "size": "1",
+            "status": "OFFLINE_FINISHED",
+            "url": "magnet:?xt=urn:btih:3333333333333333333333333333333333333333&dn=JNK-203"
+          }
+        ]
+      },
+      "seq": 1
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/CAA-201",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/CAA-201",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "CAA-201",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/CAB-202",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/CAB-202",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "CAB-202",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/JNK-203",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/JNK-203",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "JNK-203",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 2
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox/CAA-201"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/CAA-201/CAA-201.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/CAA-201/CAA-201.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "CAA-201.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "3",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 3
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{mount}/library/sorted/CAA"
+      },
+      "response": null,
+      "seq": 4
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{mount}/library/sorted/CAA/CAA-201.mp4",
+        "src": "{mount}/115/task/inbox/CAA-201/CAA-201.mp4"
+      },
+      "response": null,
+      "seq": 5
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{mount}/115/task/inbox/CAA-201"
+      },
+      "response": null,
+      "seq": 6
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "ListOfflineFilesByPath",
+      "request": {
+        "path": "/115/task/inbox"
+      },
+      "response": {
+        "offlineFiles": [
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "1111111111111111111111111111111111111111",
+            "name": "CAA-201",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 100.0,
+            "size": "3",
+            "status": "OFFLINE_FINISHED",
+            "url": "magnet:?xt=urn:btih:1111111111111111111111111111111111111111&dn=CAA-201"
+          },
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "2222222222222222222222222222222222222222",
+            "name": "CAB-202",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 100.0,
+            "size": "4",
+            "status": "OFFLINE_FINISHED",
+            "url": "magnet:?xt=urn:btih:2222222222222222222222222222222222222222&dn=CAB-202"
+          },
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "3333333333333333333333333333333333333333",
+            "name": "JNK-203",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 100.0,
+            "size": "1",
+            "status": "OFFLINE_FINISHED",
+            "url": "magnet:?xt=urn:btih:3333333333333333333333333333333333333333&dn=JNK-203"
+          }
+        ]
+      },
+      "seq": 7
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/CAA-201",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/CAA-201",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "CAA-201",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/CAB-202",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/CAB-202",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "CAB-202",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/JNK-203",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/JNK-203",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "JNK-203",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 8
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox/CAB-202"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/CAB-202/CAB-202.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/CAB-202/CAB-202.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "CAB-202.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "4",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 9
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{mount}/library/sorted/CAB"
+      },
+      "response": null,
+      "seq": 10
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{mount}/library/sorted/CAB/CAB-202.mp4",
+        "src": "{mount}/115/task/inbox/CAB-202/CAB-202.mp4"
+      },
+      "response": null,
+      "seq": 11
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{mount}/115/task/inbox/CAB-202"
+      },
+      "response": null,
+      "seq": 12
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/CAA-201",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/CAA-201",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "CAA-201",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/CAB-202",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/CAB-202",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "CAB-202",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/JNK-203",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/JNK-203",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "JNK-203",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 13
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox/JNK-203"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/JNK-203/sample.txt",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/JNK-203/sample.txt",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "sample.txt",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 14
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "AddOfflineFiles",
+      "request": {
+        "checkFolderAfterSecs": "10",
+        "toFolder": "/115/task/inbox",
+        "urls": "magnet:?xt=urn:btih:3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A&dn=JNK-203"
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 15
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "RemoveOfflineFiles",
+      "request": {
+        "cloudAccountId": "",
+        "cloudName": "",
+        "deleteFiles": true,
+        "infoHashes": [
+          "3333333333333333333333333333333333333333"
+        ],
+        "path": "/115/task/inbox"
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 16
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "ListOfflineFilesByPath",
+      "request": {
+        "path": "/115/task/inbox"
+      },
+      "response": {
+        "offlineFiles": [
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "1111111111111111111111111111111111111111",
+            "name": "CAA-201",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 100.0,
+            "size": "3",
+            "status": "OFFLINE_FINISHED",
+            "url": "magnet:?xt=urn:btih:1111111111111111111111111111111111111111&dn=CAA-201"
+          },
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "2222222222222222222222222222222222222222",
+            "name": "CAB-202",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 100.0,
+            "size": "4",
+            "status": "OFFLINE_FINISHED",
+            "url": "magnet:?xt=urn:btih:2222222222222222222222222222222222222222&dn=CAB-202"
+          },
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a",
+            "name": "JNK-203",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 0.0,
+            "size": "0",
+            "status": "OFFLINE_INIT",
+            "url": "magnet:?xt=urn:btih:3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A&dn=JNK-203"
+          }
+        ]
+      },
+      "seq": 17
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "RemoveOfflineFiles",
+      "request": {
+        "cloudAccountId": "",
+        "cloudName": "",
+        "deleteFiles": false,
+        "infoHashes": [
+          "1111111111111111111111111111111111111111",
+          "2222222222222222222222222222222222222222"
+        ],
+        "path": "/115/task/inbox"
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 18
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/",
+        "/115/task/inbox",
+        "/115/task/inbox/CAA-201",
+        "/115/task/inbox/CAB-202"
+      ],
+      "files": [
+        {
+          "hashes": {},
+          "path": "/115/task/inbox/CAA-201/CAA-201.mp4",
+          "size": 3
+        },
+        {
+          "hashes": {},
+          "path": "/115/task/inbox/CAB-202/CAB-202.mp4",
+          "size": 4
+        }
+      ],
+      "offline_tasks": [
+        {
+          "folder": "/115/task/inbox",
+          "info_hash": "3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a",
+          "name": "JNK-203",
+          "progress": 0.0,
+          "size": 0,
+          "status": "OFFLINE_INIT",
+          "url": "magnet:?xt=urn:btih:3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A&dn=JNK-203"
+        }
+      ],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "tracker.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "error": {
+            "message": "",
+            "type": "RunCancelledError"
+          },
+          "errors": [],
+          "log": [],
+          "op": "poll",
+          "stats": {}
+        },
+        {
+          "error": {
+            "message": "",
+            "type": "RunCancelledError"
+          },
+          "errors": [],
+          "log": [
+            "moving CAA-201.mp4 to sorted/CAA/CAA-201.mp4"
+          ],
+          "op": "poll",
+          "stats": {
+            "archived": 1,
+            "folders_discarded": 1,
+            "offline_tasks": 3,
+            "videos_archived": 1
+          }
+        },
+        {
+          "error": {
+            "message": "",
+            "type": "CancelledError"
+          },
+          "errors": [],
+          "log": [
+            "moving CAB-202.mp4 to sorted/CAB/CAB-202.mp4",
+            "JNK-203 holds no video above 0MB",
+            "WARNING: JNK-203 finished with no usable video, trying the next magnet",
+            "JNK-203: trying magnet 2"
+          ],
+          "op": "poll",
+          "stats": {
+            "archived": 1,
+            "folders_discarded": 1,
+            "junk": 1,
+            "offline_tasks": 3,
+            "retried": 1,
+            "videos_archived": 1
+          }
+        },
+        {
+          "errors": [],
+          "log": [],
+          "op": "poll",
+          "result": null,
+          "stats": {
+            "archived_tasks_cleared": 2,
+            "offline_tasks": 3
+          }
+        }
+      ]
+    }
+  },
+  "rows": {
+    "app_config": [],
+    "archive_acquisitions": [
+      {
+        "archived_paths_json": "[\"sorted/CAA/CAA-201.mp4\"]",
+        "avid": "CAA-201",
+        "created_at": "2026-09-09T00:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss:Actor",
+        "state": "archived",
+        "task_dir_path": "/115/task/inbox",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[\"sorted/CAB/CAB-202.mp4\"]",
+        "avid": "CAB-202",
+        "created_at": "2026-09-09T00:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss:Actor",
+        "state": "archived",
+        "task_dir_path": "/115/task/inbox",
+        "updated_at": "2026-09-10T03:01:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "JNK-203",
+        "created_at": "2026-09-09T00:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss:Actor",
+        "state": "downloading",
+        "task_dir_path": "/115/task/inbox",
+        "updated_at": "2026-09-09T00:00:00+00:00"
+      }
+    ],
+    "archive_magnet_attempts": [
+      {
+        "attempt_no": 1,
+        "avid": "CAA-201",
+        "error": null,
+        "info_hash": "1111111111111111111111111111111111111111",
+        "magnet": "magnet:?xt=urn:btih:1111111111111111111111111111111111111111&dn=CAA-201",
+        "magnet_source": "sukebei",
+        "progress": 50,
+        "size_hint": null,
+        "state": "archived",
+        "submitted_at": "2026-09-09T00:00:00+00:00",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      },
+      {
+        "attempt_no": 1,
+        "avid": "CAB-202",
+        "error": null,
+        "info_hash": "2222222222222222222222222222222222222222",
+        "magnet": "magnet:?xt=urn:btih:2222222222222222222222222222222222222222&dn=CAB-202",
+        "magnet_source": "sukebei",
+        "progress": 60,
+        "size_hint": null,
+        "state": "archived",
+        "submitted_at": "2026-09-09T00:00:00+00:00",
+        "updated_at": "2026-09-10T03:01:00+00:00"
+      },
+      {
+        "attempt_no": 2,
+        "avid": "JNK-203",
+        "error": null,
+        "info_hash": "3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A",
+        "magnet": "magnet:?xt=urn:btih:3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A3A&dn=JNK-203",
+        "magnet_source": "sukebei",
+        "progress": 0,
+        "size_hint": null,
+        "state": "downloading",
+        "submitted_at": "2026-09-10T03:01:00+00:00",
+        "updated_at": "2026-09-10T03:02:00+00:00"
+      },
+      {
+        "attempt_no": 1,
+        "avid": "JNK-203",
+        "error": null,
+        "info_hash": "3333333333333333333333333333333333333333",
+        "magnet": "magnet:?xt=urn:btih:3333333333333333333333333333333333333333&dn=JNK-203",
+        "magnet_source": "sukebei",
+        "progress": 70,
+        "size_hint": null,
+        "state": "junk",
+        "submitted_at": "2026-09-09T00:00:00+00:00",
+        "updated_at": "2026-09-10T03:01:00+00:00"
+      }
+    ],
+    "feed_subscriptions": [],
+    "fill_actor_apply_jobs": [],
+    "fill_actor_candidates": [],
+    "fill_actor_cloud_move_operations": [],
+    "fill_actor_jobs": [],
+    "fill_actor_move_journal": [],
+    "fill_actor_move_results": [],
+    "fill_actor_plans": [],
+    "health_probe": [],
+    "merge_tasks": [],
+    "merge_transcode_chunks": [],
+    "merge_transcode_parts": [],
+    "pipeline_runs": [],
+    "playlist_source": [],
+    "playlists": []
+  },
+  "scenario": "tracker/cancel",
+  "tree": {
+    "mount": [
+      {
+        "kind": "dir",
+        "path": "115"
+      },
+      {
+        "kind": "dir",
+        "path": "115/task"
+      },
+      {
+        "kind": "dir",
+        "path": "115/task/inbox"
+      },
+      {
+        "kind": "dir",
+        "path": "library"
+      },
+      {
+        "kind": "dir",
+        "path": "library/sorted"
+      },
+      {
+        "kind": "dir",
+        "path": "library/sorted/CAA"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "library/sorted/CAA/CAA-201.mp4",
+        "sha256": "cd2eb0837c9b4c96",
+        "size": 3
+      },
+      {
+        "kind": "dir",
+        "path": "library/sorted/CAB"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "library/sorted/CAB/CAB-202.mp4",
+        "sha256": "2481a63c85a62cf8",
+        "size": 4
+      }
+    ]
+  }
+}
