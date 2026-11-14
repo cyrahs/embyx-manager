@@ -1,0 +1,847 @@
+{
+  "calls": [
+    {
+      "fake": "jinjier",
+      "lane": "main",
+      "method": "discover_database_name",
+      "request": {},
+      "response": "20260112",
+      "seq": 1
+    },
+    {
+      "fake": "jinjier",
+      "lane": "main",
+      "method": "download_database",
+      "request": {
+        "name": "20260112"
+      },
+      "response": {
+        "rows": 6
+      },
+      "seq": 2
+    },
+    {
+      "fake": "emby",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/emby/Items",
+        "query": {
+          "Fields": [
+            "Path"
+          ],
+          "IncludeItemTypes": [
+            "Movie"
+          ],
+          "Limit": [
+            "10000"
+          ],
+          "Recursive": [
+            "true"
+          ],
+          "StartIndex": [
+            "0"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "Items": [
+            {
+              "Id": "10",
+              "Path": "/media/a/SSNI-497/SSNI-497.strm"
+            },
+            {
+              "Id": "30",
+              "Path": "/media/a/ABP-984/ABP-984.strm"
+            },
+            {
+              "Id": "40",
+              "Path": "/media/b/MIAB-317/MIAB-317.strm"
+            },
+            {
+              "Id": "50",
+              "Path": "/media/b/no title/no title.strm"
+            }
+          ],
+          "TotalRecordCount": 4
+        },
+        "status": 200
+      },
+      "seq": 3
+    },
+    {
+      "fake": "emby",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/emby/Items",
+        "query": {
+          "IncludeItemTypes": [
+            "Playlist"
+          ],
+          "Recursive": [
+            "true"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "Items": []
+        },
+        "status": 200
+      },
+      "seq": 4
+    },
+    {
+      "fake": "emby",
+      "lane": "main",
+      "method": "POST",
+      "request": {
+        "body": null,
+        "path": "/emby/Playlists",
+        "query": {
+          "Ids": [
+            "10,30"
+          ],
+          "MediaType": [
+            "Video"
+          ],
+          "Name": [
+            "JavDB 有码 TOP250"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "Id": "pl7"
+        },
+        "status": 200
+      },
+      "seq": 5
+    },
+    {
+      "fake": "emby",
+      "lane": "main",
+      "method": "POST",
+      "request": {
+        "body": null,
+        "path": "/emby/Playlists",
+        "query": {
+          "Ids": [
+            "40"
+          ],
+          "MediaType": [
+            "Video"
+          ],
+          "Name": [
+            "JavDB 2024 TOP250"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "Id": "pl24"
+        },
+        "status": 200
+      },
+      "seq": 6
+    },
+    {
+      "fake": "jinjier",
+      "lane": "main",
+      "method": "discover_database_name",
+      "request": {},
+      "response": "20260112",
+      "seq": 7
+    },
+    {
+      "fake": "emby",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/emby/Items",
+        "query": {
+          "Fields": [
+            "Path"
+          ],
+          "IncludeItemTypes": [
+            "Movie"
+          ],
+          "Limit": [
+            "10000"
+          ],
+          "Recursive": [
+            "true"
+          ],
+          "StartIndex": [
+            "0"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "Items": [
+            {
+              "Id": "10",
+              "Path": "/media/a/SSNI-497/SSNI-497.strm"
+            },
+            {
+              "Id": "30",
+              "Path": "/media/a/ABP-984/ABP-984.strm"
+            },
+            {
+              "Id": "40",
+              "Path": "/media/b/MIAB-317/MIAB-317.strm"
+            }
+          ],
+          "TotalRecordCount": 3
+        },
+        "status": 200
+      },
+      "seq": 8
+    },
+    {
+      "fake": "emby",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/emby/Items",
+        "query": {
+          "IncludeItemTypes": [
+            "Playlist"
+          ],
+          "Recursive": [
+            "true"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "Items": [
+            {
+              "Id": "pl7",
+              "Name": "JavDB 有码 TOP250"
+            },
+            {
+              "Id": "pl24",
+              "Name": "JavDB 2024 TOP250"
+            }
+          ]
+        },
+        "status": 200
+      },
+      "seq": 9
+    },
+    {
+      "fake": "emby",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/emby/Playlists/pl7/Items",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "Items": [
+            {
+              "Id": "10",
+              "PlaylistItemId": "e1"
+            },
+            {
+              "Id": "30",
+              "PlaylistItemId": "e2"
+            }
+          ]
+        },
+        "status": 200
+      },
+      "seq": 10
+    },
+    {
+      "fake": "emby",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/emby/Playlists/pl24/Items",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "Items": [
+            {
+              "Id": "40",
+              "PlaylistItemId": "e3"
+            }
+          ]
+        },
+        "status": 200
+      },
+      "seq": 11
+    },
+    {
+      "fake": "jinjier",
+      "lane": "main",
+      "method": "discover_database_name",
+      "request": {},
+      "response": "20260201",
+      "seq": 12
+    },
+    {
+      "fake": "jinjier",
+      "lane": "main",
+      "method": "download_database",
+      "request": {
+        "name": "20260201"
+      },
+      "response": {
+        "rows": 5
+      },
+      "seq": 13
+    },
+    {
+      "fake": "emby",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/emby/Items",
+        "query": {
+          "Fields": [
+            "Path"
+          ],
+          "IncludeItemTypes": [
+            "Movie"
+          ],
+          "Limit": [
+            "10000"
+          ],
+          "Recursive": [
+            "true"
+          ],
+          "StartIndex": [
+            "0"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "Items": [
+            {
+              "Id": "10",
+              "Path": "/media/a/SSNI-497/SSNI-497.strm"
+            },
+            {
+              "Id": "30",
+              "Path": "/media/a/ABP-984/ABP-984.strm"
+            },
+            {
+              "Id": "40",
+              "Path": "/media/b/MIAB-317/MIAB-317.strm"
+            }
+          ],
+          "TotalRecordCount": 3
+        },
+        "status": 200
+      },
+      "seq": 14
+    },
+    {
+      "fake": "emby",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/emby/Items",
+        "query": {
+          "IncludeItemTypes": [
+            "Playlist"
+          ],
+          "Recursive": [
+            "true"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "Items": [
+            {
+              "Id": "pl7",
+              "Name": "JavDB 有码 TOP250"
+            },
+            {
+              "Id": "pl24",
+              "Name": "JavDB 2024 TOP250"
+            }
+          ]
+        },
+        "status": 200
+      },
+      "seq": 15
+    },
+    {
+      "fake": "emby",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/emby/Playlists/pl7/Items",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "Items": [
+            {
+              "Id": "10",
+              "PlaylistItemId": "e1"
+            },
+            {
+              "Id": "30",
+              "PlaylistItemId": "e2"
+            }
+          ]
+        },
+        "status": 200
+      },
+      "seq": 16
+    },
+    {
+      "fake": "emby",
+      "lane": "main",
+      "method": "DELETE",
+      "request": {
+        "body": null,
+        "path": "/emby/Playlists/pl7/Items",
+        "query": {
+          "EntryIds": [
+            "e1,e2"
+          ]
+        }
+      },
+      "response": {
+        "body": null,
+        "status": 204
+      },
+      "seq": 17
+    },
+    {
+      "fake": "emby",
+      "lane": "main",
+      "method": "POST",
+      "request": {
+        "body": null,
+        "path": "/emby/Playlists/pl7/Items",
+        "query": {
+          "Ids": [
+            "30,10"
+          ]
+        }
+      },
+      "response": {
+        "body": null,
+        "status": 204
+      },
+      "seq": 18
+    },
+    {
+      "fake": "emby",
+      "lane": "main",
+      "method": "POST",
+      "request": {
+        "body": null,
+        "path": "/emby/Items/Delete",
+        "query": {
+          "Ids": [
+            "pl24"
+          ]
+        }
+      },
+      "response": {
+        "body": null,
+        "status": 204
+      },
+      "seq": 19
+    },
+    {
+      "error": {
+        "message": "page changed",
+        "type": "JinjierError"
+      },
+      "fake": "jinjier",
+      "lane": "main",
+      "method": "discover_database_name",
+      "request": {},
+      "seq": 20
+    },
+    {
+      "fake": "emby",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/emby/Items",
+        "query": {
+          "Fields": [
+            "Path"
+          ],
+          "IncludeItemTypes": [
+            "Movie"
+          ],
+          "Limit": [
+            "10000"
+          ],
+          "Recursive": [
+            "true"
+          ],
+          "StartIndex": [
+            "0"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "Items": [
+            {
+              "Id": "10",
+              "Path": "/media/a/SSNI-497/SSNI-497.strm"
+            },
+            {
+              "Id": "30",
+              "Path": "/media/a/ABP-984/ABP-984.strm"
+            },
+            {
+              "Id": "40",
+              "Path": "/media/b/MIAB-317/MIAB-317.strm"
+            }
+          ],
+          "TotalRecordCount": 3
+        },
+        "status": 200
+      },
+      "seq": 21
+    },
+    {
+      "fake": "emby",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/emby/Items",
+        "query": {
+          "IncludeItemTypes": [
+            "Playlist"
+          ],
+          "Recursive": [
+            "true"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "Items": [
+            {
+              "Id": "pl7",
+              "Name": "JavDB 有码 TOP250"
+            }
+          ]
+        },
+        "status": 200
+      },
+      "seq": 22
+    },
+    {
+      "fake": "emby",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/emby/Playlists/pl7/Items",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "error": "database is locked"
+        },
+        "status": 500
+      },
+      "seq": 23
+    },
+    {
+      "fake": "jinjier",
+      "lane": "main",
+      "method": "discover_database_name",
+      "request": {},
+      "response": "20260301",
+      "seq": 24
+    },
+    {
+      "error": {
+        "message": "20260301: HTTP 503",
+        "type": "JinjierError"
+      },
+      "fake": "jinjier",
+      "lane": "main",
+      "method": "download_database",
+      "request": {
+        "name": "20260301"
+      },
+      "seq": 25
+    },
+    {
+      "fake": "emby",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/emby/Items",
+        "query": {
+          "Fields": [
+            "Path"
+          ],
+          "IncludeItemTypes": [
+            "Movie"
+          ],
+          "Limit": [
+            "10000"
+          ],
+          "Recursive": [
+            "true"
+          ],
+          "StartIndex": [
+            "0"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "error": "unauthorized"
+        },
+        "status": 401
+      },
+      "seq": 26
+    },
+    {
+      "fake": "jinjier",
+      "lane": "main",
+      "method": "discover_database_name",
+      "request": {},
+      "response": "20260301",
+      "seq": 27
+    },
+    {
+      "error": {
+        "message": "20260301: HTTP 503",
+        "type": "JinjierError"
+      },
+      "fake": "jinjier",
+      "lane": "main",
+      "method": "download_database",
+      "request": {
+        "name": "20260301"
+      },
+      "seq": 28
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "playlists.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "errors": [],
+          "log": [
+            "stored 3 lists from ranking database 20260112",
+            "created playlist JavDB 有码 TOP250 with 2 titles",
+            "created playlist JavDB 2024 TOP250 with 1 titles"
+          ],
+          "op": "run",
+          "result": null,
+          "stats": {
+            "library_titles": 3,
+            "lists": 3,
+            "lists_created": 2,
+            "lists_synced": 3,
+            "missing_total": 3,
+            "source_updated": 1
+          }
+        },
+        {
+          "errors": [],
+          "log": [],
+          "op": "run",
+          "result": null,
+          "stats": {
+            "library_titles": 3,
+            "lists": 3,
+            "lists_synced": 3,
+            "lists_unchanged": 2,
+            "missing_total": 3
+          }
+        },
+        {
+          "errors": [],
+          "log": [],
+          "op": "set_enabled",
+          "result": {
+            "enabled": false,
+            "key": "k2024"
+          },
+          "stats": {}
+        },
+        {
+          "errors": [],
+          "log": [],
+          "op": "set_enabled",
+          "result": null,
+          "stats": {}
+        },
+        {
+          "errors": [],
+          "log": [
+            "stored 2 lists from ranking database 20260201",
+            "rebuilt playlist JavDB 有码 TOP250: 2 titles",
+            "removed playlist JavDB 2024 TOP250: the list is disabled"
+          ],
+          "op": "run",
+          "result": null,
+          "stats": {
+            "library_titles": 3,
+            "lists": 3,
+            "lists_rebuilt": 1,
+            "lists_removed": 1,
+            "lists_synced": 2,
+            "missing_total": 2,
+            "source_updated": 1
+          }
+        },
+        {
+          "errors": [
+            "ERROR: JavDB 有码 TOP250: GET /Playlists/pl7/Items: HTTP 500"
+          ],
+          "log": [
+            "WARNING: ranking source unavailable, keeping the stored lists: page changed",
+            "ERROR: JavDB 有码 TOP250: GET /Playlists/pl7/Items: HTTP 500"
+          ],
+          "op": "run",
+          "result": null,
+          "stats": {
+            "library_titles": 3,
+            "lists": 3,
+            "lists_failed": 1,
+            "lists_synced": 1,
+            "missing_total": 1
+          }
+        },
+        {
+          "error": {
+            "message": "GET /Items: the API key was rejected",
+            "type": "EmbyAuthError"
+          },
+          "errors": [],
+          "log": [
+            "WARNING: ranking database 20260301 could not be read, keeping the stored lists: 20260301: HTTP 503"
+          ],
+          "op": "run",
+          "stats": {
+            "lists": 3
+          }
+        },
+        {
+          "error": {
+            "message": "",
+            "type": "RunCancelledError"
+          },
+          "errors": [],
+          "log": [
+            "WARNING: ranking database 20260301 could not be read, keeping the stored lists: 20260301: HTTP 503"
+          ],
+          "op": "run",
+          "stats": {
+            "lists": 3
+          }
+        }
+      ]
+    }
+  },
+  "rows": {
+    "playlist_source": [
+      {
+        "database_name": "20260201",
+        "fetched_at": "2026-01-01T02:01:00+00:00",
+        "id": true
+      }
+    ],
+    "playlists": [
+      {
+        "created_at": "2026-01-01T00:00:00+00:00",
+        "emby_playlist_id": null,
+        "enabled": false,
+        "entries_json": "[[1, \"MIAB-317\", \"不登校オタク生徒を\"], [2, \"SONE-308\", \"美脚下半身が\"]]",
+        "key": "k2024",
+        "kind": 2024,
+        "last_error": null,
+        "last_synced_at": "2026-01-01T03:01:00+00:00",
+        "missing_json": "[\"SONE-308\"]",
+        "name": "JavDB 2024 TOP250",
+        "note": "JavDB 2024 TOP250",
+        "present_json": "[\"MIAB-317\"]",
+        "updated_at": "2026-01-01T03:01:00+00:00"
+      },
+      {
+        "created_at": "2026-01-01T00:00:00+00:00",
+        "emby_playlist_id": null,
+        "enabled": true,
+        "entries_json": "[[1, \"START-257\", \"苦手な同僚と\"]]",
+        "key": "k5",
+        "kind": 5,
+        "last_error": null,
+        "last_synced_at": "2026-01-01T03:01:00+00:00",
+        "missing_json": "[\"START-257\"]",
+        "name": "JavLibray TOP500",
+        "note": "JavLibray TOP500",
+        "present_json": "[]",
+        "updated_at": "2026-01-01T03:01:00+00:00"
+      },
+      {
+        "created_at": "2026-01-01T00:00:00+00:00",
+        "emby_playlist_id": "pl7",
+        "enabled": true,
+        "entries_json": "[[1, \"ABP-984\", \"中出し 射精執行官 05\"], [2, \"SSNI-497\", \"新任なのに常にパンスト挑発してくる\"], [3, \"IPX-811\", \"-媚薬で翌朝まで覚醒絶頂-\"]]",
+        "key": "k7",
+        "kind": 7,
+        "last_error": "GET /Playlists/pl7/Items: HTTP 500",
+        "last_synced_at": "2026-01-01T02:01:00+00:00",
+        "missing_json": "[\"IPX-811\"]",
+        "name": "JavDB 有码 TOP250",
+        "note": "JavDB 有码 TOP250",
+        "present_json": "[\"ABP-984\", \"SSNI-497\"]",
+        "updated_at": "2026-01-01T03:01:00+00:00"
+      }
+    ]
+  },
+  "scenario": "playlists/sync",
+  "tree": {}
+}

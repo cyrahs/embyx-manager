@@ -22,6 +22,8 @@ pub mod intake;
 pub mod manual;
 pub mod mapping;
 pub mod move_in;
+pub mod playlist_sync;
+pub mod playlists;
 pub mod reconcile;
 pub mod release_dates;
 pub mod replace;

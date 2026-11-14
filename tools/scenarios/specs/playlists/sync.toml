@@ -1,0 +1,201 @@
+# Playlist sync (WP8). Run 1: the first download stores three lists and creates a playlist for
+# each list the library holds titles of, in ranking order (none for a list it holds nothing
+# of). Run 2: the same database name, every playlist already in order: no download, no change
+# on the server. The operator disables one list. Run 3: a new database reorders one list and
+# drops another (kept, marked as no longer published): the reordered playlist is emptied and
+# refilled in one pass, the disabled list's playlist is deleted. Failures midway: run 4 cannot
+# reach the source (a warning; the stored lists still sync) and one list's playlist cannot be
+# read (that list fails, the run goes on); run 5's download fails (a warning) and then the
+# Emby key is rejected while reading the index (the run ends with the error); run 6 is asked
+# to stop before it starts (the source is still consulted first, as in Python).
+description = "playlists: download, create, in-sync, reorder, retire, then failures midway"
+operation = "playlists.steps"
+
+[database]
+schema = "app"
+tables = ["playlists", "playlist_source"]
+
+[args.source]
+name = "20260112"
+rows = [
+  [7, 1, "SSNI-497 新任なのに常にパンスト挑発してくる", "JavDB 有码 TOP250"],
+  [7, 2, "IPX-811 -媚薬で翌朝まで覚醒絶頂-", "JavDB 有码 TOP250"],
+  [7, 3, "ABP-984 中出し 射精執行官 05", "JavDB 有码 TOP250"],
+  [5, 1, "START-257 苦手な同僚と", "JavLibray TOP500"],
+  [2024, 1, "MIAB-317 不登校オタク生徒を", "JavDB 2024 TOP250"],
+  [2024, 2, "SONE-308 美脚下半身が", "JavDB 2024 TOP250"],
+]
+
+[[args.steps]]
+op = "run"
+
+[[args.steps]]
+op = "run"
+args = { advance_seconds = 3600 }
+
+[[args.steps]]
+op = "set_enabled"
+args = { key = "k2024", enabled = false, advance_seconds = 60 }
+
+[[args.steps]]
+op = "set_enabled"
+args = { key = "k9", enabled = true }
+
+[[args.steps]]
+op = "run"
+args = { advance_seconds = 3600, source = { name = "20260201", rows = [
+  [7, 1, "ABP-984 中出し 射精執行官 05", "JavDB 有码 TOP250"],
+  [7, 2, "SSNI-497 新任なのに常にパンスト挑発してくる", "JavDB 有码 TOP250"],
+  [7, 3, "IPX-811 -媚薬で翌朝まで覚醒絶頂-", "JavDB 有码 TOP250"],
+  [2024, 1, "MIAB-317 不登校オタク生徒を", "JavDB 2024 TOP250"],
+  [2024, 2, "SONE-308 美脚下半身が", "JavDB 2024 TOP250"],
+] } }
+
+[[args.steps]]
+op = "run"
+args = { advance_seconds = 3600, source = {} }
+
+[[args.steps]]
+op = "run"
+args = { advance_seconds = 3600, source = { name = "20260301", broken_download = true } }
+
+[[args.steps]]
+op = "run"
+args = { advance_seconds = 3600, stop_before = true }
+
+# -- run 1 ---------------------------------------------------------------------------
+
+[[emby.routes]]
+method = "GET"
+path = "/emby/Items"
+times = 1
+body = { TotalRecordCount = 4, Items = [
+  { Id = "10", Path = "/media/a/SSNI-497/SSNI-497.strm" },
+  { Id = "30", Path = "/media/a/ABP-984/ABP-984.strm" },
+  { Id = "40", Path = "/media/b/MIAB-317/MIAB-317.strm" },
+  { Id = "50", Path = "/media/b/no title/no title.strm" },
+] }
+
+[[emby.routes]]
+method = "GET"
+path = "/emby/Items"
+times = 1
+body = { Items = [] }
+
+[[emby.routes]]
+method = "POST"
+path = "/emby/Playlists"
+times = 1
+body = { Id = "pl7" }
+
+[[emby.routes]]
+method = "POST"
+path = "/emby/Playlists"
+times = 1
+body = { Id = "pl24" }
+
+# -- run 2 ---------------------------------------------------------------------------
+
+[[emby.routes]]
+method = "GET"
+path = "/emby/Items"
+times = 1
+body = { TotalRecordCount = 3, Items = [
+  { Id = "10", Path = "/media/a/SSNI-497/SSNI-497.strm" },
+  { Id = "30", Path = "/media/a/ABP-984/ABP-984.strm" },
+  { Id = "40", Path = "/media/b/MIAB-317/MIAB-317.strm" },
+] }
+
+[[emby.routes]]
+method = "GET"
+path = "/emby/Items"
+times = 1
+body = { Items = [{ Id = "pl7", Name = "JavDB 有码 TOP250" }, { Id = "pl24", Name = "JavDB 2024 TOP250" }] }
+
+[[emby.routes]]
+method = "GET"
+path = "/emby/Playlists/pl7/Items"
+times = 1
+body = { Items = [{ PlaylistItemId = "e1", Id = "10" }, { PlaylistItemId = "e2", Id = "30" }] }
+
+[[emby.routes]]
+method = "GET"
+path = "/emby/Playlists/pl24/Items"
+times = 1
+body = { Items = [{ PlaylistItemId = "e3", Id = "40" }] }
+
+# -- run 3 ---------------------------------------------------------------------------
+
+[[emby.routes]]
+method = "GET"
+path = "/emby/Items"
+times = 1
+body = { TotalRecordCount = 3, Items = [
+  { Id = "10", Path = "/media/a/SSNI-497/SSNI-497.strm" },
+  { Id = "30", Path = "/media/a/ABP-984/ABP-984.strm" },
+  { Id = "40", Path = "/media/b/MIAB-317/MIAB-317.strm" },
+] }
+
+[[emby.routes]]
+method = "GET"
+path = "/emby/Items"
+times = 1
+body = { Items = [{ Id = "pl7", Name = "JavDB 有码 TOP250" }, { Id = "pl24", Name = "JavDB 2024 TOP250" }] }
+
+[[emby.routes]]
+method = "GET"
+path = "/emby/Playlists/pl7/Items"
+times = 1
+body = { Items = [{ PlaylistItemId = "e1", Id = "10" }, { PlaylistItemId = "e2", Id = "30" }] }
+
+[[emby.routes]]
+method = "DELETE"
+path = "/emby/Playlists/pl7/Items"
+times = 1
+status = 204
+
+[[emby.routes]]
+method = "POST"
+path = "/emby/Playlists/pl7/Items"
+times = 1
+status = 204
+
+[[emby.routes]]
+method = "POST"
+path = "/emby/Items/Delete"
+times = 1
+status = 204
+
+# -- run 4 ---------------------------------------------------------------------------
+
+[[emby.routes]]
+method = "GET"
+path = "/emby/Items"
+times = 1
+body = { TotalRecordCount = 3, Items = [
+  { Id = "10", Path = "/media/a/SSNI-497/SSNI-497.strm" },
+  { Id = "30", Path = "/media/a/ABP-984/ABP-984.strm" },
+  { Id = "40", Path = "/media/b/MIAB-317/MIAB-317.strm" },
+] }
+
+[[emby.routes]]
+method = "GET"
+path = "/emby/Items"
+times = 1
+body = { Items = [{ Id = "pl7", Name = "JavDB 有码 TOP250" }] }
+
+[[emby.routes]]
+method = "GET"
+path = "/emby/Playlists/pl7/Items"
+times = 1
+status = 500
+body = { error = "database is locked" }
+
+# -- run 5 ---------------------------------------------------------------------------
+
+[[emby.routes]]
+method = "GET"
+path = "/emby/Items"
+times = 1
+status = 401
+body = { error = "unauthorized" }
