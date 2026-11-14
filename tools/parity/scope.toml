@@ -51,7 +51,7 @@ tests = [
 
 [WP4]
 title = "API shell, config API, serve"
-status = "pending"
+status = "done"
 tests = [
   "tests/test_config.py::test_config_api_round_trip_masks_secrets",
   "tests/test_config.py::test_clouddrive_test_endpoint_*",

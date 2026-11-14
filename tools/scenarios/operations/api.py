@@ -11,7 +11,8 @@ each response. `args.transcode_requests` go to the transcode listener's app
 A request is `{method, path, headers?, json? | body? | body_size?, content_type?}`: `json`
 is sent compact (`separators=(',', ':')`, `ensure_ascii=False`) with
 `content-type: application/json` unless `content_type` says otherwise (an empty
-`content_type` sends none); `body` is sent as UTF-8 text, `body_hex` as the bytes it spells; `body_size` sends that many `x`;
+`content_type` sends none); `body` is sent as UTF-8 text, `body_hex` as the bytes it spells;
+`body_size` sends that many `x`;
 `body_nested = n` sends `{"values":` and `n` nested empty lists as JSON.
 `{clouddrive}` and `{emby}` in a path, header or body are replaced by the fakes' addresses,
 and replaced back in what is reported.

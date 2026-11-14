@@ -18,18 +18,17 @@
 from __future__ import annotations
 
 import email.message
-import json
 import email.utils
+import json
 import mimetypes
 import os
 import tempfile
 from pathlib import Path
 from typing import Any
 
+from pydantic import TypeAdapter, ValidationError
 from starlette.responses import FileResponse, MalformedRangeHeader, RangeNotSatisfiable
 from starlette.staticfiles import StaticFiles
-
-from pydantic import TypeAdapter, ValidationError
 
 from embyx_manager.bootstrap import build_app
 from embyx_manager.config.api import TestConnectionRequest, UpdateSectionRequest
@@ -131,7 +130,7 @@ RANGE_HEADERS = [
     'bytes=0--3',
     'bytes=+1-+2',
     'bytes=1_0-1_2',
-    'bytes=١-٢',
+    'bytes=\u0661-\u0662',
     'bytes=0-99999999999999999999999999999999999999999999',
     'bytes=-99999999999999999999999999999999999999999999',
     'bytes=1-2=3',
@@ -169,7 +168,7 @@ PARSEDATE_TEXTS = [
     'Thu, 01 Jan , 00:00:00 GMT',
     'Thu, 01 Jan 2026 00:00:00 GMT extra words',
     'Thu, 01 Jan ²2026 00:00:00 GMT',
-    'Thu, ١ Jan 2026 00:00:00 GMT',
+    'Thu, \u0661 Jan 2026 00:00:00 GMT',
     '\xa0Thu,\xa001 Jan 2026 00:00:00 GMT',
     '',
     '   ',

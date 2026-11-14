@@ -424,6 +424,35 @@ or says why one stays.
   that quotes a CloudDrive result. The `intake/steps` scenario (`tools/scenarios/operations/intake.py`) pins clocks
   by patching the modules' `datetime` and skips `CLOUD_RETRY`'s waits; WP6-WP9 scenarios can do the same.
 
+- WP4 left these for later packages. The request models (`UpdateSectionRequest`, `TestConnectionRequest`) are
+  validated in `embyx_api::body` against pydantic goldens (`goldens/api/request_models.json`) rather than through
+  `embyx_core::config::lax`: they are two small models whose lax rules (a lax `int | None` with `ge=0`, a `dict`
+  field) the section types do not use. WP9/WP12/WP14 request models either extend `lax` or follow `body.rs`;
+  WP16 merges whichever two exist. `embyx_db::health::health_check` is Python's
+  `PostgresFillActorRepository.health_check` (the readiness probe of `/api/health`), placed in `embyx-db` because
+  the shell needs it before WP10; WP10 calls it instead of writing it again. A feature joins the app as Python's
+  do: an `ApiRouter` (`routing::ApiRouter::route(method, path, openapi_json, handler)`), a
+  `(name, FeatureHealthProbe)` and a `Lifespan`, wired in `bootstrap::build_app`; its operations leave
+  `openapi::PENDING` in the same PR (the structural test fails otherwise). Feature errors are the handler's
+  answer (`http::json(status, &http::error_envelope(code))`), an `Internal` is the 500 nothing handles. Handlers read bodies with
+  `body::read_json` so the order body, auth, validation stays FastAPI's (`config_api.rs`). The transcode app is
+  `create_transcode_app(ApiRouter::new("/api/transcode"))` with no size limit or `no-store`; WP14 adds its
+  routes, its error handlers and its `RequestValidationError` answer. `tools/scenarios/operations/api.py` replays
+  request lists through both apps; later API packages add specs under `specs/api/` rather than a new operation.
+  `tools/smoke/run.sh` is the page smoke (CI, after the parity check); it seeds through the API only, so a page
+  whose API arrives later shows its own error state and the smoke only checks that nothing throws.
+
+## Checkpoint notes
+
+- Checkpoint A (after WP4, 2026-11-14): the unmodified React front end, built with its own `npm run build`,
+  runs against the Rust server (`tools/smoke`): the login gate refuses a wrong token and accepts the right
+  one, all six pages open without an uncaught error, the settings page reads every section, saves Emby (version
+  bump, address normalized, key kept and masked), runs the Emby connection test against a stand-in, and a
+  reloaded deep link is served by the SPA fallback; SIGTERM ends the server with its shutdown lines and exit 0.
+  The shell's HTTP surface (contract 8) matches Python byte for byte over 137 recorded requests (112 + 4 + 21)
+  (`goldens/scenarios/api/`), the `/openapi.json` structure matches for the 7 ported operations with 45 pending
+  (WP9, WP12, WP14). Pages other than settings still show their error states, since their APIs are not ported.
+
 ## Experiment log
 
 One row per merged work package. "Rework" counts pushes after the PR was opened that fixed something CI or
