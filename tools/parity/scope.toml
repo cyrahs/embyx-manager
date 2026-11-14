@@ -51,9 +51,8 @@ tests = [
 
 [WP4]
 title = "API shell, config API, serve"
-status = "pending"
+status = "done"
 tests = [
-  "tests/test_bootstrap.py",
   "tests/test_config.py::test_config_api_round_trip_masks_secrets",
   "tests/test_config.py::test_clouddrive_test_endpoint_*",
   "tests/test_config.py::test_emby_test_endpoint_*",
@@ -144,6 +143,9 @@ tests = [
   "tests/test_api.py::test_mutations_require_configured_bearer_token",
   "tests/test_api.py::test_request_size_limit_and_health",
   "tests/test_bootstrap.py::test_bootstrap_wires_fill_actor_onto_the_catalog_and_the_app_root",
+  # Its assertions are the fill-actor health block and routes; WP4's bootstrap tests cover
+  # the store load, the config router and the shutdown order on their own.
+  "tests/test_bootstrap.py::test_bootstrap_wires_repository_api_and_shutdown",
 ]
 
 [WP13]

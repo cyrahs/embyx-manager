@@ -18,4 +18,8 @@ path = "src/main.rs"
 clap.workspace = true
 embyx-merge.workspace = true
 
+# The server runs on Linux only; the Windows build is the home transcode worker's (D58).
+[target.'cfg(unix)'.dependencies]
+embyx-api.workspace = true
+
 [dev-dependencies]

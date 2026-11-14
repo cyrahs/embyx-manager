@@ -3,10 +3,10 @@
 //!
 //! Python origin: `src/embyx_manager/__main__.py`. The three commands and their flags are
 //! declared here as Python declares them; their bodies arrive with their work packages
-//! (`docs/rewrite/PLAN.md`): `serve` in WP4, `merge-worker` in WP13 (done:
-//! `embyx_merge::worker::run`), `transcode-worker` in WP15. Until then `serve` and
-//! `transcode-worker` stop with "not implemented yet", the one placeholder WP0 is allowed.
-//! `import-config` is not ported (PLAN.md, decision 1).
+//! (`docs/rewrite/PLAN.md`): `serve` in WP4 (done: `embyx_api::serve::run`, Unix only,
+//! D58), `merge-worker` in WP13 (done: `embyx_merge::worker::run`), `transcode-worker` in
+//! WP15. Until then `transcode-worker` stops with "not implemented yet", the one
+//! placeholder WP0 is allowed. `import-config` is not ported (PLAN.md, decision 1).
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -140,16 +140,36 @@ fn merge_worker(args: MergeWorkerArgs) -> ExitCode {
     ExitCode::from(u8::try_from(code).unwrap_or(1))
 }
 
-fn main() -> ExitCode {
-    let cli = Cli::parse();
-    if let Some(Command::MergeWorker(args)) = cli.command {
-        return merge_worker(args);
-    }
-    let (name, package) = planned(cli.command.as_ref());
-    // The binary has no logging yet (WP4 adds it); this one line is its whole output.
+/// `serve`: `_serve()` in `__main__.py`.
+#[cfg(unix)]
+fn serve() -> ExitCode {
+    ExitCode::from(embyx_api::serve::run())
+}
+
+/// The server is not built for Windows, where only the home transcode worker runs (D58).
+#[cfg(not(unix))]
+fn serve() -> ExitCode {
     #[allow(
         clippy::print_stderr,
-        reason = "the placeholder's only output, until WP4 and WP15 replace it"
+        reason = "the only output of a command this build does not carry"
+    )]
+    {
+        eprintln!("embyx-manager serve: the server runs on Linux only");
+    }
+    ExitCode::FAILURE
+}
+
+fn main() -> ExitCode {
+    let cli = Cli::parse();
+    let command = match cli.command {
+        None | Some(Command::Serve) => return serve(),
+        Some(Command::MergeWorker(args)) => return merge_worker(args),
+        Some(command @ Command::TranscodeWorker(_)) => command,
+    };
+    let (name, package) = planned(Some(&command));
+    #[allow(
+        clippy::print_stderr,
+        reason = "the placeholder's only output, until WP15 replaces it"
     )]
     {
         eprintln!("embyx-manager {name}: not implemented yet ({package}, docs/rewrite/PLAN.md)");

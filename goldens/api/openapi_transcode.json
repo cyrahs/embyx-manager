@@ -1,0 +1,472 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "api",
+  "cases": [
+    {
+      "openapi": "3.1.0",
+      "info": {
+        "title": "embyx-manager transcode",
+        "version": "0.1.0"
+      },
+      "paths": {
+        "/api/transcode/claim": {
+          "post": {
+            "summary": "Claim",
+            "operationId": "claim_api_transcode_claim_post",
+            "requestBody": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ReportIn"
+                  }
+                }
+              },
+              "required": true
+            },
+            "responses": {
+              "200": {
+                "description": "Successful Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "additionalProperties": true,
+                      "type": "object",
+                      "title": "Response Claim Api Transcode Claim Post"
+                    }
+                  }
+                }
+              },
+              "422": {
+                "description": "Validation Error",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/HTTPValidationError"
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "HTTPBearer": []
+              }
+            ]
+          }
+        },
+        "/api/transcode/heartbeat": {
+          "post": {
+            "summary": "Heartbeat",
+            "operationId": "heartbeat_api_transcode_heartbeat_post",
+            "requestBody": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ReportIn"
+                  }
+                }
+              },
+              "required": true
+            },
+            "responses": {
+              "200": {
+                "description": "Successful Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "additionalProperties": true,
+                      "type": "object",
+                      "title": "Response Heartbeat Api Transcode Heartbeat Post"
+                    }
+                  }
+                }
+              },
+              "422": {
+                "description": "Validation Error",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/HTTPValidationError"
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "HTTPBearer": []
+              }
+            ]
+          }
+        },
+        "/api/transcode/tasks/{task_id}/parts/{part_index}": {
+          "get": {
+            "summary": "Read Part",
+            "operationId": "read_part_api_transcode_tasks__task_id__parts__part_index__get",
+            "security": [
+              {
+                "HTTPBearer": []
+              }
+            ],
+            "parameters": [
+              {
+                "name": "task_id",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "title": "Task Id"
+                }
+              },
+              {
+                "name": "part_index",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "title": "Part Index"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Successful Response",
+                "content": {
+                  "application/json": {
+                    "schema": {}
+                  }
+                }
+              },
+              "422": {
+                "description": "Validation Error",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/HTTPValidationError"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/api/transcode/tasks/{task_id}/parts/{part_index}/chunks/{chunk_index}": {
+          "put": {
+            "summary": "Put Chunk",
+            "operationId": "put_chunk_api_transcode_tasks__task_id__parts__part_index__chunks__chunk_index__put",
+            "security": [
+              {
+                "HTTPBearer": []
+              }
+            ],
+            "parameters": [
+              {
+                "name": "task_id",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "title": "Task Id"
+                }
+              },
+              {
+                "name": "part_index",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "title": "Part Index"
+                }
+              },
+              {
+                "name": "chunk_index",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "title": "Chunk Index"
+                }
+              },
+              {
+                "name": "x-chunk-start",
+                "in": "header",
+                "required": true,
+                "schema": {
+                  "type": "number",
+                  "title": "X-Chunk-Start"
+                }
+              },
+              {
+                "name": "x-chunk-duration",
+                "in": "header",
+                "required": true,
+                "schema": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "title": "X-Chunk-Duration"
+                }
+              },
+              {
+                "name": "x-chunk-frames",
+                "in": "header",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "title": "X-Chunk-Frames"
+                }
+              },
+              {
+                "name": "x-chunk-sha256",
+                "in": "header",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "minLength": 64,
+                  "maxLength": 64,
+                  "title": "X-Chunk-Sha256"
+                }
+              },
+              {
+                "name": "content-length",
+                "in": "header",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "maximum": 2147483648,
+                  "exclusiveMinimum": 0,
+                  "title": "Content-Length"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Successful Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "title": "Response Put Chunk Api Transcode Tasks  Task Id  Parts  Part Index  Chunks  Chunk Index  Put"
+                    }
+                  }
+                }
+              },
+              "422": {
+                "description": "Validation Error",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/HTTPValidationError"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/api/transcode/tasks/{task_id}/parts/{part_index}/finish": {
+          "post": {
+            "summary": "Finish Part",
+            "operationId": "finish_part_api_transcode_tasks__task_id__parts__part_index__finish_post",
+            "security": [
+              {
+                "HTTPBearer": []
+              }
+            ],
+            "parameters": [
+              {
+                "name": "task_id",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "title": "Task Id"
+                }
+              },
+              {
+                "name": "part_index",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "title": "Part Index"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Successful Response",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "title": "Response Finish Part Api Transcode Tasks  Task Id  Parts  Part Index  Finish Post"
+                    }
+                  }
+                }
+              },
+              "422": {
+                "description": "Validation Error",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/HTTPValidationError"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "components": {
+        "schemas": {
+          "HTTPValidationError": {
+            "properties": {
+              "detail": {
+                "items": {
+                  "$ref": "#/components/schemas/ValidationError"
+                },
+                "type": "array",
+                "title": "Detail"
+              }
+            },
+            "type": "object",
+            "title": "HTTPValidationError"
+          },
+          "PartProgress": {
+            "properties": {
+              "index": {
+                "type": "integer",
+                "title": "Index"
+              },
+              "fps": {
+                "type": "number",
+                "title": "Fps",
+                "default": 0.0
+              },
+              "position": {
+                "type": "number",
+                "title": "Position",
+                "default": 0.0
+              }
+            },
+            "type": "object",
+            "required": [
+              "index"
+            ],
+            "title": "PartProgress"
+          },
+          "ReportIn": {
+            "properties": {
+              "name": {
+                "type": "string",
+                "maxLength": 128,
+                "title": "Name",
+                "default": ""
+              },
+              "version": {
+                "type": "string",
+                "maxLength": 64,
+                "title": "Version",
+                "default": ""
+              },
+              "task_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Task Id"
+              },
+              "state": {
+                "type": "string",
+                "maxLength": 32,
+                "title": "State",
+                "default": "idle"
+              },
+              "parts": {
+                "items": {
+                  "$ref": "#/components/schemas/PartProgress"
+                },
+                "type": "array",
+                "maxItems": 16,
+                "title": "Parts"
+              },
+              "upload_bps": {
+                "type": "number",
+                "title": "Upload Bps",
+                "default": 0.0
+              },
+              "queue_chunks": {
+                "type": "integer",
+                "title": "Queue Chunks",
+                "default": 0
+              },
+              "queue_bytes": {
+                "type": "integer",
+                "title": "Queue Bytes",
+                "default": 0
+              }
+            },
+            "type": "object",
+            "title": "ReportIn"
+          },
+          "ValidationError": {
+            "properties": {
+              "loc": {
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ]
+                },
+                "type": "array",
+                "title": "Location"
+              },
+              "msg": {
+                "type": "string",
+                "title": "Message"
+              },
+              "type": {
+                "type": "string",
+                "title": "Error Type"
+              },
+              "input": {
+                "title": "Input"
+              },
+              "ctx": {
+                "type": "object",
+                "title": "Context"
+              }
+            },
+            "type": "object",
+            "required": [
+              "loc",
+              "msg",
+              "type"
+            ],
+            "title": "ValidationError"
+          }
+        },
+        "securitySchemes": {
+          "HTTPBearer": {
+            "type": "http",
+            "scheme": "bearer"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "api",
+  "cases": [
+    {
+      "hex": "7b7d",
+      "value": "{}"
+    },
+    {
+      "hex": "efbbbf7b7d",
+      "value": "{}"
+    },
+    {
+      "hex": "fffe7b007d00",
+      "value": "{}"
+    },
+    {
+      "hex": "feff007b007d",
+      "value": "{}"
+    },
+    {
+      "hex": "fffe00007b0000007d000000",
+      "value": "{}"
+    },
+    {
+      "hex": "0000feff0000007b0000007d",
+      "value": "{}"
+    },
+    {
+      "hex": "7b007d00",
+      "value": "{}"
+    },
+    {
+      "hex": "007b007d",
+      "value": "{}"
+    },
+    {
+      "hex": "7b0000007d000000",
+      "value": "{}"
+    },
+    {
+      "hex": "0000007b0000007d",
+      "value": "{}"
+    },
+    {
+      "hex": "ff7b7d",
+      "error": "UnicodeDecodeError"
+    },
+    {
+      "hex": "7bff7d",
+      "error": "UnicodeDecodeError"
+    },
+    {
+      "hex": "fffe7b",
+      "error": "UnicodeDecodeError"
+    },
+    {
+      "hex": "7b",
+      "error": "JSONDecodeError"
+    },
+    {
+      "hex": "7d",
+      "error": "JSONDecodeError"
+    },
+    {
+      "hex": "",
+      "error": "JSONDecodeError"
+    },
+    {
+      "hex": "20",
+      "error": "JSONDecodeError"
+    },
+    {
+      "hex": "22c3a922",
+      "value": "'é'"
+    },
+    {
+      "hex": "22eda08022",
+      "value": "'\\ud800'"
+    },
+    {
+      "hex": "225c75643830302200",
+      "error": "JSONDecodeError"
+    },
+    {
+      "hex": "225c756438303022",
+      "value": "'\\ud800'"
+    },
+    {
+      "hex": "5b312c5d",
+      "error": "JSONDecodeError"
+    },
+    {
+      "hex": "7b2261223a317d78",
+      "error": "JSONDecodeError"
+    },
+    {
+      "hex": "efbbbfefbbbf7b7d",
+      "error": "JSONDecodeError"
+    },
+    {
+      "hex": "7b22613a317d",
+      "error": "JSONDecodeError"
+    },
+    {
+      "hex": "313030303030303030303030303030303030303030303030303030303030303030303030303030303030",
+      "value": "100000000000000000000000000000000000000000"
+    },
+    {
+      "hex": "4e614e",
+      "value": "nan"
+    },
+    {
+      "hex": "496e66696e697479",
+      "value": "inf"
+    },
+    {
+      "hex": "2d496e66696e697479",
+      "value": "-inf"
+    },
+    {
+      "hex": "312e30",
+      "value": "1.0"
+    },
+    {
+      "hex": "31653330",
+      "value": "1e+30"
+    }
+  ]
+}

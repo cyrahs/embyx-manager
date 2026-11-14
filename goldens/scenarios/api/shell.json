@@ -1,0 +1,2273 @@
+{
+  "calls": [
+    {
+      "error": {
+        "code": "UNAUTHENTICATED",
+        "details": "token rejected"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSystemInfo",
+      "request": {},
+      "seq": 1
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSystemInfo",
+      "request": {},
+      "response": {
+        "IsLogin": true,
+        "SystemReady": true,
+        "UserName": "fake"
+      },
+      "seq": 2
+    },
+    {
+      "error": {
+        "code": "NOT_FOUND",
+        "details": "no such directory"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/"
+      },
+      "seq": 3
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSystemInfo",
+      "request": {},
+      "response": {
+        "IsLogin": true,
+        "SystemReady": true,
+        "UserName": "fake"
+      },
+      "seq": 4
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115",
+              "hasDetailProperties": false,
+              "id": "/115",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "115",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 5
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSystemInfo",
+      "request": {},
+      "response": {
+        "IsLogin": true,
+        "SystemReady": true,
+        "UserName": "fake"
+      },
+      "seq": 6
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115",
+              "hasDetailProperties": false,
+              "id": "/115",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "115",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 7
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSystemInfo",
+      "request": {},
+      "response": {
+        "IsLogin": true,
+        "SystemReady": true,
+        "UserName": "fake"
+      },
+      "seq": 8
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115",
+              "hasDetailProperties": false,
+              "id": "/115",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "115",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 9
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSystemInfo",
+      "request": {},
+      "response": {
+        "IsLogin": true,
+        "SystemReady": true,
+        "UserName": "fake"
+      },
+      "seq": 10
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115",
+              "hasDetailProperties": false,
+              "id": "/115",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "115",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 11
+    },
+    {
+      "fake": "emby",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/emby/System/Info",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "Id": "srv",
+          "ServerName": "embyx",
+          "Version": "4.10.0.40"
+        },
+        "status": 200
+      },
+      "seq": 12
+    },
+    {
+      "fake": "emby",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/emby/System/Info",
+        "query": {}
+      },
+      "response": {
+        "body": "unauthorized",
+        "status": 401
+      },
+      "seq": 13
+    },
+    {
+      "fake": "emby",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/emby/System/Info",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "error": "boom"
+        },
+        "status": 500
+      },
+      "seq": 14
+    },
+    {
+      "fake": "emby",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/emby/System/Info",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "Version": "4.9"
+        },
+        "status": 200
+      },
+      "seq": 15
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/",
+        "/115"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "api.exchange",
+  "outcome": {
+    "result": {
+      "responses": [
+        {
+          "body": {
+            "auth_required": true,
+            "database": true,
+            "status": "ok"
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "52",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unauthorized"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "33",
+            "content-type": "application/json",
+            "www-authenticate": "Bearer"
+          },
+          "status": 401
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unauthorized"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "33",
+            "content-type": "application/json",
+            "www-authenticate": "Bearer"
+          },
+          "status": 401
+        },
+        {
+          "body": {
+            "auth_required": true
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "22",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "auth_required": true
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "22",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unauthorized"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "33",
+            "content-type": "application/json",
+            "www-authenticate": "Bearer"
+          },
+          "status": 401
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unauthorized"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "33",
+            "content-type": "application/json",
+            "www-authenticate": "Bearer"
+          },
+          "status": 401
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unauthorized"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "33",
+            "content-type": "application/json",
+            "www-authenticate": "Bearer"
+          },
+          "status": 401
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unauthorized"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "33",
+            "content-type": "application/json",
+            "www-authenticate": "Bearer"
+          },
+          "status": 401
+        },
+        {
+          "body": "",
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "22",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": {
+            "detail": "Method Not Allowed"
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "31",
+            "content-type": "application/json"
+          },
+          "status": 405
+        },
+        {
+          "body": {
+            "detail": "Method Not Allowed"
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "31",
+            "content-type": "application/json"
+          },
+          "status": 405
+        },
+        {
+          "body": [
+            {
+              "secrets": {
+                "api_token": false
+              },
+              "section": "clouddrive",
+              "values": {
+                "address": "",
+                "api_token": "",
+                "secure": true
+              },
+              "version": 0
+            },
+            {
+              "secrets": {
+                "api_key": false
+              },
+              "section": "emby",
+              "values": {
+                "address": "",
+                "api_key": ""
+              },
+              "version": 0
+            },
+            {
+              "secrets": {},
+              "section": "avid",
+              "values": {
+                "id_exceptions": [],
+                "ignored_id_patterns": []
+              },
+              "version": 0
+            },
+            {
+              "secrets": {},
+              "section": "rss",
+              "values": {
+                "categories": [],
+                "enabled": false,
+                "failed_avid_cooldown_seconds": 86400,
+                "interval_seconds": 1800
+              },
+              "version": 0
+            },
+            {
+              "secrets": {},
+              "section": "archive",
+              "values": {
+                "brand_mapping": {},
+                "dst_dir": "",
+                "enabled": false,
+                "mapping": {},
+                "max_attempts": 5,
+                "min_size_mb": 0,
+                "priority_mapping": {},
+                "scan_cron": "0 4 * * *",
+                "src_dir": "",
+                "stall_timeout_hours": 24,
+                "tracker_interval_seconds": 1800
+              },
+              "version": 0
+            },
+            {
+              "secrets": {},
+              "section": "mapping",
+              "values": {
+                "debounce_seconds": 2.0,
+                "dst_dir": "",
+                "enabled": false,
+                "full_sync_interval_seconds": 86400,
+                "src_dir": ""
+              },
+              "version": 0
+            },
+            {
+              "secrets": {},
+              "section": "playlists",
+              "values": {
+                "enabled": false,
+                "interval_seconds": 86400,
+                "source_url": "https://jinjier.art/sql",
+                "task_dir_path": ""
+              },
+              "version": 0
+            },
+            {
+              "secrets": {},
+              "section": "fill_actor",
+              "values": {
+                "actor_root": "",
+                "additional_roots": [],
+                "apply_enabled": false,
+                "cloud_move_in_root": "",
+                "cloud_source_roots": [],
+                "cloud_strm_mount_prefix": "",
+                "move_in_by_brand": false,
+                "move_in_root": "",
+                "root_sentinel": ".embyx-root",
+                "task_dir_path": ""
+              },
+              "version": 0
+            },
+            {
+              "secrets": {},
+              "section": "merge",
+              "values": {
+                "auto_enabled": false,
+                "auto_include_stackable": false,
+                "auto_pause_on_failure": false,
+                "cloud_mount_prefix": "/mnt/cd2",
+                "cloud_staging_dir": "/115/upload",
+                "cloud_work_dir": "/downloads/upload",
+                "free_space_reserve_gib": 20,
+                "home_transcode_enabled": false,
+                "work_dir": "/downloads/upload"
+              },
+              "version": 0
+            }
+          ],
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "1669",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "secrets": {
+              "api_token": false
+            },
+            "section": "clouddrive",
+            "values": {
+              "address": "",
+              "api_token": "",
+              "secure": true
+            },
+            "version": 0
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "119",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "secrets": {
+              "api_token": false
+            },
+            "section": "clouddrive",
+            "values": {
+              "address": "",
+              "api_token": "",
+              "secure": true
+            },
+            "version": 0
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "119",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "secrets": {
+              "api_key": false
+            },
+            "section": "emby",
+            "values": {
+              "address": "",
+              "api_key": ""
+            },
+            "version": 0
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "95",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unknown_config_section"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "43",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": {
+            "detail": "Not Found"
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "22",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unknown_config_section"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "43",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": {
+            "detail": "Not Found"
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "22",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": [
+            {
+              "secrets": {
+                "api_token": false
+              },
+              "section": "clouddrive",
+              "values": {
+                "address": "",
+                "api_token": "",
+                "secure": true
+              },
+              "version": 0
+            },
+            {
+              "secrets": {
+                "api_key": false
+              },
+              "section": "emby",
+              "values": {
+                "address": "",
+                "api_key": ""
+              },
+              "version": 0
+            },
+            {
+              "secrets": {},
+              "section": "avid",
+              "values": {
+                "id_exceptions": [],
+                "ignored_id_patterns": []
+              },
+              "version": 0
+            },
+            {
+              "secrets": {},
+              "section": "rss",
+              "values": {
+                "categories": [],
+                "enabled": false,
+                "failed_avid_cooldown_seconds": 86400,
+                "interval_seconds": 1800
+              },
+              "version": 0
+            },
+            {
+              "secrets": {},
+              "section": "archive",
+              "values": {
+                "brand_mapping": {},
+                "dst_dir": "",
+                "enabled": false,
+                "mapping": {},
+                "max_attempts": 5,
+                "min_size_mb": 0,
+                "priority_mapping": {},
+                "scan_cron": "0 4 * * *",
+                "src_dir": "",
+                "stall_timeout_hours": 24,
+                "tracker_interval_seconds": 1800
+              },
+              "version": 0
+            },
+            {
+              "secrets": {},
+              "section": "mapping",
+              "values": {
+                "debounce_seconds": 2.0,
+                "dst_dir": "",
+                "enabled": false,
+                "full_sync_interval_seconds": 86400,
+                "src_dir": ""
+              },
+              "version": 0
+            },
+            {
+              "secrets": {},
+              "section": "playlists",
+              "values": {
+                "enabled": false,
+                "interval_seconds": 86400,
+                "source_url": "https://jinjier.art/sql",
+                "task_dir_path": ""
+              },
+              "version": 0
+            },
+            {
+              "secrets": {},
+              "section": "fill_actor",
+              "values": {
+                "actor_root": "",
+                "additional_roots": [],
+                "apply_enabled": false,
+                "cloud_move_in_root": "",
+                "cloud_source_roots": [],
+                "cloud_strm_mount_prefix": "",
+                "move_in_by_brand": false,
+                "move_in_root": "",
+                "root_sentinel": ".embyx-root",
+                "task_dir_path": ""
+              },
+              "version": 0
+            },
+            {
+              "secrets": {},
+              "section": "merge",
+              "values": {
+                "auto_enabled": false,
+                "auto_include_stackable": false,
+                "auto_pause_on_failure": false,
+                "cloud_mount_prefix": "/mnt/cd2",
+                "cloud_staging_dir": "/115/upload",
+                "cloud_work_dir": "/downloads/upload",
+                "free_space_reserve_gib": 20,
+                "home_transcode_enabled": false,
+                "work_dir": "/downloads/upload"
+              },
+              "version": 0
+            }
+          ],
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "1669",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "detail": "Method Not Allowed"
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "31",
+            "content-type": "application/json"
+          },
+          "status": 405
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unauthorized"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "33",
+            "content-type": "application/json",
+            "www-authenticate": "Bearer"
+          },
+          "status": 401
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "36",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "detail": "There was an error parsing the body"
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "48",
+            "content-type": "application/json"
+          },
+          "status": 400
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unauthorized"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "33",
+            "content-type": "application/json",
+            "www-authenticate": "Bearer"
+          },
+          "status": 401
+        },
+        {
+          "body": {
+            "secrets": {
+              "api_token": true
+            },
+            "section": "clouddrive",
+            "values": {
+              "address": "{clouddrive}",
+              "api_token": "",
+              "secure": false
+            },
+            "version": 1
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "134",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "config_version_conflict"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "44",
+            "content-type": "application/json"
+          },
+          "status": 409
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "36",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "36",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "36",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "36",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "36",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "36",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "36",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "36",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "secrets": {
+              "api_token": true
+            },
+            "section": "clouddrive",
+            "values": {
+              "address": "{clouddrive}",
+              "api_token": "",
+              "secure": false
+            },
+            "version": 2
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "134",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "36",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_config_values"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "42",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_config_values"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "42",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unknown_config_section"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "43",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": {
+            "secrets": {},
+            "section": "rss",
+            "values": {
+              "categories": [
+                {
+                  "label": "Rank",
+                  "task_dir_path": "/115/rank"
+                }
+              ],
+              "enabled": false,
+              "failed_avid_cooldown_seconds": 1,
+              "interval_seconds": 900
+            },
+            "version": 1
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "185",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "config_version_conflict"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "44",
+            "content-type": "application/json"
+          },
+          "status": 409
+        },
+        {
+          "body": [
+            {
+              "secrets": {
+                "api_token": true
+              },
+              "section": "clouddrive",
+              "values": {
+                "address": "{clouddrive}",
+                "api_token": "",
+                "secure": false
+              },
+              "version": 2
+            },
+            {
+              "secrets": {
+                "api_key": false
+              },
+              "section": "emby",
+              "values": {
+                "address": "",
+                "api_key": ""
+              },
+              "version": 0
+            },
+            {
+              "secrets": {},
+              "section": "avid",
+              "values": {
+                "id_exceptions": [],
+                "ignored_id_patterns": []
+              },
+              "version": 0
+            },
+            {
+              "secrets": {},
+              "section": "rss",
+              "values": {
+                "categories": [
+                  {
+                    "label": "Rank",
+                    "task_dir_path": "/115/rank"
+                  }
+                ],
+                "enabled": false,
+                "failed_avid_cooldown_seconds": 1,
+                "interval_seconds": 900
+              },
+              "version": 1
+            },
+            {
+              "secrets": {},
+              "section": "archive",
+              "values": {
+                "brand_mapping": {},
+                "dst_dir": "",
+                "enabled": false,
+                "mapping": {},
+                "max_attempts": 5,
+                "min_size_mb": 0,
+                "priority_mapping": {},
+                "scan_cron": "0 4 * * *",
+                "src_dir": "",
+                "stall_timeout_hours": 24,
+                "tracker_interval_seconds": 1800
+              },
+              "version": 0
+            },
+            {
+              "secrets": {},
+              "section": "mapping",
+              "values": {
+                "debounce_seconds": 2.0,
+                "dst_dir": "",
+                "enabled": false,
+                "full_sync_interval_seconds": 86400,
+                "src_dir": ""
+              },
+              "version": 0
+            },
+            {
+              "secrets": {},
+              "section": "playlists",
+              "values": {
+                "enabled": false,
+                "interval_seconds": 86400,
+                "source_url": "https://jinjier.art/sql",
+                "task_dir_path": ""
+              },
+              "version": 0
+            },
+            {
+              "secrets": {},
+              "section": "fill_actor",
+              "values": {
+                "actor_root": "",
+                "additional_roots": [],
+                "apply_enabled": false,
+                "cloud_move_in_root": "",
+                "cloud_source_roots": [],
+                "cloud_strm_mount_prefix": "",
+                "move_in_by_brand": false,
+                "move_in_root": "",
+                "root_sentinel": ".embyx-root",
+                "task_dir_path": ""
+              },
+              "version": 0
+            },
+            {
+              "secrets": {},
+              "section": "merge",
+              "values": {
+                "auto_enabled": false,
+                "auto_include_stackable": false,
+                "auto_pause_on_failure": false,
+                "cloud_mount_prefix": "/mnt/cd2",
+                "cloud_staging_dir": "/115/upload",
+                "cloud_work_dir": "/downloads/upload",
+                "free_space_reserve_gib": 20,
+                "home_transcode_enabled": false,
+                "work_dir": "/downloads/upload"
+              },
+              "version": 0
+            }
+          ],
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "1723",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unauthorized"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "33",
+            "content-type": "application/json",
+            "www-authenticate": "Bearer"
+          },
+          "status": 401
+        },
+        {
+          "body": {
+            "detail": "UNAUTHENTICATED: token rejected",
+            "ok": false
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "55",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "detail": "connection failed: [Errno 2] no such directory: '/'",
+            "ok": false
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "75",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "detail": "connected",
+            "ok": true
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "32",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "detail": "connected",
+            "ok": true
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "32",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "detail": "address and api_token are required",
+            "ok": false
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "58",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_config_values"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "42",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_config_values"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "42",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "36",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "36",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "36",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "detail": "connected",
+            "ok": true
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "32",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "detail": "connected",
+            "ok": true
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "32",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "detail": "address and api_key are required",
+            "ok": false
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "56",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "detail": "address and api_key are required",
+            "ok": false
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "56",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "secrets": {
+              "api_key": true
+            },
+            "section": "emby",
+            "values": {
+              "address": "http://emby.invalid:8096",
+              "api_key": ""
+            },
+            "version": 1
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "118",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "detail": "embyx 4.10.0.40",
+            "ok": true
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "38",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "detail": "the API key was rejected",
+            "ok": false
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "48",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "detail": "connection failed: GET /System/Info: HTTP 500",
+            "ok": false
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "69",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "detail": "4.9",
+            "ok": true
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "26",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_config_values"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "42",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unauthorized"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "33",
+            "content-type": "application/json",
+            "www-authenticate": "Bearer"
+          },
+          "status": 401
+        },
+        {
+          "body": {
+            "detail": "There was an error parsing the body"
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "48",
+            "content-type": "application/json"
+          },
+          "status": 400
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "36",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "request_too_large"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "38",
+            "content-type": "application/json"
+          },
+          "status": 413
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "36",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "request_too_large"
+            }
+          },
+          "headers": {
+            "content-length": "38",
+            "content-type": "application/json"
+          },
+          "status": 413
+        },
+        {
+          "body": {
+            "detail": "Method Not Allowed"
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "31",
+            "content-type": "application/json"
+          },
+          "status": 405
+        },
+        {
+          "body": {
+            "detail": "Not Found"
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "22",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": "<!doctype html><title>embyx</title><div id=\"root\"></div>\n",
+          "headers": {
+            "accept-ranges": "bytes",
+            "cache-control": "no-store",
+            "content-length": "57",
+            "content-type": "text/html; charset=utf-8",
+            "etag": "\"b0b21ec1c9044df99fd0528ca26a1880\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 200
+        },
+        {
+          "body": "<!doctype html><title>embyx</title><div id=\"root\"></div>\n",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "57",
+            "content-type": "text/html; charset=utf-8",
+            "etag": "\"b0b21ec1c9044df99fd0528ca26a1880\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "detail": "Method Not Allowed"
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "31",
+            "content-type": "application/json"
+          },
+          "status": 405
+        },
+        {
+          "body": "<!doctype html><title>embyx</title><div id=\"root\"></div>\n",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "57",
+            "content-type": "text/html; charset=utf-8",
+            "etag": "\"b0b21ec1c9044df99fd0528ca26a1880\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 200
+        },
+        {
+          "body": "<!doctype html><title>embyx</title><div id=\"root\"></div>\n",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "57",
+            "content-type": "text/html; charset=utf-8",
+            "etag": "\"b0b21ec1c9044df99fd0528ca26a1880\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 200
+        },
+        {
+          "body": "<!doctype html><title>embyx</title><div id=\"root\"></div>\n",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "57",
+            "content-type": "text/html; charset=utf-8",
+            "etag": "\"b0b21ec1c9044df99fd0528ca26a1880\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 200
+        },
+        {
+          "body": "console.log('embyx');\n",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "22",
+            "content-type": "text/javascript; charset=utf-8",
+            "etag": "\"8d6244f9693aead2ae4cd6dfafba1a06\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 200
+        },
+        {
+          "body": "",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "22",
+            "content-type": "text/css; charset=utf-8",
+            "etag": "\"8d6244f9693aead2ae4cd6dfafba1a06\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "detail": "Not Found"
+          },
+          "headers": {
+            "content-length": "22",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": "<!doctype html><title>embyx</title><div id=\"root\"></div>\n",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "57",
+            "content-type": "text/html; charset=utf-8",
+            "etag": "\"b0b21ec1c9044df99fd0528ca26a1880\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 200
+        },
+        {
+          "body": "<!doctype html><title>embyx</title><div id=\"root\"></div>\n",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "57",
+            "content-type": "text/html; charset=utf-8",
+            "etag": "\"b0b21ec1c9044df99fd0528ca26a1880\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 200
+        },
+        {
+          "body": "",
+          "headers": {
+            "content-length": "0",
+            "location": "http://testserver/guide/"
+          },
+          "status": 307
+        },
+        {
+          "body": "<p>docs</p>\n",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "12",
+            "content-type": "text/html; charset=utf-8",
+            "etag": "\"57a3e57b44d4bbb0998e16209cf1a2ff\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 200
+        },
+        {
+          "body": "<p>docs</p>\n",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "12",
+            "content-type": "text/html; charset=utf-8",
+            "etag": "\"57a3e57b44d4bbb0998e16209cf1a2ff\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 200
+        },
+        {
+          "body": "<svg xmlns=\"http://www.w3.org/2000/svg\"/>\n",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "42",
+            "content-type": "image/svg+xml",
+            "etag": "\"99276530ea807e05af0f49827a7d7894\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 200
+        },
+        {
+          "body": "binary",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "6",
+            "content-type": "application/octet-stream",
+            "etag": "\"e69f82ad26e675b6a6ab8f3596c2fab2\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 200
+        },
+        {
+          "body": {},
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "2",
+            "content-type": "application/json",
+            "etag": "\"a5c935043f25539697edc30f571bfa49\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 200
+        },
+        {
+          "body": "zipped",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "6",
+            "content-type": "text/javascript; charset=utf-8",
+            "etag": "\"e69f82ad26e675b6a6ab8f3596c2fab2\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 200
+        },
+        {
+          "body": "<!doctype html><title>embyx</title><div id=\"root\"></div>\n",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "57",
+            "content-type": "text/html; charset=utf-8",
+            "etag": "\"b0b21ec1c9044df99fd0528ca26a1880\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 200
+        },
+        {
+          "body": "<!doctype html><title>embyx</title><div id=\"root\"></div>\n",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "57",
+            "content-type": "text/html; charset=utf-8",
+            "etag": "\"b0b21ec1c9044df99fd0528ca26a1880\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 200
+        },
+        {
+          "body": "0123456789",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "10",
+            "content-type": "text/plain; charset=utf-8",
+            "etag": "\"d2bdd8b29de099abb3a310d0e91645ca\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 200
+        },
+        {
+          "body": "",
+          "headers": {
+            "etag": "\"d2bdd8b29de099abb3a310d0e91645ca\""
+          },
+          "status": 304
+        },
+        {
+          "body": "0123456789",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "10",
+            "content-type": "text/plain; charset=utf-8",
+            "etag": "\"d2bdd8b29de099abb3a310d0e91645ca\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 200
+        },
+        {
+          "body": "2345",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "4",
+            "content-range": "bytes 2-5/10",
+            "content-type": "text/plain; charset=utf-8",
+            "etag": "\"d2bdd8b29de099abb3a310d0e91645ca\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 206
+        },
+        {
+          "body": "789",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "3",
+            "content-range": "bytes 7-9/10",
+            "content-type": "text/plain; charset=utf-8",
+            "etag": "\"d2bdd8b29de099abb3a310d0e91645ca\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 206
+        },
+        {
+          "body": "789",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "3",
+            "content-range": "bytes 7-9/10",
+            "content-type": "text/plain; charset=utf-8",
+            "etag": "\"d2bdd8b29de099abb3a310d0e91645ca\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 206
+        },
+        {
+          "body": "0123456789",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "10",
+            "content-range": "bytes 0-9/10",
+            "content-type": "text/plain; charset=utf-8",
+            "etag": "\"d2bdd8b29de099abb3a310d0e91645ca\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 206
+        },
+        {
+          "body": "--<boundary>\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Range: bytes 0-2/10\r\n\r\n012\r\n--<boundary>\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Range: bytes 6-7/10\r\n\r\n67\r\n--<boundary>--",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "243",
+            "content-type": "multipart/byteranges; boundary=<boundary>",
+            "etag": "\"d2bdd8b29de099abb3a310d0e91645ca\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 206
+        },
+        {
+          "body": "",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "242",
+            "content-type": "multipart/byteranges; boundary=<boundary>",
+            "etag": "\"d2bdd8b29de099abb3a310d0e91645ca\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 206
+        },
+        {
+          "body": "",
+          "headers": {
+            "content-length": "0",
+            "content-range": "bytes */10",
+            "content-type": "text/plain; charset=utf-8"
+          },
+          "status": 416
+        },
+        {
+          "body": "Only support bytes range",
+          "headers": {
+            "content-length": "24",
+            "content-type": "text/plain; charset=utf-8"
+          },
+          "status": 400
+        },
+        {
+          "body": "Malformed range header.",
+          "headers": {
+            "content-length": "23",
+            "content-type": "text/plain; charset=utf-8"
+          },
+          "status": 400
+        },
+        {
+          "body": "Range header: start must be less than end",
+          "headers": {
+            "content-length": "41",
+            "content-type": "text/plain; charset=utf-8"
+          },
+          "status": 400
+        },
+        {
+          "body": "Range header: range must be requested",
+          "headers": {
+            "content-length": "37",
+            "content-type": "text/plain; charset=utf-8"
+          },
+          "status": 400
+        },
+        {
+          "body": "0123456789",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "10",
+            "content-type": "text/plain; charset=utf-8",
+            "etag": "\"d2bdd8b29de099abb3a310d0e91645ca\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 200
+        },
+        {
+          "body": "01",
+          "headers": {
+            "accept-ranges": "bytes",
+            "content-length": "2",
+            "content-range": "bytes 0-1/10",
+            "content-type": "text/plain; charset=utf-8",
+            "etag": "\"d2bdd8b29de099abb3a310d0e91645ca\"",
+            "last-modified": "Thu, 01 Jan 2026 00:00:00 GMT"
+          },
+          "status": 206
+        },
+        {
+          "body": {
+            "detail": "Method Not Allowed"
+          },
+          "headers": {
+            "content-length": "31",
+            "content-type": "application/json"
+          },
+          "status": 405
+        },
+        {
+          "body": {
+            "detail": "Method Not Allowed"
+          },
+          "headers": {
+            "content-length": "31",
+            "content-type": "application/json"
+          },
+          "status": 405
+        },
+        {
+          "body": {
+            "secrets": {
+              "api_token": true
+            },
+            "section": "clouddrive",
+            "values": {
+              "address": "cd.internal:19798",
+              "api_token": "",
+              "secure": false
+            },
+            "version": 3
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "136",
+            "content-type": "application/json"
+          },
+          "status": 200
+        }
+      ],
+      "transcode_responses": [
+        {
+          "body": {
+            "detail": "Not Found"
+          },
+          "headers": {
+            "content-length": "22",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": {
+            "detail": "Not Found"
+          },
+          "headers": {
+            "content-length": "22",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": {
+            "detail": "Not Found"
+          },
+          "headers": {
+            "content-length": "22",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": {
+            "detail": "Not Found"
+          },
+          "headers": {
+            "content-length": "22",
+            "content-type": "application/json"
+          },
+          "status": 404
+        }
+      ]
+    }
+  },
+  "rows": {
+    "app_config": [
+      {
+        "section": "clouddrive",
+        "updated_at": "<volatile:3>",
+        "value_json": "{\"address\":\"cd.internal:19798\",\"api_token\":\"stored-secret\",\"secure\":false}",
+        "version": 3
+      },
+      {
+        "section": "emby",
+        "updated_at": "<volatile:2>",
+        "value_json": "{\"address\":\"http://emby.invalid:8096\",\"api_key\":\"stored-key\"}",
+        "version": 1
+      },
+      {
+        "section": "rss",
+        "updated_at": "<volatile:1>",
+        "value_json": "{\"enabled\":false,\"interval_seconds\":900,\"categories\":[{\"label\":\"Rank\",\"task_dir_path\":\"/115/rank\"}],\"failed_avid_cooldown_seconds\":1}",
+        "version": 1
+      }
+    ],
+    "archive_acquisitions": [],
+    "archive_magnet_attempts": [],
+    "feed_subscriptions": [],
+    "fill_actor_apply_jobs": [],
+    "fill_actor_candidates": [],
+    "fill_actor_cloud_move_operations": [],
+    "fill_actor_jobs": [],
+    "fill_actor_move_journal": [],
+    "fill_actor_move_results": [],
+    "fill_actor_plans": [],
+    "health_probe": [],
+    "merge_tasks": [],
+    "merge_transcode_chunks": [],
+    "merge_transcode_parts": [],
+    "pipeline_runs": [],
+    "playlist_source": [],
+    "playlists": []
+  },
+  "scenario": "api/shell",
+  "tree": {
+    "static": [
+      {
+        "kind": "dir",
+        "path": "assets"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "assets/app.js",
+        "sha256": "3c4c3a3f7b1cea35",
+        "size": 22
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "assets/style.css",
+        "sha256": "13e4926a4aa03b71",
+        "size": 22
+      },
+      {
+        "kind": "dir",
+        "path": "data"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "data/blob.bin",
+        "sha256": "9a3a45d01531a20e",
+        "size": 6
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "data/bundle.js.gz",
+        "sha256": "71571b067bc261f7",
+        "size": 6
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "data/report.JSON",
+        "sha256": "44136fa355b3678a",
+        "size": 2
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "favicon.svg",
+        "sha256": "fb91f9a03c202c5f",
+        "size": 42
+      },
+      {
+        "kind": "dir",
+        "path": "guide"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "guide/index.html",
+        "sha256": "8acde4e5e25c04dc",
+        "size": 12
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "index.html",
+        "sha256": "6d527a50b80a3f31",
+        "size": 57
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "robots.txt",
+        "sha256": "84d89877f0d4041e",
+        "size": 10
+      }
+    ]
+  }
+}
