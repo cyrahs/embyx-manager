@@ -1,0 +1,1399 @@
+{
+  "calls": [
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/ABC"
+      },
+      "response": null,
+      "seq": 1
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-101.mp4",
+        "src": "{task}/intake/ABC-101 release/ABC-101.mp4"
+      },
+      "response": null,
+      "seq": 2
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/ABC-101 release"
+      },
+      "response": null,
+      "seq": 3
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/ABC"
+      },
+      "response": null,
+      "seq": 4
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-102.mkv",
+        "src": "{task}/intake/nested/inner/abc-102 1080p.mkv"
+      },
+      "response": null,
+      "seq": 5
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/nested"
+      },
+      "response": null,
+      "seq": 6
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/ABC"
+      },
+      "response": null,
+      "seq": 7
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-103-cd1.mp4",
+        "src": "{task}/intake/set/ABC-103-1.mp4"
+      },
+      "response": null,
+      "seq": 8
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-103-cd2.mp4",
+        "src": "{task}/intake/set/ABC-103-2.mp4"
+      },
+      "response": null,
+      "seq": 9
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/set"
+      },
+      "response": null,
+      "seq": 10
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/RVG"
+      },
+      "response": null,
+      "seq": 11
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/RVG/RVG-080-cd1.mp4",
+        "src": "{task}/intake/[44x.me]rvg-080/[44x.me]rvg-080.mp4"
+      },
+      "response": null,
+      "seq": 12
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/RVG/RVG-080-cd2.mp4",
+        "src": "{task}/intake/[44x.me]rvg-080/[44x.me]rvg-080-2.mp4"
+      },
+      "response": null,
+      "seq": 13
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/RVG/RVG-080-cd3.mp4",
+        "src": "{task}/intake/[44x.me]rvg-080/[44x.me]rvg-080-3.mp4"
+      },
+      "response": null,
+      "seq": 14
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/[44x.me]rvg-080"
+      },
+      "response": null,
+      "seq": 15
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/PPT"
+      },
+      "response": null,
+      "seq": 16
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/PPT/PPT-057-cd1.mp4",
+        "src": "{task}/intake/PPT-057/PPT-057A_HD.mp4"
+      },
+      "response": null,
+      "seq": 17
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/PPT/PPT-057-cd2.mp4",
+        "src": "{task}/intake/PPT-057/PPT-057B_HD.mp4"
+      },
+      "response": null,
+      "seq": 18
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/PPT-057"
+      },
+      "response": null,
+      "seq": 19
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/TBW"
+      },
+      "response": null,
+      "seq": 20
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/TBW/TBW-019-cd1.mp4",
+        "src": "{task}/intake/TBW-19/TBW-19-1.mp4"
+      },
+      "response": null,
+      "seq": 21
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/TBW/TBW-019-cd2.mp4",
+        "src": "{task}/intake/TBW-19/TBW-19_02.mp4"
+      },
+      "response": null,
+      "seq": 22
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/TBW-19"
+      },
+      "response": null,
+      "seq": 23
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/ABC"
+      },
+      "response": null,
+      "seq": 24
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-104.mp4",
+        "src": "{task}/intake/dual/ABC-104 4k.mp4"
+      },
+      "response": null,
+      "seq": 25
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/dual"
+      },
+      "response": null,
+      "seq": 26
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/URVRSP"
+      },
+      "response": null,
+      "seq": 27
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/URVRSP/URVRSP-430-cd1.mp4",
+        "src": "{task}/intake/urvrsp-430/4k2.com@urvrsp00430_1_8k.mp4"
+      },
+      "response": null,
+      "seq": 28
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/URVRSP/URVRSP-430-cd2.mp4",
+        "src": "{task}/intake/urvrsp-430/4k2.com@urvrsp00430_2_8k.mp4"
+      },
+      "response": null,
+      "seq": 29
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/urvrsp-430"
+      },
+      "response": null,
+      "seq": 30
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/NHDTB"
+      },
+      "response": null,
+      "seq": 31
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/NHDTB/NHDTB-201.mp4",
+        "src": "{task}/intake/hjd2048.com-1129nhdtb201-h264/hjd2048.com-1129nhdtb201-h264.mp4"
+      },
+      "response": null,
+      "seq": 32
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/hjd2048.com-1129nhdtb201-h264"
+      },
+      "response": null,
+      "seq": 33
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{task}/intake/dupes/ABC-105 (1).mp4"
+      },
+      "response": null,
+      "seq": 34
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/ABC"
+      },
+      "response": null,
+      "seq": 35
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-105.mp4",
+        "src": "{task}/intake/dupes/ABC-105.mp4"
+      },
+      "response": null,
+      "seq": 36
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/dupes"
+      },
+      "response": null,
+      "seq": 37
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/ABC"
+      },
+      "response": null,
+      "seq": 38
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-109.mp4",
+        "src": "{task}/intake/ABC-109/movie.mp4"
+      },
+      "response": null,
+      "seq": 39
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/ABC-109"
+      },
+      "response": null,
+      "seq": 40
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/VRKM"
+      },
+      "response": null,
+      "seq": 41
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/VRKM/VRKM-1846-cd1.mp4",
+        "src": "{task}/intake/vrkm-1846/masex.tv@vrkm01846_1_8k.mp4"
+      },
+      "response": null,
+      "seq": 42
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/VRKM/VRKM-1846-cd2.mp4",
+        "src": "{task}/intake/vrkm-1846/masex.tv@vrkm01846_2_8k.mp4"
+      },
+      "response": null,
+      "seq": 43
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/vrkm-1846"
+      },
+      "response": null,
+      "seq": 44
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/VRKM"
+      },
+      "response": null,
+      "seq": 45
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/VRKM/VRKM-1847-cd1.mp4",
+        "src": "{task}/intake/padded/VRKM-01847_2.mp4"
+      },
+      "response": null,
+      "seq": 46
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/VRKM/VRKM-1847-cd2.mp4",
+        "src": "{task}/intake/padded/VRKM-1847_1.mp4"
+      },
+      "response": null,
+      "seq": 47
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/padded"
+      },
+      "response": null,
+      "seq": 48
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/special/SPC"
+      },
+      "response": null,
+      "seq": 49
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/special/SPC/SPC-113.wmv",
+        "src": "{task}/intake/SPC-113 brand/SPC-113.wmv"
+      },
+      "response": null,
+      "seq": 50
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/SPC-113 brand"
+      },
+      "response": null,
+      "seq": 51
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/ABC"
+      },
+      "response": null,
+      "seq": 52
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-116.mp4",
+        "src": "{task}/intake/two-step/ABC-0116.mp4"
+      },
+      "response": null,
+      "seq": 53
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/two-step"
+      },
+      "response": null,
+      "seq": 54
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/ABC"
+      },
+      "response": null,
+      "seq": 55
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-117-cd1.mp4",
+        "src": "{task}/intake/ABC-117-cd1.mp4"
+      },
+      "response": null,
+      "seq": 56
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-117-cd2.mp4",
+        "src": "{task}/intake/ABC-117-cd2.mp4"
+      },
+      "response": null,
+      "seq": 57
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "archive.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "errors": [],
+          "log": [
+            "moving ABC-101.mp4 to sorted/ABC/ABC-101.mp4"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [
+              "sorted/ABC/ABC-101.mp4"
+            ],
+            "avid": "ABC-101",
+            "outcome": "archived",
+            "reason": ""
+          },
+          "stats": {
+            "folders_discarded": 1,
+            "videos_archived": 1
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "moving abc-102 1080p.mkv to sorted/ABC/ABC-102.mkv"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [
+              "sorted/ABC/ABC-102.mkv"
+            ],
+            "avid": "ABC-102",
+            "outcome": "archived",
+            "reason": ""
+          },
+          "stats": {
+            "folders_discarded": 1,
+            "videos_archived": 1
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "moving ABC-103-1.mp4 to sorted/ABC/ABC-103-cd1.mp4",
+            "moving ABC-103-2.mp4 to sorted/ABC/ABC-103-cd2.mp4"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [
+              "sorted/ABC/ABC-103-cd1.mp4",
+              "sorted/ABC/ABC-103-cd2.mp4"
+            ],
+            "avid": "ABC-103",
+            "outcome": "archived",
+            "reason": ""
+          },
+          "stats": {
+            "folders_discarded": 1,
+            "videos_archived": 2
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "moving [44x.me]rvg-080.mp4 to sorted/RVG/RVG-080-cd1.mp4",
+            "moving [44x.me]rvg-080-2.mp4 to sorted/RVG/RVG-080-cd2.mp4",
+            "moving [44x.me]rvg-080-3.mp4 to sorted/RVG/RVG-080-cd3.mp4"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [
+              "sorted/RVG/RVG-080-cd1.mp4",
+              "sorted/RVG/RVG-080-cd2.mp4",
+              "sorted/RVG/RVG-080-cd3.mp4"
+            ],
+            "avid": "RVG-080",
+            "outcome": "archived",
+            "reason": ""
+          },
+          "stats": {
+            "folders_discarded": 1,
+            "videos_archived": 3
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "moving PPT-057A_HD.mp4 to sorted/PPT/PPT-057-cd1.mp4",
+            "moving PPT-057B_HD.mp4 to sorted/PPT/PPT-057-cd2.mp4"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [
+              "sorted/PPT/PPT-057-cd1.mp4",
+              "sorted/PPT/PPT-057-cd2.mp4"
+            ],
+            "avid": "PPT-057",
+            "outcome": "archived",
+            "reason": ""
+          },
+          "stats": {
+            "folders_discarded": 1,
+            "videos_archived": 2
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "moving TBW-19-1.mp4 to sorted/TBW/TBW-019-cd1.mp4",
+            "moving TBW-19_02.mp4 to sorted/TBW/TBW-019-cd2.mp4"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [
+              "sorted/TBW/TBW-019-cd1.mp4",
+              "sorted/TBW/TBW-019-cd2.mp4"
+            ],
+            "avid": "TBW-019",
+            "outcome": "archived",
+            "reason": ""
+          },
+          "stats": {
+            "folders_discarded": 1,
+            "videos_archived": 2
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "keeping the high-resolution ABC-104 4k.mp4 in dual and dropping ABC-104.mp4",
+            "moving ABC-104 4k.mp4 to sorted/ABC/ABC-104.mp4"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [
+              "sorted/ABC/ABC-104.mp4"
+            ],
+            "avid": "ABC-104",
+            "outcome": "archived",
+            "reason": ""
+          },
+          "stats": {
+            "folders_discarded": 1,
+            "videos_archived": 1
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "keeping the high-resolution 4k2.com@urvrsp00430_1_8k.mp4 in urvrsp-430 and dropping 4k2.com@urvrsp00430_1_hq.mp4",
+            "keeping the high-resolution 4k2.com@urvrsp00430_2_8k.mp4 in urvrsp-430 and dropping 4k2.com@urvrsp00430_2_hq.mp4",
+            "moving 4k2.com@urvrsp00430_1_8k.mp4 to sorted/URVRSP/URVRSP-430-cd1.mp4",
+            "moving 4k2.com@urvrsp00430_2_8k.mp4 to sorted/URVRSP/URVRSP-430-cd2.mp4"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [
+              "sorted/URVRSP/URVRSP-430-cd1.mp4",
+              "sorted/URVRSP/URVRSP-430-cd2.mp4"
+            ],
+            "avid": "URVRSP-430",
+            "outcome": "archived",
+            "reason": ""
+          },
+          "stats": {
+            "folders_discarded": 1,
+            "videos_archived": 2
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "keeping hjd2048.com-1129nhdtb201-h264.mp4 in hjd2048.com-1129nhdtb201-h264 and dropping the phone rip nhdtb201-5.mp4",
+            "moving hjd2048.com-1129nhdtb201-h264.mp4 to sorted/NHDTB/NHDTB-201.mp4"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [
+              "sorted/NHDTB/NHDTB-201.mp4"
+            ],
+            "avid": "NHDTB-201",
+            "outcome": "archived",
+            "reason": ""
+          },
+          "stats": {
+            "folders_discarded": 1,
+            "videos_archived": 1
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "duplicate videos in dupes, keeping ABC-105.mp4 and dropping ABC-105 (1).mp4",
+            "moving ABC-105.mp4 to sorted/ABC/ABC-105.mp4"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [
+              "sorted/ABC/ABC-105.mp4"
+            ],
+            "avid": "ABC-105",
+            "outcome": "archived",
+            "reason": ""
+          },
+          "stats": {
+            "duplicate_copies_deleted": 1,
+            "folders_discarded": 1,
+            "videos_archived": 1
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "WARNING: several unrelated videos in one folder in dupes-differ, skipping"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [],
+            "avid": "ABC-106",
+            "outcome": "needs_attention",
+            "reason": "several unrelated videos in one folder"
+          },
+          "stats": {}
+        },
+        {
+          "errors": [],
+          "log": [
+            "WARNING: multiple avids in one folder: ABC-107, DEF-108 in mixed, skipping"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [],
+            "avid": "",
+            "outcome": "needs_attention",
+            "reason": "multiple avids in one folder: ABC-107, DEF-108"
+          },
+          "stats": {}
+        },
+        {
+          "errors": [],
+          "log": [
+            "WARNING: failed to read an avid for whatever, skipping"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [],
+            "avid": "",
+            "outcome": "needs_attention",
+            "reason": "no avid could be read"
+          },
+          "stats": {}
+        },
+        {
+          "errors": [],
+          "log": [
+            "moving movie.mp4 to sorted/ABC/ABC-109.mp4"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [
+              "sorted/ABC/ABC-109.mp4"
+            ],
+            "avid": "ABC-109",
+            "outcome": "archived",
+            "reason": ""
+          },
+          "stats": {
+            "folders_discarded": 1,
+            "videos_archived": 1
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "WARNING: expected ABC-110 but found DEF-110 in surprise, skipping"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [],
+            "avid": "DEF-110",
+            "outcome": "needs_attention",
+            "reason": "expected ABC-110 but found DEF-110"
+          },
+          "stats": {}
+        },
+        {
+          "errors": [],
+          "log": [
+            "moving masex.tv@vrkm01846_1_8k.mp4 to sorted/VRKM/VRKM-1846-cd1.mp4",
+            "moving masex.tv@vrkm01846_2_8k.mp4 to sorted/VRKM/VRKM-1846-cd2.mp4"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [
+              "sorted/VRKM/VRKM-1846-cd1.mp4",
+              "sorted/VRKM/VRKM-1846-cd2.mp4"
+            ],
+            "avid": "VRKM-1846",
+            "outcome": "archived",
+            "reason": ""
+          },
+          "stats": {
+            "folders_discarded": 1,
+            "videos_archived": 2
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "moving VRKM-01847_2.mp4 to sorted/VRKM/VRKM-1847-cd1.mp4",
+            "moving VRKM-1847_1.mp4 to sorted/VRKM/VRKM-1847-cd2.mp4"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [
+              "sorted/VRKM/VRKM-1847-cd1.mp4",
+              "sorted/VRKM/VRKM-1847-cd2.mp4"
+            ],
+            "avid": "VRKM-1847",
+            "outcome": "archived",
+            "reason": ""
+          },
+          "stats": {
+            "folders_discarded": 1,
+            "videos_archived": 2
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "WARNING: several unrelated videos in one folder in making of, skipping"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [],
+            "avid": "ABC-112",
+            "outcome": "needs_attention",
+            "reason": "several unrelated videos in one folder"
+          },
+          "stats": {}
+        },
+        {
+          "errors": [],
+          "log": [
+            "WARNING: several unrelated videos in one folder in OKAX449, skipping"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [],
+            "avid": "OKAX-449",
+            "outcome": "needs_attention",
+            "reason": "several unrelated videos in one folder"
+          },
+          "stats": {}
+        },
+        {
+          "errors": [],
+          "log": [
+            "moving SPC-113.wmv to special/SPC/SPC-113.wmv"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [
+              "special/SPC/SPC-113.wmv"
+            ],
+            "avid": "SPC-113",
+            "outcome": "archived",
+            "reason": ""
+          },
+          "stats": {
+            "folders_discarded": 1,
+            "videos_archived": 1
+          }
+        },
+        {
+          "errors": [],
+          "log": [],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [],
+            "avid": "",
+            "outcome": "failed",
+            "reason": "{task}/intake/loose.txt is not a directory"
+          },
+          "stats": {}
+        },
+        {
+          "errors": [],
+          "log": [],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [],
+            "avid": "",
+            "outcome": "failed",
+            "reason": "{task}/intake/gone is not a directory"
+          },
+          "stats": {}
+        },
+        {
+          "errors": [],
+          "log": [],
+          "op": "inspect_folder",
+          "result": {
+            "avid": "ABC-116",
+            "videos": [
+              "{task}/intake/two-step/ABC-0116.mp4"
+            ]
+          },
+          "stats": {}
+        },
+        {
+          "errors": [],
+          "log": [
+            "moving ABC-0116.mp4 to sorted/ABC/ABC-116.mp4"
+          ],
+          "op": "file_selection",
+          "result": {
+            "archived_paths": [
+              "sorted/ABC/ABC-116.mp4"
+            ],
+            "avid": "ABC-116",
+            "outcome": "archived",
+            "reason": ""
+          },
+          "stats": {
+            "folders_discarded": 1,
+            "videos_archived": 1
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "moving ABC-117-cd1.mp4 to sorted/ABC/ABC-117-cd1.mp4",
+            "moving ABC-117-cd2.mp4 to sorted/ABC/ABC-117-cd2.mp4"
+          ],
+          "op": "archive_loose_group",
+          "result": {
+            "archived_paths": [
+              "sorted/ABC/ABC-117-cd1.mp4",
+              "sorted/ABC/ABC-117-cd2.mp4"
+            ],
+            "avid": "ABC-117",
+            "outcome": "archived",
+            "reason": ""
+          },
+          "stats": {
+            "videos_archived": 2
+          }
+        }
+      ]
+    }
+  },
+  "rows": {},
+  "scenario": "archive/outcomes",
+  "tree": {
+    "library": [
+      {
+        "kind": "dir",
+        "path": "sorted"
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/ABC"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-101.mp4",
+        "sha256": "09ecb6ebc8bcefc7",
+        "size": 100
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-102.mkv",
+        "sha256": "d4fc1db665446507",
+        "size": 20
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-103-cd1.mp4",
+        "sha256": "0f46e4b0802fee6f",
+        "size": 31
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-103-cd2.mp4",
+        "sha256": "c62e4615bd39e222",
+        "size": 32
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-104.mp4",
+        "sha256": "efdfd9ee977cb6d9",
+        "size": 90
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-105.mp4",
+        "sha256": "bd913ff68243d41b",
+        "size": 40
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-109.mp4",
+        "sha256": "fc11d6f28e59d3cc",
+        "size": 10
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-116.mp4",
+        "sha256": "fc11d6f28e59d3cc",
+        "size": 10
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-117-cd1.mp4",
+        "sha256": "2d711642b726b044",
+        "size": 1
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-117-cd2.mp4",
+        "sha256": "5dde896887f6754c",
+        "size": 2
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/NHDTB"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/NHDTB/NHDTB-201.mp4",
+        "sha256": "9537c5fdf120482f",
+        "size": 65
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/PPT"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/PPT/PPT-057-cd1.mp4",
+        "sha256": "b35f3728761a26a5",
+        "size": 47
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/PPT/PPT-057-cd2.mp4",
+        "sha256": "5ef8b2e5e7a040f3",
+        "size": 58
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/RVG"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/RVG/RVG-080-cd1.mp4",
+        "sha256": "45f316e10b2c99ab",
+        "size": 54
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/RVG/RVG-080-cd2.mp4",
+        "sha256": "c508e75f24e25db9",
+        "size": 61
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/RVG/RVG-080-cd3.mp4",
+        "sha256": "5ef8b2e5e7a040f3",
+        "size": 58
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/TBW"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/TBW/TBW-019-cd1.mp4",
+        "sha256": "404e0d6b65bc5eac",
+        "size": 46
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/TBW/TBW-019-cd2.mp4",
+        "sha256": "87b88e4e14bba7c4",
+        "size": 91
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/URVRSP"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/URVRSP/URVRSP-430-cd1.mp4",
+        "sha256": "b0b43789f1857820",
+        "size": 34
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/URVRSP/URVRSP-430-cd2.mp4",
+        "sha256": "bd913ff68243d41b",
+        "size": 40
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/VRKM"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/VRKM/VRKM-1846-cd1.mp4",
+        "sha256": "7668d2cd32a37eb4",
+        "size": 11
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/VRKM/VRKM-1846-cd2.mp4",
+        "sha256": "59ffe12a70df1510",
+        "size": 12
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/VRKM/VRKM-1847-cd1.mp4",
+        "sha256": "59ffe12a70df1510",
+        "size": 12
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/VRKM/VRKM-1847-cd2.mp4",
+        "sha256": "7668d2cd32a37eb4",
+        "size": 11
+      },
+      {
+        "kind": "dir",
+        "path": "special"
+      },
+      {
+        "kind": "dir",
+        "path": "special/SPC"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "special/SPC/SPC-113.wmv",
+        "sha256": "fc11d6f28e59d3cc",
+        "size": 10
+      }
+    ],
+    "task": [
+      {
+        "kind": "dir",
+        "path": "intake"
+      },
+      {
+        "kind": "dir",
+        "path": "intake/OKAX449"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/OKAX449/okax449-5.mp4",
+        "sha256": "d929cdeea7e6a0f4",
+        "size": 80
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/OKAX449/okax449-h264.mp4",
+        "sha256": "09ecb6ebc8bcefc7",
+        "size": 100
+      },
+      {
+        "kind": "dir",
+        "path": "intake/dupes-differ"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/dupes-differ/ABC-106 (1).mp4",
+        "sha256": "3164596df4fdd018",
+        "size": 41
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/dupes-differ/ABC-106.mp4",
+        "sha256": "bd913ff68243d41b",
+        "size": 40
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/loose.txt",
+        "sha256": "75867a6093f3b3ed",
+        "size": 12
+      },
+      {
+        "kind": "dir",
+        "path": "intake/making of"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/making of/ABC-112 making of.mp4",
+        "sha256": "fc11d6f28e59d3cc",
+        "size": 10
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/making of/ABC-112.mp4",
+        "sha256": "fc11d6f28e59d3cc",
+        "size": 10
+      },
+      {
+        "kind": "dir",
+        "path": "intake/mixed"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/mixed/ABC-107.mp4",
+        "sha256": "fc11d6f28e59d3cc",
+        "size": 10
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/mixed/DEF-108.mp4",
+        "sha256": "fc11d6f28e59d3cc",
+        "size": 10
+      },
+      {
+        "kind": "dir",
+        "path": "intake/surprise"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/surprise/DEF-110.mp4",
+        "sha256": "fc11d6f28e59d3cc",
+        "size": 10
+      },
+      {
+        "kind": "dir",
+        "path": "intake/whatever"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/whatever/movie.mp4",
+        "sha256": "fc11d6f28e59d3cc",
+        "size": 10
+      }
+    ]
+  }
+}

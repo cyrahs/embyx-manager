@@ -1,0 +1,431 @@
+{
+  "calls": [
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/starred/ABC"
+      },
+      "response": null,
+      "seq": 1
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/starred/ABC/ABC-301.mp4",
+        "src": "{task}/vip/better/ABC-301.mp4"
+      },
+      "response": null,
+      "seq": 2
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/vip/better"
+      },
+      "response": null,
+      "seq": 3
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/ZZZ"
+      },
+      "response": null,
+      "seq": 4
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ZZZ/ZZZ-307.mp4",
+        "src": "{task}/intake/ZZZ-307/ZZZ-307.mp4"
+      },
+      "response": null,
+      "seq": 5
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/ZZZ-307"
+      },
+      "response": null,
+      "seq": 6
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/ABC"
+      },
+      "response": null,
+      "seq": 7
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-302-cd1.mp4",
+        "src": "{task}/intake/ABC-302-cd1.mp4"
+      },
+      "response": null,
+      "seq": 8
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-302-cd2.mp4",
+        "src": "{task}/intake/ABC-302-cd2.mp4"
+      },
+      "response": null,
+      "seq": 9
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/DEF"
+      },
+      "response": null,
+      "seq": 10
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/DEF/DEF-303.mkv",
+        "src": "{task}/intake/DEF-303.mkv"
+      },
+      "response": null,
+      "seq": 11
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/rank/DEF"
+      },
+      "response": null,
+      "seq": 12
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/rank/DEF/DEF-304.mp4",
+        "src": "{task}/intake/rank/DEF-304 release/DEF-304.mp4"
+      },
+      "response": null,
+      "seq": 13
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/rank/DEF-304 release"
+      },
+      "response": null,
+      "seq": 14
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/rank/DEF"
+      },
+      "response": null,
+      "seq": 15
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/rank/DEF/DEF-305.mp4",
+        "src": "{task}/intake/rank/DEF-305.mp4"
+      },
+      "response": null,
+      "seq": 16
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/new/DEF"
+      },
+      "response": null,
+      "seq": 17
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/new/DEF/DEF-306.mp4",
+        "src": "{task}/intake/deep/new/DEF-306 release/DEF-306.mp4"
+      },
+      "response": null,
+      "seq": 18
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/deep/new/DEF-306 release"
+      },
+      "response": null,
+      "seq": 19
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "archive.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "errors": [],
+          "log": [
+            "processing {task}/vip -> {library}/starred (priority)",
+            "moving ABC-301.mp4 to starred/ABC/ABC-301.mp4",
+            "processing {task}/intake -> {library}/sorted",
+            "moving ZZZ-307.mp4 to sorted/ZZZ/ZZZ-307.mp4",
+            "skipping intake/deep, it is another route of its own",
+            "WARNING: ABC-301 already archived in priority starred/ABC, skipping",
+            "skipping intake/rank, it is another route of its own",
+            "WARNING: failed to read an avid for the loose file holiday footage.mp4, skipping",
+            "moving ABC-302-cd1.mp4 to sorted/ABC/ABC-302-cd1.mp4",
+            "moving ABC-302-cd2.mp4 to sorted/ABC/ABC-302-cd2.mp4",
+            "moving DEF-303.mkv to sorted/DEF/DEF-303.mkv",
+            "processing {task}/intake/rank -> {library}/sorted/rank",
+            "moving DEF-304.mp4 to sorted/rank/DEF/DEF-304.mp4",
+            "moving DEF-305.mp4 to sorted/rank/DEF/DEF-305.mp4",
+            "processing {task}/intake/deep/new -> {library}/sorted/new",
+            "moving DEF-306.mp4 to sorted/new/DEF/DEF-306.mp4",
+            "skipping gone, its source directory does not exist"
+          ],
+          "op": "run",
+          "result": null,
+          "stats": {
+            "folders_discarded": 4,
+            "skipped_priority": 1,
+            "videos_archived": 8
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "processing {task}/vip -> {library}/starred (priority)",
+            "processing {task}/intake -> {library}/sorted",
+            "skipping intake/deep, it is another route of its own",
+            "WARNING: ABC-301 already archived in priority starred/ABC, skipping",
+            "skipping intake/rank, it is another route of its own",
+            "WARNING: failed to read an avid for the loose file holiday footage.mp4, skipping",
+            "processing {task}/intake/rank -> {library}/sorted/rank",
+            "processing {task}/intake/deep/new -> {library}/sorted/new",
+            "skipping gone, its source directory does not exist"
+          ],
+          "op": "run",
+          "result": null,
+          "stats": {
+            "skipped_priority": 1
+          }
+        }
+      ]
+    }
+  },
+  "rows": {},
+  "scenario": "archive/run",
+  "tree": {
+    "library": [
+      {
+        "kind": "dir",
+        "path": "sorted"
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/ABC"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-302-cd1.mp4",
+        "sha256": "2d711642b726b044",
+        "size": 1
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-302-cd2.mp4",
+        "sha256": "5dde896887f6754c",
+        "size": 2
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/DEF"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/DEF/DEF-303.mkv",
+        "sha256": "cd2eb0837c9b4c96",
+        "size": 3
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/ZZZ"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ZZZ/ZZZ-307.mp4",
+        "sha256": "4cf0c1012276f46a",
+        "size": 8
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/new"
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/new/DEF"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/new/DEF/DEF-306.mp4",
+        "sha256": "7b70d3ab4c764154",
+        "size": 7
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/rank"
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/rank/DEF"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/rank/DEF/DEF-304.mp4",
+        "sha256": "eaf16bc07968e013",
+        "size": 5
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/rank/DEF/DEF-305.mp4",
+        "sha256": "b7fb217694ae2d30",
+        "size": 6
+      },
+      {
+        "kind": "dir",
+        "path": "starred"
+      },
+      {
+        "kind": "dir",
+        "path": "starred/ABC"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "starred/ABC/ABC-301.mp4",
+        "sha256": "d4fc1db665446507",
+        "size": 20
+      }
+    ],
+    "task": [
+      {
+        "kind": "dir",
+        "path": "intake"
+      },
+      {
+        "kind": "dir",
+        "path": "intake/deep"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/deep/kept.txt",
+        "sha256": "a7b3d3031579f3bf",
+        "size": 33
+      },
+      {
+        "kind": "dir",
+        "path": "intake/deep/new"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/holiday footage.mp4",
+        "sha256": "2481a63c85a62cf8",
+        "size": 4
+      },
+      {
+        "kind": "dir",
+        "path": "intake/normal"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/normal/ABC-301.mp4",
+        "sha256": "fc11d6f28e59d3cc",
+        "size": 10
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/notes.txt",
+        "sha256": "dc00e479fa32993c",
+        "size": 20
+      },
+      {
+        "kind": "dir",
+        "path": "intake/rank"
+      },
+      {
+        "kind": "dir",
+        "path": "vip"
+      }
+    ]
+  }
+}

@@ -30,7 +30,10 @@ from contextlib import ExitStack
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 HERE = Path(__file__).resolve().parent
 REPO_ROOT = HERE.parents[1]
@@ -72,6 +75,9 @@ class Context:
     args: dict[str, Any]
     clouddrive_address: str = ''
     http_fakes: dict[str, str] = field(default_factory=dict)
+    #: Appends one call record to the transcript's `calls`, for a fake that lives inside the
+    #: operation (the recording file system of `operations/archive.py`).
+    record: Callable[[dict[str, Any]], None] = field(default=lambda _call: None)
     _connection: asyncpg.Connection | None = None
 
     async def connection(self) -> asyncpg.Connection:
@@ -215,6 +221,7 @@ async def run_one(name: str, spec: dict[str, Any], admin_dsn: str, index: int) -
                 args=dict(spec.get('args', {})),
                 clouddrive_address=clouddrive.address,
                 http_fakes={fake: server.url for fake, server in http_fakes.items()},
+                record=calls.append,
             )
             try:
                 outcome: dict[str, Any] = {'result': await operation(context)}

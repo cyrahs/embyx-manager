@@ -1,0 +1,358 @@
+{
+  "calls": [
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/ABC"
+      },
+      "response": null,
+      "seq": 1
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-802-cd1.mp4",
+        "src": "{movein}/ABC/ABC-802-cd1.mp4"
+      },
+      "response": null,
+      "seq": 2
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-802-cd2.mp4",
+        "src": "{movein}/ABC/ABC-802-cd2.mp4"
+      },
+      "response": null,
+      "seq": 3
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/DEF"
+      },
+      "response": null,
+      "seq": 4
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/DEF/DEF-801.mp4",
+        "src": "{movein}/DEF-801.mp4"
+      },
+      "response": null,
+      "seq": 5
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/GHI"
+      },
+      "response": null,
+      "seq": 6
+    },
+    {
+      "error": {
+        "message": "[Errno 13] Permission denied: '{movein}/GHI/GHI-805.mp4' -> '{library}/sorted/GHI/GHI-805.mp4'",
+        "type": "PermissionError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/GHI/GHI-805.mp4",
+        "src": "{movein}/GHI/GHI-805.mp4"
+      },
+      "seq": 7
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/GHI"
+      },
+      "response": null,
+      "seq": 8
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/GHI/GHI-805.mp4",
+        "src": "{movein}/GHI/GHI-805.mp4"
+      },
+      "response": null,
+      "seq": 9
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "move_in.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "errors": [
+            "ERROR: failed to archive the staged files of GHI-805: PermissionError(13, 'Permission denied')"
+          ],
+          "log": [
+            "WARNING: failed to read an avid for the staged file holiday footage.mp4, leaving it",
+            "moving ABC-802-cd1.mp4 to sorted/ABC/ABC-802-cd1.mp4",
+            "moving ABC-802-cd2.mp4 to sorted/ABC/ABC-802-cd2.mp4",
+            "WARNING: sorted/ABC/ABC-803.mp4 exists, skipping",
+            "WARNING: ABC-803 needs attention: destination already holds this avid",
+            "moving DEF-801.mp4 to sorted/DEF/DEF-801.mp4",
+            "moving GHI-805.mp4 to sorted/GHI/GHI-805.mp4",
+            "ERROR: failed to archive the staged files of GHI-805: PermissionError(13, 'Permission denied')"
+          ],
+          "op": "run",
+          "result": null,
+          "stats": {
+            "items_failed": 1,
+            "move_in_archived": 2,
+            "needs_attention": 2,
+            "videos_archived": 3
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "WARNING: sorted/ABC/ABC-803.mp4 exists, skipping",
+            "moving GHI-805.mp4 to sorted/GHI/GHI-805.mp4"
+          ],
+          "op": "run",
+          "result": null,
+          "stats": {
+            "move_in_archived": 1,
+            "videos_archived": 1
+          }
+        }
+      ]
+    }
+  },
+  "rows": {
+    "app_config": [],
+    "archive_acquisitions": [
+      {
+        "archived_paths_json": "[\"sorted/ABC/ABC-802-cd1.mp4\", \"sorted/ABC/ABC-802-cd2.mp4\"]",
+        "avid": "ABC-802",
+        "created_at": "2026-09-06T03:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "fill_actor",
+        "state": "archived",
+        "task_dir_path": null,
+        "updated_at": "2026-09-06T03:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "ABC-803",
+        "created_at": "2026-09-06T03:00:00+00:00",
+        "next_action_at": null,
+        "note": "destination already holds this avid",
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "fill_actor",
+        "state": "needs_attention",
+        "task_dir_path": null,
+        "updated_at": "2026-09-06T03:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[\"sorted/DEF/DEF-801.mp4\"]",
+        "avid": "DEF-801",
+        "created_at": "2026-09-06T03:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "fill_actor",
+        "state": "archived",
+        "task_dir_path": null,
+        "updated_at": "2026-09-06T03:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[\"sorted/GHI/GHI-805.mp4\"]",
+        "avid": "GHI-805",
+        "created_at": "2026-09-06T03:10:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "fill_actor",
+        "state": "archived",
+        "task_dir_path": null,
+        "updated_at": "2026-09-06T03:10:00+00:00"
+      }
+    ],
+    "archive_magnet_attempts": [],
+    "feed_subscriptions": [],
+    "fill_actor_apply_jobs": [],
+    "fill_actor_candidates": [],
+    "fill_actor_cloud_move_operations": [],
+    "fill_actor_jobs": [],
+    "fill_actor_move_journal": [],
+    "fill_actor_move_results": [],
+    "fill_actor_plans": [],
+    "health_probe": [],
+    "merge_tasks": [],
+    "merge_transcode_chunks": [],
+    "merge_transcode_parts": [],
+    "pipeline_runs": [],
+    "playlist_source": [],
+    "playlists": []
+  },
+  "scenario": "move_in/passes",
+  "tree": {
+    "library": [
+      {
+        "kind": "dir",
+        "path": "sorted"
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/ABC"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-802-cd1.mp4",
+        "sha256": "cd2eb0837c9b4c96",
+        "size": 3
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-802-cd2.mp4",
+        "sha256": "5dde896887f6754c",
+        "size": 2
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-803.mp4",
+        "sha256": "2481a63c85a62cf8",
+        "size": 4
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/DEF"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/DEF/DEF-801.mp4",
+        "sha256": "2d711642b726b044",
+        "size": 1
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/GHI"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/GHI/GHI-805.mp4",
+        "sha256": "a73add1aecea03a8",
+        "size": 9
+      }
+    ],
+    "movein": [
+      {
+        "kind": "dir",
+        "path": "ABC"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC/ABC-803.mp4",
+        "sha256": "eaf16bc07968e013",
+        "size": 5
+      },
+      {
+        "kind": "symlink",
+        "path": "ABC/ABC-804.mp4",
+        "target": "../../outside/ABC-804.mp4"
+      },
+      {
+        "kind": "dir",
+        "path": "ABC/deeper"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC/deeper/ABC-806.mp4",
+        "sha256": "4cf0c1012276f46a",
+        "size": 8
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC/notes.txt",
+        "sha256": "f8a69ede5e62175f",
+        "size": 11
+      },
+      {
+        "kind": "dir",
+        "path": "GHI"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "holiday footage.mp4",
+        "sha256": "b7fb217694ae2d30",
+        "size": 6
+      }
+    ],
+    "outside": [
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC-804.mp4",
+        "sha256": "7b70d3ab4c764154",
+        "size": 7
+      }
+    ],
+    "task": [
+      {
+        "kind": "dir",
+        "path": "intake"
+      }
+    ]
+  }
+}

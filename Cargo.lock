@@ -1137,6 +1137,7 @@ dependencies = [
  "getrandom 0.4.3",
  "indexmap",
  "notify",
+ "rustix",
  "sqlx",
  "tempfile",
  "thiserror 2.0.21",

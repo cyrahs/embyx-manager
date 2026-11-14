@@ -22,6 +22,7 @@ embyx-db.workspace = true
 getrandom.workspace = true
 indexmap.workspace = true
 caseless.workspace = true
+rustix.workspace = true
 sqlx.workspace = true
 thiserror.workspace = true
 tokio = { workspace = true, features = ["sync"] }

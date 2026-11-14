@@ -1,0 +1,71 @@
+# Move-in without a route (WP6): no fill-actor directory configured, then one no route covers;
+# nothing moves either time. A staging root that is a symbolic link stages nothing. Then the
+# route appears (rebind) and a cancelled sweep files only the first AVID.
+description = "move-in: unconfigured, unrouted, a linked root, a cancelled sweep"
+operation = "move_in.steps"
+clock = "2026-09-07T03:00:00+00:00"
+
+[roots]
+names = ["task", "library", "movein", "outside"]
+
+[args]
+move_in_root = "movein"
+task_dir_path = ""
+
+[args.config]
+src_dir = "task"
+dst_dir = "library"
+mapping = { intake = "sorted" }
+priority_mapping = { vip = "starred" }
+min_size_mb = 0
+
+[[args.stops]]
+op = "rename"
+path = "movein/ABC-901.mp4"
+
+[[args.steps]]
+op = "run"
+
+[[args.steps]]
+op = "rebind"
+args = { task_dir_path = "/somewhere/else" }
+
+[[args.steps]]
+op = "run"
+
+[[args.steps]]
+op = "rebind"
+args = { task_dir_path = "/task/vip", move_in_root = "outside/linked" }
+
+[[args.steps]]
+op = "run"
+
+[[args.steps]]
+op = "rebind"
+args = { task_dir_path = "/task/vip", move_in_root = "movein" }
+
+[[args.steps]]
+op = "run"
+
+[[args.steps]]
+op = "run"
+
+[[tree]]
+path = "task/vip"
+kind = "dir"
+
+[[tree]]
+path = "movein/ABC-901.mp4"
+size = 1
+
+[[tree]]
+path = "movein/ABC-902.mp4"
+size = 2
+
+[[tree]]
+path = "outside/linked"
+kind = "symlink"
+target = "../movein"
+
+[database]
+schema = "app"
