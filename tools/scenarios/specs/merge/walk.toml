@@ -1,0 +1,148 @@
+# A title merged from the queue into the intake route, one step per tick: the merge Job is
+# started (on the pod's own image) and followed through its status file, the merged file is
+# copied into the task's staging folder and followed through the upload queue, its size and
+# SHA-1 are checked once 115 reports them, the parts go, the merged file moves into
+# `{intake}/vr/SQTEVR-009/`, the archive is asked for a run and nudged again while the folder
+# waits, and the task is done once the folder is filed.
+# Its `restart` steps split it for the resume matrix (`crates/embyx-merge/tests/service_scenarios.rs`):
+# a new process each, and in the matrix the other build.
+description = "merge service: queued to done, one step per tick"
+operation = "merge.service"
+clock = "2026-11-14T08:00:00+00:00"
+
+[roots]
+names = ["work", "mapping", "secrets"]
+
+[database]
+schema = "app"
+
+[args.archive]
+src_dir = "/mnt/cd2/115/embyx_in"
+dst_dir = "/mnt/cd2/115/embyx"
+priority_mapping = { vr = "type/vr" }
+
+[[args.steps]]
+op = "create"
+args = { avid = "SQTEVR-009", source = "vr", library_dir = "type/vr", brand = "SQTEVR", merged_name = "SQTEVR-009.mp4", parts = ["/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4", "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4", "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd3.mp4"] }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "write"
+args = { path = "work/.merge/1.json", json = { state = "running", phase = "concat", progress = 0.4 } }
+
+[[args.steps]]
+op = "advance"
+args = { seconds = 30 }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "write"
+args = { path = "work/SQTEVR-009.mp4", text = "merged-file-of-sqtevr-009" }
+
+[[args.steps]]
+op = "write"
+args = { path = "work/.merge/1.json", json = { state = "done", size = 25, sha1 = "4a5e2bb31de0d4c9c3c1a5a4b8a5a6c7d8e9f0a1" } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "cloud"
+args = { edit = "update_copy_tasks", args = { dest_path = "/115/upload/merge-1", fields = { status = "Scanned" } } }
+
+[[args.steps]]
+op = "cloud"
+args = { edit = "set_uploads", args = { uploads = [{ dest_path = "/115/upload/merge-1/SQTEVR-009.mp4", size = 25, transferred = 12, status = "Transfer" }] } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "cloud"
+args = { edit = "update_copy_tasks", args = { dest_path = "/115/upload/merge-1", fields = { status = "Completed", uploaded_bytes = 25, total_bytes = 25 } } }
+
+[[args.steps]]
+op = "cloud"
+args = { edit = "set_uploads", args = { uploads = [] } }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "cloud"
+args = { edit = "add_file", args = { path = "/115/upload/merge-1/SQTEVR-009.mp4", size = 25 } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "cloud"
+args = { edit = "add_file", args = { path = "/115/upload/merge-1/SQTEVR-009.mp4", size = 25, hashes = { "2" = "4A5E2BB31DE0D4C9C3C1A5A4B8A5A6C7D8E9F0A1" } } }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "advance"
+args = { seconds = 600 }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "advance"
+args = { seconds = 360 }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "cloud"
+args = { edit = "remove", args = { path = "/115/embyx_in/vr/SQTEVR-009" } }
+
+[[args.steps]]
+op = "tick"
+
+[kubernetes]
+jobs = {}
+
+[[kubernetes.routes]]
+method = "GET"
+path = "/api/v1/namespaces/media/pods/embyx-manager-0"
+body = { spec = { containers = [{ image = "ghcr.io/cyrahs/embyx-manager:latest" }] }, status = { containerStatuses = [{ imageID = "ghcr.io/cyrahs/embyx-manager@sha256:abc123" }] } }
+
+[clouddrive]
+directories = ["/115/upload", "/115/embyx_in"]
+files = [
+    { path = "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4", size = 10 },
+    { path = "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4", size = 10 },
+    { path = "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd3.mp4", size = 5 },
+]

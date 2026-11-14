@@ -1,0 +1,2832 @@
+{
+  "calls": [
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/embyx/type/vr/SQTEVR"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "SQTEVR-009-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "SQTEVR-009-cd2.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 1
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/api/v1/namespaces/media/pods/embyx-manager-0",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "spec": {
+            "containers": [
+              {
+                "image": "ghcr.io/cyrahs/embyx-manager:latest"
+              }
+            ]
+          },
+          "status": {
+            "containerStatuses": [
+              {
+                "imageID": "ghcr.io/cyrahs/embyx-manager@sha256:abc123"
+              }
+            ]
+          }
+        },
+        "status": 200
+      },
+      "seq": 2
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "POST",
+      "request": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "1"
+            },
+            "name": "embyx-merge-1-sqtevr-009"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "1"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/SQTEVR-009.mp4",
+                      "--status",
+                      "{work}/.merge/1.json",
+                      "--reserve-gib",
+                      "20",
+                      "--",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "1"
+            },
+            "name": "embyx-merge-1-sqtevr-009"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "1"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/SQTEVR-009.mp4",
+                      "--status",
+                      "{work}/.merge/1.json",
+                      "--reserve-gib",
+                      "20",
+                      "--",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          },
+          "status": {}
+        },
+        "status": 201
+      },
+      "seq": 3
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/apis/batch/v1/namespaces/media/jobs/embyx-merge-1-sqtevr-009",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "message": "etcdserver: request timed out"
+        },
+        "status": 500
+      },
+      "seq": 4
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/apis/batch/v1/namespaces/media/jobs/embyx-merge-1-sqtevr-009",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "reason": "NotFound"
+        },
+        "status": 404
+      },
+      "seq": 5
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "DELETE",
+      "request": {
+        "body": {
+          "propagationPolicy": "Background"
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs/embyx-merge-1-sqtevr-009",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "status": "Success"
+        },
+        "status": 200
+      },
+      "seq": 6
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/embyx/type/vr/SQTEVR"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "SQTEVR-009-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "SQTEVR-009-cd2.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 7
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/api/v1/namespaces/media/pods/embyx-manager-0",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "spec": {
+            "containers": [
+              {
+                "image": "ghcr.io/cyrahs/embyx-manager:latest"
+              }
+            ]
+          },
+          "status": {
+            "containerStatuses": [
+              {
+                "imageID": "ghcr.io/cyrahs/embyx-manager@sha256:abc123"
+              }
+            ]
+          }
+        },
+        "status": 200
+      },
+      "seq": 8
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "POST",
+      "request": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "1"
+            },
+            "name": "embyx-merge-1-sqtevr-009"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "1"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/SQTEVR-009.mp4",
+                      "--status",
+                      "{work}/.merge/1.json",
+                      "--reserve-gib",
+                      "20",
+                      "--",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "1"
+            },
+            "name": "embyx-merge-1-sqtevr-009"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "1"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/SQTEVR-009.mp4",
+                      "--status",
+                      "{work}/.merge/1.json",
+                      "--reserve-gib",
+                      "20",
+                      "--",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          },
+          "status": {}
+        },
+        "status": 201
+      },
+      "seq": 9
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "DELETE",
+      "request": {
+        "body": {
+          "propagationPolicy": "Background"
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs/embyx-merge-1-sqtevr-009",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "status": "Success"
+        },
+        "status": 200
+      },
+      "seq": 10
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/embyx/type/vr/SQTEVR"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "SQTEVR-009-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "SQTEVR-009-cd2.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 11
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "POST",
+      "request": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "1"
+            },
+            "name": "embyx-merge-1-sqtevr-009"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "1"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/SQTEVR-009.mp4",
+                      "--status",
+                      "{work}/.merge/1.json",
+                      "--reserve-gib",
+                      "20",
+                      "--",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "1"
+            },
+            "name": "embyx-merge-1-sqtevr-009"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "1"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/SQTEVR-009.mp4",
+                      "--status",
+                      "{work}/.merge/1.json",
+                      "--reserve-gib",
+                      "20",
+                      "--",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          },
+          "status": {}
+        },
+        "status": 201
+      },
+      "seq": 12
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/apis/batch/v1/namespaces/media/jobs/embyx-merge-1-sqtevr-009",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "1"
+            },
+            "name": "embyx-merge-1-sqtevr-009"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "1"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/SQTEVR-009.mp4",
+                      "--status",
+                      "{work}/.merge/1.json",
+                      "--reserve-gib",
+                      "20",
+                      "--",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          },
+          "status": {
+            "conditions": [
+              {
+                "message": "Job was active longer than specified deadline",
+                "reason": "DeadlineExceeded",
+                "status": "True",
+                "type": "Failed"
+              }
+            ],
+            "failed": 1
+          }
+        },
+        "status": 200
+      },
+      "seq": 13
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/api/v1/namespaces/media/pods",
+        "query": {
+          "labelSelector": [
+            "job-name=embyx-merge-1-sqtevr-009"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "items": [
+            {
+              "metadata": {
+                "name": "embyx-merge-1-sqtevr-009-x7k2p"
+              }
+            }
+          ]
+        },
+        "status": 200
+      },
+      "seq": 14
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/api/v1/namespaces/media/pods/embyx-merge-1-sqtevr-009-x7k2p/log",
+        "query": {
+          "tailLines": [
+            "20"
+          ]
+        }
+      },
+      "response": {
+        "body": "ffmpeg: Killed",
+        "status": 200
+      },
+      "seq": 15
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "DELETE",
+      "request": {
+        "body": {
+          "propagationPolicy": "Background"
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs/embyx-merge-1-sqtevr-009",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "status": "Success"
+        },
+        "status": 200
+      },
+      "seq": 16
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/embyx/type/vr/SQTEVR"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "SQTEVR-009-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "SQTEVR-009-cd2.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 17
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/api/v1/namespaces/media/pods/embyx-manager-0",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "spec": {
+            "containers": [
+              {
+                "image": "ghcr.io/cyrahs/embyx-manager:latest"
+              }
+            ]
+          },
+          "status": {
+            "containerStatuses": [
+              {
+                "imageID": "ghcr.io/cyrahs/embyx-manager@sha256:abc123"
+              }
+            ]
+          }
+        },
+        "status": 200
+      },
+      "seq": 18
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "POST",
+      "request": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "1"
+            },
+            "name": "embyx-merge-1-sqtevr-009"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "1"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/SQTEVR-009.mp4",
+                      "--status",
+                      "{work}/.merge/1.json",
+                      "--reserve-gib",
+                      "20",
+                      "--",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "1"
+            },
+            "name": "embyx-merge-1-sqtevr-009"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "1"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/SQTEVR-009.mp4",
+                      "--status",
+                      "{work}/.merge/1.json",
+                      "--reserve-gib",
+                      "20",
+                      "--",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          },
+          "status": {}
+        },
+        "status": 201
+      },
+      "seq": 19
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/apis/batch/v1/namespaces/media/jobs/embyx-merge-1-sqtevr-009",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "1"
+            },
+            "name": "embyx-merge-1-sqtevr-009"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "1"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/SQTEVR-009.mp4",
+                      "--status",
+                      "{work}/.merge/1.json",
+                      "--reserve-gib",
+                      "20",
+                      "--",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          },
+          "status": {
+            "conditions": [
+              {
+                "status": "True",
+                "type": "Complete"
+              }
+            ],
+            "succeeded": 1
+          }
+        },
+        "status": 200
+      },
+      "seq": 20
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "DELETE",
+      "request": {
+        "body": {
+          "propagationPolicy": "Background"
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs/embyx-merge-1-sqtevr-009",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "status": "Success"
+        },
+        "status": 200
+      },
+      "seq": 21
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/embyx/type/vr/SQTEVR"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "SQTEVR-009-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "SQTEVR-009-cd2.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 22
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "POST",
+      "request": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "1"
+            },
+            "name": "embyx-merge-1-sqtevr-009"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "1"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/SQTEVR-009.mp4",
+                      "--status",
+                      "{work}/.merge/1.json",
+                      "--reserve-gib",
+                      "20",
+                      "--",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "1"
+            },
+            "name": "embyx-merge-1-sqtevr-009"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "1"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/SQTEVR-009.mp4",
+                      "--status",
+                      "{work}/.merge/1.json",
+                      "--reserve-gib",
+                      "20",
+                      "--",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                      "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          },
+          "status": {}
+        },
+        "status": 201
+      },
+      "seq": 23
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "DELETE",
+      "request": {
+        "body": {
+          "propagationPolicy": "Background"
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs/embyx-merge-1-sqtevr-009",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "status": "Success"
+        },
+        "status": 200
+      },
+      "seq": 24
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/embyx/type/vr/SQTEVR"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "SQTEVR-009-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "SQTEVR-009-cd2.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/SQTEVR/SQTEVR-009.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/SQTEVR/SQTEVR-009.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "SQTEVR-009.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "20",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 25
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/",
+        "/115",
+        "/115/embyx",
+        "/115/embyx/type",
+        "/115/embyx/type/vr",
+        "/115/embyx/type/vr/SQTEVR",
+        "/115/embyx_in",
+        "/115/upload"
+      ],
+      "files": [
+        {
+          "hashes": {},
+          "path": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+          "size": 10
+        },
+        {
+          "hashes": {},
+          "path": "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4",
+          "size": 10
+        },
+        {
+          "hashes": {},
+          "path": "/115/embyx/type/vr/SQTEVR/SQTEVR-009.mp4",
+          "size": 20
+        }
+      ],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "jobs": {},
+      "routes_left": [
+        {
+          "body": {
+            "spec": {
+              "containers": [
+                {
+                  "image": "ghcr.io/cyrahs/embyx-manager:latest"
+                }
+              ]
+            },
+            "status": {
+              "containerStatuses": [
+                {
+                  "imageID": "ghcr.io/cyrahs/embyx-manager@sha256:abc123"
+                }
+              ]
+            }
+          },
+          "method": "GET",
+          "path": "/api/v1/namespaces/media/pods/embyx-manager-0"
+        }
+      ]
+    }
+  },
+  "format": 1,
+  "operation": "merge.service",
+  "outcome": {
+    "result": {
+      "clock": "2026-11-14T08:00:00+00:00",
+      "steps": [
+        {
+          "op": "create",
+          "result": {
+            "avid": "SQTEVR-009",
+            "brand": "SQTEVR",
+            "error": null,
+            "failed_state": null,
+            "finished_at": null,
+            "id": 1,
+            "job_name": null,
+            "library_dir": "type/vr",
+            "merged_bytes": null,
+            "merged_name": "SQTEVR-009.mp4",
+            "merged_sha1": null,
+            "notice": null,
+            "parts": [
+              "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+              "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+            ],
+            "phase": null,
+            "progress": null,
+            "source": "vr",
+            "state": "queued",
+            "state_changed_at_is_updated_at": true,
+            "transcode_paused": false,
+            "transcoder": null,
+            "updated_at_is_created_at": true,
+            "upload_attempts": 0,
+            "uploaded_bytes": null
+          },
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "tick",
+          "result": {
+            "triggered": []
+          },
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-sqtevr-009",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "tick",
+          "result": {
+            "triggered": []
+          },
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-sqtevr-009",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": "Kubernetes API GET /apis/batch/v1/namespaces/media/jobs/embyx-merge-1-sqtevr-009 answered 500: {\"message\": \"etcdserver: request timed out\"}",
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "restart",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-sqtevr-009",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": "Kubernetes API GET /apis/batch/v1/namespaces/media/jobs/embyx-merge-1-sqtevr-009 answered 500: {\"message\": \"etcdserver: request timed out\"}",
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "tick",
+          "result": {
+            "triggered": []
+          },
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": "the merge Job disappeared before it finished",
+              "failed_state": "merging",
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-sqtevr-009",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "failed",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "retry",
+          "result": {
+            "avid": "SQTEVR-009",
+            "brand": "SQTEVR",
+            "error": null,
+            "failed_state": null,
+            "finished_at": null,
+            "id": 1,
+            "job_name": null,
+            "library_dir": "type/vr",
+            "merged_bytes": null,
+            "merged_name": "SQTEVR-009.mp4",
+            "merged_sha1": null,
+            "notice": null,
+            "parts": [
+              "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+              "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+            ],
+            "phase": null,
+            "progress": null,
+            "source": "vr",
+            "state": "queued",
+            "state_changed_at_is_updated_at": true,
+            "transcode_paused": false,
+            "transcoder": null,
+            "updated_at_is_created_at": true,
+            "upload_attempts": 0,
+            "uploaded_bytes": null
+          },
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "tick",
+          "result": {
+            "triggered": []
+          },
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-sqtevr-009",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "write",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-sqtevr-009",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "tick",
+          "result": {
+            "triggered": []
+          },
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": "the parts' streams differ: cd2 has 3 streams, cd1 2",
+              "failed_state": "merging",
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-sqtevr-009",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "failed",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "retry",
+          "result": {
+            "avid": "SQTEVR-009",
+            "brand": "SQTEVR",
+            "error": null,
+            "failed_state": null,
+            "finished_at": null,
+            "id": 1,
+            "job_name": null,
+            "library_dir": "type/vr",
+            "merged_bytes": null,
+            "merged_name": "SQTEVR-009.mp4",
+            "merged_sha1": null,
+            "notice": null,
+            "parts": [
+              "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+              "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+            ],
+            "phase": null,
+            "progress": null,
+            "source": "vr",
+            "state": "queued",
+            "state_changed_at_is_updated_at": true,
+            "transcode_paused": false,
+            "transcoder": null,
+            "updated_at_is_created_at": true,
+            "upload_attempts": 0,
+            "uploaded_bytes": null
+          },
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "tick",
+          "result": {
+            "triggered": []
+          },
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-sqtevr-009",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "write",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-sqtevr-009",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "write",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-sqtevr-009",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "job_status",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-sqtevr-009",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "tick",
+          "result": {
+            "triggered": []
+          },
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": "the merge Job failed: Job was active longer than specified deadline | \"ffmpeg: Killed\"",
+              "failed_state": "merging",
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-sqtevr-009",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "failed",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "restart",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": "the merge Job failed: Job was active longer than specified deadline | \"ffmpeg: Killed\"",
+              "failed_state": "merging",
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-sqtevr-009",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "failed",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "retry",
+          "result": {
+            "avid": "SQTEVR-009",
+            "brand": "SQTEVR",
+            "error": null,
+            "failed_state": null,
+            "finished_at": null,
+            "id": 1,
+            "job_name": null,
+            "library_dir": "type/vr",
+            "merged_bytes": null,
+            "merged_name": "SQTEVR-009.mp4",
+            "merged_sha1": null,
+            "notice": null,
+            "parts": [
+              "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+              "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+            ],
+            "phase": null,
+            "progress": null,
+            "source": "vr",
+            "state": "queued",
+            "state_changed_at_is_updated_at": true,
+            "transcode_paused": false,
+            "transcoder": null,
+            "updated_at_is_created_at": true,
+            "upload_attempts": 0,
+            "uploaded_bytes": null
+          },
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "tick",
+          "result": {
+            "triggered": []
+          },
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-sqtevr-009",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "job_status",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-sqtevr-009",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "tick",
+          "result": {
+            "triggered": []
+          },
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": "the merge Job ended without reporting a result",
+              "failed_state": "merging",
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-sqtevr-009",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "failed",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "retry",
+          "result": {
+            "avid": "SQTEVR-009",
+            "brand": "SQTEVR",
+            "error": null,
+            "failed_state": null,
+            "finished_at": null,
+            "id": 1,
+            "job_name": null,
+            "library_dir": "type/vr",
+            "merged_bytes": null,
+            "merged_name": "SQTEVR-009.mp4",
+            "merged_sha1": null,
+            "notice": null,
+            "parts": [
+              "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+              "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+            ],
+            "phase": null,
+            "progress": null,
+            "source": "vr",
+            "state": "queued",
+            "state_changed_at_is_updated_at": true,
+            "transcode_paused": false,
+            "transcoder": null,
+            "updated_at_is_created_at": true,
+            "upload_attempts": 0,
+            "uploaded_bytes": null
+          },
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "tick",
+          "result": {
+            "triggered": []
+          },
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-sqtevr-009",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "write",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-sqtevr-009",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "tick",
+          "result": {
+            "triggered": []
+          },
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": "the Job reported SQTEVR-009.mp4 done, but it is not on the work volume",
+              "failed_state": "merging",
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-sqtevr-009",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "failed",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "retry",
+          "result": {
+            "avid": "SQTEVR-009",
+            "brand": "SQTEVR",
+            "error": null,
+            "failed_state": null,
+            "finished_at": null,
+            "id": 1,
+            "job_name": null,
+            "library_dir": "type/vr",
+            "merged_bytes": null,
+            "merged_name": "SQTEVR-009.mp4",
+            "merged_sha1": null,
+            "notice": null,
+            "parts": [
+              "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+              "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+            ],
+            "phase": null,
+            "progress": null,
+            "source": "vr",
+            "state": "queued",
+            "state_changed_at_is_updated_at": true,
+            "transcode_paused": false,
+            "transcoder": null,
+            "updated_at_is_created_at": true,
+            "upload_attempts": 0,
+            "uploaded_bytes": null
+          },
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "cloud",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "tick",
+          "result": {
+            "triggered": []
+          },
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": "the library already holds SQTEVR-009.mp4, a whole copy of SQTEVR-009; merging its parts would only duplicate it",
+              "failed_state": "queued",
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "failed",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "restart",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": "the library already holds SQTEVR-009.mp4, a whole copy of SQTEVR-009; merging its parts would only duplicate it",
+              "failed_state": "queued",
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "failed",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "error": {
+            "code": "merge_task_not_found",
+            "type": "MergeActionError"
+          },
+          "op": "retry",
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": "the library already holds SQTEVR-009.mp4, a whole copy of SQTEVR-009; merging its parts would only duplicate it",
+              "failed_state": "queued",
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "failed",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "cancel",
+          "result": {
+            "avid": "SQTEVR-009",
+            "brand": "SQTEVR",
+            "error": "the library already holds SQTEVR-009.mp4, a whole copy of SQTEVR-009; merging its parts would only duplicate it",
+            "failed_state": "queued",
+            "finished_at": "2026-11-14T08:00:00+00:00",
+            "id": 1,
+            "job_name": null,
+            "library_dir": "type/vr",
+            "merged_bytes": null,
+            "merged_name": "SQTEVR-009.mp4",
+            "merged_sha1": null,
+            "notice": null,
+            "parts": [
+              "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+              "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+            ],
+            "phase": null,
+            "progress": null,
+            "source": "vr",
+            "state": "cancelled",
+            "state_changed_at_is_updated_at": true,
+            "transcode_paused": false,
+            "transcoder": null,
+            "updated_at_is_created_at": true,
+            "upload_attempts": 0,
+            "uploaded_bytes": null
+          },
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": "the library already holds SQTEVR-009.mp4, a whole copy of SQTEVR-009; merging its parts would only duplicate it",
+              "failed_state": "queued",
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "error": {
+            "code": "merge_task_not_failed",
+            "type": "MergeActionError"
+          },
+          "op": "retry",
+          "tasks": [
+            {
+              "avid": "SQTEVR-009",
+              "brand": "SQTEVR",
+              "error": "the library already holds SQTEVR-009.mp4, a whole copy of SQTEVR-009; merging its parts would only duplicate it",
+              "failed_state": "queued",
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "SQTEVR-009.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "rows": {
+    "app_config": [],
+    "archive_acquisitions": [],
+    "archive_magnet_attempts": [],
+    "feed_subscriptions": [],
+    "fill_actor_apply_jobs": [],
+    "fill_actor_candidates": [],
+    "fill_actor_cloud_move_operations": [],
+    "fill_actor_jobs": [],
+    "fill_actor_move_journal": [],
+    "fill_actor_move_results": [],
+    "fill_actor_plans": [],
+    "health_probe": [],
+    "merge_tasks": [
+      {
+        "avid": "SQTEVR-009",
+        "brand": "SQTEVR",
+        "created_at": "2026-11-14T08:00:00+00:00",
+        "error": "the library already holds SQTEVR-009.mp4, a whole copy of SQTEVR-009; merging its parts would only duplicate it",
+        "failed_state": "queued",
+        "finished_at": "2026-11-14T08:00:00+00:00",
+        "id": 1,
+        "job_name": null,
+        "library_dir": "type/vr",
+        "merged_bytes": null,
+        "merged_name": "SQTEVR-009.mp4",
+        "merged_sha1": null,
+        "notice": null,
+        "parts_json": "[\"/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4\", \"/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4\"]",
+        "phase": null,
+        "progress": null,
+        "source": "vr",
+        "state": "cancelled",
+        "state_changed_at": "2026-11-14T08:00:00+00:00",
+        "transcode_paused": false,
+        "transcoder": null,
+        "updated_at": "2026-11-14T08:00:00+00:00",
+        "upload_attempts": 0,
+        "uploaded_bytes": null
+      }
+    ],
+    "merge_transcode_chunks": [],
+    "merge_transcode_parts": [],
+    "pipeline_runs": [],
+    "playlist_source": [],
+    "playlists": []
+  },
+  "scenario": "merge/merge_failures",
+  "tree": {
+    "mapping": [],
+    "secrets": [
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "job.json",
+        "sha256": "8c299e50567ce0e6",
+        "size": 204
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "token",
+        "sha256": "52713805db90269f",
+        "size": 15
+      }
+    ],
+    "work": [
+      {
+        "kind": "dir",
+        "path": ".merge"
+      }
+    ]
+  }
+}

@@ -497,6 +497,71 @@ impl FakeCloudDrive {
         self.state.lock().expect("fake state").dump()
     }
 
+    /// `FakeCloudDrive.edit(op, args)`: change the state without a call, as CloudDrive itself
+    /// does (WP14): `add_file`, `add_directory`, `remove`, `update_copy_tasks`,
+    /// `drop_copy_tasks`, `set_uploads`, `fail` (a scripted failure as the seed's `errors`).
+    pub fn edit(&self, op: &str, args: &Value) {
+        let mut state = self.state.lock().expect("fake state");
+        let path = || text(args, "path").to_owned();
+        match op {
+            "add_file" => {
+                let size = match args.get("size") {
+                    Some(Value::Int(size)) => i64::try_from(*size).expect("size fits i64"),
+                    None => 0,
+                    Some(other) => panic!("size must be an integer, not {other:?}"),
+                };
+                let hashes = args.get("hashes").and_then(Value::as_dict).cloned().unwrap_or_default();
+                let path = path();
+                state.files.insert(
+                    path.clone(),
+                    FileEntry {
+                        size,
+                        hashes,
+                        id: None,
+                        write_time: None,
+                    },
+                );
+                state.add_parents(&path);
+            }
+            "add_directory" => {
+                let path = path();
+                state.directories.insert(path.clone());
+                state.add_parents(&path);
+            }
+            "remove" => state.remove(&path()),
+            "update_copy_tasks" => {
+                let destination = text(args, "dest_path").to_owned();
+                let fields = field(args, "fields").as_dict().expect("fields is a table").clone();
+                for task in &mut state.copy_tasks {
+                    if task.get("dest_path").and_then(Value::as_str) == Some(destination.as_str())
+                        && let Value::Dict(task) = task
+                    {
+                        for (key, value) in fields.iter() {
+                            let Key::Str(key) = key else {
+                                panic!("copy task fields are named");
+                            };
+                            task.insert(key.as_str(), value.clone());
+                        }
+                    }
+                }
+            }
+            "drop_copy_tasks" => {
+                let destination = text(args, "dest_path").to_owned();
+                state
+                    .copy_tasks
+                    .retain(|task| task.get("dest_path").and_then(Value::as_str) != Some(destination.as_str()));
+            }
+            "set_uploads" => {
+                state.uploads = list_of(args, "uploads");
+            }
+            "fail" => {
+                let error = args.as_dict().expect("a scripted error is a table").clone();
+                state.errors.push(error);
+            }
+            other => panic!("unknown CloudDrive edit {other:?}"),
+        }
+    }
+
     /// Every call's metadata, in arrival order.
     pub fn seen(&self) -> Vec<Seen> {
         self.seen.lock().expect("seen").clone()

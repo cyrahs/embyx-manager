@@ -1,0 +1,77 @@
+# Which titles the home worker takes: an AVI too big for 115 has no muxer the worker writes,
+# so the merge Job takes it (it cannot be paused or sent to the CPU), while a Matroska title
+# waits for the worker, which the merge under way holds back (`busy`).
+description = "merge service: home-bound only for the muxers the worker writes"
+operation = "merge.service"
+clock = "2026-11-14T08:00:00+00:00"
+
+[roots]
+names = ["work", "mapping", "secrets"]
+
+[database]
+schema = "app"
+
+[args.archive]
+src_dir = "/mnt/cd2/115/embyx_in"
+dst_dir = "/mnt/cd2/115/embyx"
+priority_mapping = { vr = "type/vr" }
+
+[args.merge]
+home_transcode_enabled = true
+
+[args.part_sizes]
+"/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd1.avi" = 60000000000
+"/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd2.avi" = 60000000000
+"/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd1.mkv" = 60000000000
+"/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd2.mkv" = 60000000000
+
+[[args.steps]]
+op = "create"
+args = { avid = "BIG-002", source = "vr", library_dir = "type/vr", brand = "BIG", merged_name = "BIG-002.avi", parts = ["/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd1.avi", "/mnt/cd2/115/embyx/type/vr/BIG/BIG-002-cd2.avi"] }
+
+[[args.steps]]
+op = "create"
+args = { avid = "BIG-003", source = "vr", library_dir = "type/vr", brand = "BIG", merged_name = "BIG-003.mkv", parts = ["/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd1.mkv", "/mnt/cd2/115/embyx/type/vr/BIG/BIG-003-cd2.mkv"] }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "home"
+
+[[args.steps]]
+op = "set_paused"
+args = { id = 1, paused = true }
+
+[[args.steps]]
+op = "use_cpu"
+args = { id = 1 }
+
+[[args.steps]]
+op = "claim"
+args = { name = "home-5090", version = "1.0.0", state = "idle" }
+
+[[args.steps]]
+op = "cancel"
+args = { id = 1 }
+
+[[args.steps]]
+op = "cancel"
+args = { id = 2 }
+
+[kubernetes]
+jobs = {}
+
+[[kubernetes.routes]]
+method = "GET"
+path = "/api/v1/namespaces/media/pods/embyx-manager-0"
+body = { spec = { containers = [{ image = "ghcr.io/cyrahs/embyx-manager:latest" }] }, status = { containerStatuses = [{ imageID = "ghcr.io/cyrahs/embyx-manager@sha256:abc123" }] } }
+
+[clouddrive]
+directories = ["/115/upload", "/115/embyx_in"]
+files = [
+    { path = "/115/embyx/type/vr/BIG/BIG-002-cd1.avi", size = 10 },
+    { path = "/115/embyx/type/vr/BIG/BIG-002-cd2.avi", size = 10 },
+    { path = "/115/embyx/type/vr/BIG/BIG-003-cd1.mkv", size = 10 },
+    { path = "/115/embyx/type/vr/BIG/BIG-003-cd2.mkv", size = 10 },
+]

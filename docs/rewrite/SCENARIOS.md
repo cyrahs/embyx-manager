@@ -98,8 +98,8 @@ which is what makes the transcripts comparable. A port copies a fake rule for ru
   table (first matching route answers, matched on method and path without the query, used up
   after `times`; anything else is 404 `{"error": "no route"}`). Answers are JSON (`json.dumps`
   with `ensure_ascii=False`), so a text body such as a pod log arrives quoted, on both sides.
-  A WP that needs a stateful model (Kubernetes Jobs for WP14, Emby playlists for WP8) replaces
-  the route table for that fake on both sides, keeping the call record shape.
+  A WP that needs a stateful model adds it on both sides, keeping the call record shape: the
+  Kubernetes Jobs model (WP14) answers what the routes do not.
 
 `embyx_clients::scenario::ScenarioFakes::start(&spec, &recorder)` starts the three fakes the way
 the runner does and `dump()` gives the transcript's `fakes`.
@@ -196,8 +196,29 @@ the runner does and `dump()` gives the transcript's `fakes`.
 - **WP13 (done):** `merge/tasks` runs `MergeTaskRepository` step by step (`merge.tasks`, the same
   `{op, args}` shape); its rows pin the `parts_json` bytes. Timestamps the repository takes from the wall
   clock are `rows.merge_tasks.*` selectors; a WP14 spec can add steps without new operation code.
-- **WP14 (merge service):** the Kubernetes fake needs Job state (create, read, delete, status) on
-  both sides; generated Job names and task UUIDs are covered by the UUID step or by
-  `calls.kubernetes.<method>.<path>` selectors.
+- **WP14 (service, done in its first PR):** a `jobs` seed (a table, `{}` for none) turns on a model of
+  the Jobs API behind the Kubernetes fake's routes on both sides (`fakes/http.py`,
+  `embyx_clients::fakehttp`): a request no route answers creates (201, or 409 `AlreadyExists`), reads (404
+  `NotFound` when absent) or deletes a Job, kept by name with an empty `status`; the dump adds `jobs`.
+  Routes still answer first, so a `times = 1` route scripts a 500 or a vanished Job for one read. The
+  CloudDrive fake has `edit(op, args)` on both sides (`add_file`, `add_directory`, `remove`,
+  `update_copy_tasks`, `drop_copy_tasks`, `set_uploads`, and `fail` for a scripted failure of the next calls of an RPC): CloudDrive changing on its own, unrecorded. The
+  runner's `Context.fakes` hands an operation the running fakes for such steps. `merge/*` (walk,
+  merge_failures, upload, cancel, replace_archive, home, home_muxers, over115_cpu, auto) run `merge.service`
+  (`tools/scenarios/operations/merge_service.py`, `crates/embyx-merge/tests/service_scenarios.rs`): one
+  world of `MergeService`, `AutoMerger` and the transcode bookkeeping over the scenario database, the fakes,
+  a `work` root (the merge volume, status files and `.transcode/<id>/`), a `mapping` root (strm tree) and a
+  `secrets` root (Job template and token). Steps: `create`, `tick`, `cancel`, `retry`, `use_cpu`,
+  `set_paused`, `claim`, `heartbeat`, `chunk` (as the transcode PUT stores one), `finish_part`,
+  `transcode_view`, `home`, `auto`, `restart`, and the unrecorded `write`, `remove`, `advance`,
+  `job_status`, `cloud`, `free_space`; each reports the task listing after it. `cancel_after = "<method>"`
+  cancels the step once that `AsyncCloudDrive` method answered. Python pins `datetime` in the five merge
+  modules; Rust hands one clock to every repository, the presence, the title cache, the service and
+  auto-merge. **Resume matrix:** `tools/scenarios/segment.py` runs `steps[from:to]` of a spec on the Python
+  baseline against a given database, roots, clock and fake states (a dump's `routes_left` become routes
+  again) and prints the steps, clock, calls and fake dumps. The Rust test splits a spec at its `restart`
+  steps and runs the segments by the two builds in turn, Python first and Rust first; both must render the
+  single build's transcript, so task rows, status files and chunk folders one build left are continued by
+  the other. A spec run this way carries no scripted CloudDrive `errors` (a dump does not keep them).
 - The format is fixed. If a WP finds it cannot express something, it bumps `FORMAT` on both sides
   in the same PR and regenerates every transcript.

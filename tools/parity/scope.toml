@@ -160,7 +160,7 @@ tests = [
 
 [WP14]
 title = "Merge service, auto-merge, transcode, API"
-status = "pending"
+status = "in-progress"
 tests = [
   # Everything but the merge.kube tests, which are WP3's.
   "tests/test_merge_service.py",

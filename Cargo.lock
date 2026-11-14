@@ -1131,15 +1131,20 @@ name = "embyx-merge"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "embyx-clients",
  "embyx-core",
  "embyx-db",
+ "embyx-merge",
  "regex",
  "rustix",
  "sha1",
+ "sha2 0.11.1",
  "sqlx",
  "tempfile",
  "thiserror 2.0.21",
  "tokio",
+ "tokio-util",
+ "tracing",
 ]
 
 [[package]]

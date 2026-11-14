@@ -9,6 +9,11 @@
 //! another body kept as text, no body `null`. The answer is the route's body as
 //! `json.dumps(body, ensure_ascii=False)`, or nothing when it has none.
 //!
+//! A seed with a `jobs` table adds the Kubernetes Jobs model of WP14 behind the routes, rule
+//! for rule as `fakes/http.py` has it: create (201 with an empty `status`, 409 for a name in
+//! use), read and delete by name (404 `{"reason": "NotFound"}` when unknown), and
+//! [`FakeHttp::set_job_status`] for the cluster finishing a Job; the dump then has `jobs`.
+//!
 //! Like Python's `http.server`, it answers in HTTP/1.0 and closes the connection after each
 //! answer.
 
@@ -59,11 +64,71 @@ fn times(route: &Value) -> Option<i128> {
     }
 }
 
+/// The Jobs model's store, by name; `None` without a `jobs` seed.
+type Jobs = Arc<Mutex<Option<Dict>>>;
+
+fn reason_body(key: &str, text: &str) -> Value {
+    let mut body = Dict::new();
+    body.insert(key, Value::from(text));
+    Value::Dict(body)
+}
+
+/// `FakeHttpServer._model`: the Jobs model's answer, or the 404 of a request nothing answers.
+fn model(jobs: &mut Option<Dict>, method: &str, path: &str, body: &Value) -> (u16, Value) {
+    let no_route = || (404, reason_body("error", "no route"));
+    let Some(jobs) = jobs.as_mut() else {
+        return no_route();
+    };
+    let Some(rest) = path.strip_prefix("/apis/batch/v1/namespaces/") else {
+        return no_route();
+    };
+    let Some((namespace, rest)) = rest.split_once('/') else {
+        return no_route();
+    };
+    if namespace.is_empty() {
+        return no_route();
+    }
+    let name = match rest {
+        "jobs" => None,
+        _ => match rest.strip_prefix("jobs/") {
+            Some(name) if !name.is_empty() && !name.contains('/') => Some(name),
+            _ => return no_route(),
+        },
+    };
+    match (name, method, body) {
+        (None, "POST", Value::Dict(fields)) => {
+            let created = match fields.get("metadata").and_then(|metadata| metadata.get("name")) {
+                Some(Value::Str(name)) => name.clone(),
+                Some(other) => crate::pyvalue::py_str(other),
+                None => String::new(),
+            };
+            if jobs.get(&created).is_some() {
+                return (409, reason_body("reason", "AlreadyExists"));
+            }
+            let mut job = fields.clone();
+            job.insert("status", Value::Dict(Dict::new()));
+            jobs.insert(created.as_str(), Value::Dict(job.clone()));
+            (201, Value::Dict(job))
+        }
+        (Some(name), "GET", _) => jobs
+            .get(name)
+            .map_or_else(|| (404, reason_body("reason", "NotFound")), |job| (200, job.clone())),
+        (Some(name), "DELETE", _) => {
+            if jobs.remove(name).is_none() {
+                return (404, reason_body("reason", "NotFound"));
+            }
+            (200, reason_body("status", "Success"))
+        }
+        _ => no_route(),
+    }
+}
+
 /// One fake HTTP service on a local port.
 #[derive(Clone)]
 pub struct FakeHttp {
     name: Arc<str>,
     routes: Arc<Mutex<Vec<Value>>>,
+    jobs: Jobs,
     /// `http://127.0.0.1:<port>`.
     pub url: String,
     task: Arc<tokio::task::JoinHandle<()>>,
@@ -95,19 +160,30 @@ impl FakeHttp {
             .map(<[Value]>::to_vec)
             .unwrap_or_default();
         let routes = Arc::new(Mutex::new(routes));
+        let jobs: Jobs = Arc::new(Mutex::new(match seed.get("jobs") {
+            Some(Value::Dict(jobs)) => Some(jobs.clone()),
+            Some(other) => panic!("jobs must be a table, not {other:?}"),
+            None => None,
+        }));
         let listener = TcpListener::bind("127.0.0.1:0").await.expect("bind");
         let url = format!("http://{}", listener.local_addr().expect("address"));
         let name: Arc<str> = Arc::from(name);
-        let (served_name, served_routes) = (Arc::clone(&name), Arc::clone(&routes));
+        let (served_name, served_routes, served_jobs) = (Arc::clone(&name), Arc::clone(&routes), Arc::clone(&jobs));
         let task = tokio::spawn(async move {
             while let Ok((stream, _)) = listener.accept().await {
-                let (name, routes, recorder) = (Arc::clone(&served_name), Arc::clone(&served_routes), recorder.clone());
-                tokio::spawn(async move { handle(stream, &name, &routes, &recorder).await });
+                let (name, routes, jobs, recorder) = (
+                    Arc::clone(&served_name),
+                    Arc::clone(&served_routes),
+                    Arc::clone(&served_jobs),
+                    recorder.clone(),
+                );
+                tokio::spawn(async move { handle(stream, &name, &routes, &jobs, &recorder).await });
             }
         });
         Self {
             name,
             routes,
+            jobs,
             url,
             task: Arc::new(task),
         }
@@ -125,7 +201,23 @@ impl FakeHttp {
             .collect();
         let mut dump = Dict::new();
         dump.insert("routes_left", Value::List(left));
+        if let Some(jobs) = self.jobs.lock().expect("jobs").as_ref() {
+            dump.insert("jobs", Value::Dict(jobs.clone()));
+        }
         Value::Dict(dump)
+    }
+
+    /// `set_job_status(name, status)`: the cluster changed a kept Job's status.
+    pub fn set_job_status(&self, name: &str, status: &Value) {
+        let mut jobs = self.jobs.lock().expect("jobs");
+        let job = jobs
+            .as_mut()
+            .and_then(|jobs| jobs.get_mut(name))
+            .unwrap_or_else(|| panic!("no Job {name:?} to set the status of"));
+        let Value::Dict(job) = job else {
+            panic!("a kept Job is an object");
+        };
+        job.insert("status", status.clone());
     }
 }
 
@@ -137,7 +229,13 @@ fn reason(status: u16) -> &'static str {
         .unwrap_or("")
 }
 
-async fn handle(mut stream: TcpStream, name: &str, routes: &Mutex<Vec<Value>>, recorder: &Recorder) {
+async fn handle(
+    mut stream: TcpStream,
+    name: &str,
+    routes: &Mutex<Vec<Value>>,
+    jobs: &Mutex<Option<Dict>>,
+    recorder: &Recorder,
+) {
     let mut buffer = Vec::new();
     let mut chunk = [0_u8; 8192];
     let head_end = loop {
@@ -184,11 +282,7 @@ async fn handle(mut stream: TcpStream, name: &str, routes: &Mutex<Vec<Value>>, r
                 && times(route) != Some(0)
         });
         let (status, answer) = match route {
-            None => {
-                let mut answer = Dict::new();
-                answer.insert("error", Value::from("no route"));
-                (404, Value::Dict(answer))
-            }
+            None => model(&mut jobs.lock().expect("jobs"), &method, &path, &request_body),
             Some(route) => {
                 if let Some(left) = times(route)
                     && let Value::Dict(route) = route
