@@ -352,7 +352,9 @@ Same shape as fav's, with the pipelines paused first because of what they can de
    no thread starts a pod or sends a request from the cluster; the fingerprint is compared offline (ClientHello
    and HTTP/2 settings captured from curl_cffi and from the Rust client against a local listener) and the live
    proof moves to the deployment.
-4. Level 2 export (masked database dump and read-only listings): asked when WP16 reaches it. Not allowed before.
+4. Level 2 export (masked database dump and read-only listings): allowed by Max on 2026-11-14 17:23Z, after
+   WP16. The database export ran the same day (REPORT.md "Where it stands"): 18,005 of 18,005 GET answers and
+   16,572 of 16,572 decisions equal; no listing was taken; the export is deleted.
 
 ## Cleanup notes
 

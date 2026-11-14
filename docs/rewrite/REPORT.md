@@ -1,7 +1,7 @@
 # embyx-manager Rust rewrite: final report data
 
 The data behind the final report of the rewrite (`docs/rewrite/PLAN.md`), written at the end of WP16 on
-2026-11-14. The rewrite ran from Max's approval on 2026-11-13 18:22Z to WP16's last merge, about 16 hours
+2026-11-14; the level 2 results were added the same day, after Max allowed the export. The rewrite ran from Max's approval on 2026-11-13 18:22Z to WP16's last merge, about 16 hours
 of wall-clock time, in 17 work packages and 21 pull requests into `rust` (#81-#101). Nothing was deployed.
 A copy of this file is at `/mnt/project-files/embyx-rust/report-data.md`.
 
@@ -24,11 +24,26 @@ A copy of this file is at `/mnt/project-files/embyx-rust/report-data.md`.
   - the React build passes its tests (121; the plan counted 117) and the page smoke;
   - an empty `pg_dump --schema-only` diff;
   - the cross-version tests in every pairing.
-- **Level 2.** Not allowed: the production export was not permitted. The tooling is built and tested on
-  synthetic data only:
-  - a masked export (`mask.py`);
-  - a GET differ over every read route of the main API (101 of 101 equal on a synthetic export, status and content type included);
-  - a decision replay of AVID, brand and archive routing (77 of 77 and 52 of 52 names equal).
+- **Level 2.** Run on production data on 2026-11-14, after WP16, once Max allowed the export (17:23Z).
+  During WP16 the tooling had only seen synthetic data (101 of 101 GETs, 77 of 77 and 52 of 52 names).
+  - **Export.** `mask.py export` ran on the nas-us host over a read-only connection
+    (`default_transaction_read_only=on`): 19 tables, 23,339 rows, schema version 19. Two values were
+    masked (`clouddrive.api_token`, `emby.api_key`). `mask.py check` found nothing, and a second,
+    independent check found none of the 4 known secret values (the API token, the database password and
+    the two above) in the 39 MB written. Only the masked export left the cluster; the host's staging
+    folder was deleted right after the transfer.
+  - **GET differ.** Every GET route, with the item routes for every stored row (4,712 acquisitions, 8,383
+    runs, 70 playlists, 18 apply jobs): 18,005 of 18,005 answers equal in status, content type and body.
+    Python answered 17,927 with 200, 75 with 404, 1 with 422 and 2 with 500; the two 500s are the
+    CloudDrive directory listing, which has no CloudDrive to reach here, in both builds. No row these
+    routes read was refused by the Rust build (D62, D92, D112).
+  - **Decision replay.** AVID, brand and archive routing of every name the export holds: 16,572 of 16,572
+    decided alike.
+  - **Not done.** The plan's second half of level 2, a pass of each pipeline over a tree rebuilt from
+    listings of the library and intake, has no tooling, and no listing was taken. `find_dst_dir` reads only
+    the config, so the routing replay does not need one.
+  - **Clean-up.** The export, both scratch databases and every report derived from it were deleted from
+    the cloud session the same day.
 - **Level 3.** One capped, anonymous, read-only run against the real sites from this cloud container
   (besides WP0's AVBase fingerprint probe, run once from nas-us-2 on Max's approval, #82):
   - 8 of 11 reads were equal;
@@ -89,10 +104,11 @@ The goldens and transcripts that pin this behaviour come from the Python tree, n
 
 ## Verification level per pipeline
 
-Level 1 is offline and in CI. Level 2 means replay of production data; only its tooling exists (synthetic
-data). Level 3 means live reads of the anonymous sites.
+Level 1 is offline and in CI. Level 2 means replay of production data: the GET differ and the decision
+replay ran on a masked export of the production database on 2026-11-14 (see "Where it stands"). Level 3
+means live reads of the anonymous sites.
 
-| Area | Level 1 | Level 2 tooling | Level 3 |
+| Area | Level 1 | Level 2 (run on the production export) | Level 3 |
 | --- | --- | --- | --- |
 | Settings, config sections, validation, masking | tests, goldens for all 9 sections | GET differ (`/api/config/*`) | n/a |
 | AVID parsing, brands, magnets | tests, goldens (the corpus TSVs) | decision replay | n/a |
@@ -112,7 +128,8 @@ data). Level 3 means live reads of the anonymous sites.
 | Database schema | catalog transcript and `pg_dump` diff | load of an export | n/a |
 
 What no level covers: CloudDrive, Emby and Kubernetes behaviour beyond what the fakes record; the real 115
-upload path; a real title on the home 5090; and production data (level 2).
+upload path; a real title on the home 5090; and the write paths on production data (level 2 compared
+reads and filing decisions; no pipeline ran on production listings).
 
 ## Divergences D1-D175
 
@@ -358,6 +375,12 @@ The full rows are in PLAN.md "Experiment log".
   - The Chocolatey ffmpeg shim (WP15 CI).
   - The AVBase connection-reuse resend (WP16 level 3, D175).
   - The level 2 differ showing D62's refusal on out-of-shape rows.
+  - On production rows the level 2 differ itself failed twice before it compared anything real: playlist
+    keys hold spaces and CJK text, which it put into the URL unencoded, and three values are read off the
+    server's clock (`scanned_at`, an unfinished apply job's `elapsed_seconds` and
+    `last_progress_seconds`), which differed by the seconds between the two runs. Both are fixed in the
+    tool, with a relative `--binary` path that the server's scratch directory broke; none is a difference
+    between the builds.
 - **WP16.**
   - #99: parity audit and cleanup notes. Its review found 0 blocker, 0 major, 3 minor and 4 nits, all
     answered.
@@ -366,10 +389,10 @@ The full rows are in PLAN.md "Experiment log".
 
 ## Choices for Max
 
-1. **Level 2.** Running the tooling on a masked export of production would compare both builds' GET
-   answers and filing decisions on real rows: `mask.py export` against the production database, then
-   `get_diff.py` and `replay.py` offline. It needs Max's permission for the export. Otherwise it stays
-   unrun.
+1. **Level 2 on listings.** The database half of level 2 is done (above). A pass of each pipeline over a
+   tree rebuilt from production listings would need new tooling and a walk of the library through
+   CloudDrive, which costs 115 API calls. The paused deployment's manual round checks the same paths on
+   the real tree, one pipeline at a time, so this is not recommended.
 2. **Pod memory.** Keep 256Mi / 768Mi, or lower the request (for example to 128Mi) after a week of
    watching the pod's working set (DEPLOY.md).
 3. **Job Object for the home worker** (HOME-WORKER.md). It would make ffmpeg shims harmless for stops.
@@ -382,9 +405,10 @@ The full rows are in PLAN.md "Experiment log".
 - **No live coverage.** CloudDrive, Emby and Kubernetes were never reached live; their fakes follow the
   Python tests and transcripts. A behaviour of the real services that the Python tests never pinned
   could differ (contract 6 is the most delicate: mutations always awaited).
-- **No production data.** Level 2 was not run, so rows in production that no test imagined (hand edits,
-  very old shapes) are untested; D62, D92, D112 and D172 refuse out-of-shape rows where Python passed
-  them through.
+- **Production data, writes.** Level 2 read every stored row through both builds and found no row the
+  Rust build refuses (D62, D92, D112) and no differing answer. It did not run a pipeline: what a run
+  writes on production data is first seen in the deployment's manual round. D172 (the home worker's local
+  sidecars) is outside the database and was not covered.
 - **AVBase fingerprint.** The AVBase client impersonates Chrome through `wreq`/BoringSSL. It passed from
   the production network (nas-us-2, WP0's probe, #82) and from this container (level 3). A Cloudflare
   change can break either build, but the two may not break the same way.
@@ -402,4 +426,4 @@ The full rows are in PLAN.md "Experiment log".
 - The RSSHub feed live (refused from this network for both builds).
 - AVBase's work read live after the D175 fix (the run cap allowed one run; the fix is pinned by a test
   that reproduces the dropped connection).
-- Level 2 on production data.
+- A pass of the pipelines over production listings (the second half of the plan's level 2).

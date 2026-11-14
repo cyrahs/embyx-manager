@@ -13,7 +13,10 @@ finds no table or column is reported under `skipped`, not dropped silently. The 
 listener's GET (a part's bytes) needs a task in `transcoding`, which an export at rest does not
 hold. A response pair is equal when the status, the content type and the body are equal: JSON is
 parsed and compared with its types (`true` is not `1`, `5` is not `5.0`), keys in `--ignore-key`
-dropped at any depth; any other body is compared whole.
+dropped at any depth; any other body is compared whole. Three values are read off the server's
+clock at request time (`scanned_at`, and `elapsed_seconds` / `last_progress_seconds` of an
+unfinished apply job): they count as equal when no further apart than the two runs. Values taken
+from the rows go into the URL percent-encoded.
 
     EMBYX_MANAGER_TEST_DATABASE_URL=postgresql://... uv run python tools/level2/get_diff.py DIR \\
         --binary target/release/embyx-manager --out diff.json
@@ -27,6 +30,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import contextlib
+import datetime as dt
 import json
 import os
 import shutil
@@ -35,6 +39,7 @@ import sys
 import tempfile
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -50,6 +55,9 @@ HTTP_TIMEOUT = 600
 
 #: Keys whose values depend on when the request ran, not on the rows.
 DEFAULT_IGNORED = ('checked_at', 'generated_at', 'now', 'server_time', 'listed_at', 'age_seconds')
+#: Values a server reads off its clock when the request runs (the title scan's time, an unfinished
+#: apply job's elapsed seconds): equal when they are no further apart than the two builds' runs.
+CLOCK_KEYS = frozenset({'scanned_at', 'elapsed_seconds', 'last_progress_seconds'})
 SWITCHES = ('enabled', 'auto_enabled', 'home_transcode_enabled')
 
 
@@ -107,6 +115,18 @@ async def requests_for(dsn: str, per_route: int, skipped: list[str]) -> list[str
                 skipped.append(f'{name}: {type(error).__name__}')
     finally:
         await connection.close()
+    paths += item_paths(found)
+    paths += ['/api/monitor/acquisitions/NOPE-000', '/api/monitor/runs/nope', '/api/fill-actor/plans/nope']
+    return paths
+
+
+def item_paths(found: dict[str, list[str]]) -> list[str]:
+    """The item routes for the ids a copy holds, each id percent-encoded.
+
+    Production playlist keys hold spaces and CJK text, which `urllib` refuses in a request line.
+    """
+    found = {name: [urllib.parse.quote(value, safe='') for value in values] for name, values in found.items()}
+    paths: list[str] = []
     for avid in found.get('avid', []):
         paths += [f'/api/monitor/acquisitions/{avid}', f'/api/monitor/replace?avid={avid}']
     paths += [f'/api/monitor/runs/{run_id}' for run_id in found.get('run', [])]
@@ -114,7 +134,6 @@ async def requests_for(dsn: str, per_route: int, skipped: list[str]) -> list[str
     paths += [f'/api/fill-actor/apply-jobs/{job_id}' for job_id in found.get('apply', [])]
     for key in found.get('playlist', []):
         paths += [f'/api/playlists/{key}/missing', f'/api/playlists/{key}/fill']
-    paths += ['/api/monitor/acquisitions/NOPE-000', '/api/monitor/runs/nope', '/api/fill-actor/plans/nope']
     return paths
 
 
@@ -134,12 +153,14 @@ def answers(command: list[str], dsn: str, paths: list[str]) -> dict[str, Any]:
         process = subprocess.Popen(command, env=env, stdout=log, stderr=subprocess.STDOUT, cwd=work)
     try:
         server = Server(port, transcode_port)
+        started = time.time()
         wait_healthy(server, process)
         time.sleep(1.0)
         out = {}
         for path in paths:
             out[path] = fetch(server.base, path)
         out['__proxy_hosts__'] = proxy.hosts
+        out['__clock__'] = (started, time.time())
         return out
     finally:
         process.terminate()
@@ -175,22 +196,48 @@ def strip(value: Any, ignored: frozenset[str]) -> Any:
     return value
 
 
-def differences(left: Any, right: Any, path: str = '$') -> list[dict[str, str]]:
-    """The JSON paths where two values differ, each side cut to 200 characters."""
+def _seconds(value: Any) -> float | None:
+    """A clock value as seconds: a number as it is, an ISO time as its timestamp."""
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int | float):
+        return float(value)
+    if isinstance(value, str):
+        with contextlib.suppress(ValueError):
+            return dt.datetime.fromisoformat(value).timestamp()
+    return None
+
+
+def near(left: Any, right: Any, window: float) -> bool:
+    """Two clock values of one type that lie within `window` seconds of each other."""
+    if type(left) is not type(right):
+        return False
+    first, second = _seconds(left), _seconds(right)
+    return first is not None and second is not None and abs(first - second) <= window
+
+
+def differences(left: Any, right: Any, path: str = '$', window: float = 0.0) -> list[dict[str, str]]:
+    """The JSON paths where two values differ, each side cut to 200 characters.
+
+    A `CLOCK_KEYS` value is equal when both sides lie within `window` seconds (the time the two
+    builds' runs span); with the default of 0 it is compared like any other value.
+    """
     if isinstance(left, dict) and isinstance(right, dict):
         out = []
         for key in [*left, *(key for key in right if key not in left)]:
             if key not in left or key not in right:
                 side = 'python' if key in left else 'rust'
                 out.append({'path': f'{path}.{key}', 'only': side})
+            elif window > 0 and key in CLOCK_KEYS and near(left[key], right[key], window):
+                continue
             else:
-                out += differences(left[key], right[key], f'{path}.{key}')
+                out += differences(left[key], right[key], f'{path}.{key}', window)
         return out
     if isinstance(left, list) and isinstance(right, list) and len(left) == len(right):
         return [
             item
             for index, pair in enumerate(zip(left, right, strict=True))
-            for item in differences(*pair, f'{path}[{index}]')
+            for item in differences(*pair, f'{path}[{index}]', window)
         ]
     # `type` too: Python's `True == 1 == 1.0` would hide a bool sent as a number.
     if type(left) is type(right) and left == right:
@@ -218,7 +265,8 @@ def main() -> int:
     skipped: list[str] = []
     for side, command in (
         ('python', [str(ROOT / '.venv/bin/python'), '-m', 'embyx_manager', 'serve']),
-        ('rust', [args.binary, 'serve']),
+        # Absolute: the server starts in a scratch directory.
+        ('rust', [str(Path(args.binary).resolve()), 'serve']),
     ):
         name = f'embyx_l2_{side}_{os.getpid()}'
         dsn = asyncio.run(load(args.export, admin, name))
@@ -238,6 +286,9 @@ def main() -> int:
     report: dict[str, Any] = {
         'requests': len(paths), 'skipped': skipped, 'switched_off': switched, 'equal': 0, 'different': [],
     }  # fmt: skip
+    # The two builds run one after the other: their clocks are at most this far apart.
+    clocks = [results[side]['__clock__'] for side in results]
+    window = max(end for _, end in clocks) - min(start for start, _ in clocks)
     for path in paths:
         left, right = results['python'][path], results['rust'][path]
         found = [
@@ -245,12 +296,21 @@ def main() -> int:
             for field in ('status', 'content_type')
             if left[field] != right[field]
         ]
-        found += differences(strip(left['body'], ignored), strip(right['body'], ignored))
+        found += differences(strip(left['body'], ignored), strip(right['body'], ignored), window=window)
         if found:
             report['different'].append({'request': path, 'differences': found})
         else:
             report['equal'] += 1
     report['proxy_hosts'] = {side: results[side]['__proxy_hosts__'] for side in results}
+    # How many answers of each status the Python build gave (equal answers that are all errors
+    # would say little), and which requests the 5xx ones were.
+    statuses: dict[str, int] = {}
+    for path in paths:
+        status = str(results['python'][path]['status'])
+        statuses[status] = statuses.get(status, 0) + 1
+    report['python_statuses'] = dict(sorted(statuses.items()))
+    report['python_5xx'] = [path for path in paths if results['python'][path]['status'] >= 500]  # noqa: PLR2004
+    report['clock_window_seconds'] = round(window, 1)
     args.out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print(f'{report["equal"]} of {len(paths)} requests equal; {len(report["different"])} different')
     for item in skipped:

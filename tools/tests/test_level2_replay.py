@@ -88,6 +88,50 @@ def test_get_diff_reports_json_paths_and_drops_ignored_keys() -> None:
     ]
 
 
+def test_get_diff_takes_clock_values_within_the_window_as_equal() -> None:
+    import get_diff  # noqa: PLC0415 - imports the benchmark's server helpers
+
+    left = {'scanned_at': '2026-11-14T17:34:24.640766Z', 'job': {'progress': {'elapsed_seconds': 2554974, 'done': 3}}}
+    right = {'scanned_at': '2026-11-14T17:34:29.338770Z', 'job': {'progress': {'elapsed_seconds': 2554979, 'done': 3}}}
+    assert get_diff.differences(left, right, window=10.0) == []
+    # Without a window, and beyond it, a clock value is compared like any other.
+    assert [item['path'] for item in get_diff.differences(left, right)] == [
+        '$.scanned_at',
+        '$.job.progress.elapsed_seconds',
+    ]
+    assert [item['path'] for item in get_diff.differences(left, right, window=4.0)] == [
+        '$.scanned_at',
+        '$.job.progress.elapsed_seconds',
+    ]
+    # Only the clock keys, only values of one type, and never a missing key.
+    assert get_diff.differences({'done': 3}, {'done': 4}, window=10.0) == [
+        {'path': '$.done', 'python': '3', 'rust': '4'}
+    ]
+    assert get_diff.differences({'elapsed_seconds': 5}, {'elapsed_seconds': 5.0}, window=10.0) == [
+        {'path': '$.elapsed_seconds', 'python': '5', 'rust': '5.0'},
+    ]
+    assert get_diff.differences({'elapsed_seconds': None}, {'elapsed_seconds': 3}, window=10.0) == [
+        {'path': '$.elapsed_seconds', 'python': 'null', 'rust': '3'},
+    ]
+    assert get_diff.differences({'scanned_at': 'then'}, {'scanned_at': 'now'}, window=10.0) == [
+        {'path': '$.scanned_at', 'python': '"then"', 'rust': '"now"'},
+    ]
+    assert get_diff.differences({'scanned_at': 'x'}, {}, window=10.0) == [{'path': '$.scanned_at', 'only': 'python'}]
+
+
+def test_get_diff_percent_encodes_stored_ids() -> None:
+    import get_diff  # noqa: PLC0415 - imports the benchmark's server helpers
+
+    paths = get_diff.item_paths({'playlist': ['k4:第一届 奖/2021'], 'avid': ['ABC-123'], 'run': ['a b']})
+    assert paths == [
+        '/api/monitor/acquisitions/ABC-123',
+        '/api/monitor/replace?avid=ABC-123',
+        '/api/monitor/runs/a%20b',
+        '/api/playlists/k4%3A%E7%AC%AC%E4%B8%80%E5%B1%8A%20%E5%A5%96%2F2021/missing',
+        '/api/playlists/k4%3A%E7%AC%AC%E4%B8%80%E5%B1%8A%20%E5%A5%96%2F2021/fill',
+    ]
+
+
 def test_the_tools_run_as_scripts() -> None:
     for script in ('replay.py', 'get_diff.py', 'mask.py'):
         done = subprocess.run(
