@@ -135,6 +135,10 @@ pub struct Assembled {
     pub database: Database,
     pub cloud: Arc<CloudDriveHandle>,
     pub scheduler: embyx_monitor::scheduler::MonitorScheduler,
+    /// The names the app's `feature_health` reports under, in order.
+    pub feature_health: Vec<String>,
+    /// Whether the fill-actor router got its `avid_actor_lookup`.
+    pub fill_actor_avid_lookup: bool,
 }
 
 impl std::fmt::Debug for Assembled {
@@ -227,6 +231,8 @@ pub fn build_app(settings: &Settings, frontend_dist: Option<PathBuf>) -> Result<
         settings.transcode_token.as_deref(),
     )
     .map_err(BuildError::Client)?;
+    let feature_health = vec![("fill_actor".to_owned(), fill_actor.health)];
+    let feature_health_names = feature_health.iter().map(|(name, _)| name.clone()).collect();
     let app = create_app(AppParts {
         app_ready,
         routers: vec![
@@ -236,7 +242,7 @@ pub fn build_app(settings: &Settings, frontend_dist: Option<PathBuf>) -> Result<
             monitor.playlists,
             merge.router.clone(),
         ],
-        feature_health: vec![("fill_actor".to_owned(), fill_actor.health)],
+        feature_health,
         api_token: settings.api_token.clone(),
         max_request_bytes: usize::try_from(settings.max_request_bytes).unwrap_or(usize::MAX),
         frontend_dist,
@@ -261,6 +267,8 @@ pub fn build_app(settings: &Settings, frontend_dist: Option<PathBuf>) -> Result<
         database,
         cloud,
         scheduler: monitor.scheduler,
+        feature_health: feature_health_names,
+        fill_actor_avid_lookup: fill_actor.avid_actor_lookup,
     })
 }
 

@@ -359,34 +359,6 @@ pub struct CloudMovePaths {
     pub move_in_api_root: CloudPath,
 }
 
-/// Python `str.splitlines()`: lines end at `\n`, `\r`, `\r\n`, `\v`, `\f`, `\x1c`-`\x1e`,
-/// `\x85`, U+2028 and U+2029. (A copy of `embyx_merge::py::splitlines`; PLAN.md, "Cleanup
-/// notes".)
-fn splitlines(text: &str) -> Vec<&str> {
-    let mut lines = Vec::new();
-    let mut start = 0;
-    let mut chars = text.char_indices().peekable();
-    while let Some((at, ch)) = chars.next() {
-        let ends = matches!(
-            ch,
-            '\n' | '\r' | '\u{0b}' | '\u{0c}' | '\u{1c}' | '\u{1d}' | '\u{1e}' | '\u{85}' | '\u{2028}' | '\u{2029}'
-        );
-        if !ends {
-            continue;
-        }
-        lines.push(&text[start..at]);
-        start = at + ch.len_utf8();
-        if ch == '\r' && chars.peek().is_some_and(|&(_, next)| next == '\n') {
-            chars.next();
-            start += 1;
-        }
-    }
-    if start < text.len() {
-        lines.push(&text[start..]);
-    }
-    lines
-}
-
 impl CloudMovePaths {
     /// `CloudMovePaths.from_values(...)`.
     pub fn from_values(
@@ -440,7 +412,7 @@ impl CloudMovePaths {
             return Err(CheckError::strm("STRM mapping size is invalid"));
         }
         let value = std::str::from_utf8(&payload).map_err(|_| CheckError::strm("STRM mapping must be UTF-8"))?;
-        let lines = splitlines(value);
+        let lines = embyx_core::pytext::splitlines(value);
         if lines.len() != 1 || lines[0].is_empty() || lines[0] != py_strip(lines[0]) {
             return Err(CheckError::strm("STRM mapping must contain one absolute path"));
         }

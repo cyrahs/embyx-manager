@@ -26,7 +26,8 @@ struct Deps {
 /// (the inbox and the rank one) and a submit that succeeds.
 fn make_replacer(root: &Path, ledger: Option<FakeLedger>, magnet: Option<&str>) -> (ReplacementSource, Deps) {
     let ledger = Arc::new(ledger.unwrap_or_default());
-    let cloud = Arc::new(FakeCloud::standard());
+    // `FakeCloud()`: an empty tree, as Python's replacer tests use.
+    let cloud = Arc::new(FakeCloud::default());
     let (intake, _) = make_intake(&ledger, &cloud, magnet);
     let submitted: Arc<Mutex<Vec<(String, String)>>> = Arc::default();
     let recorder = Arc::clone(&submitted);

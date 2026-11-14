@@ -22,20 +22,20 @@ from typing import Any
 FORMATS: dict[str, tuple[str, Any]] = {
     'hash': (
         (
-            "fav's content hashes: sort_keys, separators=(',', ':'), ensure_ascii=False, default=str "
-            '(no embyx-manager call site)'
+            "sort_keys, separators=(',', ':'), ensure_ascii=False, default=str: the OpenAPI diff's "
+            'canonical form (tools only)'
         ),
         lambda value: json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(',', ':'), default=str),
     ),
     'pretty': (
-        (
-            "fav's manifests: indent=2, sort_keys, ensure_ascii=False, default=str, plus a newline "
-            '(no embyx-manager call site)'
-        ),
+        ('indent=2, sort_keys, ensure_ascii=False, default=str, plus a newline: the effect transcripts (tools only)'),
         lambda value: json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True, default=str) + '\n',
     ),
     'compact': (
-        "separators=(',', ':'), ensure_ascii=False, insertion order (no embyx-manager call site)",
+        (
+            "separators=(',', ':'), ensure_ascii=False, insertion order: Starlette's JSONResponse, "
+            'the kube and home worker request bodies'
+        ),
         lambda value: json.dumps(value, ensure_ascii=False, separators=(',', ':')),
     ),
     'plain': (
@@ -44,14 +44,6 @@ FORMATS: dict[str, tuple[str, Any]] = {
             'merge/tasks.py parts, merge/worker.py status file'
         ),
         lambda value: json.dumps(value, ensure_ascii=False),
-    ),
-    'pretty_unsorted': (
-        'indent=2, ensure_ascii=False, insertion order, no trailing newline (no embyx-manager call site)',
-        lambda value: json.dumps(value, ensure_ascii=False, indent=2),
-    ),
-    'sorted_plain': (
-        'ensure_ascii=False, sort_keys, default separators (no embyx-manager call site)',
-        lambda value: json.dumps(value, ensure_ascii=False, sort_keys=True),
     ),
     'sorted_compact_ascii': (
         "separators=(',', ':'), sort_keys, ensure_ascii=True: fill_actor/postgres_repository.py cloud file snapshots",

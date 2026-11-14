@@ -124,6 +124,7 @@ struct Harness {
     tmp: tempfile::TempDir,
     repository: MergeTaskRepository,
     app: App,
+    service: MergeService,
 }
 
 impl Harness {
@@ -156,7 +157,7 @@ impl Harness {
         let router = create_merge_router(
             catalog(&tmp.path().join("mapping"), setup.task_dirs),
             Some(MergeTasksApi {
-                service,
+                service: service.clone(),
                 auto_status: setup.auto_status,
             }),
             MutationAuth::new(None),
@@ -167,6 +168,7 @@ impl Harness {
             tmp,
             repository,
             app: app(router),
+            service,
         }
     }
 
@@ -295,7 +297,7 @@ async fn create_queues_a_title_with_its_parts_and_route() {
     assert_eq!(created.parts[0], "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4");
     assert!(created.parts.last().expect("parts").ends_with("-cd12.mp4"));
     assert_eq!(created.merged_name, "SQTEVR-009.mp4");
-    // `service.woken == 1`: the wake only sets the service's event, which no loop reads here.
+    assert_eq!(harness.service.woken(), 1);
 
     let (_, again) = harness
         .post("/api/merge/tasks", Some(r#"{"avid": "SQTEVR-009"}"#))

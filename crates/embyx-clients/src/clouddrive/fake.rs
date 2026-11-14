@@ -409,7 +409,20 @@ pub struct Seen {
     pub authorization: Option<String>,
     /// The `grpc-timeout` header, parsed.
     pub timeout: Option<Duration>,
+    /// Every metadata key the call carried that gRPC and HTTP/2 do not add themselves, in
+    /// arrival order (`stub.Call(request, metadata=[...])` in Python's client).
+    pub application_metadata: Vec<String>,
 }
+
+/// Headers the transport adds to every call; anything else came from the client's metadata.
+const TRANSPORT_HEADERS: &[&str] = &[
+    "te",
+    "content-type",
+    "user-agent",
+    "grpc-timeout",
+    "grpc-encoding",
+    "grpc-accept-encoding",
+];
 
 /// `grpc-timeout`: an integer and a unit (`H`, `M`, `S`, `m`, `u`, `n`).
 fn parse_grpc_timeout(value: &str) -> Option<Duration> {
@@ -628,6 +641,14 @@ impl FakeCloudDrive {
             method: method.to_owned(),
             authorization: header("authorization"),
             timeout: header("grpc-timeout").as_deref().and_then(parse_grpc_timeout),
+            application_metadata: metadata
+                .keys()
+                .map(|key| match key {
+                    tonic::metadata::KeyRef::Ascii(key) => key.as_str().to_owned(),
+                    tonic::metadata::KeyRef::Binary(key) => key.as_str().to_owned(),
+                })
+                .filter(|key| !TRANSPORT_HEADERS.contains(&key.as_str()))
+                .collect(),
         });
         let hold = self.holds.lock().expect("holds").get(method).cloned();
         if let Some(hold) = hold {

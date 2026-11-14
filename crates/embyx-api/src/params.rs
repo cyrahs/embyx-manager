@@ -9,10 +9,11 @@
 //! order, a UTC `datetime` as `YYYY-MM-DDTHH:MM:SS[.ffffff]Z` (the fraction only when it is
 //! not zero) and a `date` as `YYYY-MM-DD`.
 
-use chrono::{DateTime, NaiveDate, Timelike as _, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use embyx_core::config::lax::{Mode, lax_bool, lax_int, lax_str};
 use embyx_core::pyjson::{Dict, Value};
 use embyx_core::pyurl::unquote;
+use embyx_fill_actor::pydatetime::{PyDateTime, date_text};
 
 use crate::body::JsonBody;
 
@@ -54,15 +55,10 @@ pub fn int_query(query: &str, name: &str, default: i64) -> Option<i64> {
     }
 }
 
-/// A UTC `datetime` as pydantic writes it in JSON mode.
+/// A UTC `datetime` as pydantic writes it in JSON mode (`embyx_fill_actor::pydatetime`, the
+/// one copy of pydantic's datetime text since WP16).
 pub fn py_datetime(value: DateTime<Utc>) -> Value {
-    let base = value.format("%Y-%m-%dT%H:%M:%S");
-    let micros = value.nanosecond() / 1_000 % 1_000_000;
-    Value::Str(if micros == 0 {
-        format!("{base}Z")
-    } else {
-        format!("{base}.{micros:06}Z")
-    })
+    PyDateTime::utc(value).to_value()
 }
 
 /// `datetime | None`.
@@ -72,7 +68,7 @@ pub fn py_opt_datetime(value: Option<DateTime<Utc>>) -> Value {
 
 /// A `date` as pydantic writes it.
 pub fn py_date(value: NaiveDate) -> Value {
-    Value::Str(value.format("%Y-%m-%d").to_string())
+    Value::Str(date_text(value))
 }
 
 /// `str | None`.

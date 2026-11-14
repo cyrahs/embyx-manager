@@ -243,9 +243,13 @@ impl MergeCloud for FakeCloud {
         Box::pin(async move {
             let mut state = self.state();
             let target = format!("{destination}/{}", pypath::name(source));
-            if let Some(file) = state.files.remove(source) {
-                state.files.insert(target.clone(), file);
-            }
+            // `self.files.pop(source)`: Python's fake raises `KeyError` for a source it does not
+            // hold, so a test that moves the wrong path fails here as it does there.
+            let file = state
+                .files
+                .remove(source)
+                .unwrap_or_else(|| panic!("KeyError: {source:?} is not in the fake CloudDrive"));
+            state.files.insert(target.clone(), file);
             Ok(MoveResult {
                 success: true,
                 error_message: String::new(),

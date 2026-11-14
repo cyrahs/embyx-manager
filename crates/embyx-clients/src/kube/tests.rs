@@ -689,3 +689,32 @@ fn errors_say_which_python_class_they_stand_for() {
     assert!(!KubeJobsError::key("spec").is_kube());
     assert_eq!(TASK_LABEL, "embyx-manager/merge-task");
 }
+
+/// Not a port: the `UnicodeDecodeError` text of a template that is not UTF-8, as Python 3.13
+/// words it (`b'{"a":"\xc3("}'.decode()` and a truncated sequence), through the shared
+/// `http::utf8_error_message` since WP16.
+#[tokio::test]
+async fn a_template_that_is_not_utf8_reads_as_pythons_unicode_decode_error() {
+    let mounted = Mounted::new(&minimal_template());
+    let web = scripted(vec![]).await;
+    let kube = KubeJobs::new(&mounted.options(&web)).expect("client");
+    for (bytes, message) in [
+        (
+            &b"{\"a\":\"\xc3(\"}"[..],
+            "'utf-8' codec can't decode byte 0xc3 in position 6: invalid continuation byte",
+        ),
+        (
+            &b"{\"a\":\"\xff\"}"[..],
+            "'utf-8' codec can't decode byte 0xff in position 6: invalid start byte",
+        ),
+        (
+            &b"{\"a\":\"\xe2\x82"[..],
+            "'utf-8' codec can't decode bytes in position 6-7: unexpected end of data",
+        ),
+    ] {
+        std::fs::write(mounted.path("job.json"), bytes).expect("template");
+        let error = kube.template().expect_err("not UTF-8");
+        assert_eq!(error.class_name(), "UnicodeDecodeError");
+        assert_eq!(error.to_string(), message);
+    }
+}

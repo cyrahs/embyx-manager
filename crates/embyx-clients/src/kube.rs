@@ -27,7 +27,7 @@ use rustls::pki_types::pem::PemObject as _;
 use tokio::sync::OnceCell;
 
 use crate::net::client::{ClientOptions, HttpClient, Request};
-use crate::net::download::PyOsError;
+use embyx_core::pyos::PyOsError;
 
 /// Where Kubernetes mounts the pod's service account.
 pub const SERVICE_ACCOUNT_DIR: &str = "/var/run/secrets/kubernetes.io/serviceaccount";
@@ -457,11 +457,7 @@ impl KubeJobs {
         let text = String::from_utf8(bytes).map_err(|error| {
             KubeJobsError::other(
                 "UnicodeDecodeError",
-                format!(
-                    "'utf-8' codec can't decode byte 0x{:02x} in position {}: invalid start byte",
-                    error.as_bytes()[error.utf8_error().valid_up_to()],
-                    error.utf8_error().valid_up_to()
-                ),
+                crate::http::utf8_error_message(error.as_bytes(), &error.utf8_error()),
             )
         })?;
         pyjson::loads(&text).map_err(|error| KubeJobsError::other("JSONDecodeError", error.python_message(&text)))

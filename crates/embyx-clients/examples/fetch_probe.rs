@@ -1,7 +1,8 @@
-//! One GET with a Rust client candidate, for the WP0 fingerprint probes (not part of the
-//! application). `tools/probes/tls_fingerprint.py` points it at its own local listener and
-//! compares what a server sees with `curl_cffi`'s; `tools/probes/live_fingerprint.py` uses it
-//! for the one live run Max approved (docs/rewrite/API-COVERAGE.md).
+//! One GET with a Rust client, for the fingerprint probe (not part of the application).
+//! `tools/probes/tls_fingerprint.py` points it at its own local listener and compares what a
+//! server sees with `curl_cffi`'s (docs/rewrite/API-COVERAGE.md). Kept after the rewrite (WP16)
+//! as the offline check to repeat when `wreq`, its Chrome emulation or `curl_cffi` is upgraded;
+//! the live probe pod's tooling was removed with the pod approval it needed.
 //!
 //!     cargo run -p embyx-clients --example fetch_probe -- <client> <url> \
 //!         [--root CERT.der] [--body PATH] [-H 'Name: value']...

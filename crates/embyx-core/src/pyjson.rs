@@ -356,29 +356,14 @@ impl DumpOptions {
         }
     }
 
-    /// `json.dumps(value, ensure_ascii=False, sort_keys=True)`.
-    pub const fn sorted_plain() -> Self {
-        Self {
-            sort_keys: true,
-            ..Self::plain()
-        }
-    }
-
-    /// `json.dumps(value, ensure_ascii=False, indent=2)`.
-    pub const fn pretty_unsorted() -> Self {
-        Self {
-            indent: Some(2),
-            item_separator: ",",
-            ..Self::plain()
-        }
-    }
-
-    /// `json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True, default=str)`; the
-    /// manifest writers add a trailing newline themselves.
+    /// `json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True, default=str)`: the
+    /// effect transcripts and the OpenAPI diff's display; writers add a trailing newline.
     pub const fn pretty() -> Self {
         Self {
             sort_keys: true,
-            ..Self::pretty_unsorted()
+            indent: Some(2),
+            item_separator: ",",
+            ..Self::plain()
         }
     }
 }
@@ -1086,8 +1071,6 @@ mod tests {
             "pretty" => DumpOptions::pretty(),
             "compact" => DumpOptions::compact(),
             "plain" => DumpOptions::plain(),
-            "pretty_unsorted" => DumpOptions::pretty_unsorted(),
-            "sorted_plain" => DumpOptions::sorted_plain(),
             "sorted_compact_ascii" => DumpOptions::sorted_compact_ascii(),
             "ascii" => DumpOptions::python_default(),
             other => panic!("unknown format {other}"),
@@ -1109,16 +1092,7 @@ mod tests {
             .collect();
         assert_eq!(
             names,
-            [
-                "hash",
-                "pretty",
-                "compact",
-                "plain",
-                "pretty_unsorted",
-                "sorted_plain",
-                "sorted_compact_ascii",
-                "ascii"
-            ]
+            ["hash", "pretty", "compact", "plain", "sorted_compact_ascii", "ascii"]
         );
     }
 

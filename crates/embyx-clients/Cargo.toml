@@ -50,15 +50,11 @@ reqwest = { workspace = true, features = [
     "deflate",
     "brotli",
     "socks",
-    # `Response::bytes_stream()` in `net::httpx::stream_body_to`.
-    "stream",
 ] }
 rustls.workspace = true
 serde_json.workspace = true
-sha2.workspace = true
-tempfile.workspace = true
 thiserror.workspace = true
-tokio = { workspace = true, features = ["fs", "io-util", "time", "rt", "macros", "process", "net"] }
+tokio = { workspace = true, features = ["fs", "io-util", "time", "rt", "macros", "net"] }
 tokio-rustls.workspace = true
 tonic = { workspace = true, optional = true }
 tokio-util = { workspace = true, optional = true }
@@ -85,6 +81,7 @@ embyx-core = { workspace = true, features = ["test-support"] }
 hex.workspace = true
 rcgen.workspace = true
 sqlx.workspace = true
+tempfile.workspace = true
 prost-reflect.workspace = true
 tokio = { workspace = true, features = ["macros", "rt", "net", "rt-multi-thread"] }
 tokio-stream = { version = "0.1", features = ["net"] }

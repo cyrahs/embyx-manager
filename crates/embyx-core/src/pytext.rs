@@ -368,6 +368,33 @@ pub fn casefold(text: &str) -> String {
     folded
 }
 
+/// Python `str.splitlines()`: lines end at `\n`, `\r`, `\r\n`, `\v`, `\f`, `\x1c`-`\x1e`,
+/// `\x85`, U+2028 and U+2029.
+pub fn splitlines(text: &str) -> Vec<&str> {
+    let mut lines = Vec::new();
+    let mut start = 0;
+    let mut chars = text.char_indices().peekable();
+    while let Some((at, ch)) = chars.next() {
+        let ends = matches!(
+            ch,
+            '\n' | '\r' | '\u{0b}' | '\u{0c}' | '\u{1c}' | '\u{1d}' | '\u{1e}' | '\u{85}' | '\u{2028}' | '\u{2029}'
+        );
+        if !ends {
+            continue;
+        }
+        lines.push(&text[start..at]);
+        start = at + ch.len_utf8();
+        if ch == '\r' && chars.peek().is_some_and(|&(_, next)| next == '\n') {
+            chars.next();
+            start += 1;
+        }
+    }
+    if start < text.len() {
+        lines.push(&text[start..]);
+    }
+    lines
+}
+
 #[cfg(test)]
 mod tests {
     use super::{

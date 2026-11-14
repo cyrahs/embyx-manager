@@ -578,6 +578,62 @@ or says why one stays.
   can follow its shape. The page smoke now checks the fill-actor page's unconfigured state; `NOT_YET_PORTED`
   still holds only `/api/merge/`.
 
+### WP16: how each note ended
+
+Closed (behaviour unchanged: goldens and transcripts byte for byte, the full suite green):
+
+- Unused fav code removed: `embyx_clients::net::{download, httpx, proxy, subprocess}` (fav's downloads,
+  streaming, proxy rule and async subprocess runner; nothing here called them), fav's text helpers in
+  `pyre` (whitespace and tag stripping, char windows, `parse_qs`, `int()`), and the two `DumpOptions`
+  formats nothing writes (`sorted_plain`, `pretty_unsorted`; `json/*.json` goldens regenerated without
+  them). reqwest's `stream` feature and the crate's `sha2` dependency went with them.
+- The `OSError` text: one copy, `embyx_core::pyos` (`PyOsError` with class and `str()`, `os_error_text`
+  with both file names, `strerror`). `embyx-clients` (kube) and `embyx_merge::py` use it; the merge
+  module re-exports it under its old names. `embyx_monitor::fs::PyOsError` stays: it is the structured
+  error (errno, both file names, `repr()`) the archive, tracker and fill-actor file systems need, and the
+  fill actor re-exports it, so there is one copy of each shape.
+- Float builtins: `embyx_core::pyfloat` (`sum`, `min`, `max`, `float()`, `.Nf`) replaces the identical
+  copies in `embyx_merge::py` and `embyx_transcode_worker::py`; `str.splitlines()` is
+  `embyx_core::pytext::splitlines` (the copies in the merge worker, the home worker's `ffmpeg.rs` and
+  `fill_actor::cloud_moves` are gone). The two `py` modules keep only what differs: each crate's exception
+  type and the conversions that raise it.
+- kube's template `UnicodeDecodeError` text is `http::utf8_error_message` (it only knew "invalid start
+  byte"); a new test pins three cases to Python's text.
+- pydantic's datetime text: `embyx_api::params::{py_datetime, py_date}` call `embyx_fill_actor::pydatetime`.
+- The parity gap: `tools/parity/list_rust_tests.py` lists every compiled test with its crate (it builds
+  the test binaries with `--message-format=json` and runs each with `--list`), and `parity.py` matches a
+  claim only in its own crate; a listing line without a crate is an error. Both CI jobs use it.
+- The probes: `tools/probes/live_fingerprint.py`, `live_probe_pod.sh` and their test removed (the pod
+  approval is used up).
+- cron: `embyx_core::cron::CronSpec` (cronsim's parser) validates first and croner only computes fires;
+  the `croner_accepts_what_cronsim_accepts` probe lists every expression where the two differ, so they
+  agree on what reaches croner.
+
+Kept, with the reason:
+
+- `tools/probes/tls_fingerprint.py` and `examples/fetch_probe.rs`: the offline ClientHello / HTTP/2
+  comparison against curl_cffi is the check to repeat when `wreq`, its Chrome emulation or curl_cffi
+  moves; it needs no network beyond a local listener. The crates' `probes` test modules stay as
+  regression tests of the libraries they pin (tonic, prost-reflect, scraper, croner, notify, rustix).
+- The three request helpers: `config::lax` is pydantic's lax mode for the nine stored sections (the
+  goldens' error `type`, `loc`, `msg`), `body.rs` is the request body reader (FastAPI's body, auth,
+  validate order, the 64 KiB limit) with WP4's two models, and `params` is FastAPI's query and path
+  parameters. They share no code that could be folded without moving each one's goldens; only the
+  datetime text was duplicated, and that is folded.
+- Two subprocess runners: the merge worker's blocking `SystemExec` (Linux Job, stdin closed, a stall
+  timer) and the home worker's `process` (Windows process groups, suspend/resume, console events).
+  `SystemExec` cannot sit on `process` without `embyx-merge` depending on the worker crate; the async
+  `SystemRunner` copied from fav had no caller and is removed.
+- `embyx_monitor::fs::Fs` and `embyx_fill_actor::fs::MoveFs`: one trait would touch every delete and move
+  path of archive, tracker, mapping and fill actor for no behaviour change; left for the cleanup after
+  the deployment (plan step 9).
+- `embyx_fill_actor::models::str_enum!` and `embyx_monitor`'s `str_enum!`, `embyx_fill_actor::pystr`:
+  crate-private macros and helpers with different surfaces (`ALL`, `parse` returning `Option`); kept.
+- The real-ffmpeg cross-check against the Python worker stays while the Python tree does; the cleanup
+  after the deployment drops it with the Python tree.
+- The `.strm` and fill-actor scenario operations, the Rust fakes and `RecordingFs` stay as the test
+  harness of the Rust build.
+
 ## Checkpoint notes
 
 - Checkpoint A (after WP4, 2026-11-14): the unmodified React front end, built with its own `npm run build`,

@@ -232,30 +232,7 @@ fn file_name(path: &Path) -> String {
         .unwrap_or_default()
 }
 
-/// Python's `str.splitlines()`.
-pub(crate) fn splitlines(text: &str) -> Vec<&str> {
-    let mut lines = Vec::new();
-    let mut rest = text;
-    while !rest.is_empty() {
-        let Some(at) = rest.find(|ch: char| {
-            matches!(
-                ch,
-                '\n' | '\r' | '\u{0b}' | '\u{0c}' | '\u{1c}' | '\u{1d}' | '\u{1e}' | '\u{85}' | '\u{2028}' | '\u{2029}'
-            )
-        }) else {
-            lines.push(rest);
-            break;
-        };
-        lines.push(&rest[..at]);
-        let width = if rest[at..].starts_with("\r\n") {
-            2
-        } else {
-            rest[at..].chars().next().map_or(1, char::len_utf8)
-        };
-        rest = &rest[at + width..];
-    }
-    lines
-}
+pub(crate) use embyx_core::pytext::splitlines;
 
 fn run(runner: &dyn Runner, argv: &[OsString], timeout: Option<Duration>) -> Result<Captured, ProbeError> {
     runner.run(argv, timeout).map_err(|error| match error {

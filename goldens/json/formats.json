@@ -6,27 +6,19 @@
   "cases": [
     {
       "name": "hash",
-      "mirrors": "fav's content hashes: sort_keys, separators=(',', ':'), ensure_ascii=False, default=str (no embyx-manager call site)"
+      "mirrors": "sort_keys, separators=(',', ':'), ensure_ascii=False, default=str: the OpenAPI diff's canonical form (tools only)"
     },
     {
       "name": "pretty",
-      "mirrors": "fav's manifests: indent=2, sort_keys, ensure_ascii=False, default=str, plus a newline (no embyx-manager call site)"
+      "mirrors": "indent=2, sort_keys, ensure_ascii=False, default=str, plus a newline: the effect transcripts (tools only)"
     },
     {
       "name": "compact",
-      "mirrors": "separators=(',', ':'), ensure_ascii=False, insertion order (no embyx-manager call site)"
+      "mirrors": "separators=(',', ':'), ensure_ascii=False, insertion order: Starlette's JSONResponse, the kube and home worker request bodies"
     },
     {
       "name": "plain",
       "mirrors": "ensure_ascii=False, default separators, insertion order: monitor/playlists.py ranked entries, merge/tasks.py parts, merge/worker.py status file"
-    },
-    {
-      "name": "pretty_unsorted",
-      "mirrors": "indent=2, ensure_ascii=False, insertion order, no trailing newline (no embyx-manager call site)"
-    },
-    {
-      "name": "sorted_plain",
-      "mirrors": "ensure_ascii=False, sort_keys, default separators (no embyx-manager call site)"
     },
     {
       "name": "sorted_compact_ascii",

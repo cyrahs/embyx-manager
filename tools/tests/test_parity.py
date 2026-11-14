@@ -119,12 +119,31 @@ def test_a_claim_naming_a_missing_python_test_is_rejected(repo: Path) -> None:
 def test_a_claim_on_a_test_cargo_does_not_compile_is_rejected(repo: Path) -> None:
     _rust(repo, '// py: tests/test_alpha.py::test_two\n#[test]\nfn orphan() {}\n')
     listing = repo / 'cargo-tests.txt'
-    listing.write_text('demo::tests::other: test\n', encoding='utf-8')
+    listing.write_text('demo\tdemo::tests::other: test\n', encoding='utf-8')
     _, errors = _collect(repo, rust_listing=listing)
     assert any('cargo does not list it' in error for error in errors)
-    listing.write_text('orphan: test\n', encoding='utf-8')
+    listing.write_text('demo\torphan: test\n', encoding='utf-8')
     _, errors = _collect(repo, rust_listing=listing)
     assert errors == []
+
+
+def test_a_claim_is_matched_only_in_its_own_crate(repo: Path) -> None:
+    _source(repo, 'demo/src/task.rs', '// py: tests/test_alpha.py::test_two\n#[test]\nfn run() {}\n')
+    listing = repo / 'cargo-tests.txt'
+    # Another crate with a test at the same module path does not satisfy the claim.
+    listing.write_text('other\ttask::run: test\n', encoding='utf-8')
+    _, errors = _collect(repo, rust_listing=listing)
+    assert any('(demo: task::run)' in error for error in errors), errors
+    listing.write_text('other\ttask::run: test\ndemo\ttask::run: test\n', encoding='utf-8')
+    _, errors = _collect(repo, rust_listing=listing)
+    assert errors == []
+
+
+def test_a_listing_line_without_its_crate_is_rejected(repo: Path) -> None:
+    listing = repo / 'cargo-tests.txt'
+    listing.write_text('task::run: test\n', encoding='utf-8')
+    _, errors = _collect(repo, rust_listing=listing)
+    assert any('a test without its crate' in error for error in errors), errors
 
 
 def _source(root: Path, relative: str, text: str) -> None:
@@ -142,11 +161,11 @@ def test_a_claim_is_matched_by_its_module_path(repo: Path) -> None:
     _source(repo, 'demo/tests/flows.rs', '// py: tests/test_beta.py::test_four\n#[test]\nfn four() {}\n')
     listing = repo / 'cargo-tests.txt'
     # The same names elsewhere do not count.
-    listing.write_text('other::inner::run: test\nother::four: test\n', encoding='utf-8')
+    listing.write_text('demo\tother::inner::run: test\ndemo\tother::four: test\n', encoding='utf-8')
     _, errors = _collect(repo, rust_listing=listing)
-    assert any('(task::tests::run)' in error for error in errors), errors
-    assert any('(four)' in error for error in errors), errors
-    listing.write_text('task::tests::inner::run: test\nfour: test\n', encoding='utf-8')
+    assert any('(demo: task::tests::run)' in error for error in errors), errors
+    assert any('(demo: four)' in error for error in errors), errors
+    listing.write_text('demo\ttask::tests::inner::run: test\ndemo\tfour: test\n', encoding='utf-8')
     _, errors = _collect(repo, rust_listing=listing)
     assert errors == []
 
@@ -179,9 +198,9 @@ def test_a_test_compiled_only_on_windows_is_found_in_the_windows_listing(repo: P
         '#[cfg(windows)]\nmod windows {\n    // py: tests/test_alpha.py::test_two\n    #[test]\n    fn pause() {}\n}\n',
     )
     linux = repo / 'linux-tests.txt'
-    linux.write_text('process::tests::other: test\n', encoding='utf-8')
+    linux.write_text('demo\tprocess::tests::other: test\n', encoding='utf-8')
     windows = repo / 'windows-tests.txt'
-    windows.write_text('process::windows::pause: test\n', encoding='utf-8')
+    windows.write_text('demo\tprocess::windows::pause: test\n', encoding='utf-8')
     _, errors = _collect(repo, rust_listing=[linux])  # type: ignore[arg-type]
     assert any('cargo does not list it' in error for error in errors)
     _, errors = _collect(repo, rust_listing=[linux, windows])  # type: ignore[arg-type]
