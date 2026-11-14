@@ -56,6 +56,8 @@ pub(crate) struct FillActorParts {
     pub router: ApiRouter,
     pub health: FeatureHealthProbe,
     pub lifespan: Arc<dyn Lifespan>,
+    /// Whether the router got an `avid_actor_lookup` (Python's test reads the keyword).
+    pub avid_actor_lookup: bool,
 }
 
 /// `FillActorRuntimeHandle`: the stored section as the snapshot the service reads, rebuilt
@@ -244,14 +246,17 @@ pub(crate) fn assemble(
         JobManagerOptions::default(),
     )
     .expect("the default job options are valid");
+    let avid_actor_lookup = Some(actors_for_avid(inputs.avbase, inputs.javbus));
+    let wired_lookup = avid_actor_lookup.is_some();
     let router = create_fill_actor_router(FillActorApi {
         service: service.clone(),
         repository: Arc::clone(&repository),
         jobs: jobs.clone(),
         auth: auth.clone(),
-        avid_actor_lookup: Some(actors_for_avid(inputs.avbase, inputs.javbus)),
+        avid_actor_lookup,
     });
     FillActorParts {
+        avid_actor_lookup: wired_lookup,
         router,
         health: fill_actor_health(service.clone(), Arc::clone(&repository)),
         lifespan: Arc::new(FillActorLifespan::new(service, repository, jobs)),

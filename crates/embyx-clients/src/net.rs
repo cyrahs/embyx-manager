@@ -7,26 +7,22 @@
 //! `HTTP_PROXY` / `HTTPS_PROXY` / `NO_PROXY` from the environment.
 //!
 //! The sources use [`client::HttpClient`] (an `httpx.AsyncClient` look-alike: per-source
-//! proxy, httpx's redirect rules and `response.history`, `raise_for_status()` text),
-//! [`download`] (a body streamed into a temporary file beside its destination, hashed on
-//! the way, renamed into place) and [`retry`] (the retry ladders, `Retry-After`, and an
-//! injectable sleep so tests never wait). [`subprocess`] runs yt-dlp and gallery-dl.
+//! proxy, httpx's redirect rules and `response.history`, `raise_for_status()` text) and
+//! [`retry`] (the retry ladders, `Retry-After`, and an injectable sleep so tests never wait).
 //!
 //! Copied from fav (`fav-net/src/lib.rs`); see docs/CONVENTIONS.md, "Code copied from fav". `D` numbers
-//! marked fav's are fav's own DIVERGENCES.md entries.
+//! marked fav's are fav's own DIVERGENCES.md entries. WP16 removed the parts nothing here uses
+//! (fav's downloads, its subprocess runner, its proxy rule and the httpx streaming helpers); the
+//! `OSError` text moved to `embyx_core::pyos`.
 
 use std::sync::Once;
 
 pub use reqwest;
 
 pub mod client;
-pub mod download;
 #[cfg(any(test, feature = "test-support"))]
 pub mod fakeweb;
-pub mod httpx;
-pub mod proxy;
 pub mod retry;
-pub mod subprocess;
 
 pub use client::{BuildError, ClientOptions, HttpClient, Request, Response, StatusError, TransportError};
 

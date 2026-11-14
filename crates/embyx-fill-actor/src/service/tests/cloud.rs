@@ -189,11 +189,13 @@ impl CloudFileMover for FakeCloudMover {
     }
 }
 
-/// Holds the next `list_directory` call (once armed) in a task of its own until released, as
-/// a scoped CloudDrive call outlives a dropped caller; `settle()` waits for such calls (D116).
+/// Holds the next `list_directory` call (once `armed`) or the next `move_file` call (once
+/// `move_armed`) in a task of its own until released, as a scoped CloudDrive call outlives a
+/// dropped caller; `settle()` waits for such calls (D116).
 #[derive(Clone, Default)]
 struct Gate {
     armed: Arc<std::sync::atomic::AtomicBool>,
+    move_armed: Arc<std::sync::atomic::AtomicBool>,
     entered: Event,
     release: Event,
     calls: TaskTracker,
@@ -234,7 +236,17 @@ impl CloudFileMover for GatedMover {
         source_api_path: &'a str,
         destination_api_directory: &'a str,
     ) -> BoxFuture<'a, Result<CloudMoveResponse, MoverError>> {
-        self.inner.move_file(source_api_path, destination_api_directory)
+        if !self.gate.move_armed.swap(false, std::sync::atomic::Ordering::SeqCst) {
+            return self.inner.move_file(source_api_path, destination_api_directory);
+        }
+        let (inner, gate) = (self.inner.clone(), self.gate.clone());
+        let (source, destination) = (source_api_path.to_owned(), destination_api_directory.to_owned());
+        let call = self.gate.calls.spawn(async move {
+            gate.entered.set();
+            assert!(gate.release.wait_async(5).await, "the held call was never released");
+            inner.move_file(&source, &destination).await
+        });
+        Box::pin(async move { call.await.expect("the held call") })
     }
 
     fn scoped(&self) -> Arc<dyn CloudFileMover> {
@@ -728,6 +740,53 @@ async fn a_dropped_cloud_reconcile_keeps_the_lock_until_its_call_settles() {
         .expect("the lock is released once the call settled")
         .unwrap()
         .unwrap();
+    made.service.aclose().await;
+    fixture.finish().await;
+}
+
+/// Contract 6 on the mutating path (WP16 audit): an apply dropped while its `MoveFile` is in
+/// flight keeps the mutation lock until that call has ended, and the move it sent still lands
+/// (the source leaves, the destination holds the file) for a later reconciliation to find; no
+/// reconciliation runs here.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn a_dropped_cloud_apply_keeps_the_lock_until_its_move_settles() {
+    let fixture = Fixture::new().await;
+    let gate = Gate::default();
+    let made = fixture.make_service(Options {
+        gate: Some(gate.clone()),
+        locked: true,
+        ..Options::default()
+    });
+    let (plan, candidate) = create_candidate(&made.service).await;
+
+    gate.move_armed.store(true, std::sync::atomic::Ordering::SeqCst);
+    let (service, held_plan, held_candidate) = (made.service.clone(), plan.clone(), candidate.clone());
+    let applying = tokio::spawn(async move { apply(&service, &held_plan, &held_candidate).await });
+    assert!(gate.entered.wait_async(5).await, "the apply never sent its move");
+    applying.abort();
+    assert!(applying.await.unwrap_err().is_cancelled());
+
+    let lock = AsyncFileLock::new(fixture.root.join("move.lock"));
+    let acquire = tokio::spawn(async move { lock.acquire().await.map(drop) });
+    tokio::time::sleep(std::time::Duration::from_millis(200)).await;
+    assert!(
+        !acquire.is_finished(),
+        "the lock was free while the dropped apply's MoveFile still ran"
+    );
+    gate.release.set();
+    tokio::time::timeout(std::time::Duration::from_secs(5), acquire)
+        .await
+        .expect("the lock is released once the move settled")
+        .unwrap()
+        .unwrap();
+    // The move that was sent completed: exactly one MoveFile, the file at its destination.
+    assert_eq!(made.mover.move_calls().len(), 1);
+    {
+        let state = made.mover.state();
+        assert!(!state.directories[&posix_parent(SOURCE_API_PATH)].contains_key(name(SOURCE_API_PATH)));
+        let (_, destination) = &state.move_calls[0];
+        assert!(state.directories[destination].contains_key(name(SOURCE_API_PATH)));
+    }
     made.service.aclose().await;
     fixture.finish().await;
 }

@@ -5,6 +5,9 @@
 //! helpers but keeps them crate-private, and this crate builds without it (PLAN.md,
 //! "Cleanup notes": WP16 moves what two crates use into `embyx-core`).
 
+pub use embyx_core::pyfloat::float_from_str;
+pub(crate) use embyx_core::pyfloat::{fixed, max, min, sum};
+
 use embyx_core::pyjson::{self, Key, Value};
 use embyx_core::pytext;
 
@@ -32,65 +35,7 @@ impl PyError {
     }
 }
 
-/// Python's `type(value).__name__`.
-pub(crate) fn type_name(value: &Value) -> &'static str {
-    match value {
-        Value::Null => "NoneType",
-        Value::Bool(_) => "bool",
-        Value::Int(_) => "int",
-        Value::Float(_) => "float",
-        Value::Str(_) => "str",
-        Value::List(_) => "list",
-        Value::Dict(_) => "dict",
-    }
-}
-
-/// Python `float(text)` for a `str`: surrounding whitespace dropped, digits of any script,
-/// single underscores between digits, `inf`, `infinity` and `nan` in any case. `None` where
-/// Python raises `ValueError`.
-pub fn float_from_str(text: &str) -> Option<f64> {
-    let stripped = pytext::py_strip(text);
-    let mut ascii = String::with_capacity(stripped.len());
-    for ch in stripped.chars() {
-        if ch.is_ascii() {
-            ascii.push(ch);
-        } else {
-            let digit = pytext::py_decimal_value(ch)?;
-            ascii.push(char::from_digit(digit, 10)?);
-        }
-    }
-    let bytes = ascii.as_bytes();
-    for (at, byte) in bytes.iter().enumerate() {
-        if *byte == b'_' {
-            let before = at.checked_sub(1).and_then(|before| bytes.get(before));
-            let after = bytes.get(at + 1);
-            if !before.is_some_and(u8::is_ascii_digit) || !after.is_some_and(u8::is_ascii_digit) {
-                return None;
-            }
-        }
-    }
-    let cleaned: String = ascii.chars().filter(|&ch| ch != '_').collect();
-    let unsigned = cleaned.strip_prefix(['+', '-']).unwrap_or(&cleaned);
-    let lower = unsigned.to_ascii_lowercase();
-    if matches!(lower.as_str(), "inf" | "infinity" | "nan") {
-        return cleaned.parse().ok();
-    }
-    let mantissa_end = unsigned.find(['e', 'E']).unwrap_or(unsigned.len());
-    let (mantissa, exponent) = unsigned.split_at(mantissa_end);
-    let mantissa_ok = {
-        let (whole, fraction) = mantissa.split_once('.').unwrap_or((mantissa, ""));
-        let digits = |part: &str| part.bytes().all(|byte| byte.is_ascii_digit());
-        digits(whole) && digits(fraction) && (!whole.is_empty() || !fraction.is_empty())
-    };
-    let exponent_ok = exponent.is_empty() || {
-        let digits = exponent[1..].strip_prefix(['+', '-']).unwrap_or(&exponent[1..]);
-        !digits.is_empty() && digits.bytes().all(|byte| byte.is_ascii_digit())
-    };
-    if !mantissa_ok || !exponent_ok {
-        return None;
-    }
-    cleaned.parse().ok()
-}
+pub(crate) use embyx_core::pyjson::type_name;
 
 /// Python `float(value)`.
 pub(crate) fn float(value: &Value) -> Result<f64, PyError> {
@@ -201,46 +146,6 @@ fn key_repr(key: &Key) -> String {
         Key::Bool(flag) => if *flag { "True" } else { "False" }.to_owned(),
         Key::Null => "None".to_owned(),
     }
-}
-
-/// Python's `sum()` of floats (3.12 and later): Neumaier's compensated summation.
-pub(crate) fn sum(values: impl IntoIterator<Item = f64>) -> f64 {
-    let mut total = 0.0_f64;
-    let mut compensation = 0.0_f64;
-    for value in values {
-        let next = total + value;
-        if total.abs() >= value.abs() {
-            compensation += (total - next) + value;
-        } else {
-            compensation += (value - next) + total;
-        }
-        total = next;
-    }
-    if compensation != 0.0 && compensation.is_finite() {
-        total += compensation;
-    }
-    total
-}
-
-/// Python `min(a, b)`: `b` only when `b < a`.
-pub(crate) fn min(a: f64, b: f64) -> f64 {
-    if b < a { b } else { a }
-}
-
-/// Python `max(a, b)`: `b` only when `b > a`.
-pub(crate) fn max(a: f64, b: f64) -> f64 {
-    if b > a { b } else { a }
-}
-
-/// Python `format(value, '.{precision}f')`.
-pub(crate) fn fixed(value: f64, precision: usize) -> String {
-    if value.is_nan() {
-        return "nan".to_owned();
-    }
-    if value.is_infinite() {
-        return if value > 0.0 { "inf" } else { "-inf" }.to_owned();
-    }
-    format!("{value:.precision$}")
 }
 
 /// Python `format(value, '.{precision}%')`: the value times 100 in fixed notation, then `%`.

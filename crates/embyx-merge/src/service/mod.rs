@@ -271,14 +271,7 @@ pub(crate) fn os_error(error: &std::io::Error, path: &Path) -> StepError {
 
 /// The `OSError` subclass Python raises for an errno.
 pub(crate) fn os_class(error: &std::io::Error) -> &'static str {
-    match error.raw_os_error() {
-        Some(2) => "FileNotFoundError",
-        Some(1 | 13) => "PermissionError",
-        Some(17) => "FileExistsError",
-        Some(20) => "NotADirectoryError",
-        Some(21) => "IsADirectoryError",
-        _ => "OSError",
-    }
+    embyx_core::pyos::class_name(error)
 }
 
 /// `path.unlink(missing_ok=True)`.
@@ -477,6 +470,8 @@ struct Inner {
     trigger: Trigger,
     poll: StdDuration,
     wake: Notify,
+    /// How many times `wake()` was called (Python's test fake counts `woken`).
+    woken: std::sync::atomic::AtomicU64,
     /// `_tick_lock`: a tick, a claim and the operator's actions run one at a time.
     tick_lock: tokio::sync::Mutex<()>,
     transcodes: Option<TranscodeRepository>,
@@ -524,6 +519,7 @@ impl MergeService {
                 trigger: parts.trigger,
                 poll: StdDuration::from_secs_f64(parts.poll_seconds.max(0.0)),
                 wake: Notify::new(),
+                woken: std::sync::atomic::AtomicU64::new(0),
                 tick_lock: tokio::sync::Mutex::new(()),
                 transcodes: parts.transcodes,
                 presence,
@@ -588,7 +584,13 @@ impl MergeService {
 
     /// `wake()`: poll now rather than at the next interval.
     pub fn wake(&self) {
+        self.inner.woken.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         self.inner.wake.notify_one();
+    }
+
+    /// How many times [`Self::wake`] was called, for tests (`service.woken`).
+    pub fn woken(&self) -> u64 {
+        self.inner.woken.load(std::sync::atomic::Ordering::Relaxed)
     }
 
     /// `unavailable()`: why merging cannot run here, or `None` when it can.

@@ -478,6 +478,8 @@ async fn a_secure_client_speaks_tls_and_sends_the_bearer_token() {
     );
     let seen = served.fake.seen();
     assert_eq!(seen[0].authorization.as_deref(), Some("Bearer test-token"));
+    // `metadata == [('authorization', 'Bearer test-token')]`: nothing else is sent.
+    assert_eq!(seen[0].application_metadata, ["authorization"]);
 
     // A plain-text client cannot talk to the TLS server: the channel really is TLS.
     let plain = CloudDriveClient::new(&options(&format!("localhost:{}", served.address.port())));
@@ -507,6 +509,8 @@ async fn an_insecure_client_speaks_plain_http2_and_sends_the_bearer_token() {
     );
     let seen = served.fake.seen();
     assert_eq!(seen[0].authorization.as_deref(), Some("Bearer test-token"));
+    // `metadata == [('authorization', 'Bearer test-token')]`: nothing else is sent.
+    assert_eq!(seen[0].application_metadata, ["authorization"]);
 
     // And a secure client does not fall back to plain text.
     let secure = CloudDriveClient::new(&ClientOptions::new(served.address(), "test-token", true));

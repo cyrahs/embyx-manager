@@ -4,8 +4,8 @@
 //! repository and the service; here the merger takes the real ones, so the tasks live in a
 //! disposable PostgreSQL database and the service is one that can run (a Job API, CloudDrive
 //! configured, no home worker). What the Python fakes answered is what these answer: no task
-//! is parked and nothing is reserved. Python's count of `wake()` calls is not checked: the
-//! real service's wake only shortens a poll that is not running here.
+//! is parked and nothing is reserved. Python's count of `wake()` calls is read from the real
+//! service (`MergeService::woken`).
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
@@ -186,6 +186,7 @@ struct Harness {
     config: Arc<Mutex<MergeConfig>>,
     free_gib: Arc<Mutex<i128>>,
     merger: AutoMerger,
+    service: MergeService,
 }
 
 impl Harness {
@@ -238,7 +239,7 @@ impl Harness {
             repository.clone(),
             catalog,
             TitleScanCache::default(),
-            service,
+            service.clone(),
             merge_config,
             cloud_source,
         );
@@ -251,6 +252,7 @@ impl Harness {
             config,
             free_gib: free,
             merger: AutoMerger::new(auto),
+            service,
         }
     }
 
@@ -330,6 +332,7 @@ async fn queues_the_title_with_most_parts_and_leaves_stacked_ones() {
         format!("{LIBRARY}/type/vr/SQTEVR/SQTEVR-009-cd1.mp4")
     );
     assert_eq!(harness.merger.status().state, AutoState::Busy);
+    assert_eq!(harness.service.woken(), 1);
     harness.close().await;
 }
 

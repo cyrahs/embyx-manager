@@ -234,6 +234,17 @@ async fn bootstrap_wires_repository_api_and_shutdown() {
     // error: the app is healthy and every other feature keeps working.
     let (_, unconfigured) = call(app, Method::GET, "/api/health", &[], None).await;
     assert_eq!(unconfigured.get("status"), Some(&Value::from("ok")));
+    // The reserved keys and one feature block: the fill actor's.
+    let keys: Vec<&str> = unconfigured
+        .as_dict()
+        .expect("an object")
+        .iter()
+        .filter_map(|(key, _)| match key {
+            pyjson::Key::Str(key) => Some(key.as_str()),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(keys, ["status", "database", "auth_required", "fill_actor"]);
     let fill_actor = unconfigured.get("fill_actor").expect("fill_actor");
     assert_eq!(fill_actor.get("configured"), Some(&Value::Bool(false)));
     assert_eq!(fill_actor.get("apply_enabled"), Some(&Value::Bool(false)));
@@ -324,6 +335,10 @@ fn bootstrap_wires_fill_actor_onto_the_catalog_and_the_app_root() {
             "/api/fill-actor/plans/{plan_id}/apply",
         ]
     );
+    // `set(captured['api']['feature_health']) == {'fill_actor'}` and
+    // `callable(captured['fill_actor']['avid_actor_lookup'])`.
+    assert_eq!(assembled.feature_health, ["fill_actor"]);
+    assert!(assembled.fill_actor_avid_lookup);
     // The store is not loaded, so the runtime is idle: unconfigured, moves off.
     let idle = super::FillActorRuntimeHandle::new(Arc::clone(&assembled.store)).current();
     assert!(!idle.configured());

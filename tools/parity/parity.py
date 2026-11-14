@@ -16,13 +16,15 @@ cases the Rust test covers, and the claims of one Python test must add up to pyt
 
 One Rust test may claim several Python tests (stack the comments), and one Python test may be
 claimed by several Rust tests. With `--rust-tests` (given once per listing: the Linux job's and
-the Windows job's), a claimed function must be listed under its own module path: the file's
-path in its crate (`src/task/tests.rs` is `task::tests`, a file under `tests/` is its test
-binary's root), then any of the inline `mod` blocks of that file. Waivers live in `tools/parity/waivers.toml`, and
+the Windows job's, written by `tools/parity/list_rust_tests.py`), a claimed function must be
+listed by its own crate under its own module path: the file's path in its crate
+(`src/task/tests.rs` is `task::tests`, a file under `tests/` is its test binary's root), then
+any of the inline `mod` blocks of that file. Waivers live in `tools/parity/waivers.toml`, and
 `tools/parity/scope.toml` assigns every Python test to exactly one work package. When a work
 package is marked done, every test in its scope must be ported or waived.
 
     uv run pytest --collect-only -q > collected.txt
+    python3 tools/parity/list_rust_tests.py --workspace --locked > linux-tests.txt
     python3 tools/parity/parity.py --write --pytest-collected collected.txt   # regenerate PARITY.md
     python3 tools/parity/parity.py --check --pytest-collected collected.txt \
         --rust-tests linux-tests.txt --rust-tests windows-tests.txt         # what CI runs
@@ -72,17 +74,20 @@ class RustTest:
     line: int
     name: str
     cases: int | None
+    #: The crate's directory under `crates/`, as the listing names it.
+    crate: str = ''
     #: The file's module path in its test binary.
     module: tuple[str, ...] = ()
     #: The names of the file's inline `mod` blocks, any of which may sit between the two.
     inline: frozenset[str] = frozenset()
 
-    def listed_as(self, entry: str) -> bool:
-        """Whether `entry` (a path in cargo's test listing) can be this function."""
+    def listed_as(self, crate: str, entry: str) -> bool:
+        """Whether `entry` (a path in `crate`'s test listing) can be this function."""
         parts = entry.split('::')
         size = len(self.module)
         return (
-            len(parts) > size
+            crate == self.crate
+            and len(parts) > size
             and tuple(parts[:size]) == self.module
             and parts[-1] == self.name
             and all(part in self.inline for part in parts[size:-1])
@@ -163,6 +168,7 @@ def rust_annotations(report: Report, root: Path | None = None) -> dict[str, list
     for path in rust_sources(root):
         lines = path.read_text(encoding='utf-8').splitlines()
         relative = path.relative_to(REPO_ROOT).as_posix()
+        crate = path.relative_to(root or RUST_DIR).parts[0]
         module = module_path(path, root)
         inline = frozenset(match.group('name') for line in lines if (match := INLINE_MOD.match(line)))
         index = 0
@@ -195,17 +201,25 @@ def rust_annotations(report: Report, root: Path | None = None) -> dict[str, list
                 report.error(f'{relative}:{start + 1}: {message}')
                 continue
             for test_id, cases in found:
-                claims[test_id].append(RustTest(relative, start + 1, fn.group('name'), cases, module, inline))
+                claims[test_id].append(RustTest(relative, start + 1, fn.group('name'), cases, crate, module, inline))
     return claims
 
 
-def rust_test_paths(listings: list[Path]) -> set[str]:
-    """Test paths from `cargo test -- --list --format terse` (`path::to::name: test`), all listings."""
+def rust_test_paths(report: Report, listings: list[Path]) -> set[tuple[str, str]]:
+    """`(crate, test path)` pairs from `list_rust_tests.py` listings (`<crate>\t<path::to::name>: test`).
+
+    A line without the crate is an error: cargo's own listing names no crate, so two crates with a test
+    at the same module path would satisfy each other's claims."""
     paths = set()
     for listing in listings:
-        for line in listing.read_text(encoding='utf-8').splitlines():
-            if line.endswith(': test'):
-                paths.add(line.removesuffix(': test'))
+        for number, line in enumerate(listing.read_text(encoding='utf-8').splitlines(), 1):
+            if not line.endswith(': test'):
+                continue
+            crate, tab, entry = line.removesuffix(': test').partition('\t')
+            if not tab or not crate:
+                report.error(f'{listing}:{number}: a test without its crate; list with tools/parity/list_rust_tests.py')
+                continue
+            paths.add((crate, entry))
     return paths
 
 
@@ -460,14 +474,14 @@ def _check_claims(
 
 
 def _check_compiled(report: Report, claims: dict[str, list[RustTest]], listings: list[Path]) -> None:
-    compiled = rust_test_paths(listings)
-    by_name: dict[str, list[str]] = defaultdict(list)
-    for entry in compiled:
-        by_name[entry.rsplit('::', 1)[-1]].append(entry)
+    compiled = rust_test_paths(report, listings)
+    by_name: dict[str, list[tuple[str, str]]] = defaultdict(list)
+    for crate, entry in compiled:
+        by_name[entry.rsplit('::', 1)[-1]].append((crate, entry))
     for rust in claims.values():
         for claim in rust:
-            if not any(claim.listed_as(entry) for entry in by_name.get(claim.name, [])):
-                where = '::'.join((*claim.module, claim.name))
+            if not any(claim.listed_as(crate, entry) for crate, entry in by_name.get(claim.name, [])):
+                where = claim.crate + ': ' + '::'.join((*claim.module, claim.name))
                 message = f'{claim.name} carries a `// py:` claim but cargo does not list it as a test ({where})'
                 report.error(f'{claim.path}:{claim.line}: {message}')
 
@@ -542,7 +556,8 @@ def main() -> int:
         '--rust-tests',
         type=Path,
         action='append',
-        help='output of `cargo test -- --list --format terse`, to check claims compile; once per platform',
+        help='output of tools/parity/list_rust_tests.py (crate, tab, `cargo test -- --list --format terse` line), '
+        'to check claims compile; once per platform',
     )
     parser.add_argument(
         '--base-scope',

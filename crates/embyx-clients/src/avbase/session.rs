@@ -8,7 +8,9 @@
 //! list and order, the session's two headers merged into it the way `curl_cffi` merges them
 //! (a default of the same name replaced in place, others appended), and the HEADERS frame's
 //! priority weight 256. Like `curl_cffi`'s session it keeps cookies, follows redirects (at most
-//! 30) and never retries; the timeout covers the whole request. `params` are encoded as
+//! 30) and retries nothing but what libcurl itself resends: a request whose connection closed
+//! before any of the answer came is sent once more on a new connection (D175); the timeout
+//! covers the whole request. `params` are encoded as
 //! `curl_cffi` encodes them (`urlencode`). What still differs from `curl_cffi`: three ML-DSA
 //! signature algorithms in the ClientHello, and the text of transport errors (D29).
 
@@ -136,7 +138,7 @@ impl ImpersonatingSession {
             .timeout(options.timeout)
             .cookie_store(true)
             .redirect(wreq::redirect::Policy::limited(MAX_REDIRECTS))
-            .retry(wreq::retry::Policy::never());
+            .retry(resend_on_dropped_connection());
         if let Some(proxy) = options.proxy.as_deref().filter(|proxy| !proxy.is_empty()) {
             builder = builder.proxy(wreq::Proxy::all(proxy).map_err(|error| error.to_string())?);
         }
@@ -151,6 +153,40 @@ impl ImpersonatingSession {
             client: builder.build().map_err(|error| error.to_string())?,
         })
     }
+}
+
+/// libcurl's own resend (`Curl_retry_request`): when a reused connection closes before any byte
+/// of the answer arrives (a keep-alive connection the server or a proxy dropped while it sat in
+/// the pool), curl sends the request once more on a new connection ("Connection died, retrying
+/// a fresh connect"). wreq resends only a request that never started, so a GET that ends with
+/// hyper's "connection closed before message completed" is resent here once. wreq does not say
+/// whether the connection was reused, so a fresh connection that closes unanswered is resent
+/// too, where curl raises at once; the second failure is raised as the first would be (D175).
+fn resend_on_dropped_connection() -> wreq::retry::Policy {
+    wreq::retry::Policy::default()
+        .max_retries_per_request(1)
+        .classify_fn(|attempt| {
+            if attempt.method() == wreq::Method::GET && attempt.error().is_some_and(closed_unanswered) {
+                attempt.retryable()
+            } else {
+                attempt.success()
+            }
+        })
+}
+
+/// The connection closed before the answer's head was read (hyper's `IncompleteMessage`).
+fn closed_unanswered(error: &(dyn std::error::Error + 'static)) -> bool {
+    let mut current = Some(error);
+    while let Some(cause) = current {
+        if cause
+            .downcast_ref::<wreq_proto::Error>()
+            .is_some_and(wreq_proto::Error::is_incomplete_message)
+        {
+            return true;
+        }
+        current = cause.source();
+    }
+    false
 }
 
 /// `curl_cffi`'s exception class for a failed request (`code2error`, by the libcurl code the

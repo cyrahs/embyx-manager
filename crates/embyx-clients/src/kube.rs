@@ -18,7 +18,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Duration;
 
-use embyx_core::pyjson::{self, DumpOptions, Value};
+use embyx_core::pyjson::{self, DumpOptions, Value, type_name};
 use embyx_core::pytext::{py_repr, py_strip};
 use embyx_core::pyurl;
 use reqwest::Method;
@@ -27,7 +27,7 @@ use rustls::pki_types::pem::PemObject as _;
 use tokio::sync::OnceCell;
 
 use crate::net::client::{ClientOptions, HttpClient, Request};
-use crate::net::download::PyOsError;
+use embyx_core::pyos::PyOsError;
 
 /// Where Kubernetes mounts the pod's service account.
 pub const SERVICE_ACCOUNT_DIR: &str = "/var/run/secrets/kubernetes.io/serviceaccount";
@@ -93,19 +93,6 @@ impl KubeJobsError {
             "TypeError",
             format!("'{}' object is not subscriptable", type_name(value)),
         )
-    }
-}
-
-/// Python's type name of a JSON value.
-fn type_name(value: &Value) -> &'static str {
-    match value {
-        Value::Null => "NoneType",
-        Value::Bool(_) => "bool",
-        Value::Int(_) => "int",
-        Value::Float(_) => "float",
-        Value::Str(_) => "str",
-        Value::List(_) => "list",
-        Value::Dict(_) => "dict",
     }
 }
 
@@ -457,11 +444,7 @@ impl KubeJobs {
         let text = String::from_utf8(bytes).map_err(|error| {
             KubeJobsError::other(
                 "UnicodeDecodeError",
-                format!(
-                    "'utf-8' codec can't decode byte 0x{:02x} in position {}: invalid start byte",
-                    error.as_bytes()[error.utf8_error().valid_up_to()],
-                    error.utf8_error().valid_up_to()
-                ),
+                crate::http::utf8_error_message(error.as_bytes(), &error.utf8_error()),
             )
         })?;
         pyjson::loads(&text).map_err(|error| KubeJobsError::other("JSONDecodeError", error.python_message(&text)))

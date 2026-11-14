@@ -11,8 +11,6 @@
         "pretty": "null\n",
         "compact": "null",
         "plain": "null",
-        "pretty_unsorted": "null",
-        "sorted_plain": "null",
         "sorted_compact_ascii": "null",
         "ascii": "null"
       }
@@ -24,8 +22,6 @@
         "pretty": "true\n",
         "compact": "true",
         "plain": "true",
-        "pretty_unsorted": "true",
-        "sorted_plain": "true",
         "sorted_compact_ascii": "true",
         "ascii": "true"
       }
@@ -37,8 +33,6 @@
         "pretty": "0\n",
         "compact": "0",
         "plain": "0",
-        "pretty_unsorted": "0",
-        "sorted_plain": "0",
         "sorted_compact_ascii": "0",
         "ascii": "0"
       }
@@ -50,8 +44,6 @@
         "pretty": "-17\n",
         "compact": "-17",
         "plain": "-17",
-        "pretty_unsorted": "-17",
-        "sorted_plain": "-17",
         "sorted_compact_ascii": "-17",
         "ascii": "-17"
       }
@@ -63,8 +55,6 @@
         "pretty": "123456789012345678901234567890\n",
         "compact": "123456789012345678901234567890",
         "plain": "123456789012345678901234567890",
-        "pretty_unsorted": "123456789012345678901234567890",
-        "sorted_plain": "123456789012345678901234567890",
         "sorted_compact_ascii": "123456789012345678901234567890",
         "ascii": "123456789012345678901234567890"
       }
@@ -76,8 +66,6 @@
         "pretty": "-9223372036854775809\n",
         "compact": "-9223372036854775809",
         "plain": "-9223372036854775809",
-        "pretty_unsorted": "-9223372036854775809",
-        "sorted_plain": "-9223372036854775809",
         "sorted_compact_ascii": "-9223372036854775809",
         "ascii": "-9223372036854775809"
       }
@@ -89,8 +77,6 @@
         "pretty": "0.1\n",
         "compact": "0.1",
         "plain": "0.1",
-        "pretty_unsorted": "0.1",
-        "sorted_plain": "0.1",
         "sorted_compact_ascii": "0.1",
         "ascii": "0.1"
       }
@@ -102,8 +88,6 @@
         "pretty": "1.0\n",
         "compact": "1.0",
         "plain": "1.0",
-        "pretty_unsorted": "1.0",
-        "sorted_plain": "1.0",
         "sorted_compact_ascii": "1.0",
         "ascii": "1.0"
       }
@@ -115,8 +99,6 @@
         "pretty": "-0.0\n",
         "compact": "-0.0",
         "plain": "-0.0",
-        "pretty_unsorted": "-0.0",
-        "sorted_plain": "-0.0",
         "sorted_compact_ascii": "-0.0",
         "ascii": "-0.0"
       }
@@ -128,8 +110,6 @@
         "pretty": "1e+16\n",
         "compact": "1e+16",
         "plain": "1e+16",
-        "pretty_unsorted": "1e+16",
-        "sorted_plain": "1e+16",
         "sorted_compact_ascii": "1e+16",
         "ascii": "1e+16"
       }
@@ -141,8 +121,6 @@
         "pretty": "1.5e-07\n",
         "compact": "1.5e-07",
         "plain": "1.5e-07",
-        "pretty_unsorted": "1.5e-07",
-        "sorted_plain": "1.5e-07",
         "sorted_compact_ascii": "1.5e-07",
         "ascii": "1.5e-07"
       }
@@ -154,8 +132,6 @@
         "pretty": "0.0001\n",
         "compact": "0.0001",
         "plain": "0.0001",
-        "pretty_unsorted": "0.0001",
-        "sorted_plain": "0.0001",
         "sorted_compact_ascii": "0.0001",
         "ascii": "0.0001"
       }
@@ -167,8 +143,6 @@
         "pretty": "1e-05\n",
         "compact": "1e-05",
         "plain": "1e-05",
-        "pretty_unsorted": "1e-05",
-        "sorted_plain": "1e-05",
         "sorted_compact_ascii": "1e-05",
         "ascii": "1e-05"
       }
@@ -180,8 +154,6 @@
         "pretty": "123456789.12345679\n",
         "compact": "123456789.12345679",
         "plain": "123456789.12345679",
-        "pretty_unsorted": "123456789.12345679",
-        "sorted_plain": "123456789.12345679",
         "sorted_compact_ascii": "123456789.12345679",
         "ascii": "123456789.12345679"
       }
@@ -193,8 +165,6 @@
         "pretty": "1e+300\n",
         "compact": "1e+300",
         "plain": "1e+300",
-        "pretty_unsorted": "1e+300",
-        "sorted_plain": "1e+300",
         "sorted_compact_ascii": "1e+300",
         "ascii": "1e+300"
       }
@@ -206,8 +176,6 @@
         "pretty": "2.5e-320\n",
         "compact": "2.5e-320",
         "plain": "2.5e-320",
-        "pretty_unsorted": "2.5e-320",
-        "sorted_plain": "2.5e-320",
         "sorted_compact_ascii": "2.5e-320",
         "ascii": "2.5e-320"
       }
@@ -219,8 +187,6 @@
         "pretty": "3.141592653589793\n",
         "compact": "3.141592653589793",
         "plain": "3.141592653589793",
-        "pretty_unsorted": "3.141592653589793",
-        "sorted_plain": "3.141592653589793",
         "sorted_compact_ascii": "3.141592653589793",
         "ascii": "3.141592653589793"
       }
@@ -232,8 +198,6 @@
         "pretty": "100.0\n",
         "compact": "100.0",
         "plain": "100.0",
-        "pretty_unsorted": "100.0",
-        "sorted_plain": "100.0",
         "sorted_compact_ascii": "100.0",
         "ascii": "100.0"
       }
@@ -245,8 +209,6 @@
         "pretty": "1e+22\n",
         "compact": "1e+22",
         "plain": "1e+22",
-        "pretty_unsorted": "1e+22",
-        "sorted_plain": "1e+22",
         "sorted_compact_ascii": "1e+22",
         "ascii": "1e+22"
       }
@@ -258,8 +220,6 @@
         "pretty": "1.2345678901234568e+16\n",
         "compact": "1.2345678901234568e+16",
         "plain": "1.2345678901234568e+16",
-        "pretty_unsorted": "1.2345678901234568e+16",
-        "sorted_plain": "1.2345678901234568e+16",
         "sorted_compact_ascii": "1.2345678901234568e+16",
         "ascii": "1.2345678901234568e+16"
       }
@@ -271,8 +231,6 @@
         "pretty": "\"\"\n",
         "compact": "\"\"",
         "plain": "\"\"",
-        "pretty_unsorted": "\"\"",
-        "sorted_plain": "\"\"",
         "sorted_compact_ascii": "\"\"",
         "ascii": "\"\""
       }
@@ -284,8 +242,6 @@
         "pretty": "\"plain ascii\"\n",
         "compact": "\"plain ascii\"",
         "plain": "\"plain ascii\"",
-        "pretty_unsorted": "\"plain ascii\"",
-        "sorted_plain": "\"plain ascii\"",
         "sorted_compact_ascii": "\"plain ascii\"",
         "ascii": "\"plain ascii\""
       }
@@ -297,8 +253,6 @@
         "pretty": "\"quote \\\" backslash \\\\ slash /\"\n",
         "compact": "\"quote \\\" backslash \\\\ slash /\"",
         "plain": "\"quote \\\" backslash \\\\ slash /\"",
-        "pretty_unsorted": "\"quote \\\" backslash \\\\ slash /\"",
-        "sorted_plain": "\"quote \\\" backslash \\\\ slash /\"",
         "sorted_compact_ascii": "\"quote \\\" backslash \\\\ slash /\"",
         "ascii": "\"quote \\\" backslash \\\\ slash /\""
       }
@@ -310,8 +264,6 @@
         "pretty": "\"\\b\\f\\n\\r\\t\"\n",
         "compact": "\"\\b\\f\\n\\r\\t\"",
         "plain": "\"\\b\\f\\n\\r\\t\"",
-        "pretty_unsorted": "\"\\b\\f\\n\\r\\t\"",
-        "sorted_plain": "\"\\b\\f\\n\\r\\t\"",
         "sorted_compact_ascii": "\"\\b\\f\\n\\r\\t\"",
         "ascii": "\"\\b\\f\\n\\r\\t\""
       }
@@ -323,8 +275,6 @@
         "pretty": "\"\\u0000\\u0001\\u001f\"\n",
         "compact": "\"\\u0000\\u0001\\u001f\"",
         "plain": "\"\\u0000\\u0001\\u001f\"",
-        "pretty_unsorted": "\"\\u0000\\u0001\\u001f\"",
-        "sorted_plain": "\"\\u0000\\u0001\\u001f\"",
         "sorted_compact_ascii": "\"\\u0000\\u0001\\u001f\\u007f\\u0080\\u009f\"",
         "ascii": "\"\\u0000\\u0001\\u001f\\u007f\\u0080\\u009f\""
       }
@@ -336,8 +286,6 @@
         "pretty": "\"  \"\n",
         "compact": "\"  \"",
         "plain": "\"  \"",
-        "pretty_unsorted": "\"  \"",
-        "sorted_plain": "\"  \"",
         "sorted_compact_ascii": "\"\\u2028\\u2029\"",
         "ascii": "\"\\u2028\\u2029\""
       }
@@ -349,8 +297,6 @@
         "pretty": "\"中文 繁體 日本語 한국어\"\n",
         "compact": "\"中文 繁體 日本語 한국어\"",
         "plain": "\"中文 繁體 日本語 한국어\"",
-        "pretty_unsorted": "\"中文 繁體 日本語 한국어\"",
-        "sorted_plain": "\"中文 繁體 日本語 한국어\"",
         "sorted_compact_ascii": "\"\\u4e2d\\u6587 \\u7e41\\u9ad4 \\u65e5\\u672c\\u8a9e \\ud55c\\uad6d\\uc5b4\"",
         "ascii": "\"\\u4e2d\\u6587 \\u7e41\\u9ad4 \\u65e5\\u672c\\u8a9e \\ud55c\\uad6d\\uc5b4\""
       }
@@ -362,8 +308,6 @@
         "pretty": "\"emoji 😀 and 🇨🇳\"\n",
         "compact": "\"emoji 😀 and 🇨🇳\"",
         "plain": "\"emoji 😀 and 🇨🇳\"",
-        "pretty_unsorted": "\"emoji 😀 and 🇨🇳\"",
-        "sorted_plain": "\"emoji 😀 and 🇨🇳\"",
         "sorted_compact_ascii": "\"emoji \\ud83d\\ude00 and \\ud83c\\udde8\\ud83c\\uddf3\"",
         "ascii": "\"emoji \\ud83d\\ude00 and \\ud83c\\udde8\\ud83c\\uddf3\""
       }
@@ -375,8 +319,6 @@
         "pretty": "\"﻿bom\"\n",
         "compact": "\"﻿bom\"",
         "plain": "\"﻿bom\"",
-        "pretty_unsorted": "\"﻿bom\"",
-        "sorted_plain": "\"﻿bom\"",
         "sorted_compact_ascii": "\"\\ufeffbom\"",
         "ascii": "\"\\ufeffbom\""
       }
@@ -388,8 +330,6 @@
         "pretty": "[]\n",
         "compact": "[]",
         "plain": "[]",
-        "pretty_unsorted": "[]",
-        "sorted_plain": "[]",
         "sorted_compact_ascii": "[]",
         "ascii": "[]"
       }
@@ -401,8 +341,6 @@
         "pretty": "{}\n",
         "compact": "{}",
         "plain": "{}",
-        "pretty_unsorted": "{}",
-        "sorted_plain": "{}",
         "sorted_compact_ascii": "{}",
         "ascii": "{}"
       }
@@ -414,8 +352,6 @@
         "pretty": "[\n  [],\n  {},\n  [\n    {}\n  ],\n  {\n    \"a\": []\n  }\n]\n",
         "compact": "[[],{},[{}],{\"a\":[]}]",
         "plain": "[[], {}, [{}], {\"a\": []}]",
-        "pretty_unsorted": "[\n  [],\n  {},\n  [\n    {}\n  ],\n  {\n    \"a\": []\n  }\n]",
-        "sorted_plain": "[[], {}, [{}], {\"a\": []}]",
         "sorted_compact_ascii": "[[],{},[{}],{\"a\":[]}]",
         "ascii": "[[], {}, [{}], {\"a\": []}]"
       }
@@ -427,8 +363,6 @@
         "pretty": "[\n  1,\n  \"two\",\n  3.0,\n  null,\n  true,\n  false\n]\n",
         "compact": "[1,\"two\",3.0,null,true,false]",
         "plain": "[1, \"two\", 3.0, null, true, false]",
-        "pretty_unsorted": "[\n  1,\n  \"two\",\n  3.0,\n  null,\n  true,\n  false\n]",
-        "sorted_plain": "[1, \"two\", 3.0, null, true, false]",
         "sorted_compact_ascii": "[1,\"two\",3.0,null,true,false]",
         "ascii": "[1, \"two\", 3.0, null, true, false]"
       }
@@ -440,8 +374,6 @@
         "pretty": "{\n  \"a\": 2,\n  \"b\": 1,\n  \"c\": {\n    \"y\": [\n      3,\n      2,\n      1\n    ],\n    \"z\": 0\n  }\n}\n",
         "compact": "{\"b\":1,\"a\":2,\"c\":{\"z\":0,\"y\":[3,2,1]}}",
         "plain": "{\"b\": 1, \"a\": 2, \"c\": {\"z\": 0, \"y\": [3, 2, 1]}}",
-        "pretty_unsorted": "{\n  \"b\": 1,\n  \"a\": 2,\n  \"c\": {\n    \"z\": 0,\n    \"y\": [\n      3,\n      2,\n      1\n    ]\n  }\n}",
-        "sorted_plain": "{\"a\": 2, \"b\": 1, \"c\": {\"y\": [3, 2, 1], \"z\": 0}}",
         "sorted_compact_ascii": "{\"a\":2,\"b\":1,\"c\":{\"y\":[3,2,1],\"z\":0}}",
         "ascii": "{\"b\": 1, \"a\": 2, \"c\": {\"z\": 0, \"y\": [3, 2, 1]}}"
       }
@@ -453,8 +385,6 @@
         "pretty": "{\n  \"\": 5,\n  \"1\": 4,\n  \"B\": 1,\n  \"_\": 3,\n  \"a\": 2\n}\n",
         "compact": "{\"B\":1,\"a\":2,\"_\":3,\"1\":4,\"\":5}",
         "plain": "{\"B\": 1, \"a\": 2, \"_\": 3, \"1\": 4, \"\": 5}",
-        "pretty_unsorted": "{\n  \"B\": 1,\n  \"a\": 2,\n  \"_\": 3,\n  \"1\": 4,\n  \"\": 5\n}",
-        "sorted_plain": "{\"\": 5, \"1\": 4, \"B\": 1, \"_\": 3, \"a\": 2}",
         "sorted_compact_ascii": "{\"\":5,\"1\":4,\"B\":1,\"_\":3,\"a\":2}",
         "ascii": "{\"B\": 1, \"a\": 2, \"_\": 3, \"1\": 4, \"\": 5}"
       }
@@ -466,8 +396,6 @@
         "pretty": "{\n  \"Z\": 5,\n  \"a\": 2,\n  \"é\": 3,\n  \"ü\": 6,\n  \"中\": 1,\n  \"😀\": 4\n}\n",
         "compact": "{\"中\":1,\"a\":2,\"é\":3,\"😀\":4,\"Z\":5,\"ü\":6}",
         "plain": "{\"中\": 1, \"a\": 2, \"é\": 3, \"😀\": 4, \"Z\": 5, \"ü\": 6}",
-        "pretty_unsorted": "{\n  \"中\": 1,\n  \"a\": 2,\n  \"é\": 3,\n  \"😀\": 4,\n  \"Z\": 5,\n  \"ü\": 6\n}",
-        "sorted_plain": "{\"Z\": 5, \"a\": 2, \"é\": 3, \"ü\": 6, \"中\": 1, \"😀\": 4}",
         "sorted_compact_ascii": "{\"Z\":5,\"a\":2,\"\\u00e9\":3,\"\\u00fc\":6,\"\\u4e2d\":1,\"\\ud83d\\ude00\":4}",
         "ascii": "{\"\\u4e2d\": 1, \"a\": 2, \"\\u00e9\": 3, \"\\ud83d\\ude00\": 4, \"Z\": 5, \"\\u00fc\": 6}"
       }
@@ -479,8 +407,6 @@
         "pretty": "{\n  \" \": \"line\",\n  \"😀\": \"pair\"\n}\n",
         "compact": "{\" \":\"line\",\"😀\":\"pair\"}",
         "plain": "{\" \": \"line\", \"😀\": \"pair\"}",
-        "pretty_unsorted": "{\n  \" \": \"line\",\n  \"😀\": \"pair\"\n}",
-        "sorted_plain": "{\" \": \"line\", \"😀\": \"pair\"}",
         "sorted_compact_ascii": "{\"\\u2028\":\"line\",\"\\ud83d\\ude00\":\"pair\"}",
         "ascii": "{\"\\u2028\": \"line\", \"\\ud83d\\ude00\": \"pair\"}"
       }
@@ -492,8 +418,6 @@
         "pretty": "{\n  \"nested\": {\n    \"deeper\": {\n      \"deepest\": [\n        {\n          \"j\": [\n            1.5,\n            -2,\n            0.0\n          ],\n          \"k\": \"v\"\n        }\n      ]\n    }\n  }\n}\n",
         "compact": "{\"nested\":{\"deeper\":{\"deepest\":[{\"k\":\"v\",\"j\":[1.5,-2,0.0]}]}}}",
         "plain": "{\"nested\": {\"deeper\": {\"deepest\": [{\"k\": \"v\", \"j\": [1.5, -2, 0.0]}]}}}",
-        "pretty_unsorted": "{\n  \"nested\": {\n    \"deeper\": {\n      \"deepest\": [\n        {\n          \"k\": \"v\",\n          \"j\": [\n            1.5,\n            -2,\n            0.0\n          ]\n        }\n      ]\n    }\n  }\n}",
-        "sorted_plain": "{\"nested\": {\"deeper\": {\"deepest\": [{\"j\": [1.5, -2, 0.0], \"k\": \"v\"}]}}}",
         "sorted_compact_ascii": "{\"nested\":{\"deeper\":{\"deepest\":[{\"j\":[1.5,-2,0.0],\"k\":\"v\"}]}}}",
         "ascii": "{\"nested\": {\"deeper\": {\"deepest\": [{\"k\": \"v\", \"j\": [1.5, -2, 0.0]}]}}}"
       }
@@ -505,8 +429,6 @@
         "pretty": "{\n  \"path\": \"collection/bd2/角色/x.png\",\n  \"url\": \"https://example.com/a?b=1&c=<2>\"\n}\n",
         "compact": "{\"url\":\"https://example.com/a?b=1&c=<2>\",\"path\":\"collection/bd2/角色/x.png\"}",
         "plain": "{\"url\": \"https://example.com/a?b=1&c=<2>\", \"path\": \"collection/bd2/角色/x.png\"}",
-        "pretty_unsorted": "{\n  \"url\": \"https://example.com/a?b=1&c=<2>\",\n  \"path\": \"collection/bd2/角色/x.png\"\n}",
-        "sorted_plain": "{\"path\": \"collection/bd2/角色/x.png\", \"url\": \"https://example.com/a?b=1&c=<2>\"}",
         "sorted_compact_ascii": "{\"path\":\"collection/bd2/\\u89d2\\u8272/x.png\",\"url\":\"https://example.com/a?b=1&c=<2>\"}",
         "ascii": "{\"url\": \"https://example.com/a?b=1&c=<2>\", \"path\": \"collection/bd2/\\u89d2\\u8272/x.png\"}"
       }

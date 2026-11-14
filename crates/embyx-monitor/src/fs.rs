@@ -184,23 +184,7 @@ impl PyException for PyOsError {
         if let Some(class) = self.class {
             return class;
         }
-        match self.errno {
-            Some(11 | 114 | 115) => "BlockingIOError",
-            Some(10) => "ChildProcessError",
-            Some(32 | 108) => "BrokenPipeError",
-            Some(103) => "ConnectionAbortedError",
-            Some(111) => "ConnectionRefusedError",
-            Some(104) => "ConnectionResetError",
-            Some(17) => "FileExistsError",
-            Some(ENOENT) => "FileNotFoundError",
-            Some(21) => "IsADirectoryError",
-            Some(ENOTDIR) => "NotADirectoryError",
-            Some(4) => "InterruptedError",
-            Some(1 | 13) => "PermissionError",
-            Some(3) => "ProcessLookupError",
-            Some(110) => "TimeoutError",
-            _ => "OSError",
-        }
+        self.errno.map_or("OSError", embyx_core::pyos::errno_class)
     }
 
     /// `repr(exc)`: the arguments without the file names.

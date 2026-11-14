@@ -157,8 +157,9 @@ jobs:
           exit 1
         fi
 
+    # Each line names its crate (cargo's own listing does not), so a claim is matched in its crate.
     - name: List compiled tests for the parity check
-      run: cargo test --workspace --locked -- --list --format terse > "$RUNNER_TEMP/rust-tests.txt"
+      run: python3 tools/parity/list_rust_tests.py --workspace --locked > "$RUNNER_TEMP/rust-tests.txt"
 
     - name: Collect the Python tests for the parity check
       run: uv run pytest --collect-only -q > "$RUNNER_TEMP/pytest-collected.txt"
@@ -234,7 +235,7 @@ jobs:
 
     - name: List compiled tests for the parity check
       shell: bash
-      run: cargo test -p embyx-transcode-worker -p embyx-manager --locked -- --list --format terse > "$RUNNER_TEMP/rust-tests-windows.txt"
+      run: python tools/parity/list_rust_tests.py -p embyx-transcode-worker -p embyx-manager --locked > "$RUNNER_TEMP/rust-tests-windows.txt"
 
     - name: Keep the listing for the parity check
       uses: actions/upload-artifact@v4
