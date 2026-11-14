@@ -106,6 +106,35 @@ impl JavBusCatalog for JavBusClient {
     }
 }
 
+/// The app shares one client between the monitor and the fill actor, as Python does.
+impl<T: AvbaseCatalog + ?Sized> AvbaseCatalog for Arc<T> {
+    fn talent<'a>(&'a self, name: &'a str) -> BoxFuture<'a, Result<Option<AvbaseTalent>, AvbaseError>> {
+        (**self).talent(name)
+    }
+
+    fn talent_pages<'a>(&'a self, name: &'a str) -> Box<dyn TalentPageWalk + 'a> {
+        (**self).talent_pages(name)
+    }
+}
+
+impl<T: JavBusCatalog + ?Sized> JavBusCatalog for Arc<T> {
+    fn search_stars<'a>(&'a self, name: &'a str) -> BoxFuture<'a, Result<Vec<JavBusActor>, JavBusError>> {
+        (**self).search_stars(name)
+    }
+
+    fn get_actor<'a>(&'a self, actor_id: &'a str) -> BoxFuture<'a, Result<Option<JavBusActorPage>, JavBusError>> {
+        (**self).get_actor(actor_id)
+    }
+
+    fn scrape<'a>(
+        &'a self,
+        actor_id: &'a str,
+        progress: Option<&'a PageProgress>,
+    ) -> BoxFuture<'a, Result<Vec<String>, JavBusError>> {
+        (**self).scrape(actor_id, progress)
+    }
+}
+
 fn catalog_error(error: &AvbaseError) -> CatalogError {
     CatalogError {
         class: error.class_name().to_owned(),

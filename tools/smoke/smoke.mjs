@@ -213,6 +213,9 @@ async function main() {
         await page.getByRole('tab', { name: /榜单/ }).click()
         await page.getByText('https://feeds.invalid/smoke.xml').waitFor()
         check(true, 'the subscriptions page lists the seeded feed')
+      } else if (path === '/fill-actor') {
+        await page.getByText('补全演员尚未配置').waitFor()
+        check(true, "the fill-actor page reads the health block's unconfigured state")
       } else if (path === '/playlists') {
         await page.getByText('还没有列表').waitFor()
         check(true, 'the playlists page shows its empty list')

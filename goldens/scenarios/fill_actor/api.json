@@ -1,0 +1,1043 @@
+{
+  "calls": [],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "fill_actor.api",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "body": {
+            "auth_required": true,
+            "database": true,
+            "fill_actor": {
+              "apply_enabled": true,
+              "apply_ready": true,
+              "cloud": true,
+              "configured": true,
+              "legacy_journal": true,
+              "roots": true,
+              "scan_ready": true
+            },
+            "status": "ok"
+          },
+          "op": "request",
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unauthorized"
+            }
+          },
+          "op": "request",
+          "status": 401
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "op": "request",
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "op": "request",
+          "status": 422
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "wait"
+        },
+        {
+          "body": {
+            "job": {
+              "created_at": "2026-09-10T02:58:00Z",
+              "error_code": null,
+              "job_id": "other-queued",
+              "operation": "create_plan",
+              "plan_id": "other-queued",
+              "progress": {
+                "completed": 1,
+                "current": "扫描结果已保存",
+                "elapsed_seconds": "<set>",
+                "eta_seconds": "<set>",
+                "last_progress_seconds": "<set>",
+                "percent": 100.0,
+                "stage": "done",
+                "stage_started_at": "2026-09-10T03:00:00Z",
+                "total": 1,
+                "unit": "steps",
+                "updated_at": "2026-09-10T03:00:00Z"
+              },
+              "state": "completed",
+              "updated_at": "2026-09-10T03:00:00Z"
+            },
+            "plan": {
+              "actors": [
+                {
+                  "actor_id": "actor2",
+                  "actor_name": null,
+                  "aliases": [],
+                  "error_code": null,
+                  "error_message": null,
+                  "scraped_count": 1,
+                  "talent_id": null,
+                  "video_ids": [
+                    "ABC-003"
+                  ]
+                }
+              ],
+              "created_at": "2026-09-10T03:00:00Z",
+              "expires_at": "2026-09-10T04:00:00Z",
+              "plan_id": "other-queued",
+              "revision": "token-3",
+              "videos": [
+                {
+                  "actor_ids": [
+                    "actor2"
+                  ],
+                  "existing_files": [],
+                  "move_candidates": [
+                    {
+                      "candidate_id": "token-2",
+                      "destination_conflict": false,
+                      "file_name": "ABC-003.mp4",
+                      "source_label": "{additional}",
+                      "video_id": "ABC-003"
+                    }
+                  ],
+                  "release_date": null,
+                  "state": "additional_found",
+                  "video_id": "ABC-003",
+                  "warnings": []
+                }
+              ]
+            }
+          },
+          "op": "request",
+          "status": 200
+        },
+        {
+          "body": {
+            "job": {
+              "created_at": "2026-09-10T02:57:00Z",
+              "error_code": "job_interrupted",
+              "job_id": "other-expired",
+              "operation": "create_plan",
+              "plan_id": "other-expired",
+              "progress": {
+                "completed": 1,
+                "current": "ABC-001",
+                "elapsed_seconds": "<set>",
+                "eta_seconds": "<set>",
+                "last_progress_seconds": "<set>",
+                "percent": 50.0,
+                "stage": "done",
+                "stage_started_at": "2026-09-10T03:00:00Z",
+                "total": 2,
+                "unit": "videos",
+                "updated_at": "2026-09-10T03:00:00Z"
+              },
+              "state": "failed",
+              "updated_at": "2026-09-10T03:00:00Z"
+            },
+            "plan": null
+          },
+          "op": "request",
+          "status": 200
+        },
+        {
+          "body": {
+            "job": {
+              "created_at": "2026-09-10T02:59:00Z",
+              "error_code": null,
+              "job_id": "other-leased",
+              "operation": "create_plan",
+              "plan_id": "other-leased",
+              "progress": {
+                "completed": 0,
+                "current": "actor",
+                "elapsed_seconds": "<set>",
+                "eta_seconds": null,
+                "last_progress_seconds": "<set>",
+                "percent": 0.0,
+                "stage": "actor_catalog",
+                "stage_started_at": "2026-09-10T02:59:10Z",
+                "total": 1,
+                "unit": "actors",
+                "updated_at": "2026-09-10T02:59:50Z"
+              },
+              "state": "running",
+              "updated_at": "2026-09-10T02:59:50Z"
+            },
+            "plan": null
+          },
+          "op": "request",
+          "status": 200
+        },
+        {
+          "body": {
+            "job": {
+              "created_at": "2026-09-10T03:00:05Z",
+              "error_code": null,
+              "job_id": "token-4",
+              "operation": "create_plan",
+              "plan_id": "token-4",
+              "progress": {
+                "completed": 0,
+                "current": null,
+                "elapsed_seconds": "<set>",
+                "eta_seconds": null,
+                "last_progress_seconds": "<set>",
+                "percent": 0.0,
+                "stage": "queued",
+                "stage_started_at": "2026-09-10T03:00:05Z",
+                "total": 1,
+                "unit": "actors",
+                "updated_at": "2026-09-10T03:00:05Z"
+              },
+              "state": "queued",
+              "updated_at": "2026-09-10T03:00:05Z"
+            },
+            "plan": null
+          },
+          "op": "request",
+          "status": 202
+        },
+        {
+          "op": "wait"
+        },
+        {
+          "body": {
+            "job": {
+              "created_at": "2026-09-10T03:00:05Z",
+              "error_code": null,
+              "job_id": "token-4",
+              "operation": "create_plan",
+              "plan_id": "token-4",
+              "progress": {
+                "completed": 1,
+                "current": "扫描结果已保存",
+                "elapsed_seconds": "<set>",
+                "eta_seconds": "<set>",
+                "last_progress_seconds": "<set>",
+                "percent": 100.0,
+                "stage": "done",
+                "stage_started_at": "2026-09-10T03:00:05Z",
+                "total": 1,
+                "unit": "steps",
+                "updated_at": "2026-09-10T03:00:05Z"
+              },
+              "state": "completed",
+              "updated_at": "2026-09-10T03:00:05Z"
+            },
+            "plan": {
+              "actors": [
+                {
+                  "actor_id": "actor",
+                  "actor_name": null,
+                  "aliases": [],
+                  "error_code": null,
+                  "error_message": null,
+                  "scraped_count": 2,
+                  "talent_id": null,
+                  "video_ids": [
+                    "ABC-001",
+                    "ABC-002"
+                  ]
+                }
+              ],
+              "created_at": "2026-09-10T03:00:05Z",
+              "expires_at": "2026-09-10T04:00:05Z",
+              "plan_id": "token-4",
+              "revision": "token-6",
+              "videos": [
+                {
+                  "actor_ids": [
+                    "actor"
+                  ],
+                  "existing_files": [],
+                  "move_candidates": [
+                    {
+                      "candidate_id": "token-5",
+                      "destination_conflict": false,
+                      "file_name": "ABC-001.mp4",
+                      "source_label": "{additional}",
+                      "video_id": "ABC-001"
+                    }
+                  ],
+                  "release_date": null,
+                  "state": "additional_found",
+                  "video_id": "ABC-001",
+                  "warnings": []
+                },
+                {
+                  "actor_ids": [
+                    "actor"
+                  ],
+                  "existing_files": [
+                    "ABC-002.mp4"
+                  ],
+                  "move_candidates": [],
+                  "release_date": null,
+                  "state": "exists",
+                  "video_id": "ABC-002",
+                  "warnings": []
+                }
+              ]
+            }
+          },
+          "op": "request",
+          "status": 200
+        },
+        {
+          "body": {
+            "job": {
+              "created_at": "2026-09-10T03:00:05Z",
+              "error_code": null,
+              "job_id": "request-0000000001",
+              "operation": "apply",
+              "plan_id": "token-4",
+              "progress": {
+                "completed": 0,
+                "current": null,
+                "elapsed_seconds": "<set>",
+                "eta_seconds": null,
+                "last_progress_seconds": "<set>",
+                "percent": 0.0,
+                "stage": "queued",
+                "stage_started_at": "2026-09-10T03:00:05Z",
+                "total": 1,
+                "unit": "items",
+                "updated_at": "2026-09-10T03:00:05Z"
+              },
+              "state": "queued",
+              "updated_at": "2026-09-10T03:00:05Z"
+            },
+            "result": null
+          },
+          "op": "request",
+          "status": 202
+        },
+        {
+          "op": "wait"
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unauthorized"
+            }
+          },
+          "op": "request",
+          "status": 401
+        },
+        {
+          "body": {
+            "job": {
+              "created_at": "2026-09-10T03:00:05Z",
+              "error_code": "revision_mismatch",
+              "job_id": "request-0000000001",
+              "operation": "apply",
+              "plan_id": "token-4",
+              "progress": {
+                "completed": 0,
+                "current": null,
+                "elapsed_seconds": "<set>",
+                "eta_seconds": "<set>",
+                "last_progress_seconds": "<set>",
+                "percent": 0.0,
+                "stage": "done",
+                "stage_started_at": "2026-09-10T03:00:05Z",
+                "total": 1,
+                "unit": "items",
+                "updated_at": "2026-09-10T03:00:05Z"
+              },
+              "state": "failed",
+              "updated_at": "2026-09-10T03:00:05Z"
+            },
+            "result": null
+          },
+          "op": "request",
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "apply_request_conflict"
+            }
+          },
+          "op": "request",
+          "status": 409
+        },
+        {
+          "body": {
+            "job": {
+              "created_at": "2026-09-10T03:00:10Z",
+              "error_code": null,
+              "job_id": "request-0000000003",
+              "operation": "apply",
+              "plan_id": "token-4",
+              "progress": {
+                "completed": 0,
+                "current": null,
+                "elapsed_seconds": "<set>",
+                "eta_seconds": null,
+                "last_progress_seconds": "<set>",
+                "percent": 0.0,
+                "stage": "queued",
+                "stage_started_at": "2026-09-10T03:00:10Z",
+                "total": 1,
+                "unit": "items",
+                "updated_at": "2026-09-10T03:00:10Z"
+              },
+              "state": "queued",
+              "updated_at": "2026-09-10T03:00:10Z"
+            },
+            "result": null
+          },
+          "op": "request",
+          "status": 202
+        },
+        {
+          "op": "wait"
+        },
+        {
+          "body": {
+            "job": {
+              "created_at": "2026-09-10T03:00:10Z",
+              "error_code": null,
+              "job_id": "request-0000000003",
+              "operation": "apply",
+              "plan_id": "token-4",
+              "progress": {
+                "completed": 1,
+                "current": null,
+                "elapsed_seconds": "<set>",
+                "eta_seconds": "<set>",
+                "last_progress_seconds": "<set>",
+                "percent": 100.0,
+                "stage": "done",
+                "stage_started_at": "2026-09-10T03:00:10Z",
+                "total": 1,
+                "unit": "items",
+                "updated_at": "2026-09-10T03:00:10Z"
+              },
+              "state": "completed",
+              "updated_at": "2026-09-10T03:00:10Z"
+            },
+            "result": {
+              "plan_id": "token-4",
+              "results": [
+                {
+                  "candidate_id": "token-5",
+                  "error_code": null,
+                  "file_name": "ABC-001.mp4",
+                  "state": "moved",
+                  "video_id": "ABC-001"
+                }
+              ],
+              "revision": "token-6",
+              "state": "succeeded"
+            }
+          },
+          "op": "request",
+          "status": 200
+        },
+        {
+          "body": {
+            "job": {
+              "created_at": "2026-09-10T03:00:10Z",
+              "error_code": null,
+              "job_id": "request-0000000003",
+              "operation": "apply",
+              "plan_id": "token-4",
+              "progress": {
+                "completed": 1,
+                "current": null,
+                "elapsed_seconds": "<set>",
+                "eta_seconds": "<set>",
+                "last_progress_seconds": "<set>",
+                "percent": 100.0,
+                "stage": "done",
+                "stage_started_at": "2026-09-10T03:00:10Z",
+                "total": 1,
+                "unit": "items",
+                "updated_at": "2026-09-10T03:00:10Z"
+              },
+              "state": "completed",
+              "updated_at": "2026-09-10T03:00:10Z"
+            },
+            "result": {
+              "plan_id": "token-4",
+              "results": [
+                {
+                  "candidate_id": "token-5",
+                  "error_code": null,
+                  "file_name": "ABC-001.mp4",
+                  "state": "moved",
+                  "video_id": "ABC-001"
+                }
+              ],
+              "revision": "token-6",
+              "state": "succeeded"
+            }
+          },
+          "op": "request",
+          "status": 202
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unknown_apply_job"
+            }
+          },
+          "op": "request",
+          "status": 404
+        },
+        {
+          "body": {
+            "plan_id": "token-4",
+            "results": [
+              {
+                "candidate_id": "token-5",
+                "error_code": null,
+                "file_name": "ABC-001.mp4",
+                "state": "moved",
+                "video_id": "ABC-001"
+              }
+            ],
+            "revision": "token-6",
+            "state": "succeeded"
+          },
+          "op": "request",
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "plan_not_cancellable"
+            }
+          },
+          "op": "request",
+          "status": 409
+        },
+        {
+          "body": {
+            "job": {
+              "created_at": "2026-09-10T03:00:20Z",
+              "error_code": null,
+              "job_id": "request-0000000002",
+              "operation": "apply",
+              "plan_id": "other-queued",
+              "progress": {
+                "completed": 0,
+                "current": null,
+                "elapsed_seconds": "<set>",
+                "eta_seconds": null,
+                "last_progress_seconds": "<set>",
+                "percent": 100.0,
+                "stage": "queued",
+                "stage_started_at": "2026-09-10T03:00:20Z",
+                "total": 0,
+                "unit": "items",
+                "updated_at": "2026-09-10T03:00:20Z"
+              },
+              "state": "queued",
+              "updated_at": "2026-09-10T03:00:20Z"
+            },
+            "result": null
+          },
+          "op": "request",
+          "status": 202
+        },
+        {
+          "op": "wait"
+        },
+        {
+          "body": {
+            "job": {
+              "created_at": "2026-09-10T03:00:20Z",
+              "error_code": null,
+              "job_id": "request-0000000002",
+              "operation": "apply",
+              "plan_id": "other-queued",
+              "progress": {
+                "completed": 0,
+                "current": null,
+                "elapsed_seconds": "<set>",
+                "eta_seconds": "<set>",
+                "last_progress_seconds": "<set>",
+                "percent": 100.0,
+                "stage": "done",
+                "stage_started_at": "2026-09-10T03:00:20Z",
+                "total": 0,
+                "unit": "items",
+                "updated_at": "2026-09-10T03:00:20Z"
+              },
+              "state": "completed",
+              "updated_at": "2026-09-10T03:00:20Z"
+            },
+            "result": {
+              "plan_id": "other-queued",
+              "results": [],
+              "revision": "token-3",
+              "state": "succeeded"
+            }
+          },
+          "op": "request",
+          "status": 200
+        },
+        {
+          "op": "recover",
+          "result": 1
+        },
+        {
+          "body": {
+            "job": {
+              "created_at": "2026-09-10T02:59:00Z",
+              "error_code": "job_interrupted",
+              "job_id": "other-leased",
+              "operation": "create_plan",
+              "plan_id": "other-leased",
+              "progress": {
+                "completed": 0,
+                "current": "actor",
+                "elapsed_seconds": "<set>",
+                "eta_seconds": "<set>",
+                "last_progress_seconds": "<set>",
+                "percent": 0.0,
+                "stage": "done",
+                "stage_started_at": "2026-09-10T03:01:20Z",
+                "total": 1,
+                "unit": "actors",
+                "updated_at": "2026-09-10T03:01:20Z"
+              },
+              "state": "failed",
+              "updated_at": "2026-09-10T03:01:20Z"
+            },
+            "plan": null
+          },
+          "op": "request",
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unknown_plan"
+            }
+          },
+          "op": "request",
+          "status": 404
+        },
+        {
+          "op": "restart"
+        },
+        {
+          "body": {
+            "job": {
+              "created_at": "2026-09-10T03:00:05Z",
+              "error_code": null,
+              "job_id": "token-4",
+              "operation": "create_plan",
+              "plan_id": "token-4",
+              "progress": {
+                "completed": 1,
+                "current": "扫描结果已保存",
+                "elapsed_seconds": "<set>",
+                "eta_seconds": "<set>",
+                "last_progress_seconds": "<set>",
+                "percent": 100.0,
+                "stage": "done",
+                "stage_started_at": "2026-09-10T03:00:05Z",
+                "total": 1,
+                "unit": "steps",
+                "updated_at": "2026-09-10T03:00:05Z"
+              },
+              "state": "completed",
+              "updated_at": "2026-09-10T03:00:05Z"
+            },
+            "plan": {
+              "actors": [
+                {
+                  "actor_id": "actor",
+                  "actor_name": null,
+                  "aliases": [],
+                  "error_code": null,
+                  "error_message": null,
+                  "scraped_count": 2,
+                  "talent_id": null,
+                  "video_ids": [
+                    "ABC-001",
+                    "ABC-002"
+                  ]
+                }
+              ],
+              "created_at": "2026-09-10T03:00:05Z",
+              "expires_at": "2026-09-10T04:00:05Z",
+              "plan_id": "token-4",
+              "revision": "token-6",
+              "videos": [
+                {
+                  "actor_ids": [
+                    "actor"
+                  ],
+                  "existing_files": [],
+                  "move_candidates": [
+                    {
+                      "candidate_id": "token-5",
+                      "destination_conflict": false,
+                      "file_name": "ABC-001.mp4",
+                      "source_label": "{additional}",
+                      "video_id": "ABC-001"
+                    }
+                  ],
+                  "release_date": null,
+                  "state": "additional_found",
+                  "video_id": "ABC-001",
+                  "warnings": []
+                },
+                {
+                  "actor_ids": [
+                    "actor"
+                  ],
+                  "existing_files": [
+                    "ABC-002.mp4"
+                  ],
+                  "move_candidates": [],
+                  "release_date": null,
+                  "state": "exists",
+                  "video_id": "ABC-002",
+                  "warnings": []
+                }
+              ]
+            }
+          },
+          "op": "request",
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "plan_not_cancellable"
+            }
+          },
+          "op": "request",
+          "status": 409
+        },
+        {
+          "body": {
+            "job": {
+              "created_at": "2026-09-10T03:00:10Z",
+              "error_code": null,
+              "job_id": "request-0000000003",
+              "operation": "apply",
+              "plan_id": "token-4",
+              "progress": {
+                "completed": 1,
+                "current": null,
+                "elapsed_seconds": "<set>",
+                "eta_seconds": "<set>",
+                "last_progress_seconds": "<set>",
+                "percent": 100.0,
+                "stage": "done",
+                "stage_started_at": "2026-09-10T03:00:10Z",
+                "total": 1,
+                "unit": "items",
+                "updated_at": "2026-09-10T03:00:10Z"
+              },
+              "state": "completed",
+              "updated_at": "2026-09-10T03:00:10Z"
+            },
+            "result": {
+              "plan_id": "token-4",
+              "results": [
+                {
+                  "candidate_id": "token-5",
+                  "error_code": null,
+                  "file_name": "ABC-001.mp4",
+                  "state": "moved",
+                  "video_id": "ABC-001"
+                }
+              ],
+              "revision": "token-6",
+              "state": "succeeded"
+            }
+          },
+          "op": "request",
+          "status": 202
+        },
+        {
+          "body": {
+            "plan_id": "token-4",
+            "results": [
+              {
+                "candidate_id": "token-5",
+                "error_code": null,
+                "file_name": "ABC-001.mp4",
+                "state": "moved",
+                "video_id": "ABC-001"
+              }
+            ],
+            "revision": "token-6",
+            "state": "succeeded"
+          },
+          "op": "request",
+          "status": 200
+        }
+      ]
+    }
+  },
+  "rows": {
+    "fill_actor_apply_jobs": [
+      {
+        "candidate_ids_json": "[\"token-5\"]",
+        "job_id": "request-0000000001",
+        "result_json": null,
+        "revision": "stale"
+      },
+      {
+        "candidate_ids_json": "[]",
+        "job_id": "request-0000000002",
+        "result_json": "{\"plan_id\":\"other-queued\",\"revision\":\"token-3\",\"state\":\"succeeded\",\"results\":[]}",
+        "revision": "token-3"
+      },
+      {
+        "candidate_ids_json": "[\"token-5\"]",
+        "job_id": "request-0000000003",
+        "result_json": "{\"plan_id\":\"token-4\",\"revision\":\"token-6\",\"state\":\"succeeded\",\"results\":[{\"candidate_id\":\"token-5\",\"video_id\":\"ABC-001\",\"file_name\":\"ABC-001.mp4\",\"state\":\"moved\",\"error_code\":null}]}",
+        "revision": "token-6"
+      }
+    ],
+    "fill_actor_jobs": [
+      {
+        "actor_ids_json": "[\"actor2\"]",
+        "created_at": "2026-09-10T02:58:00+00:00",
+        "error_code": null,
+        "job_id": "other-queued",
+        "lease_expires_at": null,
+        "operation": "create_plan",
+        "owner_id": null,
+        "plan_id": "other-queued",
+        "progress_completed": 1,
+        "progress_current": "扫描结果已保存",
+        "progress_stage": "done",
+        "progress_stage_started_at": "2026-09-10T03:00:00+00:00",
+        "progress_total": 1,
+        "progress_unit": "steps",
+        "progress_updated_at": "2026-09-10T03:00:00+00:00",
+        "state": "completed",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      },
+      {
+        "actor_ids_json": "[]",
+        "created_at": "2026-09-10T03:00:20+00:00",
+        "error_code": null,
+        "job_id": "request-0000000002",
+        "lease_expires_at": null,
+        "operation": "apply",
+        "owner_id": null,
+        "plan_id": "other-queued",
+        "progress_completed": 0,
+        "progress_current": null,
+        "progress_stage": "done",
+        "progress_stage_started_at": "2026-09-10T03:00:20+00:00",
+        "progress_total": 0,
+        "progress_unit": "items",
+        "progress_updated_at": "2026-09-10T03:00:20+00:00",
+        "state": "completed",
+        "updated_at": "2026-09-10T03:00:20+00:00"
+      },
+      {
+        "actor_ids_json": "[]",
+        "created_at": "2026-09-10T03:00:10+00:00",
+        "error_code": null,
+        "job_id": "request-0000000003",
+        "lease_expires_at": null,
+        "operation": "apply",
+        "owner_id": null,
+        "plan_id": "token-4",
+        "progress_completed": 1,
+        "progress_current": null,
+        "progress_stage": "done",
+        "progress_stage_started_at": "2026-09-10T03:00:10+00:00",
+        "progress_total": 1,
+        "progress_unit": "items",
+        "progress_updated_at": "2026-09-10T03:00:10+00:00",
+        "state": "completed",
+        "updated_at": "2026-09-10T03:00:10+00:00"
+      },
+      {
+        "actor_ids_json": "[\"actor\"]",
+        "created_at": "2026-09-10T03:00:05+00:00",
+        "error_code": null,
+        "job_id": "token-4",
+        "lease_expires_at": null,
+        "operation": "create_plan",
+        "owner_id": null,
+        "plan_id": "token-4",
+        "progress_completed": 1,
+        "progress_current": "扫描结果已保存",
+        "progress_stage": "done",
+        "progress_stage_started_at": "2026-09-10T03:00:05+00:00",
+        "progress_total": 1,
+        "progress_unit": "steps",
+        "progress_updated_at": "2026-09-10T03:00:05+00:00",
+        "state": "completed",
+        "updated_at": "2026-09-10T03:00:05+00:00"
+      },
+      {
+        "actor_ids_json": "[\"actor\"]",
+        "created_at": "2026-09-10T02:57:00+00:00",
+        "error_code": "job_interrupted",
+        "job_id": "other-expired",
+        "lease_expires_at": null,
+        "operation": "create_plan",
+        "owner_id": null,
+        "plan_id": "other-expired",
+        "progress_completed": 1,
+        "progress_current": "ABC-001",
+        "progress_stage": "done",
+        "progress_stage_started_at": "2026-09-10T03:00:00+00:00",
+        "progress_total": 2,
+        "progress_unit": "videos",
+        "progress_updated_at": "2026-09-10T03:00:00+00:00",
+        "state": "failed",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      },
+      {
+        "actor_ids_json": "[\"actor\"]",
+        "created_at": "2026-09-10T02:59:00+00:00",
+        "error_code": "job_interrupted",
+        "job_id": "other-leased",
+        "lease_expires_at": null,
+        "operation": "create_plan",
+        "owner_id": null,
+        "plan_id": "other-leased",
+        "progress_completed": 0,
+        "progress_current": "actor",
+        "progress_stage": "done",
+        "progress_stage_started_at": "2026-09-10T03:01:20+00:00",
+        "progress_total": 1,
+        "progress_unit": "actors",
+        "progress_updated_at": "2026-09-10T03:01:20+00:00",
+        "state": "failed",
+        "updated_at": "2026-09-10T03:01:20+00:00"
+      },
+      {
+        "actor_ids_json": "[]",
+        "created_at": "2026-09-10T03:00:05+00:00",
+        "error_code": "revision_mismatch",
+        "job_id": "request-0000000001",
+        "lease_expires_at": null,
+        "operation": "apply",
+        "owner_id": null,
+        "plan_id": "token-4",
+        "progress_completed": 0,
+        "progress_current": null,
+        "progress_stage": "done",
+        "progress_stage_started_at": "2026-09-10T03:00:05+00:00",
+        "progress_total": 1,
+        "progress_unit": "items",
+        "progress_updated_at": "2026-09-10T03:00:05+00:00",
+        "state": "failed",
+        "updated_at": "2026-09-10T03:00:05+00:00"
+      }
+    ],
+    "fill_actor_move_journal": [
+      {
+        "candidate_id": "token-5",
+        "plan_id": "token-4",
+        "state": "reconciled",
+        "updated_at": "2026-09-10T03:00:10+00:00"
+      }
+    ],
+    "fill_actor_move_results": [
+      {
+        "candidate_id": "token-5",
+        "plan_id": "token-4",
+        "result_json": "{\"candidate_id\":\"token-5\",\"video_id\":\"ABC-001\",\"file_name\":\"ABC-001.mp4\",\"state\":\"moved\",\"error_code\":null}"
+      }
+    ],
+    "fill_actor_plans": [
+      {
+        "config_version": 0,
+        "created_at": "2026-09-10T03:00:00+00:00",
+        "expires_at": "2026-09-10T04:00:00+00:00",
+        "plan_id": "other-queued",
+        "public_json": "{\"plan_id\":\"other-queued\",\"revision\":\"token-3\",\"created_at\":\"2026-09-10T03:00:00Z\",\"expires_at\":\"2026-09-10T04:00:00Z\",\"actors\":[{\"actor_id\":\"actor2\",\"scraped_count\":1,\"video_ids\":[\"ABC-003\"],\"error_code\":null,\"actor_name\":null,\"talent_id\":null,\"aliases\":[],\"error_message\":null}],\"videos\":[{\"video_id\":\"ABC-003\",\"actor_ids\":[\"actor2\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-2\",\"video_id\":\"ABC-003\",\"file_name\":\"ABC-003.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]}]}",
+        "revision": "token-3"
+      },
+      {
+        "config_version": 0,
+        "created_at": "2026-09-10T03:00:05+00:00",
+        "expires_at": "2026-09-10T04:00:05+00:00",
+        "plan_id": "token-4",
+        "public_json": "{\"plan_id\":\"token-4\",\"revision\":\"token-6\",\"created_at\":\"2026-09-10T03:00:05Z\",\"expires_at\":\"2026-09-10T04:00:05Z\",\"actors\":[{\"actor_id\":\"actor\",\"scraped_count\":2,\"video_ids\":[\"ABC-001\",\"ABC-002\"],\"error_code\":null,\"actor_name\":null,\"talent_id\":null,\"aliases\":[],\"error_message\":null}],\"videos\":[{\"video_id\":\"ABC-001\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-5\",\"video_id\":\"ABC-001\",\"file_name\":\"ABC-001.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-002\",\"actor_ids\":[\"actor\"],\"state\":\"exists\",\"release_date\":null,\"existing_files\":[\"ABC-002.mp4\"],\"move_candidates\":[],\"warnings\":[]}]}",
+        "revision": "token-6"
+      }
+    ]
+  },
+  "scenario": "fill_actor/api",
+  "tree": {
+    "actor": [
+      {
+        "kind": "dir",
+        "path": "ABC"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC/ABC-002.mp4",
+        "sha256": "5dde896887f6754c",
+        "size": 2
+      }
+    ],
+    "additional": [
+      {
+        "kind": "dir",
+        "path": "ABC"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC/ABC-003.mp4",
+        "sha256": "cd2eb0837c9b4c96",
+        "size": 3
+      }
+    ],
+    "movein": [
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC-001.mp4",
+        "sha256": "2d711642b726b044",
+        "size": 1
+      }
+    ]
+  }
+}

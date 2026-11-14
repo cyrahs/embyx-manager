@@ -170,6 +170,147 @@ async fn managed_scan_cancellation_waits_for_worker_exit_and_wins_worker_error()
     fixture.finish().await;
 }
 
+/// The real file system, but `iterdir` of one directory runs `hook` first: where Python's test
+/// monkeypatches `_find_matching_files` to block.
+#[derive(Default)]
+struct BlockingIterdir {
+    path: Mutex<Option<PathBuf>>,
+    #[allow(clippy::type_complexity, reason = "a test hook")]
+    hook: Mutex<Option<Arc<dyn Fn() + Send + Sync>>>,
+}
+
+impl std::fmt::Debug for BlockingIterdir {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("BlockingIterdir")
+    }
+}
+
+impl crate::fs::MoveFs for BlockingIterdir {
+    fn stat(&self, path: &std::path::Path, follow_symlinks: bool) -> Result<crate::fs::Stat, PyOsError> {
+        crate::fs::LocalMoveFs.stat(path, follow_symlinks)
+    }
+
+    fn readlink(&self, path: &std::path::Path) -> Result<std::ffi::OsString, PyOsError> {
+        crate::fs::LocalMoveFs.readlink(path)
+    }
+
+    fn iterdir(&self, path: &std::path::Path) -> Result<Vec<PathBuf>, PyOsError> {
+        let blocked = self.path.lock().unwrap_or_else(PoisonError::into_inner).as_deref() == Some(path);
+        let hook = self.hook.lock().unwrap_or_else(PoisonError::into_inner).clone();
+        if blocked && let Some(hook) = hook {
+            hook();
+            return Ok(Vec::new());
+        }
+        crate::fs::LocalMoveFs.iterdir(path)
+    }
+
+    fn mkdir(&self, path: &std::path::Path, mode: u32) -> Result<(), PyOsError> {
+        crate::fs::LocalMoveFs.mkdir(path, mode)
+    }
+
+    fn rename_noreplace(&self, source: &std::path::Path, destination: &std::path::Path) -> Result<(), PyOsError> {
+        crate::fs::LocalMoveFs.rename_noreplace(source, destination)
+    }
+
+    fn link(&self, source: &std::path::Path, destination: &std::path::Path) -> Result<(), PyOsError> {
+        crate::fs::LocalMoveFs.link(source, destination)
+    }
+
+    fn rename(&self, source: &std::path::Path, destination: &std::path::Path) -> Result<(), PyOsError> {
+        crate::fs::LocalMoveFs.rename(source, destination)
+    }
+
+    fn unlink(&self, path: &std::path::Path) -> Result<(), PyOsError> {
+        crate::fs::LocalMoveFs.unlink(path)
+    }
+
+    fn read_limited(&self, path: &std::path::Path, limit: usize) -> Result<Vec<u8>, PyOsError> {
+        crate::fs::LocalMoveFs.read_limited(path, limit)
+    }
+
+    fn getcwd(&self) -> Result<PathBuf, PyOsError> {
+        crate::fs::LocalMoveFs.getcwd()
+    }
+}
+
+// py: tests/test_fill_actor_service.py::test_job_cancel_does_not_return_before_managed_scan_worker_exits
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn job_cancel_does_not_return_before_managed_scan_worker_exits() {
+    use crate::jobs::{FillActorJobManager, JobManagerOptions, JobRepository, JobService};
+    use crate::records::CancelJobOutcome;
+
+    let fixture = Fixture::new().await;
+    let fs = Arc::new(BlockingIterdir::default());
+    let mut setup = fixture.setup(&[("actor", &["ABC-001"])], &[("ABC-001", Some("ABC"))]);
+    setup.options.fs = fs.clone();
+    let repository = fixture.db.repository();
+    let service = setup.build(Arc::clone(&repository));
+    let manager = FillActorJobManager::new(
+        Arc::new(service.clone()) as Arc<dyn JobService>,
+        repository as Arc<dyn JobRepository>,
+        JobManagerOptions {
+            max_concurrent_jobs: 1,
+            max_active_jobs: 1,
+            poll_interval: std::time::Duration::from_millis(10),
+            ..JobManagerOptions::default()
+        },
+    )
+    .unwrap();
+    let (started, stop_seen, release, exited) =
+        (Event::default(), Event::default(), Event::default(), Event::default());
+
+    // `blocked_scan`: the scan of the actor root's brand directory waits for its stop.
+    let brand = fixture.paths.actor_brand_path.join("ABC");
+    std::fs::create_dir(&brand).unwrap();
+    *fs.path.lock().unwrap() = Some(brand);
+    *fs.hook.lock().unwrap() = Some({
+        let (service, started, stop_seen, release, exited) = (
+            service.clone(),
+            started.clone(),
+            stop_seen.clone(),
+            release.clone(),
+            exited.clone(),
+        );
+        Arc::new(move || {
+            started.set();
+            let deadline = std::time::Instant::now() + std::time::Duration::from_secs(2);
+            while !service.scan_stop_requested() {
+                assert!(std::time::Instant::now() < deadline, "scan stop was not delivered");
+                std::thread::sleep(std::time::Duration::from_millis(5));
+            }
+            stop_seen.set();
+            assert!(release.wait(2), "test did not release scan worker");
+            exited.set();
+        })
+    });
+    let job = manager.start_plan(&strings(&["actor"])).await.unwrap();
+    assert!(started.wait_async(1).await);
+    let cancel = tokio::spawn({
+        let (manager, job_id) = (manager.clone(), job.job_id.clone());
+        async move { manager.cancel_plan(&job_id).await }
+    });
+    let seen = stop_seen.wait_async(1).await;
+    tokio::task::yield_now().await;
+    let returned_early = cancel.is_finished();
+    release.set();
+    assert!(seen);
+    assert!(!returned_early);
+
+    let result = tokio::time::timeout(std::time::Duration::from_secs(1), cancel)
+        .await
+        .unwrap()
+        .unwrap()
+        .unwrap();
+    assert_eq!(result.outcome, CancelJobOutcome::Cancelled);
+    assert!(exited.is_set());
+    assert_eq!(service.scan_workers(), 0);
+    // The hook holds a clone of the service; let it go before the service closes.
+    *fs.hook.lock().unwrap() = None;
+    manager.aclose().await;
+    service.aclose().await;
+    fixture.finish().await;
+}
+
 /// `PageProgressActorCatalog`.
 struct PageProgressCatalog;
 

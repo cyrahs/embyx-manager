@@ -27,6 +27,7 @@ embyx-clients = { workspace = true, features = ["clouddrive"] }
 embyx-core.workspace = true
 embyx-db.workspace = true
 embyx-monitor.workspace = true
+embyx-fill-actor.workspace = true
 futures-util = { workspace = true, features = ["std"] }
 getrandom.workspace = true
 hex.workspace = true
@@ -44,6 +45,7 @@ tracing-subscriber.workspace = true
 
 [dev-dependencies]
 embyx-api = { path = ".", features = ["test-support"] }
+sqlx.workspace = true
 tempfile.workspace = true
 tokio = { workspace = true, features = ["test-util"] }
 tower = { workspace = true, features = ["util"] }

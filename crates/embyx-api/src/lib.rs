@@ -13,6 +13,7 @@ pub mod auth;
 pub mod body;
 pub mod bootstrap;
 pub mod config_api;
+pub mod fill_actor_api;
 pub mod http;
 pub mod logging;
 pub mod mimetypes;

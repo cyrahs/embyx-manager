@@ -193,6 +193,18 @@ the runner does and `dump()` gives the transcript's `fakes`.
   either build resume a journal the other left. Candidate rows are not dumped as tables, since their
   fingerprints (device, inode, times) differ from run to run; the `candidates` step compares them with the
   fingerprint cut to its size.
+- **WP12 (done):** `fill_actor/api` runs `fill_actor.api` (`tools/scenarios/operations/fill_actor_api.py`,
+  `crates/embyx-api/tests/scenario_fill_actor_api.rs`): WP11's service world (same fakes, clock and `token-N`
+  counter) under a `FillActorJobManager` (one worker, a 10 ms poll) and an app with the fill-actor router, its
+  health block and the token, without the lifespans (the maintenance loop purges by the wall clock). Steps:
+  `request` (`method`, `path`, `headers`, `json`; Python sends it through httpx's ASGI transport, Rust calls the
+  app; reported as status and JSON body with `args.mask_keys` masked, the ages the job view takes from the wall
+  clock), `start`, `recover` (the reaper's pass), `wait` (until nothing is queued and nothing runs under this
+  manager, or with `settled` at all; the rows are polled) and `restart` (a new service, manager and pool). Job
+  rows seeded through `database.sql` stand for another build's: a queued scan this manager runs, an expired
+  lease failed at start, a live lease left to its owner until the reaper's pass after it ends. The rows
+  (`fill_actor_jobs`, `_plans`, `_apply_jobs`, `_move_results`, `_move_journal`) and the tree are equal on both
+  sides.
 - **WP13 (done):** `merge/tasks` runs `MergeTaskRepository` step by step (`merge.tasks`, the same
   `{op, args}` shape); its rows pin the `parts_json` bytes. Timestamps the repository takes from the wall
   clock are `rows.merge_tasks.*` selectors; a WP14 spec can add steps without new operation code.

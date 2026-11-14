@@ -1,0 +1,173 @@
+# The fill-actor job manager and API (WP12) on a local library: the health block, the token
+# and request validation in front of the job queue, job rows another build left behind (a
+# queued scan this manager runs, a running one whose lease expired and fails at start, one
+# whose lease still holds and stays the other owner's until the reaper's pass after it ends),
+# a scan queued through the API, an apply job and its replay by request id, the synchronous
+# apply's stored result, cancels of finished jobs, and the same answers after a restart.
+description = "fill_actor: job manager and API over PostgreSQL, rows of another build resumed"
+operation = "fill_actor.api"
+clock = "2026-09-10T03:00:00+00:00"
+
+[roots]
+names = ["actor", "additional", "movein"]
+
+[[tree]]
+path = "actor/ABC/ABC-002.mp4"
+size = 2
+
+[[tree]]
+path = "additional/ABC/ABC-001.mp4"
+size = 1
+
+[[tree]]
+path = "additional/ABC/ABC-003.mp4"
+size = 3
+
+[database]
+schema = "app"
+tables = ["fill_actor_jobs", "fill_actor_plans", "fill_actor_apply_jobs", "fill_actor_move_results", "fill_actor_move_journal"]
+sql = [
+    """INSERT INTO fill_actor_jobs (job_id, operation, state, created_at, updated_at, plan_id, error_code, owner_id, lease_expires_at, actor_ids_json, progress_stage, progress_completed, progress_total, progress_unit, progress_current, progress_stage_started_at, progress_updated_at) VALUES
+    ('other-queued', 'create_plan', 'queued', '2026-09-10T02:58:00Z', '2026-09-10T02:58:00Z', 'other-queued', NULL, NULL, NULL, '["actor2"]', 'queued', 0, 1, 'actors', NULL, '2026-09-10T02:58:00Z', '2026-09-10T02:58:00Z'),
+    ('other-expired', 'create_plan', 'running', '2026-09-10T02:57:00Z', '2026-09-10T02:59:00Z', 'other-expired', NULL, 'other-owner', '2026-09-10T02:59:30Z', '["actor"]', 'library_scan', 1, 2, 'videos', 'ABC-001', '2026-09-10T02:58:30Z', '2026-09-10T02:59:00Z'),
+    ('other-leased', 'create_plan', 'running', '2026-09-10T02:59:00Z', '2026-09-10T02:59:50Z', 'other-leased', NULL, 'other-owner', '2026-09-10T03:00:20Z', '["actor"]', 'actor_catalog', 0, 1, 'actors', 'actor', '2026-09-10T02:59:10Z', '2026-09-10T02:59:50Z')""",
+]
+
+[args]
+library = { actor = "actor", additional = ["additional"], move_in = "movein" }
+catalog = { actor = ["ABC-001", "ABC-002"], actor2 = ["ABC-003"] }
+api_token = "secret"
+mask_keys = ["elapsed_seconds", "last_progress_seconds", "eta_seconds"]
+
+[[args.steps]]
+op = "request"
+args = { method = "GET", path = "/api/health" }
+
+[[args.steps]]
+op = "request"
+args = { method = "POST", path = "/api/fill-actor/plans", json = { actor_ids = ["actor"] } }
+
+[[args.steps]]
+op = "request"
+args = { method = "POST", path = "/api/fill-actor/plans", headers = { authorization = "Bearer secret" }, json = { actor_ids = [] } }
+
+[[args.steps]]
+op = "request"
+args = { method = "POST", path = "/api/fill-actor/plans", headers = { authorization = "Bearer secret" }, json = { actor_ids = ["actor"], extra = 1 } }
+
+[[args.steps]]
+op = "start"
+
+[[args.steps]]
+op = "wait"
+
+[[args.steps]]
+op = "request"
+args = { method = "GET", path = "/api/fill-actor/plans/other-queued" }
+
+[[args.steps]]
+op = "request"
+args = { method = "GET", path = "/api/fill-actor/plans/other-expired" }
+
+[[args.steps]]
+op = "request"
+args = { method = "GET", path = "/api/fill-actor/plans/other-leased" }
+
+[[args.steps]]
+op = "request"
+args = { method = "POST", path = "/api/fill-actor/plans", headers = { authorization = "Bearer secret" }, json = { actor_ids = ["actor"] }, advance_seconds = 5 }
+
+[[args.steps]]
+op = "wait"
+
+[[args.steps]]
+op = "request"
+args = { method = "GET", path = "/api/fill-actor/plans/token-4" }
+
+[[args.steps]]
+op = "request"
+args = { method = "POST", path = "/api/fill-actor/plans/token-4/apply-jobs", headers = { authorization = "Bearer secret" }, json = { revision = "stale", candidate_ids = ["token-5"], request_id = "request-0000000001" } }
+
+[[args.steps]]
+op = "wait"
+
+[[args.steps]]
+op = "request"
+args = { method = "GET", path = "/api/fill-actor/apply-jobs/request-0000000001" }
+
+[[args.steps]]
+op = "request"
+args = { method = "GET", path = "/api/fill-actor/apply-jobs/request-0000000001", headers = { authorization = "Bearer secret" } }
+
+[[args.steps]]
+op = "request"
+args = { method = "POST", path = "/api/fill-actor/plans/token-4/apply-jobs", headers = { authorization = "Bearer secret" }, json = { revision = "token-6", candidate_ids = ["token-5"], request_id = "request-0000000001" } }
+
+[[args.steps]]
+op = "request"
+args = { method = "POST", path = "/api/fill-actor/plans/token-4/apply-jobs", headers = { authorization = "Bearer secret" }, json = { revision = "token-6", candidate_ids = ["token-5"], request_id = "request-0000000003" }, advance_seconds = 5 }
+
+[[args.steps]]
+op = "wait"
+
+[[args.steps]]
+op = "request"
+args = { method = "GET", path = "/api/fill-actor/apply-jobs/request-0000000003", headers = { authorization = "Bearer secret" } }
+
+[[args.steps]]
+op = "request"
+args = { method = "POST", path = "/api/fill-actor/plans/token-4/apply-jobs", headers = { authorization = "Bearer secret" }, json = { revision = "token-6", candidate_ids = ["token-5"], request_id = "request-0000000003" }, advance_seconds = 5 }
+
+[[args.steps]]
+op = "request"
+args = { method = "GET", path = "/api/fill-actor/apply-jobs/unknown-job", headers = { authorization = "Bearer secret" } }
+
+[[args.steps]]
+op = "request"
+args = { method = "POST", path = "/api/fill-actor/plans/token-4/apply", headers = { authorization = "Bearer secret" }, json = { revision = "token-6", candidate_ids = ["token-5"] } }
+
+[[args.steps]]
+op = "request"
+args = { method = "POST", path = "/api/fill-actor/plans/token-4/cancel", headers = { authorization = "Bearer secret" } }
+
+[[args.steps]]
+op = "request"
+args = { method = "POST", path = "/api/fill-actor/plans/other-queued/apply-jobs", headers = { authorization = "Bearer secret" }, json = { revision = "token-3", candidate_ids = [], request_id = "request-0000000002" }, advance_seconds = 5 }
+
+[[args.steps]]
+op = "wait"
+
+[[args.steps]]
+op = "request"
+args = { method = "GET", path = "/api/fill-actor/apply-jobs/request-0000000002", headers = { authorization = "Bearer secret" } }
+
+[[args.steps]]
+op = "recover"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "request"
+args = { method = "GET", path = "/api/fill-actor/plans/other-leased" }
+
+[[args.steps]]
+op = "request"
+args = { method = "GET", path = "/api/fill-actor/plans/unknown-plan" }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "request"
+args = { method = "GET", path = "/api/fill-actor/plans/token-4" }
+
+[[args.steps]]
+op = "request"
+args = { method = "POST", path = "/api/fill-actor/plans/other-leased/cancel", headers = { authorization = "Bearer secret" } }
+
+[[args.steps]]
+op = "request"
+args = { method = "POST", path = "/api/fill-actor/plans/token-4/apply-jobs", headers = { authorization = "Bearer secret" }, json = { revision = "token-6", candidate_ids = ["token-5"], request_id = "request-0000000003" } }
+
+[[args.steps]]
+op = "request"
+args = { method = "POST", path = "/api/fill-actor/plans/token-4/apply", headers = { authorization = "Bearer secret" }, json = { revision = "token-6", candidate_ids = ["token-5"] } }

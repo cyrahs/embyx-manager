@@ -86,7 +86,7 @@ impl Fixture {
         setup.runtime.root_sentinel = options.root_sentinel.map(str::to_owned);
         setup.runtime.apply_enabled = options.apply_enabled;
         setup.options.token_factory = None;
-        setup.options.mutation_lock = Some(AsyncFileLock::new(self.root.join("move.lock")));
+        setup.options.mutation_lock = Some(AsyncFileLock::new(self.root.join("move.lock")).into());
         if let Some(fs) = options.fs {
             setup = setup.fs(fs);
         }
