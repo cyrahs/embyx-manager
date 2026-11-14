@@ -6,8 +6,18 @@
 //! `merge-worker` body) and the path helpers of `transcode.py` the worker reads
 //! ([`transcode`]); WP14 adds the service, auto-merge, transcode bookkeeping and the merge API.
 
+#[cfg(feature = "db")]
+pub mod auto;
+#[cfg(feature = "db")]
+pub mod catalog;
 pub mod detect;
+#[cfg(feature = "test-support")]
+pub mod fakes;
+#[cfg(feature = "db")]
+pub mod ports;
 mod py;
+#[cfg(feature = "db")]
+pub mod service;
 #[cfg(feature = "db")]
 pub mod tasks;
 pub mod transcode;

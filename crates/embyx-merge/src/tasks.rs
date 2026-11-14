@@ -13,6 +13,8 @@ use embyx_db::database::{Database, DatabaseError};
 use sqlx::postgres::{PgArguments, PgRow};
 use sqlx::{Arguments as _, AssertSqlSafe, Row as _};
 
+use crate::ports::{Clock, system_clock};
+
 /// `MergeState`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum MergeState {
@@ -194,9 +196,17 @@ pub enum TaskError {
 }
 
 /// `MergeTaskRepository`.
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct MergeTaskRepository {
     database: Database,
+    /// `datetime.now(UTC)`, injected so scenarios can pin it.
+    clock: Clock,
+}
+
+impl std::fmt::Debug for MergeTaskRepository {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MergeTaskRepository").finish_non_exhaustive()
+    }
 }
 
 /// The fields of a new task (`create`'s keyword arguments).
@@ -261,7 +271,12 @@ fn from_row(row: &PgRow) -> Result<MergeTask, TaskError> {
 
 impl MergeTaskRepository {
     pub fn new(database: Database) -> Self {
-        Self { database }
+        Self::with_clock(database, system_clock())
+    }
+
+    /// The repository with the time it stamps rows with taken from `clock`.
+    pub fn with_clock(database: Database, clock: Clock) -> Self {
+        Self { database, clock }
     }
 
     pub fn database(&self) -> &Database {
@@ -291,7 +306,7 @@ impl MergeTaskRepository {
         .bind(&task.brand)
         .bind(parts_json)
         .bind(&task.merged_name)
-        .bind(Utc::now())
+        .bind((self.clock)())
         .fetch_one(&pool)
         .await
         .map_err(|error| match &error {
@@ -399,7 +414,7 @@ impl MergeTaskRepository {
         let mut arguments = PgArguments::default();
         let bind_error = |error: sqlx::error::BoxDynError| TaskError::Sqlx(sqlx::Error::Encode(error));
         arguments.add(task_id).map_err(bind_error)?;
-        arguments.add(Utc::now()).map_err(bind_error)?;
+        arguments.add((self.clock)()).map_err(bind_error)?;
         let mut count = 2;
         let mut assignments = vec!["updated_at = $2".to_owned()];
         if let Some(state) = state {

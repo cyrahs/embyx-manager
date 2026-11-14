@@ -1131,8 +1131,10 @@ name = "embyx-merge"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "embyx-clients",
  "embyx-core",
  "embyx-db",
+ "embyx-merge",
  "regex",
  "rustix",
  "sha1",
@@ -1140,6 +1142,8 @@ dependencies = [
  "tempfile",
  "thiserror 2.0.21",
  "tokio",
+ "tokio-util",
+ "tracing",
 ]
 
 [[package]]
