@@ -1547,14 +1547,16 @@ async fn heartbeat_retries_transient_repository_failure() {
         &service,
         &repository,
         JobManagerOptions {
-            lease_duration: SHORT_LEASE,
+            // Twice `SHORT_LEASE`: a renewal may now land 600 ms late before the reaper takes the
+            // lease, not 300 ms, which a loaded CI runner overran once (#102).
+            lease_duration: SHORT_LEASE * 2,
             ..options(1, 2)
         },
     );
     let job = manager.start_plan(&strings(&["actor"])).await.unwrap();
     service.started.wait_for(1.0).await;
     // Python waits 250 ms on its 150 ms lease: longer than one lease.
-    sleep_ms(750).await;
+    sleep_ms(1500).await;
     service.release.set();
 
     let completed = repository
