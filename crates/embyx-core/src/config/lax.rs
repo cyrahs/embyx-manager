@@ -481,6 +481,18 @@ impl<'a> Validator<'a> {
     }
 }
 
+impl Validator<'_> {
+    /// `extra='ignore'` (pydantic's default, the fill actor's stored models): keys that are
+    /// not fields are dropped without an error; the field errors, if any.
+    pub fn finish_ignoring_extras(self) -> Result<(), Vec<ErrorDetail>> {
+        if self.errors.is_empty() {
+            Ok(())
+        } else {
+            Err(self.errors)
+        }
+    }
+}
+
 fn unreachable_default<T>() -> T {
     panic!("a required field is present when its default is asked for")
 }

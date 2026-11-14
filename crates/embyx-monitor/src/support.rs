@@ -128,7 +128,7 @@ impl StoreError {
 
     /// Whether the database refused a write for a unique index (asyncpg's
     /// `UniqueViolationError`).
-    pub(crate) fn is_unique_violation(error: &sqlx::Error) -> bool {
+    pub fn is_unique_violation(error: &sqlx::Error) -> bool {
         matches!(error, sqlx::Error::Database(database) if database.code().as_deref() == Some("23505"))
     }
 

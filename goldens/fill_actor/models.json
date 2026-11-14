@@ -1,0 +1,925 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "fill_actor",
+  "cases": [
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-07-13T10:00:00.123456Z\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [{\"actor_id\": \"actor-1\", \"scraped_count\": 2, \"video_ids\": [\"ABC-001\", \"ABC-002\"], \"error_code\": null, \"actor_name\": \"河北彩花\", \"talent_id\": 5022, \"aliases\": [\"河北彩伽\"], \"error_message\": null}], \"videos\": [{\"video_id\": \"ABC-001\", \"actor_ids\": [\"actor-1\"], \"state\": \"additional_found\", \"release_date\": \"2026-01-01\", \"existing_files\": [\"/library/ABC/ABC-001.mp4\"], \"move_candidates\": [{\"candidate_id\": \"c-1\", \"video_id\": \"ABC-001\", \"file_name\": \"ABC-001 [演员] \\\"x\\\".mp4\", \"source_label\": \"additional-1\", \"destination_conflict\": false}], \"warnings\": [\"不同 行\", \"tab\\there\", \"ctrl\\u0001\"]}]}",
+      "dump": "{\"plan_id\":\"plan-1\",\"revision\":\"revision-1\",\"created_at\":\"2026-07-13T10:00:00.123456Z\",\"expires_at\":\"2026-07-13T11:00:00Z\",\"actors\":[{\"actor_id\":\"actor-1\",\"scraped_count\":2,\"video_ids\":[\"ABC-001\",\"ABC-002\"],\"error_code\":null,\"actor_name\":\"河北彩花\",\"talent_id\":5022,\"aliases\":[\"河北彩伽\"],\"error_message\":null}],\"videos\":[{\"video_id\":\"ABC-001\",\"actor_ids\":[\"actor-1\"],\"state\":\"additional_found\",\"release_date\":\"2026-01-01\",\"existing_files\":[\"/library/ABC/ABC-001.mp4\"],\"move_candidates\":[{\"candidate_id\":\"c-1\",\"video_id\":\"ABC-001\",\"file_name\":\"ABC-001 [演员] \\\"x\\\".mp4\",\"source_label\":\"additional-1\",\"destination_conflict\":false}],\"warnings\":[\"不同 行\",\"tab\\there\",\"ctrl\\u0001\"]}]}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-07-13T10:00:00.123456Z\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [{\"actor_id\": \"actor-1\", \"scraped_count\": 2, \"video_ids\": [\"ABC-001\", \"ABC-002\"], \"error_code\": null, \"actor_name\": \"\\u6cb3\\u5317\\u5f69\\u82b1\", \"talent_id\": 5022, \"aliases\": [\"\\u6cb3\\u5317\\u5f69\\u4f3d\"], \"error_message\": null}], \"videos\": [{\"video_id\": \"ABC-001\", \"actor_ids\": [\"actor-1\"], \"state\": \"additional_found\", \"release_date\": \"2026-01-01\", \"existing_files\": [\"/library/ABC/ABC-001.mp4\"], \"move_candidates\": [{\"candidate_id\": \"c-1\", \"video_id\": \"ABC-001\", \"file_name\": \"ABC-001 [\\u6f14\\u5458] \\\"x\\\".mp4\", \"source_label\": \"additional-1\", \"destination_conflict\": false}], \"warnings\": [\"\\u4e0d\\u540c\\u2028\\u884c\", \"tab\\there\", \"ctrl\\u0001\\u007f\"]}]}",
+      "dump": "{\"plan_id\":\"plan-1\",\"revision\":\"revision-1\",\"created_at\":\"2026-07-13T10:00:00.123456Z\",\"expires_at\":\"2026-07-13T11:00:00Z\",\"actors\":[{\"actor_id\":\"actor-1\",\"scraped_count\":2,\"video_ids\":[\"ABC-001\",\"ABC-002\"],\"error_code\":null,\"actor_name\":\"河北彩花\",\"talent_id\":5022,\"aliases\":[\"河北彩伽\"],\"error_message\":null}],\"videos\":[{\"video_id\":\"ABC-001\",\"actor_ids\":[\"actor-1\"],\"state\":\"additional_found\",\"release_date\":\"2026-01-01\",\"existing_files\":[\"/library/ABC/ABC-001.mp4\"],\"move_candidates\":[{\"candidate_id\":\"c-1\",\"video_id\":\"ABC-001\",\"file_name\":\"ABC-001 [演员] \\\"x\\\".mp4\",\"source_label\":\"additional-1\",\"destination_conflict\":false}],\"warnings\":[\"不同 行\",\"tab\\there\",\"ctrl\\u0001\"]}]}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-07-13T10:00:00.123456Z\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": [], \"extra\": \"ignored\"}",
+      "dump": "{\"plan_id\":\"plan-1\",\"revision\":\"revision-1\",\"created_at\":\"2026-07-13T10:00:00.123456Z\",\"expires_at\":\"2026-07-13T11:00:00Z\",\"actors\":[],\"videos\":[]}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"revision\": \"revision-1\", \"created_at\": \"2026-07-13T10:00:00.123456Z\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"videos\": [{\"video_id\": \"ABC-001\", \"actor_ids\": [\"actor-1\"], \"state\": \"additional_found\", \"release_date\": \"2026-01-01\", \"existing_files\": [\"/library/ABC/ABC-001.mp4\"], \"move_candidates\": [{\"candidate_id\": \"c-1\", \"video_id\": \"ABC-001\", \"file_name\": \"ABC-001 [\\u6f14\\u5458] \\\"x\\\".mp4\", \"source_label\": \"additional-1\", \"destination_conflict\": false}], \"warnings\": [\"\\u4e0d\\u540c\\u2028\\u884c\", \"tab\\there\", \"ctrl\\u0001\\u007f\"]}]}",
+      "errors": [
+        {
+          "type": "missing",
+          "loc": [
+            "plan_id"
+          ],
+          "msg": "Field required"
+        },
+        {
+          "type": "missing",
+          "loc": [
+            "actors"
+          ],
+          "msg": "Field required"
+        }
+      ]
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-07-13T10:00:00.123456Z\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [{\"actor_id\": \"actor-1\", \"scraped_count\": -1, \"video_ids\": [\"ABC-001\", \"ABC-002\"], \"error_code\": null, \"actor_name\": \"\\u6cb3\\u5317\\u5f69\\u82b1\", \"talent_id\": 5022, \"aliases\": [\"\\u6cb3\\u5317\\u5f69\\u4f3d\"], \"error_message\": null}], \"videos\": [{}]}",
+      "errors": [
+        {
+          "type": "greater_than_equal",
+          "loc": [
+            "actors",
+            0,
+            "scraped_count"
+          ],
+          "msg": "Input should be greater than or equal to 0"
+        },
+        {
+          "type": "missing",
+          "loc": [
+            "videos",
+            0,
+            "video_id"
+          ],
+          "msg": "Field required"
+        },
+        {
+          "type": "missing",
+          "loc": [
+            "videos",
+            0,
+            "actor_ids"
+          ],
+          "msg": "Field required"
+        },
+        {
+          "type": "missing",
+          "loc": [
+            "videos",
+            0,
+            "state"
+          ],
+          "msg": "Field required"
+        }
+      ]
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"p\", \"revision\": \"r\", \"created_at\": \"2026-07-13T10:00:00Z\"",
+      "errors": [
+        {
+          "type": "json_invalid",
+          "loc": [],
+          "msg": "Invalid JSON: EOF while parsing an object at line 1 column 70"
+        }
+      ]
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "[]",
+      "errors": [
+        {
+          "type": "model_type",
+          "loc": [],
+          "msg": "Input should be an object"
+        }
+      ]
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "null",
+      "errors": [
+        {
+          "type": "model_type",
+          "loc": [],
+          "msg": "Input should be an object"
+        }
+      ]
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "",
+      "errors": [
+        {
+          "type": "json_invalid",
+          "loc": [],
+          "msg": "Invalid JSON: EOF while parsing a value at line 1 column 0"
+        }
+      ]
+    },
+    {
+      "model": "ActorPlan",
+      "input": "{\"actor_id\": \"a\", \"scraped_count\": 0}",
+      "dump": "{\"actor_id\":\"a\",\"scraped_count\":0,\"video_ids\":[],\"error_code\":null,\"actor_name\":null,\"talent_id\":null,\"aliases\":[],\"error_message\":null}"
+    },
+    {
+      "model": "ActorPlan",
+      "input": "{\"actor_id\": \"actor-1\", \"scraped_count\": 3.0, \"video_ids\": [\"ABC-001\", \"ABC-002\"], \"error_code\": null, \"actor_name\": \"\\u6cb3\\u5317\\u5f69\\u82b1\", \"talent_id\": null, \"aliases\": [], \"error_message\": null}",
+      "dump": "{\"actor_id\":\"actor-1\",\"scraped_count\":3,\"video_ids\":[\"ABC-001\",\"ABC-002\"],\"error_code\":null,\"actor_name\":\"河北彩花\",\"talent_id\":null,\"aliases\":[],\"error_message\":null}"
+    },
+    {
+      "model": "ActorPlan",
+      "input": "{\"actor_id\": \"actor-1\", \"scraped_count\": 3.5, \"video_ids\": [\"ABC-001\", \"ABC-002\"], \"error_code\": null, \"actor_name\": \"\\u6cb3\\u5317\\u5f69\\u82b1\", \"talent_id\": 5022, \"aliases\": [\"\\u6cb3\\u5317\\u5f69\\u4f3d\"], \"error_message\": null}",
+      "errors": [
+        {
+          "type": "int_from_float",
+          "loc": [
+            "scraped_count"
+          ],
+          "msg": "Input should be a valid integer, got a number with a fractional part"
+        }
+      ]
+    },
+    {
+      "model": "ActorPlan",
+      "input": "{\"actor_id\": \"actor-1\", \"scraped_count\": \"3\", \"video_ids\": [\"ABC-001\", \"ABC-002\"], \"error_code\": null, \"actor_name\": \"\\u6cb3\\u5317\\u5f69\\u82b1\", \"talent_id\": 5022, \"aliases\": [\"\\u6cb3\\u5317\\u5f69\\u4f3d\"], \"error_message\": null}",
+      "dump": "{\"actor_id\":\"actor-1\",\"scraped_count\":3,\"video_ids\":[\"ABC-001\",\"ABC-002\"],\"error_code\":null,\"actor_name\":\"河北彩花\",\"talent_id\":5022,\"aliases\":[\"河北彩伽\"],\"error_message\":null}"
+    },
+    {
+      "model": "ActorPlan",
+      "input": "{\"actor_id\": \"actor-1\", \"scraped_count\": true, \"video_ids\": [\"ABC-001\", \"ABC-002\"], \"error_code\": null, \"actor_name\": \"\\u6cb3\\u5317\\u5f69\\u82b1\", \"talent_id\": 5022, \"aliases\": [\"\\u6cb3\\u5317\\u5f69\\u4f3d\"], \"error_message\": null}",
+      "dump": "{\"actor_id\":\"actor-1\",\"scraped_count\":1,\"video_ids\":[\"ABC-001\",\"ABC-002\"],\"error_code\":null,\"actor_name\":\"河北彩花\",\"talent_id\":5022,\"aliases\":[\"河北彩伽\"],\"error_message\":null}"
+    },
+    {
+      "model": "ActorPlan",
+      "input": "{\"actor_id\": \"actor-1\", \"scraped_count\": null, \"video_ids\": [\"ABC-001\", \"ABC-002\"], \"error_code\": null, \"actor_name\": \"\\u6cb3\\u5317\\u5f69\\u82b1\", \"talent_id\": 5022, \"aliases\": [\"\\u6cb3\\u5317\\u5f69\\u4f3d\"], \"error_message\": null}",
+      "errors": [
+        {
+          "type": "int_type",
+          "loc": [
+            "scraped_count"
+          ],
+          "msg": "Input should be a valid integer"
+        }
+      ]
+    },
+    {
+      "model": "ActorPlan",
+      "input": "{\"actor_id\": \"actor-1\", \"scraped_count\": 2, \"video_ids\": \"ABC-001\", \"error_code\": null, \"actor_name\": \"\\u6cb3\\u5317\\u5f69\\u82b1\", \"talent_id\": 5022, \"aliases\": [\"\\u6cb3\\u5317\\u5f69\\u4f3d\"], \"error_message\": null}",
+      "errors": [
+        {
+          "type": "tuple_type",
+          "loc": [
+            "video_ids"
+          ],
+          "msg": "Input should be a valid array"
+        }
+      ]
+    },
+    {
+      "model": "ActorPlan",
+      "input": "{\"actor_id\": \"actor-1\", \"scraped_count\": 2, \"video_ids\": [\"ABC-001\", 1, null], \"error_code\": null, \"actor_name\": \"\\u6cb3\\u5317\\u5f69\\u82b1\", \"talent_id\": 5022, \"aliases\": [\"\\u6cb3\\u5317\\u5f69\\u4f3d\"], \"error_message\": null}",
+      "errors": [
+        {
+          "type": "string_type",
+          "loc": [
+            "video_ids",
+            1
+          ],
+          "msg": "Input should be a valid string"
+        },
+        {
+          "type": "string_type",
+          "loc": [
+            "video_ids",
+            2
+          ],
+          "msg": "Input should be a valid string"
+        }
+      ]
+    },
+    {
+      "model": "ActorPlan",
+      "input": "{\"actor_id\": \"actor-1\", \"scraped_count\": 2, \"video_ids\": [\"ABC-001\", \"ABC-002\"], \"error_code\": \"not_found\", \"actor_name\": \"\\u6cb3\\u5317\\u5f69\\u82b1\", \"talent_id\": 5022, \"aliases\": [\"\\u6cb3\\u5317\\u5f69\\u4f3d\"], \"error_message\": \"AVBase: 403 \\\"x\\\"\"}",
+      "dump": "{\"actor_id\":\"actor-1\",\"scraped_count\":2,\"video_ids\":[\"ABC-001\",\"ABC-002\"],\"error_code\":\"not_found\",\"actor_name\":\"河北彩花\",\"talent_id\":5022,\"aliases\":[\"河北彩伽\"],\"error_message\":\"AVBase: 403 \\\"x\\\"\"}"
+    },
+    {
+      "model": "ActorPlan",
+      "input": "{\"actor_id\": \"actor-1\", \"scraped_count\": 2, \"video_ids\": [\"ABC-001\", \"ABC-002\"], \"error_code\": null, \"actor_name\": \"\\u6cb3\\u5317\\u5f69\\u82b1\", \"talent_id\": \"5022\", \"aliases\": [\"\\u6cb3\\u5317\\u5f69\\u4f3d\"], \"error_message\": null}",
+      "dump": "{\"actor_id\":\"actor-1\",\"scraped_count\":2,\"video_ids\":[\"ABC-001\",\"ABC-002\"],\"error_code\":null,\"actor_name\":\"河北彩花\",\"talent_id\":5022,\"aliases\":[\"河北彩伽\"],\"error_message\":null}"
+    },
+    {
+      "model": "ActorPlan",
+      "input": "{\"actor_id\": \"actor-1\", \"scraped_count\": 2, \"video_ids\": [\"ABC-001\", \"ABC-002\"], \"error_code\": null, \"actor_name\": \"\\u6cb3\\u5317\\u5f69\\u82b1\", \"talent_id\": 5022.0, \"aliases\": [\"\\u6cb3\\u5317\\u5f69\\u4f3d\"], \"error_message\": null}",
+      "dump": "{\"actor_id\":\"actor-1\",\"scraped_count\":2,\"video_ids\":[\"ABC-001\",\"ABC-002\"],\"error_code\":null,\"actor_name\":\"河北彩花\",\"talent_id\":5022,\"aliases\":[\"河北彩伽\"],\"error_message\":null}"
+    },
+    {
+      "model": "ActorPlan",
+      "input": "{\"actor_id\": 7, \"scraped_count\": 2, \"video_ids\": [\"ABC-001\", \"ABC-002\"], \"error_code\": 1, \"actor_name\": \"\\u6cb3\\u5317\\u5f69\\u82b1\", \"talent_id\": 5022, \"aliases\": [\"\\u6cb3\\u5317\\u5f69\\u4f3d\"], \"error_message\": null}",
+      "errors": [
+        {
+          "type": "string_type",
+          "loc": [
+            "actor_id"
+          ],
+          "msg": "Input should be a valid string"
+        },
+        {
+          "type": "string_type",
+          "loc": [
+            "error_code"
+          ],
+          "msg": "Input should be a valid string"
+        }
+      ]
+    },
+    {
+      "model": "ActorPlan",
+      "input": "{\"actor_id\": \"actor-1\", \"scraped_count\": 1000000000000000000000000000000, \"video_ids\": [\"ABC-001\", \"ABC-002\"], \"error_code\": null, \"actor_name\": \"\\u6cb3\\u5317\\u5f69\\u82b1\", \"talent_id\": 5022, \"aliases\": [\"\\u6cb3\\u5317\\u5f69\\u4f3d\"], \"error_message\": null}",
+      "dump": "{\"actor_id\":\"actor-1\",\"scraped_count\":1000000000000000000000000000000,\"video_ids\":[\"ABC-001\",\"ABC-002\"],\"error_code\":null,\"actor_name\":\"河北彩花\",\"talent_id\":5022,\"aliases\":[\"河北彩伽\"],\"error_message\":null}"
+    },
+    {
+      "model": "MoveCandidate",
+      "input": "{\"candidate_id\": \"c-1\", \"video_id\": \"ABC-001\", \"file_name\": \"ABC-001 [演员] \\\"x\\\".mp4\", \"source_label\": \"additional-1\", \"destination_conflict\": false}",
+      "dump": "{\"candidate_id\":\"c-1\",\"video_id\":\"ABC-001\",\"file_name\":\"ABC-001 [演员] \\\"x\\\".mp4\",\"source_label\":\"additional-1\",\"destination_conflict\":false}"
+    },
+    {
+      "model": "MoveCandidate",
+      "input": "{\"candidate_id\": \"c-1\", \"video_id\": \"ABC-001\", \"file_name\": \"ABC-001 [\\u6f14\\u5458] \\\"x\\\".mp4\", \"source_label\": \"additional-1\", \"destination_conflict\": \"true\"}",
+      "dump": "{\"candidate_id\":\"c-1\",\"video_id\":\"ABC-001\",\"file_name\":\"ABC-001 [演员] \\\"x\\\".mp4\",\"source_label\":\"additional-1\",\"destination_conflict\":true}"
+    },
+    {
+      "model": "MoveCandidate",
+      "input": "{\"candidate_id\": \"c-1\", \"video_id\": \"ABC-001\", \"file_name\": \"ABC-001 [\\u6f14\\u5458] \\\"x\\\".mp4\", \"source_label\": \"additional-1\", \"destination_conflict\": 1}",
+      "dump": "{\"candidate_id\":\"c-1\",\"video_id\":\"ABC-001\",\"file_name\":\"ABC-001 [演员] \\\"x\\\".mp4\",\"source_label\":\"additional-1\",\"destination_conflict\":true}"
+    },
+    {
+      "model": "MoveCandidate",
+      "input": "{\"candidate_id\": \"c-1\", \"video_id\": \"ABC-001\", \"file_name\": \"ABC-001 [\\u6f14\\u5458] \\\"x\\\".mp4\", \"source_label\": \"additional-1\", \"destination_conflict\": \"maybe\"}",
+      "errors": [
+        {
+          "type": "bool_parsing",
+          "loc": [
+            "destination_conflict"
+          ],
+          "msg": "Input should be a valid boolean, unable to interpret input"
+        }
+      ]
+    },
+    {
+      "model": "MoveCandidate",
+      "input": "{\"candidate_id\": \"c-1\", \"video_id\": \"ABC-001\", \"file_name\": \"ABC-001 [\\u6f14\\u5458] \\\"x\\\".mp4\", \"source_label\": \"additional-1\"}",
+      "errors": [
+        {
+          "type": "missing",
+          "loc": [
+            "destination_conflict"
+          ],
+          "msg": "Field required"
+        }
+      ]
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"ABC-001\", \"actor_ids\": [\"actor-1\"], \"state\": \"additional_found\", \"release_date\": \"2026-01-01\", \"existing_files\": [\"/library/ABC/ABC-001.mp4\"], \"move_candidates\": [{\"candidate_id\": \"c-1\", \"video_id\": \"ABC-001\", \"file_name\": \"ABC-001 [演员] \\\"x\\\".mp4\", \"source_label\": \"additional-1\", \"destination_conflict\": false}], \"warnings\": [\"不同 行\", \"tab\\there\", \"ctrl\\u0001\"]}",
+      "dump": "{\"video_id\":\"ABC-001\",\"actor_ids\":[\"actor-1\"],\"state\":\"additional_found\",\"release_date\":\"2026-01-01\",\"existing_files\":[\"/library/ABC/ABC-001.mp4\"],\"move_candidates\":[{\"candidate_id\":\"c-1\",\"video_id\":\"ABC-001\",\"file_name\":\"ABC-001 [演员] \\\"x\\\".mp4\",\"source_label\":\"additional-1\",\"destination_conflict\":false}],\"warnings\":[\"不同 行\",\"tab\\there\",\"ctrl\\u0001\"]}"
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"X\", \"actor_ids\": [], \"state\": \"queued\"}",
+      "dump": "{\"video_id\":\"X\",\"actor_ids\":[],\"state\":\"queued\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[],\"warnings\":[]}"
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"ABC-001\", \"actor_ids\": [\"actor-1\"], \"state\": \"bogus\", \"release_date\": \"2026-01-01\", \"existing_files\": [\"/library/ABC/ABC-001.mp4\"], \"move_candidates\": [{\"candidate_id\": \"c-1\", \"video_id\": \"ABC-001\", \"file_name\": \"ABC-001 [\\u6f14\\u5458] \\\"x\\\".mp4\", \"source_label\": \"additional-1\", \"destination_conflict\": false}], \"warnings\": [\"\\u4e0d\\u540c\\u2028\\u884c\", \"tab\\there\", \"ctrl\\u0001\\u007f\"]}",
+      "errors": [
+        {
+          "type": "enum",
+          "loc": [
+            "state"
+          ],
+          "msg": "Input should be 'exists', 'additional_found', 'magnet_found', 'queued', 'submitted', 'already_tracked', 'submit_failed', 'missing', 'invalid_video_id' or 'scan_failed'"
+        }
+      ]
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"ABC-001\", \"actor_ids\": [\"actor-1\"], \"state\": \"QUEUED\", \"release_date\": \"2026-01-01\", \"existing_files\": [\"/library/ABC/ABC-001.mp4\"], \"move_candidates\": [{\"candidate_id\": \"c-1\", \"video_id\": \"ABC-001\", \"file_name\": \"ABC-001 [\\u6f14\\u5458] \\\"x\\\".mp4\", \"source_label\": \"additional-1\", \"destination_conflict\": false}], \"warnings\": [\"\\u4e0d\\u540c\\u2028\\u884c\", \"tab\\there\", \"ctrl\\u0001\\u007f\"]}",
+      "errors": [
+        {
+          "type": "enum",
+          "loc": [
+            "state"
+          ],
+          "msg": "Input should be 'exists', 'additional_found', 'magnet_found', 'queued', 'submitted', 'already_tracked', 'submit_failed', 'missing', 'invalid_video_id' or 'scan_failed'"
+        }
+      ]
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"ABC-001\", \"actor_ids\": [\"actor-1\"], \"state\": null, \"release_date\": \"2026-01-01\", \"existing_files\": [\"/library/ABC/ABC-001.mp4\"], \"move_candidates\": [{\"candidate_id\": \"c-1\", \"video_id\": \"ABC-001\", \"file_name\": \"ABC-001 [\\u6f14\\u5458] \\\"x\\\".mp4\", \"source_label\": \"additional-1\", \"destination_conflict\": false}], \"warnings\": [\"\\u4e0d\\u540c\\u2028\\u884c\", \"tab\\there\", \"ctrl\\u0001\\u007f\"]}",
+      "errors": [
+        {
+          "type": "enum",
+          "loc": [
+            "state"
+          ],
+          "msg": "Input should be 'exists', 'additional_found', 'magnet_found', 'queued', 'submitted', 'already_tracked', 'submit_failed', 'missing', 'invalid_video_id' or 'scan_failed'"
+        }
+      ]
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"ABC-001\", \"actor_ids\": [\"actor-1\"], \"state\": \"additional_found\", \"release_date\": \"2026-01-01\", \"existing_files\": [\"/library/ABC/ABC-001.mp4\"], \"move_candidates\": [{\"video_id\": \"ABC-001\", \"file_name\": \"ABC-001 [\\u6f14\\u5458] \\\"x\\\".mp4\", \"source_label\": \"additional-1\", \"destination_conflict\": false}], \"warnings\": [\"\\u4e0d\\u540c\\u2028\\u884c\", \"tab\\there\", \"ctrl\\u0001\\u007f\"]}",
+      "errors": [
+        {
+          "type": "missing",
+          "loc": [
+            "move_candidates",
+            0,
+            "candidate_id"
+          ],
+          "msg": "Field required"
+        }
+      ]
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"ABC-001\", \"actor_ids\": [\"actor-1\"], \"state\": \"additional_found\", \"release_date\": \"2026-01-01\", \"existing_files\": [\"/library/ABC/ABC-001.mp4\"], \"move_candidates\": {}, \"warnings\": [\"\\u4e0d\\u540c\\u2028\\u884c\", \"tab\\there\", \"ctrl\\u0001\\u007f\"]}",
+      "errors": [
+        {
+          "type": "tuple_type",
+          "loc": [
+            "move_candidates"
+          ],
+          "msg": "Input should be a valid array"
+        }
+      ]
+    },
+    {
+      "model": "MoveResult",
+      "input": "{\"candidate_id\": \"c-1\", \"video_id\": \"ABC-001\", \"file_name\": \"ABC-001.mp4\", \"state\": \"moved\", \"error_code\": null}",
+      "dump": "{\"candidate_id\":\"c-1\",\"video_id\":\"ABC-001\",\"file_name\":\"ABC-001.mp4\",\"state\":\"moved\",\"error_code\":null}"
+    },
+    {
+      "model": "MoveResult",
+      "input": "{\"candidate_id\": \"c-1\", \"video_id\": \"ABC-001\", \"file_name\": \"ABC-001.mp4\", \"state\": \"failed\", \"error_code\": \"move_failed\"}",
+      "dump": "{\"candidate_id\":\"c-1\",\"video_id\":\"ABC-001\",\"file_name\":\"ABC-001.mp4\",\"state\":\"failed\",\"error_code\":\"move_failed\"}"
+    },
+    {
+      "model": "MoveResult",
+      "input": "{\"candidate_id\": \"c-1\", \"video_id\": \"ABC-001\", \"file_name\": \"ABC-001.mp4\", \"state\": \"Moved\", \"error_code\": null}",
+      "errors": [
+        {
+          "type": "enum",
+          "loc": [
+            "state"
+          ],
+          "msg": "Input should be 'moved', 'stale', 'conflict', 'invalid_path' or 'failed'"
+        }
+      ]
+    },
+    {
+      "model": "MoveResult",
+      "input": "{\"candidate_id\": \"c-1\", \"video_id\": \"ABC-001\", \"state\": \"moved\"}",
+      "errors": [
+        {
+          "type": "missing",
+          "loc": [
+            "file_name"
+          ],
+          "msg": "Field required"
+        }
+      ]
+    },
+    {
+      "model": "ApplyResult",
+      "input": "{\"plan_id\": \"p\", \"revision\": \"r\", \"state\": \"partial_failed\", \"results\": [{\"candidate_id\": \"c-1\", \"video_id\": \"ABC-001\", \"file_name\": \"ABC-001.mp4\", \"state\": \"moved\", \"error_code\": null}, {\"candidate_id\": \"c-1\", \"video_id\": \"ABC-001\", \"file_name\": \"ABC-001.mp4\", \"state\": \"moved\", \"error_code\": null}]}",
+      "dump": "{\"plan_id\":\"p\",\"revision\":\"r\",\"state\":\"partial_failed\",\"results\":[{\"candidate_id\":\"c-1\",\"video_id\":\"ABC-001\",\"file_name\":\"ABC-001.mp4\",\"state\":\"moved\",\"error_code\":null},{\"candidate_id\":\"c-1\",\"video_id\":\"ABC-001\",\"file_name\":\"ABC-001.mp4\",\"state\":\"moved\",\"error_code\":null}]}"
+    },
+    {
+      "model": "ApplyResult",
+      "input": "{\"plan_id\": \"p\", \"revision\": \"r\", \"state\": \"succeeded\", \"results\": []}",
+      "dump": "{\"plan_id\":\"p\",\"revision\":\"r\",\"state\":\"succeeded\",\"results\":[]}"
+    },
+    {
+      "model": "ApplyResult",
+      "input": "{\"plan_id\": \"p\", \"revision\": \"r\", \"state\": \"done\", \"results\": [{}]}",
+      "errors": [
+        {
+          "type": "enum",
+          "loc": [
+            "state"
+          ],
+          "msg": "Input should be 'succeeded', 'partial_failed' or 'failed'"
+        },
+        {
+          "type": "missing",
+          "loc": [
+            "results",
+            0,
+            "candidate_id"
+          ],
+          "msg": "Field required"
+        },
+        {
+          "type": "missing",
+          "loc": [
+            "results",
+            0,
+            "video_id"
+          ],
+          "msg": "Field required"
+        },
+        {
+          "type": "missing",
+          "loc": [
+            "results",
+            0,
+            "file_name"
+          ],
+          "msg": "Field required"
+        },
+        {
+          "type": "missing",
+          "loc": [
+            "results",
+            0,
+            "state"
+          ],
+          "msg": "Field required"
+        }
+      ]
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"X\", \"actor_ids\": [\"a\"], \"state\": \"exists\"}",
+      "dump": "{\"video_id\":\"X\",\"actor_ids\":[\"a\"],\"state\":\"exists\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[],\"warnings\":[]}"
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"X\", \"actor_ids\": [\"a\"], \"state\": \"additional_found\"}",
+      "dump": "{\"video_id\":\"X\",\"actor_ids\":[\"a\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[],\"warnings\":[]}"
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"X\", \"actor_ids\": [\"a\"], \"state\": \"magnet_found\"}",
+      "dump": "{\"video_id\":\"X\",\"actor_ids\":[\"a\"],\"state\":\"magnet_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[],\"warnings\":[]}"
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"X\", \"actor_ids\": [\"a\"], \"state\": \"queued\"}",
+      "dump": "{\"video_id\":\"X\",\"actor_ids\":[\"a\"],\"state\":\"queued\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[],\"warnings\":[]}"
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"X\", \"actor_ids\": [\"a\"], \"state\": \"submitted\"}",
+      "dump": "{\"video_id\":\"X\",\"actor_ids\":[\"a\"],\"state\":\"submitted\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[],\"warnings\":[]}"
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"X\", \"actor_ids\": [\"a\"], \"state\": \"already_tracked\"}",
+      "dump": "{\"video_id\":\"X\",\"actor_ids\":[\"a\"],\"state\":\"already_tracked\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[],\"warnings\":[]}"
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"X\", \"actor_ids\": [\"a\"], \"state\": \"submit_failed\"}",
+      "dump": "{\"video_id\":\"X\",\"actor_ids\":[\"a\"],\"state\":\"submit_failed\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[],\"warnings\":[]}"
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"X\", \"actor_ids\": [\"a\"], \"state\": \"missing\"}",
+      "dump": "{\"video_id\":\"X\",\"actor_ids\":[\"a\"],\"state\":\"missing\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[],\"warnings\":[]}"
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"X\", \"actor_ids\": [\"a\"], \"state\": \"invalid_video_id\"}",
+      "dump": "{\"video_id\":\"X\",\"actor_ids\":[\"a\"],\"state\":\"invalid_video_id\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[],\"warnings\":[]}"
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"X\", \"actor_ids\": [\"a\"], \"state\": \"scan_failed\"}",
+      "dump": "{\"video_id\":\"X\",\"actor_ids\":[\"a\"],\"state\":\"scan_failed\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[],\"warnings\":[]}"
+    },
+    {
+      "model": "MoveResult",
+      "input": "{\"candidate_id\": \"c-1\", \"video_id\": \"ABC-001\", \"file_name\": \"ABC-001.mp4\", \"state\": \"moved\", \"error_code\": null}",
+      "dump": "{\"candidate_id\":\"c-1\",\"video_id\":\"ABC-001\",\"file_name\":\"ABC-001.mp4\",\"state\":\"moved\",\"error_code\":null}"
+    },
+    {
+      "model": "MoveResult",
+      "input": "{\"candidate_id\": \"c-1\", \"video_id\": \"ABC-001\", \"file_name\": \"ABC-001.mp4\", \"state\": \"stale\", \"error_code\": null}",
+      "dump": "{\"candidate_id\":\"c-1\",\"video_id\":\"ABC-001\",\"file_name\":\"ABC-001.mp4\",\"state\":\"stale\",\"error_code\":null}"
+    },
+    {
+      "model": "MoveResult",
+      "input": "{\"candidate_id\": \"c-1\", \"video_id\": \"ABC-001\", \"file_name\": \"ABC-001.mp4\", \"state\": \"conflict\", \"error_code\": null}",
+      "dump": "{\"candidate_id\":\"c-1\",\"video_id\":\"ABC-001\",\"file_name\":\"ABC-001.mp4\",\"state\":\"conflict\",\"error_code\":null}"
+    },
+    {
+      "model": "MoveResult",
+      "input": "{\"candidate_id\": \"c-1\", \"video_id\": \"ABC-001\", \"file_name\": \"ABC-001.mp4\", \"state\": \"invalid_path\", \"error_code\": null}",
+      "dump": "{\"candidate_id\":\"c-1\",\"video_id\":\"ABC-001\",\"file_name\":\"ABC-001.mp4\",\"state\":\"invalid_path\",\"error_code\":null}"
+    },
+    {
+      "model": "MoveResult",
+      "input": "{\"candidate_id\": \"c-1\", \"video_id\": \"ABC-001\", \"file_name\": \"ABC-001.mp4\", \"state\": \"failed\", \"error_code\": null}",
+      "dump": "{\"candidate_id\":\"c-1\",\"video_id\":\"ABC-001\",\"file_name\":\"ABC-001.mp4\",\"state\":\"failed\",\"error_code\":null}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-07-13T10:00:00Z\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "dump": "{\"plan_id\":\"plan-1\",\"revision\":\"revision-1\",\"created_at\":\"2026-07-13T10:00:00Z\",\"expires_at\":\"2026-07-13T11:00:00Z\",\"actors\":[],\"videos\":[]}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-07-13T10:00:00.120000Z\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "dump": "{\"plan_id\":\"plan-1\",\"revision\":\"revision-1\",\"created_at\":\"2026-07-13T10:00:00.120000Z\",\"expires_at\":\"2026-07-13T11:00:00Z\",\"actors\":[],\"videos\":[]}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-07-13T10:00:00.1Z\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "dump": "{\"plan_id\":\"plan-1\",\"revision\":\"revision-1\",\"created_at\":\"2026-07-13T10:00:00.100000Z\",\"expires_at\":\"2026-07-13T11:00:00Z\",\"actors\":[],\"videos\":[]}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-07-13T10:00:00.1234567Z\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "dump": "{\"plan_id\":\"plan-1\",\"revision\":\"revision-1\",\"created_at\":\"2026-07-13T10:00:00.123456Z\",\"expires_at\":\"2026-07-13T11:00:00Z\",\"actors\":[],\"videos\":[]}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-07-13T10:00:00.123456789+09:00\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "dump": "{\"plan_id\":\"plan-1\",\"revision\":\"revision-1\",\"created_at\":\"2026-07-13T10:00:00.123456+09:00\",\"expires_at\":\"2026-07-13T11:00:00Z\",\"actors\":[],\"videos\":[]}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-07-13T10:00:00+09:00\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "dump": "{\"plan_id\":\"plan-1\",\"revision\":\"revision-1\",\"created_at\":\"2026-07-13T10:00:00+09:00\",\"expires_at\":\"2026-07-13T11:00:00Z\",\"actors\":[],\"videos\":[]}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-07-13T10:00:00-05:30\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "dump": "{\"plan_id\":\"plan-1\",\"revision\":\"revision-1\",\"created_at\":\"2026-07-13T10:00:00-05:30\",\"expires_at\":\"2026-07-13T11:00:00Z\",\"actors\":[],\"videos\":[]}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-07-13T10:00:00-00:00\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "dump": "{\"plan_id\":\"plan-1\",\"revision\":\"revision-1\",\"created_at\":\"2026-07-13T10:00:00Z\",\"expires_at\":\"2026-07-13T11:00:00Z\",\"actors\":[],\"videos\":[]}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-07-13T10:00:00+0900\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "dump": "{\"plan_id\":\"plan-1\",\"revision\":\"revision-1\",\"created_at\":\"2026-07-13T10:00:00+09:00\",\"expires_at\":\"2026-07-13T11:00:00Z\",\"actors\":[],\"videos\":[]}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-07-13 10:00\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "dump": "{\"plan_id\":\"plan-1\",\"revision\":\"revision-1\",\"created_at\":\"2026-07-13T10:00:00\",\"expires_at\":\"2026-07-13T11:00:00Z\",\"actors\":[],\"videos\":[]}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-07-13t10:00:00z\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "dump": "{\"plan_id\":\"plan-1\",\"revision\":\"revision-1\",\"created_at\":\"2026-07-13T10:00:00Z\",\"expires_at\":\"2026-07-13T11:00:00Z\",\"actors\":[],\"videos\":[]}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-07-13T10:00:00\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "dump": "{\"plan_id\":\"plan-1\",\"revision\":\"revision-1\",\"created_at\":\"2026-07-13T10:00:00\",\"expires_at\":\"2026-07-13T11:00:00Z\",\"actors\":[],\"videos\":[]}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-07-13\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "dump": "{\"plan_id\":\"plan-1\",\"revision\":\"revision-1\",\"created_at\":\"2026-07-13T00:00:00\",\"expires_at\":\"2026-07-13T11:00:00Z\",\"actors\":[],\"videos\":[]}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"0001-01-01T00:00:00Z\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "dump": "{\"plan_id\":\"plan-1\",\"revision\":\"revision-1\",\"created_at\":\"0001-01-01T00:00:00Z\",\"expires_at\":\"2026-07-13T11:00:00Z\",\"actors\":[],\"videos\":[]}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"9999-12-31T23:59:59.999999-01:00\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "dump": "{\"plan_id\":\"plan-1\",\"revision\":\"revision-1\",\"created_at\":\"9999-12-31T23:59:59.999999-01:00\",\"expires_at\":\"2026-07-13T11:00:00Z\",\"actors\":[],\"videos\":[]}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": 1700000000, \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "dump": "{\"plan_id\":\"plan-1\",\"revision\":\"revision-1\",\"created_at\":\"2023-11-14T22:13:20Z\",\"expires_at\":\"2026-07-13T11:00:00Z\",\"actors\":[],\"videos\":[]}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": 1700000000.5, \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "dump": "{\"plan_id\":\"plan-1\",\"revision\":\"revision-1\",\"created_at\":\"2023-11-14T22:13:20.500000Z\",\"expires_at\":\"2026-07-13T11:00:00Z\",\"actors\":[],\"videos\":[]}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"1700000000\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "dump": "{\"plan_id\":\"plan-1\",\"revision\":\"revision-1\",\"created_at\":\"2023-11-14T22:13:20Z\",\"expires_at\":\"2026-07-13T11:00:00Z\",\"actors\":[],\"videos\":[]}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": -1, \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "dump": "{\"plan_id\":\"plan-1\",\"revision\":\"revision-1\",\"created_at\":\"1969-12-31T23:59:59Z\",\"expires_at\":\"2026-07-13T11:00:00Z\",\"actors\":[],\"videos\":[]}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": 20000000000, \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "dump": "{\"plan_id\":\"plan-1\",\"revision\":\"revision-1\",\"created_at\":\"2603-10-11T11:33:20Z\",\"expires_at\":\"2026-07-13T11:00:00Z\",\"actors\":[],\"videos\":[]}"
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-07-13T10:00:00+09\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "errors": [
+        {
+          "type": "datetime_from_date_parsing",
+          "loc": [
+            "created_at"
+          ],
+          "msg": "Input should be a valid datetime or date, unexpected extra characters at the end of the input"
+        }
+      ]
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-07-13T25:00:00\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "errors": [
+        {
+          "type": "datetime_from_date_parsing",
+          "loc": [
+            "created_at"
+          ],
+          "msg": "Input should be a valid datetime or date, unexpected extra characters at the end of the input"
+        }
+      ]
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-07-13T10:00:60\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "errors": [
+        {
+          "type": "datetime_from_date_parsing",
+          "loc": [
+            "created_at"
+          ],
+          "msg": "Input should be a valid datetime or date, unexpected extra characters at the end of the input"
+        }
+      ]
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-07-13T10:00:00+24:00\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "errors": [
+        {
+          "type": "datetime_from_date_parsing",
+          "loc": [
+            "created_at"
+          ],
+          "msg": "Input should be a valid datetime or date, unexpected extra characters at the end of the input"
+        }
+      ]
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-07-13T10:00:00.Z\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "errors": [
+        {
+          "type": "datetime_from_date_parsing",
+          "loc": [
+            "created_at"
+          ],
+          "msg": "Input should be a valid datetime or date, unexpected extra characters at the end of the input"
+        }
+      ]
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-7-13T10:00:00\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "errors": [
+        {
+          "type": "datetime_from_date_parsing",
+          "loc": [
+            "created_at"
+          ],
+          "msg": "Input should be a valid datetime or date, invalid character in month"
+        }
+      ]
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-02-30T10:00:00\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "errors": [
+        {
+          "type": "datetime_from_date_parsing",
+          "loc": [
+            "created_at"
+          ],
+          "msg": "Input should be a valid datetime or date, day value is outside expected range"
+        }
+      ]
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"2026-07-13T10:00:00 \", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "errors": [
+        {
+          "type": "datetime_from_date_parsing",
+          "loc": [
+            "created_at"
+          ],
+          "msg": "Input should be a valid datetime or date, unexpected extra characters at the end of the input"
+        }
+      ]
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "errors": [
+        {
+          "type": "datetime_from_date_parsing",
+          "loc": [
+            "created_at"
+          ],
+          "msg": "Input should be a valid datetime or date, input is too short"
+        }
+      ]
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": \"x\", \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "errors": [
+        {
+          "type": "datetime_from_date_parsing",
+          "loc": [
+            "created_at"
+          ],
+          "msg": "Input should be a valid datetime or date, input is too short"
+        }
+      ]
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": null, \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "errors": [
+        {
+          "type": "datetime_type",
+          "loc": [
+            "created_at"
+          ],
+          "msg": "Input should be a valid datetime"
+        }
+      ]
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": true, \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "errors": [
+        {
+          "type": "datetime_type",
+          "loc": [
+            "created_at"
+          ],
+          "msg": "Input should be a valid datetime"
+        }
+      ]
+    },
+    {
+      "model": "FillActorPlan",
+      "input": "{\"plan_id\": \"plan-1\", \"revision\": \"revision-1\", \"created_at\": [], \"expires_at\": \"2026-07-13T11:00:00Z\", \"actors\": [], \"videos\": []}",
+      "errors": [
+        {
+          "type": "datetime_type",
+          "loc": [
+            "created_at"
+          ],
+          "msg": "Input should be a valid datetime"
+        }
+      ]
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"ABC-001\", \"actor_ids\": [\"actor-1\"], \"state\": \"additional_found\", \"release_date\": \"2026-01-01\", \"existing_files\": [\"/library/ABC/ABC-001.mp4\"], \"move_candidates\": [], \"warnings\": [\"\\u4e0d\\u540c\\u2028\\u884c\", \"tab\\there\", \"ctrl\\u0001\\u007f\"]}",
+      "dump": "{\"video_id\":\"ABC-001\",\"actor_ids\":[\"actor-1\"],\"state\":\"additional_found\",\"release_date\":\"2026-01-01\",\"existing_files\":[\"/library/ABC/ABC-001.mp4\"],\"move_candidates\":[],\"warnings\":[\"不同 行\",\"tab\\there\",\"ctrl\\u0001\"]}"
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"ABC-001\", \"actor_ids\": [\"actor-1\"], \"state\": \"additional_found\", \"release_date\": \"2026-01-01T00:00:00\", \"existing_files\": [\"/library/ABC/ABC-001.mp4\"], \"move_candidates\": [], \"warnings\": [\"\\u4e0d\\u540c\\u2028\\u884c\", \"tab\\there\", \"ctrl\\u0001\\u007f\"]}",
+      "dump": "{\"video_id\":\"ABC-001\",\"actor_ids\":[\"actor-1\"],\"state\":\"additional_found\",\"release_date\":\"2026-01-01\",\"existing_files\":[\"/library/ABC/ABC-001.mp4\"],\"move_candidates\":[],\"warnings\":[\"不同 行\",\"tab\\there\",\"ctrl\\u0001\"]}"
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"ABC-001\", \"actor_ids\": [\"actor-1\"], \"state\": \"additional_found\", \"release_date\": \"2026-01-01T00:00:00Z\", \"existing_files\": [\"/library/ABC/ABC-001.mp4\"], \"move_candidates\": [], \"warnings\": [\"\\u4e0d\\u540c\\u2028\\u884c\", \"tab\\there\", \"ctrl\\u0001\\u007f\"]}",
+      "dump": "{\"video_id\":\"ABC-001\",\"actor_ids\":[\"actor-1\"],\"state\":\"additional_found\",\"release_date\":\"2026-01-01\",\"existing_files\":[\"/library/ABC/ABC-001.mp4\"],\"move_candidates\":[],\"warnings\":[\"不同 行\",\"tab\\there\",\"ctrl\\u0001\"]}"
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"ABC-001\", \"actor_ids\": [\"actor-1\"], \"state\": \"additional_found\", \"release_date\": \"2026-01-01T00:00:00+09:00\", \"existing_files\": [\"/library/ABC/ABC-001.mp4\"], \"move_candidates\": [], \"warnings\": [\"\\u4e0d\\u540c\\u2028\\u884c\", \"tab\\there\", \"ctrl\\u0001\\u007f\"]}",
+      "dump": "{\"video_id\":\"ABC-001\",\"actor_ids\":[\"actor-1\"],\"state\":\"additional_found\",\"release_date\":\"2026-01-01\",\"existing_files\":[\"/library/ABC/ABC-001.mp4\"],\"move_candidates\":[],\"warnings\":[\"不同 行\",\"tab\\there\",\"ctrl\\u0001\"]}"
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"ABC-001\", \"actor_ids\": [\"actor-1\"], \"state\": \"additional_found\", \"release_date\": \"2026-01-01T01:00:00\", \"existing_files\": [\"/library/ABC/ABC-001.mp4\"], \"move_candidates\": [], \"warnings\": [\"\\u4e0d\\u540c\\u2028\\u884c\", \"tab\\there\", \"ctrl\\u0001\\u007f\"]}",
+      "errors": [
+        {
+          "type": "date_from_datetime_inexact",
+          "loc": [
+            "release_date"
+          ],
+          "msg": "Datetimes provided to dates should have zero time - e.g. be exact dates"
+        }
+      ]
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"ABC-001\", \"actor_ids\": [\"actor-1\"], \"state\": \"additional_found\", \"release_date\": \"2026-02-29\", \"existing_files\": [\"/library/ABC/ABC-001.mp4\"], \"move_candidates\": [], \"warnings\": [\"\\u4e0d\\u540c\\u2028\\u884c\", \"tab\\there\", \"ctrl\\u0001\\u007f\"]}",
+      "errors": [
+        {
+          "type": "date_from_datetime_parsing",
+          "loc": [
+            "release_date"
+          ],
+          "msg": "Input should be a valid date or datetime, day value is outside expected range"
+        }
+      ]
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"ABC-001\", \"actor_ids\": [\"actor-1\"], \"state\": \"additional_found\", \"release_date\": \"2028-02-29\", \"existing_files\": [\"/library/ABC/ABC-001.mp4\"], \"move_candidates\": [], \"warnings\": [\"\\u4e0d\\u540c\\u2028\\u884c\", \"tab\\there\", \"ctrl\\u0001\\u007f\"]}",
+      "dump": "{\"video_id\":\"ABC-001\",\"actor_ids\":[\"actor-1\"],\"state\":\"additional_found\",\"release_date\":\"2028-02-29\",\"existing_files\":[\"/library/ABC/ABC-001.mp4\"],\"move_candidates\":[],\"warnings\":[\"不同 行\",\"tab\\there\",\"ctrl\\u0001\"]}"
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"ABC-001\", \"actor_ids\": [\"actor-1\"], \"state\": \"additional_found\", \"release_date\": 1700006400, \"existing_files\": [\"/library/ABC/ABC-001.mp4\"], \"move_candidates\": [], \"warnings\": [\"\\u4e0d\\u540c\\u2028\\u884c\", \"tab\\there\", \"ctrl\\u0001\\u007f\"]}",
+      "dump": "{\"video_id\":\"ABC-001\",\"actor_ids\":[\"actor-1\"],\"state\":\"additional_found\",\"release_date\":\"2023-11-15\",\"existing_files\":[\"/library/ABC/ABC-001.mp4\"],\"move_candidates\":[],\"warnings\":[\"不同 行\",\"tab\\there\",\"ctrl\\u0001\"]}"
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"ABC-001\", \"actor_ids\": [\"actor-1\"], \"state\": \"additional_found\", \"release_date\": 1700000000, \"existing_files\": [\"/library/ABC/ABC-001.mp4\"], \"move_candidates\": [], \"warnings\": [\"\\u4e0d\\u540c\\u2028\\u884c\", \"tab\\there\", \"ctrl\\u0001\\u007f\"]}",
+      "errors": [
+        {
+          "type": "date_from_datetime_inexact",
+          "loc": [
+            "release_date"
+          ],
+          "msg": "Datetimes provided to dates should have zero time - e.g. be exact dates"
+        }
+      ]
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"ABC-001\", \"actor_ids\": [\"actor-1\"], \"state\": \"additional_found\", \"release_date\": 0, \"existing_files\": [\"/library/ABC/ABC-001.mp4\"], \"move_candidates\": [], \"warnings\": [\"\\u4e0d\\u540c\\u2028\\u884c\", \"tab\\there\", \"ctrl\\u0001\\u007f\"]}",
+      "dump": "{\"video_id\":\"ABC-001\",\"actor_ids\":[\"actor-1\"],\"state\":\"additional_found\",\"release_date\":\"1970-01-01\",\"existing_files\":[\"/library/ABC/ABC-001.mp4\"],\"move_candidates\":[],\"warnings\":[\"不同 行\",\"tab\\there\",\"ctrl\\u0001\"]}"
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"ABC-001\", \"actor_ids\": [\"actor-1\"], \"state\": \"additional_found\", \"release_date\": \"20260101\", \"existing_files\": [\"/library/ABC/ABC-001.mp4\"], \"move_candidates\": [], \"warnings\": [\"\\u4e0d\\u540c\\u2028\\u884c\", \"tab\\there\", \"ctrl\\u0001\\u007f\"]}",
+      "errors": [
+        {
+          "type": "date_from_datetime_inexact",
+          "loc": [
+            "release_date"
+          ],
+          "msg": "Datetimes provided to dates should have zero time - e.g. be exact dates"
+        }
+      ]
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"ABC-001\", \"actor_ids\": [\"actor-1\"], \"state\": \"additional_found\", \"release_date\": \"x\", \"existing_files\": [\"/library/ABC/ABC-001.mp4\"], \"move_candidates\": [], \"warnings\": [\"\\u4e0d\\u540c\\u2028\\u884c\", \"tab\\there\", \"ctrl\\u0001\\u007f\"]}",
+      "errors": [
+        {
+          "type": "date_from_datetime_parsing",
+          "loc": [
+            "release_date"
+          ],
+          "msg": "Input should be a valid date or datetime, input is too short"
+        }
+      ]
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"ABC-001\", \"actor_ids\": [\"actor-1\"], \"state\": \"additional_found\", \"release_date\": null, \"existing_files\": [\"/library/ABC/ABC-001.mp4\"], \"move_candidates\": [], \"warnings\": [\"\\u4e0d\\u540c\\u2028\\u884c\", \"tab\\there\", \"ctrl\\u0001\\u007f\"]}",
+      "dump": "{\"video_id\":\"ABC-001\",\"actor_ids\":[\"actor-1\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[\"/library/ABC/ABC-001.mp4\"],\"move_candidates\":[],\"warnings\":[\"不同 行\",\"tab\\there\",\"ctrl\\u0001\"]}"
+    },
+    {
+      "model": "VideoPlan",
+      "input": "{\"video_id\": \"ABC-001\", \"actor_ids\": [\"actor-1\"], \"state\": \"additional_found\", \"release_date\": true, \"existing_files\": [\"/library/ABC/ABC-001.mp4\"], \"move_candidates\": [], \"warnings\": [\"\\u4e0d\\u540c\\u2028\\u884c\", \"tab\\there\", \"ctrl\\u0001\\u007f\"]}",
+      "errors": [
+        {
+          "type": "date_type",
+          "loc": [
+            "release_date"
+          ],
+          "msg": "Input should be a valid date"
+        }
+      ]
+    }
+  ]
+}

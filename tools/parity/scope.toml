@@ -112,7 +112,7 @@ tests = [
 
 [WP10]
 title = "Fill-actor persistence and cloud moves"
-status = "pending"
+status = "done"
 tests = [
   "tests/test_fill_actor_persistence.py",
   "tests/test_cloud_move_persistence.py",

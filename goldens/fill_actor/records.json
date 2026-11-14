@@ -1,0 +1,1339 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "fill_actor",
+  "cases": [
+    {
+      "kind": "constructors",
+      "cases": [
+        {
+          "label": "candidate_cloud",
+          "result": "ok"
+        },
+        {
+          "label": "candidate_local",
+          "result": "ok"
+        },
+        {
+          "label": "candidate_local_with_digest",
+          "error": {
+            "type": "ValueError",
+            "message": "local candidates must not contain CloudDrive metadata"
+          }
+        },
+        {
+          "label": "candidate_local_with_file",
+          "error": {
+            "type": "ValueError",
+            "message": "local candidates must not contain CloudDrive metadata"
+          }
+        },
+        {
+          "label": "candidate_cloud_without_file",
+          "error": {
+            "type": "ValueError",
+            "message": "CloudDrive candidates require mapping and remote metadata"
+          }
+        },
+        {
+          "label": "candidate_cloud_without_digest",
+          "error": {
+            "type": "ValueError",
+            "message": "CloudDrive candidates require mapping and remote metadata"
+          }
+        },
+        {
+          "label": "candidate_cloud_without_source",
+          "error": {
+            "type": "ValueError",
+            "message": "CloudDrive candidates require mapping and remote metadata"
+          }
+        },
+        {
+          "label": "candidate_cloud_without_destination",
+          "error": {
+            "type": "ValueError",
+            "message": "CloudDrive candidates require mapping and remote metadata"
+          }
+        },
+        {
+          "label": "candidate_cloud_path_mismatch",
+          "error": {
+            "type": "ValueError",
+            "message": "CloudDrive candidate metadata path must match its source path"
+          }
+        },
+        {
+          "label": "candidate_cloud_short_digest",
+          "error": {
+            "type": "ValueError",
+            "message": "CloudDrive candidate mapping digest is invalid"
+          }
+        },
+        {
+          "label": "candidate_cloud_long_digest",
+          "error": {
+            "type": "ValueError",
+            "message": "CloudDrive candidate mapping digest is invalid"
+          }
+        },
+        {
+          "label": "candidate_cloud_non_hex_digest",
+          "result": "ok"
+        },
+        {
+          "label": "plan_matching",
+          "result": "ok"
+        },
+        {
+          "label": "plan_empty",
+          "result": "ok"
+        },
+        {
+          "label": "plan_missing_record",
+          "error": {
+            "type": "ValueError",
+            "message": "private candidate records must match public plan candidates"
+          }
+        },
+        {
+          "label": "plan_extra_record",
+          "error": {
+            "type": "ValueError",
+            "message": "private candidate records must match public plan candidates"
+          }
+        },
+        {
+          "label": "plan_video_mismatch",
+          "error": {
+            "type": "ValueError",
+            "message": "private candidate records must match public plan candidates"
+          }
+        },
+        {
+          "label": "plan_duplicate_records",
+          "error": {
+            "type": "ValueError",
+            "message": "candidate ids must be unique within a plan"
+          }
+        },
+        {
+          "label": "plan_duplicate_public",
+          "result": "ok"
+        },
+        {
+          "label": "progress_0_None",
+          "result": "ok"
+        },
+        {
+          "label": "progress_event_0_None",
+          "result": "ok"
+        },
+        {
+          "label": "progress_3_None",
+          "result": "ok"
+        },
+        {
+          "label": "progress_event_3_None",
+          "result": "ok"
+        },
+        {
+          "label": "progress_0_0",
+          "result": "ok"
+        },
+        {
+          "label": "progress_event_0_0",
+          "result": "ok"
+        },
+        {
+          "label": "progress_2_3",
+          "result": "ok"
+        },
+        {
+          "label": "progress_event_2_3",
+          "result": "ok"
+        },
+        {
+          "label": "progress_3_3",
+          "result": "ok"
+        },
+        {
+          "label": "progress_event_3_3",
+          "result": "ok"
+        },
+        {
+          "label": "progress_4_3",
+          "error": {
+            "type": "ValueError",
+            "message": "job progress completed must not exceed total"
+          }
+        },
+        {
+          "label": "progress_event_4_3",
+          "error": {
+            "type": "ValueError",
+            "message": "job progress completed must not exceed total"
+          }
+        },
+        {
+          "label": "progress_-1_None",
+          "error": {
+            "type": "ValueError",
+            "message": "job progress completed must not be negative"
+          }
+        },
+        {
+          "label": "progress_event_-1_None",
+          "error": {
+            "type": "ValueError",
+            "message": "job progress completed must not be negative"
+          }
+        },
+        {
+          "label": "progress_0_-1",
+          "error": {
+            "type": "ValueError",
+            "message": "job progress total must not be negative"
+          }
+        },
+        {
+          "label": "progress_event_0_-1",
+          "error": {
+            "type": "ValueError",
+            "message": "job progress total must not be negative"
+          }
+        },
+        {
+          "label": "progress_-1_-2",
+          "error": {
+            "type": "ValueError",
+            "message": "job progress completed must not be negative"
+          }
+        },
+        {
+          "label": "progress_event_-1_-2",
+          "error": {
+            "type": "ValueError",
+            "message": "job progress completed must not be negative"
+          }
+        },
+        {
+          "label": "job_no_actors",
+          "result": {
+            "stage": "queued",
+            "completed": 0,
+            "total": null,
+            "unit": "items",
+            "current": null,
+            "stage_started_at": "2026-07-13T10:00:00+00:00",
+            "updated_at": "2026-07-13T10:00:01+00:00"
+          }
+        },
+        {
+          "label": "job_actors",
+          "result": {
+            "stage": "queued",
+            "completed": 0,
+            "total": 3,
+            "unit": "actors",
+            "current": null,
+            "stage_started_at": "2026-07-13T10:00:00+00:00",
+            "updated_at": "2026-07-13T10:00:01+00:00"
+          }
+        },
+        {
+          "label": "job_explicit_progress",
+          "result": {
+            "stage": "done",
+            "completed": 1,
+            "total": 1,
+            "unit": "steps",
+            "current": "x",
+            "stage_started_at": "2026-07-13T11:00:00+00:00",
+            "updated_at": "2026-07-13T12:00:00+00:00"
+          }
+        },
+        {
+          "label": "apply_job",
+          "result": "ok"
+        },
+        {
+          "label": "apply_job_empty_candidates",
+          "result": "ok"
+        },
+        {
+          "label": "apply_job_create_plan",
+          "error": {
+            "type": "ValueError",
+            "message": "apply job records require the apply operation"
+          }
+        },
+        {
+          "label": "apply_job_empty_revision",
+          "error": {
+            "type": "ValueError",
+            "message": "apply job revision must not be empty"
+          }
+        },
+        {
+          "label": "apply_job_duplicate_candidates",
+          "error": {
+            "type": "ValueError",
+            "message": "apply job candidate ids must be unique"
+          }
+        },
+        {
+          "label": "apply_job_result",
+          "result": "ok"
+        },
+        {
+          "label": "apply_job_result_without_plan",
+          "result": "ok"
+        },
+        {
+          "label": "apply_job_result_not_completed",
+          "error": {
+            "type": "ValueError",
+            "message": "apply results require a completed job"
+          }
+        },
+        {
+          "label": "apply_job_result_revision",
+          "error": {
+            "type": "ValueError",
+            "message": "apply result revision must match its job"
+          }
+        },
+        {
+          "label": "apply_job_result_plan",
+          "error": {
+            "type": "ValueError",
+            "message": "apply result plan id must match its job"
+          }
+        },
+        {
+          "label": "operation_prepared_None",
+          "result": "ok"
+        },
+        {
+          "label": "operation_prepared_cloud_move_failed",
+          "error": {
+            "type": "ValueError",
+            "message": "successful or in-progress CloudDrive operations must not carry an error code"
+          }
+        },
+        {
+          "label": "operation_prepared_",
+          "error": {
+            "type": "ValueError",
+            "message": "successful or in-progress CloudDrive operations must not carry an error code"
+          }
+        },
+        {
+          "label": "operation_submitting_None",
+          "result": "ok"
+        },
+        {
+          "label": "operation_submitting_cloud_move_failed",
+          "error": {
+            "type": "ValueError",
+            "message": "successful or in-progress CloudDrive operations must not carry an error code"
+          }
+        },
+        {
+          "label": "operation_submitting_",
+          "error": {
+            "type": "ValueError",
+            "message": "successful or in-progress CloudDrive operations must not carry an error code"
+          }
+        },
+        {
+          "label": "operation_verifying_None",
+          "result": "ok"
+        },
+        {
+          "label": "operation_verifying_cloud_move_failed",
+          "error": {
+            "type": "ValueError",
+            "message": "successful or in-progress CloudDrive operations must not carry an error code"
+          }
+        },
+        {
+          "label": "operation_verifying_",
+          "error": {
+            "type": "ValueError",
+            "message": "successful or in-progress CloudDrive operations must not carry an error code"
+          }
+        },
+        {
+          "label": "operation_unknown_None",
+          "error": {
+            "type": "ValueError",
+            "message": "non-successful CloudDrive operations require an error code"
+          }
+        },
+        {
+          "label": "operation_unknown_cloud_move_failed",
+          "result": "ok"
+        },
+        {
+          "label": "operation_unknown_",
+          "result": "ok"
+        },
+        {
+          "label": "operation_succeeded_None",
+          "result": "ok"
+        },
+        {
+          "label": "operation_succeeded_cloud_move_failed",
+          "error": {
+            "type": "ValueError",
+            "message": "successful or in-progress CloudDrive operations must not carry an error code"
+          }
+        },
+        {
+          "label": "operation_succeeded_",
+          "error": {
+            "type": "ValueError",
+            "message": "successful or in-progress CloudDrive operations must not carry an error code"
+          }
+        },
+        {
+          "label": "operation_conflict_None",
+          "error": {
+            "type": "ValueError",
+            "message": "non-successful CloudDrive operations require an error code"
+          }
+        },
+        {
+          "label": "operation_conflict_cloud_move_failed",
+          "result": "ok"
+        },
+        {
+          "label": "operation_conflict_",
+          "result": "ok"
+        },
+        {
+          "label": "operation_failed_None",
+          "error": {
+            "type": "ValueError",
+            "message": "non-successful CloudDrive operations require an error code"
+          }
+        },
+        {
+          "label": "operation_failed_cloud_move_failed",
+          "result": "ok"
+        },
+        {
+          "label": "operation_failed_",
+          "result": "ok"
+        },
+        {
+          "label": "operation_empty_attempt_id",
+          "error": {
+            "type": "ValueError",
+            "message": "CloudDrive operation identifiers and paths must not be empty"
+          }
+        },
+        {
+          "label": "operation_empty_source_path",
+          "error": {
+            "type": "ValueError",
+            "message": "CloudDrive operation identifiers and paths must not be empty"
+          }
+        },
+        {
+          "label": "operation_empty_destination_dir",
+          "error": {
+            "type": "ValueError",
+            "message": "CloudDrive operation identifiers and paths must not be empty"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "transitions",
+      "cases": [
+        {
+          "table": "journal",
+          "current": null,
+          "requested": "prepared",
+          "allowed": true
+        },
+        {
+          "table": "journal",
+          "current": null,
+          "requested": "linked",
+          "allowed": false,
+          "error": {
+            "type": "InvalidMoveJournalTransitionError",
+            "message": "invalid move journal transition: none -> linked"
+          }
+        },
+        {
+          "table": "journal",
+          "current": null,
+          "requested": "source_removed",
+          "allowed": false,
+          "error": {
+            "type": "InvalidMoveJournalTransitionError",
+            "message": "invalid move journal transition: none -> source_removed"
+          }
+        },
+        {
+          "table": "journal",
+          "current": null,
+          "requested": "reconciled",
+          "allowed": false,
+          "error": {
+            "type": "InvalidMoveJournalTransitionError",
+            "message": "invalid move journal transition: none -> reconciled"
+          }
+        },
+        {
+          "table": "journal",
+          "current": "prepared",
+          "requested": "prepared",
+          "allowed": true
+        },
+        {
+          "table": "journal",
+          "current": "prepared",
+          "requested": "linked",
+          "allowed": true
+        },
+        {
+          "table": "journal",
+          "current": "prepared",
+          "requested": "source_removed",
+          "allowed": false,
+          "error": {
+            "type": "InvalidMoveJournalTransitionError",
+            "message": "invalid move journal transition: prepared -> source_removed"
+          }
+        },
+        {
+          "table": "journal",
+          "current": "prepared",
+          "requested": "reconciled",
+          "allowed": true
+        },
+        {
+          "table": "journal",
+          "current": "linked",
+          "requested": "prepared",
+          "allowed": false,
+          "error": {
+            "type": "InvalidMoveJournalTransitionError",
+            "message": "invalid move journal transition: linked -> prepared"
+          }
+        },
+        {
+          "table": "journal",
+          "current": "linked",
+          "requested": "linked",
+          "allowed": true
+        },
+        {
+          "table": "journal",
+          "current": "linked",
+          "requested": "source_removed",
+          "allowed": true
+        },
+        {
+          "table": "journal",
+          "current": "linked",
+          "requested": "reconciled",
+          "allowed": true
+        },
+        {
+          "table": "journal",
+          "current": "source_removed",
+          "requested": "prepared",
+          "allowed": false,
+          "error": {
+            "type": "InvalidMoveJournalTransitionError",
+            "message": "invalid move journal transition: source_removed -> prepared"
+          }
+        },
+        {
+          "table": "journal",
+          "current": "source_removed",
+          "requested": "linked",
+          "allowed": false,
+          "error": {
+            "type": "InvalidMoveJournalTransitionError",
+            "message": "invalid move journal transition: source_removed -> linked"
+          }
+        },
+        {
+          "table": "journal",
+          "current": "source_removed",
+          "requested": "source_removed",
+          "allowed": true
+        },
+        {
+          "table": "journal",
+          "current": "source_removed",
+          "requested": "reconciled",
+          "allowed": true
+        },
+        {
+          "table": "journal",
+          "current": "reconciled",
+          "requested": "prepared",
+          "allowed": false,
+          "error": {
+            "type": "InvalidMoveJournalTransitionError",
+            "message": "invalid move journal transition: reconciled -> prepared"
+          }
+        },
+        {
+          "table": "journal",
+          "current": "reconciled",
+          "requested": "linked",
+          "allowed": false,
+          "error": {
+            "type": "InvalidMoveJournalTransitionError",
+            "message": "invalid move journal transition: reconciled -> linked"
+          }
+        },
+        {
+          "table": "journal",
+          "current": "reconciled",
+          "requested": "source_removed",
+          "allowed": false,
+          "error": {
+            "type": "InvalidMoveJournalTransitionError",
+            "message": "invalid move journal transition: reconciled -> source_removed"
+          }
+        },
+        {
+          "table": "journal",
+          "current": "reconciled",
+          "requested": "reconciled",
+          "allowed": true
+        },
+        {
+          "table": "cloud_move",
+          "current": null,
+          "requested": "prepared",
+          "allowed": true
+        },
+        {
+          "table": "cloud_move",
+          "current": null,
+          "requested": "submitting",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: none -> submitting"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": null,
+          "requested": "verifying",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: none -> verifying"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": null,
+          "requested": "unknown",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: none -> unknown"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": null,
+          "requested": "succeeded",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: none -> succeeded"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": null,
+          "requested": "conflict",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: none -> conflict"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": null,
+          "requested": "failed",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: none -> failed"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "prepared",
+          "requested": "prepared",
+          "allowed": true
+        },
+        {
+          "table": "cloud_move",
+          "current": "prepared",
+          "requested": "submitting",
+          "allowed": true
+        },
+        {
+          "table": "cloud_move",
+          "current": "prepared",
+          "requested": "verifying",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: prepared -> verifying"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "prepared",
+          "requested": "unknown",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: prepared -> unknown"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "prepared",
+          "requested": "succeeded",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: prepared -> succeeded"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "prepared",
+          "requested": "conflict",
+          "allowed": true
+        },
+        {
+          "table": "cloud_move",
+          "current": "prepared",
+          "requested": "failed",
+          "allowed": true
+        },
+        {
+          "table": "cloud_move",
+          "current": "submitting",
+          "requested": "prepared",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: submitting -> prepared"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "submitting",
+          "requested": "submitting",
+          "allowed": true
+        },
+        {
+          "table": "cloud_move",
+          "current": "submitting",
+          "requested": "verifying",
+          "allowed": true
+        },
+        {
+          "table": "cloud_move",
+          "current": "submitting",
+          "requested": "unknown",
+          "allowed": true
+        },
+        {
+          "table": "cloud_move",
+          "current": "submitting",
+          "requested": "succeeded",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: submitting -> succeeded"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "submitting",
+          "requested": "conflict",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: submitting -> conflict"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "submitting",
+          "requested": "failed",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: submitting -> failed"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "verifying",
+          "requested": "prepared",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: verifying -> prepared"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "verifying",
+          "requested": "submitting",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: verifying -> submitting"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "verifying",
+          "requested": "verifying",
+          "allowed": true
+        },
+        {
+          "table": "cloud_move",
+          "current": "verifying",
+          "requested": "unknown",
+          "allowed": true
+        },
+        {
+          "table": "cloud_move",
+          "current": "verifying",
+          "requested": "succeeded",
+          "allowed": true
+        },
+        {
+          "table": "cloud_move",
+          "current": "verifying",
+          "requested": "conflict",
+          "allowed": true
+        },
+        {
+          "table": "cloud_move",
+          "current": "verifying",
+          "requested": "failed",
+          "allowed": true
+        },
+        {
+          "table": "cloud_move",
+          "current": "unknown",
+          "requested": "prepared",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: unknown -> prepared"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "unknown",
+          "requested": "submitting",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: unknown -> submitting"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "unknown",
+          "requested": "verifying",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: unknown -> verifying"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "unknown",
+          "requested": "unknown",
+          "allowed": true
+        },
+        {
+          "table": "cloud_move",
+          "current": "unknown",
+          "requested": "succeeded",
+          "allowed": true
+        },
+        {
+          "table": "cloud_move",
+          "current": "unknown",
+          "requested": "conflict",
+          "allowed": true
+        },
+        {
+          "table": "cloud_move",
+          "current": "unknown",
+          "requested": "failed",
+          "allowed": true
+        },
+        {
+          "table": "cloud_move",
+          "current": "succeeded",
+          "requested": "prepared",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: succeeded -> prepared"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "succeeded",
+          "requested": "submitting",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: succeeded -> submitting"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "succeeded",
+          "requested": "verifying",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: succeeded -> verifying"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "succeeded",
+          "requested": "unknown",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: succeeded -> unknown"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "succeeded",
+          "requested": "succeeded",
+          "allowed": true
+        },
+        {
+          "table": "cloud_move",
+          "current": "succeeded",
+          "requested": "conflict",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: succeeded -> conflict"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "succeeded",
+          "requested": "failed",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: succeeded -> failed"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "conflict",
+          "requested": "prepared",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: conflict -> prepared"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "conflict",
+          "requested": "submitting",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: conflict -> submitting"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "conflict",
+          "requested": "verifying",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: conflict -> verifying"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "conflict",
+          "requested": "unknown",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: conflict -> unknown"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "conflict",
+          "requested": "succeeded",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: conflict -> succeeded"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "conflict",
+          "requested": "conflict",
+          "allowed": true
+        },
+        {
+          "table": "cloud_move",
+          "current": "conflict",
+          "requested": "failed",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: conflict -> failed"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "failed",
+          "requested": "prepared",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: failed -> prepared"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "failed",
+          "requested": "submitting",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: failed -> submitting"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "failed",
+          "requested": "verifying",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: failed -> verifying"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "failed",
+          "requested": "unknown",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: failed -> unknown"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "failed",
+          "requested": "succeeded",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: failed -> succeeded"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "failed",
+          "requested": "conflict",
+          "allowed": false,
+          "error": {
+            "type": "InvalidCloudMoveTransitionError",
+            "message": "invalid CloudDrive move transition: failed -> conflict"
+          }
+        },
+        {
+          "table": "cloud_move",
+          "current": "failed",
+          "requested": "failed",
+          "allowed": true
+        }
+      ]
+    },
+    {
+      "kind": "values",
+      "cases": [
+        {
+          "enum": "VideoState",
+          "values": [
+            "exists",
+            "additional_found",
+            "magnet_found",
+            "queued",
+            "submitted",
+            "already_tracked",
+            "submit_failed",
+            "missing",
+            "invalid_video_id",
+            "scan_failed"
+          ]
+        },
+        {
+          "enum": "MoveState",
+          "values": [
+            "moved",
+            "stale",
+            "conflict",
+            "invalid_path",
+            "failed"
+          ]
+        },
+        {
+          "enum": "ApplyState",
+          "values": [
+            "succeeded",
+            "partial_failed",
+            "failed"
+          ]
+        },
+        {
+          "enum": "JobState",
+          "values": [
+            "queued",
+            "running",
+            "completed",
+            "partial_failed",
+            "failed"
+          ]
+        },
+        {
+          "enum": "CancelJobOutcome",
+          "values": [
+            "cancelled",
+            "already_cancelled",
+            "already_terminal",
+            "not_cancellable",
+            "not_found"
+          ]
+        },
+        {
+          "enum": "EnqueueApplyJobOutcome",
+          "values": [
+            "enqueued",
+            "existing",
+            "conflict",
+            "full"
+          ]
+        },
+        {
+          "enum": "JobOperation",
+          "values": [
+            "create_plan",
+            "apply"
+          ]
+        },
+        {
+          "enum": "JobStage",
+          "values": [
+            "queued",
+            "actor_catalog",
+            "library_scan",
+            "magnet_lookup",
+            "submitting",
+            "persisting",
+            "done",
+            "unknown"
+          ]
+        },
+        {
+          "enum": "JobProgressUnit",
+          "values": [
+            "actors",
+            "pages",
+            "videos",
+            "magnets",
+            "steps",
+            "items"
+          ]
+        },
+        {
+          "enum": "MoveJournalState",
+          "values": [
+            "prepared",
+            "linked",
+            "source_removed",
+            "reconciled"
+          ]
+        },
+        {
+          "enum": "CandidateKind",
+          "values": [
+            "local_file",
+            "cloud_strm"
+          ]
+        },
+        {
+          "enum": "CloudMoveOperationState",
+          "values": [
+            "prepared",
+            "submitting",
+            "verifying",
+            "unknown",
+            "succeeded",
+            "conflict",
+            "failed"
+          ]
+        },
+        {
+          "enum": "AcquisitionOutcome",
+          "values": [
+            "queued",
+            "submitted",
+            "already_tracked",
+            "no_magnet",
+            "submit_failed",
+            "cloud_not_configured",
+            "task_dir_not_configured"
+          ]
+        },
+        {
+          "enum": "CloudMoveOperationState.terminal",
+          "values": [
+            "succeeded",
+            "conflict",
+            "failed"
+          ]
+        },
+        {
+          "enum": "error_codes",
+          "values": [
+            [
+              "FillActorError",
+              "fill_actor_error"
+            ],
+            [
+              "InvalidActorIdError",
+              "invalid_actor_id"
+            ],
+            [
+              "TooManyActorsError",
+              "too_many_actors"
+            ],
+            [
+              "TooManyVideosError",
+              "too_many_videos"
+            ],
+            [
+              "JobQueueFullError",
+              "job_queue_full"
+            ],
+            [
+              "ApplyRequestConflictError",
+              "apply_request_conflict"
+            ],
+            [
+              "ApplyJobNotCancellableError",
+              "apply_job_not_cancellable"
+            ],
+            [
+              "UnknownApplyJobError",
+              "unknown_apply_job"
+            ],
+            [
+              "MoveDisabledError",
+              "move_disabled"
+            ],
+            [
+              "NotConfiguredError",
+              "fill_actor_not_configured"
+            ],
+            [
+              "LegacyPlanError",
+              "legacy_plan_requires_rescan"
+            ],
+            [
+              "UnknownPlanError",
+              "unknown_plan"
+            ],
+            [
+              "ExpiredPlanError",
+              "expired_plan"
+            ],
+            [
+              "RevisionMismatchError",
+              "revision_mismatch"
+            ],
+            [
+              "UnknownCandidateError",
+              "unknown_candidate"
+            ]
+          ]
+        },
+        {
+          "enum": "JOB_CANCELLED_ERROR_CODE",
+          "values": [
+            "job_cancelled"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "normalize_datetime",
+      "cases": [
+        {
+          "input": "2026-07-13T10:00:00.123456+00:00",
+          "normalized": "2026-07-13T10:00:00.123456+00:00"
+        },
+        {
+          "input": "2026-07-13T10:00:00.123456",
+          "normalized": "2026-07-13T10:00:00.123456+00:00"
+        },
+        {
+          "input": "2026-07-13T19:00:00+09:00",
+          "normalized": "2026-07-13T10:00:00+00:00"
+        },
+        {
+          "input": "2026-07-13T04:30:00-05:30",
+          "normalized": "2026-07-13T10:00:00+00:00"
+        }
+      ]
+    }
+  ]
+}
