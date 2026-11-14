@@ -1595,3 +1595,5 @@ async fn errors_are_described_as_python_does_and_a_stop_ends_the_run() {
     assert!(deps.fetch.calls().is_empty());
     assert!(deps.subscriptions.state().polls.is_empty());
 }
+
+mod routing;

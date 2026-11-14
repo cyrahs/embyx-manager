@@ -3,8 +3,9 @@
 //!
 //! Python origin: the shell of `bootstrap.py` (`build_app`, `CloudDriveHandle`, the runtime
 //! lifespan's store load and client close). WP4 assembles what the shell needs: the store,
-//! the config router, health and the transcode listener's empty app. The features'
-//! routers, schedulers and lifespans join here in their packages (WP9, WP12, WP14).
+//! the config router, health and the transcode listener's empty app; WP9 the monitor
+//! ([`monitor`]: its scheduler, started after the store loads and closed before the clients,
+//! and the monitor and playlists routers). The fill actor and merge join in WP12 and WP14.
 
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
@@ -23,6 +24,10 @@ use crate::auth::MutationAuth;
 use crate::config_api::{ConfigApiOptions, create_config_router};
 use crate::http::Internal;
 use crate::routing::{ApiRouter, App};
+
+mod monitor;
+
+pub use monitor::ClientBuildError;
 
 /// How long shutdown waits for CloudDrive calls still running, after the requests in flight
 /// drained: under the pod's 60 s termination grace period, so the database usually still
@@ -110,6 +115,8 @@ pub enum BuildError {
     Settings(SettingsError),
     /// The database URL is not one; Python fails at startup, when it first connects.
     Database(DatabaseError),
+    /// An HTTP client could not be built (its TLS backend or proxy settings refused).
+    Client(ClientBuildError),
 }
 
 /// The assembled server: both apps and the lifespans that run around them.
@@ -120,6 +127,7 @@ pub struct Assembled {
     pub store: Arc<ConfigStore>,
     pub database: Database,
     pub cloud: Arc<CloudDriveHandle>,
+    pub scheduler: embyx_monitor::scheduler::MonitorScheduler,
 }
 
 impl std::fmt::Debug for Assembled {
@@ -132,21 +140,26 @@ impl std::fmt::Debug for Assembled {
     }
 }
 
-/// `runtime_lifespan`: the config store loaded first; at the end the clients closed and
-/// the database last.
+/// `runtime_lifespan`: the config store loaded first, then the scheduler started; at the
+/// end the scheduler closed, then the clients and the database last.
 struct RuntimeLifespan {
     store: Arc<ConfigStore>,
     database: Database,
     cloud: Arc<CloudDriveHandle>,
+    scheduler: embyx_monitor::scheduler::MonitorScheduler,
 }
 
 impl Lifespan for RuntimeLifespan {
     fn start(&self) -> BoxFuture<'_, Result<(), Internal>> {
-        Box::pin(async move { self.store.load().await.map_err(Internal::new) })
+        Box::pin(async move {
+            self.store.load().await.map_err(Internal::new)?;
+            self.scheduler.start().await.map_err(Internal::new)
+        })
     }
 
     fn stop(&self) -> BoxFuture<'_, Result<(), Internal>> {
         Box::pin(async move {
+            self.scheduler.aclose().await;
             self.cloud.close(CLOUD_CLOSE_LIMIT).await;
             self.database.close().await;
             Ok(())
@@ -174,14 +187,12 @@ pub fn build_app(settings: &Settings, frontend_dist: Option<PathBuf>) -> Result<
         let database = ready_database.clone();
         Box::pin(async move { embyx_db::health::health_check(&database).await.map_err(Internal::new) })
     });
-    let config_router = create_config_router(
-        Arc::clone(&store),
-        MutationAuth::new(settings.api_token.as_deref()),
-        ConfigApiOptions::default(),
-    );
+    let auth = MutationAuth::new(settings.api_token.as_deref());
+    let config_router = create_config_router(Arc::clone(&store), auth.clone(), ConfigApiOptions::default());
+    let monitor = monitor::assemble(&store, &database, &cloud, &auth).map_err(BuildError::Client)?;
     let app = create_app(AppParts {
         app_ready,
-        routers: vec![config_router],
+        routers: vec![config_router, monitor.monitor, monitor.playlists],
         feature_health: Vec::new(),
         api_token: settings.api_token.clone(),
         max_request_bytes: usize::try_from(settings.max_request_bytes).unwrap_or(usize::MAX),
@@ -195,6 +206,7 @@ pub fn build_app(settings: &Settings, frontend_dist: Option<PathBuf>) -> Result<
         store: Arc::clone(&store),
         database: database.clone(),
         cloud: Arc::clone(&cloud),
+        scheduler: monitor.scheduler.clone(),
     });
     Ok(Assembled {
         app,
@@ -203,6 +215,7 @@ pub fn build_app(settings: &Settings, frontend_dist: Option<PathBuf>) -> Result<
         store,
         database,
         cloud,
+        scheduler: monitor.scheduler,
     })
 }
 

@@ -1,7 +1,8 @@
 //! The API shell scenarios (`tools/scenarios/specs/api/`): the Rust port of
 //! `tools/scenarios/operations/api.py` assembles the shell as `build_app` does (the config
 //! store on the migrated database, the readiness probe, the token, the size limit, the
-//! config router, the SPA root when `frontend` is set), sends each request through the app
+//! config router, the SPA root when `frontend` is set, the monitor and playlists routers
+//! when `monitor` is set), sends each request through the app
 //! as Starlette's `TestClient` does (`Host: testserver`), and must render the bytes the
 //! Python baseline committed under `goldens/scenarios/api/`.
 
@@ -14,12 +15,21 @@ use embyx_api::app::{AppParts, ReadyProbe, create_app, create_transcode_app};
 use embyx_api::auth::MutationAuth;
 use embyx_api::config_api::{ConfigApiOptions, create_config_router};
 use embyx_api::http::Internal;
+use embyx_api::monitor_api::{AcquisitionApi, SubscriptionsApi, create_monitor_router};
+use embyx_api::playlists_api::create_playlists_router;
 use embyx_api::routing::{ApiRouter, App};
 use embyx_clients::scenario::ScenarioFakes;
+use embyx_core::config::models::RssConfig;
 use embyx_core::pyjson::{self, Dict, DumpOptions, Value};
 use embyx_core::scenario::{self, Parts, Recorder, Seeded, Spec};
 use embyx_db::config_store::ConfigStore;
+use embyx_db::database::Database;
 use embyx_db::testdb::TestDatabase;
+use embyx_monitor::acquisitions::AcquisitionRepository;
+use embyx_monitor::playlists::PlaylistRepository;
+use embyx_monitor::runs::PipelineRunRepository;
+use embyx_monitor::scheduler::{MappingFactory, MonitorScheduler, Ready, Runner, SchedulerParts};
+use embyx_monitor::subscriptions::SubscriptionRepository;
 use http_body_util::BodyExt as _;
 
 /// `STATIC_MTIME_NS`: 2026-01-01T00:00:00Z.
@@ -176,14 +186,94 @@ async fn report(response: http::Response<Body>) -> Value {
     Value::Dict(reported)
 }
 
+/// `_mask`: a named key's non-null value, anywhere in the body, reads `<set>`.
+fn mask(value: &Value, keys: &[String]) -> Value {
+    match value {
+        Value::List(items) => Value::List(items.iter().map(|item| mask(item, keys)).collect()),
+        Value::Dict(fields) => {
+            let mut masked = Dict::new();
+            for (key, item) in fields.iter() {
+                let named = key.as_str().is_some_and(|key| keys.iter().any(|name| name == key));
+                let item = if named && *item != Value::Null {
+                    Value::Str("<set>".to_owned())
+                } else {
+                    mask(item, keys)
+                };
+                masked.insert(key.clone(), item);
+            }
+            Value::Dict(masked)
+        }
+        other => other.clone(),
+    }
+}
+
 /// `_send`.
-async fn send(app: &App, requests: &[Value], replacements: &[(String, String)]) -> Value {
+async fn send(app: &App, requests: &[Value], replacements: &[(String, String)], mask_keys: &[String]) -> Value {
     let mut results = Vec::new();
     for raw in requests {
         let request = substitute(raw, replacements);
-        results.push(report(app.call(build_request(&request), None).await).await);
+        let Value::Dict(mut result) = report(app.call(build_request(&request), None).await).await else {
+            unreachable!("a report is an object");
+        };
+        let body = mask(result.get("body").expect("a body"), mask_keys);
+        result.insert("body", body);
+        results.push(Value::Dict(result));
     }
     Value::List(results)
+}
+
+/// `_monitor_routers`: the monitor and playlists routers over the real repositories, a
+/// scheduler never started whose pipelines all report `not_ready`, no CloudDrive, no AVBase
+/// and no fill directory.
+fn monitor_routers(
+    store: &Arc<ConfigStore>,
+    database: &Database,
+    auth: &MutationAuth,
+    not_ready: &str,
+) -> [ApiRouter; 2] {
+    let never: Runner = Arc::new(|_scope| Box::pin(async { panic!("a scenario never runs a pipeline") }));
+    let never_build: MappingFactory = Arc::new(|| panic!("a scenario never runs a pipeline"));
+    let reason = not_ready.to_owned();
+    let ready: Ready = Arc::new(move || Some(reason.clone()));
+    let runs = Arc::new(PipelineRunRepository::new(database.clone()));
+    let ledger = Arc::new(AcquisitionRepository::new(database.clone()));
+    let mut parts = SchedulerParts::new(
+        Arc::clone(store) as Arc<dyn embyx_monitor::scheduler::SchedulerConfig>,
+        Arc::clone(&runs) as Arc<_>,
+        (Arc::clone(&never), Arc::clone(&never), never_build),
+        (Arc::clone(&ready), Arc::clone(&ready), Arc::clone(&ready)),
+    );
+    parts.playlists_runner = Some(never);
+    parts.playlists_ready = Some(Arc::clone(&ready));
+    let scheduler = MonitorScheduler::new(parts);
+    let mut acquisitions = AcquisitionApi::new(Arc::clone(&ledger) as Arc<_>);
+    acquisitions.tracker_ready = Some(ready);
+    let categories_store = Arc::clone(store);
+    let monitor = create_monitor_router(
+        Arc::new(scheduler),
+        runs,
+        auth.clone(),
+        Some(acquisitions),
+        Some(SubscriptionsApi {
+            repository: Arc::new(SubscriptionRepository::new(database.clone())),
+            categories: Arc::new(move || {
+                categories_store
+                    .get::<RssConfig>()
+                    .categories
+                    .into_iter()
+                    .map(|category| category.label)
+                    .collect()
+            }),
+            resolve_talent: None,
+        }),
+    );
+    let playlists = create_playlists_router(
+        Arc::new(PlaylistRepository::new(database.clone())),
+        auth.clone(),
+        Some(ledger),
+        None,
+    );
+    [monitor, playlists]
 }
 
 /// `_pin_static_mtimes`.
@@ -231,13 +321,26 @@ async fn run_scenario(name: &str) {
         Some(Value::Int(bytes)) => usize::try_from(*bytes).expect("a size"),
         _ => 65_536,
     };
+    let auth = MutationAuth::new(api_token);
+    let mut routers = vec![create_config_router(
+        Arc::clone(&store),
+        auth.clone(),
+        ConfigApiOptions::default(),
+    )];
+    if args.get("monitor") == Some(&Value::Bool(true)) {
+        let not_ready = args.get("not_ready").and_then(Value::as_str).unwrap_or("not ready");
+        routers.extend(monitor_routers(&store, &app_database, &auth, not_ready));
+    }
+    let mask_keys: Vec<String> = args
+        .get("mask_keys")
+        .and_then(Value::as_list)
+        .unwrap_or_default()
+        .iter()
+        .map(|key| key.as_str().expect("a key").to_owned())
+        .collect();
     let app = create_app(AppParts {
         app_ready,
-        routers: vec![create_config_router(
-            Arc::clone(&store),
-            MutationAuth::new(api_token),
-            ConfigApiOptions::default(),
-        )],
+        routers,
         feature_health: Vec::new(),
         api_token: api_token.map(str::to_owned),
         max_request_bytes,
@@ -249,9 +352,9 @@ async fn run_scenario(name: &str) {
     let list = |key: &str| args.get(key).and_then(Value::as_list).unwrap_or_default().to_vec();
     // `with TestClient(app)`: the runtime lifespan loads the store, and closes the database.
     store.load().await.expect("load");
-    let main = send(&app, &list("requests"), &replacements).await;
+    let main = send(&app, &list("requests"), &replacements, &mask_keys).await;
     app_database.close().await;
-    let transcode = send(&transcode_app, &list("transcode_requests"), &replacements).await;
+    let transcode = send(&transcode_app, &list("transcode_requests"), &replacements, &[]).await;
     let mut result = Dict::new();
     result.insert("responses", main);
     result.insert("transcode_responses", transcode);
@@ -296,4 +399,9 @@ fn api_shell_matches_the_python_transcript() {
 #[test]
 fn api_open_matches_the_python_transcript() {
     on_worker_stack("api/open");
+}
+
+#[test]
+fn api_monitor_matches_the_python_transcript() {
+    on_worker_stack("api/monitor");
 }

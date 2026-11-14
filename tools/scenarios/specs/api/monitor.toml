@@ -1,0 +1,266 @@
+# The monitor and playlists routers (WP9) over the real repositories: pipeline status, a
+# trigger refused by readiness and one refused by the token, runs by pipeline and limit,
+# the ledger list (state filter, paging), detail, ignore and resume, retry and magnet with
+# nothing to submit to, the tracker card, the subscription registry (create, conflict,
+# unknown category, extra field, update, delete) and the playlists with their missing
+# titles and the enabled switch. Request validation answers its fixed 422 after the token.
+description = "api: monitor and playlists routers over PostgreSQL"
+operation = "api.exchange"
+volatile = [
+    "rows.feed_subscriptions.created_at",
+    "rows.feed_subscriptions.updated_at",
+    "rows.archive_acquisitions.updated_at",
+    "rows.archive_magnet_attempts.updated_at",
+    "rows.playlists.updated_at",
+]
+
+[database]
+schema = "app"
+tables = ["feed_subscriptions", "archive_acquisitions", "archive_magnet_attempts", "playlists", "pipeline_runs"]
+sql = [
+    """INSERT INTO app_config (section, value_json, version, updated_at) VALUES
+    ('rss', '{"categories": [{"label": "rank", "task_dir_path": "/115/rank"}, {"label": "actor", "task_dir_path": "/115/actor"}]}', 2, '2026-09-01T00:00:00+00:00'),
+    ('mapping', '{"enabled": true}', 1, '2026-09-01T00:00:00+00:00')""",
+    """INSERT INTO feed_subscriptions (kind, category, enabled, url, talent_id, name, aliases_json, cursor_json, seed_pending, last_polled_at, last_error, created_at, updated_at) VALUES
+    ('rss', 'rank', TRUE, 'https://feeds.example/rank.xml', NULL, 'Rank feed', '[]', '["a", "b", "c"]', FALSE, '2026-09-02T01:02:03.250000Z', NULL, '2026-09-01T00:00:00Z', '2026-09-02T01:02:03Z'),
+    ('avbase_talent', 'actor', FALSE, NULL, 4242, '演员', '["Alias One"]', '[]', TRUE, NULL, 'feed fetch failed: 503', '2026-09-01T00:00:00Z', '2026-09-01T00:00:00Z')""",
+    """INSERT INTO archive_acquisitions (avid, state, source, note, task_dir_path, release_date, next_action_at, created_at, updated_at, archived_paths_json) VALUES
+    ('ABC-001', 'downloading', 'rss_rank', NULL, '/115/rank', '2026-08-30', NULL, '2026-09-01T00:00:00Z', '2026-09-01T00:00:00Z', '[]'),
+    ('ABC-002', 'resolve_failed', 'rss_actor', 'no magnet found', '/115/actor', NULL, '2026-09-03T00:00:00Z', '2026-09-01T00:00:00Z', '2026-09-02T00:00:00Z', '[]'),
+    ('ABC-003', 'archived', 'manual', NULL, '/115/rank', NULL, NULL, '2026-09-01T00:00:00Z', '2026-09-03T00:00:00Z', '["rank/ABC/ABC-003.mp4"]')""",
+    """INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at, error) VALUES
+    ('ABC-001', 1, 'magnet:?xt=urn:btih:0101010101010101010101010101010101010101&dn=ABC-001', '0101010101010101010101010101010101010101', 'sukebei', 'stalled', 12.5, '2026-09-01T00:00:00Z', '2026-09-01T06:00:00Z', 'stalled'),
+    ('ABC-001', 2, 'magnet:?xt=urn:btih:1111111111111111111111111111111111111111&dn=ABC-001', '1111111111111111111111111111111111111111', 'javbus', 'downloading', 40.0, '2026-09-01T07:00:00Z', '2026-09-01T08:00:00.5Z', NULL),
+    ('ABC-003', 1, 'magnet:?xt=urn:btih:0303030303030303030303030303030303030303&dn=ABC-003', '0303030303030303030303030303030303030303', 'manual', 'archived', 100.0, '2026-09-01T00:00:00Z', '2026-09-03T00:00:00Z', NULL)""",
+    """INSERT INTO pipeline_runs (run_id, pipeline, trigger, state, started_at, finished_at, stats_json, errors_json, log_json) VALUES
+    ('run-1', 'rss', 'scheduled', 'completed', '2026-09-01T00:00:00Z', '2026-09-01T00:00:05.123456Z', '{"seen": 3, "new": 1}', '[]', '["polled 2 feeds", "queued ABC-001"]'),
+    ('run-2', 'archive', 'manual', 'failed', '2026-09-02T00:00:00Z', '2026-09-02T00:01:00Z', '{}', '["mount is not readable"]', '[]'),
+    ('run-3', 'rss', 'manual', 'cancelled', '2026-09-03T00:00:00Z', '2026-09-03T00:00:01Z', '{"seen": 0}', '[]', '["stopped"]')""",
+    """INSERT INTO playlists (key, kind, note, name, enabled, entries_json, present_json, missing_json, emby_playlist_id, last_synced_at, last_error, created_at, updated_at) VALUES
+    ('rank-1', 1, '月榜', 'Monthly', TRUE, '[[1, "ABC-001", "One"], [2, "ABC-002", "Two"], [3, "ABC-004", "Four"], [4, "ABC-003", "Three"]]', '["ABC-003"]', '["ABC-001", "ABC-002", "ABC-004"]', 'emby-77', '2026-09-04T00:00:00Z', NULL, '2026-09-01T00:00:00Z', '2026-09-04T00:00:00Z'),
+    ('rank-2', 2, '年榜', 'Yearly', FALSE, '[]', '[]', '[]', NULL, NULL, 'sync failed', '2026-09-01T00:00:00Z', '2026-09-01T00:00:00Z')""",
+]
+
+[args]
+monitor = true
+api_token = "secret"
+not_ready = "pipeline is not configured in this scenario"
+mask_keys = ["created_at", "updated_at"]
+
+[[args.requests]]
+method = "GET"
+path = "/api/monitor/status"
+
+[[args.requests]]
+method = "POST"
+path = "/api/monitor/rss/trigger"
+
+[[args.requests]]
+method = "POST"
+path = "/api/monitor/rss/trigger"
+headers = { authorization = "Bearer secret" }
+
+[[args.requests]]
+method = "POST"
+path = "/api/monitor/bogus/trigger"
+headers = { authorization = "Bearer secret" }
+
+[[args.requests]]
+method = "POST"
+path = "/api/monitor/archive/cancel"
+headers = { authorization = "Bearer secret" }
+
+[[args.requests]]
+method = "GET"
+path = "/api/monitor/runs"
+
+[[args.requests]]
+method = "GET"
+path = "/api/monitor/runs?pipeline=rss&limit=1"
+
+[[args.requests]]
+method = "GET"
+path = "/api/monitor/runs?pipeline=nope"
+
+[[args.requests]]
+method = "GET"
+path = "/api/monitor/runs?limit=abc"
+
+[[args.requests]]
+method = "GET"
+path = "/api/monitor/runs/run-1"
+
+[[args.requests]]
+method = "GET"
+path = "/api/monitor/runs/missing"
+
+[[args.requests]]
+method = "GET"
+path = "/api/monitor/acquisitions"
+
+[[args.requests]]
+method = "GET"
+path = "/api/monitor/acquisitions?state=downloading&limit=1&offset=0"
+
+[[args.requests]]
+method = "GET"
+path = "/api/monitor/acquisitions?limit=1&offset=1"
+
+[[args.requests]]
+method = "GET"
+path = "/api/monitor/acquisitions?state=bogus"
+
+[[args.requests]]
+method = "GET"
+path = "/api/monitor/acquisitions/ABC-001"
+
+[[args.requests]]
+method = "GET"
+path = "/api/monitor/acquisitions/NOPE-001"
+
+[[args.requests]]
+method = "POST"
+path = "/api/monitor/acquisitions/ABC-002/ignore"
+headers = { authorization = "Bearer secret" }
+
+[[args.requests]]
+method = "POST"
+path = "/api/monitor/acquisitions/ABC-002/resume"
+headers = { authorization = "Bearer secret" }
+
+[[args.requests]]
+method = "POST"
+path = "/api/monitor/acquisitions/ABC-003/ignore"
+headers = { authorization = "Bearer secret" }
+
+[[args.requests]]
+method = "POST"
+path = "/api/monitor/acquisitions/ABC-001/retry"
+headers = { authorization = "Bearer secret" }
+
+[[args.requests]]
+method = "POST"
+path = "/api/monitor/acquisitions/ABC-001/magnet"
+headers = { authorization = "Bearer secret" }
+json = { magnet = "magnet:?xt=urn:btih:2222222222222222222222222222222222222222" }
+
+[[args.requests]]
+method = "POST"
+path = "/api/monitor/acquisitions/ABC-001/magnet"
+headers = { authorization = "Bearer secret" }
+json = { magnet = "not a magnet" }
+
+[[args.requests]]
+method = "GET"
+path = "/api/monitor/tracker"
+
+[[args.requests]]
+method = "GET"
+path = "/api/monitor/manual/directories"
+headers = { authorization = "Bearer secret" }
+
+[[args.requests]]
+method = "GET"
+path = "/api/monitor/subscriptions"
+
+[[args.requests]]
+method = "POST"
+path = "/api/monitor/subscriptions"
+headers = { authorization = "Bearer secret" }
+json = { kind = "rss", category = "rank", url = " https://feeds.example/new.xml ", name = "New" }
+
+[[args.requests]]
+method = "POST"
+path = "/api/monitor/subscriptions"
+headers = { authorization = "Bearer secret" }
+json = { kind = "rss", category = "actor", url = "https://feeds.example/new.xml" }
+
+[[args.requests]]
+method = "POST"
+path = "/api/monitor/subscriptions"
+headers = { authorization = "Bearer secret" }
+json = { kind = "rss", category = "nope", url = "https://feeds.example/other.xml" }
+
+[[args.requests]]
+method = "POST"
+path = "/api/monitor/subscriptions"
+headers = { authorization = "Bearer secret" }
+json = { kind = "avbase_talent", category = "actor", query = "someone" }
+
+[[args.requests]]
+method = "POST"
+path = "/api/monitor/subscriptions"
+headers = { authorization = "Bearer secret" }
+json = { kind = "rss", category = "rank", url = "https://feeds.example/x.xml", extra = 1 }
+
+[[args.requests]]
+method = "POST"
+path = "/api/monitor/subscriptions"
+json = { kind = "rss", category = "rank", url = "https://feeds.example/x.xml", extra = 1 }
+
+[[args.requests]]
+method = "PATCH"
+path = "/api/monitor/subscriptions/1"
+headers = { authorization = "Bearer secret" }
+json = { enabled = false, category = "actor", aliases = ["A", " B "] }
+
+[[args.requests]]
+method = "PATCH"
+path = "/api/monitor/subscriptions/99"
+headers = { authorization = "Bearer secret" }
+json = { enabled = true }
+
+[[args.requests]]
+method = "PATCH"
+path = "/api/monitor/subscriptions/abc"
+headers = { authorization = "Bearer secret" }
+json = { enabled = true }
+
+[[args.requests]]
+method = "DELETE"
+path = "/api/monitor/subscriptions/2"
+headers = { authorization = "Bearer secret" }
+
+[[args.requests]]
+method = "DELETE"
+path = "/api/monitor/subscriptions/2"
+headers = { authorization = "Bearer secret" }
+
+[[args.requests]]
+method = "GET"
+path = "/api/monitor/subscriptions"
+
+[[args.requests]]
+method = "GET"
+path = "/api/playlists"
+
+[[args.requests]]
+method = "GET"
+path = "/api/playlists/rank-1/missing"
+
+[[args.requests]]
+method = "GET"
+path = "/api/playlists/nope/missing"
+
+[[args.requests]]
+method = "PATCH"
+path = "/api/playlists/rank-1"
+headers = { authorization = "Bearer secret" }
+json = { enabled = false }
+
+[[args.requests]]
+method = "PATCH"
+path = "/api/playlists/nope"
+headers = { authorization = "Bearer secret" }
+json = { enabled = true }
+
+[[args.requests]]
+method = "PATCH"
+path = "/api/playlists/rank-1"
+headers = { authorization = "Bearer secret" }
+json = { enabled = "maybe" }
+
+[[args.requests]]
+method = "POST"
+path = "/api/playlists/rank-1/fill"
+headers = { authorization = "Bearer secret" }
