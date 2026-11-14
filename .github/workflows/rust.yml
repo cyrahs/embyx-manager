@@ -1,9 +1,10 @@
 name: Rust rewrite
 
 # Checks for the Rust build (docs/rewrite/PLAN.md), on pull requests into `rust` and on
-# pushes to it. Read-only by design: no job here builds or publishes an image, deploys or
-# tags, and none has a token that could; the only outputs are workflow artifacts (the test
-# listings and the Windows worker binary). The Python tree's own CI (ci.yml) runs as well.
+# pushes to it. Read-only by design: no job here publishes an image (the `image` job builds
+# Dockerfile.rust and keeps it on the runner), deploys or tags, and none has a token that could;
+# the only outputs are workflow artifacts (the test listings and the Windows worker binary).
+# The Python tree's own CI (ci.yml) runs as well.
 
 on:
   push:
@@ -157,6 +158,15 @@ jobs:
           exit 1
         fi
 
+    # The level 2 decision replay's Rust side (examples/replay.rs) against the Python decisions,
+    # on the synthetic export of the tool's own tests.
+    - name: Level 2 replay, Rust example against Python
+      env:
+        EMBYX_L2_REPLAY_BINARY: target/debug/examples/replay
+      run: |
+        cargo build -p embyx-monitor --example replay --locked
+        uv run pytest tools/tests/test_level2_replay.py -q -p no:cacheprovider
+
     # Each line names its crate (cargo's own listing does not), so a claim is matched in its crate.
     - name: List compiled tests for the parity check
       run: python3 tools/parity/list_rust_tests.py --workspace --locked > "$RUNNER_TEMP/rust-tests.txt"
@@ -183,6 +193,34 @@ jobs:
       run: |
         (cd tools/smoke && npm ci --no-audit --no-fund && npx playwright install --with-deps chromium)
         tools/smoke/run.sh
+
+  # The Rust image (Dockerfile.rust, WP16): built to prove it builds and loaded only into this
+  # runner to check what it carries. Nothing logs in to a registry and nothing is pushed; the
+  # workflow that would publish it is described in docs/rewrite/DEPLOY.md, not added.
+  image:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+
+    - uses: docker/setup-buildx-action@v3
+
+    - name: Build Dockerfile.rust (not pushed)
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        file: Dockerfile.rust
+        push: false
+        load: true
+        tags: embyx-manager:rust-ci
+        cache-from: type=gha,scope=rust-image
+        cache-to: type=gha,scope=rust-image,mode=max
+
+    - name: The image runs the binary and carries ffmpeg with SVT-AV1
+      run: |
+        docker run --rm embyx-manager:rust-ci --help
+        docker run --rm --entrypoint ffmpeg embyx-manager:rust-ci -hide_banner -encoders | grep -q libsvtav1
+        docker run --rm --entrypoint ls embyx-manager:rust-ci /opt/embyx-manager/static/index.html
+        docker image ls embyx-manager:rust-ci
 
   # The home transcode worker runs on Windows (WP15). Its crate and the binary must build
   # there and their tests pass, real ffmpeg included. The binary is kept as a build artifact

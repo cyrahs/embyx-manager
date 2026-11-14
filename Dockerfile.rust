@@ -1,0 +1,66 @@
+# The Rust build's image (docs/rewrite/PLAN.md, WP16). Built in CI to prove it builds; never
+# pushed from here: the image workflow for `rust` is described in docs/rewrite/DEPLOY.md and is
+# added only at deployment. The runtime matches the Python image (Dockerfile) where the app
+# depends on it: Debian 13 (the base of python:3.13-slim) with its ffmpeg / ffprobe (7.1.x,
+# SVT-AV1 2.3.0), CA certificates, time zone data, `/etc/mime.types` as ffmpeg's packages leave
+# it, the `embyx` user (uid 1000), `embyx-manager` on PATH for the merge Job's command, and the
+# same EMBYX_MANAGER_HOST / EMBYX_MANAGER_PORT defaults, port, entry point and command.
+#
+#   docker build -f Dockerfile.rust -t embyx-manager:rust .
+
+# ---- frontend build (as the Python image builds it) ----
+FROM node:22-alpine AS frontend
+WORKDIR /build/frontend
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci --ignore-scripts
+COPY frontend/ ./
+# Vite writes the build to ../src/embyx_manager/static (frontend/vite.config.ts).
+RUN npm run build
+
+# ---- Rust toolchain with cargo-chef ----
+# The same toolchain as rust-toolchain.toml, so rustup has nothing to download in later stages.
+FROM rust:1.97.0-slim-trixie AS chef
+# BoringSSL (the AVBase client, wreq) needs cmake, clang and libclang; perl and make for its build,
+# git for the patches btls-sys applies to its source.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends cmake clang libclang-dev git make perl pkg-config g++ \
+    && rm -rf /var/lib/apt/lists/*
+RUN cargo install cargo-chef --locked --version 0.1.78
+WORKDIR /build
+ENV CARGO_INCREMENTAL=0
+
+# The dependency recipe: only manifests and the lock decide it, so a code change keeps the
+# dependency layer cached.
+FROM chef AS planner
+COPY Cargo.toml Cargo.lock rust-toolchain.toml rustfmt.toml clippy.toml ./
+COPY crates ./crates
+RUN cargo chef prepare --recipe-path recipe.json
+
+FROM chef AS builder
+COPY rust-toolchain.toml ./
+COPY --from=planner /build/recipe.json recipe.json
+RUN cargo chef cook --release --locked --recipe-path recipe.json -p embyx-manager
+COPY Cargo.toml Cargo.lock rustfmt.toml clippy.toml ./
+COPY crates ./crates
+RUN cargo build --release --locked -p embyx-manager \
+    && install -D -m 0755 target/release/embyx-manager /opt/embyx-manager/embyx-manager
+
+# ---- runtime ----
+FROM debian:trixie-slim
+# The merge Job runs this image too and concatenates, remuxes and re-encodes with ffmpeg.
+# ca-certificates and tzdata are what python:3.13-slim carries; the clients use their own
+# bundled roots (webpki-roots), as httpx (certifi) and curl_cffi do.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ffmpeg ca-certificates tzdata \
+    && rm -rf /var/lib/apt/lists/*
+RUN useradd --create-home --uid 1000 embyx
+COPY --from=builder /opt/embyx-manager/embyx-manager /opt/embyx-manager/embyx-manager
+# The front end sits next to the executable (`<exe dir>/static`, D59).
+COPY --from=frontend /build/src/embyx_manager/static /opt/embyx-manager/static
+ENV PATH="/opt/embyx-manager:$PATH" \
+    EMBYX_MANAGER_HOST=127.0.0.1 \
+    EMBYX_MANAGER_PORT=8000
+USER embyx
+EXPOSE 8000
+ENTRYPOINT ["embyx-manager"]
+CMD ["serve"]
