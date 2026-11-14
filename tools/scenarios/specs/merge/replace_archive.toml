@@ -1,0 +1,144 @@
+# Replacing and archiving going wrong. A task being replaced cannot be cancelled; the staged
+# file vanishes after the parts went, so the task fails while replacing and still cannot be
+# cancelled; the merged file is put in place by hand and the retry files it. The archive never
+# takes it and the task fails while archiving; with no whole copy in the library the cancel is
+# refused; once a whole copy is there, the archive's refusal is a duplicate and the cancel
+# deletes the merged copy (a shutdown first lands right after that delete).
+description = "merge service: replacing and archiving failures, refused and discarding cancels"
+operation = "merge.service"
+clock = "2026-11-14T08:00:00+00:00"
+
+[roots]
+names = ["work", "mapping", "secrets"]
+
+[database]
+schema = "app"
+
+[args]
+
+[args.archive]
+src_dir = "/mnt/cd2/115/embyx_in"
+dst_dir = "/mnt/cd2/115/embyx"
+priority_mapping = { vr = "type/vr" }
+
+[[args.steps]]
+op = "create"
+args = { avid = "ABC-005", source = "vr", library_dir = "type/vr", brand = "ABC", merged_name = "ABC-005.mp4", parts = ["/mnt/cd2/115/embyx/type/vr/ABC/ABC-005-cd1.mp4", "/mnt/cd2/115/embyx/type/vr/ABC/ABC-005-cd2.mp4"] }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "write"
+args = { path = "work/ABC-005.mp4", text = "merged-ABC-005" }
+
+[[args.steps]]
+op = "write"
+args = { path = "work/.merge/1.json", json = { state = "done", size = 14, sha1 = "da39a3ee5e6b4b0d3255bfef95601890afd80709" } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "cloud"
+args = { edit = "update_copy_tasks", args = { dest_path = "/115/upload/merge-1", fields = { status = "Completed", uploaded_bytes = 14, total_bytes = 14 } } }
+
+[[args.steps]]
+op = "cloud"
+args = { edit = "add_file", args = { path = "/115/upload/merge-1/ABC-005.mp4", size = 14, hashes = { "2" = "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709" } } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "tick"
+
+# Replacing: the parts may be going, so a cancel is refused.
+[[args.steps]]
+op = "cancel"
+args = { id = 1 }
+
+# The staged file vanishes: the parts are deleted, then the task fails while replacing.
+[[args.steps]]
+op = "cloud"
+args = { edit = "remove", args = { path = "/115/upload/merge-1/ABC-005.mp4" } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "cancel"
+args = { id = 1 }
+
+# Someone put the merged file in place; the retry finds it.
+[[args.steps]]
+op = "cloud"
+args = { edit = "add_file", args = { path = "/115/embyx_in/vr/ABC-005/ABC-005.mp4", size = 14 } }
+
+[[args.steps]]
+op = "retry"
+args = { id = 1 }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "advance"
+args = { seconds = 301 }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "advance"
+args = { seconds = 7200 }
+
+[[args.steps]]
+op = "tick"
+
+# The archive never filed it and there is no whole copy: the merged copy is all there is.
+[[args.steps]]
+op = "cancel"
+args = { id = 1 }
+
+# A whole copy turns up: the archive refuses the duplicate, which the cancel deletes.
+[[args.steps]]
+op = "cloud"
+args = { edit = "add_file", args = { path = "/115/embyx/type/vr/ABC/ABC-005.mp4", size = 30 } }
+
+[[args.steps]]
+op = "retry"
+args = { id = 1 }
+
+[[args.steps]]
+op = "advance"
+args = { seconds = 7201 }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "cancel"
+args = { id = 1, cancel_after = "delete_files" }
+
+[[args.steps]]
+op = "cancel"
+args = { id = 1 }
+
+[kubernetes]
+jobs = {}
+
+[[kubernetes.routes]]
+method = "GET"
+path = "/api/v1/namespaces/media/pods/embyx-manager-0"
+body = { spec = { containers = [{ image = "ghcr.io/cyrahs/embyx-manager:latest" }] }, status = { containerStatuses = [{ imageID = "ghcr.io/cyrahs/embyx-manager@sha256:abc123" }] } }
+
+[clouddrive]
+directories = ["/115/upload", "/115/embyx_in"]
+files = [
+    { path = "/115/embyx/type/vr/ABC/ABC-005-cd1.mp4", size = 7 },
+    { path = "/115/embyx/type/vr/ABC/ABC-005-cd2.mp4", size = 7 },
+]

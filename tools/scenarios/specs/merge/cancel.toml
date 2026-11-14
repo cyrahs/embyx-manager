@@ -1,0 +1,137 @@
+# Cancelling a task in each state the merge Job and the upload pass through: queued, merging
+# (the Job, the partial file, the remuxed parts and the status file go), uploading (the copy is
+# cancelled, the staging folder deleted, the merged file dropped) and failed while merging.
+# Two shutdowns land in the middle (cross-version contract 6): one right after a tick issued
+# the copy, one in the middle of a cancel; each build continues from what the other left.
+description = "merge service: cancel at each state, with shutdowns mid-step"
+operation = "merge.service"
+clock = "2026-11-14T08:00:00+00:00"
+
+[roots]
+names = ["work", "mapping", "secrets"]
+
+[database]
+schema = "app"
+
+[args]
+
+[args.archive]
+src_dir = "/mnt/cd2/115/embyx_in"
+dst_dir = "/mnt/cd2/115/embyx"
+priority_mapping = { vr = "type/vr" }
+
+[[args.steps]]
+op = "create"
+args = { avid = "ABC-001", source = "vr", library_dir = "type/vr", brand = "ABC", merged_name = "ABC-001.mp4", parts = ["/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4", "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"] }
+
+# Queued: nothing to undo.
+[[args.steps]]
+op = "cancel"
+args = { id = 1 }
+
+[[args.steps]]
+op = "cancel"
+args = { id = 1 }
+
+[[args.steps]]
+op = "cancel"
+args = { id = 9 }
+
+[[args.steps]]
+op = "create"
+args = { avid = "ABC-002", source = "vr", library_dir = "type/vr", brand = "ABC", merged_name = "ABC-002.mp4", parts = ["/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4", "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"] }
+
+[[args.steps]]
+op = "tick"
+
+# Merging: the Job and what it wrote go.
+[[args.steps]]
+op = "write"
+args = { path = "work/.ABC-002.mp4.part", text = "half" }
+
+[[args.steps]]
+op = "write"
+args = { path = "work/.ABC-002.mp4.parts/cd1.mp4", text = "remuxed" }
+
+[[args.steps]]
+op = "write"
+args = { path = "work/.merge/2.json", json = { state = "running", phase = "concat", progress = 0.5 } }
+
+[[args.steps]]
+op = "cancel"
+args = { id = 2 }
+
+[[args.steps]]
+op = "create"
+args = { avid = "ABC-003", source = "vr", library_dir = "type/vr", brand = "ABC", merged_name = "ABC-003.mp4", parts = ["/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd1.mp4", "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd2.mp4"] }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "write"
+args = { path = "work/ABC-003.mp4", text = "merged-ABC-003" }
+
+[[args.steps]]
+op = "write"
+args = { path = "work/.merge/3.json", json = { state = "done", size = 14, sha1 = "da39a3ee5e6b4b0d3255bfef95601890afd80709" } }
+
+[[args.steps]]
+op = "tick"
+
+# Uploading: a shutdown right after the copy was issued; the next tick follows that copy.
+[[args.steps]]
+op = "tick"
+args = { cancel_after = "copy_file" }
+
+[[args.steps]]
+op = "tick"
+
+# A shutdown in the middle of the cancel leaves the task uploading; the next cancel ends it.
+[[args.steps]]
+op = "cancel"
+args = { id = 3, cancel_after = "cancel_copy_task" }
+
+[[args.steps]]
+op = "cancel"
+args = { id = 3 }
+
+[[args.steps]]
+op = "create"
+args = { avid = "ABC-004", source = "vr", library_dir = "type/vr", brand = "ABC", merged_name = "ABC-004.mp4", parts = ["/mnt/cd2/115/embyx/type/vr/ABC/ABC-004-cd1.mp4", "/mnt/cd2/115/embyx/type/vr/ABC/ABC-004-cd2.mp4"] }
+
+[[args.steps]]
+op = "tick"
+
+# Failed while merging: the failed Job goes too.
+[[args.steps]]
+op = "write"
+args = { path = "work/.merge/4.json", json = { state = "failed", error = "not enough space on the work volume" } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "cancel"
+args = { id = 4 }
+
+[kubernetes]
+jobs = {}
+
+[[kubernetes.routes]]
+method = "GET"
+path = "/api/v1/namespaces/media/pods/embyx-manager-0"
+body = { spec = { containers = [{ image = "ghcr.io/cyrahs/embyx-manager:latest" }] }, status = { containerStatuses = [{ imageID = "ghcr.io/cyrahs/embyx-manager@sha256:abc123" }] } }
+
+[clouddrive]
+directories = ["/115/upload", "/115/embyx_in"]
+files = [
+    { path = "/115/embyx/type/vr/ABC/ABC-001-cd1.mp4", size = 10 },
+    { path = "/115/embyx/type/vr/ABC/ABC-001-cd2.mp4", size = 10 },
+    { path = "/115/embyx/type/vr/ABC/ABC-002-cd1.mp4", size = 10 },
+    { path = "/115/embyx/type/vr/ABC/ABC-002-cd2.mp4", size = 10 },
+    { path = "/115/embyx/type/vr/ABC/ABC-003-cd1.mp4", size = 10 },
+    { path = "/115/embyx/type/vr/ABC/ABC-003-cd2.mp4", size = 10 },
+    { path = "/115/embyx/type/vr/ABC/ABC-004-cd1.mp4", size = 10 },
+    { path = "/115/embyx/type/vr/ABC/ABC-004-cd2.mp4", size = 10 },
+]

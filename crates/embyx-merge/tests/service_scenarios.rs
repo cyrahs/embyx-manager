@@ -867,3 +867,23 @@ async fn service_steps(name: &str) {
 async fn walk_matches_the_python_transcript() {
     service_steps("merge/walk").await;
 }
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn merge_failures_match_the_python_transcript() {
+    service_steps("merge/merge_failures").await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn upload_matches_the_python_transcript() {
+    service_steps("merge/upload").await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn cancel_matches_the_python_transcript() {
+    service_steps("merge/cancel").await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn replace_archive_matches_the_python_transcript() {
+    service_steps("merge/replace_archive").await;
+}
