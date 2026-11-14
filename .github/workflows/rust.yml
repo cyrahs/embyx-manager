@@ -211,7 +211,7 @@ jobs:
         choco install ffmpeg -y --no-progress
         $real = Get-ChildItem C:\ProgramData\chocolatey\lib\ffmpeg -Recurse -Filter ffmpeg.exe | Select-Object -First 1
         $real.DirectoryName | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-        & $real.FullName -hide_banner -encoders | Select-String libx264
+        if (-not (& $real.FullName -hide_banner -encoders | Select-String libx264)) { throw 'ffmpeg has no libx264' }
 
     - name: The real ffmpeg comes first on PATH
       run: |
