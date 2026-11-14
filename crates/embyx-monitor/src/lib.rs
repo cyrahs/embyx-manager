@@ -30,6 +30,7 @@ pub mod replace;
 pub mod reports;
 pub mod rss;
 pub mod runs;
+pub mod scheduler;
 pub mod subscriptions;
 pub mod support;
 #[cfg(any(test, feature = "test-support"))]

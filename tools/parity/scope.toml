@@ -102,7 +102,7 @@ tests = [
 
 [WP9]
 title = "Scheduler, monitor API, playlists API"
-status = "pending"
+status = "done"
 tests = [
   "tests/test_monitor_scheduler.py",
   "tests/test_monitor_api.py",

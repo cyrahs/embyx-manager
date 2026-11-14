@@ -3,8 +3,11 @@
 // The server binary runs from a temporary directory with the built front end beside it
 // (`static/`, where `serve` looks for it), on a scratch database, with an API token and a
 // stand-in Emby. A headless browser then signs in, opens every page, reads and saves the
-// Emby settings, runs its connection test and reloads a deep link. Finally the server gets
-// SIGTERM and must shut down cleanly.
+// Emby settings, runs its connection test and reloads a deep link. The monitor and playlists
+// pages (WP9) must load their data without an API error: the dashboard shows the four
+// pipeline cards and a refused trigger, the subscriptions page the feed seeded through the
+// API, the playlists page its empty list. Finally the server gets SIGTERM and must shut
+// down cleanly; the scheduler it started must stop with it.
 //
 // Environment: SMOKE_BINARY (the embyx-manager binary), SMOKE_STATIC (the front end's
 // build), SMOKE_DATABASE_URL (a scratch database), SMOKE_SCREENSHOTS (optional directory).
@@ -21,6 +24,9 @@ import { chromium } from 'playwright'
 
 const TOKEN = 'smoke-token'
 const EMBY_KEY = 'smoke-key'
+// API prefixes whose routes arrive with a later work package; their pages may get 404 until then.
+const NOT_YET_PORTED = ['/api/merge/'] // WP14
+
 const PAGES = [
   ['/dashboard', '监控看板'],
   ['/fill-actor', '补全演员'],
@@ -133,6 +139,23 @@ async function main() {
     const seeded = await api(base, 'PUT', '/api/config/emby', { values: { address: emby.address, api_key: EMBY_KEY } })
     check(seeded.status === 200 && seeded.body.version === 1, 'the Emby section is seeded through the API')
 
+    const categories = await api(base, 'PUT', '/api/config/rss', {
+      values: { categories: [{ label: 'rank', task_dir_path: '/115/rank' }] },
+    })
+    check(categories.status === 200, 'an RSS category is seeded through the API')
+    const feed = await api(base, 'POST', '/api/monitor/subscriptions', {
+      kind: 'rss',
+      category: 'rank',
+      url: 'https://feeds.invalid/smoke.xml',
+      name: 'Smoke feed',
+    })
+    check(feed.status === 201 && feed.body.kind === 'rss', 'a feed subscription is created through the API')
+    const status = await api(base, 'GET', '/api/monitor/status')
+    check(
+      status.status === 200 && status.body.map((item) => item.pipeline).join() === 'rss,archive,mapping,playlists',
+      'the monitor reports every pipeline',
+    )
+
     const asset = await fetch(`${base}/assets/missing.js`)
     check(asset.status === 404, 'a missing asset is a 404, not the SPA page')
 
@@ -152,10 +175,33 @@ async function main() {
     await page.getByText('API Token 不正确').waitFor()
     check(true, 'a wrong token is refused by the login probe')
 
+    // From here on every API call a page makes must be answered: a 404 or 405 is a route
+    // the server lacks, a 5xx a handler that failed.
+    const apiFailures = []
+    page.on('response', (response) => {
+      const url = new URL(response.url())
+      const pending = NOT_YET_PORTED.some((prefix) => url.pathname.startsWith(prefix))
+      if (
+        url.pathname.startsWith('/api/') &&
+        !pending &&
+        (response.status() >= 500 || [404, 405].includes(response.status()))
+      ) {
+        apiFailures.push(`${response.request().method()} ${url.pathname}${url.search} ${response.status()}`)
+      }
+    })
+
     await tokenField.fill(TOKEN)
     await tokenField.press('Enter')
     await page.getByText('服务正常').waitFor()
     check(true, 'the right token opens the app and the health chip is green')
+
+    const cards = page.locator('article.pipeline-card')
+    await cards.nth(3).waitFor()
+    check((await cards.count()) === 4, 'the dashboard shows the four pipeline cards')
+    const rssCard = page.locator('article[aria-label="RSS 磁力摄取"]')
+    await rssCard.getByText('未配置', { exact: true }).waitFor()
+    await rssCard.getByText('尚未配置 CloudDrive').waitFor()
+    check(true, 'without CloudDrive the RSS pipeline reads as not configured, with the reason')
 
     for (const [path, label] of PAGES) {
       await page.getByRole('navigation', { name: '页面导航' }).locator(`a[href="${path}"]`).click()
@@ -163,7 +209,16 @@ async function main() {
       await page.waitForFunction((title) => document.title === title, `${label} · Embyx Manager`)
       await page.waitForLoadState('networkidle')
       check(true, `${path} renders (${await page.title()})`)
+      if (path === '/subscriptions') {
+        await page.getByRole('tab', { name: /榜单/ }).click()
+        await page.getByText('https://feeds.invalid/smoke.xml').waitFor()
+        check(true, 'the subscriptions page lists the seeded feed')
+      } else if (path === '/playlists') {
+        await page.getByText('还没有列表').waitFor()
+        check(true, 'the playlists page shows its empty list')
+      }
     }
+    check(apiFailures.length === 0, `every page's API calls are answered${apiFailures.length ? `: ${apiFailures.join('; ')}` : ''}`)
 
     const panel = page.locator('section[aria-labelledby="settings-emby"]')
     await panel.getByText('v1').waitFor()

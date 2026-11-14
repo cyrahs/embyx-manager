@@ -372,6 +372,9 @@ pub fn run() -> u8 {
             Err(crate::bootstrap::BuildError::Database(error)) => {
                 Startup::Failed(format!("Traceback (most recent call last):\n{error}"))
             }
+            Err(crate::bootstrap::BuildError::Client(error)) => {
+                return traceback_exit(&format!("RuntimeError: {}", error.0));
+            }
         };
         serve(&settings, startup).await
     })

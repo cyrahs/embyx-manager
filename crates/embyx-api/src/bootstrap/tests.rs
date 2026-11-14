@@ -119,6 +119,28 @@ async fn build_app_loads_the_store_and_serves_config() {
     .await;
     assert_eq!(status, StatusCode::OK, "{saved:?}");
     assert_eq!(assembled.store.get_with_version("emby").expect("emby").version, 1);
+    // The monitor's routers and scheduler (WP9): every pipeline reports, none is configured.
+    let (status, pipelines) = call(&assembled.app, Method::GET, "/api/monitor/status", &[], None).await;
+    assert_eq!(status, StatusCode::OK);
+    let names: Vec<Value> = pipelines
+        .as_list()
+        .expect("a list")
+        .iter()
+        .map(|pipeline| pipeline.get("pipeline").expect("a name").clone())
+        .collect();
+    assert_eq!(
+        names,
+        ["rss", "archive", "mapping", "playlists"].map(Value::from).to_vec()
+    );
+    let (status, playlists) = call(&assembled.app, Method::GET, "/api/playlists", &[], None).await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(
+        playlists.get("fill_reason"),
+        Some(&Value::from(crate::playlists_api::NO_FILL_DIRECTORY))
+    );
+    let (status, tracker) = call(&assembled.app, Method::GET, "/api/monitor/tracker", &[], None).await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(tracker.get("reason"), Some(&Value::from("archive is disabled")));
     // The transcode listener's app has no routes yet (WP14).
     let (status, _) = call(&assembled.transcode_app, Method::GET, "/api/transcode/jobs", &[], None).await;
     assert_eq!(status, StatusCode::NOT_FOUND);

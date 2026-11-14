@@ -1,17 +1,11 @@
 //! The served documents against the baseline's (`goldens/api/openapi_*.json`).
 
-use std::sync::Arc;
-
 use embyx_core::golden;
 use embyx_core::pyjson::{self, Value};
-use embyx_db::config_store::ConfigStore;
-use embyx_db::database::Database;
 use http::Method;
 
 use super::{PENDING, document, structural_diff};
-use crate::app::{AppParts, TRANSCODE_TITLE, VERSION, create_app};
-use crate::auth::MutationAuth;
-use crate::config_api::{ConfigApiOptions, create_config_router};
+use crate::app::{TRANSCODE_TITLE, VERSION};
 use crate::routing::ApiRouter;
 use crate::testing::{request, send};
 
@@ -21,21 +15,11 @@ fn baseline(name: &str) -> Value {
 
 /// The main app as `build_app` assembles it, without a database behind it.
 async fn served_main() -> Value {
-    let database = Database::new("postgresql://openapi@127.0.0.1:9/openapi").expect("a URL");
-    let store = Arc::new(ConfigStore::new(database));
-    let app = create_app(AppParts {
-        app_ready: crate::testing::ready(true),
-        routers: vec![create_config_router(
-            store,
-            MutationAuth::new(None),
-            ConfigApiOptions::default(),
-        )],
-        feature_health: Vec::new(),
-        api_token: None,
-        max_request_bytes: 65_536,
-        frontend_dist: None,
-    })
-    .expect("an app");
+    let settings = embyx_core::settings::Settings {
+        database_url: "postgresql://openapi@127.0.0.1:9/openapi".to_owned(),
+        ..embyx_core::settings::Settings::default()
+    };
+    let app = crate::bootstrap::build_app(&settings, None).expect("assembled").app;
     let (_, body) = send(&app, request(Method::GET, "/openapi.json", &[], None)).await;
     pyjson::loads(std::str::from_utf8(&body).expect("UTF-8")).expect("JSON")
 }

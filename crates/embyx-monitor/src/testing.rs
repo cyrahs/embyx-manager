@@ -50,6 +50,9 @@ pub struct FakeLedgerState {
     pub release_dates: IndexMap<String, Option<NaiveDate>>,
     pub replace_paths: IndexMap<String, Vec<String>>,
     pub replace_after: IndexMap<String, i32>,
+    /// The test's own `claim_attempt`: every chosen magnet is live for another AVID
+    /// (`MagnetInUseError`).
+    pub claim_attempt_in_use: bool,
 }
 
 impl FakeLedgerState {
@@ -525,6 +528,13 @@ impl Ledger for FakeLedger {
         attempt_no: i32,
         now: DateTime<Utc>,
     ) -> BoxFuture<'a, Result<Option<MagnetAttemptRecord>, LedgerError>> {
+        if self.state().claim_attempt_in_use {
+            let in_use = crate::acquisitions::MagnetInUseError {
+                avid: avid.to_owned(),
+                attempt_no,
+            };
+            return Box::pin(std::future::ready(Err(in_use.into())));
+        }
         ready(self.claim_sync(avid, Some(attempt_no), now))
     }
 

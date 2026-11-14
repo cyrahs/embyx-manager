@@ -992,12 +992,14 @@ dependencies = [
  "embyx-clients",
  "embyx-core",
  "embyx-db",
+ "embyx-monitor",
  "futures-util",
  "getrandom 0.4.3",
  "hex",
  "http",
  "http-body-util",
  "hyper",
+ "indexmap",
  "md-5",
  "tempfile",
  "thiserror 2.0.21",
@@ -1156,6 +1158,7 @@ dependencies = [
  "tempfile",
  "thiserror 2.0.21",
  "tokio",
+ "tokio-util",
  "tracing",
 ]
 

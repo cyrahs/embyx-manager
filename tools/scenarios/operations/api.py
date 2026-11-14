@@ -14,6 +14,13 @@ is sent compact (`separators=(',', ':')`, `ensure_ascii=False`) with
 `content_type` sends none); `body` is sent as UTF-8 text, `body_hex` as the bytes it spells;
 `body_size` sends that many `x`;
 `body_nested = n` sends `{"values":` and `n` nested empty lists as JSON.
+
+With `args.monitor = true` the monitor and playlists routers (WP9) are mounted too, over the
+real repositories on the scenario's database: a scheduler that is never started and whose
+pipelines all report `args.not_ready` (so nothing can run), the ledger routes without a
+CloudDrive to submit to, the subscription registry without an AVBase to resolve talents,
+and the playlists without a fill directory. `args.mask_keys` names the keys whose non-null
+values in a response body are reported as `<set>`: the times a mutation takes from the clock.
 `{clouddrive}` and `{emby}` in a path, header or body are replaced by the fakes' addresses,
 and replaced back in what is reported.
 
@@ -37,10 +44,18 @@ from fastapi.testclient import TestClient
 
 from embyx_manager.api import create_app, make_mutation_auth
 from embyx_manager.config.api import create_config_router
+from embyx_manager.config.models import RssConfig
 from embyx_manager.config.store import ConfigStore
 from embyx_manager.db import Database
 from embyx_manager.fill_actor.postgres_repository import PostgresFillActorRepository
 from embyx_manager.merge.transcode_api import create_transcode_app
+from embyx_manager.monitor.acquisitions import AcquisitionRepository
+from embyx_manager.monitor.api import AcquisitionApi, SubscriptionsApi, create_monitor_router
+from embyx_manager.monitor.playlists import PlaylistRepository
+from embyx_manager.monitor.playlists_api import create_playlists_router
+from embyx_manager.monitor.runs import PipelineRunRepository
+from embyx_manager.monitor.scheduler import MonitorScheduler
+from embyx_manager.monitor.subscriptions import SubscriptionRepository
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -111,14 +126,66 @@ def _response(response: Any) -> dict[str, Any]:
     return {'status': response.status_code, 'headers': headers, 'body': body}
 
 
-def _send(client: TestClient, requests: list[dict[str, Any]], replacements: dict[str, str]) -> list[dict[str, Any]]:
+def _mask(value: Any, keys: frozenset[str]) -> Any:
+    if isinstance(value, list):
+        return [_mask(item, keys) for item in value]
+    if isinstance(value, dict):
+        return {key: '<set>' if key in keys and item is not None else _mask(item, keys) for key, item in value.items()}
+    return value
+
+
+def _send(
+    client: TestClient,
+    requests: list[dict[str, Any]],
+    replacements: dict[str, str],
+    mask_keys: frozenset[str] = frozenset(),
+) -> list[dict[str, Any]]:
     results = []
     for raw in requests:
         request = _substitute(raw, replacements)
         headers, content = _request_parts(request)
         response = client.request(request['method'], request['path'], headers=headers, content=content)
-        results.append(_response(response))
+        result = _response(response)
+        result['body'] = _mask(result['body'], mask_keys)
+        results.append(result)
     return results
+
+
+def _monitor_routers(store: ConfigStore, database: Database, mutation_auth: Any, not_ready: str) -> tuple[Any, ...]:
+    async def never(_ctx: object) -> None:
+        msg = 'a scenario never runs a pipeline'
+        raise AssertionError(msg)
+
+    def never_build() -> object:
+        msg = 'a scenario never runs a pipeline'
+        raise AssertionError(msg)
+
+    runs = PipelineRunRepository(database)
+    ledger = AcquisitionRepository(database)
+    scheduler = MonitorScheduler(
+        store=store,
+        runs=runs,
+        rss_runner=never,
+        archive_runner=never,
+        mapping_factory=never_build,
+        rss_ready=lambda: not_ready,
+        archive_ready=lambda: not_ready,
+        mapping_ready=lambda: not_ready,
+        playlists_runner=never,
+        playlists_ready=lambda: not_ready,
+    )
+    monitor = create_monitor_router(
+        scheduler,
+        runs,
+        mutation_auth=mutation_auth,
+        acquisitions=AcquisitionApi(ledger=ledger, tracker_ready=lambda: not_ready),
+        subscriptions=SubscriptionsApi(
+            repository=SubscriptionRepository(database),
+            categories=lambda: tuple(category.label for category in store.get(RssConfig).categories),
+        ),
+    )
+    playlists = create_playlists_router(PlaylistRepository(database), mutation_auth=mutation_auth, ledger=ledger)
+    return monitor, playlists
 
 
 def _pin_static_mtimes(ctx: Context) -> None:
@@ -146,9 +213,15 @@ async def exchange(ctx: Context) -> Any:
         finally:
             await database.aclose()
 
+    mutation_auth = make_mutation_auth(api_token)
+    routers: tuple[Any, ...] = (create_config_router(store, mutation_auth=mutation_auth),)
+    if ctx.args.get('monitor'):
+        routers += _monitor_routers(store, database, mutation_auth, str(ctx.args.get('not_ready', 'not ready')))
+    mask_keys = frozenset(ctx.args.get('mask_keys', []))
+
     app = create_app(
         app_ready=repository.health_check,
-        routers=(create_config_router(store, mutation_auth=make_mutation_auth(api_token)),),
+        routers=routers,
         lifespans=(runtime_lifespan,),
         api_token=api_token,
         max_request_bytes=int(ctx.args.get('max_request_bytes', 65_536)),
@@ -158,7 +231,7 @@ async def exchange(ctx: Context) -> Any:
 
     def run() -> dict[str, Any]:
         with TestClient(app, follow_redirects=False) as client:
-            main = _send(client, ctx.args.get('requests', []), replacements)
+            main = _send(client, ctx.args.get('requests', []), replacements, mask_keys)
         with TestClient(transcode_app, follow_redirects=False) as client:
             transcode = _send(client, ctx.args.get('transcode_requests', []), replacements)
         return {'responses': main, 'transcode_responses': transcode}
