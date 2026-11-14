@@ -16,18 +16,23 @@ is equal when the status, the content type and the body are equal: JSON is parse
 its types (`true` is not `1`, `5` is not `5.0`), keys in `--ignore-key` dropped at any depth; any
 other body is compared whole. Values taken from the rows go into the URL percent-encoded.
 
-Three values are read off the server's clock when the request runs (`scanned_at`, and the
-`elapsed_seconds` / `last_progress_seconds` of any job's progress). The Rust server answers each
-request some seconds after the Python one did, so these count as equal only when both have one
-type and one text shape and the Rust value is later by the time between the two requests, give or
-take `CLOCK_SLACK` seconds. The report counts the values taken as equal this way.
+Three values are read off a server's clock, so they differ between the builds by design. The Rust
+server starts after the Python one has finished, and these count as equal only when both sides have
+one type, one text shape and one UTC offset, and the Rust value is later by the right time, give or
+take `CLOCK_SLACK` seconds: `elapsed_seconds` and `last_progress_seconds` of any job's progress
+(read when the request runs) by the time between the two requests, `scanned_at` (the title scan,
+done once between the server's start and the titles request) by the time between those two
+stretches. The report lists each value taken as equal this way, both sides. `eta_seconds` of a
+running job is derived from `elapsed_seconds` and is compared exactly: an export at rest holds no
+running job, and one that does shows as a difference.
 
     EMBYX_MANAGER_TEST_DATABASE_URL=postgresql://... uv run python tools/level2/get_diff.py DIR \\
         --binary target/release/embyx-manager --out diff.json
 
 The report holds request paths, statuses and the JSON paths that differ with both values cut to
 200 characters: values from a masked export only. `python_non_200` lists every request the Python
-build did not answer with 200, so a stored row that neither build can serve stays visible.
+build did not answer with 200, so a stored row that neither build can serve stays visible; `binary`
+is the Rust binary that ran.
 """
 
 from __future__ import annotations
@@ -61,13 +66,12 @@ HTTP_TIMEOUT = 600
 
 #: Keys whose values depend on when the request ran, not on the rows.
 DEFAULT_IGNORED = ('checked_at', 'generated_at', 'now', 'server_time', 'listed_at', 'age_seconds')
-#: Values a server reads off its clock when the request runs (the title scan's time, the seconds
-#: since a job's stage started and since its last progress): equal when the Rust value is later
-#: than the Python one by the time between the two requests (`near`).
-CLOCK_KEYS = frozenset({'scanned_at', 'elapsed_seconds', 'last_progress_seconds'})
-#: Seconds a clock value may be off the time between the two requests: both builds floor to whole
-#: seconds, and a server reads its clock somewhere between a request's start and its end.
-CLOCK_SLACK = 2.0
+#: Values a server reads off its clock, and when: `request` while it answers the request (the
+#: seconds since a job's stage started and since its last progress), `server` once between its
+#: start and the request (the title scan, cached from the warm-up). `near` says when two are equal.
+CLOCK_KEYS = {'scanned_at': 'server', 'elapsed_seconds': 'request', 'last_progress_seconds': 'request'}
+#: Seconds a clock value may be off: both builds floor to whole seconds.
+CLOCK_SLACK = 1.0
 SWITCHES = ('enabled', 'auto_enabled', 'home_transcode_enabled')
 
 
@@ -163,6 +167,7 @@ def answers(command: list[str], dsn: str, paths: list[str]) -> dict[str, Any]:
         'NO_PROXY': '127.0.0.1,localhost', 'no_proxy': '127.0.0.1,localhost',
     }  # fmt: skip
     with (work / 'server.log').open('wb') as log:
+        spawned = time.time()
         process = subprocess.Popen(command, env=env, stdout=log, stderr=subprocess.STDOUT, cwd=work)
     try:
         server = Server(port, transcode_port)
@@ -170,7 +175,7 @@ def answers(command: list[str], dsn: str, paths: list[str]) -> dict[str, Any]:
         time.sleep(1.0)
         out = {}
         for path in paths:
-            out[path] = fetch(server.base, path)
+            out[path] = fetch(server.base, path) | {'spawned': spawned}
         out['__proxy_hosts__'] = proxy.hosts
         return out
     finally:
@@ -208,17 +213,24 @@ def strip(value: Any, ignored: frozenset[str]) -> Any:
     return value
 
 
-def clock_gap(left: dict[str, Any], right: dict[str, Any]) -> tuple[float, float]:
-    """The least and the most seconds the second answer's clock can be ahead of the first's."""
-    return (right['sent'] - left['done'] - CLOCK_SLACK, right['done'] - left['sent'] + CLOCK_SLACK)
+def clock_gaps(left: dict[str, Any], right: dict[str, Any]) -> dict[str, tuple[float, float]]:
+    """The least and the most seconds the second answer's clock values can be ahead of the first's.
+
+    `request`: both read while the request ran. `server`: both read at some time between the
+    server's start and the end of the request.
+    """
+    return {
+        'request': (right['sent'] - left['done'] - CLOCK_SLACK, right['done'] - left['sent'] + CLOCK_SLACK),
+        'server': (right['spawned'] - left['done'] - CLOCK_SLACK, right['done'] - left['spawned'] + CLOCK_SLACK),
+    }
 
 
 def near(left: Any, right: Any, gap: tuple[float, float]) -> bool:
-    """Whether the Rust clock value is later than the Python one by the time between the requests.
+    """Whether the Rust clock value is later than the Python one by a time inside `gap`.
 
     Both must be numbers of one type, or times written in one shape (the same text once every
-    digit is replaced): `...Z` against `...+00:00`, or a time without its fraction, stays a
-    difference.
+    digit is replaced) with one UTC offset: `...Z` against `...+00:00`, a time without its
+    fraction, or another zone, stays a difference.
     """
     if type(left) is not type(right) or isinstance(left, bool):
         return False
@@ -226,9 +238,12 @@ def near(left: Any, right: Any, gap: tuple[float, float]) -> bool:
         if re.sub(r'\d', '0', left) != re.sub(r'\d', '0', right):
             return False
         try:
-            ahead = (dt.datetime.fromisoformat(right) - dt.datetime.fromisoformat(left)).total_seconds()
+            first, second = dt.datetime.fromisoformat(left), dt.datetime.fromisoformat(right)
         except ValueError:
             return False
+        if first.utcoffset() != second.utcoffset():
+            return False
+        ahead = (second - first).total_seconds()
     elif isinstance(left, int | float):
         ahead = right - left
     else:
@@ -240,13 +255,13 @@ def differences(
     left: Any,
     right: Any,
     path: str = '$',
-    gap: tuple[float, float] | None = None,
-    tolerated: list[str] | None = None,
+    gaps: dict[str, tuple[float, float]] | None = None,
+    tolerated: list[dict[str, str]] | None = None,
 ) -> list[dict[str, str]]:
     """The JSON paths where two values differ, each side cut to 200 characters.
 
-    With `gap` (`clock_gap` of the two answers), a `CLOCK_KEYS` value is equal when `near` says
-    so, and its path is added to `tolerated`; without it, it is compared like any other value.
+    With `gaps` (`clock_gaps` of the two answers), a `CLOCK_KEYS` value is equal when `near` says
+    so, and it is added to `tolerated` with both sides; without, it is compared like any other.
     """
     if isinstance(left, dict) and isinstance(right, dict):
         out = []
@@ -254,17 +269,17 @@ def differences(
             if key not in left or key not in right:
                 side = 'python' if key in left else 'rust'
                 out.append({'path': f'{path}.{key}', 'only': side})
-            elif gap is not None and key in CLOCK_KEYS and near(left[key], right[key], gap):
+            elif gaps is not None and key in CLOCK_KEYS and near(left[key], right[key], gaps[CLOCK_KEYS[key]]):
                 if tolerated is not None:
-                    tolerated.append(f'{path}.{key}')
+                    tolerated.append({'path': f'{path}.{key}', 'python': str(left[key]), 'rust': str(right[key])})
             else:
-                out += differences(left[key], right[key], f'{path}.{key}', gap, tolerated)
+                out += differences(left[key], right[key], f'{path}.{key}', gaps, tolerated)
         return out
     if isinstance(left, list) and isinstance(right, list) and len(left) == len(right):
         return [
             item
             for index, pair in enumerate(zip(left, right, strict=True))
-            for item in differences(*pair, f'{path}[{index}]', gap, tolerated)
+            for item in differences(*pair, f'{path}[{index}]', gaps, tolerated)
         ]
     # `type` too: Python's `True == 1 == 1.0` would hide a bool sent as a number.
     if type(left) is type(right) and left == right:
@@ -278,9 +293,7 @@ def differences(
 
 def compare(paths: list[str], python: dict[str, Any], rust: dict[str, Any], ignored: frozenset[str]) -> dict[str, Any]:
     """The report's comparison part: equal and differing requests, and what the clock rule let pass."""
-    out: dict[str, Any] = {'equal': 0, 'different': []}
-    tolerated: list[str] = []
-    ahead: list[float] = []
+    out: dict[str, Any] = {'equal': 0, 'different': [], 'clock_tolerated': []}
     for path in paths:
         left, right = python[path], rust[path]
         found = [
@@ -288,18 +301,20 @@ def compare(paths: list[str], python: dict[str, Any], rust: dict[str, Any], igno
             for field in ('status', 'content_type')
             if left[field] != right[field]
         ]
-        gap = clock_gap(left, right)
-        before = len(tolerated)
-        found += differences(strip(left['body'], ignored), strip(right['body'], ignored), gap=gap, tolerated=tolerated)
-        if len(tolerated) > before:
-            ahead.append(right['sent'] - left['sent'])
+        tolerated: list[dict[str, str]] = []
+        found += differences(
+            strip(left['body'], ignored),
+            strip(right['body'], ignored),
+            gaps=clock_gaps(left, right),
+            tolerated=tolerated,
+        )
+        # Each clock value that counted as equal, and how long after Python's request Rust's was sent.
+        ahead = round(right['sent'] - left['sent'], 1)
+        out['clock_tolerated'] += [{'request': path, 'requests_apart': ahead} | item for item in tolerated]
         if found:
             out['different'].append({'request': path, 'differences': found})
         else:
             out['equal'] += 1
-    # How many clock values counted as equal, and how far apart the two builds answered those requests.
-    out['clock_values_tolerated'] = len(tolerated)
-    out['clock_gap_seconds'] = [round(min(ahead), 1), round(max(ahead), 1)] if ahead else None
     # How many answers of each status the Python build gave (equal answers that are all errors
     # would say little), and every request it did not answer with 200.
     statuses: dict[str, int] = {}
@@ -325,8 +340,9 @@ def main() -> int:
     args = parser.parse_args()
     admin = os.environ['EMBYX_MANAGER_TEST_DATABASE_URL']
     ignored = frozenset(args.ignore_key)
-    # Absolute: the server starts in a scratch directory. A bare name is looked up on PATH.
-    binary = Path(shutil.which(args.binary) or args.binary).resolve()
+    # Absolute: the server starts in a scratch directory. A name that is no file here is looked up on PATH.
+    binary = Path(args.binary)
+    binary = (binary if binary.exists() else Path(shutil.which(args.binary) or args.binary)).resolve()
     results: dict[str, dict[str, Any]] = {}
     switched: list[str] = []
     paths: list[str] = []
@@ -350,7 +366,9 @@ def main() -> int:
             results[side] = answers(command, dsn, paths)
         finally:
             asyncio.run(_drop(admin, name))
-    report: dict[str, Any] = {'requests': len(paths), 'skipped': skipped, 'switched_off': switched}
+    report: dict[str, Any] = {
+        'binary': str(binary), 'requests': len(paths), 'skipped': skipped, 'switched_off': switched,
+    }  # fmt: skip
     report |= compare(paths, results['python'], results['rust'], ignored)
     report['proxy_hosts'] = {side: results[side]['__proxy_hosts__'] for side in results}
     args.out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
