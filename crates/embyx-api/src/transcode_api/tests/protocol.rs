@@ -476,7 +476,9 @@ async fn a_rust_worker_transcodes_a_title_through_the_rust_listener() {
     let parts: Vec<String> = (1..=2)
         .map(|index| format!("{library}/type/vr/SQTEVR/SQTEVR-009-cd{index}.mp4"))
         .collect();
-    // Over two of the listener's 60-second chunks, so the stop falls inside the part.
+    // Over two of the listener's 60-second chunks, so the stop falls inside the part. The encode
+    // is paced at 8x (below): the stop has to land between the first chunk closing and the
+    // second one, 7.5 s, and at 20x those 3 s were once too few on a loaded runner.
     make_part(Path::new(&parts[0]), 130.0, 0.2);
     make_part(Path::new(&parts[1]), 5.0, 0.0);
     let work = tmp.path().join("upload");
@@ -492,7 +494,7 @@ async fn a_rust_worker_transcodes_a_title_through_the_rust_listener() {
     config.jobs = 1;
     config.name = "pc".to_owned();
     config.encoder = pyjson::loads(
-        r#"{"codec": "libx264", "extra": ["-preset", "veryfast", "-bf", "3", "-vf", "realtime=speed=20"]}"#,
+        r#"{"codec": "libx264", "extra": ["-preset", "veryfast", "-bf", "3", "-vf", "realtime=speed=8"]}"#,
     )
     .expect("JSON")
     .as_dict()

@@ -439,8 +439,9 @@ The full rows are in PLAN.md "Experiment log".
    watching the pod's working set (DEPLOY.md).
 3. **Job Object for the home worker** (HOME-WORKER.md). It would make ffmpeg shims harmless for stops.
    It is not built; winget's ffmpeg needs nothing.
-4. **Deployment itself.** Described in DEPLOY.md: the image and release workflows, then switching Flux's
-   ImagePolicy filter to `^rust$`, with the way back. None of it is done.
+4. **Deployment itself.** Described in DEPLOY.md and PLAN.md "Deployment and rollback". When this report was
+   written none of it was done. Max gave the go-ahead for the trial on 2026-11-16: the image workflow
+   (`rust-image.yml`) was added then; the release workflow for the home worker is still only described.
 
 ## Open risks
 

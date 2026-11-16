@@ -6,8 +6,10 @@
 #   2. No ignored Rust tests: a test that cannot run is ported differently or waived.
 #   3. `unsafe` is denied by the workspace lints, which every crate must use; the only place
 #      allowed to lift that is the home worker's process-control module (WP15) and its probe.
-#   4. CI stays checks-only: `.github/` holds the baseline's files plus `rust.yml`, which
-#      keeps `contents: read` and asks for no write permission.
+#   4. `.github/` holds the baseline's files plus `rust.yml`, which is checks-only (it keeps
+#      `contents: read` and asks for no write permission), and `rust-image.yml`, which
+#      publishes the Rust image for the deployment trial: it runs only on pushes to `rust`,
+#      may write packages and nothing else, and never writes the `latest` tag.
 # Needs the baseline commit in the local clone (CI checks out with full history).
 # Adapted from fav (rust/tools/check_tree.sh).
 set -euo pipefail
@@ -58,9 +60,10 @@ if [[ -n "${added}" ]]; then
 fi
 
 github_files="$(git ls-files .github | sort)"
-expected_github="$( (git ls-tree -r --name-only "${baseline}" -- .github; echo .github/workflows/rust.yml) | sort)"
+expected_github="$( (git ls-tree -r --name-only "${baseline}" -- .github; echo .github/workflows/rust.yml;
+  echo .github/workflows/rust-image.yml) | sort)"
 if [[ "${github_files}" != "${expected_github}" ]]; then
-  echo "error: .github/ may hold only the baseline's files and .github/workflows/rust.yml:"
+  echo "error: .github/ may hold only the baseline's files, rust.yml and rust-image.yml:"
   diff <(echo "${expected_github}") <(echo "${github_files}") | sed 's/^/  /' || true
   status=1
 fi
@@ -71,6 +74,48 @@ if [[ -f .github/workflows/rust.yml ]]; then
   fi
   if ! grep -qE '^[[:space:]]*contents:[[:space:]]*read[[:space:]]*$' .github/workflows/rust.yml; then
     echo "error: rust.yml must keep permissions contents: read"
+    status=1
+  fi
+fi
+if [[ -f .github/workflows/rust-image.yml ]]; then
+  # The one workflow that may publish. The rules read the whole file, comments included, so
+  # nothing can hide behind a `#`: its comments avoid the words the rules look for.
+  image_workflow=.github/workflows/rust-image.yml
+  block() {
+    perl -0777 -ne 'print $1 if /^'"$1"':\n((?:[ \t]+.*\n|\n)+)/m' "${image_workflow}" | grep -vE '^[[:space:]]*$' || true
+  }
+  if [[ "$(grep -cE '^["'\'']?(on|true)["'\'']?[[:space:]]*:' "${image_workflow}")" != 1 ||
+    "$(block on)" != $'  push:\n    branches: [ rust ]' ]]; then
+    echo "error: rust-image.yml must run only on pushes to rust; its triggers are:"
+    block on | sed 's/^/  /'
+    status=1
+  fi
+  if [[ "$(grep -c 'permissions' "${image_workflow}")" != 1 ||
+    "$(block permissions)" != $'  contents: read\n  packages: write' ||
+    "$(grep -ciE 'write' "${image_workflow}")" != 1 ]]; then
+    echo "error: rust-image.yml must have one permissions block, contents: read and packages: write, and no other mention of write"
+    grep -niE 'permissions|write' "${image_workflow}" | sed 's/^/  /' || true
+    status=1
+  fi
+  if grep -niE 'latest' "${image_workflow}"; then
+    echo "error: rust-image.yml must not mention the latest tag in any spelling (Flux follows it)"
+    status=1
+  fi
+  if [[ "$(grep -i 'secrets' "${image_workflow}")" != '        password: ${{ secrets.GITHUB_TOKEN }}' ]]; then
+    echo "error: rust-image.yml may use no secret but GITHUB_TOKEN, once, as the registry password"
+    status=1
+  fi
+  # A reference without a tag means the tag Flux follows, so the image may be named only as
+  # "${IMAGE}:rust" or "${IMAGE}:rust-${GITHUB_SHA}", and nothing may add tags on its own.
+  references="$(sed -E -e 's/^      IMAGE: ghcr\.io\/\$\{\{ github\.repository \}\}$//' -e 's/^        registry: ghcr\.io$//' \
+    -e 's/"\$\{IMAGE\}:rust(-\$\{GITHUB_SHA\})?"//g' "${image_workflow}")"
+  if grep -nE 'IMAGE|ghcr\.io|github\.repository' <<< "${references}" ||
+    grep -niE 'all-tags|push[[:space:]]+-a\b|metadata-action|push:[[:space:]]*["'\'']?true|imagetools[[:space:]]+create' "${image_workflow}"; then
+    echo "error: rust-image.yml may name the image only as \"\${IMAGE}:rust\" or \"\${IMAGE}:rust-\${GITHUB_SHA}\" and push it with docker push"
+    status=1
+  fi
+  if ! grep -qE '^      run: tools/check_tree\.sh$' "${image_workflow}" || grep -nE 'continue-on-error|^[[:space:]]+if:' "${image_workflow}"; then
+    echo "error: rust-image.yml must run tools/check_tree.sh, with no step allowed to fail or be skipped"
     status=1
   fi
 fi

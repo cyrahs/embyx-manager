@@ -195,8 +195,8 @@ jobs:
         tools/smoke/run.sh
 
   # The Rust image (Dockerfile.rust, WP16): built to prove it builds and loaded only into this
-  # runner to check what it carries. Nothing logs in to a registry and nothing is pushed; the
-  # workflow that would publish it is described in docs/rewrite/DEPLOY.md, not added.
+  # runner to check what it carries. Nothing logs in to a registry and nothing is pushed from
+  # this workflow; rust-image.yml publishes the image on pushes to `rust` (docs/rewrite/DEPLOY.md).
   image:
     runs-on: ubuntu-latest
     steps:
