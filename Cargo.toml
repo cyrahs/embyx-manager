@@ -48,6 +48,9 @@ chrono = { version = "0.4", default-features = false, features = ["clock", "std"
 chrono-tz = "0.10"
 clap = { version = "4.6", features = ["derive"] }
 fancy-regex = "0.20"
+# zlib-rs is named because the deflate decoding in embyx-clients was checked against httpx on it:
+# on corrupt input the miniz_oxide backend answers differently.
+flate2 = { version = "1", default-features = false, features = ["zlib-rs"] }
 futures-util = { version = "0.3", default-features = false }
 # `uuid.uuid4().hex` run ids (WP5) and multipart boundaries (WP4, Starlette's
 # `secrets.token_hex(13)`): random bytes from the OS.

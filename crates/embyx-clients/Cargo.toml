@@ -25,6 +25,7 @@ ego-tree.workspace = true
 embyx-core.workspace = true
 encoding_rs.workspace = true
 fancy-regex.workspace = true
+flate2.workspace = true
 futures-util = { workspace = true, features = ["std"] }
 html5ever.workspace = true
 http.workspace = true

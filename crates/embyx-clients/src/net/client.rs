@@ -253,12 +253,87 @@ impl Inner {
     }
 }
 
+/// httpx's `DeflateDecoder` (`httpx/_decoders.py`): a `Content-Encoding: deflate` body is read
+/// as a zlib stream and, when its first bytes are not a zlib header, as a bare deflate stream.
+/// Servers send both under that name (Emby sends the bare one), and reqwest's own decoder
+/// accepts only the zlib form, so the client decodes this coding itself.
+#[derive(Debug)]
+struct Deflate {
+    stream: flate2::Decompress,
+    first: bool,
+    ended: bool,
+}
+
+impl Deflate {
+    /// The decoder for a response whose only content coding is `deflate`.
+    fn of(headers: &HeaderMap) -> Option<Self> {
+        let coding = header_text(headers, "content-encoding")?;
+        coding.trim().eq_ignore_ascii_case("deflate").then(|| Self {
+            stream: flate2::Decompress::new(true),
+            first: true,
+            ended: false,
+        })
+    }
+
+    /// `DeflateDecoder.decode`: only the first piece may fall back to the bare form.
+    fn decode(&mut self, data: &[u8]) -> Result<Vec<u8>, String> {
+        let first = std::mem::take(&mut self.first);
+        match self.inflate(data) {
+            Ok(decoded) => Ok(decoded),
+            Err(_) if first => {
+                self.stream = flate2::Decompress::new(false);
+                self.ended = false;
+                self.inflate(data).map_err(|error| zlib_error_text(&error))
+            }
+            Err(error) => Err(zlib_error_text(&error)),
+        }
+    }
+
+    /// Everything `data` decodes to. Bytes after the stream's end are ignored, and a stream cut
+    /// short gives what it held, as zlib's `decompressobj` does for httpx.
+    fn inflate(&mut self, data: &[u8]) -> Result<Vec<u8>, flate2::DecompressError> {
+        let mut decoded = Vec::with_capacity(data.len().saturating_mul(4).max(4096));
+        let mut rest = data;
+        while !self.ended {
+            if decoded.len() == decoded.capacity() {
+                decoded.reserve(decoded.capacity());
+            }
+            let (read, written) = (self.stream.total_in(), decoded.len());
+            let status = self
+                .stream
+                .decompress_vec(rest, &mut decoded, flate2::FlushDecompress::None)?;
+            let used = usize::try_from(self.stream.total_in() - read).unwrap_or(rest.len());
+            rest = &rest[used.min(rest.len())..];
+            self.ended = status == flate2::Status::StreamEnd;
+            let idle = used == 0 && decoded.len() == written;
+            if decoded.len() < decoded.capacity() && (rest.is_empty() || idle) {
+                break;
+            }
+        }
+        Ok(decoded)
+    }
+}
+
+/// `str(zlib.error)` as `CPython` words a failed `decompress()` (`zlibmodule.c`, `zlib_error`),
+/// which httpx carries into its `DecodingError`. The reason is the text of the zlib-rs backend
+/// named in the workspace manifest, which is zlib's except for three reasons found deep inside
+/// a block (a bad distance or length code), where zlib-rs says "repeated call with bad state".
+fn zlib_error_text(error: &flate2::DecompressError) -> String {
+    if error.needs_dictionary().is_some() {
+        return "Error 2 while decompressing data".to_owned();
+    }
+    let reason = error.message().unwrap_or("invalid input data");
+    format!("Error -3 while decompressing data: {reason}")
+}
+
 /// A response whose body has not been read yet.
 #[derive(Debug)]
 pub struct Response {
     inner: Inner,
     url: Url,
     history: Vec<Redirect>,
+    /// Set when the body is `deflate`-coded and still to be decoded.
+    deflate: Option<Deflate>,
     /// The pool slot this response holds until it is read or dropped (`max_connections`).
     _permit: Option<OwnedSemaphorePermit>,
 }
@@ -310,20 +385,39 @@ impl Response {
 
     /// The next chunk of the (decoded) body; `None` at the end.
     pub async fn chunk(&mut self) -> Result<Option<bytes::Bytes>, TransportError> {
-        match &mut self.inner {
-            Inner::Reqwest(response) => {
-                let url = self.url.clone();
-                response
+        loop {
+            let chunk = match &mut self.inner {
+                Inner::Reqwest(response) => response
                     .chunk()
                     .await
-                    .map_err(|error| TransportError::from_reqwest(&error, &url))
+                    .map_err(|error| TransportError::from_reqwest(&error, &self.url))?,
+            };
+            let (Some(raw), Some(deflate)) = (&chunk, &mut self.deflate) else {
+                return Ok(chunk);
+            };
+            let decoded = deflate
+                .decode(raw)
+                .map_err(|message| TransportError::new(ErrorClass::DecodingError, &self.url, message))?;
+            if !decoded.is_empty() {
+                return Ok(Some(decoded.into()));
             }
         }
     }
 
     /// The whole (decoded) body.
     pub async fn bytes(self) -> Result<bytes::Bytes, TransportError> {
-        self.inner.bytes(&self.url).await
+        let raw = self.inner.bytes(&self.url).await?;
+        let Some(mut deflate) = self.deflate else {
+            return Ok(raw);
+        };
+        deflate
+            .decode(&raw)
+            .map(|mut decoded| {
+                // The buffer grows by doubling; a body is kept, so it gives the slack back.
+                decoded.shrink_to_fit();
+                bytes::Bytes::from(decoded)
+            })
+            .map_err(|message| TransportError::new(ErrorClass::DecodingError, &self.url, message))
     }
 
     /// `response.is_error`: a 4xx or 5xx status.
@@ -440,6 +534,8 @@ impl HttpClient {
         let jar = Arc::new(reqwest::cookie::Jar::default());
         let mut builder = client_builder()
             .http1_only()
+            // `Content-Encoding: deflate` is decoded here, the way httpx does it ([`Deflate`]).
+            .deflate(false)
             // h11 writes names as given; the sources give them title-cased (fav's D182).
             .http1_title_case_headers()
             .cookie_provider(Arc::clone(&jar))
@@ -534,6 +630,7 @@ impl HttpClient {
             let status = response.status();
             if !self.follow_redirects || !has_redirect_location(status, response.headers()) {
                 return Ok(Response {
+                    deflate: Deflate::of(response.headers()),
                     inner: response,
                     url,
                     history,

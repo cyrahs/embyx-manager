@@ -163,11 +163,11 @@ What no level covers: CloudDrive, Emby and Kubernetes behaviour beyond what the 
 upload path; a real title on the home 5090; and the write paths on production data (level 2 compared
 reads and filing decisions; no pipeline ran on production listings).
 
-## Divergences D1-D175
+## Divergences D1-D176
 
-`docs/DIVERGENCES.md` has 108 entries:
+`docs/DIVERGENCES.md` has 109 entries:
 
-- 55 observable;
+- 56 observable;
 - 46 mechanism (the same behaviour reached another way);
 - 5 Python bugs (four fixed, one copied);
 - 2 dropped.
@@ -299,6 +299,7 @@ normal use:
 | D173 | WP15 | observable | visible (Windows) | Ctrl+Break and closing the window count like Ctrl+C before Windows ends the worker |
 | D174 | WP15 | mechanism | internal | The worker is the same binary as the server, without `serve` on Windows |
 | D175 | WP16 | observable | visible (network) | AVBase: a GET whose reused connection dropped before the answer is resent once, as libcurl does |
+| D176 | Trial | observable | visible (network) | Content codings: a lone `deflate` is read as httpx reads it; a coding list, upper-case `GZIP`, a cut or corrupt gzip stream and brotli are handled as reqwest does |
 
 ## Benchmarks
 
@@ -462,7 +463,20 @@ The full rows are in PLAN.md "Experiment log".
 - **Cross-build cache resume.** Resuming a home-worker part from a local cache the other build wrote was
   not tested; the cluster-side resume is.
 
+## Found by the deployment trial
+
+The trial that started on 2026-11-16 is logged in PLAN.md ("Deployment trial log"). Its first finding: the
+playlist sync failed on its first run against the real Emby, with nothing written, because Emby compresses
+answers as a bare deflate stream, which httpx reads and reqwest's decoder does not. The client now decodes that
+coding the way httpx does (#104). This is the kind of difference the fakes could not show: every fake answered
+uncompressed, and no level of verification before the trial talked to Emby. The settings page's Emby
+connection test goes through the same client. What the two HTTP stacks still do differently with content
+codings is D176; none of it was met.
+
 ## What was not tested
+
+This list is as it stood before the deployment trial. The trial is running the first items on the live
+system one at a time; PLAN.md's "Deployment trial log" says which are done.
 
 - A deployment of the Rust image, or the image in the pod's conditions (read-only root, uid 0 with
   `DAC_OVERRIDE`, the CloudDrive FUSE mount).

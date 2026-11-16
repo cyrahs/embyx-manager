@@ -1063,6 +1063,7 @@ dependencies = [
  "embyx-db",
  "encoding_rs",
  "fancy-regex",
+ "flate2",
  "futures-util",
  "hex",
  "html5ever",
