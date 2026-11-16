@@ -712,6 +712,38 @@ Kept, with the reason:
   the 30 s gRPC deadline (2 of Python's 793 recorded runs did too); the third was clean. Switch restored
   01:16Z; the tracker follows it and polls on its interval (a tracker that found the archive off waits a whole
   interval before it looks again, in both builds).
+- Tracker: polls at 01:46Z and then every 30 minutes after the previous poll ended. Each found 148 offline
+  tasks, as Python's last poll did, with the same stats keys and the same log lines for the same rows. At
+  most 50 due rows are retried per poll (in both builds), so the backlog the pause left (about 480 rows)
+  took several polls.
+- Second image, 01:52Z: `rust-4698126` with the deflate fix (#104, pinned by nas-gitops #184). The mapping
+  full sync at startup skipped all 34,788 files. Playlist sync, twice by hand: one list rebuilt on the first
+  run (Emby's items differed from the target, the rule in both builds), all 20 unchanged on the second.
+  Switch restored 01:55Z.
+- First download filed by the Rust build: PYM-584. The 03:27Z tracker poll's retry recorded three JavBus
+  candidates and submitted one; the 04:00Z poll moved the finished file to
+  `actor/clt/PYM/PYM-584.mp4` and the mapping watchdog wrote its `.strm` 1 s later. It was the regular poll
+  and not a fast check because the 03:27Z poll itself ran for about 153 s, past the last fast check at 120 s
+  after a submission; both builds drop fast checks whose time has passed. A listing of intake and library at
+  05:06Z against the one taken before the swap: the same 2,699 directories and one new file, that one.
+- By 19:00Z the tracker had filed four more (EROFV-399, DOJN-034, MIBB-090, HSKVR-007 in three parts). A
+  second listing differs from the 05:06Z one by exactly those files, the merge below and one download still
+  running in the intake.
+- Merge, one lossless title by hand (task 291, DSVR-2026, three parts, 19.09 GB): the Job, with the spec the
+  Python build writes, concatenated and hashed in about 6 minutes. The upload took 17 hours: CloudDrive's
+  copy to 115 crawled at about 110 MiB/h behind Aliyun OSS part timeouts (Python's tasks 276 and 288 show the
+  same pattern, 276 took 18 hours), the app restarted it once (attempt 2) and the last 6 GB went through at
+  about 15 MB/s. After the upload: hash verified, the three parts replaced, the mapping watchdog removed
+  their three `.strm` and four sidecars and kept poster, fanart and landscape; the first archive run left
+  the new folder for the next pass, the second, 5 min 9 s later (Python's interval between its two runs for
+  task 290 was the same), filed `type/vr/DSVR/DSVR-2026.mp4` with the stats Python's runs show
+  (`folders_discarded 1, videos_archived 1, reconciled 1`); a mapping run followed and the task was `done`.
+  The task row has the shape of Python's task 290 and the work directory is empty.
+- Memory under the real workload: the working set stayed between 147 and 164 Mi for 16 hours (half-hour
+  samples; 141 Mi anonymous at 05:00Z) and reached 227 Mi while the merge was filed and the full mapping
+  sync after it ran; the Python pod moved between 190 and 510 Mi in the six hours before the swap.
+- Third image: `rust-7c46721` with the merge time-base fix (#105, D177, found on Python's failed task 286),
+  pinned by nas-gitops #185 after task 291 had finished.
 
 ## Experiment log
 
@@ -740,3 +772,4 @@ the independent review found; review findings are summarised with a link to the 
 | Level 2 | #102 | ~1 h 30 min (17:23Z-18:55Z), export, both replays and review fixes included | 2 pushes (review fixes, two passes); the `rust` job was red once on `heartbeat_retries_transient_repository_failure` (a lease test whose renewal had 300 ms to spare on a loaded runner; green on the one re-run, its lease doubled in the same PR) | The clock tolerance of the first fix was too loose (the span of both runs, either sign, any time format), REPORT.md claimed more than the run covered, a row neither build serves was hidden in the 404 count; second pass: merge tasks over-counted, the scan time is read at start-up: all fixed | Masked read-only export on the nas-us host (19 tables, 23,339 rows, 2 values masked, 0 secrets found by two checks). GET differ 18,005 of 18,005 equal, decision replay 16,572 of 16,572 equal. Not read: 38 plan-job rows, the older finished merge tasks. Not done: listings and a pipeline pass. Export deleted |
 | Image workflow | #103 | ~40 min (2026-11-16 00:05Z-00:45Z), beside the pause and the backups of the deployment trial | 4 pushes (review fixes, two passes; one test fix); the `rust` job was red once on `a_rust_worker_transcodes_a_title_through_the_rust_listener` (the stop had 3 s to land between two chunks of an encode paced at 20x and missed on a loaded runner; paced at 8x now, here and in the Python-listener twin; no product code changed) | The pushed image was a second build, rule 4 could be passed without a permissions block, with quoted values or with the followed tag spelled through an expression, publishing was not gated in the run, stale statements in five files; second pass: a reference without a tag means the followed tag, the tree-check step was not required: all fixed | `rust-image.yml` publishes `rust` and `rust-<sha>` on pushes to `rust`; rule 4 of `check_tree.sh` holds it there |
 | Trial fix: deflate | #104 | ~30 min (2026-11-16, about 01:00Z-01:30Z) to the push of the review fixes; found by the first playlist sync of the deployment trial | 4 pushes after opening: a Rust-only test comment that began like a parity claim (the `parity` job was red once), the trial log, the review fixes in two passes | 0 blocker, 0 major. Low: three stale or wrong statements in PLAN.md and REPORT.md (fixed); the httpx match held only on the zlib-rs backend, which another crate happened to turn on (now named in the manifest: on miniz_oxide 56 of 4,000 generated cases differed, all of them corrupt inputs); the decoder had no test of its own (added: every piece boundary, bytes after the end, an error on a later piece, each checked against httpx 0.28.1); error text now in CPython's wording (second pass: 39 of 1,337 failing cases still differ in the reason, where zlib-rs reports a bad code inside a block as "repeated call with bad state"; recorded in D176); the body buffer gives its slack back. Left and recorded as D176: reqwest's handling of the other codings | The client decodes `Content-Encoding: deflate` in both forms, as httpx does; a bare stream from Emby had failed `GET /Items` |
+| Trial fix: merge time base | #105 | Not timed here: done on 2026-11-16 by the thread that looked into Python's failed merge task 286 (PR opened 18:31Z, merged 18:44Z) | See the PR | See the PR | MP4/MOV parts whose video time base differs from the first part's are remuxed into its units before the concat, and every MP4/MOV remux keeps them (D177); the trial log and REPORT.md entries were added with the next trial-log PR |
