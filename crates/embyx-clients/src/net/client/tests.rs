@@ -526,7 +526,7 @@ fn the_deflate_decoder_holds_at_any_piece_boundary_like_httpx() {
     assert!(decoded_in(cut, 1).as_ref() == Ok(&held), "cut, byte by byte");
 
     // An error on a later piece: stored blocks, the second one's length check broken. The first
-    // piece is given out, the second fails, and nothing is tried again as a bare stream.
+    // piece is given out and the second fails.
     let stored = {
         use std::io::Write;
         let mut encoder = flate2::write::ZlibEncoder::new(Vec::new(), flate2::Compression::none());
@@ -546,5 +546,18 @@ fn the_deflate_decoder_holds_at_any_piece_boundary_like_httpx() {
     assert_eq!(
         decoder.decode(&broken[second..]),
         Err("Error -3 while decompressing data: invalid stored block lengths".to_owned())
+    );
+    // The same with the checksum at the end broken: read again as a bare stream, the second
+    // piece would be whole blocks and decode, so this fails only because nothing is retried.
+    let mut unsummed = stored.clone();
+    *unsummed.last_mut().expect("a checksum") ^= 0xff;
+    let mut decoder = deflate_decoder();
+    assert!(
+        decoder.decode(&unsummed[..second]).as_deref() == Ok(&body[..first]),
+        "the first block"
+    );
+    assert_eq!(
+        decoder.decode(&unsummed[second..]),
+        Err("Error -3 while decompressing data: incorrect data check".to_owned())
     );
 }

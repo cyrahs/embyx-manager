@@ -315,8 +315,9 @@ impl Deflate {
 }
 
 /// `str(zlib.error)` as `CPython` words a failed `decompress()` (`zlibmodule.c`, `zlib_error`),
-/// which httpx carries into its `DecodingError`. The reason is zlib's own text; the zlib-rs
-/// backend named in the workspace manifest gives the same ones.
+/// which httpx carries into its `DecodingError`. The reason is the text of the zlib-rs backend
+/// named in the workspace manifest, which is zlib's except for three reasons found deep inside
+/// a block (a bad distance or length code), where zlib-rs says "repeated call with bad state".
 fn zlib_error_text(error: &flate2::DecompressError) -> String {
     if error.needs_dictionary().is_some() {
         return "Error 2 while decompressing data".to_owned();

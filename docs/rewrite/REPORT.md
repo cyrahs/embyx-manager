@@ -299,7 +299,7 @@ normal use:
 | D173 | WP15 | observable | visible (Windows) | Ctrl+Break and closing the window count like Ctrl+C before Windows ends the worker |
 | D174 | WP15 | mechanism | internal | The worker is the same binary as the server, without `serve` on Windows |
 | D175 | WP16 | observable | visible (network) | AVBase: a GET whose reused connection dropped before the answer is resent once, as libcurl does |
-| D176 | Trial | observable | visible (network) | Content codings: a lone `deflate` is read as httpx reads it; a coding list, upper-case `GZIP`, a gzip stream cut short and brotli are handled as reqwest does |
+| D176 | Trial | observable | visible (network) | Content codings: a lone `deflate` is read as httpx reads it; a coding list, upper-case `GZIP`, a cut or corrupt gzip stream and brotli are handled as reqwest does |
 
 ## Benchmarks
 
