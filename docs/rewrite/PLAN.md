@@ -700,6 +700,16 @@ Kept, with the reason:
   Emby and every fake answered uncompressed. Fixed in the client (`net/client.rs`, `Deflate`): reqwest's
   deflate decoding is off and the client decodes that coding as httpx does, for whole bodies and for pieces.
   Emby is used by the playlist sync only. The switch stays off until the fixed image has synced once.
+- RSS, one manual run: 290 subscriptions polled, 8,021 items, 6 new acquisitions entered (no magnet yet, so
+  `resolve_failed`, as on any Python run), 2 RSSHub timeouts on single subscriptions (Python's runs show the
+  same). Switch restored 01:12Z.
+- Archive, three manual runs: the intake listing is the same before and after each; the third run's log is
+  Python's last run line for line, apart from one title that was still in the intake then and has been filed
+  since. The first run after a process start leaves every folder for the next pass ("is still changing"): the
+  settle check keeps its sightings in memory, in both builds. The second run had one CloudDrive refresh end at
+  the 30 s gRPC deadline (2 of Python's 793 recorded runs did too); the third was clean. Switch restored
+  01:16Z; the tracker follows it and polls on its interval (a tracker that found the archive off waits a whole
+  interval before it looks again, in both builds).
 
 ## Experiment log
 
