@@ -230,22 +230,22 @@ fn video_time_base_and_duration(path: &Path) -> (String, f64) {
 /// Rust only, D177. The concat demuxer hands on a part's timestamps without scaling them when its
 /// video counts time in other units than the first part's, so the merge came out at twice the
 /// length and failed its duration check (DSVR-0386: the last part at 1/120000 beside 1/60000, and
-/// its audio first). Such a part is remuxed into the first part's units.
-fn other_time_base(third_audio_first: bool) {
+/// its audio first). Such a part is remuxed into the first part's units, and so is a part that is
+/// only reordered, which the muxer would otherwise move from 1/1000 to units of its own.
+fn time_bases(timescales: [u32; 3], audio_first: [bool; 3], expected: Option<&str>) {
     let tmp = tempfile::tempdir().expect("tempdir");
     let library = tmp.path().join("library");
     std::fs::create_dir(&library).expect("mkdir");
-    let parts: Vec<PathBuf> = (1..=3)
+    let parts: Vec<PathBuf> = (0..3)
         .map(|index| {
-            let path = library.join(format!("ABC-123-cd{index}.mp4"));
-            if index == 3 {
-                make_timed_part(&path, 120_000, third_audio_first)
-            } else {
-                make_timed_part(&path, 60_000, false)
-            }
+            let path = library.join(format!("ABC-123-cd{}.mp4", index + 1));
+            make_timed_part(&path, timescales[index], audio_first[index])
         })
         .collect();
-    assert_eq!(video_time_base_and_duration(&parts[2]).0, "1/120000");
+    assert_eq!(
+        video_time_base_and_duration(&parts[2]).0,
+        format!("1/{}", timescales[2])
+    );
     let out = tmp.path().join("upload");
     std::fs::create_dir(&out).expect("mkdir");
     let mut status = StatusFile::new(out.join("status.json"));
@@ -260,7 +260,9 @@ fn other_time_base(third_audio_first: bool) {
         "{result:?}"
     );
     let (time_base, duration) = video_time_base_and_duration(&merged);
-    assert_eq!(time_base, "1/60000");
+    if let Some(expected) = expected {
+        assert_eq!(time_base, expected);
+    }
     assert!((duration - 6.0).abs() <= 0.5, "video lasts {duration} s");
     assert_eq!(stream_types(&merged), ["video", "audio"]);
     let mut names: Vec<String> = std::fs::read_dir(&out)
@@ -273,12 +275,18 @@ fn other_time_base(third_audio_first: bool) {
 
 #[test]
 fn merge_remuxes_an_mp4_part_whose_video_counts_time_in_other_units() {
-    other_time_base(false);
+    time_bases([60_000, 60_000, 120_000], [false; 3], Some("1/60000"));
 }
 
 #[test]
 fn merge_remuxes_a_part_in_other_units_with_its_streams_in_another_order() {
-    other_time_base(true);
+    time_bases([60_000, 60_000, 120_000], [false, false, true], Some("1/60000"));
+}
+
+#[test]
+fn merge_keeps_the_units_of_a_part_it_only_reorders() {
+    // The merged file's own units are the muxer's choice (1/16000 for 1/1000); its length is not.
+    time_bases([1_000, 1_000, 1_000], [false, false, true], None);
 }
 
 // py: tests/test_merge_worker.py::test_merge_refuses_an_mp4_whose_index_would_outgrow_the_memory_limit

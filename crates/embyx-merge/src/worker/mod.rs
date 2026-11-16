@@ -15,7 +15,8 @@
 //! remuxed, video first, into a staging directory next to the output, as the concat demuxer
 //! pairs streams by index. An MP4 or MOV part whose video counts time in other units than the
 //! first part's is remuxed the same way, into the first part's units, as the concat demuxer
-//! would hand on its timestamps unscaled (D177, which Python does not do). An MP4 output's index stays in memory until ffmpeg ends, so a title
+//! would hand on its timestamps unscaled; every remux into MP4 or MOV keeps those units (D177,
+//! which Python does not do). An MP4 output's index stays in memory until ffmpeg ends, so a title
 //! with more packets than the Job's memory limit can index is refused up front rather than
 //! killed hours in.
 //!
@@ -266,14 +267,10 @@ fn same_values(a: &[Value], b: &[Value]) -> bool {
     a.len() == b.len() && a.iter().zip(b).all(|(x, y)| py::eq(x, y))
 }
 
-/// The MP4 timescale that gives a video track the time base of `time_bases`: `N` for `1/N`,
-/// when every video stream has that one time base.
+/// The MP4 timescale that gives a video track the time base of the first video stream in
+/// `time_bases`: `N` for `1/N`.
 fn video_timescale(time_bases: &[Value]) -> Option<String> {
-    let first = time_bases.first()?.as_str()?;
-    if time_bases.iter().any(|other| other.as_str() != Some(first)) {
-        return None;
-    }
-    let units = first.strip_prefix("1/")?;
+    let units = time_bases.first()?.as_str()?.strip_prefix("1/")?;
     let whole = units.bytes().all(|byte| byte.is_ascii_digit()) && units.parse::<u32>().is_ok_and(|n| n > 0);
     whole.then(|| units.to_owned())
 }
@@ -785,24 +782,29 @@ impl Worker {
         // An MP4 or MOV part whose video counts time in other units than the first part's
         // (`1/120000` beside `1/60000`) is remuxed too, into the first part's units: the concat
         // demuxer would hand on that part's timestamps unscaled, so the merge came out at twice
-        // or half the length and failed its duration check (DSVR-0386, D177).
+        // or half the length and failed its duration check (DSVR-0386, D177). Every remux into
+        // MP4 or MOV keeps the first part's units, as the muxer picks its own below 1/10000
+        // (a 1/1000 part came out at 1/16000).
         let retimed = |result: &Probe| !same_values(&result.video_time_bases, &first.video_time_bases);
-        let timescale = if INDEXED_MUXERS.contains(&muxer) && probes.iter().any(retimed) {
-            Some(video_timescale(&first.video_time_bases).ok_or_else(|| {
-                WorkerError::Refused(format!(
-                    "{} has a video time base the other parts cannot be remuxed to; a stream copy would break",
-                    name(&parts[0])
-                ))
-            })?)
+        let indexed = INDEXED_MUXERS.contains(&muxer);
+        let retime = indexed && probes.iter().any(retimed);
+        let timescale = if indexed {
+            video_timescale(&first.video_time_bases)
         } else {
             None
         };
+        if retime && timescale.is_none() {
+            return Err(WorkerError::Refused(format!(
+                "{} has a video time base the other parts cannot be remuxed to; a stream copy would break",
+                name(&parts[0])
+            )));
+        }
         let mut stray = Vec::new();
-        if reorder || timescale.is_some() {
+        if reorder || retime {
             stray = probes
                 .iter()
                 .enumerate()
-                .filter(|(_, result)| (reorder && !result.in_order()) || (timescale.is_some() && retimed(result)))
+                .filter(|(_, result)| (reorder && !result.in_order()) || (retime && retimed(result)))
                 .map(|(index, _)| index)
                 .collect();
             let written = if transcode { max } else { total_bytes };
