@@ -13,7 +13,9 @@
 //! a reserve to spare, and carry the same streams, since `-c copy` cannot reconcile different
 //! codecs or resolutions. Parts that carry the same streams in a different order are first
 //! remuxed, video first, into a staging directory next to the output, as the concat demuxer
-//! pairs streams by index. An MP4 output's index stays in memory until ffmpeg ends, so a title
+//! pairs streams by index. An MP4 or MOV part whose video counts time in other units than the
+//! first part's is remuxed the same way, into the first part's units, as the concat demuxer
+//! would hand on its timestamps unscaled (D177, which Python does not do). An MP4 output's index stays in memory until ffmpeg ends, so a title
 //! with more packets than the Job's memory limit can index is refused up front rather than
 //! killed hours in.
 //!
@@ -26,8 +28,9 @@
 //!
 //! Everything the merge Job contract fixes is Python's to the byte (PLAN.md, cross-version
 //! contract 4): every ffmpeg and ffprobe argument list, the concat scripts, the status file's
-//! fields and their order, the exit codes (a refusal exits 0). `goldens/merge/` holds Python's
-//! runs and the tests replay them.
+//! fields and their order, the exit codes (a refusal exits 0), except where D177 remuxes parts
+//! Python would have merged into a broken file. `goldens/merge/` holds Python's runs and the
+//! tests replay them.
 
 pub mod exec;
 pub mod status;
@@ -236,6 +239,9 @@ pub struct Probe {
     pub packets: Option<i128>,
     /// The audio streams' bitrate in bits per second, as the container states it or assumed.
     pub audio_bits: i128,
+    /// The video streams' `time_base` as ffprobe gives it (`1/60000`), in the file's order; a
+    /// stream without one holds `None`. Not in Python's `Probe` (D177).
+    pub video_time_bases: Vec<Value>,
 }
 
 fn is_video(stream: &[Value]) -> bool {
@@ -253,6 +259,23 @@ fn same_signature(a: &[Vec<Value>], b: &[Vec<Value>]) -> bool {
         && a.iter()
             .zip(b)
             .all(|(x, y)| x.len() == y.len() && x.iter().zip(y).all(|(x, y)| same(x, y)))
+}
+
+/// Python's `==` over two lists of ffprobe values.
+fn same_values(a: &[Value], b: &[Value]) -> bool {
+    a.len() == b.len() && a.iter().zip(b).all(|(x, y)| py::eq(x, y))
+}
+
+/// The MP4 timescale that gives a video track the time base of `time_bases`: `N` for `1/N`,
+/// when every video stream has that one time base.
+fn video_timescale(time_bases: &[Value]) -> Option<String> {
+    let first = time_bases.first()?.as_str()?;
+    if time_bases.iter().any(|other| other.as_str() != Some(first)) {
+        return None;
+    }
+    let units = first.strip_prefix("1/")?;
+    let whole = units.bytes().all(|byte| byte.is_ascii_digit()) && units.parse::<u32>().is_ok_and(|n| n > 0);
+    whole.then(|| units.to_owned())
 }
 
 impl Probe {
@@ -544,6 +567,11 @@ impl Worker {
                 .collect(),
             packets,
             audio_bits,
+            video_time_bases: media
+                .iter()
+                .filter(|stream| stream.get("codec_type").and_then(Value::as_str) == Some("video"))
+                .map(|stream| stream.get("time_base").cloned().unwrap_or(Value::Null))
+                .collect(),
         })
     }
 
@@ -753,12 +781,28 @@ impl Worker {
         };
 
         // Same streams in another order: put every part that strays video first.
+        let reorder = probes.iter().any(|result| result.layout != first.layout);
+        // An MP4 or MOV part whose video counts time in other units than the first part's
+        // (`1/120000` beside `1/60000`) is remuxed too, into the first part's units: the concat
+        // demuxer would hand on that part's timestamps unscaled, so the merge came out at twice
+        // or half the length and failed its duration check (DSVR-0386, D177).
+        let retimed = |result: &Probe| !same_values(&result.video_time_bases, &first.video_time_bases);
+        let timescale = if INDEXED_MUXERS.contains(&muxer) && probes.iter().any(retimed) {
+            Some(video_timescale(&first.video_time_bases).ok_or_else(|| {
+                WorkerError::Refused(format!(
+                    "{} has a video time base the other parts cannot be remuxed to; a stream copy would break",
+                    name(&parts[0])
+                ))
+            })?)
+        } else {
+            None
+        };
         let mut stray = Vec::new();
-        if probes.iter().any(|result| result.layout != first.layout) {
+        if reorder || timescale.is_some() {
             stray = probes
                 .iter()
                 .enumerate()
-                .filter(|(_, result)| !result.in_order())
+                .filter(|(_, result)| (reorder && !result.in_order()) || (timescale.is_some() && retimed(result)))
                 .map(|(index, _)| index)
                 .collect();
             let written = if transcode { max } else { total_bytes };
@@ -781,10 +825,12 @@ impl Worker {
                 mkdir_exist_ok(&staging)?;
                 inputs[index] = staging.join(name(&parts[index]));
                 let source = show(&parts[index]);
-                let command = self.ffmpeg_command(
-                    &["-i", &source, "-map", "0:v", "-map", "0:a?", "-c", "copy", "-f", muxer],
-                    &inputs[index],
-                );
+                let mut middle = vec!["-i", source.as_str(), "-map", "0:v", "-map", "0:a?", "-c", "copy"];
+                if let Some(timescale) = &timescale {
+                    middle.extend(["-video_track_timescale", timescale.as_str()]);
+                }
+                middle.extend(["-f", muxer]);
+                let command = self.ffmpeg_command(&middle, &inputs[index]);
                 self.run_ffmpeg(&command, probes[index].duration, status)?;
             }
             self.concat(&inputs, &target, muxer, expected, status, workdir, video_bits)
