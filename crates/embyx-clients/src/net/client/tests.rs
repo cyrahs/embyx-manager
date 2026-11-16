@@ -383,8 +383,9 @@ fn coded(body: &[u8], form: &str) -> Vec<u8> {
     }
 }
 
-// py: httpx/_decoders.py::DeflateDecoder (zlib first, the bare stream when the first bytes are
-// not a zlib header). Emby answers `Accept-Encoding: gzip, deflate` with the bare form.
+// httpx's `DeflateDecoder` (`httpx/_decoders.py`): zlib first, the bare stream when the first
+// bytes are not a zlib header. Emby answers `Accept-Encoding: gzip, deflate` with the bare form.
+// No Python test covers it, so this is a Rust-only test.
 #[tokio::test]
 async fn a_deflate_body_is_decoded_in_both_forms_like_httpx() {
     // Varied enough to stay several network chunks long once compressed.
