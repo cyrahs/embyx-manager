@@ -1,8 +1,8 @@
 # Deploying the Rust build
 
-What it takes to run the Rust build in the cluster and on the home worker, and how to go back. Nothing
-here has been done: no image of the Rust build has been pushed, no release made, no workflow below
-added, and nas-gitops is unchanged. Each step is Max's to start.
+What it takes to run the Rust build in the cluster and on the home worker, and how to go back. Max
+gave the go-ahead for the deployment trial on 2026-11-16 (PLAN.md "Deployment and rollback"): the image
+workflow below was added then. The release workflow for the home worker is still only a sketch.
 
 ## What stays the same
 
@@ -28,51 +28,17 @@ added, and nas-gitops is unchanged. Each step is Max's to start.
 - **The home worker's protocol.** Every pairing of worker and listener works (contract 5), so the
   cluster and the home worker can switch on different days, in either order.
 
-## The image workflow for `rust` (not added)
+## The image workflow for `rust`
 
-`rust.yml` builds `Dockerfile.rust` on every pull request and push but pushes nothing. Publishing the
-Rust image needs a workflow of its own on `rust`, for example `.github/workflows/rust-image.yml`. It
-runs on pushes to `rust`, which only happen by merging a PR whose `rust.yml` checks passed (a
-`workflow_run` trigger would be simpler to gate on `rust.yml`, but GitHub reads it only from the
-default branch, `main`). It never writes the `latest` tag, which Flux follows and which `ci.yml` keeps
-building from `main` (Python) until the plan's later steps:
-
-```yaml
-name: Rust image
-
-on:
-  push:
-    branches: [rust]
-
-permissions:
-  contents: read
-  packages: write
-
-jobs:
-  image:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v5
-    - uses: docker/setup-buildx-action@v3
-    - uses: docker/login-action@v3
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    - uses: docker/build-push-action@v6
-      with:
-        context: .
-        file: Dockerfile.rust
-        push: true
-        tags: |
-          ghcr.io/cyrahs/embyx-manager:rust
-          ghcr.io/cyrahs/embyx-manager:rust-${{ github.sha }}
-        cache-from: type=gha,scope=rust-image
-        cache-to: type=gha,scope=rust-image,mode=max
-```
-
-Adding it means widening rule 4 of `tools/check_tree.sh`, which today allows only the baseline's
-workflows and a read-only `rust.yml`.
+`rust.yml` builds `Dockerfile.rust` on every pull request and push but pushes nothing. The Rust image
+is published by `.github/workflows/rust-image.yml`, added for the deployment trial. It runs on pushes
+to `rust`, which only happen by merging a PR whose `rust.yml` checks passed (a `workflow_run` trigger
+would be simpler to gate on `rust.yml`, but GitHub reads it only from the default branch, `main`). It
+builds the image, runs the same three checks as `rust.yml`'s image job on it, then pushes
+`ghcr.io/cyrahs/embyx-manager:rust` and `:rust-<sha>` and prints the digest. It never writes the
+`latest` tag, which Flux follows and which `ci.yml` keeps building from `main` (Python) until the
+plan's later steps. `tools/check_tree.sh` rule 4 holds it to that: pushes to `rust` only,
+`packages: write` and no other write permission, no `latest`.
 
 ## The release workflow for the home worker (not added)
 
@@ -125,14 +91,14 @@ A way to do it with what is there today; Max decides when and whether.
    Job running was not tried on the cluster.
 2. Take a dump of the embyx database (the schema does not change, so this is for a mistake in the
    rows, not for a rollback of the schema).
-3. Point Flux at the Rust image: in nas-gitops `infra/image-automation/embyx-manager-ghcr.yaml`, set
-   the ImagePolicy's `filterTags.pattern` from `'^latest$'` to `'^rust$'`. Flux then writes the `rust`
-   digest into `apps/emby/embyx-manager/kustomization.yaml`; the deployment (`Recreate`) restarts.
-   The digest decides the image; `newTag: latest` beside it can be changed to `rust` in the same
-   commit so the file does not mislead. Nothing else in the manifests changes.
+3. Point the deployment at the Rust image. For the trial (PLAN.md step 5): a nas-gitops PR sets
+   `newTag` and `digest` in `apps/emby/embyx-manager/kustomization.yaml` to the `rust-<sha>` image and
+   removes the `$imagepolicy` marker beside them, so Flux's automation leaves the pin alone; the
+   deployment (`Recreate`) restarts. Nothing else in the manifests changes. (Once `rust` is `main`,
+   `latest` is the Rust image and the marker comes back.)
 4. Check: `/api/health`, every page of the dashboard, the run history, one manual mapping and archive
    run, the merge tab's task list, and the pod's memory for a few days (below).
-5. Going back: set the pattern to `'^latest$'` again (Python's image is still built from `main`).
+5. Going back: revert that nas-gitops PR (Python's image is still built from `main` as `latest`).
    Rows the Rust build wrote are the Python build's shapes.
 
 The home worker switches on its own schedule (`HOME-WORKER.md`), after a release exists.

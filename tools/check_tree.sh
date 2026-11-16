@@ -6,8 +6,10 @@
 #   2. No ignored Rust tests: a test that cannot run is ported differently or waived.
 #   3. `unsafe` is denied by the workspace lints, which every crate must use; the only place
 #      allowed to lift that is the home worker's process-control module (WP15) and its probe.
-#   4. CI stays checks-only: `.github/` holds the baseline's files plus `rust.yml`, which
-#      keeps `contents: read` and asks for no write permission.
+#   4. `.github/` holds the baseline's files plus `rust.yml`, which is checks-only (it keeps
+#      `contents: read` and asks for no write permission), and `rust-image.yml`, which
+#      publishes the Rust image for the deployment trial: it runs only on pushes to `rust`,
+#      may write packages and nothing else, and never writes the `latest` tag.
 # Needs the baseline commit in the local clone (CI checks out with full history).
 # Adapted from fav (rust/tools/check_tree.sh).
 set -euo pipefail
@@ -58,9 +60,10 @@ if [[ -n "${added}" ]]; then
 fi
 
 github_files="$(git ls-files .github | sort)"
-expected_github="$( (git ls-tree -r --name-only "${baseline}" -- .github; echo .github/workflows/rust.yml) | sort)"
+expected_github="$( (git ls-tree -r --name-only "${baseline}" -- .github; echo .github/workflows/rust.yml;
+  echo .github/workflows/rust-image.yml) | sort)"
 if [[ "${github_files}" != "${expected_github}" ]]; then
-  echo "error: .github/ may hold only the baseline's files and .github/workflows/rust.yml:"
+  echo "error: .github/ may hold only the baseline's files, rust.yml and rust-image.yml:"
   diff <(echo "${expected_github}") <(echo "${github_files}") | sed 's/^/  /' || true
   status=1
 fi
@@ -71,6 +74,25 @@ if [[ -f .github/workflows/rust.yml ]]; then
   fi
   if ! grep -qE '^[[:space:]]*contents:[[:space:]]*read[[:space:]]*$' .github/workflows/rust.yml; then
     echo "error: rust.yml must keep permissions contents: read"
+    status=1
+  fi
+fi
+if [[ -f .github/workflows/rust-image.yml ]]; then
+  image_workflow=.github/workflows/rust-image.yml
+  # Comments say what the workflow must not do; the rules read the YAML without them.
+  image_yaml="$(sed -E 's/(^|[[:space:]])#.*$//' "${image_workflow}")"
+  if grep -nE ':[[:space:]]*write\b|write-all' <<< "${image_yaml}" | grep -vE '^[0-9]+:[[:space:]]*packages:[[:space:]]*write[[:space:]]*$'; then
+    echo "error: rust-image.yml may ask for packages: write and no other write permission"
+    status=1
+  fi
+  if grep -nE ':latest\b' <<< "${image_yaml}"; then
+    echo "error: rust-image.yml must not name the latest tag (Flux follows it)"
+    status=1
+  fi
+  triggers="$(perl -0777 -ne 'print $1 if /^on:\n((?:[ \t]+.*\n|\n)+)/m' <<< "${image_yaml}" | grep -vE '^[[:space:]]*$' || true)"
+  if [[ "${triggers}" != $'  push:\n    branches: [ rust ]' ]]; then
+    echo "error: rust-image.yml must run only on pushes to rust; its triggers are:"
+    sed 's/^/  /' <<< "${triggers}"
     status=1
   fi
 fi
