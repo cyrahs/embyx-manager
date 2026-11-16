@@ -433,15 +433,118 @@ async fn a_deflate_body_is_decoded_in_both_forms_like_httpx() {
         assert!(count > 1, "{path} came in one piece, so the pieces were not tested");
     }
 
-    // A stream cut short gives what it held (zlib's `decompressobj` raises nothing at the end).
+    // A stream cut short gives what it held (zlib's `decompressobj` raises nothing at the end):
+    // half of the stream holds about half of a body as even as this one.
     let cut = client.send(Request::get(url("/cut"))).await.expect("send");
     let held = cut.bytes().await.expect("bytes");
-    assert!(!held.is_empty() && body.starts_with(&held), "{} bytes", held.len());
+    assert!(
+        held.len() > body.len() / 3 && body.starts_with(&held),
+        "{} bytes",
+        held.len()
+    );
 
     let empty = client.send(Request::get(url("/empty"))).await.expect("send");
     assert!(empty.bytes().await.expect("bytes").is_empty());
 
+    // Not a zlib header, so the bare form is tried, and that fails with zlib's own reason.
+    let refused = "Error -3 while decompressing data: invalid block type";
     let junk = client.send(Request::get(url("/junk"))).await.expect("send");
     let error = junk.bytes().await.expect_err("junk is refused");
-    assert_eq!(error.class, ErrorClass::DecodingError, "{error:?}");
+    assert_eq!(
+        (error.class, error.message.as_str()),
+        (ErrorClass::DecodingError, refused)
+    );
+    let mut junk = client.send(Request::get(url("/junk"))).await.expect("send");
+    let error = junk.chunk().await.expect_err("junk is refused in pieces");
+    assert_eq!(
+        (error.class, error.message.as_str()),
+        (ErrorClass::DecodingError, refused)
+    );
+}
+
+fn deflate_decoder() -> super::Deflate {
+    let mut headers = HeaderMap::new();
+    headers.insert(header::CONTENT_ENCODING, "deflate".parse().expect("value"));
+    super::Deflate::of(&headers).expect("a deflate response")
+}
+
+/// `stream` through one decoder, `size` bytes at a time.
+fn decoded_in(stream: &[u8], size: usize) -> Result<Vec<u8>, String> {
+    let mut decoder = deflate_decoder();
+    let mut read = Vec::new();
+    for piece in stream.chunks(size) {
+        read.extend(decoder.decode(piece)?);
+    }
+    Ok(read)
+}
+
+// The piece boundaries a local server cannot set, each checked against httpx 0.28.1's
+// `DeflateDecoder` by hand. Rust-only test.
+#[test]
+fn the_deflate_decoder_holds_at_any_piece_boundary_like_httpx() {
+    let body: Vec<u8> = (0..20_000_u32)
+        .flat_map(|n| format!("{n} {}\n", n.wrapping_mul(2_654_435_761)).into_bytes())
+        .collect();
+    let (zlib, bare) = (coded(&body, "zlib"), coded(&body, "bare"));
+    let header_check = "Error -3 while decompressing data: incorrect header check";
+
+    // The zlib form survives any split, its two header bytes apart included.
+    for size in [1, 2, 3, 7, 4096, zlib.len()] {
+        assert!(decoded_in(&zlib, size).as_deref() == Ok(&body[..]), "zlib by {size}");
+    }
+    // The bare form is recognised on the first piece only, and one byte is not yet a wrong
+    // header: httpx fails such a body the same way.
+    for size in [2, 3, 7, 4096, bare.len()] {
+        assert!(decoded_in(&bare, size).as_deref() == Ok(&body[..]), "bare by {size}");
+    }
+    assert_eq!(decoded_in(&bare, 1), Err(header_check.to_owned()));
+    let mut decoder = deflate_decoder();
+    assert_eq!(decoder.decode(b""), Ok(Vec::new()));
+    assert_eq!(decoder.decode(&bare), Err(header_check.to_owned()));
+
+    // Bytes after the stream's end are dropped, in the same piece or a later one.
+    for stream in [&zlib, &bare] {
+        let mut longer = stream.clone();
+        longer.extend_from_slice(&zlib);
+        longer.extend_from_slice(b"and more");
+        for size in [7, longer.len()] {
+            assert!(
+                decoded_in(&longer, size).as_deref() == Ok(&body[..]),
+                "trailing by {size}"
+            );
+        }
+    }
+
+    // A cut stream gives the same prefix however it arrives.
+    let cut = &zlib[..zlib.len() / 2];
+    let held = decoded_in(cut, cut.len()).expect("a prefix");
+    assert!(
+        held.len() > body.len() / 3 && body.starts_with(&held),
+        "{} bytes",
+        held.len()
+    );
+    assert!(decoded_in(cut, 1).as_ref() == Ok(&held), "cut, byte by byte");
+
+    // An error on a later piece: stored blocks, the second one's length check broken. The first
+    // piece is given out, the second fails, and nothing is tried again as a bare stream.
+    let stored = {
+        use std::io::Write;
+        let mut encoder = flate2::write::ZlibEncoder::new(Vec::new(), flate2::Compression::none());
+        encoder.write_all(&body).expect("write");
+        encoder.finish().expect("finish")
+    };
+    assert_eq!(stored[2] & 0b111, 0, "a stored block that is not the last");
+    let first = usize::from(u16::from_le_bytes([stored[3], stored[4]]));
+    let second = 2 + 5 + first;
+    let mut broken = stored.clone();
+    broken[second + 3] ^= 0xff;
+    let mut decoder = deflate_decoder();
+    assert!(
+        decoder.decode(&broken[..second]).as_deref() == Ok(&body[..first]),
+        "the first block"
+    );
+    assert_eq!(
+        decoder.decode(&broken[second..]),
+        Err("Error -3 while decompressing data: invalid stored block lengths".to_owned())
+    );
 }

@@ -283,9 +283,9 @@ impl Deflate {
             Err(_) if first => {
                 self.stream = flate2::Decompress::new(false);
                 self.ended = false;
-                self.inflate(data).map_err(|error| error.to_string())
+                self.inflate(data).map_err(|error| zlib_error_text(&error))
             }
-            Err(error) => Err(error.to_string()),
+            Err(error) => Err(zlib_error_text(&error)),
         }
     }
 
@@ -312,6 +312,17 @@ impl Deflate {
         }
         Ok(decoded)
     }
+}
+
+/// `str(zlib.error)` as `CPython` words a failed `decompress()` (`zlibmodule.c`, `zlib_error`),
+/// which httpx carries into its `DecodingError`. The reason is zlib's own text; the zlib-rs
+/// backend named in the workspace manifest gives the same ones.
+fn zlib_error_text(error: &flate2::DecompressError) -> String {
+    if error.needs_dictionary().is_some() {
+        return "Error 2 while decompressing data".to_owned();
+    }
+    let reason = error.message().unwrap_or("invalid input data");
+    format!("Error -3 while decompressing data: {reason}")
 }
 
 /// A response whose body has not been read yet.
@@ -400,7 +411,11 @@ impl Response {
         };
         deflate
             .decode(&raw)
-            .map(bytes::Bytes::from)
+            .map(|mut decoded| {
+                // The buffer grows by doubling; a body is kept, so it gives the slack back.
+                decoded.shrink_to_fit();
+                bytes::Bytes::from(decoded)
+            })
             .map_err(|message| TransportError::new(ErrorClass::DecodingError, &self.url, message))
     }
 
