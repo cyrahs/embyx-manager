@@ -704,7 +704,8 @@ Kept, with the reason:
   differently from httpx with other content codings is recorded as D176.
 - RSS, one manual run: 290 subscriptions polled, 8,021 items, 6 new acquisitions entered (no magnet yet, so
   `resolve_failed`, as on any Python run), 2 RSSHub timeouts on single subscriptions (Python's runs show the
-  same). Switch restored 01:12Z.
+  same). Switch restored 01:12Z; the scheduled runs since, every 30 minutes, poll 291 or 292 subscriptions
+  with the occasional RSSHub timeout or 503 on one of them.
 - Archive, three manual runs: the intake listing is the same before and after each; the third run's log is
   Python's last run line for line, apart from one title that was still in the intake then and has been filed
   since. The first run after a process start leaves every folder for the next pass ("is still changing"): the
@@ -713,8 +714,8 @@ Kept, with the reason:
   01:16Z; the tracker follows it and polls on its interval (a tracker that found the archive off waits a whole
   interval before it looks again, in both builds).
 - Tracker: first poll at 01:46Z, again at 01:52Z after the restart for the second image, then one interval
-  (30 minutes) after the previous poll ended each time. The polls up to 04:32Z each found 148 offline tasks,
-  as Python's last poll did, with the same stats keys and the same log lines for the same rows. At
+  (30 minutes) after the previous poll ended each time. The polls up to 04:32Z each reported
+  `offline_tasks 148` in their stats, as Python's last poll did, with the same stats keys and the same log lines for the same rows. At
   most 50 due rows are retried per poll (in both builds), so the backlog the pause left (about 480 rows)
   took several polls.
 - Second image, 01:52Z: `rust-4698126` with the deflate fix (#104, pinned by nas-gitops #184). The mapping
@@ -734,7 +735,7 @@ Kept, with the reason:
 - Merge, one lossless title by hand on the second image (task 291, DSVR-2026, three parts, 19.09 GB),
   created 01:57Z: the Job, with the spec the Python build writes, concatenated and hashed in about 6 minutes
   and the upload began at 02:04:48Z. It ended at 18:51Z, 16 h 47 min later. CloudDrive's copy to 115 crawled
-  behind Aliyun OSS part timeouts (2.8 GB by 05:00Z, about 110 MiB/h in the hours before; Python's tasks 276
+  behind Aliyun OSS part timeouts (2.8 GB were through by 05:00Z and it was moving at about 110 MiB/h then; Python's tasks 276
   and 288 show the same pattern, 276 took 18 hours). Nobody watched it between 05:00Z and 18:45Z; by then the
   app had restarted the upload once (attempt 2), 13.1 GB were through and the rest went at
   about 15 MB/s. After the upload: hash verified, the three parts replaced, the mapping watchdog removed
