@@ -279,7 +279,8 @@ fn the_rust_worker_transcodes_for_the_python_listener() {
     std::fs::create_dir_all(&library).expect("library");
     std::fs::create_dir_all(&work).expect("work");
     let parts = [
-        // Over two of the cluster's 60-second chunks, so the stop falls inside the part.
+        // Over two of the cluster's 60-second chunks, so the stop falls inside the part. The
+        // encode is paced at 8x (below), which leaves the stop 7.5 s to land in.
         make_part(&library.join("ABC-001-cd1.mp4"), 130.0, 0.2),
         make_part(&library.join("ABC-001-cd2.mp4"), 5.0, 0.0),
     ];
@@ -300,7 +301,7 @@ fn the_rust_worker_transcodes_for_the_python_listener() {
     config.jobs = 1;
     config.name = "pc".to_owned();
     config.encoder = pyjson::loads(
-        r#"{"codec": "libx264", "extra": ["-preset", "veryfast", "-bf", "3", "-vf", "realtime=speed=20"]}"#,
+        r#"{"codec": "libx264", "extra": ["-preset", "veryfast", "-bf", "3", "-vf", "realtime=speed=8"]}"#,
     )
     .expect("JSON")
     .as_dict()
