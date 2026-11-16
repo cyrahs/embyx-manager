@@ -357,3 +357,90 @@ async fn a_host_the_caller_sets_goes_first() {
          User-Agent: python-httpx/0.28.1\r\nX-A: 1\r\n\r\n"
     );
 }
+
+/// `body` under a content coding: `zlib` and `bare` are the two forms servers send as
+/// `deflate` (RFC 1950 around RFC 1951, and RFC 1951 alone).
+fn coded(body: &[u8], form: &str) -> Vec<u8> {
+    use std::io::Write;
+
+    let level = flate2::Compression::default();
+    match form {
+        "zlib" => {
+            let mut encoder = flate2::write::ZlibEncoder::new(Vec::new(), level);
+            encoder.write_all(body).expect("write");
+            encoder.finish().expect("finish")
+        }
+        "bare" => {
+            let mut encoder = flate2::write::DeflateEncoder::new(Vec::new(), level);
+            encoder.write_all(body).expect("write");
+            encoder.finish().expect("finish")
+        }
+        _ => {
+            let mut encoder = flate2::write::GzEncoder::new(Vec::new(), level);
+            encoder.write_all(body).expect("write");
+            encoder.finish().expect("finish")
+        }
+    }
+}
+
+// py: httpx/_decoders.py::DeflateDecoder (zlib first, the bare stream when the first bytes are
+// not a zlib header). Emby answers `Accept-Encoding: gzip, deflate` with the bare form.
+#[tokio::test]
+async fn a_deflate_body_is_decoded_in_both_forms_like_httpx() {
+    // Varied enough to stay several network chunks long once compressed.
+    let body: Vec<u8> = (0..120_000_u32)
+        .flat_map(|n| format!("{n} {}\n", n.wrapping_mul(2_654_435_761)).into_bytes())
+        .collect();
+    let answer = |coding: &'static str, bytes: Vec<u8>| {
+        get(move || {
+            let bytes = bytes.clone();
+            async move { ([(header::CONTENT_ENCODING, coding)], bytes) }
+        })
+    };
+    let zlib = coded(&body, "zlib");
+    let router = Router::new()
+        .route("/zlib", answer("deflate", zlib.clone()))
+        .route("/bare", answer("deflate", coded(&body, "bare")))
+        .route("/upper", answer("Deflate", coded(&body, "bare")))
+        .route("/gzip", answer("gzip", coded(&body, "gzip")))
+        .route("/cut", answer("deflate", zlib[..zlib.len() / 2].to_vec()))
+        .route("/junk", answer("deflate", b"\xff\xff not a deflate stream".to_vec()))
+        .route("/empty", answer("deflate", Vec::new()));
+    let address = serve(router).await;
+    let client = following();
+    let url = |path: &str| format!("http://{address}{path}");
+
+    for path in ["/zlib", "/bare", "/upper", "/gzip"] {
+        let whole = client.send(Request::get(url(path))).await.expect("send");
+        // httpx leaves the header in place for the codings it decodes itself.
+        if path != "/gzip" {
+            assert_eq!(
+                whole.header("content-encoding").map(|coding| coding.to_lowercase()),
+                Some("deflate".to_owned())
+            );
+        }
+        assert!(whole.bytes().await.expect("bytes") == body, "{path} as a whole");
+
+        let mut pieces = client.send(Request::get(url(path))).await.expect("send");
+        let (mut read, mut count) = (Vec::new(), 0);
+        while let Some(piece) = pieces.chunk().await.expect("chunk") {
+            assert!(!piece.is_empty(), "{path}");
+            read.extend_from_slice(&piece);
+            count += 1;
+        }
+        assert!(read == body, "{path} in pieces");
+        assert!(count > 1, "{path} came in one piece, so the pieces were not tested");
+    }
+
+    // A stream cut short gives what it held (zlib's `decompressobj` raises nothing at the end).
+    let cut = client.send(Request::get(url("/cut"))).await.expect("send");
+    let held = cut.bytes().await.expect("bytes");
+    assert!(!held.is_empty() && body.starts_with(&held), "{} bytes", held.len());
+
+    let empty = client.send(Request::get(url("/empty"))).await.expect("send");
+    assert!(empty.bytes().await.expect("bytes").is_empty());
+
+    let junk = client.send(Request::get(url("/junk"))).await.expect("send");
+    let error = junk.bytes().await.expect_err("junk is refused");
+    assert_eq!(error.class, ErrorClass::DecodingError, "{error:?}");
+}

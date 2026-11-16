@@ -685,6 +685,22 @@ Kept, with the reason:
   The Rust build does not mount the merge service, its router and the transcode listener yet (WP14), which the
   Python process does, so the Rust figure will grow; WP16 measures both images in the pod's conditions.
 
+## Deployment trial log (from 2026-11-16, steps 1 to 7 of "Deployment and rollback")
+
+- 00:09Z all seven switches paused through the Python build's API (all were on). 00:44Z the pod runs the Rust
+  image (`rust-a1836d8`, pinned by digest in nas-gitops). Equal to the Python build's last answers: schema
+  version 19, the row counts of all 19 tables, `/api/config` with its versions, the list pages; memory 12Mi
+  against 694Mi.
+- Mapping full sync: `files_skipped` 34,788 and nothing else, 7 min 58 s (Python: about 8 min); size, mtime and
+  path of all 236,000 files under both trees equal before and after. Switch restored.
+- Playlist sync: **failed on the first run, nothing written.** Emby answers `Accept-Encoding: gzip, deflate`
+  with a bare deflate stream (RFC 1951 without the zlib wrapper) under `Content-Encoding: deflate`. httpx reads
+  both forms (`DeflateDecoder` falls back when the first bytes are not a zlib header); reqwest's decoder takes
+  only the zlib form and ended `GET /Items` with a decode error. No test met it because no test talks to a real
+  Emby and every fake answered uncompressed. Fixed in the client (`net/client.rs`, `Deflate`): reqwest's
+  deflate decoding is off and the client decodes that coding as httpx does, for whole bodies and for pieces.
+  Emby is used by the playlist sync only. The switch stays off until the fixed image has synced once.
+
 ## Experiment log
 
 One row per merged work package. "Rework" counts pushes after the PR was opened that fixed something CI or
@@ -711,3 +727,4 @@ the independent review found; review findings are summarised with a link to the 
 | WP16 | #99, #100, #101 | ~2 h 15 min (08:30Z-10:45Z), level 1 re-run, level 3 and the benchmark included | #99: 1 push (review fixes, with D175 from the level 3 run); #100: 1 push (review fixes); the `rust` job was red on #99's first push and green from the second | #99: 0 blocker, 0 major, 3 minor, 4 nits (stale goldens and references, the listing script, PLAN claims): all fixed. #100: 0 blocker, 6 major (level 2 masking missed nested and percent-encoded URL parameters, camelCase and non-text secret keys and header credentials, and kept an export after a failed check; the GET differ compared too loosely and one of its queries named a missing column; DEPLOY.md's `workflow_run` trigger would never fire from `rust`), 6 minor, 4 nits: all fixed or answered on the PR | Parity audit closed (0 pending, 0 waived, crate-aware listing); every cleanup note closed or kept with its reason; `main` unchanged since the baseline. `Dockerfile.rust` builds in CI (800 MB vs 947 MB); memory: idle 25.5 MiB vs 105.8 MiB, peak 43.0 vs 123.1, system allocator chosen over jemalloc and mimalloc; merge worker 18.0 vs 40.6 MiB. Level 3: 8 of 11 reads equal, sukebei live counts, AVBase resend fixed (D175), RSSHub inconclusive. Level 2 not allowed: tooling only, on synthetic data. DEPLOY.md, HOME-WORKER.md, REPORT.md (copied to /mnt/project-files/embyx-rust/report-data.md) |
 | Level 2 | #102 | ~1 h 30 min (17:23Z-18:55Z), export, both replays and review fixes included | 2 pushes (review fixes, two passes); the `rust` job was red once on `heartbeat_retries_transient_repository_failure` (a lease test whose renewal had 300 ms to spare on a loaded runner; green on the one re-run, its lease doubled in the same PR) | The clock tolerance of the first fix was too loose (the span of both runs, either sign, any time format), REPORT.md claimed more than the run covered, a row neither build serves was hidden in the 404 count; second pass: merge tasks over-counted, the scan time is read at start-up: all fixed | Masked read-only export on the nas-us host (19 tables, 23,339 rows, 2 values masked, 0 secrets found by two checks). GET differ 18,005 of 18,005 equal, decision replay 16,572 of 16,572 equal. Not read: 38 plan-job rows, the older finished merge tasks. Not done: listings and a pipeline pass. Export deleted |
 | Image workflow | #103 | ~40 min (2026-11-16 00:05Z-00:45Z), beside the pause and the backups of the deployment trial | 4 pushes (review fixes, two passes; one test fix); the `rust` job was red once on `a_rust_worker_transcodes_a_title_through_the_rust_listener` (the stop had 3 s to land between two chunks of an encode paced at 20x and missed on a loaded runner; paced at 8x now, here and in the Python-listener twin; no product code changed) | The pushed image was a second build, rule 4 could be passed without a permissions block, with quoted values or with the followed tag spelled through an expression, publishing was not gated in the run, stale statements in five files; second pass: a reference without a tag means the followed tag, the tree-check step was not required: all fixed | `rust-image.yml` publishes `rust` and `rust-<sha>` on pushes to `rust`; rule 4 of `check_tree.sh` holds it there |
+| Trial fix: deflate | #104 | ~35 min (2026-11-16 01:00Z-01:35Z), found by the first playlist sync of the deployment trial | see the PR | see the PR | The client decodes `Content-Encoding: deflate` in both forms, as httpx does; a bare stream from Emby had failed `GET /Items` |

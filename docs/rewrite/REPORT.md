@@ -462,6 +462,14 @@ The full rows are in PLAN.md "Experiment log".
 - **Cross-build cache resume.** Resuming a home-worker part from a local cache the other build wrote was
   not tested; the cluster-side resume is.
 
+## Found by the deployment trial
+
+The trial that started on 2026-11-16 is logged in PLAN.md ("Deployment trial log"). Its first finding: the
+playlist sync failed on its first run against the real Emby, with nothing written, because Emby compresses
+answers as a bare deflate stream, which httpx reads and reqwest's decoder does not. The client now decodes that
+coding the way httpx does (#104). This is the kind of difference the fakes could not show: every fake answered
+uncompressed, and no level of verification before the trial talked to Emby.
+
 ## What was not tested
 
 - A deployment of the Rust image, or the image in the pod's conditions (read-only root, uid 0 with
