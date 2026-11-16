@@ -101,8 +101,21 @@ if [[ -f .github/workflows/rust-image.yml ]]; then
     echo "error: rust-image.yml must not mention the latest tag in any spelling (Flux follows it)"
     status=1
   fi
-  if grep -noE 'secrets\.[A-Za-z0-9_]+' "${image_workflow}" | grep -v 'secrets\.GITHUB_TOKEN$'; then
-    echo "error: rust-image.yml may use no secret but GITHUB_TOKEN"
+  if [[ "$(grep -i 'secrets' "${image_workflow}")" != '        password: ${{ secrets.GITHUB_TOKEN }}' ]]; then
+    echo "error: rust-image.yml may use no secret but GITHUB_TOKEN, once, as the registry password"
+    status=1
+  fi
+  # A reference without a tag means the tag Flux follows, so the image may be named only as
+  # "${IMAGE}:rust" or "${IMAGE}:rust-${GITHUB_SHA}", and nothing may add tags on its own.
+  references="$(sed -E -e 's/^      IMAGE: ghcr\.io\/\$\{\{ github\.repository \}\}$//' -e 's/^        registry: ghcr\.io$//' \
+    -e 's/"\$\{IMAGE\}:rust(-\$\{GITHUB_SHA\})?"//g' "${image_workflow}")"
+  if grep -nE 'IMAGE|ghcr\.io|github\.repository' <<< "${references}" ||
+    grep -niE 'all-tags|push[[:space:]]+-a\b|metadata-action|push:[[:space:]]*["'\'']?true|imagetools[[:space:]]+create' "${image_workflow}"; then
+    echo "error: rust-image.yml may name the image only as \"\${IMAGE}:rust\" or \"\${IMAGE}:rust-\${GITHUB_SHA}\" and push it with docker push"
+    status=1
+  fi
+  if ! grep -qE '^      run: tools/check_tree\.sh$' "${image_workflow}" || grep -nE 'continue-on-error|^[[:space:]]+if:' "${image_workflow}"; then
+    echo "error: rust-image.yml must run tools/check_tree.sh, with no step allowed to fail or be skipped"
     status=1
   fi
 fi

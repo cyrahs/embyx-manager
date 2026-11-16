@@ -32,16 +32,19 @@ workflow below was added then. The release workflow for the home worker is still
 
 `rust.yml` builds `Dockerfile.rust` on every pull request and push but pushes nothing. The Rust image
 is published by `.github/workflows/rust-image.yml`, added for the deployment trial. It runs on pushes
-to `rust`. By the merge rule those are merges of PRs whose checks passed, but `rust` has no branch
-protection and a `workflow_run` trigger gated on `rust.yml` is read only from the default branch,
-`main`, so the workflow guards itself: its first step is `tools/check_tree.sh`. It then builds the
+to `rust`. The rewrite merges a PR into `rust` only after its checks passed (PLAN.md, "How threads work"),
+but nothing on GitHub enforces that for `rust`, and a `workflow_run` trigger gated on `rust.yml` is
+read only from the default branch, `main`. So the workflow guards what it can itself: its first
+step is `tools/check_tree.sh` (the tree rules only; a direct push with failing tests would still
+publish, and the cluster would not follow, being pinned by digest). It then builds the
 image, runs the same three checks as `rust.yml`'s image job on it, pushes that very image (the
 loaded one, not a second build) as `ghcr.io/cyrahs/embyx-manager:rust-<sha>` and `:rust`, where
 `<sha>` is the commit on `rust`, and prints the digest in the run's summary. It never pushes the
 `latest` tag, which Flux follows and which `ci.yml` keeps building from `main` (Python) until the
 plan's cleanup step. `tools/check_tree.sh` rule 4 holds it to that: pushes to `rust` only, one
-permissions block with `contents: read` and `packages: write`, no secret but `GITHUB_TOKEN`, and
-the word `latest` nowhere in the file. Re-running an old run moves `rust` back to that commit; the
+permissions block with `contents: read` and `packages: write`, no secret but `GITHUB_TOKEN`, the
+word `latest` nowhere in the file, the image named only with a `rust` tag (a reference without a
+tag would mean `latest`), and the tree check step present. Re-running an old run moves `rust` back to that commit; the
 cluster is pinned by digest, so it does not follow.
 
 ## The release workflow for the home worker (not added)

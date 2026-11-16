@@ -70,7 +70,8 @@ jobs:
 
     - name: Digest
       run: |
-        digest="$(docker buildx imagetools inspect "${IMAGE}:rust-${GITHUB_SHA}" --format '{{.Manifest.Digest}}')"
-        moving="$(docker buildx imagetools inspect "${IMAGE}:rust" --format '{{.Manifest.Digest}}')"
+        digest="$(docker buildx imagetools inspect "${IMAGE}:rust-${GITHUB_SHA}" --format '{{json .Manifest}}' | jq -r .digest)"
+        moving="$(docker buildx imagetools inspect "${IMAGE}:rust" --format '{{json .Manifest}}' | jq -r .digest)"
         [[ "${digest}" == sha256:* && "${digest}" == "${moving}" ]]
-        echo "${IMAGE}:rust-${GITHUB_SHA}@${digest}" | tee -a "${GITHUB_STEP_SUMMARY}"
+        pinned="${IMAGE}:rust-${GITHUB_SHA}"
+        echo "${pinned}@${digest}" | tee -a "${GITHUB_STEP_SUMMARY}"
