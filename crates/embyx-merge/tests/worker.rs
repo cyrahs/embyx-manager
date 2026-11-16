@@ -189,6 +189,106 @@ fn merge_puts_mkv_parts_with_the_streams_in_another_order_video_first() {
     streams_in_another_order(".mkv");
 }
 
+/// A two-second part whose video track counts time in `1/timescale`.
+fn make_timed_part(path: &Path, timescale: u32, audio_first: bool) -> PathBuf {
+    let mut command = Process::new("ffmpeg");
+    command.args(["-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i"]);
+    command.arg("testsrc=size=160x120:rate=10:duration=2");
+    command.args(["-f", "lavfi", "-i", "sine=frequency=440:duration=2"]);
+    command.args(["-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest"]);
+    if audio_first {
+        command.args(["-map", "1:a", "-map", "0:v"]);
+    }
+    command.args(["-video_track_timescale", &timescale.to_string()]);
+    let status = command.arg(path).status().expect("ffmpeg runs (it must be installed)");
+    assert!(status.success(), "ffmpeg made {}", path.display());
+    path.to_path_buf()
+}
+
+fn video_time_base_and_duration(path: &Path) -> (String, f64) {
+    let output = Process::new("ffprobe")
+        .args([
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=time_base,duration",
+        ])
+        .args(["-of", "default=noprint_wrappers=1:nokey=1"])
+        .arg(path)
+        .output()
+        .expect("ffprobe runs");
+    assert!(output.status.success());
+    let text = String::from_utf8_lossy(&output.stdout).into_owned();
+    let mut lines = text.lines();
+    let time_base = lines.next().expect("a time base").to_owned();
+    let duration = lines.next().expect("a duration").parse().expect("seconds");
+    (time_base, duration)
+}
+
+/// Rust only, D177. The concat demuxer hands on a part's timestamps without scaling them when its
+/// video counts time in other units than the first part's, so the merge came out at twice the
+/// length and failed its duration check (DSVR-0386: the last part at 1/120000 beside 1/60000, and
+/// its audio first). Such a part is remuxed into the first part's units, and so is a part that is
+/// only reordered, which the muxer would otherwise move from 1/1000 to units of its own.
+fn time_bases(timescales: [u32; 3], audio_first: [bool; 3], expected: Option<&str>) {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    let library = tmp.path().join("library");
+    std::fs::create_dir(&library).expect("mkdir");
+    let parts: Vec<PathBuf> = (0..3)
+        .map(|index| {
+            let path = library.join(format!("ABC-123-cd{}.mp4", index + 1));
+            make_timed_part(&path, timescales[index], audio_first[index])
+        })
+        .collect();
+    assert_eq!(
+        video_time_base_and_duration(&parts[2]).0,
+        format!("1/{}", timescales[2])
+    );
+    let out = tmp.path().join("upload");
+    std::fs::create_dir(&out).expect("mkdir");
+    let mut status = StatusFile::new(out.join("status.json"));
+    let merged = out.join("ABC-123.mp4");
+
+    let result = Worker::default()
+        .merge(&parts, &merged, &mut status, 0, tmp.path(), None)
+        .expect("merged");
+
+    assert!(
+        approx(result.get("duration").expect("duration"), 6.0, 0.5),
+        "{result:?}"
+    );
+    let (time_base, duration) = video_time_base_and_duration(&merged);
+    if let Some(expected) = expected {
+        assert_eq!(time_base, expected);
+    }
+    assert!((duration - 6.0).abs() <= 0.5, "video lasts {duration} s");
+    assert_eq!(stream_types(&merged), ["video", "audio"]);
+    let mut names: Vec<String> = std::fs::read_dir(&out)
+        .expect("list")
+        .map(|entry| entry.expect("entry").file_name().to_string_lossy().into_owned())
+        .collect();
+    names.sort();
+    assert_eq!(names, ["ABC-123.mp4".to_owned(), "status.json".to_owned()]);
+}
+
+#[test]
+fn merge_remuxes_an_mp4_part_whose_video_counts_time_in_other_units() {
+    time_bases([60_000, 60_000, 120_000], [false; 3], Some("1/60000"));
+}
+
+#[test]
+fn merge_remuxes_a_part_in_other_units_with_its_streams_in_another_order() {
+    time_bases([60_000, 60_000, 120_000], [false, false, true], Some("1/60000"));
+}
+
+#[test]
+fn merge_keeps_the_units_of_a_part_it_only_reorders() {
+    // The merged file's own units are the muxer's choice (1/16000 for 1/1000); its length is not.
+    time_bases([1_000, 1_000, 1_000], [false, false, true], None);
+}
+
 // py: tests/test_merge_worker.py::test_merge_refuses_an_mp4_whose_index_would_outgrow_the_memory_limit
 #[test]
 fn merge_refuses_an_mp4_whose_index_would_outgrow_the_memory_limit() {
@@ -406,6 +506,7 @@ fn transcode_memory_scales_with_the_frame_and_keeps_a_floor() {
         layout: Vec::new(),
         packets: None,
         audio_bits: 0,
+        video_time_bases: Vec::new(),
     };
     // UNVRSP-003's 4096x2048 VR frames are the reference.
     assert_eq!(

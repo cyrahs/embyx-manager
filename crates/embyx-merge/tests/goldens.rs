@@ -447,6 +447,7 @@ fn worker_helpers_give_pythons_values() {
             layout: Vec::new(),
             packets: None,
             audio_bits: 0,
+            video_time_bases: Vec::new(),
         };
         assert_eq!(
             worker::transcode_memory(&probe),
