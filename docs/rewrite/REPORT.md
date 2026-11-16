@@ -163,13 +163,13 @@ What no level covers: CloudDrive, Emby and Kubernetes behaviour beyond what the 
 upload path; a real title on the home 5090; and the write paths on production data (level 2 compared
 reads and filing decisions; no pipeline ran on production listings).
 
-## Divergences D1-D176
+## Divergences D1-D177
 
-`docs/DIVERGENCES.md` has 109 entries:
+`docs/DIVERGENCES.md` has 110 entries:
 
 - 56 observable;
 - 46 mechanism (the same behaviour reached another way);
-- 5 Python bugs (four fixed, one copied);
+- 6 Python bugs (five fixed, one copied);
 - 2 dropped.
 
 "Visible" means a user, the front end, an API client or an operator reading logs or stored data could
@@ -186,6 +186,8 @@ normal use:
   (D41, D56).
 - The tracker polls attempts in info-hash order (D80).
 - Mapping no longer keeps a stale comparison cache (D90).
+- A multi-part MP4 or MOV title whose parts count video time in different units is remuxed into one
+  unit and merged; Python fails it at the duration check every time (D177).
 - The home worker's error texts and User-Agent differ (D170), and a probe timeout no longer prints the
   token (D168).
 
@@ -300,6 +302,7 @@ normal use:
 | D174 | WP15 | mechanism | internal | The worker is the same binary as the server, without `serve` on Windows |
 | D175 | WP16 | observable | visible (network) | AVBase: a GET whose reused connection dropped before the answer is resent once, as libcurl does |
 | D176 | Trial | observable | visible (network) | Content codings: a lone `deflate` is read as httpx reads it; a coding list, upper-case `GZIP`, a cut or corrupt gzip stream and brotli are handled as reqwest does |
+| D177 | Trial | python-bug | visible (fixed) | A merge whose MP4 or MOV parts count video time in different units remuxes them into the first part's units instead of producing a file of the wrong length (Python fails such a title every time) |
 
 ## Benchmarks
 
@@ -446,7 +449,8 @@ The full rows are in PLAN.md "Experiment log".
 
 ## Open risks
 
-- **No live coverage.** CloudDrive, Emby and Kubernetes were never reached live; their fakes follow the
+- **No live coverage before the trial.** Until the deployment trial (see "Found by the deployment trial"),
+  CloudDrive, Emby and Kubernetes were never reached live; their fakes follow the
   Python tests and transcripts. A behaviour of the real services that the Python tests never pinned
   could differ (contract 6 is the most delicate: mutations always awaited).
 - **Production data, writes.** Level 2 read the stored acquisitions, attempts, runs, subscriptions,
@@ -472,6 +476,21 @@ coding the way httpx does (#104). This is the kind of difference the fakes could
 uncompressed, and no level of verification before the trial talked to Emby. The settings page's Emby
 connection test goes through the same client. What the two HTTP stacks still do differently with content
 codings is D176; none of it was met.
+
+The second finding came from a merge the Python build had failed the evening before the swap (task 286,
+DSVR-0386: the merged file twice as long as its parts). One part's video track counts time in other units
+than the others', and the concat passes its timestamps on unscaled; the Rust worker had copied that. It now
+remuxes such parts into the first part's units first (#105, D177, a Python bug fixed). Every title with such
+parts failed under Python however often it was retried.
+
+What the trial has shown so far on the live system (PLAN.md has each round with its figures): a mapping
+full sync that changed nothing, one RSS run by hand and the scheduled ones after it, archive runs and tracker
+polls whose log lines and stats match the Python build's last ones, the playlist sync (after #104), five
+downloads submitted and filed in the right place with nothing else touched (two listings of intake and
+library against the one taken before the swap), and one lossless merge from the Job through the 115 upload,
+the replacement of the parts and the filing of the merged file. Over 16 hours of that load the working set
+stayed between 147 and 164 Mi (227 Mi at its highest, while a merge was filed); the Python pod's moved between
+190 and 513 Mi in the six hours before the swap.
 
 ## What was not tested
 
