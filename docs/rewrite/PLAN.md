@@ -33,6 +33,12 @@ built a shared piece twice, a line to "Cleanup notes". Divergences go to `docs/D
 
 ## Hard safety rules (until Max lifts them for the deployment)
 
+Lifted on 2026-11-16, when Max gave the go-ahead for the deployment trial (steps 1 to 7 of "Deployment and
+rollback"), and only as far as those steps need: the image is published from `rust` under the tags `rust` and
+`rust-<sha>` (`rust-image.yml`), the running app is paused and read through its own API, backups are taken, and
+one nas-gitops PR pins the Rust image. Still in force: no workflow dispatch, no git tags, no release, nothing
+under the `latest` tag, no direct write to the database, no `rust` into `main`; those wait for Max (steps 8, 9).
+
 - Never deploy. No image publish from `rust`, no change to charys117/nas-gitops, no workflow dispatch, no tags.
   (`ci.yml` publishes `latest` from `main` only; Flux follows `latest` by digest and restarts the pod.)
 - Never touch what is running: the live pod, its merge Jobs, the home worker and its WireGuard gateway, the
@@ -322,7 +328,9 @@ Same shape as fav's, with the pipelines paused first because of what they can de
 7. A functional failure leaves that pipeline off and is fixed forward on `rust`. Data loss or damage: stop,
    revert the nas-gitops PR (Python image on the same database), restore from the recycle bin and the backups,
    report to Max.
-8. On Max's word: `rust` into `main`, `latest` becomes the Rust image, marker restored.
+8. On Max's word: `rust` into `main`. `ci.yml` still builds `Dockerfile`, the Python one, so `latest` stays the
+   Python image and the pin stays until step 9 has made `latest` the Rust image; only then is the marker restored
+   (restoring it earlier would let Flux put the Python image back).
 9. Cleanup WP, as fav's: git tag and image tag `python-final` first; delete the Python tree; `Dockerfile.rust`
    becomes `Dockerfile`; one `ci.yml` (fmt, clippy, tests, front end, image with cargo-chef and registry cache,
    publish); a release workflow for the Windows exe; README and `docs/home-transcode.md` rewritten; nas-gitops

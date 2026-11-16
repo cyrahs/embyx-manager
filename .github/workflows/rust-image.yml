@@ -1,10 +1,10 @@
 name: Rust image
 
-# Publishes the Rust build's image for the deployment trial (docs/rewrite/DEPLOY.md), added on
-# Max's go-ahead of 2026-11-16. It runs on pushes to `rust`, which only happen by merging a pull
-# request whose `rust.yml` checks passed. It writes two tags, `rust` and `rust-<sha>`, and never
-# `latest`: Flux follows `latest`, which ci.yml keeps building from `main` (the Python build).
-# The cluster is pointed at an image by digest in nas-gitops, by hand.
+# Publishes the Rust build's image for the deployment trial (DEPLOY.md), added on Max's go-ahead
+# of 2026-11-16. It runs on pushes to `rust` and pushes two tags, `rust` and `rust-<sha>`, never
+# the tag Flux follows, which ci.yml keeps building from `main` (the Python build); the cluster
+# is pointed at an image by digest in nas-gitops, by hand. Rule 4 of tools/check_tree.sh holds
+# this file to that and is the first step here, so a push that breaks the rule publishes nothing.
 
 on:
   push:
@@ -20,9 +20,18 @@ concurrency:
 
 jobs:
   image:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      IMAGE: ghcr.io/${{ github.repository }}
     steps:
     - uses: actions/checkout@v5
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+
+    - name: Tree check
+      run: tools/check_tree.sh
 
     - uses: docker/setup-buildx-action@v3
 
@@ -34,6 +43,7 @@ jobs:
         platforms: linux/amd64
         push: false
         load: true
+        provenance: false
         tags: embyx-manager:rust-ci
         cache-from: type=gha,scope=rust-image
 
@@ -49,21 +59,18 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+    # The loaded image itself is pushed, not a second build, so what the registry holds is what
+    # the step above ran.
     - name: Push the image that was just checked
-      id: push
-      uses: docker/build-push-action@v6
-      with:
-        context: .
-        file: Dockerfile.rust
-        platforms: linux/amd64
-        push: true
-        tags: |
-          ghcr.io/${{ github.repository }}:rust
-          ghcr.io/${{ github.repository }}:rust-${{ github.sha }}
-        cache-from: type=gha,scope=rust-image
+      run: |
+        docker tag embyx-manager:rust-ci "${IMAGE}:rust-${GITHUB_SHA}"
+        docker tag embyx-manager:rust-ci "${IMAGE}:rust"
+        docker push "${IMAGE}:rust-${GITHUB_SHA}"
+        docker push "${IMAGE}:rust"
 
     - name: Digest
-      env:
-        DIGEST: ${{ steps.push.outputs.digest }}
       run: |
-        echo "ghcr.io/${GITHUB_REPOSITORY}:rust-${GITHUB_SHA}@${DIGEST}" | tee -a "${GITHUB_STEP_SUMMARY}"
+        digest="$(docker buildx imagetools inspect "${IMAGE}:rust-${GITHUB_SHA}" --format '{{.Manifest.Digest}}')"
+        moving="$(docker buildx imagetools inspect "${IMAGE}:rust" --format '{{.Manifest.Digest}}')"
+        [[ "${digest}" == sha256:* && "${digest}" == "${moving}" ]]
+        echo "${IMAGE}:rust-${GITHUB_SHA}@${digest}" | tee -a "${GITHUB_STEP_SUMMARY}"

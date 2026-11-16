@@ -32,13 +32,17 @@ workflow below was added then. The release workflow for the home worker is still
 
 `rust.yml` builds `Dockerfile.rust` on every pull request and push but pushes nothing. The Rust image
 is published by `.github/workflows/rust-image.yml`, added for the deployment trial. It runs on pushes
-to `rust`, which only happen by merging a PR whose `rust.yml` checks passed (a `workflow_run` trigger
-would be simpler to gate on `rust.yml`, but GitHub reads it only from the default branch, `main`). It
-builds the image, runs the same three checks as `rust.yml`'s image job on it, then pushes
-`ghcr.io/cyrahs/embyx-manager:rust` and `:rust-<sha>` and prints the digest. It never writes the
+to `rust`. By the merge rule those are merges of PRs whose checks passed, but `rust` has no branch
+protection and a `workflow_run` trigger gated on `rust.yml` is read only from the default branch,
+`main`, so the workflow guards itself: its first step is `tools/check_tree.sh`. It then builds the
+image, runs the same three checks as `rust.yml`'s image job on it, pushes that very image (the
+loaded one, not a second build) as `ghcr.io/cyrahs/embyx-manager:rust-<sha>` and `:rust`, where
+`<sha>` is the commit on `rust`, and prints the digest in the run's summary. It never pushes the
 `latest` tag, which Flux follows and which `ci.yml` keeps building from `main` (Python) until the
-plan's later steps. `tools/check_tree.sh` rule 4 holds it to that: pushes to `rust` only,
-`packages: write` and no other write permission, no `latest`.
+plan's cleanup step. `tools/check_tree.sh` rule 4 holds it to that: pushes to `rust` only, one
+permissions block with `contents: read` and `packages: write`, no secret but `GITHUB_TOKEN`, and
+the word `latest` nowhere in the file. Re-running an old run moves `rust` back to that commit; the
+cluster is pinned by digest, so it does not follow.
 
 ## The release workflow for the home worker (not added)
 
@@ -84,7 +88,8 @@ above was not tried in CI. `docs/rewrite/HOME-WORKER.md` is what Max follows on 
 
 ## Switching the cluster
 
-A way to do it with what is there today; Max decides when and whether.
+The trial follows PLAN.md "Deployment and rollback", which adds the pause, the backups and the manual round to
+the steps below.
 
 1. Prefer a quiet moment: no merge Job running and no home transcode in progress. Both survive a
    switch by design (rows, Job names and status files are shared: cross-version contract 4), but a switch with a
@@ -94,8 +99,11 @@ A way to do it with what is there today; Max decides when and whether.
 3. Point the deployment at the Rust image. For the trial (PLAN.md step 5): a nas-gitops PR sets
    `newTag` and `digest` in `apps/emby/embyx-manager/kustomization.yaml` to the `rust-<sha>` image and
    removes the `$imagepolicy` marker beside them, so Flux's automation leaves the pin alone; the
-   deployment (`Recreate`) restarts. Nothing else in the manifests changes. (Once `rust` is `main`,
-   `latest` is the Rust image and the marker comes back.)
+   deployment (`Recreate`) restarts. Nothing else in the manifests changes. The digest is the one
+   in the summary of the `rust-image.yml` run for that commit. The pin stays, and the marker stays
+   out, until `latest` is the Rust image: that is after the cleanup step has replaced `Dockerfile`,
+   not when `rust` is merged into `main` (`ci.yml` builds the Python `Dockerfile` until then, so
+   restoring the marker earlier would let Flux put the Python image back).
 4. Check: `/api/health`, every page of the dashboard, the run history, one manual mapping and archive
    run, the merge tab's task list, and the pod's memory for a few days (below).
 5. Going back: revert that nas-gitops PR (Python's image is still built from `main` as `latest`).

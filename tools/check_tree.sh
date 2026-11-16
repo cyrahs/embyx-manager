@@ -78,21 +78,31 @@ if [[ -f .github/workflows/rust.yml ]]; then
   fi
 fi
 if [[ -f .github/workflows/rust-image.yml ]]; then
+  # The one workflow that may publish. The rules read the whole file, comments included, so
+  # nothing can hide behind a `#`: its comments avoid the words the rules look for.
   image_workflow=.github/workflows/rust-image.yml
-  # Comments say what the workflow must not do; the rules read the YAML without them.
-  image_yaml="$(sed -E 's/(^|[[:space:]])#.*$//' "${image_workflow}")"
-  if grep -nE ':[[:space:]]*write\b|write-all' <<< "${image_yaml}" | grep -vE '^[0-9]+:[[:space:]]*packages:[[:space:]]*write[[:space:]]*$'; then
-    echo "error: rust-image.yml may ask for packages: write and no other write permission"
-    status=1
-  fi
-  if grep -nE ':latest\b' <<< "${image_yaml}"; then
-    echo "error: rust-image.yml must not name the latest tag (Flux follows it)"
-    status=1
-  fi
-  triggers="$(perl -0777 -ne 'print $1 if /^on:\n((?:[ \t]+.*\n|\n)+)/m' <<< "${image_yaml}" | grep -vE '^[[:space:]]*$' || true)"
-  if [[ "${triggers}" != $'  push:\n    branches: [ rust ]' ]]; then
+  block() {
+    perl -0777 -ne 'print $1 if /^'"$1"':\n((?:[ \t]+.*\n|\n)+)/m' "${image_workflow}" | grep -vE '^[[:space:]]*$' || true
+  }
+  if [[ "$(grep -cE '^["'\'']?(on|true)["'\'']?[[:space:]]*:' "${image_workflow}")" != 1 ||
+    "$(block on)" != $'  push:\n    branches: [ rust ]' ]]; then
     echo "error: rust-image.yml must run only on pushes to rust; its triggers are:"
-    sed 's/^/  /' <<< "${triggers}"
+    block on | sed 's/^/  /'
+    status=1
+  fi
+  if [[ "$(grep -c 'permissions' "${image_workflow}")" != 1 ||
+    "$(block permissions)" != $'  contents: read\n  packages: write' ||
+    "$(grep -ciE 'write' "${image_workflow}")" != 1 ]]; then
+    echo "error: rust-image.yml must have one permissions block, contents: read and packages: write, and no other mention of write"
+    grep -niE 'permissions|write' "${image_workflow}" | sed 's/^/  /' || true
+    status=1
+  fi
+  if grep -niE 'latest' "${image_workflow}"; then
+    echo "error: rust-image.yml must not mention the latest tag in any spelling (Flux follows it)"
+    status=1
+  fi
+  if grep -noE 'secrets\.[A-Za-z0-9_]+' "${image_workflow}" | grep -v 'secrets\.GITHUB_TOKEN$'; then
+    echo "error: rust-image.yml may use no secret but GITHUB_TOKEN"
     status=1
   fi
 fi

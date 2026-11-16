@@ -1,6 +1,6 @@
-# The Rust build's image (docs/rewrite/PLAN.md, WP16). Built in CI to prove it builds; never
-# pushed from here: the image workflow for `rust` is described in docs/rewrite/DEPLOY.md and is
-# added only at deployment. The runtime matches the Python image (Dockerfile) where the app
+# The Rust build's image (docs/rewrite/PLAN.md, WP16). rust.yml builds it to prove it builds and
+# pushes nothing; rust-image.yml publishes it on pushes to `rust` (docs/rewrite/DEPLOY.md), added
+# for the deployment trial. The runtime matches the Python image (Dockerfile) where the app
 # depends on it: Debian 13 (the base of python:3.13-slim) with its ffmpeg / ffprobe (7.1.x,
 # SVT-AV1 2.3.0), CA certificates, time zone data, `/etc/mime.types` as ffmpeg's packages leave
 # it, the `embyx` user (uid 1000), `embyx-manager` on PATH for the merge Job's command, and the
