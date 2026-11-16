@@ -186,8 +186,8 @@ normal use:
   (D41, D56).
 - The tracker polls attempts in info-hash order (D80).
 - Mapping no longer keeps a stale comparison cache (D90).
-- A multi-part title whose parts count video time in different units now merges; Python fails it at
-  the duration check every time (D177).
+- A multi-part MP4 or MOV title whose parts count video time in different units is remuxed into one
+  unit and merged; Python fails it at the duration check every time (D177).
 - The home worker's error texts and User-Agent differ (D170), and a probe timeout no longer prints the
   token (D168).
 
@@ -449,7 +449,8 @@ The full rows are in PLAN.md "Experiment log".
 
 ## Open risks
 
-- **No live coverage.** CloudDrive, Emby and Kubernetes were never reached live; their fakes follow the
+- **No live coverage before the trial.** Until the deployment trial (see "Found by the deployment trial"),
+  CloudDrive, Emby and Kubernetes were never reached live; their fakes follow the
   Python tests and transcripts. A behaviour of the real services that the Python tests never pinned
   could differ (contract 6 is the most delicate: mutations always awaited).
 - **Production data, writes.** Level 2 read the stored acquisitions, attempts, runs, subscriptions,
@@ -482,12 +483,14 @@ than the others', and the concat passes its timestamps on unscaled; the Rust wor
 remuxes such parts into the first part's units first (#105, D177, a Python bug fixed). Every title with such
 parts failed under Python however often it was retried.
 
-What the trial has shown so far on the live system, each against the Python build's records: the mapping
-full sync, RSS runs, archive runs, tracker polls, the playlist sync (after #104), five downloads submitted
-and filed in the right place with nothing else touched (two listings of intake and library against the one
-taken before the swap), and one lossless merge from the Job through the 115 upload, the replacement of the
-parts and the filing of the merged file. The working set under that load stayed between 147 and 164 Mi
-(227 Mi at its highest, while a merge was filed), where the Python pod moved between 190 and 510 Mi.
+What the trial has shown so far on the live system (PLAN.md has each round with its figures): a mapping
+full sync that changed nothing, one RSS run by hand and the scheduled ones after it, archive runs and tracker
+polls whose log lines and stats match the Python build's last ones, the playlist sync (after #104), five
+downloads submitted and filed in the right place with nothing else touched (two listings of intake and
+library against the one taken before the swap), and one lossless merge from the Job through the 115 upload,
+the replacement of the parts and the filing of the merged file. Over 16 hours of that load the working set
+stayed between 147 and 164 Mi (227 Mi at its highest, while a merge was filed); the Python pod's moved between
+190 and 513 Mi in the six hours before the swap.
 
 ## What was not tested
 

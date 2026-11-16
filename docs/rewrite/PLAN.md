@@ -712,8 +712,9 @@ Kept, with the reason:
   the 30 s gRPC deadline (2 of Python's 793 recorded runs did too); the third was clean. Switch restored
   01:16Z; the tracker follows it and polls on its interval (a tracker that found the archive off waits a whole
   interval before it looks again, in both builds).
-- Tracker: polls at 01:46Z and then every 30 minutes after the previous poll ended. Each found 148 offline
-  tasks, as Python's last poll did, with the same stats keys and the same log lines for the same rows. At
+- Tracker: first poll at 01:46Z, again at 01:52Z after the restart for the second image, then one interval
+  (30 minutes) after the previous poll ended each time. The polls up to 04:32Z each found 148 offline tasks,
+  as Python's last poll did, with the same stats keys and the same log lines for the same rows. At
   most 50 due rows are retried per poll (in both builds), so the backlog the pause left (about 480 rows)
   took several polls.
 - Second image, 01:52Z: `rust-4698126` with the deflate fix (#104, pinned by nas-gitops #184). The mapping
@@ -723,16 +724,19 @@ Kept, with the reason:
 - First download filed by the Rust build: PYM-584. The 03:27Z tracker poll's retry recorded three JavBus
   candidates and submitted one; the 04:00Z poll moved the finished file to
   `actor/clt/PYM/PYM-584.mp4` and the mapping watchdog wrote its `.strm` 1 s later. It was the regular poll
-  and not a fast check because the 03:27Z poll itself ran for about 153 s, past the last fast check at 120 s
+  and not a fast check: the magnet was submitted at 03:27:38Z and that poll ended at about 03:30:10Z (the next
+  began one interval later, at 04:00:10Z), 152 s after the submission and past the last fast check at 120 s
   after a submission; both builds drop fast checks whose time has passed. A listing of intake and library at
   05:06Z against the one taken before the swap: the same 2,699 directories and one new file, that one.
 - By 19:00Z the tracker had filed four more (EROFV-399, DOJN-034, MIBB-090, HSKVR-007 in three parts). A
   second listing differs from the 05:06Z one by exactly those files, the merge below and one download still
   running in the intake.
-- Merge, one lossless title by hand (task 291, DSVR-2026, three parts, 19.09 GB): the Job, with the spec the
-  Python build writes, concatenated and hashed in about 6 minutes. The upload took 17 hours: CloudDrive's
-  copy to 115 crawled at about 110 MiB/h behind Aliyun OSS part timeouts (Python's tasks 276 and 288 show the
-  same pattern, 276 took 18 hours), the app restarted it once (attempt 2) and the last 6 GB went through at
+- Merge, one lossless title by hand on the second image (task 291, DSVR-2026, three parts, 19.09 GB),
+  created 01:57Z: the Job, with the spec the Python build writes, concatenated and hashed in about 6 minutes
+  and the upload began at 02:04:48Z. It ended at 18:51Z, 16 h 47 min later. CloudDrive's copy to 115 crawled
+  behind Aliyun OSS part timeouts (2.8 GB by 05:00Z, about 110 MiB/h in the hours before; Python's tasks 276
+  and 288 show the same pattern, 276 took 18 hours). Nobody watched it between 05:00Z and 18:45Z; by then the
+  app had restarted the upload once (attempt 2), 13.1 GB were through and the rest went at
   about 15 MB/s. After the upload: hash verified, the three parts replaced, the mapping watchdog removed
   their three `.strm` and four sidecars and kept poster, fanart and landscape; the first archive run left
   the new folder for the next pass, the second, 5 min 9 s later (Python's interval between its two runs for
@@ -741,9 +745,14 @@ Kept, with the reason:
   The task row has the shape of Python's task 290 and the work directory is empty.
 - Memory under the real workload: the working set stayed between 147 and 164 Mi for 16 hours (half-hour
   samples; 141 Mi anonymous at 05:00Z) and reached 227 Mi while the merge was filed and the full mapping
-  sync after it ran; the Python pod moved between 190 and 510 Mi in the six hours before the swap.
-- Third image: `rust-7c46721` with the merge time-base fix (#105, D177, found on Python's failed task 286),
-  pinned by nas-gitops #185 after task 291 had finished.
+  sync after it ran. The same series (`container_memory_working_set_bytes`, 15-minute samples) for the
+  Python pod: between 190 and 513 Mi in the six hours before the swap (`kubectl top` showed 694 Mi at the
+  swap itself).
+- Third image, 19:07Z: `rust-7c46721` with the merge time-base fix (#105, D177, found on Python's failed
+  task 286), pinned by nas-gitops #185 after task 291 and the mapping run it started had finished.
+  `merge.home_transcode_enabled` and `merge.auto_enabled` restored together at 19:08Z (with the home switch
+  off a title over 115 GB would go to the Job's CPU encoder); the auto-merge queued its next title within
+  seconds. Still off: `fill_actor.apply_enabled`, until a fill-actor scan and a manual AVID have been run.
 
 ## Experiment log
 
