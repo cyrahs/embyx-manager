@@ -8,7 +8,7 @@ use std::time::{Duration, Instant};
 
 use embyx_core::pyjson::{Dict, Value};
 
-use super::{Assignment, Inner, RunParts, TaskRun, Timing, lock};
+use super::{Assignment, Awake, Inner, Outcome, RunParts, TaskRun, Timing, lock};
 use crate::chunks::LocalChunk;
 use crate::config::WorkerConfig;
 use crate::console::MemoryLog;
@@ -298,4 +298,124 @@ fn a_heartbeat_that_says_inactive_stops_the_run_and_failures_are_ignored() {
         log.events(),
         ["集群那边这部作品已经不在转码了（取消或改用了 CPU），停下这部"]
     );
+}
+
+/// A run of `task` whose runner starts nothing and keeps what `keep_awake` was asked.
+fn awake_run(cluster: FakeCluster, cache: &Path, task: Assignment) -> (TaskRun, Arc<FakeCluster>, Arc<ScriptedRunner>) {
+    let cluster = Arc::new(cluster);
+    let runner = Arc::new(ScriptedRunner::new(|argv| panic!("no process expected: {argv:?}")));
+    let mut config = WorkerConfig::new("http://cluster");
+    config.cache_dir = cache.to_owned();
+    config.upload_mbps = 0.0;
+    // No part is encoded: these runs are about the queue and the pause.
+    config.jobs = 0;
+    let run = TaskRun::with_clock(
+        RunParts {
+            config,
+            cluster: cluster.clone(),
+            runner: runner.clone(),
+            log: Arc::new(MemoryLog::default()),
+            timing: fast(),
+        },
+        task,
+        Arc::new(FakeClock::at(0.0)),
+    )
+    .expect("run");
+    (run, cluster, runner)
+}
+
+fn paused_cluster() -> FakeCluster {
+    FakeCluster {
+        on_heartbeat: Box::new(|_| Ok(answer(&[("active", Value::Bool(true)), ("paused", Value::Bool(true))]))),
+        ..FakeCluster::default()
+    }
+}
+
+fn paused_assignment() -> Assignment {
+    let mut task = assignment();
+    task.paused = true;
+    task
+}
+
+// Not from Python (D178): the request to stay out of idle sleep.
+#[test]
+fn the_request_to_stay_awake_is_made_once_and_taken_back_at_the_end() {
+    let runner = ScriptedRunner::new(|argv| panic!("no process expected: {argv:?}"));
+    {
+        let mut awake = Awake::new(&runner);
+        awake.set(false);
+        assert_eq!(runner.awake(), Vec::<bool>::new());
+        awake.set(true);
+        awake.set(true);
+        awake.set(false);
+        awake.set(true);
+        assert_eq!(runner.awake(), [true, false, true]);
+    }
+    assert_eq!(runner.awake(), [true, false, true, false]);
+    drop(Awake::new(&runner));
+    assert_eq!(runner.awake(), [true, false, true, false]);
+}
+
+#[test]
+fn a_task_at_work_keeps_the_machine_awake_until_the_run_ends() {
+    let cache = tempfile::tempdir().expect("cache");
+    let (run, cluster, runner) = awake_run(FakeCluster::default(), cache.path(), assignment());
+    queue(&run.inner, cache.path(), 0, 0);
+    // Ctrl+C once the queued chunk is with the cluster: nothing was encoded, and the run ends.
+    let sent = Arc::clone(&cluster);
+    let watched = Arc::clone(&runner);
+    let outcome = run
+        .run(&move || {
+            assert_ne!(watched.awake(), [true, false], "let go while the task was worked");
+            usize::from(!sent.uploaded().is_empty())
+        })
+        .expect("run");
+    assert_eq!(outcome, Outcome::Stopped);
+    assert_eq!(cluster.uploaded().len(), 1);
+    assert_eq!(runner.awake(), [true, false]);
+}
+
+#[test]
+fn a_paused_task_keeps_the_machine_awake_only_while_chunks_go_out() {
+    let cache = tempfile::tempdir().expect("cache");
+    // The chunk is held back until the loop has seen it waiting, so the order is the same
+    // on every run.
+    let seen = Arc::new(std::sync::atomic::AtomicBool::new(false));
+    let gate = Arc::clone(&seen);
+    let cluster = FakeCluster {
+        on_upload: Box::new(move |_| {
+            wait_until("the loop to see the queued chunk", || gate.load(Ordering::SeqCst));
+            Ok(answer(&[("stored", Value::Bool(true))]))
+        }),
+        ..paused_cluster()
+    };
+    let (run, cluster, runner) = awake_run(cluster, cache.path(), paused_assignment());
+    queue(&run.inner, cache.path(), 0, 0);
+    // Ctrl+C once the loop has let go, which it does while it is still running.
+    let watched = Arc::clone(&runner);
+    let outcome = run
+        .run(&move || {
+            let asked = watched.awake();
+            if asked == [true] {
+                seen.store(true, Ordering::SeqCst);
+            }
+            usize::from(asked == [true, false])
+        })
+        .expect("run");
+    assert_eq!(outcome, Outcome::Stopped);
+    assert_eq!(cluster.uploaded().len(), 1);
+    assert_eq!(runner.awake(), [true, false]);
+}
+
+#[test]
+fn a_paused_task_with_nothing_to_send_lets_the_machine_sleep() {
+    let cache = tempfile::tempdir().expect("cache");
+    let (run, _, runner) = awake_run(paused_cluster(), cache.path(), paused_assignment());
+    let turns = std::sync::atomic::AtomicUsize::new(0);
+    // Ctrl+C after the loop has gone round a number of times.
+    let outcome = run
+        .run(&|| usize::from(turns.fetch_add(1, Ordering::SeqCst) >= 20))
+        .expect("run");
+    assert_eq!(outcome, Outcome::Stopped);
+    assert_eq!(runner.awake(), Vec::<bool>::new());
 }

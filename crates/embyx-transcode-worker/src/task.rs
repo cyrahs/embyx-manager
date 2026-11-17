@@ -455,6 +455,8 @@ impl TaskRun {
         ];
         let mut encoders: HashMap<usize, JoinHandle<()>> = HashMap::new();
         let mut last_status: Option<Instant> = None;
+        // Until `run` returns, however it does.
+        let mut awake = Awake::new(inner.runner.as_ref());
         loop {
             let presses = stop_requested();
             let paused = inner.paused.load(Ordering::SeqCst);
@@ -496,6 +498,8 @@ impl TaskRun {
             }
             let queue_empty = lock(&inner.queue).is_empty();
             let idle = encoders.is_empty() && queue_empty;
+            // A paused task with nothing left to encode or upload may wait for days.
+            awake.set(!(paused && idle));
             if inner.wind_down.load(Ordering::SeqCst) && idle && (presses > 0 || inner.dropped.load(Ordering::SeqCst)) {
                 break;
             }
@@ -529,6 +533,32 @@ impl TaskRun {
             return Ok(Outcome::Resync);
         }
         Ok(Outcome::Stopped)
+    }
+}
+
+/// The request to stay out of idle sleep while a task is worked (D178): made and taken back
+/// by `run`'s own thread, and taken back when `run` ends, whichever way.
+struct Awake<'a> {
+    runner: &'a dyn Runner,
+    on: bool,
+}
+
+impl<'a> Awake<'a> {
+    fn new(runner: &'a dyn Runner) -> Self {
+        Self { runner, on: false }
+    }
+
+    fn set(&mut self, on: bool) {
+        if on != self.on {
+            self.runner.keep_awake(on);
+            self.on = on;
+        }
+    }
+}
+
+impl Drop for Awake<'_> {
+    fn drop(&mut self) {
+        self.set(false);
     }
 }
 

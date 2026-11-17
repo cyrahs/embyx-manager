@@ -11,6 +11,9 @@
 //! (`setpgid`), which keeps the terminal's signals away just the same (D166). Pausing is
 //! `SIGSTOP` / `SIGCONT` on Unix and `NtSuspendProcess` / `NtResumeProcess` on Windows, as
 //! Python does through `ctypes`.
+//!
+//! Not from Python (D178): while a task is worked the worker asks Windows not to go to sleep
+//! on its idle timer (`SetThreadExecutionState`), which a busy GPU does not hold off.
 
 use std::ffi::OsString;
 use std::io::{self, Read};
@@ -64,6 +67,10 @@ pub trait Runner: Send + Sync {
     fn run(&self, argv: &[OsString], timeout: Option<Duration>) -> Result<Captured, RunError>;
     /// `subprocess.Popen(argv, stdout=PIPE, stderr=PIPE, text=True, errors='replace')`.
     fn spawn(&self, argv: &[OsString]) -> io::Result<Arc<dyn Running>>;
+    /// Asks the system to stay out of idle sleep (`true`) or takes that back (`false`). The
+    /// request belongs to the calling thread, so one thread makes both calls. Nothing by
+    /// default: only the real runner on Windows has something to ask (D178).
+    fn keep_awake(&self, _on: bool) {}
 }
 
 /// The real processes.
@@ -119,6 +126,10 @@ fn read_all(mut pipe: impl Read + Send + 'static) -> thread::JoinHandle<Vec<u8>>
 }
 
 impl Runner for SystemRunner {
+    fn keep_awake(&self, on: bool) {
+        platform::keep_awake(on);
+    }
+
     fn run(&self, argv: &[OsString], timeout: Option<Duration>) -> Result<Captured, RunError> {
         let mut child = command(argv)?.stdout(Stdio::piped()).stderr(Stdio::piped()).spawn()?;
         let stdout = read_all(child.stdout.take().ok_or_else(|| io::Error::other("no stdout pipe"))?);
@@ -235,12 +246,15 @@ mod platform {
             .map(|name| name.to_string_lossy().into_owned())
             .unwrap_or_default()
     }
+
+    /// The home worker's machine is the Windows one; elsewhere sleep is left to the system.
+    pub(super) fn keep_awake(_on: bool) {}
 }
 
 #[cfg(windows)]
 #[allow(
     unsafe_code,
-    reason = "ntdll's suspend/resume and the host name have no safe binding; confined to this module"
+    reason = "ntdll's suspend/resume, the host name and the execution state have no safe binding; confined to this module"
 )]
 mod platform {
     use std::io;
@@ -248,6 +262,7 @@ mod platform {
     use std::process::Child;
 
     use windows_sys::Win32::Foundation::{HANDLE, NTSTATUS};
+    use windows_sys::Win32::System::Power::{ES_CONTINUOUS, ES_SYSTEM_REQUIRED, SetThreadExecutionState};
     use windows_sys::Win32::System::SystemInformation::{ComputerNamePhysicalDnsHostname, GetComputerNameExW};
 
     // Undocumented ntdll exports (what Python's `ctypes.windll.ntdll` calls), declared the
@@ -286,6 +301,20 @@ mod platform {
         }
         buffer.truncate(length as usize);
         String::from_utf16_lossy(&buffer)
+    }
+
+    /// `ES_SYSTEM_REQUIRED` holds off the idle sleep and lets the display go dark; with
+    /// `ES_CONTINUOUS` it stays until the same thread sets `ES_CONTINUOUS` alone. Sleep the
+    /// user asks for (the power button, the Start menu) is not held off.
+    pub(super) fn keep_awake(on: bool) {
+        let state = if on {
+            ES_CONTINUOUS | ES_SYSTEM_REQUIRED
+        } else {
+            ES_CONTINUOUS
+        };
+        // SAFETY: the call takes flags only. A refusal (0) leaves the power plan in charge,
+        // as it was before the worker asked.
+        unsafe { SetThreadExecutionState(state) };
     }
 }
 
