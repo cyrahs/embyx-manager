@@ -1,26 +1,18 @@
-__pycache__/
-*.py[cod]
-.venv/
-.pytest_cache/
-.ruff_cache/
-dist/
-build/
-*.egg-info/
+# Rust build
+/target/
+
+# frontend
+frontend/node_modules/
+frontend/dist/
+
+# Page smoke (tools/smoke)
+/tools/smoke/node_modules/
+
+# local state and settings
 state/
 log/
 .env
 config.toml
 
-# frontend
-frontend/node_modules/
-frontend/dist/
-src/embyx_manager/static/
-
 # agent scratch
 .claude/
-
-# Rust build (docs/rewrite/PLAN.md)
-/target/
-
-# Page smoke (tools/smoke)
-/tools/smoke/node_modules/

@@ -1195,7 +1195,6 @@ dependencies = [
 name = "embyx-monitor"
 version = "0.1.0"
 dependencies = [
- "base64 0.22.1",
  "caseless",
  "chrono",
  "chrono-tz",
@@ -1209,7 +1208,6 @@ dependencies = [
  "indexmap",
  "notify",
  "rustix",
- "serde_json",
  "sqlx",
  "tempfile",
  "thiserror 2.0.21",

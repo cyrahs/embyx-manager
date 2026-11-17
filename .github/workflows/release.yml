@@ -1,0 +1,59 @@
+name: Release
+
+# The home transcode worker for Windows (docs/home-transcode.md): a tag `v*` builds
+# `embyx-manager.exe` with the MSVC runtime linked in (no Visual C++ redistributable needed),
+# writes its SHA-256 and attaches both to a GitHub Release named after the tag. CI's `windows`
+# job builds the same exe on every pull request. Nothing here touches the image or the cluster.
+
+on:
+  push:
+    tags: [ 'v*' ]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  windows-worker:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    env:
+      CARGO_INCREMENTAL: '0'
+      RUSTFLAGS: -C target-feature=+crt-static
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Install the pinned toolchain (rust-toolchain.toml)
+      run: |
+        rustup toolchain install
+        rustup show active-toolchain
+
+    - name: Build
+      run: cargo build -p embyx-manager --release --locked
+
+    - name: The exe runs and needs no Visual C++ runtime
+      run: |
+        $exe = 'target\release\embyx-manager.exe'
+        & $exe --help
+        if ($LASTEXITCODE -ne 0) { throw 'the exe does not run' }
+        if (Select-String -Path $exe -Pattern 'VCRUNTIME140' -SimpleMatch -Quiet) { throw 'the exe imports VCRUNTIME140.dll' }
+
+    - name: Checksum
+      run: |
+        $hash = (Get-FileHash target\release\embyx-manager.exe -Algorithm SHA256).Hash.ToLower()
+        "$hash  embyx-manager.exe" | Out-File -Encoding ascii target\release\embyx-manager.exe.sha256
+        Get-Content target\release\embyx-manager.exe.sha256
+
+    - name: Release
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        notes="Home transcode worker for Windows (x86-64), built from ${GITHUB_SHA}.
+
+        Install and update: https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/docs/home-transcode.md"
+        gh release create "${GITHUB_REF_NAME}" --verify-tag --title "embyx-manager ${GITHUB_REF_NAME}" --notes "${notes}" \
+          target/release/embyx-manager.exe target/release/embyx-manager.exe.sha256

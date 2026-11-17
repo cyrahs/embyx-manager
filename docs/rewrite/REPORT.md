@@ -1,5 +1,9 @@
 # embyx-manager Rust rewrite: final report data
 
+> History of the Rust rewrite, kept as written. Paths and commands in it are from before the Python tree left
+> the repository (the cleanup after the switch, November 2026): the Python app is at tag `python-final`, the
+> rewrite's Python tooling at the commit that merged branch `rust` into `main` (b2ffd31).
+
 The data behind the final report of the rewrite (`docs/rewrite/PLAN.md`), written at the end of WP16 on
 2026-11-14; the level 2 results were added the same day (#102), after Max allowed the export. The
 rewrite ran from Max's approval on 2026-11-13 18:22Z to WP16's last merge, about 16 hours of wall-clock

@@ -1,7 +1,8 @@
 //! Generates the CloudDrive gRPC client from `proto/clouddrive.fds.bin`.
 //!
-//! The descriptor set is extracted from the baseline's `clouddrive_pb2.py` by
-//! `tools/codegen/clouddrive_descriptor.py` (CI checks it is current). Only the 14 RPCs
+//! The descriptor set was extracted from the Python app's `clouddrive_pb2.py` (tag
+//! `python-final`) by `tools/codegen/clouddrive_descriptor.py` (at commit b2ffd31) and is a
+//! frozen file now. Only the 14 RPCs
 //! embyx-manager calls are kept in the service, so the generated client cannot reach the
 //! rest of CloudDrive's API (198 methods) by accident. No `protoc` is involved.
 

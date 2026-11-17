@@ -4,7 +4,7 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   plugins: [react()],
   build: {
-    outDir: '../src/embyx_manager/static',
+    outDir: 'dist',
     emptyOutDir: true,
   },
   server: {

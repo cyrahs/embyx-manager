@@ -1,5 +1,9 @@
 # The home transcode worker, Rust build
 
+> History of the Rust rewrite, kept as written. Paths and commands in it are from before the Python tree left
+> the repository (the cleanup after the switch, November 2026): the Python app is at tag `python-final`, the
+> rewrite's Python tooling at the commit that merged branch `rust` into `main` (b2ffd31).
+
 The Rust build's home worker is the same program as the Python one (`docs/home-transcode.md`):
 the same command, the same `config.toml`, the same flags, the same protocol with the cluster. What
 changes is how it gets onto the Windows machine: one `embyx-manager.exe`, no Python, no uv.

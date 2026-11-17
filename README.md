@@ -2,7 +2,13 @@
 
 Unified web management and monitoring for `embyx` media workflows. Merges the former
 `embyx-web` (Fill Actor web UI) and `embyx-monitor` (RSS ingestion, archive, STRM mapping
-automation) into one FastAPI + React application backed by PostgreSQL.
+automation) into one application: a Rust server (axum) with a React front end, backed by
+PostgreSQL. One binary, `embyx-manager`, is the server, the merge Job's worker and the home
+transcode worker.
+
+The app was written in Python first and ported to Rust in November 2026
+([docs/rewrite/](docs/rewrite/)); the last Python build is tag `python-final` in git and in the
+image registry.
 
 ## What it does
 
@@ -83,9 +89,11 @@ Three peer features; `/` redirects to the dashboard and no feature owns the app 
 
 ## Requirements
 
-- Python 3.13+ and [uv](https://docs.astral.sh/uv/)
-- Node.js 22+ (frontend build)
+- Rust: the toolchain in `rust-toolchain.toml` (rustup installs it on first use), plus cmake,
+  clang/libclang, perl and a C++ compiler for BoringSSL (the AVBase client)
+- Node.js 22+ (front end)
 - PostgreSQL 14+
+- ffmpeg and ffprobe on PATH for merging (the image carries them) and for the tests
 
 ## Configuration
 
@@ -162,46 +170,49 @@ The login screen is a convenience gate, not the security boundary — the API en
 token on every mutation regardless of what the browser does. Reads (health, monitor
 status, run history, config) stay open by design.
 
-### Importing a legacy config.toml
-
-```bash
-uv run embyx-manager import-config /path/to/config.toml --database-url postgresql://...
-```
-
-Maps the embyx-monitor `[clouddrive]`, `[avid]`, `[archive]`, and
-`[mapping]` sections into the config store. Pipelines stay disabled until enabled from
-the dashboard.
-
 ## Layout
 
-Every feature owns its own slice on both sides, and the app root owns none of them:
-
-| | Backend | Frontend |
-| --- | --- | --- |
-| app root | `api.py` (shell, auth, health, SPA hosting), `errors.py` | `App.tsx`, `components/{Login,Feedback,Icons}`, `lib/{apiToken,errors}` |
-| fill actor | `fill_actor/api.py` | `pages/FillActorPage.tsx`, `components/fill-actor/`, `lib/fill-actor/` |
-| monitor | `monitor/api.py` | `pages/DashboardPage.tsx` |
-| settings | `config/api.py` | `pages/SettingsPage.tsx` |
-
-`create_app` takes routers, health probes, lifespans and exception handlers — never a
-feature's service — so adding or removing a feature touches only `bootstrap.py`. Fill
-Actor used to be wired into the app root itself, a leftover from embyx-web.
+```
+Cargo.toml, Cargo.lock     the workspace: members, shared dependency versions, lints
+rust-toolchain.toml        the pinned toolchain
+crates/embyx-manager       the binary: `serve` (default), `merge-worker`, `transcode-worker`
+crates/embyx-api           HTTP: the app shell, auth, health, front-end hosting, every feature's
+                           routes, the transcode listener
+crates/embyx-monitor       the pipelines: acquisitions, rss, archive, tracker, mapping, playlists,
+                           scheduler
+crates/embyx-fill-actor    Fill Actor: scans, plans, the durable job queue, safe moves
+crates/embyx-merge         the merge service, auto-merge, the merge Job's worker, home transcode
+                           bookkeeping
+crates/embyx-transcode-worker  the home transcode worker (the only crate allowed `unsafe`, for
+                           process control)
+crates/embyx-clients       site and service clients: CloudDrive (gRPC), Emby, Kubernetes, AVBase,
+                           JavBus, sukebei, jinjier, feeds; their fakes for tests
+crates/embyx-db            pool, schema (version 19) and migrations, advisory locks, test databases
+crates/embyx-core          settings, errors, AVID parsing, magnets, Python-compatible JSON and text
+frontend/                  the React front end (Vite)
+goldens/                   frozen expected outputs the tests compare with (see docs/CONVENTIONS.md)
+tools/                     tree rules (check_tree.sh), the page smoke, the scenario specs
+docs/                      conventions, divergences from the Python build, feature plans, the
+                           rewrite's history (docs/rewrite/)
+```
 
 ## Development
 
 ```bash
-uv sync --locked
-uv run pytest
-uv run ruff check .
-uv run ruff format --check .
+cargo build -p embyx-manager
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets --locked -- -D warnings
+EMBYX_MANAGER_TEST_DATABASE_URL=postgresql://tests@127.0.0.1:5432/embyx_test \
+  CARGO_INCREMENTAL=0 cargo test --workspace --locked
+tools/check_tree.sh
 ```
 
-PostgreSQL-backed tests are gated in GitHub Actions CI, which provides a disposable
-Postgres service container via `EMBYX_MANAGER_TEST_DATABASE_URL`. Locally they skip
-automatically when that variable is unset — do not point it at a real database: the
-fixtures drop and recreate the target database's `public` schema between tests.
+The tests need PostgreSQL and ffmpeg. Each database test creates and drops its own
+`embyx_test_*` database on the server `EMBYX_MANAGER_TEST_DATABASE_URL` names, and fails (it
+does not skip) when the variable is unset. Point it at a disposable server, never at a real
+database. `docs/CONVENTIONS.md` has the rest: how tests are written, goldens, the lints.
 
-Frontend:
+Front end:
 
 ```bash
 cd frontend
@@ -209,26 +220,35 @@ npm ci
 npm run dev        # proxies /api to 127.0.0.1:8000
 npm run lint
 npm test
-npm run build      # writes src/embyx_manager/static, served at /
+npm run build      # writes frontend/dist
 ```
 
-Run the app:
+Run the app (the front end is served from `static/` next to the executable, when it exists):
 
 ```bash
-uv run embyx-manager serve
+cp -r frontend/dist target/debug/static      # after npm run build, for the pages
+EMBYX_MANAGER_DATABASE_URL=postgresql://localhost/embyx_manager target/debug/embyx-manager serve
 ```
+
+The page smoke builds the front end and the server and clicks through every page in headless
+Chromium: `EMBYX_MANAGER_TEST_DATABASE_URL=... tools/smoke/run.sh` (needs node, `psql` and a
+Chromium for the Playwright version in `tools/smoke/package.json`).
+
+CI (`.github/workflows/ci.yml`) runs all of the above on every pull request, plus the home
+worker's tests and its exe on Windows, and the image build.
 
 ## Container image
 
-Self-contained two-stage build (frontend bundle → wheel → slim runtime); no base-image
-layering:
+`Dockerfile` builds the front end, the binary (cargo-chef keeps the dependency layer cached) and a
+Debian 13 runtime with ffmpeg (SVT-AV1):
 
 ```bash
 docker build -t embyx-manager:local .
 ```
 
-Pushes to `main` publish `ghcr.io/<owner>/embyx-manager:latest` and an immutable
-`sha-<commit>` tag for `linux/amd64` and `linux/arm64`. Pin the digest in production.
+A push to `main` publishes `ghcr.io/cyrahs/embyx-manager:sha-<commit>` and, once every CI job
+has passed, moves `latest` to it (`linux/amd64`). Flux follows `latest` by digest in
+nas-gitops.
 
 Deployment notes:
 
@@ -244,11 +264,18 @@ Deployment notes:
   (the app fills in name, image and arguments), and `POD_NAME`/`POD_NAMESPACE` from the
   downward API; without them the merge tab lists titles but cannot merge.
 
+## Home transcode worker
+
+Titles over 115 GB can be re-encoded on a Windows PC with an NVIDIA GPU. The worker is
+`embyx-manager.exe` from this repository's
+[Releases](https://github.com/cyrahs/embyx-manager/releases) (a `v*` tag publishes one); see
+[docs/home-transcode.md](docs/home-transcode.md).
+
 ## License
 
 GPL-3.0-or-later; see [LICENSE](LICENSE).
 
-The AVID parser in `src/embyx_manager/core/avid.py` is derived from
+The AVID parser (`crates/embyx-core/src/avid*`) is derived from
 [JavSP](https://github.com/Yuukiy/JavSP) (GPL-3.0). Parts of its tag-stripping rules and
 test corpus come from [metatube-sdk-go](https://github.com/metatube-community/metatube-sdk-go)
 (Apache-2.0); the affected files carry the corresponding notices. IDs are spelled the way

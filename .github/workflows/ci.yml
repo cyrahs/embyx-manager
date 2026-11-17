@@ -1,78 +1,264 @@
 name: CI
 
+# Every pull request and every push to `main`: the Rust workspace (tree rules, format, clippy,
+# tests on PostgreSQL and real ffmpeg, the page smoke), the front end, the home worker on
+# Windows, and the image. A push to `main` that passes all of it publishes the image as `latest`,
+# the tag Flux follows (nas-gitops `infra/image-automation/embyx-manager-ghcr.yaml`).
+
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CARGO_TERM_COLOR: always
+  IMAGE: ghcr.io/${{ github.repository }}
+
 jobs:
+  # Format, clippy and the tests (none may be ignored) in one job, so they share one compile.
+  # Debug info is reduced to line tables: backtraces keep file and line, and the test binaries
+  # compile and link faster.
   backend:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
     services:
       postgres:
         image: postgres:17-alpine
         env:
-          POSTGRES_PASSWORD: test
+          POSTGRES_USER: tests
           POSTGRES_DB: embyx_test
+          POSTGRES_HOST_AUTH_METHOD: trust
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U postgres"
+          --health-cmd "pg_isready -U tests -d embyx_test"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
+
+    env:
+      # Tests that need PostgreSQL create their own temporary database through this.
+      EMBYX_MANAGER_TEST_DATABASE_URL: postgresql://tests@127.0.0.1:5432/embyx_test
+      RUSTFLAGS: -D warnings
+      CARGO_INCREMENTAL: '0'
+      CARGO_PROFILE_DEV_DEBUG: line-tables-only
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
-      - run: uv lock --check
-      - run: uv sync --locked
-      - run: uv run ruff check .
-      - run: uv run ruff format --check .
-      - run: uv run pytest
-        env:
-          EMBYX_MANAGER_TEST_DATABASE_URL: postgresql://postgres:test@localhost:5432/embyx_test
-      - run: uv run python -m compileall -q src tests
+    - uses: actions/checkout@v5
+
+    - name: Tree rules (no ignored tests, unsafe confined, workspace lints)
+      run: tools/check_tree.sh
+
+    - name: Install the pinned toolchain (rust-toolchain.toml)
+      run: |
+        rustup toolchain install
+        rustup show active-toolchain
+
+    - uses: Swatinem/rust-cache@v2
+
+    - name: Format
+      run: cargo fmt --all -- --check
+
+    - name: Clippy
+      run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+    # The merge worker's and the home worker's tests run real ffmpeg (SVT-AV1 included).
+    - name: Install ffmpeg
+      run: |
+        sudo apt-get update -q
+        sudo apt-get install -y -q --no-install-recommends ffmpeg
+        ffmpeg -hide_banner -encoders | grep -E 'libsvtav1|libx264'
+
+    - name: Test (no test may be ignored)
+      run: |
+        set -o pipefail
+        cargo test --workspace --locked 2>&1 | tee "$RUNNER_TEMP/cargo-test.log"
+        if grep -E '^test result: .* [1-9][0-9]* ignored' "$RUNNER_TEMP/cargo-test.log"; then
+          echo "::error::ignored tests are not allowed"
+          exit 1
+        fi
+
+    # The front end, built, against the server on a scratch database: sign-in, every page,
+    # the settings round trip and a clean SIGTERM (tools/smoke).
+    - uses: actions/setup-node@v5
+      with:
+        node-version: '22'
+
+    - name: Page smoke
+      run: |
+        (cd tools/smoke && npm ci --no-audit --no-fund && npx playwright install --with-deps chromium)
+        tools/smoke/run.sh
 
   frontend:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-      - run: npm ci
-        working-directory: frontend
-      - run: npm run lint
-        working-directory: frontend
-      - run: npm test
-        working-directory: frontend
-      - run: npm run build
-        working-directory: frontend
+    - uses: actions/checkout@v5
 
+    - uses: actions/setup-node@v5
+      with:
+        node-version: '22'
+        cache: npm
+        cache-dependency-path: frontend/package-lock.json
+
+    - run: npm ci
+    - run: npm run lint
+    - run: npm test
+    - run: npm run build
+
+  # The home transcode worker runs on Windows: its crate and the binary must build there and
+  # their tests pass, real ffmpeg included. The release build is the one release.yml publishes
+  # (the MSVC runtime linked in); CI keeps it as a workflow artifact for a look, not for use.
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 60
+
+    env:
+      RUSTFLAGS: -D warnings
+      CARGO_INCREMENTAL: '0'
+      CARGO_PROFILE_DEV_DEBUG: line-tables-only
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Install the pinned toolchain (rust-toolchain.toml)
+      run: |
+        rustup toolchain install
+        rustup show active-toolchain
+
+    - uses: Swatinem/rust-cache@v2
+
+    # Chocolatey's `bin\ffmpeg.exe` is a shim that starts the real ffmpeg as its child, so
+    # killing or suspending it leaves the real one running; the worker must start the real one.
+    - name: Install ffmpeg
+      run: |
+        choco install ffmpeg -y --no-progress
+        $real = Get-ChildItem C:\ProgramData\chocolatey\lib\ffmpeg -Recurse -Filter ffmpeg.exe | Select-Object -First 1
+        $real.DirectoryName | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        if (-not (& $real.FullName -hide_banner -encoders | Select-String libx264)) { throw 'ffmpeg has no libx264' }
+
+    - name: The real ffmpeg comes first on PATH
+      run: |
+        (Get-Command ffmpeg).Source
+        (Get-Command ffprobe).Source
+        if ((Get-Command ffmpeg).Source -like '*chocolatey\bin*') { throw 'ffmpeg is the shim' }
+
+    - name: Clippy (worker crate and binary)
+      run: cargo clippy -p embyx-transcode-worker -p embyx-manager --all-targets --locked -- -D warnings
+
+    - name: Test (worker crate and binary; no test may be ignored)
+      shell: bash
+      run: |
+        set -o pipefail
+        cargo test -p embyx-transcode-worker -p embyx-manager --locked 2>&1 | tee "$RUNNER_TEMP/cargo-test.log"
+        if grep -E '^test result: .* [1-9][0-9]* ignored' "$RUNNER_TEMP/cargo-test.log"; then
+          echo "::error::ignored tests are not allowed"
+          exit 1
+        fi
+
+    - name: Build the exe as release.yml does
+      env:
+        RUSTFLAGS: -D warnings -C target-feature=+crt-static
+      run: cargo build -p embyx-manager --release --locked
+
+    - name: The exe runs and needs no Visual C++ runtime
+      run: |
+        $exe = 'target\release\embyx-manager.exe'
+        & $exe --help
+        if ($LASTEXITCODE -ne 0) { throw 'the exe does not run' }
+        if (Select-String -Path $exe -Pattern 'VCRUNTIME140' -SimpleMatch -Quiet) { throw 'the exe imports VCRUNTIME140.dll' }
+
+    - name: Keep the exe
+      uses: actions/upload-artifact@v4
+      with:
+        name: embyx-manager-windows
+        path: target/release/embyx-manager.exe
+        retention-days: 14
+
+  # The image: built with cargo-chef in the Dockerfile and a registry cache, loaded into this
+  # runner and checked. On a push to `main` the checked image itself (not a second build) is
+  # pushed as `sha-<commit>`; `publish` moves `latest` to it once every other job passed.
   image:
-    runs-on: ubuntu-latest
-    needs: [backend, frontend]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
     permissions:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
-      - name: Log in to GHCR
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build (and push on main)
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          platforms: linux/amd64
-          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-          tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:sha-${{ github.sha }}
+    - uses: actions/checkout@v5
+
+    - uses: docker/setup-buildx-action@v3
+
+    - uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build (not pushed)
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        platforms: linux/amd64
+        push: false
+        load: true
+        provenance: false
+        tags: embyx-manager:ci
+        cache-from: |
+          type=registry,ref=${{ env.IMAGE }}:buildcache
+          type=gha,scope=image
+        # The registry cache is written from `main` only; pull requests keep theirs in the
+        # Actions cache.
+        cache-to: ${{ github.event_name == 'push' && format('type=registry,ref={0}:buildcache,mode=max', env.IMAGE) || 'type=gha,scope=image,mode=max' }}
+
+    - name: The image runs the binary and carries ffmpeg with SVT-AV1 and the front end
+      run: |
+        docker run --rm embyx-manager:ci --help
+        docker run --rm --entrypoint ffmpeg embyx-manager:ci -hide_banner -encoders | grep -q libsvtav1
+        docker run --rm --entrypoint ls embyx-manager:ci /opt/embyx-manager/static/index.html
+        docker image ls embyx-manager:ci
+
+    - name: Push the checked image as sha-<commit>
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: |
+        docker tag embyx-manager:ci "${IMAGE}:sha-${GITHUB_SHA}"
+        docker push "${IMAGE}:sha-${GITHUB_SHA}"
+
+  publish:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [ backend, frontend, windows, image ]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: write
+    steps:
+    - uses: docker/setup-buildx-action@v3
+
+    - uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Tag the checked image latest
+      run: |
+        docker buildx imagetools create --tag "${IMAGE}:latest" "${IMAGE}:sha-${GITHUB_SHA}"
+
+    - name: Digest
+      run: |
+        digest_of() { docker buildx imagetools inspect "$1" --format '{{json .Manifest}}' | jq -r .digest; }
+        latest="$(digest_of "${IMAGE}:latest")"
+        [[ "${latest}" == sha256:* ]]
+        echo "${IMAGE}:latest@${latest} (from sha-${GITHUB_SHA})" | tee -a "${GITHUB_STEP_SUMMARY}"

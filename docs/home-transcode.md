@@ -47,21 +47,29 @@ apply. In nas-gitops, a WireGuard gateway pod on nas-us-2 forwards the tunnel to
 
 ## Windows worker
 
-You need an NVIDIA GPU with AV1 NVENC (RTX 40 series or later) and a recent driver.
+The worker is one file, `embyx-manager.exe` (Windows x86-64), from this repository's
+[Releases](https://github.com/cyrahs/embyx-manager/releases). It needs no Python, no uv and no
+Visual C++ redistributable. You need an NVIDIA GPU with AV1 NVENC (RTX 40 series or later) and
+a recent driver.
 
 1. Install the tools:
 
    ```powershell
-   winget install astral-sh.uv
    winget install Gyan.FFmpeg      # the full build has av1_nvenc
    winget install WireGuard.WireGuard
    ```
 
-2. Install the worker (this updates it too):
+2. Download `embyx-manager.exe` and `embyx-manager.exe.sha256` from the latest release into a
+   folder of your choice, for example `%LOCALAPPDATA%\Programs\embyx-manager`, and check it:
 
    ```powershell
-   uv tool install --force git+https://github.com/cyrahs/embyx-manager
+   $dir = "$env:LOCALAPPDATA\Programs\embyx-manager"
+   (Get-FileHash "$dir\embyx-manager.exe" -Algorithm SHA256).Hash.ToLower()
+   Get-Content "$dir\embyx-manager.exe.sha256"     # the same 64 characters
    ```
+
+   Add that folder to your user PATH (Settings, System, About, Advanced system settings,
+   Environment Variables) or run the exe by its full path.
 
 3. Import the WireGuard tunnel you were given and activate it.
 4. Write `%APPDATA%\embyx-transcode\config.toml`:
@@ -73,6 +81,8 @@ You need an NVIDIA GPU with AV1 NVENC (RTX 40 series or later) and a recent driv
    jobs = 3                 # parts encoded at once
    max_queue_gb = 8         # chunks waiting for upload before encoding pauses
    # cache_dir = "D:\\embyx-transcode"   # default %LOCALAPPDATA%\embyx-transcode
+   # ffmpeg = 'C:\…\ffmpeg.exe'           # default: ffmpeg on PATH (see below)
+   # ffprobe = 'C:\…\ffprobe.exe'
 
    # [encoder]              # overrides what the cluster sends, e.g.
    # tune = "hq"
@@ -89,5 +99,57 @@ The status line shows each part's progress and fps, the upload rate and the queu
 **Ctrl+C** twice exits at once. The next start picks up after the last chunk the cluster
 holds, or after the last chunk still in the local cache.
 
-Every flag can also be given on the command line (`--server`, `--upload-mbps`, `--jobs`,
-`--max-queue-gb`, `--cache-dir`, `--ffmpeg`, `--ffprobe`, `--config`).
+Every setting can also be given on the command line (`--server`, `--token`, `--upload-mbps`,
+`--jobs`, `--max-queue-gb`, `--cache-dir`, `--ffmpeg`, `--ffprobe`, `--config`).
+
+To update, stop the worker (one Ctrl+C, let it finish uploading) and replace the exe with the
+new release's.
+
+### ffmpeg and ffprobe must be the real executables
+
+The worker pauses, resumes and stops ffmpeg itself (when the upload queue is full, on Ctrl+C,
+when the cluster cancels a task). It can only do that to the process it started. Some package
+managers put a launcher in front of ffmpeg instead of the program:
+
+- Chocolatey: `C:\ProgramData\chocolatey\bin\ffmpeg.exe` is a shim that starts the real ffmpeg
+  as its child.
+- Scoop: `%USERPROFILE%\scoop\shims\ffmpeg.exe` is the same kind of shim.
+
+With a shim, a stop or a pause reaches only the shim: the real ffmpeg keeps encoding and holding
+the output, and the stop only lands when the part is finished. winget's `Gyan.FFmpeg` is fine:
+the `ffmpeg` and `ffprobe` it puts on PATH are links to the real executables. To check what the
+worker will start:
+
+```powershell
+(Get-Command ffmpeg).Source
+(Get-Command ffprobe).Source
+```
+
+If either path is under `chocolatey\bin` or `scoop\shims`, find the real files and point the
+worker at them with `ffmpeg` / `ffprobe` in `config.toml` (or `--ffmpeg` / `--ffprobe`):
+
+```powershell
+# Chocolatey (the folder name depends on the package version)
+(Get-ChildItem C:\ProgramData\chocolatey\lib\ffmpeg -Recurse -Filter ffmpeg.exe | Select-Object -First 1).FullName
+# Scoop
+(Get-ChildItem $env:USERPROFILE\scoop\apps\ffmpeg\current -Recurse -Filter ffmpeg.exe | Select-Object -First 1).FullName
+```
+
+Use single quotes for those paths in TOML, which then takes the backslashes literally.
+
+### The Python worker
+
+Until November 2026 the worker was a Python program installed with uv. It speaks the same
+protocol and reads the same `config.toml`, so a PC that still runs it keeps working against the
+cluster. It now installs only from the tag of the last Python build:
+
+```powershell
+uv tool install --force git+https://github.com/cyrahs/embyx-manager@python-final
+```
+
+(The old command without `@python-final` no longer works: `main` has no Python package.)
+
+To switch to the exe: stop the Python worker with one Ctrl+C and let it finish uploading, remove
+it with `uv tool uninstall embyx-manager` so that `embyx-manager` on PATH is the exe, then start
+the exe as above. The WireGuard tunnel and `config.toml` stay as they are. The cluster keeps every
+chunk it has accepted, and a worker resumes after the last one it holds, whichever build sent it.

@@ -1,11 +1,8 @@
-# Cargo workspace for the Rust rewrite of embyx-manager. See docs/rewrite/PLAN.md.
+# Cargo workspace of embyx-manager (README.md, docs/CONVENTIONS.md).
 #
-# The Python tree next to it (src/, tests/, frontend/, ...) is the reference and stays
-# byte-identical to the commit in BASELINE until the cleanup after the switch.
-#
-# Crates whose API coverage WP0 checked (docs/rewrite/API-COVERAGE.md) carry a comment saying
-# so; read that file before changing their version. Everything else uses a caret requirement
-# and is fixed by Cargo.lock.
+# Crates whose API coverage the rewrite's WP0 checked (docs/rewrite/API-COVERAGE.md) carry a
+# comment saying so; read that file before changing their version. Everything else uses a caret
+# requirement and is fixed by Cargo.lock.
 
 [workspace]
 resolver = "3"
@@ -138,7 +135,7 @@ unreachable_pub = "warn"
 # CI runs clippy with `-D warnings`, so every warning below is an error there.
 all = { level = "warn", priority = -1 }
 pedantic = { level = "warn", priority = -1 }
-# Placeholders never reach the `rust` branch (docs/CONVENTIONS.md).
+# Placeholders never reach `main` (docs/CONVENTIONS.md).
 todo = "deny"
 unimplemented = "deny"
 dbg_macro = "deny"

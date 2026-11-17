@@ -28,9 +28,7 @@ fn strings(value: &Value) -> Vec<String> {
 
 /// `_rows(name)` of `tests/test_avid_corpus.py`: tab-separated, `#` lines and blanks skipped.
 fn corpus_rows(name: &str) -> Vec<Vec<String>> {
-    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../../tests/data")
-        .join(name);
+    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("data").join(name);
     let text = std::fs::read_to_string(&path).unwrap_or_else(|error| panic!("{}: {error}", path.display()));
     // `str.splitlines()` also splits on \r, \v, \f, \x1c-\x1e, \x85, U+2028 and U+2029.
     text.split([

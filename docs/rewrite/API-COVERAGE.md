@@ -1,5 +1,9 @@
 # API coverage of the key crates (WP0)
 
+> History of the Rust rewrite, kept as written. Paths and commands in it are from before the Python tree left
+> the repository (the cleanup after the switch, November 2026): the Python app is at tag `python-final`, the
+> rewrite's Python tooling at the commit that merged branch `rust` into `main` (b2ffd31).
+
 What the Python baseline relies on, the Rust crate chosen for it, and what an offline probe showed. Every probe
 is a test in the crate that will use the library (`src/probes.rs`, compiled only for tests) and runs in CI; none
 contacts a real site, the cluster or a production service. The one exception is the live fingerprint run Max

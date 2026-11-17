@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Page smoke (WP4): build the unmodified front end in a copy of frontend/ (its build writes
-# beside the Python package, so never in the checkout), build the server, make a scratch
-# database on the server EMBYX_MANAGER_TEST_DATABASE_URL names, and run smoke.mjs.
+# Page smoke: build the front end in a copy of frontend/ (so the checkout's own build is left
+# alone), build the server, make a scratch database on the server EMBYX_MANAGER_TEST_DATABASE_URL
+# names, and run smoke.mjs: sign-in, every page, the settings round trip and a clean SIGTERM.
 #
 # Needs node and npm, and a Chromium for the pinned Playwright: CI installs one with
 # `npx playwright install --with-deps chromium` in tools/smoke; a machine that already has
@@ -24,7 +24,7 @@ trap cleanup EXIT
 echo "== front end (npm ci, npm run build) in a copy"
 tar -C "$repo" --exclude=frontend/node_modules --exclude=frontend/dist -cf - frontend | tar -C "$work" -xf -
 (cd "$work/frontend" && npm ci --no-audit --no-fund && npm run build)
-built="$work/src/embyx_manager/static"
+built="$work/frontend/dist"
 test -f "$built/index.html"
 
 echo "== server binary"
