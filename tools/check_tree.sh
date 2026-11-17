@@ -10,6 +10,8 @@
 #      `contents: read` and asks for no write permission), and `rust-image.yml`, which
 #      publishes the Rust image for the deployment trial: it runs only on pushes to `rust`,
 #      may write packages and nothing else, and never writes the `latest` tag.
+#      On `main`, `python-final.yml` joins them: started by hand once, it tags the last
+#      Python commit and image before the Python tree is deleted (PLAN.md, step 9).
 # Needs the baseline commit in the local clone (CI checks out with full history).
 # Adapted from fav (rust/tools/check_tree.sh).
 set -euo pipefail
@@ -61,9 +63,9 @@ fi
 
 github_files="$(git ls-files .github | sort)"
 expected_github="$( (git ls-tree -r --name-only "${baseline}" -- .github; echo .github/workflows/rust.yml;
-  echo .github/workflows/rust-image.yml) | sort)"
+  echo .github/workflows/rust-image.yml; echo .github/workflows/python-final.yml) | sort)"
 if [[ "${github_files}" != "${expected_github}" ]]; then
-  echo "error: .github/ may hold only the baseline's files, rust.yml and rust-image.yml:"
+  echo "error: .github/ may hold only the baseline's files, rust.yml, rust-image.yml and python-final.yml:"
   diff <(echo "${expected_github}") <(echo "${github_files}") | sed 's/^/  /' || true
   status=1
 fi

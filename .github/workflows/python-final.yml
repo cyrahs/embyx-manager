@@ -33,8 +33,12 @@ jobs:
 
     - name: Git tag on the baseline commit
       run: |
-        [[ "$(tr -d '[:space:]' < BASELINE)" == "${COMMIT}" ]]
+        if [[ "$(tr -d '[:space:]' < BASELINE)" != "${COMMIT}" ]]; then
+          echo "error: BASELINE is not ${COMMIT}"
+          exit 1
+        fi
         git cat-file -e "${COMMIT}^{commit}"
+        # No force: a push can create the tag but never move it.
         existing="$(git ls-remote origin refs/tags/python-final | cut -f1)"
         if [[ -z "${existing}" ]]; then
           git push origin "${COMMIT}:refs/tags/python-final"
@@ -42,7 +46,11 @@ jobs:
           echo "error: tag python-final already exists on ${existing}"
           exit 1
         fi
-        [[ "$(git ls-remote origin refs/tags/python-final | cut -f1)" == "${COMMIT}" ]]
+        now="$(git ls-remote origin refs/tags/python-final | cut -f1)"
+        if [[ "${now}" != "${COMMIT}" ]]; then
+          echo "error: tag python-final is on '${now}', expected ${COMMIT}"
+          exit 1
+        fi
 
     - uses: docker/setup-buildx-action@v3
 
@@ -53,14 +61,33 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Image tag on the Python image
+      shell: bash
       run: |
-        digest_of() { docker buildx imagetools inspect "$1" --format '{{json .Manifest}}' | jq -r .digest; }
-        [[ "$(digest_of "${IMAGE}@${DIGEST}")" == "${DIGEST}" ]]
-        existing="$(digest_of "${IMAGE}:python-final" 2>/dev/null || true)"
-        if [[ -z "${existing}" ]]; then
-          docker buildx imagetools create --tag "${IMAGE}:python-final" "${IMAGE}@${DIGEST}"
-        elif [[ "${existing}" != "${DIGEST}" ]]; then
-          echo "error: image tag python-final already exists on ${existing}"
+        inspect() { docker buildx imagetools inspect "$1" --format '{{json .Manifest}}'; }
+        source_digest="$(inspect "${IMAGE}@${DIGEST}" | jq -r .digest)"
+        if [[ "${source_digest}" != "${DIGEST}" ]]; then
+          echo "error: ${IMAGE}@${DIGEST} reads back as '${source_digest}'"
           exit 1
         fi
-        [[ "$(digest_of "${IMAGE}:python-final")" == "${DIGEST}" ]]
+        # Only "not found" counts as an absent tag; any other failure stops here, so a
+        # registry hiccup can never lead to writing over a tag that exists.
+        if out="$(inspect "${IMAGE}:python-final" 2>&1)"; then
+          existing="$(jq -r .digest <<< "${out}")"
+          if [[ "${existing}" != "${DIGEST}" ]]; then
+            echo "error: image tag python-final already exists on ${existing}"
+            exit 1
+          fi
+          echo "image tag python-final is already on ${DIGEST}"
+        elif grep -qiE 'not found|manifest unknown' <<< "${out}"; then
+          # Without --prefer-index=false a single-platform manifest would be wrapped in a
+          # new index with another digest; with it the source is tagged as it is.
+          docker buildx imagetools create --prefer-index=false --tag "${IMAGE}:python-final" "${IMAGE}@${DIGEST}"
+        else
+          echo "error: could not read ${IMAGE}:python-final: ${out}"
+          exit 1
+        fi
+        now="$(inspect "${IMAGE}:python-final" | jq -r .digest)"
+        if [[ "${now}" != "${DIGEST}" ]]; then
+          echo "error: image tag python-final is on '${now}', expected ${DIGEST}"
+          exit 1
+        fi
