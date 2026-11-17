@@ -835,8 +835,9 @@ backups from before the deployment may be deleted.
   leaked memory would sit in the same arenas, and the arenas at 58 and 13 Mi do not follow the pattern. Where
   it would have levelled off was not measured. nas-gitops #186 therefore also sets `MALLOC_ARENA_MAX=2` in
   the Deployment; nothing in the app changed. Its effect is not measured yet either: the new pod stood at
-  96 Mi after 50 minutes, but no merge finished in that time (next entry). If the process climbs past
-  150 Mi again with two arenas, it is a leak after all and has to be traced.
+  96 Mi after 50 minutes, but no merge finished in that time (next entry). If the process keeps climbing
+  with two arenas (past some 150 Mi and still rising merge after merge), that would point to a leak and has
+  to be traced.
 - Task 302 (GAH-110, 23.2 GB) was `uploading` when the pod was replaced at 01:41Z and stayed `uploading`
   on the new pod, first attempt, nothing restarted. Its upload had stalled at about 1.1 GB before that: CloudDrive
   sent about 2 MB/s at 00:50Z, 0.5 MB/s at 01:00Z and about 0.1 MB/s from 01:10Z on (15 to 21 MB/s during

@@ -515,8 +515,8 @@ glibc's thread arenas and away from a leak: eight arenas of 13 to 58 Mi, six of 
 about 236 Mi, which looks like one large transient allocation run by different worker threads in turn, each
 arena keeping its high-water mark. That is a reading, not a proof. The deployment now runs with
 `MALLOC_ARENA_MAX=2` (nas-gitops #186, set with the switch to `latest` on 2026-11-17; no change in the
-app). What that brings has to be read after a day of merges, and a climb past 150 Mi with two arenas would
-mean a leak after all; PLAN.md's "Wrap-up log" has the figures.
+app). What that brings has to be read after a day of merges, and a climb that goes on with two arenas would
+point to a leak and has to be traced; PLAN.md's "Wrap-up log" has the figures.
 
 ## What was not tested
 
