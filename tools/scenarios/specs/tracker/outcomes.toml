@@ -1,0 +1,104 @@
+# Tracker outcomes (WP7) over three polls against the ledger in PostgreSQL, the fake CloudDrive
+# and the mount: a finished download filed and its task cleared with an archived one from
+# before; a junk download (no video) dropped with its data and the next magnet submitted; an
+# errored one with no other magnet exhausted on its release schedule; a stalled one whose next
+# magnet CloudDrive already holds elsewhere ("任务已存在"), so it errors too and the AVID is
+# exhausted on the stall fallback; a task CloudDrive lost (next magnet submitted); a lost task
+# whose folder is on the mount filed as an orphan; one just submitted left alone (grace);
+# progress recorded; a finished task the mount does not show yet released, then filed once the
+# folder appears; a task with no attempt left alone. The second poll sees the new submissions.
+description = "tracker: finished, junk, error, stalled, lost, orphaned and waiting downloads"
+operation = "tracker.steps"
+clock = "2026-09-10T03:00:00+00:00"
+
+[roots]
+names = ["mount"]
+
+[args]
+mount = "mount"
+task_dirs = ["/115/task/inbox"]
+
+[args.config]
+src_dir = "mount/115/task"
+dst_dir = "mount/library"
+mapping = { inbox = "sorted" }
+min_size_mb = 0
+
+[[args.steps]]
+op = "poll"
+
+[[args.steps]]
+op = "poll"
+args = { advance_seconds = 600 }
+
+[[args.steps]]
+op = "write"
+args = { path = "mount/115/task/inbox/WAI-009/WAI-009.mp4", size = 6 }
+
+[[args.steps]]
+op = "poll"
+args = { advance_seconds = 600 }
+
+[[tree]]
+path = "mount/115/task/inbox/FIN-001/FIN-001.mp4"
+size = 5
+
+[[tree]]
+path = "mount/115/task/inbox/JNK-002/readme.txt"
+size = 9
+
+[[tree]]
+path = "mount/115/task/inbox/ORP-006 [hd]/ORP-006.mp4"
+size = 7
+
+[[tree]]
+path = "mount/library/sorted/OLD/OLD-010.mp4"
+size = 4
+
+[database]
+schema = "app"
+sql = [
+    "INSERT INTO archive_acquisitions (avid, state, source, task_dir_path, release_date, created_at, updated_at) VALUES ('FIN-001', 'downloading', 'rss:Actor', '/115/task/inbox', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_acquisitions (avid, state, source, task_dir_path, release_date, created_at, updated_at) VALUES ('JNK-002', 'downloading', 'rss:Actor', '/115/task/inbox', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_acquisitions (avid, state, source, task_dir_path, release_date, created_at, updated_at) VALUES ('ERR-003', 'downloading', 'rss:Actor', '/115/task/inbox', '2026-09-01', '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_acquisitions (avid, state, source, task_dir_path, release_date, created_at, updated_at) VALUES ('STL-004', 'downloading', 'rss:Actor', '/115/task/inbox', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_acquisitions (avid, state, source, task_dir_path, release_date, created_at, updated_at) VALUES ('LST-005', 'downloading', 'rss:Actor', '/115/task/inbox', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_acquisitions (avid, state, source, task_dir_path, release_date, created_at, updated_at) VALUES ('ORP-006', 'downloading', 'rss:Actor', '/115/task/inbox', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_acquisitions (avid, state, source, task_dir_path, release_date, created_at, updated_at) VALUES ('NEW-007', 'downloading', 'rss:Actor', '/115/task/inbox', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_acquisitions (avid, state, source, task_dir_path, release_date, created_at, updated_at) VALUES ('PRG-008', 'downloading', 'rss:Actor', '/115/task/inbox', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_acquisitions (avid, state, source, task_dir_path, release_date, created_at, updated_at) VALUES ('WAI-009', 'downloading', 'rss:Actor', '/115/task/inbox', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_acquisitions (avid, state, source, task_dir_path, release_date, created_at, updated_at) VALUES ('OLD-010', 'archived', 'rss:Actor', '/115/task/inbox', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at) VALUES ('FIN-001', 1, 'magnet:?xt=urn:btih:A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1&dn=FIN-001', 'A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1', 'sukebei', 'submitted', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at) VALUES ('JNK-002', 1, 'magnet:?xt=urn:btih:B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1&dn=JNK-002', 'B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1', 'sukebei', 'downloading', 90.0, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at) VALUES ('JNK-002', 2, 'magnet:?xt=urn:btih:B2B2B2B2B2B2B2B2B2B2B2B2B2B2B2B2B2B2B2B2&dn=JNK-002', 'B2B2B2B2B2B2B2B2B2B2B2B2B2B2B2B2B2B2B2B2', 'sukebei', 'pending', NULL, NULL, '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at) VALUES ('ERR-003', 1, 'magnet:?xt=urn:btih:C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1&dn=ERR-003', 'C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1', 'sukebei', 'submitted', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at) VALUES ('STL-004', 1, 'magnet:?xt=urn:btih:D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1&dn=STL-004', 'D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1', 'sukebei', 'downloading', 40.0, '2026-09-09T00:00:00Z', '2026-09-08T00:00:00Z')",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at) VALUES ('STL-004', 2, 'magnet:?xt=urn:btih:D2D2D2D2D2D2D2D2D2D2D2D2D2D2D2D2D2D2D2D2&dn=STL-004', 'D2D2D2D2D2D2D2D2D2D2D2D2D2D2D2D2D2D2D2D2', 'sukebei', 'pending', NULL, NULL, '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at) VALUES ('LST-005', 1, 'magnet:?xt=urn:btih:E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1&dn=LST-005', 'E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1', 'sukebei', 'submitted', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at) VALUES ('LST-005', 2, 'magnet:?xt=urn:btih:E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2&dn=LST-005', 'E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2', 'sukebei', 'pending', NULL, NULL, '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at) VALUES ('ORP-006', 1, 'magnet:?xt=urn:btih:F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1&dn=ORP-006', 'F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1', 'sukebei', 'downloading', 100.0, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at) VALUES ('NEW-007', 1, 'magnet:?xt=urn:btih:0707070707070707070707070707070707070707&dn=NEW-007', '0707070707070707070707070707070707070707', 'sukebei', 'submitted', NULL, '2026-09-10T02:58:00Z', '2026-09-10T02:58:00Z')",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at) VALUES ('PRG-008', 1, 'magnet:?xt=urn:btih:0808080808080808080808080808080808080808&dn=PRG-008', '0808080808080808080808080808080808080808', 'sukebei', 'submitted', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at) VALUES ('WAI-009', 1, 'magnet:?xt=urn:btih:0909090909090909090909090909090909090909&dn=WAI-009', '0909090909090909090909090909090909090909', 'sukebei', 'submitted', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at) VALUES ('OLD-010', 1, 'magnet:?xt=urn:btih:0A0A0A0A0A0A0A0A0A0A0A0A0A0A0A0A0A0A0A0A&dn=OLD-010', '0A0A0A0A0A0A0A0A0A0A0A0A0A0A0A0A0A0A0A0A', 'sukebei', 'archived', 100.0, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+]
+
+[clouddrive]
+directories = ["/115/task/inbox", "/115/other"]
+files = [
+    { path = "/115/task/inbox/FIN-001/FIN-001.mp4", size = 5 },
+    { path = "/115/task/inbox/JNK-002/readme.txt", size = 9 },
+    { path = "/115/task/inbox/ORP-006 [hd]/ORP-006.mp4", size = 7 },
+    { path = "/library/sorted/OLD/OLD-010.mp4", size = 4 },
+]
+offline_tasks = [
+    { name = "FIN-001", url = "magnet:?xt=urn:btih:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1&dn=FIN-001", folder = "/115/task/inbox", info_hash = "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1", status = "OFFLINE_FINISHED", size = 5, progress = 100.0 },
+    { name = "JNK-002", url = "magnet:?xt=urn:btih:b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1&dn=JNK-002", folder = "/115/task/inbox", info_hash = "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1", status = "OFFLINE_FINISHED", size = 9, progress = 100.0 },
+    { name = "ERR-003", url = "magnet:?xt=urn:btih:c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1&dn=ERR-003", folder = "/115/task/inbox", info_hash = "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1", status = "OFFLINE_ERROR", size = 0, progress = 3.0 },
+    { name = "STL-004", url = "magnet:?xt=urn:btih:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1&dn=STL-004", folder = "/115/task/inbox", info_hash = "d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1", status = "OFFLINE_DOWNLOADING", size = 0, progress = 40.0 },
+    { name = "STL-004 other", url = "magnet:?xt=urn:btih:d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2&dn=STL-004 other", folder = "/115/other", info_hash = "d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2", status = "OFFLINE_DOWNLOADING", size = 0, progress = 10.0 },
+    { name = "PRG-008", url = "magnet:?xt=urn:btih:0808080808080808080808080808080808080808&dn=PRG-008", folder = "/115/task/inbox", info_hash = "0808080808080808080808080808080808080808", status = "OFFLINE_DOWNLOADING", size = 0, progress = 12.5 },
+    { name = "WAI-009", url = "magnet:?xt=urn:btih:0909090909090909090909090909090909090909&dn=WAI-009", folder = "/115/task/inbox", info_hash = "0909090909090909090909090909090909090909", status = "OFFLINE_FINISHED", size = 0, progress = 100.0 },
+    { name = "OLD-010", url = "magnet:?xt=urn:btih:0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a&dn=OLD-010", folder = "/115/task/inbox", info_hash = "0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a", status = "OFFLINE_FINISHED", size = 4, progress = 100.0 },
+    { name = "Foreign upload", url = "magnet:?xt=urn:btih:ffffffffffffffffffffffffffffffffffffffff&dn=Foreign upload", folder = "/115/task/inbox", info_hash = "ffffffffffffffffffffffffffffffffffffffff", status = "OFFLINE_FINISHED", size = 0, progress = 100.0 },
+]

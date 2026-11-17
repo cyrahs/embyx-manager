@@ -1,0 +1,1172 @@
+{
+  "calls": [],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "api.exchange",
+  "outcome": {
+    "result": {
+      "responses": [
+        {
+          "body": [
+            {
+              "configured": false,
+              "enabled": false,
+              "last_run": {
+                "error_count": 0,
+                "finished_at": "2026-09-03T00:00:01Z",
+                "pipeline": "rss",
+                "run_id": "run-3",
+                "started_at": "2026-09-03T00:00:00Z",
+                "state": "cancelled",
+                "stats": {
+                  "seen": 0
+                },
+                "trigger": "manual"
+              },
+              "next_scheduled_at": null,
+              "pipeline": "rss",
+              "reason": "pipeline is not configured in this scenario",
+              "running_run_id": null
+            },
+            {
+              "configured": false,
+              "enabled": false,
+              "last_run": {
+                "error_count": 1,
+                "finished_at": "2026-09-02T00:01:00Z",
+                "pipeline": "archive",
+                "run_id": "run-2",
+                "started_at": "2026-09-02T00:00:00Z",
+                "state": "failed",
+                "stats": {},
+                "trigger": "manual"
+              },
+              "next_scheduled_at": null,
+              "pipeline": "archive",
+              "reason": "pipeline is not configured in this scenario",
+              "running_run_id": null
+            },
+            {
+              "configured": false,
+              "enabled": true,
+              "last_run": null,
+              "next_scheduled_at": null,
+              "pipeline": "mapping",
+              "reason": "pipeline is not configured in this scenario",
+              "running_run_id": null
+            },
+            {
+              "configured": false,
+              "enabled": false,
+              "last_run": null,
+              "next_scheduled_at": null,
+              "pipeline": "playlists",
+              "reason": "pipeline is not configured in this scenario",
+              "running_run_id": null
+            }
+          ],
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "1051",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unauthorized"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "33",
+            "content-type": "application/json",
+            "www-authenticate": "Bearer"
+          },
+          "status": 401
+        },
+        {
+          "body": {
+            "error": {
+              "code": "pipeline_not_configured"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "44",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unknown_pipeline"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "37",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": {
+            "error": {
+              "code": "pipeline_not_running"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "41",
+            "content-type": "application/json"
+          },
+          "status": 409
+        },
+        {
+          "body": [
+            {
+              "error_count": 0,
+              "finished_at": "2026-09-03T00:00:01Z",
+              "pipeline": "rss",
+              "run_id": "run-3",
+              "started_at": "2026-09-03T00:00:00Z",
+              "state": "cancelled",
+              "stats": {
+                "seen": 0
+              },
+              "trigger": "manual"
+            },
+            {
+              "error_count": 1,
+              "finished_at": "2026-09-02T00:01:00Z",
+              "pipeline": "archive",
+              "run_id": "run-2",
+              "started_at": "2026-09-02T00:00:00Z",
+              "state": "failed",
+              "stats": {},
+              "trigger": "manual"
+            },
+            {
+              "error_count": 0,
+              "finished_at": "2026-09-01T00:00:05.123456Z",
+              "pipeline": "rss",
+              "run_id": "run-1",
+              "started_at": "2026-09-01T00:00:00Z",
+              "state": "completed",
+              "stats": {
+                "new": 1,
+                "seen": 3
+              },
+              "trigger": "scheduled"
+            }
+          ],
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "561",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": [
+            {
+              "error_count": 0,
+              "finished_at": "2026-09-03T00:00:01Z",
+              "pipeline": "rss",
+              "run_id": "run-3",
+              "started_at": "2026-09-03T00:00:00Z",
+              "state": "cancelled",
+              "stats": {
+                "seen": 0
+              },
+              "trigger": "manual"
+            }
+          ],
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "184",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unknown_pipeline"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "37",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "36",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error_count": 0,
+            "errors": [],
+            "finished_at": "2026-09-01T00:00:05.123456Z",
+            "log_tail": [
+              "polled 2 feeds",
+              "queued ABC-001"
+            ],
+            "pipeline": "rss",
+            "run_id": "run-1",
+            "started_at": "2026-09-01T00:00:00Z",
+            "state": "completed",
+            "stats": {
+              "new": 1,
+              "seen": 3
+            },
+            "trigger": "scheduled"
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "259",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unknown_run"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "32",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": {
+            "counts": {
+              "archived": 1,
+              "downloading": 1,
+              "resolve_failed": 1
+            },
+            "items": [
+              {
+                "archived_paths": [
+                  "rank/ABC/ABC-003.mp4"
+                ],
+                "avid": "ABC-003",
+                "created_at": "<set>",
+                "next_action_at": null,
+                "note": null,
+                "release_date": null,
+                "replacing": [],
+                "source": "manual",
+                "state": "archived",
+                "updated_at": "<set>"
+              },
+              {
+                "archived_paths": [],
+                "avid": "ABC-002",
+                "created_at": "<set>",
+                "next_action_at": "2026-09-03T00:00:00Z",
+                "note": "no magnet found",
+                "release_date": null,
+                "replacing": [],
+                "source": "rss_actor",
+                "state": "resolve_failed",
+                "updated_at": "<set>"
+              },
+              {
+                "archived_paths": [],
+                "avid": "ABC-001",
+                "created_at": "<set>",
+                "next_action_at": null,
+                "note": null,
+                "release_date": "2026-08-30",
+                "replacing": [],
+                "source": "rss_rank",
+                "state": "downloading",
+                "updated_at": "<set>"
+              }
+            ]
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "796",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "counts": {
+              "archived": 1,
+              "downloading": 1,
+              "resolve_failed": 1
+            },
+            "items": [
+              {
+                "archived_paths": [],
+                "avid": "ABC-001",
+                "created_at": "<set>",
+                "next_action_at": null,
+                "note": null,
+                "release_date": "2026-08-30",
+                "replacing": [],
+                "source": "rss_rank",
+                "state": "downloading",
+                "updated_at": "<set>"
+              }
+            ]
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "300",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "counts": {
+              "archived": 1,
+              "downloading": 1,
+              "resolve_failed": 1
+            },
+            "items": [
+              {
+                "archived_paths": [],
+                "avid": "ABC-002",
+                "created_at": "<set>",
+                "next_action_at": "2026-09-03T00:00:00Z",
+                "note": "no magnet found",
+                "release_date": null,
+                "replacing": [],
+                "source": "rss_actor",
+                "state": "resolve_failed",
+                "updated_at": "<set>"
+              }
+            ]
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "327",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unknown_state"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "34",
+            "content-type": "application/json"
+          },
+          "status": 400
+        },
+        {
+          "body": {
+            "archived_paths": [],
+            "attempts": [
+              {
+                "attempt_no": 1,
+                "error": "stalled",
+                "info_hash": "0101010101010101010101010101010101010101",
+                "magnet_source": "sukebei",
+                "progress": 12.5,
+                "state": "stalled",
+                "submitted_at": "2026-09-01T00:00:00Z",
+                "updated_at": "<set>"
+              },
+              {
+                "attempt_no": 2,
+                "error": null,
+                "info_hash": "1111111111111111111111111111111111111111",
+                "magnet_source": "javbus",
+                "progress": 40.0,
+                "state": "downloading",
+                "submitted_at": "2026-09-01T07:00:00Z",
+                "updated_at": "<set>"
+              }
+            ],
+            "avid": "ABC-001",
+            "created_at": "<set>",
+            "next_action_at": null,
+            "note": null,
+            "release_date": "2026-08-30",
+            "replacing": [],
+            "source": "rss_rank",
+            "state": "downloading",
+            "updated_at": "<set>"
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "695",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unknown_acquisition"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "40",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": {
+            "archived_paths": [],
+            "avid": "ABC-002",
+            "created_at": "<set>",
+            "next_action_at": null,
+            "note": "ignored by an operator",
+            "release_date": null,
+            "replacing": [],
+            "source": "rss_actor",
+            "state": "ignored",
+            "updated_at": "<set>"
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "245",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "not_parked"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "31",
+            "content-type": "application/json"
+          },
+          "status": 409
+        },
+        {
+          "body": {
+            "error": {
+              "code": "already_archived"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "37",
+            "content-type": "application/json"
+          },
+          "status": 409
+        },
+        {
+          "body": {
+            "error": {
+              "code": "clouddrive_not_configured"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "46",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "clouddrive_not_configured"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "46",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unusable_magnet"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "36",
+            "content-type": "application/json"
+          },
+          "status": 400
+        },
+        {
+          "body": {
+            "last_error": null,
+            "last_polled_at": null,
+            "last_stats": {},
+            "reason": "pipeline is not configured in this scenario",
+            "running": false
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "128",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "detail": "Not Found"
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "22",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": {
+            "categories": [
+              "rank",
+              "actor"
+            ],
+            "items": [
+              {
+                "aliases": [
+                  "Alias One"
+                ],
+                "category": "actor",
+                "created_at": "<set>",
+                "cursor_size": 0,
+                "enabled": false,
+                "feed_url": "https://www.avbase.net/talents/4242/feed",
+                "id": 2,
+                "kind": "avbase_talent",
+                "last_error": "feed fetch failed: 503",
+                "last_polled_at": null,
+                "name": "演员",
+                "seed_pending": true,
+                "talent_id": 4242,
+                "updated_at": "<set>",
+                "url": null
+              },
+              {
+                "aliases": [],
+                "category": "rank",
+                "created_at": "<set>",
+                "cursor_size": 3,
+                "enabled": true,
+                "feed_url": "https://feeds.example/rank.xml",
+                "id": 1,
+                "kind": "rss",
+                "last_error": null,
+                "last_polled_at": "2026-09-02T01:02:03.250000Z",
+                "name": "Rank feed",
+                "seed_pending": false,
+                "talent_id": null,
+                "updated_at": "<set>",
+                "url": "https://feeds.example/rank.xml"
+              }
+            ]
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "759",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "aliases": [],
+            "category": "rank",
+            "created_at": "<set>",
+            "cursor_size": 0,
+            "enabled": true,
+            "feed_url": "https://feeds.example/new.xml",
+            "id": 3,
+            "kind": "rss",
+            "last_error": null,
+            "last_polled_at": null,
+            "name": "New",
+            "seed_pending": false,
+            "talent_id": null,
+            "updated_at": "<set>",
+            "url": "https://feeds.example/new.xml"
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "341",
+            "content-type": "application/json"
+          },
+          "status": 201
+        },
+        {
+          "body": {
+            "error": {
+              "code": "subscription_exists"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "40",
+            "content-type": "application/json"
+          },
+          "status": 409
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unknown_category"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "37",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "36",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "36",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unauthorized"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "33",
+            "content-type": "application/json",
+            "www-authenticate": "Bearer"
+          },
+          "status": 401
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "36",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unknown_subscription"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "41",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "36",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": "",
+          "headers": {
+            "cache-control": "no-store"
+          },
+          "status": 204
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unknown_subscription"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "41",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": {
+            "categories": [
+              "rank",
+              "actor"
+            ],
+            "items": [
+              {
+                "aliases": [],
+                "category": "rank",
+                "created_at": "<set>",
+                "cursor_size": 0,
+                "enabled": true,
+                "feed_url": "https://feeds.example/new.xml",
+                "id": 3,
+                "kind": "rss",
+                "last_error": null,
+                "last_polled_at": null,
+                "name": "New",
+                "seed_pending": false,
+                "talent_id": null,
+                "updated_at": "<set>",
+                "url": "https://feeds.example/new.xml"
+              },
+              {
+                "aliases": [],
+                "category": "rank",
+                "created_at": "<set>",
+                "cursor_size": 3,
+                "enabled": true,
+                "feed_url": "https://feeds.example/rank.xml",
+                "id": 1,
+                "kind": "rss",
+                "last_error": null,
+                "last_polled_at": "2026-09-02T01:02:03.250000Z",
+                "name": "Rank feed",
+                "seed_pending": false,
+                "talent_id": null,
+                "updated_at": "<set>",
+                "url": "https://feeds.example/rank.xml"
+              }
+            ]
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "744",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "fill_reason": "filling is not available",
+            "fill_task_dir": null,
+            "fills": [],
+            "items": [
+              {
+                "emby_playlist_id": "emby-77",
+                "enabled": true,
+                "key": "rank-1",
+                "kind": 1,
+                "last_error": null,
+                "last_synced_at": "2026-09-04T00:00:00Z",
+                "missing": 3,
+                "name": "Monthly",
+                "note": "月榜",
+                "present": 1,
+                "total": 4
+              },
+              {
+                "emby_playlist_id": null,
+                "enabled": false,
+                "key": "rank-2",
+                "kind": 2,
+                "last_error": "sync failed",
+                "last_synced_at": null,
+                "missing": 0,
+                "name": "Yearly",
+                "note": "年榜",
+                "present": 0,
+                "total": 0
+              }
+            ],
+            "source": null
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "474",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "items": [
+              {
+                "avid": "ABC-001",
+                "rank": 1,
+                "title": "One",
+                "tracked": "downloading"
+              },
+              {
+                "avid": "ABC-002",
+                "rank": 2,
+                "title": "Two",
+                "tracked": "ignored"
+              },
+              {
+                "avid": "ABC-004",
+                "rank": 3,
+                "title": "Four",
+                "tracked": null
+              }
+            ],
+            "key": "rank-1",
+            "name": "Monthly"
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "229",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unknown_playlist"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "37",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": {
+            "emby_playlist_id": "emby-77",
+            "enabled": false,
+            "key": "rank-1",
+            "kind": 1,
+            "last_error": null,
+            "last_synced_at": "2026-09-04T00:00:00Z",
+            "missing": 3,
+            "name": "Monthly",
+            "note": "月榜",
+            "present": 1,
+            "total": 4
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "195",
+            "content-type": "application/json"
+          },
+          "status": 200
+        },
+        {
+          "body": {
+            "error": {
+              "code": "unknown_playlist"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "37",
+            "content-type": "application/json"
+          },
+          "status": 404
+        },
+        {
+          "body": {
+            "error": {
+              "code": "invalid_request"
+            }
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "36",
+            "content-type": "application/json"
+          },
+          "status": 422
+        },
+        {
+          "body": {
+            "detail": "Not Found"
+          },
+          "headers": {
+            "cache-control": "no-store",
+            "content-length": "22",
+            "content-type": "application/json"
+          },
+          "status": 404
+        }
+      ],
+      "transcode_responses": []
+    }
+  },
+  "rows": {
+    "archive_acquisitions": [
+      {
+        "archived_paths_json": "[]",
+        "avid": "ABC-001",
+        "created_at": "2026-09-01T00:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": "2026-08-30",
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss_rank",
+        "state": "downloading",
+        "task_dir_path": "/115/rank",
+        "updated_at": "<volatile:1>"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "ABC-002",
+        "created_at": "2026-09-01T00:00:00+00:00",
+        "next_action_at": null,
+        "note": "ignored by an operator",
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss_actor",
+        "state": "ignored",
+        "task_dir_path": "/115/actor",
+        "updated_at": "<volatile:3>"
+      },
+      {
+        "archived_paths_json": "[\"rank/ABC/ABC-003.mp4\"]",
+        "avid": "ABC-003",
+        "created_at": "2026-09-01T00:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "manual",
+        "state": "archived",
+        "task_dir_path": "/115/rank",
+        "updated_at": "<volatile:2>"
+      }
+    ],
+    "archive_magnet_attempts": [
+      {
+        "attempt_no": 1,
+        "avid": "ABC-001",
+        "error": "stalled",
+        "info_hash": "0101010101010101010101010101010101010101",
+        "magnet": "magnet:?xt=urn:btih:0101010101010101010101010101010101010101&dn=ABC-001",
+        "magnet_source": "sukebei",
+        "progress": 12.5,
+        "size_hint": null,
+        "state": "stalled",
+        "submitted_at": "2026-09-01T00:00:00+00:00",
+        "updated_at": "<volatile:1>"
+      },
+      {
+        "attempt_no": 2,
+        "avid": "ABC-001",
+        "error": null,
+        "info_hash": "1111111111111111111111111111111111111111",
+        "magnet": "magnet:?xt=urn:btih:1111111111111111111111111111111111111111&dn=ABC-001",
+        "magnet_source": "javbus",
+        "progress": 40,
+        "size_hint": null,
+        "state": "downloading",
+        "submitted_at": "2026-09-01T07:00:00+00:00",
+        "updated_at": "<volatile:2>"
+      },
+      {
+        "attempt_no": 3,
+        "avid": "ABC-001",
+        "error": null,
+        "info_hash": "2222222222222222222222222222222222222222",
+        "magnet": "magnet:?xt=urn:btih:2222222222222222222222222222222222222222",
+        "magnet_source": "manual",
+        "progress": null,
+        "size_hint": null,
+        "state": "pending",
+        "submitted_at": null,
+        "updated_at": "<volatile:4>"
+      },
+      {
+        "attempt_no": 1,
+        "avid": "ABC-003",
+        "error": null,
+        "info_hash": "0303030303030303030303030303030303030303",
+        "magnet": "magnet:?xt=urn:btih:0303030303030303030303030303030303030303&dn=ABC-003",
+        "magnet_source": "manual",
+        "progress": 100,
+        "size_hint": null,
+        "state": "archived",
+        "submitted_at": "2026-09-01T00:00:00+00:00",
+        "updated_at": "<volatile:3>"
+      }
+    ],
+    "feed_subscriptions": [
+      {
+        "aliases_json": "[]",
+        "category": "rank",
+        "created_at": "<volatile:1>",
+        "cursor_json": "[\"a\", \"b\", \"c\"]",
+        "enabled": true,
+        "id": 1,
+        "kind": "rss",
+        "last_error": null,
+        "last_polled_at": "2026-09-02T01:02:03.25+00:00",
+        "name": "Rank feed",
+        "seed_pending": false,
+        "talent_id": null,
+        "updated_at": "<volatile:1>",
+        "url": "https://feeds.example/rank.xml"
+      },
+      {
+        "aliases_json": "[]",
+        "category": "rank",
+        "created_at": "<volatile:2>",
+        "cursor_json": "[]",
+        "enabled": true,
+        "id": 3,
+        "kind": "rss",
+        "last_error": null,
+        "last_polled_at": null,
+        "name": "New",
+        "seed_pending": false,
+        "talent_id": null,
+        "updated_at": "<volatile:2>",
+        "url": "https://feeds.example/new.xml"
+      }
+    ],
+    "pipeline_runs": [
+      {
+        "errors_json": "[]",
+        "finished_at": "2026-09-03T00:00:01+00:00",
+        "log_json": "[\"stopped\"]",
+        "pipeline": "rss",
+        "run_id": "run-3",
+        "started_at": "2026-09-03T00:00:00+00:00",
+        "state": "cancelled",
+        "stats_json": "{\"seen\": 0}",
+        "trigger": "manual"
+      },
+      {
+        "errors_json": "[]",
+        "finished_at": "2026-09-01T00:00:05.123456+00:00",
+        "log_json": "[\"polled 2 feeds\", \"queued ABC-001\"]",
+        "pipeline": "rss",
+        "run_id": "run-1",
+        "started_at": "2026-09-01T00:00:00+00:00",
+        "state": "completed",
+        "stats_json": "{\"seen\": 3, \"new\": 1}",
+        "trigger": "scheduled"
+      },
+      {
+        "errors_json": "[\"mount is not readable\"]",
+        "finished_at": "2026-09-02T00:01:00+00:00",
+        "log_json": "[]",
+        "pipeline": "archive",
+        "run_id": "run-2",
+        "started_at": "2026-09-02T00:00:00+00:00",
+        "state": "failed",
+        "stats_json": "{}",
+        "trigger": "manual"
+      }
+    ],
+    "playlists": [
+      {
+        "created_at": "2026-09-01T00:00:00+00:00",
+        "emby_playlist_id": "emby-77",
+        "enabled": false,
+        "entries_json": "[[1, \"ABC-001\", \"One\"], [2, \"ABC-002\", \"Two\"], [3, \"ABC-004\", \"Four\"], [4, \"ABC-003\", \"Three\"]]",
+        "key": "rank-1",
+        "kind": 1,
+        "last_error": null,
+        "last_synced_at": "2026-09-04T00:00:00+00:00",
+        "missing_json": "[\"ABC-001\", \"ABC-002\", \"ABC-004\"]",
+        "name": "Monthly",
+        "note": "月榜",
+        "present_json": "[\"ABC-003\"]",
+        "updated_at": "<volatile:2>"
+      },
+      {
+        "created_at": "2026-09-01T00:00:00+00:00",
+        "emby_playlist_id": null,
+        "enabled": false,
+        "entries_json": "[]",
+        "key": "rank-2",
+        "kind": 2,
+        "last_error": "sync failed",
+        "last_synced_at": null,
+        "missing_json": "[]",
+        "name": "Yearly",
+        "note": "年榜",
+        "present_json": "[]",
+        "updated_at": "<volatile:1>"
+      }
+    ]
+  },
+  "scenario": "api/monitor",
+  "tree": {}
+}

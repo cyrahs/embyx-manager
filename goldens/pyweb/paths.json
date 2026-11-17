@@ -1,0 +1,150 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "pyweb",
+  "cases": [
+    {
+      "parts": [
+        {
+          "path": "/img/x/1_p0.jpg",
+          "name": "1_p0.jpg",
+          "suffix": ".jpg",
+          "stem": "1_p0"
+        },
+        {
+          "path": "/no-extension",
+          "name": "no-extension",
+          "suffix": "",
+          "stem": "no-extension"
+        },
+        {
+          "path": "a/b.tar.gz",
+          "name": "b.tar.gz",
+          "suffix": ".gz",
+          "stem": "b.tar"
+        },
+        {
+          "path": ".hidden",
+          "name": ".hidden",
+          "suffix": "",
+          "stem": ".hidden"
+        },
+        {
+          "path": "trailing.",
+          "name": "trailing.",
+          "suffix": "",
+          "stem": "trailing."
+        },
+        {
+          "path": "dir/",
+          "name": "dir",
+          "suffix": "",
+          "stem": "dir"
+        },
+        {
+          "path": "dir/.",
+          "name": "dir",
+          "suffix": "",
+          "stem": "dir"
+        },
+        {
+          "path": "/",
+          "name": "",
+          "suffix": "",
+          "stem": ""
+        },
+        {
+          "path": "",
+          "name": "",
+          "suffix": "",
+          "stem": ""
+        },
+        {
+          "path": "A/B.png",
+          "name": "B.png",
+          "suffix": ".png",
+          "stem": "B"
+        },
+        {
+          "path": "Disc_Good_Night.png",
+          "name": "Disc_Good_Night.png",
+          "suffix": ".png",
+          "stem": "Disc_Good_Night"
+        },
+        {
+          "path": "..",
+          "name": "..",
+          "suffix": "",
+          "stem": ".."
+        },
+        {
+          "path": "a/..",
+          "name": "..",
+          "suffix": "",
+          "stem": ".."
+        },
+        {
+          "path": "x.",
+          "name": "x.",
+          "suffix": "",
+          "stem": "x."
+        },
+        {
+          "path": "x..png",
+          "name": "x..png",
+          "suffix": ".png",
+          "stem": "x."
+        },
+        {
+          "path": "中文.PNG",
+          "name": "中文.PNG",
+          "suffix": ".PNG",
+          "stem": "中文"
+        }
+      ],
+      "joins": [
+        {
+          "base": "collection/pixiv",
+          "part": "artist",
+          "joined": "collection/pixiv/artist"
+        },
+        {
+          "base": "./collection/stellasora",
+          "part": "disc",
+          "joined": "collection/stellasora/disc"
+        },
+        {
+          "base": "/data",
+          "part": "",
+          "joined": "/data"
+        },
+        {
+          "base": "/data",
+          "part": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "base": ".",
+          "part": "x",
+          "joined": "x"
+        },
+        {
+          "base": "a/",
+          "part": "b//c/",
+          "joined": "a/b/c"
+        },
+        {
+          "base": "collection",
+          "part": "a/./b",
+          "joined": "collection/a/b"
+        },
+        {
+          "base": "//net",
+          "part": "x",
+          "joined": "//net/x"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,149 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "clients",
+  "cases": [
+    {
+      "code": "SSNI-497",
+      "excluded": false
+    },
+    {
+      "code": "FC2-4025269",
+      "excluded": true
+    },
+    {
+      "code": "fc2-1",
+      "excluded": false
+    },
+    {
+      "code": "010115_001",
+      "excluded": true
+    },
+    {
+      "code": "092415-159",
+      "excluded": true
+    },
+    {
+      "code": "092415-159\n",
+      "excluded": true
+    },
+    {
+      "code": "0924151-59",
+      "excluded": false
+    },
+    {
+      "code": "١٢٣٤٥٦-١٢٣",
+      "excluded": true
+    },
+    {
+      "code": "HEYZO-1031",
+      "excluded": true
+    },
+    {
+      "code": "heyzo-1031",
+      "excluded": false
+    },
+    {
+      "code": "LAFBD-041",
+      "excluded": true
+    },
+    {
+      "code": "SKY-247",
+      "excluded": true
+    },
+    {
+      "code": "SKYHD-084",
+      "excluded": true
+    },
+    {
+      "code": "BT-123",
+      "excluded": true
+    },
+    {
+      "code": "BTH-123",
+      "excluded": false
+    },
+    {
+      "code": "CARIB",
+      "excluded": true
+    },
+    {
+      "code": "1PONDO-1-2",
+      "excluded": true
+    },
+    {
+      "code": "",
+      "excluded": false
+    },
+    {
+      "code": "-1",
+      "excluded": false
+    },
+    {
+      "kind": 0,
+      "playlist": false,
+      "key": "k0"
+    },
+    {
+      "kind": 2,
+      "playlist": false,
+      "key": "k2"
+    },
+    {
+      "kind": 3,
+      "playlist": false,
+      "key": "k3"
+    },
+    {
+      "kind": 4,
+      "playlist": true,
+      "key": "k4:n"
+    },
+    {
+      "kind": 5,
+      "playlist": true,
+      "key": "k5"
+    },
+    {
+      "kind": 6,
+      "playlist": false,
+      "key": "k6"
+    },
+    {
+      "kind": 7,
+      "playlist": true,
+      "key": "k7"
+    },
+    {
+      "kind": 8,
+      "playlist": false,
+      "key": "k8"
+    },
+    {
+      "kind": 2007,
+      "playlist": false,
+      "key": "k2007"
+    },
+    {
+      "kind": 2008,
+      "playlist": true,
+      "key": "k2008"
+    },
+    {
+      "kind": 2024,
+      "playlist": true,
+      "key": "k2024"
+    },
+    {
+      "kind": 2100,
+      "playlist": true,
+      "key": "k2100"
+    },
+    {
+      "kind": 2101,
+      "playlist": false,
+      "key": "k2101"
+    }
+  ]
+}

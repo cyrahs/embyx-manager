@@ -1,0 +1,268 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "mapping",
+  "cases": [
+    {
+      "names": [
+        {
+          "name": "4142432d3132332e7374726d",
+          "is_strm": true,
+          "stem": "4142432d313233",
+          "part_stem": null
+        },
+        {
+          "name": "4142432d3132332e5354524d",
+          "is_strm": true,
+          "stem": "4142432d313233",
+          "part_stem": null
+        },
+        {
+          "name": "4142432d3132332e5374726d",
+          "is_strm": true,
+          "stem": "4142432d313233",
+          "part_stem": null
+        },
+        {
+          "name": "2e7374726d",
+          "is_strm": false,
+          "stem": "2e7374726d",
+          "part_stem": null
+        },
+        {
+          "name": "612e7374726d2e",
+          "is_strm": false,
+          "stem": "612e7374726d2e",
+          "part_stem": null
+        },
+        {
+          "name": "4142432d3132332e6e666f",
+          "is_strm": false,
+          "stem": "4142432d313233",
+          "part_stem": null
+        },
+        {
+          "name": "4142432d3132332d6364312e6e666f",
+          "is_strm": false,
+          "stem": "4142432d3132332d636431",
+          "part_stem": "4142432d3132332d636431"
+        },
+        {
+          "name": "4142432d3132332d4344322d706f737465722e6a7067",
+          "is_strm": false,
+          "stem": "4142432d3132332d4344322d706f73746572",
+          "part_stem": "4142432d3132332d434432"
+        },
+        {
+          "name": "4142432d3132332d636431302d6c616e6473636170652e6a7067",
+          "is_strm": false,
+          "stem": "4142432d3132332d636431302d6c616e647363617065",
+          "part_stem": "4142432d3132332d63643130"
+        },
+        {
+          "name": "4142432d3132332d6364312d344b2e6e666f",
+          "is_strm": false,
+          "stem": "4142432d3132332d6364312d344b",
+          "part_stem": "4142432d3132332d636431"
+        },
+        {
+          "name": "4142432d3132332d63642e6e666f",
+          "is_strm": false,
+          "stem": "4142432d3132332d6364",
+          "part_stem": null
+        },
+        {
+          "name": "2d6364312e6e666f",
+          "is_strm": false,
+          "stem": "2d636431",
+          "part_stem": null
+        },
+        {
+          "name": "782d6364312e6e666f",
+          "is_strm": false,
+          "stem": "782d636431",
+          "part_stem": "782d636431"
+        },
+        {
+          "name": "4142432d3132332d636431",
+          "is_strm": false,
+          "stem": "4142432d3132332d636431",
+          "part_stem": null
+        },
+        {
+          "name": "4142432d3132332d6364312d6364322e6e666f",
+          "is_strm": false,
+          "stem": "4142432d3132332d6364312d636432",
+          "part_stem": "4142432d3132332d6364312d636432"
+        },
+        {
+          "name": "4142432d3132332d636431782e6e666f",
+          "is_strm": false,
+          "stem": "4142432d3132332d63643178",
+          "part_stem": null
+        },
+        {
+          "name": "6c696e650a2d6364312e6e666f",
+          "is_strm": false,
+          "stem": "6c696e650a2d636431",
+          "part_stem": null
+        },
+        {
+          "name": "4142432d3132332d6364d9a32e6e666f",
+          "is_strm": false,
+          "stem": "4142432d3132332d6364d9a3",
+          "part_stem": "4142432d3132332d6364d9a3"
+        },
+        {
+          "name": "414243ff2d6364312e6e666f",
+          "is_strm": false,
+          "stem": "414243ff2d636431",
+          "part_stem": "414243ff2d636431"
+        },
+        {
+          "name": "414243c32d6364312e6e666f",
+          "is_strm": false,
+          "stem": "414243c32d636431",
+          "part_stem": "414243c32d636431"
+        },
+        {
+          "name": "c3a92d6364322d706f737465722e6a7067",
+          "is_strm": false,
+          "stem": "c3a92d6364322d706f73746572",
+          "part_stem": "c3a92d636432"
+        },
+        {
+          "name": "4142432d313233ff2e7374726d",
+          "is_strm": true,
+          "stem": "4142432d313233ff",
+          "part_stem": null
+        },
+        {
+          "name": "4142432d3132332e737472ff",
+          "is_strm": false,
+          "stem": "4142432d313233",
+          "part_stem": null
+        },
+        {
+          "name": "4142432d313233",
+          "is_strm": false,
+          "stem": "4142432d313233",
+          "part_stem": null
+        }
+      ],
+      "owners": [
+        {
+          "name": "4142432d3132332d6364312d706f737465722e6a7067",
+          "stems": [
+            "4142432d313233",
+            "4142432d3132332d636431"
+          ],
+          "owner": "4142432d3132332d636431"
+        },
+        {
+          "name": "4142432d3132332e6e666f",
+          "stems": [
+            "4142432d313233",
+            "4142432d3132332d636431"
+          ],
+          "owner": "4142432d313233"
+        },
+        {
+          "name": "4142432d313233342e6e666f",
+          "stems": [
+            "4142432d313233"
+          ],
+          "owner": null
+        },
+        {
+          "name": "4142432d3132335f782e6e666f",
+          "stems": [
+            "4142432d313233"
+          ],
+          "owner": null
+        },
+        {
+          "name": "4142432d3132332e6e666f",
+          "stems": [
+            "4142432d3132",
+            "4142432d313233",
+            "414243"
+          ],
+          "owner": "4142432d313233"
+        },
+        {
+          "name": "414243ff2e6e666f",
+          "stems": [
+            "414243ff",
+            "414243"
+          ],
+          "owner": "414243ff"
+        },
+        {
+          "name": "414243c32e6e666f",
+          "stems": [
+            "414243c3",
+            "414243c3a9"
+          ],
+          "owner": "414243c3"
+        },
+        {
+          "name": "706f737465722e6a7067",
+          "stems": [
+            "4142432d313233"
+          ],
+          "owner": null
+        }
+      ],
+      "orders": [
+        {
+          "paths": [
+            "2f6d2f622f782e7374726d",
+            "2f6d2f612f792e7374726d",
+            "2f6d2f612e7374726d",
+            "2f6d2f612f62",
+            "2f6d2f6120622f63",
+            "2f6d2f412f7a2e7374726d"
+          ],
+          "sorted": [
+            "2f6d2f412f7a2e7374726d",
+            "2f6d2f612f62",
+            "2f6d2f612f792e7374726d",
+            "2f6d2f6120622f63",
+            "2f6d2f612e7374726d",
+            "2f6d2f622f782e7374726d"
+          ]
+        },
+        {
+          "paths": [
+            "2f6d2fff",
+            "2f6d2fee8080",
+            "2f6d2f7a",
+            "2f6d2fc3a9"
+          ],
+          "sorted": [
+            "2f6d2f7a",
+            "2f6d2fc3a9",
+            "2f6d2fff",
+            "2f6d2fee8080"
+          ]
+        },
+        {
+          "paths": [
+            "6d2f61",
+            "6d",
+            "6d2f612f62",
+            "6e"
+          ],
+          "sorted": [
+            "6d",
+            "6d2f61",
+            "6d2f612f62",
+            "6e"
+          ]
+        }
+      ]
+    }
+  ]
+}

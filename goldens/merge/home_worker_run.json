@@ -1,0 +1,1255 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "home_worker",
+  "cases": [
+    {
+      "kind": "status",
+      "title": "two parts encoding, a queue",
+      "parts": [
+        {
+          "index": 0,
+          "name": "SQTEVR-009-cd1.mp4",
+          "size": 1000000000,
+          "duration": 3600.0,
+          "done": false,
+          "next_chunk": 0,
+          "resume_at": 0.0
+        },
+        {
+          "index": 1,
+          "name": "SQTEVR-009-cd2.mp4",
+          "size": 1000000000,
+          "duration": 1800.5,
+          "done": false,
+          "next_chunk": 0,
+          "resume_at": 0.0
+        },
+        {
+          "index": 2,
+          "name": "SQTEVR-009-cd3.mp4",
+          "size": 1000000000,
+          "duration": 0.0,
+          "done": false,
+          "next_chunk": 0,
+          "resume_at": 0.0
+        }
+      ],
+      "states": [
+        {
+          "fps": 29.97,
+          "position": 1234.5,
+          "resume_at": 1200.0
+        },
+        {
+          "fps": 0.5,
+          "position": 0.0,
+          "resume_at": 0.0
+        },
+        {
+          "finished": true,
+          "resume_at": 0.0
+        }
+      ],
+      "active": [
+        0,
+        1,
+        2
+      ],
+      "queue": [
+        524288000,
+        1610612736
+      ],
+      "uploads": [
+        [
+          999.0,
+          2000000
+        ],
+        [
+          1000.0,
+          1000000
+        ]
+      ],
+      "paused": false,
+      "wind_down": false,
+      "lines": [
+        {
+          "status": true,
+          "line": "[SQTEVR-009] cd1 34% 30fps | cd2 0% 0fps | 完成 1/3 盘 | 上传 2.4 Mbps，队列 2 块 1.99 GB | 总进度 22.2%"
+        }
+      ],
+      "reports": {
+        "encoding": {
+          "name": "pc",
+          "version": "1",
+          "task_id": 7,
+          "state": "encoding",
+          "parts": [
+            {
+              "index": 0,
+              "fps": 29.97,
+              "position": 1234.5
+            },
+            {
+              "index": 1,
+              "fps": 0.5,
+              "position": 0.0
+            },
+            {
+              "index": 2,
+              "fps": 0.0,
+              "position": 0.0
+            }
+          ],
+          "upload_bps": 2400000.0,
+          "queue_chunks": 2,
+          "queue_bytes": 2134900736
+        },
+        "paused": {
+          "name": "pc",
+          "version": "1",
+          "task_id": 7,
+          "state": "paused",
+          "parts": [
+            {
+              "index": 0,
+              "fps": 29.97,
+              "position": 1234.5
+            },
+            {
+              "index": 1,
+              "fps": 0.5,
+              "position": 0.0
+            },
+            {
+              "index": 2,
+              "fps": 0.0,
+              "position": 0.0
+            }
+          ],
+          "upload_bps": 2400000.0,
+          "queue_chunks": 2,
+          "queue_bytes": 2134900736
+        },
+        "stopping": {
+          "name": "pc",
+          "version": "1",
+          "task_id": 7,
+          "state": "stopping",
+          "parts": [
+            {
+              "index": 0,
+              "fps": 29.97,
+              "position": 1234.5
+            },
+            {
+              "index": 1,
+              "fps": 0.5,
+              "position": 0.0
+            },
+            {
+              "index": 2,
+              "fps": 0.0,
+              "position": 0.0
+            }
+          ],
+          "upload_bps": 2400000.0,
+          "queue_chunks": 2,
+          "queue_bytes": 2134900736
+        }
+      }
+    },
+    {
+      "kind": "status",
+      "title": "paused, nothing encoding",
+      "parts": [
+        {
+          "index": 0,
+          "name": "SQTEVR-009-cd1.mp4",
+          "size": 1000000000,
+          "duration": 10.0,
+          "done": false,
+          "next_chunk": 0,
+          "resume_at": 0.0
+        },
+        {
+          "index": 1,
+          "name": "SQTEVR-009-cd2.mp4",
+          "size": 1000000000,
+          "duration": 20.0,
+          "done": false,
+          "next_chunk": 0,
+          "resume_at": 0.0
+        }
+      ],
+      "states": [
+        {
+          "resume_at": 4.0,
+          "finished": true
+        },
+        {
+          "resume_at": 25.0
+        }
+      ],
+      "active": [],
+      "queue": [],
+      "uploads": [
+        [
+          985.0,
+          5
+        ]
+      ],
+      "paused": true,
+      "wind_down": true,
+      "lines": [
+        {
+          "status": true,
+          "line": "[SQTEVR-009] 已暂停 | 没有在编码 | 完成 1/2 盘 | 上传 0.0 Mbps，队列 0 块 0.00 GB | 总进度 80.0%"
+        }
+      ],
+      "reports": {
+        "encoding": {
+          "name": "pc",
+          "version": "1",
+          "task_id": 7,
+          "state": "encoding",
+          "parts": [],
+          "upload_bps": 0.0,
+          "queue_chunks": 0,
+          "queue_bytes": 0
+        },
+        "paused": {
+          "name": "pc",
+          "version": "1",
+          "task_id": 7,
+          "state": "paused",
+          "parts": [],
+          "upload_bps": 0.0,
+          "queue_chunks": 0,
+          "queue_bytes": 0
+        },
+        "stopping": {
+          "name": "pc",
+          "version": "1",
+          "task_id": 7,
+          "state": "stopping",
+          "parts": [],
+          "upload_bps": 0.0,
+          "queue_chunks": 0,
+          "queue_bytes": 0
+        }
+      }
+    },
+    {
+      "kind": "status",
+      "title": "winding down",
+      "parts": [
+        {
+          "index": 0,
+          "name": "SQTEVR-009-cd1.mp4",
+          "size": 1000000000,
+          "duration": 100.0,
+          "done": false,
+          "next_chunk": 0,
+          "resume_at": 0.0
+        }
+      ],
+      "states": [
+        {
+          "fps": 120.4,
+          "position": 99.995,
+          "resume_at": 99.5
+        }
+      ],
+      "active": [
+        0
+      ],
+      "queue": [
+        1
+      ],
+      "uploads": [],
+      "paused": false,
+      "wind_down": true,
+      "lines": [
+        {
+          "status": true,
+          "line": "[SQTEVR-009] 收尾中（再按 Ctrl+C 立即退出）| cd1 100% 120fps | 完成 0/1 盘 | 上传 0.0 Mbps，队列 1 块 0.00 GB | 总进度 99.5%"
+        }
+      ],
+      "reports": {
+        "encoding": {
+          "name": "pc",
+          "version": "1",
+          "task_id": 7,
+          "state": "encoding",
+          "parts": [
+            {
+              "index": 0,
+              "fps": 120.4,
+              "position": 99.995
+            }
+          ],
+          "upload_bps": 0.0,
+          "queue_chunks": 1,
+          "queue_bytes": 1
+        },
+        "paused": {
+          "name": "pc",
+          "version": "1",
+          "task_id": 7,
+          "state": "paused",
+          "parts": [
+            {
+              "index": 0,
+              "fps": 120.4,
+              "position": 99.995
+            }
+          ],
+          "upload_bps": 0.0,
+          "queue_chunks": 1,
+          "queue_bytes": 1
+        },
+        "stopping": {
+          "name": "pc",
+          "version": "1",
+          "task_id": 7,
+          "state": "stopping",
+          "parts": [
+            {
+              "index": 0,
+              "fps": 120.4,
+              "position": 99.995
+            }
+          ],
+          "upload_bps": 0.0,
+          "queue_chunks": 1,
+          "queue_bytes": 1
+        }
+      }
+    },
+    {
+      "kind": "status",
+      "title": "every part without a duration",
+      "parts": [
+        {
+          "index": 0,
+          "name": "SQTEVR-009-cd1.mp4",
+          "size": 1000000000,
+          "duration": 0.0,
+          "done": false,
+          "next_chunk": 0,
+          "resume_at": 0.0
+        },
+        {
+          "index": 1,
+          "name": "SQTEVR-009-cd2.mp4",
+          "size": 1000000000,
+          "duration": 0.0,
+          "done": false,
+          "next_chunk": 0,
+          "resume_at": 0.0
+        }
+      ],
+      "states": [
+        {
+          "fps": 1.5,
+          "position": 3.0
+        },
+        {}
+      ],
+      "active": [
+        0
+      ],
+      "queue": [],
+      "uploads": [],
+      "paused": false,
+      "wind_down": false,
+      "lines": [
+        {
+          "status": true,
+          "line": "[SQTEVR-009] 没有在编码 | 完成 0/2 盘 | 上传 0.0 Mbps，队列 0 块 0.00 GB | 总进度 0.0%"
+        }
+      ],
+      "reports": {
+        "encoding": {
+          "name": "pc",
+          "version": "1",
+          "task_id": 7,
+          "state": "encoding",
+          "parts": [
+            {
+              "index": 0,
+              "fps": 1.5,
+              "position": 3.0
+            }
+          ],
+          "upload_bps": 0.0,
+          "queue_chunks": 0,
+          "queue_bytes": 0
+        },
+        "paused": {
+          "name": "pc",
+          "version": "1",
+          "task_id": 7,
+          "state": "paused",
+          "parts": [
+            {
+              "index": 0,
+              "fps": 1.5,
+              "position": 3.0
+            }
+          ],
+          "upload_bps": 0.0,
+          "queue_chunks": 0,
+          "queue_bytes": 0
+        },
+        "stopping": {
+          "name": "pc",
+          "version": "1",
+          "task_id": 7,
+          "state": "stopping",
+          "parts": [
+            {
+              "index": 0,
+              "fps": 1.5,
+              "position": 3.0
+            }
+          ],
+          "upload_bps": 0.0,
+          "queue_chunks": 0,
+          "queue_bytes": 0
+        }
+      }
+    },
+    {
+      "kind": "collect",
+      "title": "a first run: the reorder delay is dropped",
+      "part": {
+        "next_index": 0,
+        "resume_at": 0.0
+      },
+      "listing": "chunk-00000.mkv,0.000000,60.093333\nchunk-00001.mkv,60.093333,120.093333\n",
+      "pts": "0.083333,\n0.000000,\n",
+      "frames": "1800\n",
+      "seen": 0,
+      "returned": 2,
+      "shift_after": 0.0,
+      "next_index": 2,
+      "resume_at": 120.093333,
+      "queued": [
+        {
+          "part_index": 0,
+          "index": 0,
+          "start": 0.0,
+          "duration": 60.093333,
+          "frames": 1800,
+          "bytes": 7,
+          "sha256": "3887e4ff4cb117983b927fde9da0c0818813a3d587b053db40fe6d951f6a3f47",
+          "path": "<root>/7/cd01/chunk-00000.mkv"
+        },
+        {
+          "part_index": 0,
+          "index": 1,
+          "start": 60.093333,
+          "duration": 60.0,
+          "frames": 1800,
+          "bytes": 7,
+          "sha256": "1993a3c633cf3e4fd898beaccbf56c1544235cd8f97396e3cbe30952502a5167",
+          "path": "<root>/7/cd01/chunk-00001.mkv"
+        }
+      ],
+      "sidecars": [
+        {
+          "name": "chunk-00000.json",
+          "text": "{\"part_index\": 0, \"index\": 0, \"start\": 0.0, \"duration\": 60.093333, \"frames\": 1800, \"bytes\": 7, \"sha256\": \"3887e4ff4cb117983b927fde9da0c0818813a3d587b053db40fe6d951f6a3f47\"}"
+        },
+        {
+          "name": "chunk-00001.json",
+          "text": "{\"part_index\": 0, \"index\": 1, \"start\": 60.093333, \"duration\": 60.0, \"frames\": 1800, \"bytes\": 7, \"sha256\": \"1993a3c633cf3e4fd898beaccbf56c1544235cd8f97396e3cbe30952502a5167\"}"
+        }
+      ],
+      "calls": [
+        [
+          "ffprobe",
+          "-v",
+          "error",
+          "-select_streams",
+          "v:0",
+          "-read_intervals",
+          "%+#32",
+          "-show_entries",
+          "packet=pts_time",
+          "-of",
+          "csv=p=0",
+          "<root>/7/cd01/chunk-00000.mkv"
+        ],
+        [
+          "ffprobe",
+          "-v",
+          "error",
+          "-select_streams",
+          "v:0",
+          "-count_packets",
+          "-show_entries",
+          "stream=nb_read_packets",
+          "-of",
+          "csv=p=0",
+          "<root>/7/cd01/chunk-00000.mkv"
+        ],
+        [
+          "ffprobe",
+          "-v",
+          "error",
+          "-select_streams",
+          "v:0",
+          "-count_packets",
+          "-show_entries",
+          "stream=nb_read_packets",
+          "-of",
+          "csv=p=0",
+          "<root>/7/cd01/chunk-00001.mkv"
+        ]
+      ],
+      "log": []
+    },
+    {
+      "kind": "collect",
+      "title": "a resumed run lines up with what the cluster has",
+      "part": {
+        "next_index": 3,
+        "resume_at": 180.06
+      },
+      "listing": "\"chunk-00003.mkv\",0.000000,60.083333\nchunk-00004.mkv,60.083333,62.5\n",
+      "pts": "0.083333\n",
+      "frames": "1799\n",
+      "seen": 0,
+      "returned": 2,
+      "shift_after": 0.083333,
+      "next_index": 5,
+      "resume_at": 242.476667,
+      "queued": [
+        {
+          "part_index": 0,
+          "index": 3,
+          "start": 180.06,
+          "duration": 60.0,
+          "frames": 1799,
+          "bytes": 7,
+          "sha256": "9e6813f2af150d90d31db8156361cf1a334be969eee1d912c1cadd83214a3886",
+          "path": "<root>/7/cd01/chunk-00003.mkv"
+        },
+        {
+          "part_index": 0,
+          "index": 4,
+          "start": 240.06,
+          "duration": 2.4166669999999897,
+          "frames": 1799,
+          "bytes": 7,
+          "sha256": "cf70e8b1f4bd180733abd45cbcbe0d8d4ccace9ee1c40b6e87db4d1adfa30d98",
+          "path": "<root>/7/cd01/chunk-00004.mkv"
+        }
+      ],
+      "sidecars": [
+        {
+          "name": "chunk-00003.json",
+          "text": "{\"part_index\": 0, \"index\": 3, \"start\": 180.06, \"duration\": 60.0, \"frames\": 1799, \"bytes\": 7, \"sha256\": \"9e6813f2af150d90d31db8156361cf1a334be969eee1d912c1cadd83214a3886\"}"
+        },
+        {
+          "name": "chunk-00004.json",
+          "text": "{\"part_index\": 0, \"index\": 4, \"start\": 240.06, \"duration\": 2.4166669999999897, \"frames\": 1799, \"bytes\": 7, \"sha256\": \"cf70e8b1f4bd180733abd45cbcbe0d8d4ccace9ee1c40b6e87db4d1adfa30d98\"}"
+        }
+      ],
+      "calls": [
+        [
+          "ffprobe",
+          "-v",
+          "error",
+          "-select_streams",
+          "v:0",
+          "-read_intervals",
+          "%+#32",
+          "-show_entries",
+          "packet=pts_time",
+          "-of",
+          "csv=p=0",
+          "<root>/7/cd01/chunk-00003.mkv"
+        ],
+        [
+          "ffprobe",
+          "-v",
+          "error",
+          "-select_streams",
+          "v:0",
+          "-count_packets",
+          "-show_entries",
+          "stream=nb_read_packets",
+          "-of",
+          "csv=p=0",
+          "<root>/7/cd01/chunk-00003.mkv"
+        ],
+        [
+          "ffprobe",
+          "-v",
+          "error",
+          "-select_streams",
+          "v:0",
+          "-count_packets",
+          "-show_entries",
+          "stream=nb_read_packets",
+          "-of",
+          "csv=p=0",
+          "<root>/7/cd01/chunk-00004.mkv"
+        ]
+      ],
+      "log": []
+    },
+    {
+      "kind": "collect",
+      "title": "a chunk number that does not follow",
+      "part": {
+        "next_index": 3,
+        "resume_at": 180.0
+      },
+      "listing": "chunk-00005.mkv,0.0,60.0\n",
+      "pts": "0.0\n",
+      "frames": "1800\n",
+      "seen": 0,
+      "returned": 1,
+      "shift_after": null,
+      "next_index": 3,
+      "resume_at": 180.0,
+      "queued": [],
+      "sidecars": [],
+      "calls": [],
+      "log": [
+        {
+          "status": false,
+          "line": "cd1: 块编号对不上（5 != 3），丢弃这次输出"
+        }
+      ]
+    },
+    {
+      "kind": "collect",
+      "title": "a row still being written",
+      "part": {
+        "next_index": 0,
+        "resume_at": 0.0
+      },
+      "listing": "chunk-00000.mkv,0.0,60.0\nchunk-00001.mkv,60.0\n",
+      "pts": "0.0\n",
+      "frames": "1800\n",
+      "seen": 0,
+      "returned": 1,
+      "shift_after": 0.0,
+      "next_index": 1,
+      "resume_at": 60.0,
+      "queued": [
+        {
+          "part_index": 0,
+          "index": 0,
+          "start": 0.0,
+          "duration": 60.0,
+          "frames": 1800,
+          "bytes": 7,
+          "sha256": "3887e4ff4cb117983b927fde9da0c0818813a3d587b053db40fe6d951f6a3f47",
+          "path": "<root>/7/cd01/chunk-00000.mkv"
+        }
+      ],
+      "sidecars": [
+        {
+          "name": "chunk-00000.json",
+          "text": "{\"part_index\": 0, \"index\": 0, \"start\": 0.0, \"duration\": 60.0, \"frames\": 1800, \"bytes\": 7, \"sha256\": \"3887e4ff4cb117983b927fde9da0c0818813a3d587b053db40fe6d951f6a3f47\"}"
+        }
+      ],
+      "calls": [
+        [
+          "ffprobe",
+          "-v",
+          "error",
+          "-select_streams",
+          "v:0",
+          "-read_intervals",
+          "%+#32",
+          "-show_entries",
+          "packet=pts_time",
+          "-of",
+          "csv=p=0",
+          "<root>/7/cd01/chunk-00000.mkv"
+        ],
+        [
+          "ffprobe",
+          "-v",
+          "error",
+          "-select_streams",
+          "v:0",
+          "-count_packets",
+          "-show_entries",
+          "stream=nb_read_packets",
+          "-of",
+          "csv=p=0",
+          "<root>/7/cd01/chunk-00000.mkv"
+        ]
+      ],
+      "log": []
+    },
+    {
+      "kind": "collect",
+      "title": "rows already picked up are skipped",
+      "part": {
+        "next_index": 1,
+        "resume_at": 60.0
+      },
+      "listing": "chunk-00000.mkv,0.0,60.0\nchunk-00001.mkv,60.0,120.0\n",
+      "pts": "0.0\n",
+      "frames": "1800\n",
+      "seen": 1,
+      "shift": 0.0,
+      "returned": 2,
+      "shift_after": 0.0,
+      "next_index": 2,
+      "resume_at": 180.0,
+      "queued": [
+        {
+          "part_index": 0,
+          "index": 1,
+          "start": 120.0,
+          "duration": 60.0,
+          "frames": 1800,
+          "bytes": 7,
+          "sha256": "1993a3c633cf3e4fd898beaccbf56c1544235cd8f97396e3cbe30952502a5167",
+          "path": "<root>/7/cd01/chunk-00001.mkv"
+        }
+      ],
+      "sidecars": [
+        {
+          "name": "chunk-00001.json",
+          "text": "{\"part_index\": 0, \"index\": 1, \"start\": 120.0, \"duration\": 60.0, \"frames\": 1800, \"bytes\": 7, \"sha256\": \"1993a3c633cf3e4fd898beaccbf56c1544235cd8f97396e3cbe30952502a5167\"}"
+        }
+      ],
+      "calls": [
+        [
+          "ffprobe",
+          "-v",
+          "error",
+          "-select_streams",
+          "v:0",
+          "-count_packets",
+          "-show_entries",
+          "stream=nb_read_packets",
+          "-of",
+          "csv=p=0",
+          "<root>/7/cd01/chunk-00001.mkv"
+        ]
+      ],
+      "log": []
+    },
+    {
+      "kind": "collect",
+      "title": "ffprobe cannot read the chunk yet",
+      "part": {
+        "next_index": 0,
+        "resume_at": 0.0
+      },
+      "listing": "chunk-00000.mkv,0.0,60.0\n",
+      "pts": "",
+      "frames": "1800\n",
+      "seen": 0,
+      "returned": 0,
+      "shift_after": null,
+      "next_index": 0,
+      "resume_at": 0.0,
+      "queued": [],
+      "sidecars": [],
+      "calls": [
+        [
+          "ffprobe",
+          "-v",
+          "error",
+          "-select_streams",
+          "v:0",
+          "-read_intervals",
+          "%+#32",
+          "-show_entries",
+          "packet=pts_time",
+          "-of",
+          "csv=p=0",
+          "<root>/7/cd01/chunk-00000.mkv"
+        ]
+      ],
+      "log": []
+    },
+    {
+      "kind": "collect",
+      "title": "no listing yet",
+      "part": {
+        "next_index": 0,
+        "resume_at": 0.0
+      },
+      "listing": null,
+      "pts": "0.0\n",
+      "frames": "1800\n",
+      "seen": 0,
+      "returned": 0,
+      "shift_after": null,
+      "next_index": 0,
+      "resume_at": 0.0,
+      "queued": [],
+      "sidecars": [],
+      "calls": [],
+      "log": []
+    },
+    {
+      "kind": "collect",
+      "title": "the frames cannot be counted",
+      "part": {
+        "next_index": 0,
+        "resume_at": 0.0
+      },
+      "listing": "chunk-00000.mkv,0.0,60.0\n",
+      "pts": "0.0\n",
+      "frames": "N/A\n",
+      "seen": 0,
+      "returned": 0,
+      "shift_after": 0.0,
+      "next_index": 0,
+      "resume_at": 0.0,
+      "queued": [],
+      "sidecars": [],
+      "calls": [
+        [
+          "ffprobe",
+          "-v",
+          "error",
+          "-select_streams",
+          "v:0",
+          "-read_intervals",
+          "%+#32",
+          "-show_entries",
+          "packet=pts_time",
+          "-of",
+          "csv=p=0",
+          "<root>/7/cd01/chunk-00000.mkv"
+        ],
+        [
+          "ffprobe",
+          "-v",
+          "error",
+          "-select_streams",
+          "v:0",
+          "-count_packets",
+          "-show_entries",
+          "stream=nb_read_packets",
+          "-of",
+          "csv=p=0",
+          "<root>/7/cd01/chunk-00000.mkv"
+        ]
+      ],
+      "log": []
+    },
+    {
+      "kind": "collect",
+      "title": "a full path in the listing, a start before the shift",
+      "part": {
+        "next_index": 0,
+        "resume_at": 10.01
+      },
+      "listing": "/elsewhere/chunk-00000.mkv,0.0,10.0933\n",
+      "pts": "0.0833\n",
+      "frames": "300\n",
+      "seen": 0,
+      "returned": 1,
+      "shift_after": 0.0833,
+      "next_index": 1,
+      "resume_at": 20.02,
+      "queued": [
+        {
+          "part_index": 0,
+          "index": 0,
+          "start": 10.01,
+          "duration": 10.01,
+          "frames": 300,
+          "bytes": 7,
+          "sha256": "3887e4ff4cb117983b927fde9da0c0818813a3d587b053db40fe6d951f6a3f47",
+          "path": "<root>/7/cd01/chunk-00000.mkv"
+        }
+      ],
+      "sidecars": [
+        {
+          "name": "chunk-00000.json",
+          "text": "{\"part_index\": 0, \"index\": 0, \"start\": 10.01, \"duration\": 10.01, \"frames\": 300, \"bytes\": 7, \"sha256\": \"3887e4ff4cb117983b927fde9da0c0818813a3d587b053db40fe6d951f6a3f47\"}"
+        }
+      ],
+      "calls": [
+        [
+          "ffprobe",
+          "-v",
+          "error",
+          "-select_streams",
+          "v:0",
+          "-read_intervals",
+          "%+#32",
+          "-show_entries",
+          "packet=pts_time",
+          "-of",
+          "csv=p=0",
+          "<root>/7/cd01/chunk-00000.mkv"
+        ],
+        [
+          "ffprobe",
+          "-v",
+          "error",
+          "-select_streams",
+          "v:0",
+          "-count_packets",
+          "-show_entries",
+          "stream=nb_read_packets",
+          "-of",
+          "csv=p=0",
+          "<root>/7/cd01/chunk-00000.mkv"
+        ]
+      ],
+      "log": []
+    },
+    {
+      "kind": "clock",
+      "anchor": 10.01,
+      "shift": 0.0833,
+      "start": 0.0,
+      "end": 10.0933,
+      "resume_at": 10.01,
+      "begin": 10.01,
+      "duration": 10.01
+    },
+    {
+      "kind": "clock",
+      "anchor": 0.0,
+      "shift": 0.083333,
+      "start": 0.0,
+      "end": 60.093333,
+      "resume_at": 0.0,
+      "begin": 0.0,
+      "duration": 60.01
+    },
+    {
+      "kind": "clock",
+      "anchor": 180.06,
+      "shift": 0.083333,
+      "start": 60.083333,
+      "end": 120.08,
+      "resume_at": 180.06,
+      "begin": 240.06,
+      "duration": 59.996667
+    },
+    {
+      "kind": "clock",
+      "anchor": 5.0,
+      "shift": 0.2,
+      "start": 0.1,
+      "end": 2.0,
+      "resume_at": 5.0,
+      "begin": 5.0,
+      "duration": 1.7999999999999998
+    },
+    {
+      "kind": "clock",
+      "anchor": 5.0,
+      "shift": 0.0,
+      "start": 0.3,
+      "end": 2.0,
+      "resume_at": 5.0,
+      "begin": 5.3,
+      "duration": 1.7000000000000002
+    },
+    {
+      "kind": "limiter",
+      "bits_per_second": 30000000,
+      "steps": [
+        [
+          0.0,
+          262144
+        ],
+        [
+          0.0,
+          262144
+        ],
+        [
+          0.05,
+          262144
+        ],
+        [
+          2.0,
+          262144
+        ],
+        [
+          2.0,
+          10000000
+        ]
+      ],
+      "sleeps": [
+        0.06990506666666667,
+        0.13981013333333334,
+        0.1597152000000455,
+        1.7365717333333333
+      ]
+    },
+    {
+      "kind": "limiter",
+      "bits_per_second": 8000000,
+      "steps": [
+        [
+          0.5,
+          1000000
+        ],
+        [
+          0.5,
+          1
+        ],
+        [
+          10.0,
+          500000
+        ],
+        [
+          10.1,
+          500000
+        ]
+      ],
+      "sleeps": [
+        0.5,
+        0.500001
+      ]
+    },
+    {
+      "kind": "limiter",
+      "bits_per_second": 0,
+      "steps": [
+        [
+          0.0,
+          1000000000
+        ]
+      ],
+      "sleeps": []
+    },
+    {
+      "kind": "limiter",
+      "bits_per_second": -5,
+      "steps": [
+        [
+          0.0,
+          1
+        ]
+      ],
+      "sleeps": []
+    },
+    {
+      "kind": "meter",
+      "samples": [
+        [
+          0.0,
+          100
+        ],
+        [
+          5.0,
+          200
+        ],
+        [
+          9.99,
+          300
+        ]
+      ],
+      "rates": [
+        {
+          "at": 9.99,
+          "rate": 60.0
+        },
+        {
+          "at": 10.0,
+          "rate": 60.0
+        },
+        {
+          "at": 10.000001,
+          "rate": 50.0
+        },
+        {
+          "at": 15.0,
+          "rate": 50.0
+        },
+        {
+          "at": 20.0,
+          "rate": 0.0
+        },
+        {
+          "at": 25.0,
+          "rate": 0.0
+        }
+      ]
+    },
+    {
+      "kind": "idle_report",
+      "name": "pc",
+      "value": {
+        "name": "pc",
+        "version": "1",
+        "task_id": null,
+        "state": "waiting",
+        "parts": []
+      }
+    },
+    {
+      "kind": "idle_report",
+      "name": "PC-名前",
+      "value": {
+        "name": "PC-名前",
+        "version": "1",
+        "task_id": null,
+        "state": "waiting",
+        "parts": []
+      }
+    },
+    {
+      "kind": "wait_reason",
+      "wait": "idle",
+      "reason": "没有等转码的作品"
+    },
+    {
+      "kind": "wait_reason",
+      "wait": "busy",
+      "reason": "集群在合并别的作品，等它完成"
+    },
+    {
+      "kind": "wait_reason",
+      "wait": "probing",
+      "reason": "集群正在读取分盘信息"
+    },
+    {
+      "kind": "wait_reason",
+      "wait": "assembling",
+      "reason": "这部已全部转完，集群在拼接，等它完成"
+    },
+    {
+      "kind": "wait_reason",
+      "wait": "unavailable",
+      "reason": "集群这边暂时不能合并"
+    },
+    {
+      "kind": "constants",
+      "version": "1",
+      "retry_delays": [
+        5.0,
+        10.0,
+        20.0,
+        40.0,
+        80.0,
+        160.0,
+        300.0
+      ],
+      "heartbeat": 15.0,
+      "idle_poll": 30.0,
+      "status": 2.0,
+      "upload_piece": 262144
+    },
+    {
+      "kind": "tools",
+      "ffmpeg": "ffmpeg-embyx-missing",
+      "ffprobe": "ffprobe",
+      "problem": "找不到 ffmpeg-embyx-missing，请先安装 ffmpeg（winget install Gyan.FFmpeg）或用 --ffmpeg 指定路径"
+    },
+    {
+      "kind": "tools",
+      "ffmpeg": "sh",
+      "ffprobe": "ffprobe-embyx-missing",
+      "problem": "找不到 ffprobe-embyx-missing，请先安装 ffmpeg（winget install Gyan.FFmpeg）或用 --ffmpeg 指定路径"
+    },
+    {
+      "kind": "tools",
+      "ffmpeg": "sh",
+      "ffprobe": "sh",
+      "problem": null
+    },
+    {
+      "kind": "task",
+      "task": {
+        "id": 7,
+        "avid": "SQTEVR-009",
+        "video_bitrate": 6140000,
+        "chunk_seconds": 60,
+        "encoder": {
+          "codec": "av1_nvenc",
+          "preset": "p7",
+          "tune": "uhq",
+          "multipass": "fullres",
+          "lookahead": 32,
+          "spatial_aq": true,
+          "bit_depth": 10,
+          "gop_seconds": 5
+        },
+        "paused": 1,
+        "parts": [
+          {
+            "index": 0,
+            "name": "SQTEVR-009-cd1.mp4",
+            "size": 1000000000,
+            "duration": 30.0,
+            "done": false,
+            "next_chunk": 2,
+            "resume_at": 12.5
+          },
+          {
+            "index": 3,
+            "name": "SQTEVR-009-cd4.mp4",
+            "size": 1000000000,
+            "duration": 20.0,
+            "done": true,
+            "next_chunk": 0,
+            "resume_at": 0.0
+          }
+        ]
+      },
+      "encoder_override": {
+        "tune": "hq",
+        "codec": "libx264"
+      },
+      "parts": [
+        {
+          "name": "SQTEVR-009-cd1.mp4",
+          "index": 0,
+          "duration": 30.0,
+          "next_index": 2,
+          "resume_at": 12.5,
+          "fps": 0.0,
+          "position": 0.0,
+          "encoded": false,
+          "finished": false,
+          "error": null,
+          "uploads": 0
+        },
+        {
+          "name": "SQTEVR-009-cd4.mp4",
+          "index": 3,
+          "duration": 20.0,
+          "next_index": 0,
+          "resume_at": 0.0,
+          "fps": 0.0,
+          "position": 0.0,
+          "encoded": false,
+          "finished": true,
+          "error": null,
+          "uploads": 0
+        }
+      ],
+      "paused": true,
+      "directory": "/nonexistent/7",
+      "max_queue_bytes": 8589934592,
+      "encoder": {
+        "codec": "libx264",
+        "preset": "p7",
+        "tune": "hq",
+        "multipass": "fullres",
+        "lookahead": 32,
+        "spatial_aq": true,
+        "bit_depth": 10,
+        "gop_seconds": 5
+      }
+    }
+  ]
+}

@@ -1,0 +1,178 @@
+# The merge Job's ways of failing, each retried: the Job API answers 500 (a notice, the task
+# stays), the Job disappears, the worker reports a failure, the cluster kills the Job (its
+# failure and its pod's log tail make the error, the leftovers go), the Job ends without a
+# report, and the report says done but the file is not there. A retry deletes the old Job, whose name the new
+# one is started under. Last the library gains a whole copy, so the next start refuses the
+# title (failed while queued), and the operator cancels it.
+# Its `restart` steps split it for the resume matrix (`crates/embyx-merge/tests/service_scenarios.rs`):
+# a new process each, and in the matrix the other build.
+description = "merge service: merge Job failures, retried, then a whole copy refuses the title"
+operation = "merge.service"
+clock = "2026-11-14T08:00:00+00:00"
+
+[roots]
+names = ["work", "mapping", "secrets"]
+
+[database]
+schema = "app"
+
+[args.archive]
+src_dir = "/mnt/cd2/115/embyx_in"
+dst_dir = "/mnt/cd2/115/embyx"
+priority_mapping = { vr = "type/vr" }
+
+[[args.steps]]
+op = "create"
+args = { avid = "SQTEVR-009", source = "vr", library_dir = "type/vr", brand = "SQTEVR", merged_name = "SQTEVR-009.mp4", parts = ["/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4", "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4"] }
+
+# 1. The Job API fails once (a notice), then the Job is gone.
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "retry"
+args = { id = 1 }
+
+# 2. The worker reports a failure.
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "write"
+args = { path = "work/.merge/1.json", json = { state = "failed", error = "the parts' streams differ: cd2 has 3 streams, cd1 2" } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "retry"
+args = { id = 1 }
+
+# 3. The cluster kills the Job past its deadline; the leftovers go.
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "write"
+args = { path = "work/.SQTEVR-009.mp4.part", text = "half" }
+
+[[args.steps]]
+op = "write"
+args = { path = "work/.SQTEVR-009.mp4.parts/cd1.mp4", text = "remuxed" }
+
+[[args.steps]]
+op = "job_status"
+args = { name = "embyx-merge-1-sqtevr-009", status = { failed = 1, conditions = [{ type = "Failed", status = "True", reason = "DeadlineExceeded", message = "Job was active longer than specified deadline" }] } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "retry"
+args = { id = 1 }
+
+# 4. The Job succeeds without a report.
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "job_status"
+args = { name = "embyx-merge-1-sqtevr-009", status = { succeeded = 1, conditions = [{ type = "Complete", status = "True" }] } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "retry"
+args = { id = 1 }
+
+# 5. Done, but the merged file is not on the work volume.
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "write"
+args = { path = "work/.merge/1.json", json = { state = "done", size = 20, sha1 = "abc" } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "retry"
+args = { id = 1 }
+
+# 6. A whole copy turns up: the start refuses the title; cancel it.
+[[args.steps]]
+op = "cloud"
+args = { edit = "add_file", args = { path = "/115/embyx/type/vr/SQTEVR/SQTEVR-009.mp4", size = 20 } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "retry"
+args = { id = 2 }
+
+[[args.steps]]
+op = "cancel"
+args = { id = 1 }
+
+[[args.steps]]
+op = "retry"
+args = { id = 1 }
+
+[kubernetes]
+jobs = {}
+
+[[kubernetes.routes]]
+method = "GET"
+path = "/api/v1/namespaces/media/pods/embyx-manager-0"
+body = { spec = { containers = [{ image = "ghcr.io/cyrahs/embyx-manager:latest" }] }, status = { containerStatuses = [{ imageID = "ghcr.io/cyrahs/embyx-manager@sha256:abc123" }] } }
+
+[[kubernetes.routes]]
+method = "GET"
+path = "/apis/batch/v1/namespaces/media/jobs/embyx-merge-1-sqtevr-009"
+status = 500
+body = { message = "etcdserver: request timed out" }
+times = 1
+
+[[kubernetes.routes]]
+method = "GET"
+path = "/apis/batch/v1/namespaces/media/jobs/embyx-merge-1-sqtevr-009"
+status = 404
+body = { reason = "NotFound" }
+times = 1
+
+[[kubernetes.routes]]
+method = "GET"
+path = "/api/v1/namespaces/media/pods"
+body = { items = [{ metadata = { name = "embyx-merge-1-sqtevr-009-x7k2p" } }] }
+times = 1
+
+[[kubernetes.routes]]
+method = "GET"
+path = "/api/v1/namespaces/media/pods/embyx-merge-1-sqtevr-009-x7k2p/log"
+body = "ffmpeg: Killed"
+times = 1
+
+[clouddrive]
+directories = ["/115/upload", "/115/embyx_in"]
+files = [
+    { path = "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4", size = 10 },
+    { path = "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4", size = 10 },
+]

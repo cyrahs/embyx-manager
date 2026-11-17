@@ -1,0 +1,10 @@
+# A database a newer build migrated is refused and left as it is.
+description = "db: a schema version above 19 is refused, nothing applied"
+operation = "db.open"
+
+[database]
+schema = "none"
+sql = [
+    "CREATE TABLE schema_migrations (version INTEGER PRIMARY KEY, applied_at TIMESTAMPTZ NOT NULL)",
+    "INSERT INTO schema_migrations VALUES (19, '2026-01-01T00:00:00+00:00'), (20, '2026-02-01T00:00:00+00:00')",
+]

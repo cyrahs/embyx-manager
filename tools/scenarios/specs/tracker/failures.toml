@@ -1,0 +1,99 @@
+# Tracker failures (WP7): a task listing CloudDrive refuses ends the poll before anything is
+# touched; a refresh of the mount that fails is logged and the folder filed anyway; a rename
+# that fails releases the claim and the next poll files the folder; a folder holding another
+# title is parked for a human; an errored download past the attempt cap exhausts the AVID with
+# a candidate left over; an AVID an operator ignored is never filed or retried, though its
+# errored task is still dropped, and a failure to drop it is logged and costs nothing else.
+description = "tracker: CloudDrive errors, a failed rename, a wrong title, the attempt cap, ignored rows"
+operation = "tracker.steps"
+clock = "2026-09-10T03:00:00+00:00"
+
+[roots]
+names = ["mount"]
+
+[args]
+mount = "mount"
+task_dirs = ["/115/task/inbox"]
+
+[args.config]
+src_dir = "mount/115/task"
+dst_dir = "mount/library"
+mapping = { inbox = "sorted" }
+min_size_mb = 0
+max_attempts = 3
+
+[[args.faults]]
+op = "rename"
+path = "mount/115/task/inbox/FIN-101/FIN-101.mp4"
+errno = 5
+times = 1
+
+[[args.steps]]
+op = "poll"
+
+[[args.steps]]
+op = "poll"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "poll"
+args = { advance_seconds = 60 }
+
+[[tree]]
+path = "mount/115/task/inbox/RFR-102/RFR-102.mp4"
+size = 3
+
+[[tree]]
+path = "mount/115/task/inbox/FIN-101/FIN-101.mp4"
+size = 4
+
+[[tree]]
+path = "mount/115/task/inbox/NAT-103/XYZ-999.mp4"
+size = 6
+
+[[tree]]
+path = "mount/115/task/inbox/IGN-105/IGN-105.mp4"
+size = 2
+
+[database]
+schema = "app"
+sql = [
+    "INSERT INTO archive_acquisitions (avid, state, source, task_dir_path, release_date, created_at, updated_at) VALUES ('RFR-102', 'downloading', 'rss:Actor', '/115/task/inbox', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_acquisitions (avid, state, source, task_dir_path, release_date, created_at, updated_at) VALUES ('IGN-106', 'ignored', 'rss:Actor', '/115/task/inbox', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_acquisitions (avid, state, source, task_dir_path, release_date, created_at, updated_at) VALUES ('FIN-101', 'downloading', 'rss:Actor', '/115/task/inbox', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_acquisitions (avid, state, source, task_dir_path, release_date, created_at, updated_at) VALUES ('REJ-104', 'downloading', 'rss:Actor', '/115/task/inbox', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_acquisitions (avid, state, source, task_dir_path, release_date, created_at, updated_at) VALUES ('NAT-103', 'downloading', 'rss:Actor', '/115/task/inbox', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_acquisitions (avid, state, source, task_dir_path, release_date, created_at, updated_at) VALUES ('IGN-105', 'ignored', 'rss:Actor', '/115/task/inbox', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at, error) VALUES ('RFR-102', 1, 'magnet:?xt=urn:btih:1111111111111111111111111111111111111111&dn=RFR-102', '1111111111111111111111111111111111111111', 'sukebei', 'submitted', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z', NULL)",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at, error) VALUES ('IGN-106', 1, 'magnet:?xt=urn:btih:2222222222222222222222222222222222222222&dn=IGN-106', '2222222222222222222222222222222222222222', 'sukebei', 'downloading', 5.0, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z', NULL)",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at, error) VALUES ('IGN-106', 2, 'magnet:?xt=urn:btih:2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A&dn=IGN-106', '2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A', 'sukebei', 'pending', NULL, NULL, '2026-09-09T00:00:00Z', NULL)",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at, error) VALUES ('FIN-101', 1, 'magnet:?xt=urn:btih:3333333333333333333333333333333333333333&dn=FIN-101', '3333333333333333333333333333333333333333', 'sukebei', 'downloading', 99.0, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z', NULL)",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at, error) VALUES ('REJ-104', 1, 'magnet:?xt=urn:btih:4141414141414141414141414141414141414141&dn=REJ-104', '4141414141414141414141414141414141414141', 'sukebei', 'error', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z', 'CloudDrive reported the download failed')",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at, error) VALUES ('REJ-104', 2, 'magnet:?xt=urn:btih:4242424242424242424242424242424242424242&dn=REJ-104', '4242424242424242424242424242424242424242', 'sukebei', 'stalled', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z', 'no progress for 1d at 0%')",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at, error) VALUES ('REJ-104', 3, 'magnet:?xt=urn:btih:4444444444444444444444444444444444444444&dn=REJ-104', '4444444444444444444444444444444444444444', 'sukebei', 'downloading', 1.0, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z', NULL)",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at, error) VALUES ('REJ-104', 4, 'magnet:?xt=urn:btih:4545454545454545454545454545454545454545&dn=REJ-104', '4545454545454545454545454545454545454545', 'sukebei', 'pending', NULL, NULL, '2026-09-09T00:00:00Z', NULL)",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at, error) VALUES ('NAT-103', 1, 'magnet:?xt=urn:btih:5555555555555555555555555555555555555555&dn=NAT-103', '5555555555555555555555555555555555555555', 'sukebei', 'submitted', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z', NULL)",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at, error) VALUES ('IGN-105', 1, 'magnet:?xt=urn:btih:6666666666666666666666666666666666666666&dn=IGN-105', '6666666666666666666666666666666666666666', 'sukebei', 'submitted', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z', NULL)",
+]
+
+[clouddrive]
+directories = ["/115/task/inbox"]
+files = [
+    { path = "/115/task/inbox/RFR-102/RFR-102.mp4", size = 3 },
+    { path = "/115/task/inbox/FIN-101/FIN-101.mp4", size = 4 },
+    { path = "/115/task/inbox/NAT-103/XYZ-999.mp4", size = 6 },
+    { path = "/115/task/inbox/IGN-105/IGN-105.mp4", size = 2 },
+]
+offline_tasks = [
+    { name = "RFR-102", url = "magnet:?xt=urn:btih:1111111111111111111111111111111111111111&dn=RFR-102", folder = "/115/task/inbox", info_hash = "1111111111111111111111111111111111111111", status = "OFFLINE_FINISHED", size = 3, progress = 100.0 },
+    { name = "IGN-106", url = "magnet:?xt=urn:btih:2222222222222222222222222222222222222222&dn=IGN-106", folder = "/115/task/inbox", info_hash = "2222222222222222222222222222222222222222", status = "OFFLINE_ERROR", size = 0, progress = 5.0 },
+    { name = "FIN-101", url = "magnet:?xt=urn:btih:3333333333333333333333333333333333333333&dn=FIN-101", folder = "/115/task/inbox", info_hash = "3333333333333333333333333333333333333333", status = "OFFLINE_FINISHED", size = 4, progress = 100.0 },
+    { name = "REJ-104", url = "magnet:?xt=urn:btih:4444444444444444444444444444444444444444&dn=REJ-104", folder = "/115/task/inbox", info_hash = "4444444444444444444444444444444444444444", status = "OFFLINE_ERROR", size = 0, progress = 1.0 },
+    { name = "NAT-103", url = "magnet:?xt=urn:btih:5555555555555555555555555555555555555555&dn=NAT-103", folder = "/115/task/inbox", info_hash = "5555555555555555555555555555555555555555", status = "OFFLINE_FINISHED", size = 6, progress = 100.0 },
+    { name = "IGN-105", url = "magnet:?xt=urn:btih:6666666666666666666666666666666666666666&dn=IGN-105", folder = "/115/task/inbox", info_hash = "6666666666666666666666666666666666666666", status = "OFFLINE_FINISHED", size = 2, progress = 100.0 },
+]
+errors = [
+    { method = "ListOfflineFilesByPath", code = "UNAVAILABLE", details = "connection reset" },
+    { method = "GetSubFiles", code = "INTERNAL", details = "cache busy" },
+    { method = "RemoveOfflineFiles", code = "INTERNAL", details = "busy" },
+]

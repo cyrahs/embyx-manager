@@ -1,0 +1,597 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "api",
+  "cases": [
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": {}
+      },
+      "ok": true,
+      "validated": {
+        "values": {},
+        "version": null
+      }
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": {
+          "address": "x"
+        },
+        "version": 3
+      },
+      "ok": true,
+      "validated": {
+        "values": {
+          "address": "x"
+        },
+        "version": 3
+      }
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": {},
+        "version": null
+      },
+      "ok": true,
+      "validated": {
+        "values": {},
+        "version": null
+      }
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": {},
+        "version": 0
+      },
+      "ok": true,
+      "validated": {
+        "values": {},
+        "version": 0
+      }
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": {},
+        "version": -1
+      },
+      "ok": false
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": {},
+        "version": 1.0
+      },
+      "ok": true,
+      "validated": {
+        "values": {},
+        "version": 1
+      }
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": {},
+        "version": 1.5
+      },
+      "ok": false
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": {},
+        "version": true
+      },
+      "ok": true,
+      "validated": {
+        "values": {},
+        "version": 1
+      }
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": {},
+        "version": false
+      },
+      "ok": true,
+      "validated": {
+        "values": {},
+        "version": 0
+      }
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": {},
+        "version": "2"
+      },
+      "ok": true,
+      "validated": {
+        "values": {},
+        "version": 2
+      }
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": {},
+        "version": " 2 "
+      },
+      "ok": true,
+      "validated": {
+        "values": {},
+        "version": 2
+      }
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": {},
+        "version": "2.0"
+      },
+      "ok": true,
+      "validated": {
+        "values": {},
+        "version": 2
+      }
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": {},
+        "version": "-0"
+      },
+      "ok": true,
+      "validated": {
+        "values": {},
+        "version": 0
+      }
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": {},
+        "version": "1_0"
+      },
+      "ok": true,
+      "validated": {
+        "values": {},
+        "version": 10
+      }
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": {},
+        "version": "two"
+      },
+      "ok": false
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": {},
+        "version": ""
+      },
+      "ok": false
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": {},
+        "version": []
+      },
+      "ok": false
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": {},
+        "version": {}
+      },
+      "ok": false
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": {},
+        "version": 9223372036854775807
+      },
+      "ok": true,
+      "validated": {
+        "values": {},
+        "version": 9223372036854775807
+      }
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": {},
+        "version": 1e+300
+      },
+      "ok": false
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": {},
+        "extra": 1
+      },
+      "ok": false
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "version": 1
+      },
+      "ok": false
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": null
+      },
+      "ok": false
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": []
+      },
+      "ok": false
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": "x"
+      },
+      "ok": false
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {
+        "values": {
+          "nested": {
+            "deep": [
+              1,
+              {
+                "x": null
+              }
+            ]
+          }
+        }
+      },
+      "ok": true,
+      "validated": {
+        "values": {
+          "nested": {
+            "deep": [
+              1,
+              {
+                "x": null
+              }
+            ]
+          }
+        },
+        "version": null
+      }
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": {},
+      "ok": false
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": [],
+      "ok": false
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": [
+        {
+          "values": {}
+        }
+      ],
+      "ok": false
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": "values",
+      "ok": false
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": 3,
+      "ok": false
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": null,
+      "ok": false
+    },
+    {
+      "model": "UpdateSectionRequest",
+      "body": true,
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": {}
+      },
+      "ok": true,
+      "validated": {
+        "values": {}
+      }
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": {
+          "address": "x"
+        },
+        "version": 3
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": {},
+        "version": null
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": {},
+        "version": 0
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": {},
+        "version": -1
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": {},
+        "version": 1.0
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": {},
+        "version": 1.5
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": {},
+        "version": true
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": {},
+        "version": false
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": {},
+        "version": "2"
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": {},
+        "version": " 2 "
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": {},
+        "version": "2.0"
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": {},
+        "version": "-0"
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": {},
+        "version": "1_0"
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": {},
+        "version": "two"
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": {},
+        "version": ""
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": {},
+        "version": []
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": {},
+        "version": {}
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": {},
+        "version": 9223372036854775807
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": {},
+        "version": 1e+300
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": {},
+        "extra": 1
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "version": 1
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": null
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": []
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": "x"
+      },
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {
+        "values": {
+          "nested": {
+            "deep": [
+              1,
+              {
+                "x": null
+              }
+            ]
+          }
+        }
+      },
+      "ok": true,
+      "validated": {
+        "values": {
+          "nested": {
+            "deep": [
+              1,
+              {
+                "x": null
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": {},
+      "ok": true,
+      "validated": {
+        "values": {}
+      }
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": [],
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": [
+        {
+          "values": {}
+        }
+      ],
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": "values",
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": 3,
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": null,
+      "ok": false
+    },
+    {
+      "model": "TestConnectionRequest",
+      "body": true,
+      "ok": false
+    }
+  ]
+}

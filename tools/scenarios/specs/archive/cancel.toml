@@ -1,0 +1,53 @@
+# Cancellation (WP6): a stop requested while a folder is being filed lets that folder finish
+# (filing is not interrupted between its parts or before its folder is removed) and ends the
+# run at the next folder; a stop during the loose videos ends the run before the next AVID; a
+# run asked to stop before it starts touches nothing.
+description = "archive: run() cancelled between folders and between loose groups"
+operation = "archive.steps"
+
+[roots]
+names = ["task", "library"]
+
+[args.config]
+src_dir = "task"
+dst_dir = "library"
+mapping = { intake = "sorted", loose = "other" }
+min_size_mb = 0
+
+[[args.stops]]
+op = "rename"
+path = "task/intake/aaa/ABC-501-1.mp4"
+
+[[args.stops]]
+op = "rename"
+path = "task/loose/DEF-511.mp4"
+
+[[args.steps]]
+op = "run"
+args = { stop_before = true }
+
+[[args.steps]]
+op = "run"
+
+[[args.steps]]
+op = "run"
+
+[[tree]]
+path = "task/intake/aaa/ABC-501-1.mp4"
+size = 1
+
+[[tree]]
+path = "task/intake/aaa/ABC-501-2.mp4"
+size = 2
+
+[[tree]]
+path = "task/intake/bbb/ABC-502.mp4"
+size = 3
+
+[[tree]]
+path = "task/loose/DEF-511.mp4"
+size = 4
+
+[[tree]]
+path = "task/loose/DEF-512.mp4"
+size = 5

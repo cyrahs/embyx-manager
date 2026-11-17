@@ -1,0 +1,122 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "urls",
+  "cases": [
+    {
+      "path": "cover.jpeg",
+      "name": "cover.jpeg",
+      "suffix": ".jpeg",
+      "stem": "cover"
+    },
+    {
+      "path": "archive.tar.gz",
+      "name": "archive.tar.gz",
+      "suffix": ".gz",
+      "stem": "archive.tar"
+    },
+    {
+      "path": ".hidden",
+      "name": ".hidden",
+      "suffix": "",
+      "stem": ".hidden"
+    },
+    {
+      "path": ".hidden.png",
+      "name": ".hidden.png",
+      "suffix": ".png",
+      "stem": ".hidden"
+    },
+    {
+      "path": "name.",
+      "name": "name.",
+      "suffix": "",
+      "stem": "name."
+    },
+    {
+      "path": "a..b",
+      "name": "a..b",
+      "suffix": ".b",
+      "stem": "a."
+    },
+    {
+      "path": "..",
+      "name": "..",
+      "suffix": "",
+      "stem": ".."
+    },
+    {
+      "path": ".",
+      "name": "",
+      "suffix": "",
+      "stem": ""
+    },
+    {
+      "path": "",
+      "name": "",
+      "suffix": "",
+      "stem": ""
+    },
+    {
+      "path": "/",
+      "name": "",
+      "suffix": "",
+      "stem": ""
+    },
+    {
+      "path": "dir/file.png",
+      "name": "file.png",
+      "suffix": ".png",
+      "stem": "file"
+    },
+    {
+      "path": "dir/sub/",
+      "name": "sub",
+      "suffix": "",
+      "stem": "sub"
+    },
+    {
+      "path": "/aa/bb/659e1483.jpeg",
+      "name": "659e1483.jpeg",
+      "suffix": ".jpeg",
+      "stem": "659e1483"
+    },
+    {
+      "path": "dir/./",
+      "name": "dir",
+      "suffix": "",
+      "stem": "dir"
+    },
+    {
+      "path": "back\\slash.txt",
+      "name": "back\\slash.txt",
+      "suffix": ".txt",
+      "stem": "back\\slash"
+    },
+    {
+      "path": "xxxxxxxxxx.PNG",
+      "name": "xxxxxxxxxx.PNG",
+      "suffix": ".PNG",
+      "stem": "xxxxxxxxxx"
+    },
+    {
+      "path": "no-ext",
+      "name": "no-ext",
+      "suffix": "",
+      "stem": "no-ext"
+    },
+    {
+      "path": "/abc.unknown",
+      "name": "abc.unknown",
+      "suffix": ".unknown",
+      "stem": "abc"
+    },
+    {
+      "path": "/path/abc.gif",
+      "name": "abc.gif",
+      "suffix": ".gif",
+      "stem": "abc"
+    }
+  ]
+}

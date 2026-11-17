@@ -1,0 +1,57 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "monitor",
+  "cases": [
+    {
+      "fields": {},
+      "str": ""
+    },
+    {
+      "fields": {
+        "success": true
+      },
+      "str": "success: true\n"
+    },
+    {
+      "fields": {
+        "success": false,
+        "errorMessage": "quota exceeded"
+      },
+      "str": "errorMessage: \"quota exceeded\"\n"
+    },
+    {
+      "fields": {
+        "errorMessage": "任务已存在 \"x\"\n\\ 'q'"
+      },
+      "str": "errorMessage: \"任务已存在 \\\"x\\\"\\n\\\\ \\'q\\'\"\n"
+    },
+    {
+      "fields": {
+        "errorMessage": "\u0000\u0001\u001f  é"
+      },
+      "str": "errorMessage: \"\\000\\001\\037\\177  é\"\n"
+    },
+    {
+      "fields": {
+        "success": true,
+        "resultFilePaths": [
+          "/115/a",
+          "/115/路径"
+        ]
+      },
+      "str": "success: true\nresultFilePaths: \"/115/a\"\nresultFilePaths: \"/115/路径\"\n"
+    },
+    {
+      "fields": {
+        "errorMessage": "e",
+        "resultFilePaths": [
+          "",
+          "\t"
+        ]
+      },
+      "str": "errorMessage: \"e\"\nresultFilePaths: \"\"\nresultFilePaths: \"\\t\"\n"
+    }
+  ]
+}

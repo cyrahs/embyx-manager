@@ -1,0 +1,107 @@
+# Incremental sync (WP8): a changed source is mirrored and, run again, skipped (in sync, no
+# change); a deleted part takes the metadata it owns and leaves the title's own; the last part
+# going leaves a directory that still holds metadata no strm claims; a title deleted alone
+# takes its now empty directories up to (not including) the mirror root. Paths that are not
+# strms, lie outside the source root, have no ID or no source file are skipped or warned
+# about, never failed. A batch asked to stop before it starts is cancelled untouched.
+description = "mapping: run_incremental() applies changed and deleted batches"
+operation = "mapping.steps"
+
+[roots]
+names = ["flat", "emby", "elsewhere"]
+
+[args.config]
+src_dir = "flat"
+dst_dir = "emby"
+
+[[args.steps]]
+op = "incremental"
+args = { changed = ["flat/a/ABC-101.strm", "flat/a/notes.txt", "flat/a/PQR-777.strm", "flat/a/no title.strm", "elsewhere/JKL-1.strm"], deleted = ["flat/a/GONE-1.strm"] }
+
+[[args.steps]]
+op = "incremental"
+args = { changed = ["flat/a/ABC-101.strm", "flat/a/ABC-102-cd1.strm"] }
+
+[[args.steps]]
+op = "remove"
+args = { path = "flat/a/ABC-102-cd2.strm" }
+
+[[args.steps]]
+op = "incremental"
+args = { deleted = ["flat/a/ABC-102-cd2.strm"] }
+
+[[args.steps]]
+op = "remove"
+args = { path = "flat/a/ABC-102-cd1.strm" }
+
+[[args.steps]]
+op = "incremental"
+args = { deleted = ["flat/a/ABC-102-cd1.strm"] }
+
+[[args.steps]]
+op = "remove"
+args = { path = "flat/b/c/DEF-201.strm" }
+
+[[args.steps]]
+op = "incremental"
+args = { deleted = ["flat/b/c/DEF-201.strm"] }
+
+[[args.steps]]
+op = "incremental"
+args = { stop_before = true, changed = ["flat/a/ABC-101.strm"], deleted = ["flat/a/ABC-101.strm"] }
+
+[[tree]]
+path = "flat/a/ABC-101.strm"
+text = "/cloud/a/ABC-101.mp4"
+
+[[tree]]
+path = "flat/a/ABC-102-cd1.strm"
+text = "/cloud/a/ABC-102-cd1.mp4"
+
+[[tree]]
+path = "flat/a/ABC-102-cd2.strm"
+text = "/cloud/a/ABC-102-cd2.mp4"
+
+[[tree]]
+path = "flat/a/notes.txt"
+text = "not a strm"
+
+[[tree]]
+path = "flat/a/no title.strm"
+text = "/cloud/a/no title.mp4"
+
+[[tree]]
+path = "flat/b/c/DEF-201.strm"
+text = "/cloud/b/c/DEF-201.mp4"
+
+[[tree]]
+path = "elsewhere/JKL-1.strm"
+text = "/cloud/JKL-1.mp4"
+
+[[tree]]
+path = "emby/a/ABC-102/ABC-102-cd1.strm"
+text = "/cloud/a/ABC-102-cd1.mp4"
+
+[[tree]]
+path = "emby/a/ABC-102/ABC-102-cd2.strm"
+text = "/cloud/a/ABC-102-cd2.mp4"
+
+[[tree]]
+path = "emby/a/ABC-102/ABC-102-cd1.nfo"
+text = "<movie/>"
+
+[[tree]]
+path = "emby/a/ABC-102/ABC-102-cd2-poster.jpg"
+size = 3
+
+[[tree]]
+path = "emby/a/ABC-102/ABC-102.nfo"
+text = "<movie/>"
+
+[[tree]]
+path = "emby/a/ABC-102/poster.jpg"
+size = 4
+
+[[tree]]
+path = "emby/b/c/DEF-201/DEF-201.strm"
+text = "/cloud/b/c/DEF-201.mp4"

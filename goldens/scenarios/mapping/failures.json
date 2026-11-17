@@ -1,0 +1,826 @@
+{
+  "calls": [
+    {
+      "error": {
+        "message": "[Errno 30] Read-only file system: '{emby}/d/MNO-501/MNO-501.strm'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{emby}/d/MNO-501/MNO-501.strm"
+      },
+      "seq": 1
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{emby}/d/MNO-502/MNO-502.strm"
+      },
+      "response": null,
+      "seq": 2
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{emby}/d/MNO-503/MNO-503.strm"
+      },
+      "response": null,
+      "seq": 3
+    },
+    {
+      "error": {
+        "message": "[Errno 13] Permission denied: '{emby}/d/MNO-503'",
+        "type": "PermissionError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmdir",
+      "request": {
+        "path": "{emby}/d/MNO-503"
+      },
+      "seq": 4
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{emby}/d/MNO-504/MNO-504.strm"
+      },
+      "response": null,
+      "seq": 5
+    },
+    {
+      "error": {
+        "message": "[Errno 39] Directory not empty: '{emby}/d/MNO-504'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmdir",
+      "request": {
+        "path": "{emby}/d/MNO-504"
+      },
+      "seq": 6
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-101"
+      },
+      "response": null,
+      "seq": 7
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "copy2",
+      "request": {
+        "dst": "{emby}/a/ABC-101/ABC-101.strm",
+        "src": "{flat}/a/ABC-101.strm"
+      },
+      "response": null,
+      "seq": 8
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-102"
+      },
+      "response": null,
+      "seq": 9
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "copy2",
+      "request": {
+        "dst": "{emby}/a/ABC-102/ABC-102.strm",
+        "src": "{flat}/a/ABC-102.strm"
+      },
+      "response": null,
+      "seq": 10
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-101"
+      },
+      "response": null,
+      "seq": 11
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-102"
+      },
+      "response": null,
+      "seq": 12
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-103"
+      },
+      "response": null,
+      "seq": 13
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "copy2",
+      "request": {
+        "dst": "{emby}/a/ABC-103/ABC-103.strm",
+        "src": "{flat}/a/ABC-103.strm"
+      },
+      "response": null,
+      "seq": 14
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/b/DEF-201"
+      },
+      "response": null,
+      "seq": 15
+    },
+    {
+      "error": {
+        "message": "[Errno 5] Input/output error: '{flat}/b/DEF-201.strm' -> '{emby}/b/DEF-201/DEF-201.strm'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "copy2",
+      "request": {
+        "dst": "{emby}/b/DEF-201/DEF-201.strm",
+        "src": "{flat}/b/DEF-201.strm"
+      },
+      "seq": 16
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-101"
+      },
+      "response": null,
+      "seq": 17
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-102"
+      },
+      "response": null,
+      "seq": 18
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-103"
+      },
+      "response": null,
+      "seq": 19
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/b/DEF-201"
+      },
+      "response": null,
+      "seq": 20
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "copy2",
+      "request": {
+        "dst": "{emby}/b/DEF-201/DEF-201.strm",
+        "src": "{flat}/b/DEF-201.strm"
+      },
+      "response": null,
+      "seq": 21
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{emby}/d/MNO-501/MNO-501.strm"
+      },
+      "response": null,
+      "seq": 22
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{emby}/stale/three"
+      },
+      "response": null,
+      "seq": 23
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{emby}/stale/one/two"
+      },
+      "response": null,
+      "seq": 24
+    },
+    {
+      "error": {
+        "message": "[Errno 39] Directory not empty: '{emby}/stale/one'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{emby}/stale/one"
+      },
+      "seq": 25
+    },
+    {
+      "error": {
+        "message": "[Errno 13] Permission denied: '{emby}/locked'",
+        "type": "PermissionError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{emby}/locked"
+      },
+      "seq": 26
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{emby}/gone/away"
+      },
+      "response": null,
+      "seq": 27
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{emby}/gone"
+      },
+      "response": null,
+      "seq": 28
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{emby}/d/MNO-504"
+      },
+      "response": null,
+      "seq": 29
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{emby}/d/MNO-503"
+      },
+      "response": null,
+      "seq": 30
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{emby}/d/MNO-502"
+      },
+      "response": null,
+      "seq": 31
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{emby}/d/MNO-501"
+      },
+      "response": null,
+      "seq": 32
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{emby}/d"
+      },
+      "response": null,
+      "seq": 33
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-101"
+      },
+      "response": null,
+      "seq": 34
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-102"
+      },
+      "response": null,
+      "seq": 35
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-103"
+      },
+      "response": null,
+      "seq": 36
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/b/DEF-201"
+      },
+      "response": null,
+      "seq": 37
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/c/JKL-401"
+      },
+      "response": null,
+      "seq": 38
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-101"
+      },
+      "response": null,
+      "seq": 39
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/c/JKL-401"
+      },
+      "response": null,
+      "seq": 40
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{other}/new/mirror/a/ABC-101"
+      },
+      "response": null,
+      "seq": 41
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "copy2",
+      "request": {
+        "dst": "{other}/new/mirror/a/ABC-101/ABC-101.strm",
+        "src": "{flat}/a/ABC-101.strm"
+      },
+      "response": null,
+      "seq": 42
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "mapping.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "errors": [
+            "ERROR: Incremental delete failed for {flat}/d/MNO-501.strm: OSError(30, 'Read-only file system')",
+            "ERROR: Incremental delete failed for {flat}/d/MNO-502.strm: OSError(5, 'Input/output error')",
+            "ERROR: Incremental delete failed for {flat}/d/MNO-503.strm: PermissionError(13, 'Permission denied')"
+          ],
+          "log": [
+            "ERROR: Incremental delete failed for {flat}/d/MNO-501.strm: OSError(30, 'Read-only file system')",
+            "deleted d/MNO-502/MNO-502.strm",
+            "ERROR: Incremental delete failed for {flat}/d/MNO-502.strm: OSError(5, 'Input/output error')",
+            "deleted d/MNO-503/MNO-503.strm",
+            "ERROR: Incremental delete failed for {flat}/d/MNO-503.strm: PermissionError(13, 'Permission denied')",
+            "deleted d/MNO-504/MNO-504.strm",
+            "WARNING: skipped directory that is not empty on disk: d/MNO-504"
+          ],
+          "op": "incremental",
+          "result": {
+            "failed_changed": [],
+            "failed_deleted": [
+              "{flat}/d/MNO-501.strm",
+              "{flat}/d/MNO-502.strm",
+              "{flat}/d/MNO-503.strm"
+            ]
+          },
+          "stats": {
+            "files_deleted": 3
+          }
+        },
+        {
+          "error": {
+            "message": "",
+            "type": "RunCancelledError"
+          },
+          "errors": [],
+          "log": [
+            "starting mapping from {flat} to {emby}",
+            "updated a/ABC-101.strm -> a/ABC-101/ABC-101.strm",
+            "updated a/ABC-102.strm -> a/ABC-102/ABC-102.strm"
+          ],
+          "op": "full",
+          "stats": {
+            "files_updated": 2
+          }
+        },
+        {
+          "error": {
+            "message": "[Errno 5] Input/output error: '{flat}/b/DEF-201.strm' -> '{emby}/b/DEF-201/DEF-201.strm'",
+            "type": "OSError"
+          },
+          "errors": [],
+          "log": [
+            "starting mapping from {flat} to {emby}",
+            "updated a/ABC-103.strm -> a/ABC-103/ABC-103.strm"
+          ],
+          "op": "full",
+          "stats": {
+            "files_skipped": 2,
+            "files_updated": 1
+          }
+        },
+        {
+          "errors": [
+            "ERROR: failed to delete empty directory locked: PermissionError(13, 'Permission denied')"
+          ],
+          "log": [
+            "starting mapping from {flat} to {emby}",
+            "updated b/DEF-201.strm -> b/DEF-201/DEF-201.strm",
+            "deleted d/MNO-501/MNO-501.strm",
+            "deleted empty directory: stale/three",
+            "deleted empty directory: stale/one/two",
+            "WARNING: skipped directory that is not empty on disk: stale/one",
+            "ERROR: failed to delete empty directory locked: PermissionError(13, 'Permission denied')",
+            "deleted empty directory: gone/away",
+            "deleted empty directory: gone",
+            "deleted empty directory: d/MNO-504",
+            "deleted empty directory: d/MNO-503",
+            "deleted empty directory: d/MNO-502",
+            "deleted empty directory: d/MNO-501",
+            "deleted empty directory: d"
+          ],
+          "op": "full",
+          "result": null,
+          "stats": {
+            "dirs_deleted": 9,
+            "dirs_skipped": 2,
+            "files_deleted": 1,
+            "files_skipped": 3,
+            "files_updated": 1
+          }
+        },
+        {
+          "op": "mkdir"
+        },
+        {
+          "op": "write"
+        },
+        {
+          "error": {
+            "message": "{emby}/c/JKL-401/JKL-401.strm exists and is not a file",
+            "type": "FileExistsError"
+          },
+          "errors": [],
+          "log": [
+            "starting mapping from {flat} to {emby}"
+          ],
+          "op": "full",
+          "stats": {
+            "files_skipped": 4
+          }
+        },
+        {
+          "errors": [
+            "ERROR: Incremental update failed for {flat}/c/JKL-401.strm: FileExistsError('{emby}/c/JKL-401/JKL-401.strm exists and is not a file')"
+          ],
+          "log": [
+            "ERROR: Incremental update failed for {flat}/c/JKL-401.strm: FileExistsError('{emby}/c/JKL-401/JKL-401.strm exists and is not a file')"
+          ],
+          "op": "incremental",
+          "result": {
+            "failed_changed": [
+              "{flat}/c/JKL-401.strm"
+            ],
+            "failed_deleted": []
+          },
+          "stats": {
+            "files_skipped": 1
+          }
+        },
+        {
+          "errors": [],
+          "log": [],
+          "op": "configure",
+          "result": null,
+          "stats": {}
+        },
+        {
+          "error": {
+            "message": "{other}/file is not a directory",
+            "type": "ValueError"
+          },
+          "errors": [],
+          "log": [],
+          "op": "full",
+          "stats": {}
+        },
+        {
+          "errors": [],
+          "log": [],
+          "op": "configure",
+          "result": null,
+          "stats": {}
+        },
+        {
+          "error": {
+            "message": "{other}/missing is not a directory",
+            "type": "ValueError"
+          },
+          "errors": [],
+          "log": [],
+          "op": "full",
+          "stats": {}
+        },
+        {
+          "errors": [],
+          "log": [],
+          "op": "configure",
+          "result": null,
+          "stats": {}
+        },
+        {
+          "errors": [],
+          "log": [
+            "updated a/ABC-101.strm -> a/ABC-101/ABC-101.strm"
+          ],
+          "op": "incremental",
+          "result": {
+            "failed_changed": [],
+            "failed_deleted": []
+          },
+          "stats": {
+            "files_updated": 1
+          }
+        }
+      ]
+    }
+  },
+  "rows": {},
+  "scenario": "mapping/failures",
+  "tree": {
+    "emby": [
+      {
+        "kind": "dir",
+        "path": "a"
+      },
+      {
+        "kind": "dir",
+        "path": "a/ABC-101"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "a/ABC-101/ABC-101.strm",
+        "sha256": "d8adc39bf60a0497",
+        "size": 20
+      },
+      {
+        "kind": "dir",
+        "path": "a/ABC-102"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "a/ABC-102/ABC-102.strm",
+        "sha256": "414239c850f0e807",
+        "size": 20
+      },
+      {
+        "kind": "dir",
+        "path": "a/ABC-103"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "a/ABC-103/ABC-103.strm",
+        "sha256": "f9b41b9e91cefeaf",
+        "size": 20
+      },
+      {
+        "kind": "dir",
+        "path": "b"
+      },
+      {
+        "kind": "dir",
+        "path": "b/DEF-201"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "b/DEF-201/DEF-201.strm",
+        "sha256": "e9de4ff318e6773b",
+        "size": 20
+      },
+      {
+        "kind": "dir",
+        "path": "c"
+      },
+      {
+        "kind": "dir",
+        "path": "c/JKL-401"
+      },
+      {
+        "kind": "dir",
+        "path": "c/JKL-401/JKL-401.strm"
+      },
+      {
+        "kind": "dir",
+        "path": "locked"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "locked/poster.jpg",
+        "sha256": "2d711642b726b044",
+        "size": 1
+      },
+      {
+        "kind": "dir",
+        "path": "stale"
+      },
+      {
+        "kind": "dir",
+        "path": "stale/one"
+      }
+    ],
+    "flat": [
+      {
+        "kind": "dir",
+        "path": "a"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "a/ABC-101.strm",
+        "sha256": "d8adc39bf60a0497",
+        "size": 20
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "a/ABC-102.strm",
+        "sha256": "414239c850f0e807",
+        "size": 20
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "a/ABC-103.strm",
+        "sha256": "f9b41b9e91cefeaf",
+        "size": 20
+      },
+      {
+        "kind": "dir",
+        "path": "b"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "b/DEF-201.strm",
+        "sha256": "e9de4ff318e6773b",
+        "size": 20
+      },
+      {
+        "kind": "dir",
+        "path": "c"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "c/JKL-401.strm",
+        "sha256": "36e706eabc834fc1",
+        "size": 20
+      }
+    ],
+    "other": [
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "file",
+        "sha256": "7365d029861e32c5",
+        "size": 6
+      },
+      {
+        "kind": "dir",
+        "path": "new"
+      },
+      {
+        "kind": "dir",
+        "path": "new/mirror"
+      },
+      {
+        "kind": "dir",
+        "path": "new/mirror/a"
+      },
+      {
+        "kind": "dir",
+        "path": "new/mirror/a/ABC-101"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "new/mirror/a/ABC-101/ABC-101.strm",
+        "sha256": "d8adc39bf60a0497",
+        "size": 20
+      }
+    ]
+  }
+}

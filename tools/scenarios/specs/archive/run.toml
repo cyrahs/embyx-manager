@@ -1,0 +1,71 @@
+# The full scan (WP6): priority routes first, so the priority copy claims an AVID the normal
+# route also downloaded; a route whose source is missing is skipped; a plain file in a route
+# is not a folder; loose videos are grouped by AVID (an unreadable one is skipped) and filed
+# without a folder to delete; a route nested in another is left to its own scan, also when
+# it is deeper.
+description = "archive: run() over every route"
+operation = "archive.steps"
+
+[roots]
+names = ["task", "library"]
+
+[args.config]
+src_dir = "task"
+dst_dir = "library"
+mapping = { intake = "sorted", "intake/rank" = "sorted/rank", "intake/deep/new" = "sorted/new", gone = "elsewhere" }
+priority_mapping = { vip = "starred" }
+min_size_mb = 0
+
+[[args.steps]]
+op = "run"
+
+[[args.steps]]
+op = "run"
+
+[[tree]]
+path = "task/intake/normal/ABC-301.mp4"
+size = 10
+
+[[tree]]
+path = "task/vip/better/ABC-301.mp4"
+size = 20
+
+[[tree]]
+path = "task/intake/notes.txt"
+text = "a file, not a folder"
+
+[[tree]]
+path = "task/intake/ABC-302-cd2.mp4"
+size = 2
+
+[[tree]]
+path = "task/intake/ABC-302-cd1.mp4"
+size = 1
+
+[[tree]]
+path = "task/intake/DEF-303.mkv"
+size = 3
+
+[[tree]]
+path = "task/intake/holiday footage.mp4"
+size = 4
+
+[[tree]]
+path = "task/intake/rank/DEF-304 release/DEF-304.mp4"
+size = 5
+
+[[tree]]
+path = "task/intake/rank/DEF-305.mp4"
+size = 6
+
+[[tree]]
+path = "task/intake/deep/new/DEF-306 release/DEF-306.mp4"
+size = 7
+
+[[tree]]
+path = "task/intake/deep/kept.txt"
+text = "deep is not a route but holds one"
+
+[[tree]]
+path = "task/intake/ZZZ-307/ZZZ-307.mp4"
+size = 8

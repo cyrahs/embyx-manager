@@ -1,0 +1,391 @@
+{
+  "calls": [
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "AddOfflineFiles",
+      "request": {
+        "checkFolderAfterSecs": "10",
+        "toFolder": "/115/offline",
+        "urls": "magnet:?xt=urn:btih:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&dn=ABC-001\nmagnet:?xt=urn:btih:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 1
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "AddOfflineFiles",
+      "request": {
+        "checkFolderAfterSecs": "10",
+        "toFolder": "/115/offline",
+        "urls": "magnet:?xt=urn:btih:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb&dn=again"
+      },
+      "response": {
+        "errorMessage": "任务已存在",
+        "resultFilePaths": [],
+        "success": false
+      },
+      "seq": 2
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "AddOfflineFiles",
+      "request": {
+        "checkFolderAfterSecs": "10",
+        "toFolder": "/115/nowhere",
+        "urls": "magnet:?xt=urn:btih:cccccccccccccccccccccccccccccccccccccccc"
+      },
+      "response": {
+        "errorMessage": "destination not found: /115/nowhere",
+        "resultFilePaths": [],
+        "success": false
+      },
+      "seq": 3
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "ListOfflineFilesByPath",
+      "request": {
+        "path": "/115/offline"
+      },
+      "response": {
+        "offlineFiles": [
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "name": "ABC-001",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 0.0,
+            "size": "0",
+            "status": "OFFLINE_INIT",
+            "url": "magnet:?xt=urn:btih:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&dn=ABC-001"
+          },
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "name": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 0.0,
+            "size": "0",
+            "status": "OFFLINE_INIT",
+            "url": "magnet:?xt=urn:btih:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          }
+        ]
+      },
+      "seq": 4
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "ListOfflineFilesByPath",
+      "request": {
+        "path": "/115/other"
+      },
+      "response": {
+        "offlineFiles": [
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "dddddddddddddddddddddddddddddddddddddddd",
+            "name": "DONE-001",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 100.0,
+            "size": "9",
+            "status": "OFFLINE_FINISHED",
+            "url": "magnet:?xt=urn:btih:dddddddddddddddddddddddddddddddddddddddd"
+          },
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "name": "FAIL-001",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 12.5,
+            "size": "0",
+            "status": "OFFLINE_ERROR",
+            "url": "magnet:?xt=urn:btih:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+          }
+        ]
+      },
+      "seq": 5
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "RemoveOfflineFiles",
+      "request": {
+        "cloudAccountId": "",
+        "cloudName": "",
+        "deleteFiles": true,
+        "infoHashes": [
+          "dddddddddddddddddddddddddddddddddddddddd"
+        ],
+        "path": "/115/other"
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 6
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "RemoveOfflineFiles",
+      "request": {
+        "cloudAccountId": "",
+        "cloudName": "",
+        "deleteFiles": false,
+        "infoHashes": [
+          "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        ],
+        "path": "/115/offline"
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 7
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "ListOfflineFilesByPath",
+      "request": {
+        "path": "/115/offline"
+      },
+      "response": {
+        "offlineFiles": [
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "name": "ABC-001",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 0.0,
+            "size": "0",
+            "status": "OFFLINE_INIT",
+            "url": "magnet:?xt=urn:btih:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&dn=ABC-001"
+          }
+        ]
+      },
+      "seq": 8
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "ListOfflineFilesByPath",
+      "request": {
+        "path": "/115/other"
+      },
+      "response": {
+        "offlineFiles": [
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "name": "FAIL-001",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 12.5,
+            "size": "0",
+            "status": "OFFLINE_ERROR",
+            "url": "magnet:?xt=urn:btih:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+          }
+        ]
+      },
+      "seq": 9
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/",
+        "/115/offline",
+        "/115/other"
+      ],
+      "files": [],
+      "offline_tasks": [
+        {
+          "folder": "/115/other",
+          "info_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "name": "FAIL-001",
+          "progress": 12.5,
+          "size": 0,
+          "status": "OFFLINE_ERROR",
+          "url": "magnet:?xt=urn:btih:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        {
+          "folder": "/115/offline",
+          "info_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "name": "ABC-001",
+          "progress": 0.0,
+          "size": 0,
+          "status": "OFFLINE_INIT",
+          "url": "magnet:?xt=urn:btih:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&dn=ABC-001"
+        }
+      ],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "clouddrive.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "op": "add_offline_files",
+          "result": {
+            "errorMessage": "",
+            "resultFilePaths": [],
+            "success": true
+          }
+        },
+        {
+          "op": "add_offline_files",
+          "result": {
+            "errorMessage": "任务已存在",
+            "resultFilePaths": [],
+            "success": false
+          }
+        },
+        {
+          "op": "add_offline_files",
+          "result": {
+            "errorMessage": "destination not found: /115/nowhere",
+            "resultFilePaths": [],
+            "success": false
+          }
+        },
+        {
+          "op": "list_offline_files",
+          "result": [
+            {
+              "add_time": 0,
+              "file_id": "",
+              "info_hash": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "name": "ABC-001",
+              "peers": 0,
+              "progress": 0.0,
+              "size": 0,
+              "status": "OFFLINE_INIT",
+              "url": "magnet:?xt=urn:btih:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&dn=ABC-001"
+            },
+            {
+              "add_time": 0,
+              "file_id": "",
+              "info_hash": "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+              "name": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "peers": 0,
+              "progress": 0.0,
+              "size": 0,
+              "status": "OFFLINE_INIT",
+              "url": "magnet:?xt=urn:btih:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+            }
+          ]
+        },
+        {
+          "op": "list_offline_files",
+          "result": [
+            {
+              "add_time": 0,
+              "file_id": "",
+              "info_hash": "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
+              "name": "DONE-001",
+              "peers": 0,
+              "progress": 100.0,
+              "size": 9,
+              "status": "OFFLINE_FINISHED",
+              "url": "magnet:?xt=urn:btih:dddddddddddddddddddddddddddddddddddddddd"
+            },
+            {
+              "add_time": 0,
+              "file_id": "",
+              "info_hash": "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",
+              "name": "FAIL-001",
+              "peers": 0,
+              "progress": 12.5,
+              "size": 0,
+              "status": "OFFLINE_ERROR",
+              "url": "magnet:?xt=urn:btih:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+            }
+          ]
+        },
+        {
+          "op": "remove_offline_files",
+          "result": {
+            "errorMessage": "",
+            "resultFilePaths": [],
+            "success": true
+          }
+        },
+        {
+          "op": "remove_offline_files",
+          "result": {
+            "errorMessage": "",
+            "resultFilePaths": [],
+            "success": true
+          }
+        },
+        {
+          "op": "list_offline_files",
+          "result": [
+            {
+              "add_time": 0,
+              "file_id": "",
+              "info_hash": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "name": "ABC-001",
+              "peers": 0,
+              "progress": 0.0,
+              "size": 0,
+              "status": "OFFLINE_INIT",
+              "url": "magnet:?xt=urn:btih:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&dn=ABC-001"
+            }
+          ]
+        },
+        {
+          "op": "list_offline_files",
+          "result": [
+            {
+              "add_time": 0,
+              "file_id": "",
+              "info_hash": "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",
+              "name": "FAIL-001",
+              "peers": 0,
+              "progress": 12.5,
+              "size": 0,
+              "status": "OFFLINE_ERROR",
+              "url": "magnet:?xt=urn:btih:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "rows": {},
+  "scenario": "clouddrive/offline",
+  "tree": {}
+}

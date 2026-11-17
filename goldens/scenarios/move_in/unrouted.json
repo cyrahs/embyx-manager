@@ -1,0 +1,234 @@
+{
+  "calls": [
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/starred/ABC"
+      },
+      "response": null,
+      "seq": 1
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/starred/ABC/ABC-901.mp4",
+        "src": "{movein}/ABC-901.mp4"
+      },
+      "response": null,
+      "seq": 2
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/starred/ABC"
+      },
+      "response": null,
+      "seq": 3
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/starred/ABC/ABC-902.mp4",
+        "src": "{movein}/ABC-902.mp4"
+      },
+      "response": null,
+      "seq": 4
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "move_in.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "errors": [],
+          "log": [
+            "skipping the move-in sweep, fill_actor.task_dir_path is not configured"
+          ],
+          "op": "run",
+          "result": null,
+          "stats": {}
+        },
+        {
+          "errors": [],
+          "log": [],
+          "op": "rebind",
+          "result": null,
+          "stats": {}
+        },
+        {
+          "errors": [],
+          "log": [
+            "WARNING: skipping the move-in sweep, no archive route covers /somewhere/else"
+          ],
+          "op": "run",
+          "result": null,
+          "stats": {}
+        },
+        {
+          "errors": [],
+          "log": [],
+          "op": "rebind",
+          "result": null,
+          "stats": {}
+        },
+        {
+          "errors": [],
+          "log": [],
+          "op": "run",
+          "result": null,
+          "stats": {}
+        },
+        {
+          "errors": [],
+          "log": [],
+          "op": "rebind",
+          "result": null,
+          "stats": {}
+        },
+        {
+          "error": {
+            "message": "",
+            "type": "RunCancelledError"
+          },
+          "errors": [],
+          "log": [
+            "moving ABC-901.mp4 to starred/ABC/ABC-901.mp4"
+          ],
+          "op": "run",
+          "stats": {
+            "move_in_archived": 1,
+            "videos_archived": 1
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "moving ABC-902.mp4 to starred/ABC/ABC-902.mp4"
+          ],
+          "op": "run",
+          "result": null,
+          "stats": {
+            "move_in_archived": 1,
+            "videos_archived": 1
+          }
+        }
+      ]
+    }
+  },
+  "rows": {
+    "app_config": [],
+    "archive_acquisitions": [
+      {
+        "archived_paths_json": "[\"starred/ABC/ABC-901.mp4\"]",
+        "avid": "ABC-901",
+        "created_at": "2026-09-07T03:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "fill_actor",
+        "state": "archived",
+        "task_dir_path": null,
+        "updated_at": "2026-09-07T03:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[\"starred/ABC/ABC-902.mp4\"]",
+        "avid": "ABC-902",
+        "created_at": "2026-09-07T03:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "fill_actor",
+        "state": "archived",
+        "task_dir_path": null,
+        "updated_at": "2026-09-07T03:00:00+00:00"
+      }
+    ],
+    "archive_magnet_attempts": [],
+    "feed_subscriptions": [],
+    "fill_actor_apply_jobs": [],
+    "fill_actor_candidates": [],
+    "fill_actor_cloud_move_operations": [],
+    "fill_actor_jobs": [],
+    "fill_actor_move_journal": [],
+    "fill_actor_move_results": [],
+    "fill_actor_plans": [],
+    "health_probe": [],
+    "merge_tasks": [],
+    "merge_transcode_chunks": [],
+    "merge_transcode_parts": [],
+    "pipeline_runs": [],
+    "playlist_source": [],
+    "playlists": []
+  },
+  "scenario": "move_in/unrouted",
+  "tree": {
+    "library": [
+      {
+        "kind": "dir",
+        "path": "starred"
+      },
+      {
+        "kind": "dir",
+        "path": "starred/ABC"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "starred/ABC/ABC-901.mp4",
+        "sha256": "2d711642b726b044",
+        "size": 1
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "starred/ABC/ABC-902.mp4",
+        "sha256": "5dde896887f6754c",
+        "size": 2
+      }
+    ],
+    "movein": [],
+    "outside": [
+      {
+        "kind": "symlink",
+        "path": "linked",
+        "target": "../movein"
+      }
+    ],
+    "task": [
+      {
+        "kind": "dir",
+        "path": "vip"
+      }
+    ]
+  }
+}

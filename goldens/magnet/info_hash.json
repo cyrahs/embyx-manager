@@ -1,0 +1,176 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "magnet",
+  "cases": [
+    {
+      "magnet": "magnet:?xt=urn:btih:C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+      "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A"
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:c12fe1c06bba254a9dc9f519b335aa7c1367a88a",
+      "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A"
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:C12FE1C06BBA254A9DC9F519B335AA7C1367A88A&dn=ABC-123",
+      "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A"
+    },
+    {
+      "magnet": "magnet:?dn=ABC-123&xt=urn:btih:C12FE1C06BBA254A9DC9F519B335AA7C1367A88A&tr=udp://tracker",
+      "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A"
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:YEX6DQDLXISUVHOJ6UM3GNNKPQJWPKEK",
+      "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A"
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:yex6dqdlxisuvhoj6um3gnnkpqjwpkek&dn=ABC-123",
+      "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A"
+    },
+    {
+      "magnet": "MAGNET:?XT=URN:BTIH:C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+      "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A"
+    },
+    {
+      "magnet": "",
+      "info_hash": null
+    },
+    {
+      "magnet": "not a magnet",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?dn=ABC-123",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:sha1:C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:C12FE1C06BBA254A9DC9F519B335AA7C1367A88",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:btmh:1220caf1e1c30e81cb361b9ee167c4aa64228a7fa4fa9f6105232b28ad099f3a302e",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:C12FE1C06BBA254A9DC9F519B335AA7C1367A88A0",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:YEX6DQDLXISUVHOJ6UM3GNNKPQJWPKEKA",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:YEX6DQDLXISUVHOJ6UM3GNNKPQJWPKE1",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:YEX6DQDLXISUVHOJ6UM3GNNKPQJWPKE0",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:YEX6DQDLXISUVHOJ6UM3GNNKPQJWPKE8",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "info_hash": "0000000000000000000000000000000000000000"
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:22222222222222222222222222222222",
+      "info_hash": "D6B5AD6B5AD6B5AD6B5AD6B5AD6B5AD6B5AD6B5A"
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:77777777777777777777777777777777",
+      "info_hash": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:C12FE1C06BBA254A9DC9-F519B335AA7C1367A88A",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:C12FE1C06BBA254A9DC9éF519B335AA7C1367A88A",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:١12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:Ａ12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+      "info_hash": null
+    },
+    {
+      "magnet": "urn:btih:C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+      "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A"
+    },
+    {
+      "magnet": "xt=urn:btih:abc&xt=urn:btih:C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:BtIh:c12fe1c06bba254a9dc9f519b335aa7c1367a88a&dn=x",
+      "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A"
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:C12FE1C06BBA254A9DC9F519B335AA7C1367A88AK",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:C12FE1C06BBA254A9DC9F519B335AA7C1367A88K",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:YEX6DQDLXISUVHOJ6UM3GNNKPQJWPKEſ",
+      "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A892"
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:YEX6DQDLXISUVHOJ6UM3GNNKPQJWPKEı",
+      "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A888"
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:YEX6DQDLXISUVHOJ6UM3GNNKPQJWPKEİ",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:C12FE1C06BBA254A9DC9F519B335AA7C1367A88Aı",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:C12FE1C06BBA254A9DC9F519B335AA7C1367A88Aİ",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:bİth:C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:bıth:C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:",
+      "info_hash": null
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:0x2FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+      "info_hash": "0X2FE1C06BBA254A9DC9F519B335AA7C1367A88A"
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:0000000000000000000000000000000000000000",
+      "info_hash": "0000000000000000000000000000000000000000"
+    },
+    {
+      "magnet": "magnet:?xt=urn:btih:ffffffffffffffffffffffffffffffffffffffff",
+      "info_hash": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    }
+  ]
+}

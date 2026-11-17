@@ -1,0 +1,52 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "text",
+  "cases": [
+    {
+      "ranges": [
+        [
+          9,
+          13
+        ],
+        [
+          28,
+          32
+        ],
+        [
+          133,
+          133
+        ],
+        [
+          160,
+          160
+        ],
+        [
+          5760,
+          5760
+        ],
+        [
+          8192,
+          8202
+        ],
+        [
+          8232,
+          8233
+        ],
+        [
+          8239,
+          8239
+        ],
+        [
+          8287,
+          8287
+        ],
+        [
+          12288,
+          12288
+        ]
+      ]
+    }
+  ]
+}

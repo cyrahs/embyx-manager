@@ -1,0 +1,191 @@
+# A CloudDrive move stopped between each pair of its steps (WP11): a crash in front of the
+# operation's prepared, its submitting, the MoveFile call, its verifying and the final write
+# (result and operation together), and a cancel right after MoveFile answered. A new service
+# recovers each operation from the state it was left in: never submitted is a failure, an
+# interrupted submission is observed (moved: succeeded; untouched: unknown until the grace has
+# passed, then not observed), verifying is observed again. Apply returns what recovery stored.
+description = "fill_actor: a crash or cancel between the steps of a CloudDrive move, then recovery"
+operation = "fill_actor.service"
+clock = "2026-09-17T03:00:00+00:00"
+
+[roots]
+names = ["actor", "additional", "movein"]
+
+[args]
+catalog = { actor = ["ABC-701", "ABC-702", "ABC-703", "ABC-704", "ABC-705", "ABC-706"] }
+cloud = { strm_mount_prefix = "/mnt/cd2", source_api_roots = ["/lib/src"], move_in_api_root = "/lib/movein" }
+
+[[args.steps]]
+op = "scan"
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-701.mp4"], advance_seconds = 60, crash = { repository = "save_cloud_move_operation", state = "prepared" } }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-701.mp4"] }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-702.mp4"], advance_seconds = 60, crash = { repository = "save_cloud_move_operation", state = "submitting" } }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-702.mp4"] }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-703.mp4"], advance_seconds = 60, crash = { mover = "move_file" } }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-703.mp4"] }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-704.mp4"], advance_seconds = 60, crash = { repository = "save_cloud_move_operation", state = "verifying" } }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-704.mp4"] }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-705.mp4"], advance_seconds = 60, crash = { repository = "finalize_cloud_move" } }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-705.mp4"] }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-706.mp4"], advance_seconds = 60, cancel_after = { mover = "move_file" } }
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-706.mp4"] }
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 900 }
+
+[[args.steps]]
+op = "apply"
+
+[[tree]]
+path = "additional/ABC/ABC-701.strm"
+text = "/mnt/cd2/lib/src/ABC/ABC-701.mp4"
+
+[[tree]]
+path = "additional/ABC/ABC-702.strm"
+text = "/mnt/cd2/lib/src/ABC/ABC-702.mp4"
+
+[[tree]]
+path = "additional/ABC/ABC-703.strm"
+text = "/mnt/cd2/lib/src/ABC/ABC-703.mp4"
+
+[[tree]]
+path = "additional/ABC/ABC-704.strm"
+text = "/mnt/cd2/lib/src/ABC/ABC-704.mp4"
+
+[[tree]]
+path = "additional/ABC/ABC-705.strm"
+text = "/mnt/cd2/lib/src/ABC/ABC-705.mp4"
+
+[[tree]]
+path = "additional/ABC/ABC-706.strm"
+text = "/mnt/cd2/lib/src/ABC/ABC-706.mp4"
+
+[clouddrive]
+directories = ["/lib/movein/ABC"]
+
+[[clouddrive.files]]
+path = "/lib/src/ABC/ABC-701.mp4"
+id = "file-ABC-701"
+size = 1000
+write_time = 1788000000123456789
+hashes = { 2 = "sha1-ABC-701" }
+
+[[clouddrive.files]]
+path = "/lib/src/ABC/ABC-702.mp4"
+id = "file-ABC-702"
+size = 1001
+write_time = 1788000000123456790
+hashes = { 2 = "sha1-ABC-702" }
+
+[[clouddrive.files]]
+path = "/lib/src/ABC/ABC-703.mp4"
+id = "file-ABC-703"
+size = 1002
+write_time = 1788000000123456791
+hashes = { 2 = "sha1-ABC-703" }
+
+[[clouddrive.files]]
+path = "/lib/src/ABC/ABC-704.mp4"
+id = "file-ABC-704"
+size = 1003
+write_time = 1788000000123456792
+hashes = { 2 = "sha1-ABC-704" }
+
+[[clouddrive.files]]
+path = "/lib/src/ABC/ABC-705.mp4"
+id = "file-ABC-705"
+size = 1004
+write_time = 1788000000123456793
+hashes = { 2 = "sha1-ABC-705" }
+
+[[clouddrive.files]]
+path = "/lib/src/ABC/ABC-706.mp4"
+id = "file-ABC-706"
+size = 1005
+write_time = 1788000000123456794
+hashes = { 2 = "sha1-ABC-706" }
+
+[database]
+schema = "app"
+tables = [
+    "fill_actor_plans",
+    "fill_actor_move_results",
+    "fill_actor_move_journal",
+    "fill_actor_cloud_move_operations",
+]

@@ -1,0 +1,33 @@
+# Upgrading a version-4 database: the data migrations 5 (RSS cooldowns become acquisitions),
+# 6 and 7 (retired config keys), 8 (RSS categories, the pinned task directory), 9 (tracker
+# interval), 13 (zero-padded AVIDs) and 14 (retired sections) on rows shaped the way a
+# version-4 deployment left them.
+description = "db: open a v4 database with config and RSS failures, migrate to 19"
+operation = "db.migrate_from"
+clock = "2026-08-14T00:00:00+00:00"
+
+[args]
+from_version = 4
+seed = [
+    """INSERT INTO app_config (section, value_json, version, updated_at) VALUES
+    ('clouddrive', '{"address": "clouddrive:19798", "api_token": "x", "secure": false, "cloud_name": "115", "cloud_account_id": "42", "task_dir_path": " /115/embyx_in "}', 3, '2026-05-01T00:00:00+00:00'),
+    ('rss', '{"enabled": true, "interval_seconds": 900, "actor_label": "\\u6f14\\u5458", "rank_label": "  ", "failed_avid_cooldown_seconds": 3600}', 2, '2026-05-02T00:00:00+00:00'),
+    ('archive', '{"enabled": true, "src_dir": "/downloads", "dst_dir": "/library", "tracker_interval_seconds": 300, "task_dir_local": "/x", "task_dst": "y", "task_priority": "z"}', 4, '2026-05-03T00:00:00+00:00'),
+    ('mapping', '{"enabled": false, "debounce_seconds": 2.5}', 1, '2026-05-04T00:00:00+00:00'),
+    ('freshrss', '{"url": "http://freshrss"}', 1, '2026-05-05T00:00:00+00:00'),
+    ('feeds', '[]', 1, '2026-05-06T00:00:00+00:00')""",
+    """INSERT INTO rss_failed_avids (avid, failed_at) VALUES
+    ('ABC-00123', '2026-07-01T10:00:00+00:00'),
+    ('ABP-012', '2026-07-02T10:00:00+00:00'),
+    ('ABP-0012', '2026-07-03T10:00:00+00:00'),
+    ('FC2-00123', '2026-07-04T10:00:00+00:00'),
+    ('TBW-19', '2026-07-05T10:00:00+00:00'),
+    ('XYZ-0045', '2026-07-06T10:00:00+00:00'),
+    ('XYZ-045', '2026-07-06T11:00:00+00:00'),
+    ('123456-789', '2026-07-07T10:00:00+00:00')""",
+    """INSERT INTO fill_actor_plans (plan_id, revision, public_json, created_at, expires_at, config_version)
+    VALUES ('plan-1', 'r1', '{}', '2026-07-01T00:00:00+00:00', '2026-07-02T00:00:00+00:00', 3)""",
+]
+
+[database]
+schema = "none"

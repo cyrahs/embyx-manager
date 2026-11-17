@@ -1,0 +1,104 @@
+# The manual intake (WP7) against the ledger, the fake CloudDrive and the routes: the default
+# directory (a configured one, then the last batch's), browsing marks what can be submitted to,
+# directories refused for having no route or not existing, a batch of dirty lines (a release
+# name, unreadable text, a title the library holds, one already tracked, one with no magnet,
+# one whose magnet CloudDrive already holds), a queued batch, a batch cancelled the moment
+# CloudDrive took its first magnet and the same batch again, a paste over the limit, and the
+# tracker's poll seeing the new downloads.
+description = "manual: directories, a dirty batch, a queued batch, a cancelled batch"
+operation = "tracker.steps"
+clock = "2026-09-10T03:00:00+00:00"
+
+[roots]
+names = ["mount"]
+
+[args]
+mount = "mount"
+task_dirs = ["/115/task/inbox"]
+
+[args.sukebei]
+"NEW-503" = "magnet:?xt=urn:btih:C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1&dn=NEW-503"
+"DUPE-504" = "magnet:?xt=urn:btih:D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1&dn=DUPE-504"
+"CXL-508" = "magnet:?xt=urn:btih:E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1&dn=CXL-508"
+"CXL-509" = "magnet:?xt=urn:btih:E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2&dn=CXL-509"
+
+[args.config]
+src_dir = "mount/115/task"
+dst_dir = "mount/library"
+mapping = { inbox = "sorted", picks = "picked", absent = "gone" }
+min_size_mb = 0
+
+[[args.steps]]
+op = "default_directory"
+
+[[args.steps]]
+op = "browse"
+args = { path = "/115/task/" }
+
+[[args.steps]]
+op = "browse"
+args = { path = "/nowhere" }
+
+[[args.steps]]
+op = "check_target"
+args = { task_dir = "/115/misc" }
+
+[[args.steps]]
+op = "check_target"
+args = { task_dir = "/115/task/absent" }
+
+[[args.steps]]
+op = "check_target"
+args = { task_dir = "/115/task/picks/" }
+
+[[args.steps]]
+op = "submit"
+args = { task_dir = "/115/task/picks", lines = ["[FHD] new-503.mp4", "hello", "HLD-501", "TRK-502", "NOM-505", "DUPE-504", "   "] }
+
+[[args.steps]]
+op = "default_directory"
+
+[[args.steps]]
+op = "submit"
+args = { task_dir = "/115/task/inbox", lines = ["QUE-506", "que-507"], queue = true }
+
+[[args.steps]]
+op = "submit"
+args = { task_dir = "/115/task/inbox", lines = ["CXL-508", "CXL-509"], cancel_after = "AddOfflineFiles" }
+
+[[args.steps]]
+op = "submit"
+args = { task_dir = "/115/task/inbox", lines = ["CXL-508", "CXL-509"] }
+
+[[args.steps]]
+op = "submit"
+args = { task_dir = "/115/task/inbox", lines = ["ABC-000", "ABC-001", "ABC-002", "ABC-003", "ABC-004", "ABC-005", "ABC-006", "ABC-007", "ABC-008", "ABC-009", "ABC-010", "ABC-011", "ABC-012", "ABC-013", "ABC-014", "ABC-015", "ABC-016", "ABC-017", "ABC-018", "ABC-019", "ABC-020", "ABC-021", "ABC-022", "ABC-023", "ABC-024", "ABC-025", "ABC-026", "ABC-027", "ABC-028", "ABC-029", "ABC-030", "ABC-031", "ABC-032", "ABC-033", "ABC-034", "ABC-035", "ABC-036", "ABC-037", "ABC-038", "ABC-039", "ABC-040", "ABC-041", "ABC-042", "ABC-043", "ABC-044", "ABC-045", "ABC-046", "ABC-047", "ABC-048", "ABC-049", "ABC-050", "ABC-051", "ABC-052", "ABC-053", "ABC-054", "ABC-055", "ABC-056", "ABC-057", "ABC-058", "ABC-059", "ABC-060", "ABC-061", "ABC-062", "ABC-063", "ABC-064", "ABC-065", "ABC-066", "ABC-067", "ABC-068", "ABC-069", "ABC-070", "ABC-071", "ABC-072", "ABC-073", "ABC-074", "ABC-075", "ABC-076", "ABC-077", "ABC-078", "ABC-079", "ABC-080", "ABC-081", "ABC-082", "ABC-083", "ABC-084", "ABC-085", "ABC-086", "ABC-087", "ABC-088", "ABC-089", "ABC-090", "ABC-091", "ABC-092", "ABC-093", "ABC-094", "ABC-095", "ABC-096", "ABC-097", "ABC-098", "ABC-099", "ABC-100"] }
+
+[[args.steps]]
+op = "submit"
+args = { task_dir = "/115/misc", lines = ["ABC-001"] }
+
+[[args.steps]]
+op = "poll"
+args = { advance_seconds = 60 }
+
+[[tree]]
+path = "mount/library/sorted/HLD/HLD-501.mp4"
+size = 4
+
+[database]
+schema = "app"
+sql = [
+    "INSERT INTO archive_acquisitions (avid, state, source, task_dir_path, release_date, created_at, updated_at) VALUES ('TRK-502', 'downloading', 'rss:Actor', '/115/task/inbox', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z')",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at, error) VALUES ('TRK-502', 1, 'magnet:?xt=urn:btih:B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1&dn=TRK-502', 'B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1', 'sukebei', 'downloading', 30.0, '2026-09-09T00:00:00Z', '2026-09-10T02:00:00Z', NULL)",
+]
+
+[clouddrive]
+directories = ["/115", "/115/task", "/115/task/inbox", "/115/task/picks", "/115/task/other", "/115/misc"]
+files = [
+    { path = "/115/task/inbox/notes.txt", size = 1 },
+]
+offline_tasks = [
+    { name = "TRK-502", url = "magnet:?xt=urn:btih:b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1", folder = "/115/task/inbox", info_hash = "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1", status = "OFFLINE_DOWNLOADING", size = 0, progress = 35.0 },
+    { name = "someone else's", url = "magnet:?xt=urn:btih:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1", folder = "/115/misc", info_hash = "d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1", status = "OFFLINE_DOWNLOADING", size = 0, progress = 10.0 },
+]

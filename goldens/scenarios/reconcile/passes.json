@@ -1,0 +1,579 @@
+{
+  "calls": [
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/starred/ABC"
+      },
+      "response": null,
+      "seq": 1
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/starred/ABC/ABC-609.mp4",
+        "src": "{task}/vip/ABC-609/ABC-609.mp4"
+      },
+      "response": null,
+      "seq": 2
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/vip/ABC-609"
+      },
+      "response": null,
+      "seq": 3
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/ABC"
+      },
+      "response": null,
+      "seq": 4
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-600.mp4",
+        "src": "{task}/intake/ABC-600 release/ABC-600.mp4"
+      },
+      "response": null,
+      "seq": 5
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/ABC-600 release"
+      },
+      "response": null,
+      "seq": 6
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/ABC"
+      },
+      "response": null,
+      "seq": 7
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-602.mp4",
+        "src": "{task}/intake/ABC-602 leftover/ABC-602.mp4"
+      },
+      "response": null,
+      "seq": 8
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/ABC-602 leftover"
+      },
+      "response": null,
+      "seq": 9
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/rank/DEF"
+      },
+      "response": null,
+      "seq": 10
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/rank/DEF/DEF-608.mp4",
+        "src": "{task}/intake/rank/DEF-608 release/DEF-608.mp4"
+      },
+      "response": null,
+      "seq": 11
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/rank/DEF-608 release"
+      },
+      "response": null,
+      "seq": 12
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/ABC"
+      },
+      "response": null,
+      "seq": 13
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-603.mp4",
+        "src": "{task}/intake/ABC-603 growing/ABC-603.mp4"
+      },
+      "response": null,
+      "seq": 14
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/ABC-603 growing"
+      },
+      "response": null,
+      "seq": 15
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "reconcile.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "errors": [],
+          "log": [
+            "ABC-609 is still changing, leaving it for the next pass",
+            "ABC-600 release is still changing, leaving it for the next pass",
+            "leaving ABC-601 dl to the tracker",
+            "ABC-602 leftover is still changing, leaving it for the next pass",
+            "ABC-603 growing is still changing, leaving it for the next pass",
+            "ABC-606 again is still changing, leaving it for the next pass",
+            "ABC-607 again is still changing, leaving it for the next pass",
+            "junk is still changing, leaving it for the next pass",
+            "mixed is still changing, leaving it for the next pass",
+            "skipping rank, it is another route of its own",
+            "whatever is still changing, leaving it for the next pass",
+            "DEF-608 release is still changing, leaving it for the next pass",
+            "skipping {task}/gone, its source directory does not exist"
+          ],
+          "op": "run",
+          "result": null,
+          "stats": {}
+        },
+        {
+          "op": "write"
+        },
+        {
+          "errors": [],
+          "log": [
+            "moving ABC-609.mp4 to starred/ABC/ABC-609.mp4",
+            "moving ABC-600.mp4 to sorted/ABC/ABC-600.mp4",
+            "leaving ABC-601 dl to the tracker",
+            "moving ABC-602.mp4 to sorted/ABC/ABC-602.mp4",
+            "ABC-603 growing is still changing, leaving it for the next pass",
+            "WARNING: sorted/ABC/ABC-606.mp4 exists, skipping",
+            "WARNING: ABC-606 needs attention: destination already holds this avid",
+            "WARNING: sorted/ABC/ABC-607.mp4 exists, skipping",
+            "junk holds no video above 0MB",
+            "WARNING: multiple avids in one folder: ABC-604, DEF-605 in mixed, skipping",
+            "WARNING: mixed needs attention: multiple avids in one folder: ABC-604, DEF-605",
+            "skipping rank, it is another route of its own",
+            "WARNING: failed to read an avid for whatever, skipping",
+            "WARNING: whatever needs attention: no avid could be read",
+            "moving DEF-608.mp4 to sorted/rank/DEF/DEF-608.mp4",
+            "skipping {task}/gone, its source directory does not exist"
+          ],
+          "op": "run",
+          "result": null,
+          "stats": {
+            "folders_discarded": 4,
+            "needs_attention": 3,
+            "reconciled": 4,
+            "videos_archived": 4
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "leaving ABC-601 dl to the tracker",
+            "moving ABC-603.mp4 to sorted/ABC/ABC-603.mp4",
+            "WARNING: sorted/ABC/ABC-606.mp4 exists, skipping",
+            "WARNING: sorted/ABC/ABC-607.mp4 exists, skipping",
+            "junk holds no video above 0MB",
+            "WARNING: multiple avids in one folder: ABC-604, DEF-605 in mixed, skipping",
+            "skipping rank, it is another route of its own",
+            "WARNING: failed to read an avid for whatever, skipping",
+            "skipping {task}/gone, its source directory does not exist"
+          ],
+          "op": "run",
+          "result": null,
+          "stats": {
+            "folders_discarded": 1,
+            "reconciled": 1,
+            "videos_archived": 1
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "leaving ABC-601 dl to the tracker",
+            "WARNING: sorted/ABC/ABC-606.mp4 exists, skipping",
+            "WARNING: sorted/ABC/ABC-607.mp4 exists, skipping",
+            "junk holds no video above 0MB",
+            "WARNING: multiple avids in one folder: ABC-604, DEF-605 in mixed, skipping",
+            "skipping rank, it is another route of its own",
+            "WARNING: failed to read an avid for whatever, skipping",
+            "skipping {task}/gone, its source directory does not exist"
+          ],
+          "op": "run",
+          "result": null,
+          "stats": {}
+        }
+      ]
+    }
+  },
+  "rows": {
+    "app_config": [],
+    "archive_acquisitions": [
+      {
+        "archived_paths_json": "[\"sorted/ABC/ABC-600.mp4\"]",
+        "avid": "ABC-600",
+        "created_at": "2026-09-04T04:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "reconcile",
+        "state": "archived",
+        "task_dir_path": null,
+        "updated_at": "2026-09-04T04:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "ABC-601",
+        "created_at": "2026-09-01T00:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss:Actor",
+        "state": "downloading",
+        "task_dir_path": null,
+        "updated_at": "2026-09-01T00:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[\"sorted/ABC/ABC-602.mp4\"]",
+        "avid": "ABC-602",
+        "created_at": "2026-09-01T00:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss:Actor",
+        "state": "archived",
+        "task_dir_path": null,
+        "updated_at": "2026-09-02T00:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[\"sorted/ABC/ABC-603.mp4\"]",
+        "avid": "ABC-603",
+        "created_at": "2026-09-04T05:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "reconcile",
+        "state": "archived",
+        "task_dir_path": null,
+        "updated_at": "2026-09-04T05:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "ABC-606",
+        "created_at": "2026-09-04T04:00:00+00:00",
+        "next_action_at": null,
+        "note": "destination already holds this avid",
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "reconcile",
+        "state": "needs_attention",
+        "task_dir_path": null,
+        "updated_at": "2026-09-04T04:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "ABC-607",
+        "created_at": "2026-09-01T00:00:00+00:00",
+        "next_action_at": null,
+        "note": "parked earlier",
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "manual",
+        "state": "needs_attention",
+        "task_dir_path": null,
+        "updated_at": "2026-09-02T00:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[\"starred/ABC/ABC-609.mp4\"]",
+        "avid": "ABC-609",
+        "created_at": "2026-09-04T04:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "reconcile",
+        "state": "archived",
+        "task_dir_path": null,
+        "updated_at": "2026-09-04T04:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[\"sorted/rank/DEF/DEF-608.mp4\"]",
+        "avid": "DEF-608",
+        "created_at": "2026-09-04T04:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "reconcile",
+        "state": "archived",
+        "task_dir_path": null,
+        "updated_at": "2026-09-04T04:00:00+00:00"
+      }
+    ],
+    "archive_magnet_attempts": [],
+    "feed_subscriptions": [],
+    "fill_actor_apply_jobs": [],
+    "fill_actor_candidates": [],
+    "fill_actor_cloud_move_operations": [],
+    "fill_actor_jobs": [],
+    "fill_actor_move_journal": [],
+    "fill_actor_move_results": [],
+    "fill_actor_plans": [],
+    "health_probe": [],
+    "merge_tasks": [],
+    "merge_transcode_chunks": [],
+    "merge_transcode_parts": [],
+    "pipeline_runs": [],
+    "playlist_source": [],
+    "playlists": []
+  },
+  "scenario": "reconcile/passes",
+  "tree": {
+    "library": [
+      {
+        "kind": "dir",
+        "path": "sorted"
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/ABC"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-600.mp4",
+        "sha256": "fc11d6f28e59d3cc",
+        "size": 10
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-602.mp4",
+        "sha256": "59ffe12a70df1510",
+        "size": 12
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-603.mp4",
+        "sha256": "d0621fdd5f0673d6",
+        "size": 99
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-606.mp4",
+        "sha256": "9c5729595fb287cc",
+        "size": 16
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-607.mp4",
+        "sha256": "6f3226f77f030743",
+        "size": 18
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/rank"
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/rank/DEF"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/rank/DEF/DEF-608.mp4",
+        "sha256": "7799e51458c8540c",
+        "size": 21
+      },
+      {
+        "kind": "dir",
+        "path": "starred"
+      },
+      {
+        "kind": "dir",
+        "path": "starred/ABC"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "starred/ABC/ABC-609.mp4",
+        "sha256": "ec4a4fcd915a7672",
+        "size": 22
+      }
+    ],
+    "task": [
+      {
+        "kind": "dir",
+        "path": "intake"
+      },
+      {
+        "kind": "dir",
+        "path": "intake/ABC-601 dl"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/ABC-601 dl/ABC-601.mp4",
+        "sha256": "7668d2cd32a37eb4",
+        "size": 11
+      },
+      {
+        "kind": "dir",
+        "path": "intake/ABC-606 again"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/ABC-606 again/ABC-606.mp4",
+        "sha256": "d04fd59f3d9a1fd4",
+        "size": 17
+      },
+      {
+        "kind": "dir",
+        "path": "intake/ABC-607 again"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/ABC-607 again/ABC-607.mp4",
+        "sha256": "0d0f234feb2d235c",
+        "size": 19
+      },
+      {
+        "kind": "dir",
+        "path": "intake/junk"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/junk/readme.txt",
+        "sha256": "8e1539df61f78b8a",
+        "size": 13
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/loose-ABC-610.mp4",
+        "sha256": "564b146b27c9ded7",
+        "size": 23
+      },
+      {
+        "kind": "dir",
+        "path": "intake/mixed"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/mixed/ABC-604.mp4",
+        "sha256": "8108ed602688b707",
+        "size": 14
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/mixed/DEF-605.mp4",
+        "sha256": "b670825c8f110a2e",
+        "size": 15
+      },
+      {
+        "kind": "dir",
+        "path": "intake/rank"
+      },
+      {
+        "kind": "dir",
+        "path": "intake/whatever"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/whatever/movie.mp4",
+        "sha256": "d4fc1db665446507",
+        "size": 20
+      },
+      {
+        "kind": "dir",
+        "path": "vip"
+      }
+    ]
+  }
+}

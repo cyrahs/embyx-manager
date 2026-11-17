@@ -1,0 +1,444 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "urls",
+  "cases": [
+    {
+      "url": "http://wx1.sinaimg.cn/mw600/abc.jpg",
+      "result": [
+        "http",
+        "wx1.sinaimg.cn",
+        "/mw600/abc.jpg",
+        "",
+        "",
+        "wx1.sinaimg.cn",
+        "http://wx1.sinaimg.cn/mw600/abc.jpg"
+      ]
+    },
+    {
+      "url": "https://img.wangmoyu.com/mw1024/abc.png?x=1&y=2#frag",
+      "result": [
+        "https",
+        "img.wangmoyu.com",
+        "/mw1024/abc.png",
+        "x=1&y=2",
+        "frag",
+        "img.wangmoyu.com",
+        "https://img.wangmoyu.com/mw1024/abc.png?x=1&y=2#frag"
+      ]
+    },
+    {
+      "url": "//img.wangmoyu.com/mw600/demo-b.png",
+      "result": [
+        "",
+        "img.wangmoyu.com",
+        "/mw600/demo-b.png",
+        "",
+        "",
+        "img.wangmoyu.com",
+        "//img.wangmoyu.com/mw600/demo-b.png"
+      ]
+    },
+    {
+      "url": "HTTP://WX4.SINAIMG.CN/Large/ABC.JPG",
+      "result": [
+        "http",
+        "WX4.SINAIMG.CN",
+        "/Large/ABC.JPG",
+        "",
+        "",
+        "wx4.sinaimg.cn",
+        "http://WX4.SINAIMG.CN/Large/ABC.JPG"
+      ]
+    },
+    {
+      "url": "https://user:pw@Host.Example:8443/p/a/t/h?q#f",
+      "result": [
+        "https",
+        "user:pw@Host.Example:8443",
+        "/p/a/t/h",
+        "q",
+        "f",
+        "host.example",
+        "https://user:pw@Host.Example:8443/p/a/t/h?q#f"
+      ]
+    },
+    {
+      "url": "https://pawchive.pw/fanbox/user/70050825?o=50",
+      "result": [
+        "https",
+        "pawchive.pw",
+        "/fanbox/user/70050825",
+        "o=50",
+        "",
+        "pawchive.pw",
+        "https://pawchive.pw/fanbox/user/70050825?o=50"
+      ]
+    },
+    {
+      "url": "https://kemono.cr/patreon/user/9069743/posts",
+      "result": [
+        "https",
+        "kemono.cr",
+        "/patreon/user/9069743/posts",
+        "",
+        "",
+        "kemono.cr",
+        "https://kemono.cr/patreon/user/9069743/posts"
+      ]
+    },
+    {
+      "url": "fanbox/user/70050825",
+      "result": [
+        "",
+        "",
+        "fanbox/user/70050825",
+        "",
+        "",
+        null,
+        "fanbox/user/70050825"
+      ]
+    },
+    {
+      "url": "70050825",
+      "result": [
+        "",
+        "",
+        "70050825",
+        "",
+        "",
+        null,
+        "70050825"
+      ]
+    },
+    {
+      "url": "mailto:someone@example.com",
+      "result": [
+        "mailto",
+        "",
+        "someone@example.com",
+        "",
+        "",
+        null,
+        "mailto:someone@example.com"
+      ]
+    },
+    {
+      "url": "http:/one-slash/path",
+      "result": [
+        "http",
+        "",
+        "/one-slash/path",
+        "",
+        "",
+        null,
+        "http:///one-slash/path"
+      ]
+    },
+    {
+      "url": "http:path-only",
+      "result": [
+        "http",
+        "",
+        "path-only",
+        "",
+        "",
+        null,
+        "http:path-only"
+      ]
+    },
+    {
+      "url": "file:///etc/hosts",
+      "result": [
+        "file",
+        "",
+        "/etc/hosts",
+        "",
+        "",
+        null,
+        "file:///etc/hosts"
+      ]
+    },
+    {
+      "url": "svn+ssh://host/repo",
+      "result": [
+        "svn+ssh",
+        "host",
+        "/repo",
+        "",
+        "",
+        "host",
+        "svn+ssh://host/repo"
+      ]
+    },
+    {
+      "url": "  \u0001 http://lead.example/ctrl  ",
+      "result": [
+        "http",
+        "lead.example",
+        "/ctrl  ",
+        "",
+        "",
+        "lead.example",
+        "http://lead.example/ctrl  "
+      ]
+    },
+    {
+      "url": "http://ta\tb.example/new\nline\r",
+      "result": [
+        "http",
+        "tab.example",
+        "/newline",
+        "",
+        "",
+        "tab.example",
+        "http://tab.example/newline"
+      ]
+    },
+    {
+      "url": "https://[::1]:8080/v6",
+      "result": [
+        "https",
+        "[::1]:8080",
+        "/v6",
+        "",
+        "",
+        "::1",
+        "https://[::1]:8080/v6"
+      ]
+    },
+    {
+      "url": "https://[fe80::1%25eth0]/zone",
+      "result": [
+        "https",
+        "[fe80::1%25eth0]",
+        "/zone",
+        "",
+        "",
+        "fe80::1%25eth0",
+        "https://[fe80::1%25eth0]/zone"
+      ]
+    },
+    {
+      "url": "https://[fe80::1%Eth0]/zone-case",
+      "result": [
+        "https",
+        "[fe80::1%Eth0]",
+        "/zone-case",
+        "",
+        "",
+        "fe80::1%Eth0",
+        "https://[fe80::1%Eth0]/zone-case"
+      ]
+    },
+    {
+      "url": "https://[v1.fe]/future",
+      "result": [
+        "https",
+        "[v1.fe]",
+        "/future",
+        "",
+        "",
+        "v1.fe",
+        "https://[v1.fe]/future"
+      ]
+    },
+    {
+      "url": "https://[v1]/future-bad",
+      "result": "ValueError: IPvFuture address is invalid"
+    },
+    {
+      "url": "https://[127.0.0.1]/v4-in-brackets",
+      "result": "ValueError: An IPv4 address cannot be in brackets"
+    },
+    {
+      "url": "https://[::1/missing-close",
+      "result": "ValueError: Invalid IPv6 URL"
+    },
+    {
+      "url": "https://::1]/missing-open",
+      "result": "ValueError: Invalid IPv6 URL"
+    },
+    {
+      "url": "https://x[::1]/before-bracket",
+      "result": "ValueError: Invalid IPv6 URL"
+    },
+    {
+      "url": "https://[::1]x/after-bracket",
+      "result": "ValueError: Invalid IPv6 URL"
+    },
+    {
+      "url": "https://[not-an-ip]/bad",
+      "result": "ValueError: 'not-an-ip' does not appear to be an IPv4 or IPv6 address"
+    },
+    {
+      "url": "https://[::1]:80:90/two-ports",
+      "result": [
+        "https",
+        "[::1]:80:90",
+        "/two-ports",
+        "",
+        "",
+        "::1",
+        "https://[::1]:80:90/two-ports"
+      ]
+    },
+    {
+      "url": "https://host:/empty-port",
+      "result": [
+        "https",
+        "host:",
+        "/empty-port",
+        "",
+        "",
+        "host",
+        "https://host:/empty-port"
+      ]
+    },
+    {
+      "url": "https://@/empty-host",
+      "result": [
+        "https",
+        "@",
+        "/empty-host",
+        "",
+        "",
+        null,
+        "https://@/empty-host"
+      ]
+    },
+    {
+      "url": "https:///triple-slash",
+      "result": [
+        "https",
+        "",
+        "/triple-slash",
+        "",
+        "",
+        null,
+        "https:///triple-slash"
+      ]
+    },
+    {
+      "url": "https://h/a?b?c#d#e",
+      "result": [
+        "https",
+        "h",
+        "/a",
+        "b?c",
+        "d#e",
+        "h",
+        "https://h/a?b?c#d#e"
+      ]
+    },
+    {
+      "url": "https://h#frag?notquery",
+      "result": [
+        "https",
+        "h",
+        "",
+        "",
+        "frag?notquery",
+        "h",
+        "https://h#frag?notquery"
+      ]
+    },
+    {
+      "url": "https://ÉXAMPLE.com/Ünicode",
+      "result": [
+        "https",
+        "ÉXAMPLE.com",
+        "/Ünicode",
+        "",
+        "",
+        "éxample.com",
+        "https://ÉXAMPLE.com/Ünicode"
+      ]
+    },
+    {
+      "url": "h-t.t+p://scheme-chars/ok",
+      "result": [
+        "h-t.t+p",
+        "scheme-chars",
+        "/ok",
+        "",
+        "",
+        "scheme-chars",
+        "h-t.t+p://scheme-chars/ok"
+      ]
+    },
+    {
+      "url": "1http://digit-first/path",
+      "result": [
+        "",
+        "",
+        "1http://digit-first/path",
+        "",
+        "",
+        null,
+        "1http://digit-first/path"
+      ]
+    },
+    {
+      "url": "ht_tp://underscore/not-scheme",
+      "result": [
+        "",
+        "",
+        "ht_tp://underscore/not-scheme",
+        "",
+        "",
+        null,
+        "ht_tp://underscore/not-scheme"
+      ]
+    },
+    {
+      "url": "://no-scheme",
+      "result": [
+        "",
+        "",
+        "://no-scheme",
+        "",
+        "",
+        null,
+        "://no-scheme"
+      ]
+    },
+    {
+      "url": "",
+      "result": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        null,
+        ""
+      ]
+    },
+    {
+      "url": "/just/a/path.jpg",
+      "result": [
+        "",
+        "",
+        "/just/a/path.jpg",
+        "",
+        "",
+        null,
+        "/just/a/path.jpg"
+      ]
+    },
+    {
+      "url": "https://img.wangmoyu.com/images/default_d_h_mw600.gif#101",
+      "result": [
+        "https",
+        "img.wangmoyu.com",
+        "/images/default_d_h_mw600.gif",
+        "",
+        "101",
+        "img.wangmoyu.com",
+        "https://img.wangmoyu.com/images/default_d_h_mw600.gif#101"
+      ]
+    }
+  ]
+}

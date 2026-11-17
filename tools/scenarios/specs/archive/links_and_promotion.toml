@@ -1,0 +1,87 @@
+# Discarding and promotion (WP6, review of #89): a filed folder that holds a link to a library
+# directory, a link to a library video and a nested directory is removed without touching what
+# the links point at; a priority arrival whose promotion fails on the second part leaves the
+# first part promoted, the second in place and its own folder untouched (failed); the library
+# check's promotion cannot create the brand directory (the error ends the call) and then
+# succeeds once the fault is spent.
+description = "archive: discarding a folder with links into the library, promotion failures"
+operation = "archive.steps"
+
+[roots]
+names = ["task", "library"]
+
+[args.config]
+src_dir = "task"
+dst_dir = "library"
+mapping = { intake = "sorted" }
+priority_mapping = { vip = "starred" }
+min_size_mb = 0
+
+[[args.faults]]
+op = "rename"
+path = "library/sorted/ABC/ABC-302-cd2.mp4"
+errno = 5
+
+[[args.faults]]
+op = "mkdir"
+path = "library/starred/DEF"
+errno = 28
+times = 1
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/ABC-301 links", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/vip/ABC-302", dst = "starred", priority = true }
+
+[[args.steps]]
+op = "library_holdings"
+args = { avid = "DEF-303", task_dir = "/task/vip" }
+
+[[args.steps]]
+op = "library_holdings"
+args = { avid = "DEF-303", task_dir = "/task/vip" }
+
+[[tree]]
+path = "task/intake/ABC-301 links/ABC-301.mp4"
+size = 31
+
+[[tree]]
+path = "task/intake/ABC-301 links/extras/sample.txt"
+text = "sample"
+
+[[tree]]
+path = "task/intake/ABC-301 links/library-dir"
+kind = "symlink"
+target = "../../../library/sorted/KEEP"
+
+[[tree]]
+path = "task/intake/ABC-301 links/library-video.nfo"
+kind = "symlink"
+target = "../../../library/sorted/KEEP/KEEP-001.mp4"
+
+[[tree]]
+path = "library/sorted/KEEP/KEEP-001.mp4"
+size = 41
+
+[[tree]]
+path = "library/sorted/KEEP/KEEP-002.mp4"
+size = 42
+
+[[tree]]
+path = "library/sorted/ABC/ABC-302-cd1.mp4"
+size = 32
+
+[[tree]]
+path = "library/sorted/ABC/ABC-302-cd2.mp4"
+size = 33
+
+[[tree]]
+path = "task/vip/ABC-302/ABC-302-4k.mp4"
+size = 34
+
+[[tree]]
+path = "library/sorted/DEF/DEF-303.mp4"
+size = 35

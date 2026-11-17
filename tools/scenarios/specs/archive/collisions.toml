@@ -1,0 +1,106 @@
+# Name collisions (WP6): the library already holds the AVID, or only one part of a set, so
+# nothing moves; a hard-linked video keeps its link count when filed; a symbolic link to a
+# folder files the folder's video but cannot be removed itself; a min-size threshold makes
+# a folder junk and leaves it in place.
+description = "archive: destinations that already exist, links, the size threshold"
+operation = "archive.steps"
+
+[roots]
+names = ["task", "library", "outside"]
+
+[args.config]
+src_dir = "task"
+dst_dir = "library"
+mapping = { intake = "sorted" }
+min_size_mb = 1
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/again", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/part-taken", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/hardlinked", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/linked", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/ads", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/longer", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_loose_group"
+args = { avid = "ABC-111", videos = ["task/intake/ABC-111.mp4"], dst = "sorted" }
+
+[[tree]]
+path = "library/sorted/ABC/ABC-111.mp4"
+size = 999
+
+[[tree]]
+path = "task/intake/again/ABC-111.mp4"
+size = 1048577
+
+[[tree]]
+path = "task/intake/ABC-111.mp4"
+size = 1048578
+
+[[tree]]
+path = "library/sorted/ABC/ABC-112-cd2.mp4"
+size = 5
+
+[[tree]]
+path = "task/intake/part-taken/ABC-112-1.mp4"
+size = 1048577
+
+[[tree]]
+path = "task/intake/part-taken/ABC-112-2.mp4"
+size = 1048578
+
+[[tree]]
+path = "outside/keep/ABC-114.mp4"
+size = 1048579
+
+[[tree]]
+path = "task/intake/hardlinked/ABC-114.mp4"
+kind = "hardlink"
+target = "outside/keep/ABC-114.mp4"
+
+[[tree]]
+path = "outside/linked/ABC-115.mp4"
+size = 1048580
+
+[[tree]]
+path = "outside/linked/ABC-115.nfo"
+text = "<movie/>"
+
+[[tree]]
+path = "task/intake/linked"
+kind = "symlink"
+target = "../../outside/linked"
+
+[[tree]]
+path = "task/intake/ads/ABC-118.mp4"
+size = 1048576
+
+[[tree]]
+path = "task/intake/ads/promo.mp4"
+size = 100
+
+# A longer AVID sharing the prefix is not a copy of ABC-119.
+[[tree]]
+path = "library/sorted/ABC/ABC-1190.mp4"
+size = 3
+
+[[tree]]
+path = "task/intake/longer/ABC-119.mp4"
+size = 1048581

@@ -1,0 +1,319 @@
+{
+  "calls": [
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "ListOfflineFilesByPath",
+      "request": {
+        "path": "/115/task/inbox"
+      },
+      "response": {
+        "offlineFiles": [
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "3333333333333333333333333333333333333333",
+            "name": "ROU-331",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 100.0,
+            "size": "9",
+            "status": "OFFLINE_FINISHED",
+            "url": "magnet:?xt=urn:btih:3333333333333333333333333333333333333333&dn=ROU-331"
+          }
+        ]
+      },
+      "seq": 1
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/ROU-331",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/ROU-331",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ROU-331",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 2
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox/ROU-331"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/ROU-331/ROU-331.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/ROU-331/ROU-331.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ROU-331.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "9",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 3
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "ListOfflineFilesByPath",
+      "request": {
+        "path": "/115/task/inbox"
+      },
+      "response": {
+        "offlineFiles": [
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "3333333333333333333333333333333333333333",
+            "name": "ROU-331",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 100.0,
+            "size": "9",
+            "status": "OFFLINE_FINISHED",
+            "url": "magnet:?xt=urn:btih:3333333333333333333333333333333333333333&dn=ROU-331"
+          }
+        ]
+      },
+      "seq": 4
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/",
+        "/115/task/inbox",
+        "/115/task/inbox/ROU-331"
+      ],
+      "files": [
+        {
+          "hashes": {},
+          "path": "/115/task/inbox/ROU-331/ROU-331.mp4",
+          "size": 9
+        }
+      ],
+      "offline_tasks": [
+        {
+          "folder": "/115/task/inbox",
+          "info_hash": "3333333333333333333333333333333333333333",
+          "name": "ROU-331",
+          "progress": 100.0,
+          "size": 9,
+          "status": "OFFLINE_FINISHED",
+          "url": "magnet:?xt=urn:btih:3333333333333333333333333333333333333333&dn=ROU-331"
+        }
+      ],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "tracker.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "errors": [],
+          "log": [],
+          "op": "poll",
+          "result": null,
+          "stats": {
+            "needs_attention": 1,
+            "offline_tasks": 1
+          }
+        },
+        {
+          "errors": [],
+          "log": [],
+          "op": "poll",
+          "result": null,
+          "stats": {
+            "offline_tasks": 1
+          }
+        }
+      ]
+    }
+  },
+  "rows": {
+    "app_config": [],
+    "archive_acquisitions": [
+      {
+        "archived_paths_json": "[\"sorted/ROU/ROU-331.mp4\"]",
+        "avid": "ROU-331",
+        "created_at": "2026-09-09T00:00:00+00:00",
+        "next_action_at": null,
+        "note": "{library}/sorted/ROU/ROU-331.mp4 is outside the CloudDrive mount {mount}",
+        "release_date": null,
+        "replace_after_attempt": 1,
+        "replace_paths_json": "[\"sorted/ROU/ROU-331.mp4\"]",
+        "source": "manual",
+        "state": "needs_attention",
+        "task_dir_path": "/115/task/inbox",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      }
+    ],
+    "archive_magnet_attempts": [
+      {
+        "attempt_no": 1,
+        "avid": "ROU-331",
+        "error": null,
+        "info_hash": "0303030303030303030303030303030303030303",
+        "magnet": "magnet:?xt=urn:btih:0303030303030303030303030303030303030303&dn=ROU-331",
+        "magnet_source": "sukebei",
+        "progress": 100,
+        "size_hint": null,
+        "state": "archived",
+        "submitted_at": "2026-08-01T00:00:00+00:00",
+        "updated_at": "2026-08-01T00:00:00+00:00"
+      },
+      {
+        "attempt_no": 2,
+        "avid": "ROU-331",
+        "error": null,
+        "info_hash": "3333333333333333333333333333333333333333",
+        "magnet": "magnet:?xt=urn:btih:3333333333333333333333333333333333333333&dn=ROU-331",
+        "magnet_source": "sukebei",
+        "progress": 80,
+        "size_hint": null,
+        "state": "finished",
+        "submitted_at": "2026-09-09T00:00:00+00:00",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      }
+    ],
+    "feed_subscriptions": [],
+    "fill_actor_apply_jobs": [],
+    "fill_actor_candidates": [],
+    "fill_actor_cloud_move_operations": [],
+    "fill_actor_jobs": [],
+    "fill_actor_move_journal": [],
+    "fill_actor_move_results": [],
+    "fill_actor_plans": [],
+    "health_probe": [],
+    "merge_tasks": [],
+    "merge_transcode_chunks": [],
+    "merge_transcode_parts": [],
+    "pipeline_runs": [],
+    "playlist_source": [],
+    "playlists": []
+  },
+  "scenario": "replace/outside",
+  "tree": {
+    "library": [
+      {
+        "kind": "dir",
+        "path": "sorted"
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/ROU"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ROU/ROU-331.mp4",
+        "sha256": "2481a63c85a62cf8",
+        "size": 4
+      }
+    ],
+    "mount": [
+      {
+        "kind": "dir",
+        "path": "115"
+      },
+      {
+        "kind": "dir",
+        "path": "115/task"
+      },
+      {
+        "kind": "dir",
+        "path": "115/task/inbox"
+      },
+      {
+        "kind": "dir",
+        "path": "115/task/inbox/ROU-331"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "115/task/inbox/ROU-331/ROU-331.mp4",
+        "sha256": "a73add1aecea03a8",
+        "size": 9
+      }
+    ]
+  }
+}

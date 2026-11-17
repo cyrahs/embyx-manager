@@ -1,0 +1,2037 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "home_worker",
+  "cases": [
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 200,
+        "body": "{\"task\": null, \"wait\": \"idle\"}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "value": {
+        "task": null,
+        "wait": "idle"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 200,
+        "body": "{\"active\": true, \"paused\": false}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "value": {
+        "active": true,
+        "paused": false
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 409,
+        "body": "{\"error\": {\"code\": \"transcode_chunk_out_of_order\", \"next_chunk\": 1, \"resume_at\": 20.0}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 409,
+        "code": "transcode_chunk_out_of_order",
+        "details": {
+          "code": "transcode_chunk_out_of_order",
+          "next_chunk": 1,
+          "resume_at": 20.0
+        },
+        "str": "409 transcode_chunk_out_of_order",
+        "details_repr": "{'code': 'transcode_chunk_out_of_order', 'next_chunk': 1, 'resume_at': 20.0}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 400,
+        "body": "{\"error\": {\"code\": \"transcode_chunk_corrupt\"}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 400,
+        "code": "transcode_chunk_corrupt",
+        "details": {
+          "code": "transcode_chunk_corrupt"
+        },
+        "str": "400 transcode_chunk_corrupt",
+        "details_repr": "{'code': 'transcode_chunk_corrupt'}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 401,
+        "body": "{\"error\": {\"code\": \"unauthorized\"}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 401,
+        "code": "unauthorized",
+        "details": {
+          "code": "unauthorized"
+        },
+        "str": "401 unauthorized",
+        "details_repr": "{'code': 'unauthorized'}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 422,
+        "body": "{\"error\": {\"code\": \"invalid_request\"}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 422,
+        "code": "invalid_request",
+        "details": {
+          "code": "invalid_request"
+        },
+        "str": "422 invalid_request",
+        "details_repr": "{'code': 'invalid_request'}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 404,
+        "body": "{\"detail\": \"Not Found\"}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 404,
+        "code": "Not Found",
+        "details": {},
+        "str": "404 Not Found",
+        "details_repr": "{}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 500,
+        "body": "Internal Server Error",
+        "type": "text/plain"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 500,
+        "code": "Internal Server Error",
+        "details": {},
+        "str": "500 Internal Server Error",
+        "details_repr": "{}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 502,
+        "body": "",
+        "type": "text/plain"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 502,
+        "code": "Bad Gateway",
+        "details": {},
+        "str": "502 Bad Gateway",
+        "details_repr": "{}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 409,
+        "body": "{\"error\": {\"code\": 5, \"x\": [1, \"y\"]}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 409,
+        "code": "5",
+        "details": {
+          "code": 5,
+          "x": [
+            1,
+            "y"
+          ]
+        },
+        "str": "409 5",
+        "details_repr": "{'code': 5, 'x': [1, 'y']}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 409,
+        "body": "{\"error\": null}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 409,
+        "code": "Conflict",
+        "details": {},
+        "str": "409 Conflict",
+        "details_repr": "{}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 503,
+        "body": "{\"error\": {\"note\": \"no code\"}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 503,
+        "code": "Service Unavailable",
+        "details": {
+          "note": "no code"
+        },
+        "str": "503 Service Unavailable",
+        "details_repr": "{'note': 'no code'}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 201,
+        "body": "{\"stored\": true}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "value": {
+        "stored": true
+      }
+    },
+    {
+      "call": "heartbeat",
+      "server": "http://10.117.200.1:8080",
+      "token": "",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 200,
+        "body": "{\"task\": null, \"wait\": \"idle\"}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/heartbeat",
+          "headers": {
+            "content-length": "223",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc-名前\",\"version\":\"1\",\"task_id\":7,\"state\":\"encoding\",\"parts\":[{\"index\":0,\"fps\":29.5,\"position\":12.000001},{\"index\":2,\"fps\":0.0,\"position\":0.0}],\"upload_bps\":1234567.891,\"queue_chunks\":2,\"queue_bytes\":3000000000}",
+          "body_bytes": 223,
+          "body_sha256": "6a322e5d048133063aea6caa3168825c5a5bbf69fe4ba44ec71fdcaed1592a5f"
+        }
+      ],
+      "value": {
+        "task": null,
+        "wait": "idle"
+      }
+    },
+    {
+      "call": "upload",
+      "server": "http://10.117.200.1:8080",
+      "token": "",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 200,
+        "body": "{\"task\": null, \"wait\": \"idle\"}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "PUT",
+          "url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/1/chunks/3",
+          "headers": {
+            "content-length": "281604",
+            "content-type": "application/octet-stream",
+            "x-chunk-start": "6.006000",
+            "x-chunk-duration": "59.993333",
+            "x-chunk-frames": "3596",
+            "x-chunk-sha256": "86785ffb1ac7449d5d7b9f638ac8736e97cc80d770ed3d722ea00bd4db838d13"
+          },
+          "body": null,
+          "body_bytes": 281604,
+          "body_sha256": "86785ffb1ac7449d5d7b9f638ac8736e97cc80d770ed3d722ea00bd4db838d13"
+        }
+      ],
+      "value": {
+        "task": null,
+        "wait": "idle"
+      }
+    },
+    {
+      "call": "finish",
+      "server": "http://10.117.200.1:8080",
+      "token": "",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 200,
+        "body": "{\"task\": null, \"wait\": \"idle\"}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2/finish",
+          "headers": {
+            "content-length": "0"
+          },
+          "body": "",
+          "body_bytes": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "value": {
+        "task": null,
+        "wait": "idle"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "secret-token",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 200,
+        "body": "{\"task\": null, \"wait\": \"idle\"}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "value": {
+        "task": null,
+        "wait": "idle"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "secret-token",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 200,
+        "body": "{\"active\": true, \"paused\": false}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "value": {
+        "active": true,
+        "paused": false
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "secret-token",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 409,
+        "body": "{\"error\": {\"code\": \"transcode_chunk_out_of_order\", \"next_chunk\": 1, \"resume_at\": 20.0}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 409,
+        "code": "transcode_chunk_out_of_order",
+        "details": {
+          "code": "transcode_chunk_out_of_order",
+          "next_chunk": 1,
+          "resume_at": 20.0
+        },
+        "str": "409 transcode_chunk_out_of_order",
+        "details_repr": "{'code': 'transcode_chunk_out_of_order', 'next_chunk': 1, 'resume_at': 20.0}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "secret-token",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 400,
+        "body": "{\"error\": {\"code\": \"transcode_chunk_corrupt\"}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 400,
+        "code": "transcode_chunk_corrupt",
+        "details": {
+          "code": "transcode_chunk_corrupt"
+        },
+        "str": "400 transcode_chunk_corrupt",
+        "details_repr": "{'code': 'transcode_chunk_corrupt'}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "secret-token",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 401,
+        "body": "{\"error\": {\"code\": \"unauthorized\"}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 401,
+        "code": "unauthorized",
+        "details": {
+          "code": "unauthorized"
+        },
+        "str": "401 unauthorized",
+        "details_repr": "{'code': 'unauthorized'}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "secret-token",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 422,
+        "body": "{\"error\": {\"code\": \"invalid_request\"}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 422,
+        "code": "invalid_request",
+        "details": {
+          "code": "invalid_request"
+        },
+        "str": "422 invalid_request",
+        "details_repr": "{'code': 'invalid_request'}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "secret-token",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 404,
+        "body": "{\"detail\": \"Not Found\"}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 404,
+        "code": "Not Found",
+        "details": {},
+        "str": "404 Not Found",
+        "details_repr": "{}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "secret-token",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 500,
+        "body": "Internal Server Error",
+        "type": "text/plain"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 500,
+        "code": "Internal Server Error",
+        "details": {},
+        "str": "500 Internal Server Error",
+        "details_repr": "{}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "secret-token",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 502,
+        "body": "",
+        "type": "text/plain"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 502,
+        "code": "Bad Gateway",
+        "details": {},
+        "str": "502 Bad Gateway",
+        "details_repr": "{}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "secret-token",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 409,
+        "body": "{\"error\": {\"code\": 5, \"x\": [1, \"y\"]}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 409,
+        "code": "5",
+        "details": {
+          "code": 5,
+          "x": [
+            1,
+            "y"
+          ]
+        },
+        "str": "409 5",
+        "details_repr": "{'code': 5, 'x': [1, 'y']}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "secret-token",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 409,
+        "body": "{\"error\": null}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 409,
+        "code": "Conflict",
+        "details": {},
+        "str": "409 Conflict",
+        "details_repr": "{}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "secret-token",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 503,
+        "body": "{\"error\": {\"note\": \"no code\"}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 503,
+        "code": "Service Unavailable",
+        "details": {
+          "note": "no code"
+        },
+        "str": "503 Service Unavailable",
+        "details_repr": "{'note': 'no code'}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://10.117.200.1:8080",
+      "token": "secret-token",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 201,
+        "body": "{\"stored\": true}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "value": {
+        "stored": true
+      }
+    },
+    {
+      "call": "heartbeat",
+      "server": "http://10.117.200.1:8080",
+      "token": "secret-token",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 200,
+        "body": "{\"task\": null, \"wait\": \"idle\"}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/heartbeat",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "223",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc-名前\",\"version\":\"1\",\"task_id\":7,\"state\":\"encoding\",\"parts\":[{\"index\":0,\"fps\":29.5,\"position\":12.000001},{\"index\":2,\"fps\":0.0,\"position\":0.0}],\"upload_bps\":1234567.891,\"queue_chunks\":2,\"queue_bytes\":3000000000}",
+          "body_bytes": 223,
+          "body_sha256": "6a322e5d048133063aea6caa3168825c5a5bbf69fe4ba44ec71fdcaed1592a5f"
+        }
+      ],
+      "value": {
+        "task": null,
+        "wait": "idle"
+      }
+    },
+    {
+      "call": "upload",
+      "server": "http://10.117.200.1:8080",
+      "token": "secret-token",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 200,
+        "body": "{\"task\": null, \"wait\": \"idle\"}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "PUT",
+          "url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/1/chunks/3",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "281604",
+            "content-type": "application/octet-stream",
+            "x-chunk-start": "6.006000",
+            "x-chunk-duration": "59.993333",
+            "x-chunk-frames": "3596",
+            "x-chunk-sha256": "86785ffb1ac7449d5d7b9f638ac8736e97cc80d770ed3d722ea00bd4db838d13"
+          },
+          "body": null,
+          "body_bytes": 281604,
+          "body_sha256": "86785ffb1ac7449d5d7b9f638ac8736e97cc80d770ed3d722ea00bd4db838d13"
+        }
+      ],
+      "value": {
+        "task": null,
+        "wait": "idle"
+      }
+    },
+    {
+      "call": "finish",
+      "server": "http://10.117.200.1:8080",
+      "token": "secret-token",
+      "part_url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 200,
+        "body": "{\"task\": null, \"wait\": \"idle\"}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://10.117.200.1:8080/api/transcode/tasks/7/parts/2/finish",
+          "headers": {
+            "content-length": "0",
+            "authorization": "Bearer secret-token"
+          },
+          "body": "",
+          "body_bytes": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "value": {
+        "task": null,
+        "wait": "idle"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 200,
+        "body": "{\"task\": null, \"wait\": \"idle\"}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "value": {
+        "task": null,
+        "wait": "idle"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 200,
+        "body": "{\"active\": true, \"paused\": false}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "value": {
+        "active": true,
+        "paused": false
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 409,
+        "body": "{\"error\": {\"code\": \"transcode_chunk_out_of_order\", \"next_chunk\": 1, \"resume_at\": 20.0}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 409,
+        "code": "transcode_chunk_out_of_order",
+        "details": {
+          "code": "transcode_chunk_out_of_order",
+          "next_chunk": 1,
+          "resume_at": 20.0
+        },
+        "str": "409 transcode_chunk_out_of_order",
+        "details_repr": "{'code': 'transcode_chunk_out_of_order', 'next_chunk': 1, 'resume_at': 20.0}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 400,
+        "body": "{\"error\": {\"code\": \"transcode_chunk_corrupt\"}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 400,
+        "code": "transcode_chunk_corrupt",
+        "details": {
+          "code": "transcode_chunk_corrupt"
+        },
+        "str": "400 transcode_chunk_corrupt",
+        "details_repr": "{'code': 'transcode_chunk_corrupt'}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 401,
+        "body": "{\"error\": {\"code\": \"unauthorized\"}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 401,
+        "code": "unauthorized",
+        "details": {
+          "code": "unauthorized"
+        },
+        "str": "401 unauthorized",
+        "details_repr": "{'code': 'unauthorized'}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 422,
+        "body": "{\"error\": {\"code\": \"invalid_request\"}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 422,
+        "code": "invalid_request",
+        "details": {
+          "code": "invalid_request"
+        },
+        "str": "422 invalid_request",
+        "details_repr": "{'code': 'invalid_request'}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 404,
+        "body": "{\"detail\": \"Not Found\"}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 404,
+        "code": "Not Found",
+        "details": {},
+        "str": "404 Not Found",
+        "details_repr": "{}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 500,
+        "body": "Internal Server Error",
+        "type": "text/plain"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 500,
+        "code": "Internal Server Error",
+        "details": {},
+        "str": "500 Internal Server Error",
+        "details_repr": "{}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 502,
+        "body": "",
+        "type": "text/plain"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 502,
+        "code": "Bad Gateway",
+        "details": {},
+        "str": "502 Bad Gateway",
+        "details_repr": "{}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 409,
+        "body": "{\"error\": {\"code\": 5, \"x\": [1, \"y\"]}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 409,
+        "code": "5",
+        "details": {
+          "code": 5,
+          "x": [
+            1,
+            "y"
+          ]
+        },
+        "str": "409 5",
+        "details_repr": "{'code': 5, 'x': [1, 'y']}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 409,
+        "body": "{\"error\": null}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 409,
+        "code": "Conflict",
+        "details": {},
+        "str": "409 Conflict",
+        "details_repr": "{}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 503,
+        "body": "{\"error\": {\"note\": \"no code\"}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 503,
+        "code": "Service Unavailable",
+        "details": {
+          "note": "no code"
+        },
+        "str": "503 Service Unavailable",
+        "details_repr": "{'note': 'no code'}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 201,
+        "body": "{\"stored\": true}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "value": {
+        "stored": true
+      }
+    },
+    {
+      "call": "heartbeat",
+      "server": "http://gw:8080/prefix",
+      "token": "",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 200,
+        "body": "{\"task\": null, \"wait\": \"idle\"}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/heartbeat",
+          "headers": {
+            "content-length": "223",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc-名前\",\"version\":\"1\",\"task_id\":7,\"state\":\"encoding\",\"parts\":[{\"index\":0,\"fps\":29.5,\"position\":12.000001},{\"index\":2,\"fps\":0.0,\"position\":0.0}],\"upload_bps\":1234567.891,\"queue_chunks\":2,\"queue_bytes\":3000000000}",
+          "body_bytes": 223,
+          "body_sha256": "6a322e5d048133063aea6caa3168825c5a5bbf69fe4ba44ec71fdcaed1592a5f"
+        }
+      ],
+      "value": {
+        "task": null,
+        "wait": "idle"
+      }
+    },
+    {
+      "call": "upload",
+      "server": "http://gw:8080/prefix",
+      "token": "",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 200,
+        "body": "{\"task\": null, \"wait\": \"idle\"}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "PUT",
+          "url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/1/chunks/3",
+          "headers": {
+            "content-length": "281604",
+            "content-type": "application/octet-stream",
+            "x-chunk-start": "6.006000",
+            "x-chunk-duration": "59.993333",
+            "x-chunk-frames": "3596",
+            "x-chunk-sha256": "86785ffb1ac7449d5d7b9f638ac8736e97cc80d770ed3d722ea00bd4db838d13"
+          },
+          "body": null,
+          "body_bytes": 281604,
+          "body_sha256": "86785ffb1ac7449d5d7b9f638ac8736e97cc80d770ed3d722ea00bd4db838d13"
+        }
+      ],
+      "value": {
+        "task": null,
+        "wait": "idle"
+      }
+    },
+    {
+      "call": "finish",
+      "server": "http://gw:8080/prefix",
+      "token": "",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 200,
+        "body": "{\"task\": null, \"wait\": \"idle\"}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2/finish",
+          "headers": {
+            "content-length": "0"
+          },
+          "body": "",
+          "body_bytes": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "value": {
+        "task": null,
+        "wait": "idle"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "secret-token",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 200,
+        "body": "{\"task\": null, \"wait\": \"idle\"}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "value": {
+        "task": null,
+        "wait": "idle"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "secret-token",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 200,
+        "body": "{\"active\": true, \"paused\": false}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "value": {
+        "active": true,
+        "paused": false
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "secret-token",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 409,
+        "body": "{\"error\": {\"code\": \"transcode_chunk_out_of_order\", \"next_chunk\": 1, \"resume_at\": 20.0}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 409,
+        "code": "transcode_chunk_out_of_order",
+        "details": {
+          "code": "transcode_chunk_out_of_order",
+          "next_chunk": 1,
+          "resume_at": 20.0
+        },
+        "str": "409 transcode_chunk_out_of_order",
+        "details_repr": "{'code': 'transcode_chunk_out_of_order', 'next_chunk': 1, 'resume_at': 20.0}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "secret-token",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 400,
+        "body": "{\"error\": {\"code\": \"transcode_chunk_corrupt\"}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 400,
+        "code": "transcode_chunk_corrupt",
+        "details": {
+          "code": "transcode_chunk_corrupt"
+        },
+        "str": "400 transcode_chunk_corrupt",
+        "details_repr": "{'code': 'transcode_chunk_corrupt'}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "secret-token",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 401,
+        "body": "{\"error\": {\"code\": \"unauthorized\"}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 401,
+        "code": "unauthorized",
+        "details": {
+          "code": "unauthorized"
+        },
+        "str": "401 unauthorized",
+        "details_repr": "{'code': 'unauthorized'}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "secret-token",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 422,
+        "body": "{\"error\": {\"code\": \"invalid_request\"}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 422,
+        "code": "invalid_request",
+        "details": {
+          "code": "invalid_request"
+        },
+        "str": "422 invalid_request",
+        "details_repr": "{'code': 'invalid_request'}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "secret-token",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 404,
+        "body": "{\"detail\": \"Not Found\"}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 404,
+        "code": "Not Found",
+        "details": {},
+        "str": "404 Not Found",
+        "details_repr": "{}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "secret-token",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 500,
+        "body": "Internal Server Error",
+        "type": "text/plain"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 500,
+        "code": "Internal Server Error",
+        "details": {},
+        "str": "500 Internal Server Error",
+        "details_repr": "{}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "secret-token",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 502,
+        "body": "",
+        "type": "text/plain"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 502,
+        "code": "Bad Gateway",
+        "details": {},
+        "str": "502 Bad Gateway",
+        "details_repr": "{}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "secret-token",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 409,
+        "body": "{\"error\": {\"code\": 5, \"x\": [1, \"y\"]}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 409,
+        "code": "5",
+        "details": {
+          "code": 5,
+          "x": [
+            1,
+            "y"
+          ]
+        },
+        "str": "409 5",
+        "details_repr": "{'code': 5, 'x': [1, 'y']}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "secret-token",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 409,
+        "body": "{\"error\": null}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 409,
+        "code": "Conflict",
+        "details": {},
+        "str": "409 Conflict",
+        "details_repr": "{}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "secret-token",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 503,
+        "body": "{\"error\": {\"note\": \"no code\"}}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "server_error": {
+        "status": 503,
+        "code": "Service Unavailable",
+        "details": {
+          "note": "no code"
+        },
+        "str": "503 Service Unavailable",
+        "details_repr": "{'note': 'no code'}"
+      }
+    },
+    {
+      "call": "claim",
+      "server": "http://gw:8080/prefix",
+      "token": "secret-token",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 201,
+        "body": "{\"stored\": true}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/claim",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "71",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc\",\"version\":\"1\",\"task_id\":null,\"state\":\"waiting\",\"parts\":[]}",
+          "body_bytes": 71,
+          "body_sha256": "e64e0dec9eabd0c24937b2498c7d6646f7ce12009afef02046854b8e70ba6d85"
+        }
+      ],
+      "value": {
+        "stored": true
+      }
+    },
+    {
+      "call": "heartbeat",
+      "server": "http://gw:8080/prefix",
+      "token": "secret-token",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 200,
+        "body": "{\"task\": null, \"wait\": \"idle\"}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/heartbeat",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "223",
+            "content-type": "application/json"
+          },
+          "body": "{\"name\":\"pc-名前\",\"version\":\"1\",\"task_id\":7,\"state\":\"encoding\",\"parts\":[{\"index\":0,\"fps\":29.5,\"position\":12.000001},{\"index\":2,\"fps\":0.0,\"position\":0.0}],\"upload_bps\":1234567.891,\"queue_chunks\":2,\"queue_bytes\":3000000000}",
+          "body_bytes": 223,
+          "body_sha256": "6a322e5d048133063aea6caa3168825c5a5bbf69fe4ba44ec71fdcaed1592a5f"
+        }
+      ],
+      "value": {
+        "task": null,
+        "wait": "idle"
+      }
+    },
+    {
+      "call": "upload",
+      "server": "http://gw:8080/prefix",
+      "token": "secret-token",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 200,
+        "body": "{\"task\": null, \"wait\": \"idle\"}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "PUT",
+          "url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/1/chunks/3",
+          "headers": {
+            "authorization": "Bearer secret-token",
+            "content-length": "281604",
+            "content-type": "application/octet-stream",
+            "x-chunk-start": "6.006000",
+            "x-chunk-duration": "59.993333",
+            "x-chunk-frames": "3596",
+            "x-chunk-sha256": "86785ffb1ac7449d5d7b9f638ac8736e97cc80d770ed3d722ea00bd4db838d13"
+          },
+          "body": null,
+          "body_bytes": 281604,
+          "body_sha256": "86785ffb1ac7449d5d7b9f638ac8736e97cc80d770ed3d722ea00bd4db838d13"
+        }
+      ],
+      "value": {
+        "task": null,
+        "wait": "idle"
+      }
+    },
+    {
+      "call": "finish",
+      "server": "http://gw:8080/prefix",
+      "token": "secret-token",
+      "part_url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2",
+      "answer": {
+        "status": 200,
+        "body": "{\"task\": null, \"wait\": \"idle\"}",
+        "type": "application/json"
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://gw:8080/prefix/api/transcode/tasks/7/parts/2/finish",
+          "headers": {
+            "content-length": "0",
+            "authorization": "Bearer secret-token"
+          },
+          "body": "",
+          "body_bytes": 0,
+          "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "value": {
+        "task": null,
+        "wait": "idle"
+      }
+    },
+    {
+      "call": "upload_chunk",
+      "size": 281604,
+      "path": "chunk-00003.mkv"
+    }
+  ]
+}

@@ -1,0 +1,1364 @@
+{
+  "calls": [
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSystemInfo",
+      "request": {},
+      "response": {
+        "IsLogin": true,
+        "SystemReady": true,
+        "UserName": "fake"
+      },
+      "seq": 1
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/"
+      },
+      "response": [
+        {
+          "subFiles": []
+        }
+      ],
+      "seq": 2
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/in"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "0123456789abcdef0123456789abcdef01234567"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/115/in/ABC-001.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/in/ABC-001.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-001.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1048576",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/in/ABC-002.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/in/ABC-002.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-002.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "3",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "1": "d41d8cd98f00b204e9800998ecf8427e",
+                "2": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/115/in/ABC-003.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/in/ABC-003.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-003.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "5",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 3
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": false,
+        "path": "/115/in"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "0123456789abcdef0123456789abcdef01234567"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/115/in/ABC-001.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/in/ABC-001.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-001.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1048576",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/in/ABC-002.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/in/ABC-002.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-002.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "3",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "1": "d41d8cd98f00b204e9800998ecf8427e",
+                "2": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/115/in/ABC-003.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/in/ABC-003.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-003.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "5",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 4
+    },
+    {
+      "error": {
+        "code": "INVALID_ARGUMENT",
+        "details": "can't open a file as directory: /115/in/ABC-001.mp4"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/in/ABC-001.mp4"
+      },
+      "seq": 5
+    },
+    {
+      "error": {
+        "code": "NOT_FOUND",
+        "details": "path not found: /115/missing"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/missing"
+      },
+      "seq": 6
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/in"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "0123456789abcdef0123456789abcdef01234567"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/115/in/ABC-001.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/in/ABC-001.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-001.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1048576",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/in/ABC-002.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/in/ABC-002.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-002.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "3",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "1": "d41d8cd98f00b204e9800998ecf8427e",
+                "2": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/115/in/ABC-003.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/in/ABC-003.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-003.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "5",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 7
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/in"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "0123456789abcdef0123456789abcdef01234567"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/115/in/ABC-001.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/in/ABC-001.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-001.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1048576",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/in/ABC-002.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/in/ABC-002.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-002.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "3",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "1": "d41d8cd98f00b204e9800998ecf8427e",
+                "2": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/115/in/ABC-003.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/in/ABC-003.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-003.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "5",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 8
+    },
+    {
+      "error": {
+        "code": "NOT_FOUND",
+        "details": "path not found: /115/gone"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/gone"
+      },
+      "seq": 9
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/out"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/out/ABC-002.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/out/ABC-002.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-002.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "4",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 10
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "CreateFolder",
+      "request": {
+        "folderName": "中文 目录",
+        "parentPath": "/115/out"
+      },
+      "response": {
+        "folderCreated": {
+          "CanCreateEncryptedFolder": false,
+          "CanLock": false,
+          "CanSyncFileChangesFromCloud": false,
+          "canAddShareLink": false,
+          "canDeletePermanently": false,
+          "canDirectAccessThumbnailURL": false,
+          "canMount": false,
+          "canOfflineDownload": false,
+          "canSearch": false,
+          "canUnmount": false,
+          "fileEncryptionType": "None",
+          "fileHashes": {},
+          "fileType": "Directory",
+          "fullPathName": "/115/out/中文 目录",
+          "hasDetailProperties": false,
+          "id": "/115/out/中文 目录",
+          "isCloudDirectory": false,
+          "isCloudFile": false,
+          "isCloudRoot": false,
+          "isDirectory": true,
+          "isForbidden": false,
+          "isLocal": false,
+          "isRoot": false,
+          "isSearchResult": false,
+          "name": "中文 目录",
+          "originalPath": "",
+          "previewUrl": "",
+          "size": "0",
+          "supportOfflineDownloadManagement": false,
+          "thumbnailUrl": ""
+        },
+        "result": {
+          "errorMessage": "",
+          "resultFilePaths": [
+            "/115/out/中文 目录"
+          ],
+          "success": true
+        }
+      },
+      "seq": 11
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/out"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/out/ABC-002.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/out/ABC-002.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-002.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "4",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/out/中文 目录",
+              "hasDetailProperties": false,
+              "id": "/115/out/中文 目录",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "中文 目录",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 12
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/out"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/out/ABC-002.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/out/ABC-002.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-002.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "4",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/out/中文 目录",
+              "hasDetailProperties": false,
+              "id": "/115/out/中文 目录",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "中文 目录",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 13
+    },
+    {
+      "error": {
+        "code": "NOT_FOUND",
+        "details": "path not found: /115/nowhere"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/nowhere"
+      },
+      "seq": 14
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "MoveFile",
+      "request": {
+        "conflictPolicy": "Skip",
+        "destPath": "/115/out",
+        "theFilePaths": [
+          "/115/in/ABC-001.mp4"
+        ]
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [
+          "/115/out/ABC-001.mp4"
+        ],
+        "success": true
+      },
+      "seq": 15
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "MoveFile",
+      "request": {
+        "conflictPolicy": "Skip",
+        "destPath": "/115/out",
+        "theFilePaths": [
+          "/115/in/ABC-002.mp4"
+        ]
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 16
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "MoveFile",
+      "request": {
+        "conflictPolicy": "Skip",
+        "destPath": "/115/out",
+        "theFilePaths": [
+          "/115/in/none.mp4"
+        ]
+      },
+      "response": {
+        "errorMessage": "file not found: /115/in/none.mp4",
+        "resultFilePaths": [],
+        "success": false
+      },
+      "seq": 17
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "MoveFile",
+      "request": {
+        "conflictPolicy": "Skip",
+        "destPath": "/115/nowhere",
+        "theFilePaths": [
+          "/115/in/ABC-003.mp4"
+        ]
+      },
+      "response": {
+        "errorMessage": "destination not found: /115/nowhere",
+        "resultFilePaths": [],
+        "success": false
+      },
+      "seq": 18
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "RenameFile",
+      "request": {
+        "newName": "ABC-003-C.mp4",
+        "theFilePath": "/115/in/ABC-003.mp4"
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [
+          "/115/in/ABC-003-C.mp4"
+        ],
+        "success": true
+      },
+      "seq": 19
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "RenameFile",
+      "request": {
+        "newName": "x.mp4",
+        "theFilePath": "/115/in/none.mp4"
+      },
+      "response": {
+        "errorMessage": "file not found: /115/in/none.mp4",
+        "resultFilePaths": [],
+        "success": false
+      },
+      "seq": 20
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "DeleteFiles",
+      "request": {
+        "path": [
+          "/115/in/ABC-003-C.mp4",
+          "/115/out/中文 目录"
+        ]
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 21
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "DeleteFiles",
+      "request": {
+        "path": [
+          "/115/in/none.mp4"
+        ]
+      },
+      "response": {
+        "errorMessage": "file not found: /115/in/none.mp4",
+        "resultFilePaths": [],
+        "success": false
+      },
+      "seq": 22
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "DeleteFiles",
+      "request": {
+        "path": []
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 23
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/out"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {
+                "2": "0123456789abcdef0123456789abcdef01234567"
+              },
+              "fileType": "Directory",
+              "fullPathName": "/115/out/ABC-001.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/out/ABC-001.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-001.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1048576",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/out/ABC-002.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/out/ABC-002.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-002.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "4",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 24
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/",
+        "/115/in",
+        "/115/out"
+      ],
+      "files": [
+        {
+          "hashes": {},
+          "path": "/115/in/ABC-002.mp4",
+          "size": 3
+        },
+        {
+          "hashes": {
+            "2": "0123456789abcdef0123456789abcdef01234567"
+          },
+          "path": "/115/out/ABC-001.mp4",
+          "size": 1048576
+        },
+        {
+          "hashes": {},
+          "path": "/115/out/ABC-002.mp4",
+          "size": 4
+        }
+      ],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "clouddrive.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "op": "check",
+          "result": {
+            "authenticated": true,
+            "reachable": true,
+            "version": ""
+          }
+        },
+        {
+          "op": "list_directory",
+          "result": [
+            {
+              "full_path": "/115/in/ABC-001.mp4",
+              "hashes": {
+                "2": "0123456789abcdef0123456789abcdef01234567"
+              },
+              "id": "/115/in/ABC-001.mp4",
+              "is_directory": false,
+              "name": "ABC-001.mp4",
+              "size": 1048576,
+              "write_time": null
+            },
+            {
+              "full_path": "/115/in/ABC-002.mp4",
+              "hashes": {},
+              "id": "/115/in/ABC-002.mp4",
+              "is_directory": false,
+              "name": "ABC-002.mp4",
+              "size": 3,
+              "write_time": null
+            },
+            {
+              "full_path": "/115/in/ABC-003.mp4",
+              "hashes": {
+                "1": "d41d8cd98f00b204e9800998ecf8427e",
+                "2": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+              },
+              "id": "/115/in/ABC-003.mp4",
+              "is_directory": false,
+              "name": "ABC-003.mp4",
+              "size": 5,
+              "write_time": null
+            }
+          ]
+        },
+        {
+          "op": "list_directory",
+          "result": [
+            {
+              "full_path": "/115/in/ABC-001.mp4",
+              "hashes": {
+                "2": "0123456789abcdef0123456789abcdef01234567"
+              },
+              "id": "/115/in/ABC-001.mp4",
+              "is_directory": false,
+              "name": "ABC-001.mp4",
+              "size": 1048576,
+              "write_time": null
+            },
+            {
+              "full_path": "/115/in/ABC-002.mp4",
+              "hashes": {},
+              "id": "/115/in/ABC-002.mp4",
+              "is_directory": false,
+              "name": "ABC-002.mp4",
+              "size": 3,
+              "write_time": null
+            },
+            {
+              "full_path": "/115/in/ABC-003.mp4",
+              "hashes": {
+                "1": "d41d8cd98f00b204e9800998ecf8427e",
+                "2": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+              },
+              "id": "/115/in/ABC-003.mp4",
+              "is_directory": false,
+              "name": "ABC-003.mp4",
+              "size": 5,
+              "write_time": null
+            }
+          ]
+        },
+        {
+          "error": {
+            "message": "[Errno 20] can't open a file as directory: /115/in/ABC-001.mp4: '/115/in/ABC-001.mp4'",
+            "type": "NotADirectoryError"
+          },
+          "op": "list_directory"
+        },
+        {
+          "error": {
+            "message": "[Errno 2] path not found: /115/missing: '/115/missing'",
+            "type": "FileNotFoundError"
+          },
+          "op": "list_directory"
+        },
+        {
+          "error": {
+            "message": "CloudDrive API path must be a canonical absolute POSIX path",
+            "type": "ValueError"
+          },
+          "op": "list_directory"
+        },
+        {
+          "op": "stat_file",
+          "result": {
+            "full_path": "/115/in/ABC-001.mp4",
+            "hashes": {
+              "2": "0123456789abcdef0123456789abcdef01234567"
+            },
+            "id": "/115/in/ABC-001.mp4",
+            "is_directory": false,
+            "name": "ABC-001.mp4",
+            "size": 1048576,
+            "write_time": null
+          }
+        },
+        {
+          "op": "stat_file",
+          "result": null
+        },
+        {
+          "op": "stat_file",
+          "result": null
+        },
+        {
+          "error": {
+            "message": "CloudDrive API path must be a canonical absolute POSIX path",
+            "type": "ValueError"
+          },
+          "op": "stat_file"
+        },
+        {
+          "op": "ensure_directory",
+          "result": {
+            "created": true,
+            "path": "/115/out/中文 目录",
+            "success": true
+          }
+        },
+        {
+          "op": "ensure_directory",
+          "result": {
+            "created": false,
+            "path": "/115/out/中文 目录",
+            "success": true
+          }
+        },
+        {
+          "error": {
+            "message": "CloudDrive folder name must be one safe path segment",
+            "type": "ValueError"
+          },
+          "op": "ensure_directory"
+        },
+        {
+          "error": {
+            "message": "[Errno 2] path not found: /115/nowhere: '/115/nowhere'",
+            "type": "FileNotFoundError"
+          },
+          "op": "ensure_directory"
+        },
+        {
+          "op": "move_file",
+          "result": {
+            "error_message": "",
+            "result_file_paths": [
+              "/115/out/ABC-001.mp4"
+            ],
+            "success": true
+          }
+        },
+        {
+          "op": "move_file",
+          "result": {
+            "error_message": "",
+            "result_file_paths": [],
+            "success": true
+          }
+        },
+        {
+          "op": "move_file",
+          "result": {
+            "error_message": "file not found: /115/in/none.mp4",
+            "result_file_paths": [],
+            "success": false
+          }
+        },
+        {
+          "op": "move_file",
+          "result": {
+            "error_message": "destination not found: /115/nowhere",
+            "result_file_paths": [],
+            "success": false
+          }
+        },
+        {
+          "error": {
+            "message": "CloudDrive API path must be a canonical absolute POSIX path",
+            "type": "ValueError"
+          },
+          "op": "move_file"
+        },
+        {
+          "op": "rename_file",
+          "result": {
+            "errorMessage": "",
+            "resultFilePaths": [
+              "/115/in/ABC-003-C.mp4"
+            ],
+            "success": true
+          }
+        },
+        {
+          "op": "rename_file",
+          "result": {
+            "errorMessage": "file not found: /115/in/none.mp4",
+            "resultFilePaths": [],
+            "success": false
+          }
+        },
+        {
+          "op": "delete_files",
+          "result": {
+            "error_message": "",
+            "success": true
+          }
+        },
+        {
+          "op": "delete_files",
+          "result": {
+            "error_message": "file not found: /115/in/none.mp4",
+            "success": false
+          }
+        },
+        {
+          "op": "delete_files",
+          "result": {
+            "error_message": "",
+            "success": true
+          }
+        },
+        {
+          "op": "list_directory",
+          "result": [
+            {
+              "full_path": "/115/out/ABC-001.mp4",
+              "hashes": {
+                "2": "0123456789abcdef0123456789abcdef01234567"
+              },
+              "id": "/115/out/ABC-001.mp4",
+              "is_directory": false,
+              "name": "ABC-001.mp4",
+              "size": 1048576,
+              "write_time": null
+            },
+            {
+              "full_path": "/115/out/ABC-002.mp4",
+              "hashes": {},
+              "id": "/115/out/ABC-002.mp4",
+              "is_directory": false,
+              "name": "ABC-002.mp4",
+              "size": 4,
+              "write_time": null
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "rows": {},
+  "scenario": "clouddrive/files",
+  "tree": {}
+}

@@ -1,0 +1,3524 @@
+{
+  "calls": [
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "DELETE",
+      "request": {
+        "body": {
+          "propagationPolicy": "Background"
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs/embyx-audio-1-giant-001",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "reason": "NotFound"
+        },
+        "status": 404
+      },
+      "seq": 1
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/embyx/type/vr/GIANT"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "GIANT-001-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "GIANT-001-cd2.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 2
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/api/v1/namespaces/media/pods/embyx-manager-0",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "spec": {
+            "containers": [
+              {
+                "image": "ghcr.io/cyrahs/embyx-manager:latest"
+              }
+            ]
+          },
+          "status": {
+            "containerStatuses": [
+              {
+                "imageID": "ghcr.io/cyrahs/embyx-manager@sha256:abc123"
+              }
+            ]
+          }
+        },
+        "status": 200
+      },
+      "seq": 3
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "POST",
+      "request": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "1"
+            },
+            "name": "embyx-audio-1-giant-001"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "1"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/GIANT-001.mp4",
+                      "--status",
+                      "{work}/.transcode/1/audio.json",
+                      "--reserve-gib",
+                      "20",
+                      "--home-prepare",
+                      "{work}/.transcode/1",
+                      "--",
+                      "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                      "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "1"
+            },
+            "name": "embyx-audio-1-giant-001"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "1"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/GIANT-001.mp4",
+                      "--status",
+                      "{work}/.transcode/1/audio.json",
+                      "--reserve-gib",
+                      "20",
+                      "--home-prepare",
+                      "{work}/.transcode/1",
+                      "--",
+                      "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                      "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          },
+          "status": {}
+        },
+        "status": 201
+      },
+      "seq": 4
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/api/v1/namespaces/media/pods/embyx-manager-0",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "spec": {
+            "containers": [
+              {
+                "image": "ghcr.io/cyrahs/embyx-manager:latest"
+              }
+            ]
+          },
+          "status": {
+            "containerStatuses": [
+              {
+                "imageID": "ghcr.io/cyrahs/embyx-manager@sha256:abc123"
+              }
+            ]
+          }
+        },
+        "status": 200
+      },
+      "seq": 5
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "POST",
+      "request": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "1"
+            },
+            "name": "embyx-merge-1-giant-001"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "1"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/GIANT-001.mp4",
+                      "--status",
+                      "{work}/.merge/1.json",
+                      "--reserve-gib",
+                      "20",
+                      "--home-assemble",
+                      "{work}/.transcode/1"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "1"
+            },
+            "name": "embyx-merge-1-giant-001"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "1"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/GIANT-001.mp4",
+                      "--status",
+                      "{work}/.merge/1.json",
+                      "--reserve-gib",
+                      "20",
+                      "--home-assemble",
+                      "{work}/.transcode/1"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          },
+          "status": {}
+        },
+        "status": 201
+      },
+      "seq": 6
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "DELETE",
+      "request": {
+        "body": {
+          "propagationPolicy": "Background"
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs/embyx-audio-1-giant-001",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "status": "Success"
+        },
+        "status": 200
+      },
+      "seq": 7
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/",
+        "/115",
+        "/115/embyx",
+        "/115/embyx/type",
+        "/115/embyx/type/vr",
+        "/115/embyx/type/vr/GIANT",
+        "/115/embyx/type/x",
+        "/115/embyx/type/x/SMALL",
+        "/115/embyx_in",
+        "/115/upload"
+      ],
+      "files": [
+        {
+          "hashes": {},
+          "path": "/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+          "size": 10
+        },
+        {
+          "hashes": {},
+          "path": "/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4",
+          "size": 10
+        },
+        {
+          "hashes": {},
+          "path": "/115/embyx/type/x/SMALL/SMALL-001-cd1.mp4",
+          "size": 10
+        },
+        {
+          "hashes": {},
+          "path": "/115/embyx/type/x/SMALL/SMALL-001-cd2.mp4",
+          "size": 10
+        }
+      ],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "jobs": {
+        "embyx-merge-1-giant-001": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "1"
+            },
+            "name": "embyx-merge-1-giant-001"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "1"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/GIANT-001.mp4",
+                      "--status",
+                      "{work}/.merge/1.json",
+                      "--reserve-gib",
+                      "20",
+                      "--home-assemble",
+                      "{work}/.transcode/1"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          },
+          "status": {}
+        }
+      },
+      "routes_left": [
+        {
+          "body": {
+            "spec": {
+              "containers": [
+                {
+                  "image": "ghcr.io/cyrahs/embyx-manager:latest"
+                }
+              ]
+            },
+            "status": {
+              "containerStatuses": [
+                {
+                  "imageID": "ghcr.io/cyrahs/embyx-manager@sha256:abc123"
+                }
+              ]
+            }
+          },
+          "method": "GET",
+          "path": "/api/v1/namespaces/media/pods/embyx-manager-0"
+        }
+      ]
+    }
+  },
+  "format": 1,
+  "operation": "merge.service",
+  "outcome": {
+    "result": {
+      "clock": "2026-11-14T08:00:00+00:00",
+      "steps": [
+        {
+          "op": "write",
+          "result": null,
+          "tasks": []
+        },
+        {
+          "op": "write",
+          "result": null,
+          "tasks": []
+        },
+        {
+          "op": "write",
+          "result": null,
+          "tasks": []
+        },
+        {
+          "op": "write",
+          "result": null,
+          "tasks": []
+        },
+        {
+          "op": "write",
+          "result": null,
+          "tasks": []
+        },
+        {
+          "op": "write",
+          "result": null,
+          "tasks": []
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "items": [
+                {
+                  "avid": "BROKEN-001",
+                  "brand": "BROKEN",
+                  "directory": "rank/BROKEN/BROKEN-001",
+                  "library_dir": "rank",
+                  "mergeable": false,
+                  "missing": [
+                    2
+                  ],
+                  "part_count": 2,
+                  "parts": [
+                    1,
+                    3
+                  ],
+                  "problem": null,
+                  "source": "rank",
+                  "source_basis": "library",
+                  "stackable": false
+                },
+                {
+                  "avid": "GIANT-001",
+                  "brand": "GIANT",
+                  "directory": "type/vr/GIANT/GIANT-001",
+                  "library_dir": "type/vr",
+                  "mergeable": true,
+                  "missing": [],
+                  "part_count": 2,
+                  "parts": [
+                    1,
+                    2
+                  ],
+                  "problem": null,
+                  "source": "vr",
+                  "source_basis": "library",
+                  "stackable": true
+                },
+                {
+                  "avid": "SMALL-001",
+                  "brand": "SMALL",
+                  "directory": "type/x/SMALL/SMALL-001",
+                  "library_dir": "type/x",
+                  "mergeable": true,
+                  "missing": [],
+                  "part_count": 2,
+                  "parts": [
+                    1,
+                    2
+                  ],
+                  "problem": null,
+                  "source": null,
+                  "source_basis": null,
+                  "stackable": true
+                }
+              ],
+              "reason": null,
+              "routes": [
+                "vr",
+                "rank"
+              ],
+              "scanned_at": "2026-11-14T08:00:00Z"
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json"
+            },
+            "status": 200
+          },
+          "tasks": []
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "invalid_request"
+              }
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json"
+            },
+            "status": 422
+          },
+          "tasks": []
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "unauthorized"
+              }
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json",
+              "www-authenticate": "Bearer"
+            },
+            "status": 401
+          },
+          "tasks": []
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "avid": "GIANT-001",
+              "cancellable": true,
+              "created_at": "2026-11-14T08:00:00Z",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "home": false,
+              "id": 1,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "notice": null,
+              "part_count": 2,
+              "phase": null,
+              "progress": null,
+              "retryable": false,
+              "source": "vr",
+              "state": "queued",
+              "transcode": null,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at": "2026-11-14T08:00:00Z",
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json"
+            },
+            "status": 201
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "merge_task_exists"
+              }
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json"
+            },
+            "status": 409
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "merge_source_required"
+              }
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json"
+            },
+            "status": 422
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "merge_source_unknown"
+              }
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json"
+            },
+            "status": 422
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "merge_title_incomplete"
+              }
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json"
+            },
+            "status": 422
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "merge_title_not_found"
+              }
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json"
+            },
+            "status": 404
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "invalid_request"
+              }
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json"
+            },
+            "status": 422
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "invalid_request"
+              }
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json"
+            },
+            "status": 422
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "invalid_request"
+              }
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json"
+            },
+            "status": 422
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "tick",
+          "result": {
+            "triggered": []
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": "waiting for the home transcode worker",
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "auto": {
+                "checked_at": null,
+                "room": null,
+                "skipped": [],
+                "skipped_count": 0,
+                "state": "off"
+              },
+              "items": [
+                {
+                  "avid": "GIANT-001",
+                  "cancellable": true,
+                  "created_at": "2026-11-14T08:00:00Z",
+                  "error": null,
+                  "failed_state": null,
+                  "finished_at": null,
+                  "home": true,
+                  "id": 1,
+                  "library_dir": "type/vr",
+                  "merged_bytes": null,
+                  "notice": "waiting for the home transcode worker",
+                  "part_count": 2,
+                  "phase": null,
+                  "progress": null,
+                  "retryable": false,
+                  "source": "vr",
+                  "state": "queued",
+                  "transcode": null,
+                  "transcode_paused": false,
+                  "transcoder": null,
+                  "updated_at": "2026-11-14T08:00:00Z",
+                  "upload_attempts": 0,
+                  "uploaded_bytes": null
+                }
+              ],
+              "unavailable": null,
+              "worker": null
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json"
+            },
+            "status": 200
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": "waiting for the home transcode worker",
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "unauthorized"
+              }
+            },
+            "headers": {
+              "content-type": "application/json"
+            },
+            "status": 401
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": "waiting for the home transcode worker",
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "invalid_request"
+              }
+            },
+            "headers": {
+              "content-type": "application/json"
+            },
+            "status": 422
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": "waiting for the home transcode worker",
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "task": null,
+              "task_id": 1,
+              "wait": "probing"
+            },
+            "headers": {
+              "content-type": "application/json"
+            },
+            "status": 200
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "unauthorized"
+              }
+            },
+            "headers": {
+              "content-type": "application/json"
+            },
+            "status": 401
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "write",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "task": {
+                "avid": "GIANT-001",
+                "chunk_seconds": 60,
+                "encoder": {
+                  "bit_depth": 10,
+                  "codec": "av1_nvenc",
+                  "gop_seconds": 5,
+                  "lookahead": 32,
+                  "multipass": "fullres",
+                  "preset": "p7",
+                  "spatial_aq": true,
+                  "tune": "uhq"
+                },
+                "id": 1,
+                "parts": [
+                  {
+                    "done": false,
+                    "duration": 120.0,
+                    "index": 0,
+                    "name": "GIANT-001-cd1.mp4",
+                    "next_chunk": 0,
+                    "resume_at": 0.0,
+                    "size": 60000000000
+                  },
+                  {
+                    "done": false,
+                    "duration": 90.5,
+                    "index": 1,
+                    "name": "GIANT-001-cd2.mp4",
+                    "next_chunk": 0,
+                    "resume_at": 0.0,
+                    "size": 60000000000
+                  }
+                ],
+                "paused": false,
+                "video_bitrate": 80000000
+              },
+              "wait": null
+            },
+            "headers": {
+              "content-type": "application/json"
+            },
+            "status": 200
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "active": true,
+              "paused": false
+            },
+            "headers": {
+              "content-type": "application/json"
+            },
+            "status": 200
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "stored": true
+            },
+            "headers": {
+              "content-type": "application/json"
+            },
+            "status": 200
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "stored": false
+            },
+            "headers": {
+              "content-type": "application/json"
+            },
+            "status": 200
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "transcode_chunk_conflict",
+                "next_chunk": 1
+              }
+            },
+            "headers": {
+              "content-type": "application/json"
+            },
+            "status": 409
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "transcode_chunk_out_of_order",
+                "next_chunk": 1,
+                "resume_at": 120.0
+              }
+            },
+            "headers": {
+              "content-type": "application/json"
+            },
+            "status": 409
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "transcode_chunk_corrupt"
+              }
+            },
+            "headers": {
+              "content-type": "application/json"
+            },
+            "status": 400
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "invalid_request"
+              }
+            },
+            "headers": {
+              "content-type": "application/json"
+            },
+            "status": 422
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "invalid_request"
+              }
+            },
+            "headers": {
+              "content-type": "application/json"
+            },
+            "status": 422
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "transcode_task_not_found"
+              }
+            },
+            "headers": {
+              "content-type": "application/json"
+            },
+            "status": 404
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "transcode_part_incomplete",
+                "covered": 0.0,
+                "duration": 90.5
+              }
+            },
+            "headers": {
+              "content-type": "application/json"
+            },
+            "status": 409
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "finished": true
+            },
+            "headers": {
+              "content-type": "application/json"
+            },
+            "status": 200
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "avid": "GIANT-001",
+              "cancellable": true,
+              "created_at": "2026-11-14T08:00:00Z",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "home": true,
+              "id": 1,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "notice": null,
+              "part_count": 2,
+              "phase": "probing",
+              "progress": 0.0,
+              "retryable": false,
+              "source": "vr",
+              "state": "transcoding",
+              "transcode": {
+                "audio_done": 2,
+                "audio_state": "done",
+                "duration": 210.5,
+                "encoded_bytes": 11,
+                "encoded_seconds": 120.0,
+                "part_count": 2,
+                "parts_done": 1,
+                "paused": true,
+                "video_bitrate": 80000000
+              },
+              "transcode_paused": true,
+              "transcoder": "home",
+              "updated_at": "2026-11-14T08:00:00Z",
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json"
+            },
+            "status": 200
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": true,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "active": true,
+              "paused": true
+            },
+            "headers": {
+              "content-type": "application/json"
+            },
+            "status": 200
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": true,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "unauthorized"
+              }
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json",
+              "www-authenticate": "Bearer"
+            },
+            "status": 401
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": true,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "avid": "GIANT-001",
+              "cancellable": true,
+              "created_at": "2026-11-14T08:00:00Z",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "home": true,
+              "id": 1,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "notice": null,
+              "part_count": 2,
+              "phase": "probing",
+              "progress": 0.0,
+              "retryable": false,
+              "source": "vr",
+              "state": "transcoding",
+              "transcode": {
+                "audio_done": 2,
+                "audio_state": "done",
+                "duration": 210.5,
+                "encoded_bytes": 11,
+                "encoded_seconds": 120.0,
+                "part_count": 2,
+                "parts_done": 1,
+                "paused": false,
+                "video_bitrate": 80000000
+              },
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at": "2026-11-14T08:00:00Z",
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json"
+            },
+            "status": 200
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "auto": {
+                "checked_at": null,
+                "room": null,
+                "skipped": [],
+                "skipped_count": 0,
+                "state": "off"
+              },
+              "items": [
+                {
+                  "avid": "GIANT-001",
+                  "cancellable": true,
+                  "created_at": "2026-11-14T08:00:00Z",
+                  "error": null,
+                  "failed_state": null,
+                  "finished_at": null,
+                  "home": true,
+                  "id": 1,
+                  "library_dir": "type/vr",
+                  "merged_bytes": null,
+                  "notice": null,
+                  "part_count": 2,
+                  "phase": "probing",
+                  "progress": 0.0,
+                  "retryable": false,
+                  "source": "vr",
+                  "state": "transcoding",
+                  "transcode": {
+                    "audio_done": 2,
+                    "audio_state": "done",
+                    "duration": 210.5,
+                    "encoded_bytes": 11,
+                    "encoded_seconds": 120.0,
+                    "part_count": 2,
+                    "parts_done": 1,
+                    "paused": false,
+                    "video_bitrate": 80000000
+                  },
+                  "transcode_paused": false,
+                  "transcoder": "home",
+                  "updated_at": "2026-11-14T08:00:00Z",
+                  "upload_attempts": 0,
+                  "uploaded_bytes": null
+                }
+              ],
+              "unavailable": null,
+              "worker": {
+                "name": "home-5090",
+                "online": true,
+                "parts": [],
+                "queue_bytes": 0,
+                "queue_chunks": 0,
+                "seen_at": "2026-11-14T08:00:00Z",
+                "state": "encoding",
+                "task_id": 1,
+                "upload_bps": 0.0,
+                "version": "1.0.0"
+              }
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json"
+            },
+            "status": 200
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "restart",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "stored": true
+            },
+            "headers": {
+              "content-type": "application/json"
+            },
+            "status": 200
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "finished": true
+            },
+            "headers": {
+              "content-type": "application/json"
+            },
+            "status": 200
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "task": null,
+              "task_id": 1,
+              "wait": "assembling"
+            },
+            "headers": {
+              "content-type": "application/json"
+            },
+            "status": 200
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "avid": "SMALL-001",
+              "cancellable": true,
+              "created_at": "2026-11-14T08:00:00Z",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "home": false,
+              "id": 3,
+              "library_dir": "type/x",
+              "merged_bytes": null,
+              "notice": null,
+              "part_count": 2,
+              "phase": null,
+              "progress": null,
+              "retryable": false,
+              "source": "rank",
+              "state": "queued",
+              "transcode": null,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at": "2026-11-14T08:00:00Z",
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json"
+            },
+            "status": 201
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "SMALL-001",
+              "brand": "SMALL",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 3,
+              "job_name": null,
+              "library_dir": "type/x",
+              "merged_bytes": null,
+              "merged_name": "SMALL-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "rank",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "merge_task_not_transcoding"
+              }
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json"
+            },
+            "status": 409
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "SMALL-001",
+              "brand": "SMALL",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 3,
+              "job_name": null,
+              "library_dir": "type/x",
+              "merged_bytes": null,
+              "merged_name": "SMALL-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "rank",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "merge_task_not_failed"
+              }
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json"
+            },
+            "status": 409
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "SMALL-001",
+              "brand": "SMALL",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 3,
+              "job_name": null,
+              "library_dir": "type/x",
+              "merged_bytes": null,
+              "merged_name": "SMALL-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "rank",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "merge_task_not_found"
+              }
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json"
+            },
+            "status": 404
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "SMALL-001",
+              "brand": "SMALL",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 3,
+              "job_name": null,
+              "library_dir": "type/x",
+              "merged_bytes": null,
+              "merged_name": "SMALL-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "rank",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "error": {
+                "code": "invalid_request"
+              }
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json"
+            },
+            "status": 422
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "SMALL-001",
+              "brand": "SMALL",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 3,
+              "job_name": null,
+              "library_dir": "type/x",
+              "merged_bytes": null,
+              "merged_name": "SMALL-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "rank",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "avid": "SMALL-001",
+              "cancellable": false,
+              "created_at": "2026-11-14T08:00:00Z",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00Z",
+              "home": false,
+              "id": 3,
+              "library_dir": "type/x",
+              "merged_bytes": null,
+              "notice": null,
+              "part_count": 2,
+              "phase": null,
+              "progress": null,
+              "retryable": false,
+              "source": "rank",
+              "state": "cancelled",
+              "transcode": null,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at": "2026-11-14T08:00:00Z",
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json"
+            },
+            "status": 200
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "SMALL-001",
+              "brand": "SMALL",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 3,
+              "job_name": null,
+              "library_dir": "type/x",
+              "merged_bytes": null,
+              "merged_name": "SMALL-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "rank",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "items": [
+                {
+                  "avid": "BROKEN-001",
+                  "brand": "BROKEN",
+                  "directory": "rank/BROKEN/BROKEN-001",
+                  "library_dir": "rank",
+                  "mergeable": false,
+                  "missing": [
+                    2
+                  ],
+                  "part_count": 2,
+                  "parts": [
+                    1,
+                    3
+                  ],
+                  "problem": null,
+                  "source": "rank",
+                  "source_basis": "library",
+                  "stackable": false
+                },
+                {
+                  "avid": "GIANT-001",
+                  "brand": "GIANT",
+                  "directory": "type/vr/GIANT/GIANT-001",
+                  "library_dir": "type/vr",
+                  "mergeable": true,
+                  "missing": [],
+                  "part_count": 2,
+                  "parts": [
+                    1,
+                    2
+                  ],
+                  "problem": null,
+                  "source": "vr",
+                  "source_basis": "library",
+                  "stackable": true
+                },
+                {
+                  "avid": "SMALL-001",
+                  "brand": "SMALL",
+                  "directory": "type/x/SMALL/SMALL-001",
+                  "library_dir": "type/x",
+                  "mergeable": true,
+                  "missing": [],
+                  "part_count": 2,
+                  "parts": [
+                    1,
+                    2
+                  ],
+                  "problem": null,
+                  "source": null,
+                  "source_basis": null,
+                  "stackable": true
+                }
+              ],
+              "reason": null,
+              "routes": [
+                "vr",
+                "rank"
+              ],
+              "scanned_at": "2026-11-14T08:00:00Z"
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json"
+            },
+            "status": 200
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "probing",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "transcoding",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "SMALL-001",
+              "brand": "SMALL",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 3,
+              "job_name": null,
+              "library_dir": "type/x",
+              "merged_bytes": null,
+              "merged_name": "SMALL-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "rank",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "tick",
+          "result": {
+            "triggered": []
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-giant-001",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "SMALL-001",
+              "brand": "SMALL",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 3,
+              "job_name": null,
+              "library_dir": "type/x",
+              "merged_bytes": null,
+              "merged_name": "SMALL-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "rank",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "request",
+          "result": {
+            "body": {
+              "auto": {
+                "checked_at": null,
+                "room": null,
+                "skipped": [],
+                "skipped_count": 0,
+                "state": "off"
+              },
+              "items": [
+                {
+                  "avid": "SMALL-001",
+                  "cancellable": false,
+                  "created_at": "2026-11-14T08:00:00Z",
+                  "error": null,
+                  "failed_state": null,
+                  "finished_at": "2026-11-14T08:00:00Z",
+                  "home": false,
+                  "id": 3,
+                  "library_dir": "type/x",
+                  "merged_bytes": null,
+                  "notice": null,
+                  "part_count": 2,
+                  "phase": null,
+                  "progress": null,
+                  "retryable": false,
+                  "source": "rank",
+                  "state": "cancelled",
+                  "transcode": null,
+                  "transcode_paused": false,
+                  "transcoder": null,
+                  "updated_at": "2026-11-14T08:00:00Z",
+                  "upload_attempts": 0,
+                  "uploaded_bytes": null
+                },
+                {
+                  "avid": "GIANT-001",
+                  "cancellable": true,
+                  "created_at": "2026-11-14T08:00:00Z",
+                  "error": null,
+                  "failed_state": null,
+                  "finished_at": null,
+                  "home": true,
+                  "id": 1,
+                  "library_dir": "type/vr",
+                  "merged_bytes": null,
+                  "notice": null,
+                  "part_count": 2,
+                  "phase": "starting",
+                  "progress": 0.0,
+                  "retryable": false,
+                  "source": "vr",
+                  "state": "merging",
+                  "transcode": null,
+                  "transcode_paused": false,
+                  "transcoder": "home",
+                  "updated_at": "2026-11-14T08:00:00Z",
+                  "upload_attempts": 0,
+                  "uploaded_bytes": null
+                }
+              ],
+              "unavailable": null,
+              "worker": {
+                "name": "home-5090",
+                "online": true,
+                "parts": [],
+                "queue_bytes": 0,
+                "queue_chunks": 0,
+                "seen_at": "2026-11-14T08:00:00Z",
+                "state": "idle",
+                "task_id": null,
+                "upload_bps": 0.0,
+                "version": "1.0.0"
+              }
+            },
+            "headers": {
+              "cache-control": "no-store",
+              "content-type": "application/json"
+            },
+            "status": 200
+          },
+          "tasks": [
+            {
+              "avid": "GIANT-001",
+              "brand": "GIANT",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": "embyx-merge-1-giant-001",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "GIANT-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": "home",
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "SMALL-001",
+              "brand": "SMALL",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 3,
+              "job_name": null,
+              "library_dir": "type/x",
+              "merged_bytes": null,
+              "merged_name": "SMALL-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "rank",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "rows": {
+    "app_config": [],
+    "archive_acquisitions": [],
+    "archive_magnet_attempts": [],
+    "feed_subscriptions": [],
+    "fill_actor_apply_jobs": [],
+    "fill_actor_candidates": [],
+    "fill_actor_cloud_move_operations": [],
+    "fill_actor_jobs": [],
+    "fill_actor_move_journal": [],
+    "fill_actor_move_results": [],
+    "fill_actor_plans": [],
+    "health_probe": [],
+    "merge_tasks": [
+      {
+        "avid": "GIANT-001",
+        "brand": "GIANT",
+        "created_at": "2026-11-14T08:00:00+00:00",
+        "error": null,
+        "failed_state": null,
+        "finished_at": null,
+        "id": 1,
+        "job_name": "embyx-merge-1-giant-001",
+        "library_dir": "type/vr",
+        "merged_bytes": null,
+        "merged_name": "GIANT-001.mp4",
+        "merged_sha1": null,
+        "notice": null,
+        "parts_json": "[\"/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd1.mp4\", \"/mnt/cd2/115/embyx/type/vr/GIANT/GIANT-001-cd2.mp4\"]",
+        "phase": "starting",
+        "progress": 0,
+        "source": "vr",
+        "state": "merging",
+        "state_changed_at": "2026-11-14T08:00:00+00:00",
+        "transcode_paused": false,
+        "transcoder": "home",
+        "updated_at": "2026-11-14T08:00:00+00:00",
+        "upload_attempts": 0,
+        "uploaded_bytes": null
+      },
+      {
+        "avid": "SMALL-001",
+        "brand": "SMALL",
+        "created_at": "2026-11-14T08:00:00+00:00",
+        "error": null,
+        "failed_state": null,
+        "finished_at": "2026-11-14T08:00:00+00:00",
+        "id": 3,
+        "job_name": null,
+        "library_dir": "type/x",
+        "merged_bytes": null,
+        "merged_name": "SMALL-001.mp4",
+        "merged_sha1": null,
+        "notice": null,
+        "parts_json": "[\"/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd1.mp4\", \"/mnt/cd2/115/embyx/type/x/SMALL/SMALL-001-cd2.mp4\"]",
+        "phase": null,
+        "progress": null,
+        "source": "rank",
+        "state": "cancelled",
+        "state_changed_at": "2026-11-14T08:00:00+00:00",
+        "transcode_paused": false,
+        "transcoder": null,
+        "updated_at": "2026-11-14T08:00:00+00:00",
+        "upload_attempts": 0,
+        "uploaded_bytes": null
+      }
+    ],
+    "merge_transcode_chunks": [
+      {
+        "bytes": 11,
+        "chunk_index": 0,
+        "created_at": "2026-11-14T08:00:00+00:00",
+        "duration_seconds": 120,
+        "frames": 3600,
+        "part_index": 0,
+        "sha256": "211d6129ea0a0d6431e96654c1c117400f064143112131247901a77158c8b08a",
+        "start_seconds": 0,
+        "task_id": 1
+      },
+      {
+        "bytes": 11,
+        "chunk_index": 0,
+        "created_at": "2026-11-14T08:00:00+00:00",
+        "duration_seconds": 90.5,
+        "frames": 3600,
+        "part_index": 1,
+        "sha256": "f0e0d3189d6cb4c6a1a9a006ce88d5437349b6cfd33a2cc94f6eddcf32a14036",
+        "start_seconds": 0,
+        "task_id": 1
+      }
+    ],
+    "merge_transcode_parts": [
+      {
+        "finished_at": "2026-11-14T08:00:00+00:00",
+        "part_index": 0,
+        "task_id": 1
+      },
+      {
+        "finished_at": "2026-11-14T08:00:00+00:00",
+        "part_index": 1,
+        "task_id": 1
+      }
+    ],
+    "pipeline_runs": [],
+    "playlist_source": [],
+    "playlists": []
+  },
+  "scenario": "merge/api",
+  "tree": {
+    "mapping": [
+      {
+        "kind": "dir",
+        "path": "rank"
+      },
+      {
+        "kind": "dir",
+        "path": "rank/BROKEN"
+      },
+      {
+        "kind": "dir",
+        "path": "rank/BROKEN/BROKEN-001"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "rank/BROKEN/BROKEN-001/BROKEN-001-cd1.strm",
+        "sha256": "6077841067b4c7a5",
+        "size": 50
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "rank/BROKEN/BROKEN-001/BROKEN-001-cd3.strm",
+        "sha256": "37002269c548144e",
+        "size": 50
+      },
+      {
+        "kind": "dir",
+        "path": "type"
+      },
+      {
+        "kind": "dir",
+        "path": "type/vr"
+      },
+      {
+        "kind": "dir",
+        "path": "type/vr/GIANT"
+      },
+      {
+        "kind": "dir",
+        "path": "type/vr/GIANT/GIANT-001"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "type/vr/GIANT/GIANT-001/GIANT-001-cd1.strm",
+        "sha256": "45ef5824c9549261",
+        "size": 51
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "type/vr/GIANT/GIANT-001/GIANT-001-cd2.strm",
+        "sha256": "7b074b69df144f41",
+        "size": 51
+      },
+      {
+        "kind": "dir",
+        "path": "type/x"
+      },
+      {
+        "kind": "dir",
+        "path": "type/x/SMALL"
+      },
+      {
+        "kind": "dir",
+        "path": "type/x/SMALL/SMALL-001"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "type/x/SMALL/SMALL-001/SMALL-001-cd1.strm",
+        "sha256": "9c65ac76acabc5c3",
+        "size": 50
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "type/x/SMALL/SMALL-001/SMALL-001-cd2.strm",
+        "sha256": "989ca58e6825a98d",
+        "size": 50
+      }
+    ],
+    "secrets": [
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "job.json",
+        "sha256": "8c299e50567ce0e6",
+        "size": 204
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "token",
+        "sha256": "52713805db90269f",
+        "size": 15
+      }
+    ],
+    "work": [
+      {
+        "kind": "dir",
+        "path": ".transcode"
+      },
+      {
+        "kind": "dir",
+        "path": ".transcode/1"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": ".transcode/1/audio.json",
+        "sha256": "bf4065dbc80417c1",
+        "size": 174
+      },
+      {
+        "kind": "dir",
+        "path": ".transcode/1/cd01"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": ".transcode/1/cd01/chunk-00000.mkv",
+        "sha256": "211d6129ea0a0d64",
+        "size": 11
+      },
+      {
+        "kind": "dir",
+        "path": ".transcode/1/cd02"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": ".transcode/1/cd02/chunk-00000.mkv",
+        "sha256": "f0e0d3189d6cb4c6",
+        "size": 11
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": ".transcode/1/manifest.json",
+        "sha256": "e5e2a72262c599ec",
+        "size": 128
+      }
+    ]
+  }
+}

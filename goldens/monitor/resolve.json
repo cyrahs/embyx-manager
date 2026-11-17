@@ -1,0 +1,280 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "monitor",
+  "cases": [
+    {
+      "name": "nothing anywhere",
+      "candidates": [],
+      "log_tail": [],
+      "errors": []
+    },
+    {
+      "name": "sukebei only",
+      "sukebei": "magnet:?xt=urn:btih:C12FE1C06BBA254A9DC9F519B335AA7C1367A88A&dn=ABC-123",
+      "candidates": [
+        {
+          "magnet": "magnet:?xt=urn:btih:C12FE1C06BBA254A9DC9F519B335AA7C1367A88A&dn=ABC-123",
+          "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+          "source": "sukebei",
+          "size_hint": null
+        }
+      ],
+      "log_tail": [],
+      "errors": []
+    },
+    {
+      "name": "order and duplicates",
+      "sukebei": "magnet:?xt=urn:btih:C12FE1C06BBA254A9DC9F519B335AA7C1367A88A&dn=ABC-123",
+      "item": "magnet:?xt=urn:btih:c12fe1c06bba254a9dc9f519b335aa7c1367a88a&dn=other",
+      "javbus": [
+        {
+          "magnet": "magnet:?xt=urn:btih:D23FE1C06BBA254A9DC9F519B335AA7C1367A88B&dn=ABC-123",
+          "size": "",
+          "size_int": 5,
+          "tags": [],
+          "score": 5
+        },
+        {
+          "magnet": "magnet:?xt=urn:btih:YEX6DQDLXISUVHOJ6UM3GNNKPQJWPKEK&dn=ABC-123",
+          "size": "",
+          "size_int": 3,
+          "tags": [],
+          "score": 3
+        },
+        {
+          "magnet": "magnet:?xt=urn:btih:C12FE1C06BBA254A9DC9F519B335AA7C1367A88A&dn=ABC-123",
+          "size": "",
+          "size_int": 1,
+          "tags": [],
+          "score": 1
+        }
+      ],
+      "candidates": [
+        {
+          "magnet": "magnet:?xt=urn:btih:C12FE1C06BBA254A9DC9F519B335AA7C1367A88A&dn=ABC-123",
+          "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+          "source": "sukebei",
+          "size_hint": null
+        },
+        {
+          "magnet": "magnet:?xt=urn:btih:D23FE1C06BBA254A9DC9F519B335AA7C1367A88B&dn=ABC-123",
+          "info_hash": "D23FE1C06BBA254A9DC9F519B335AA7C1367A88B",
+          "source": "javbus",
+          "size_hint": 5
+        }
+      ],
+      "log_tail": [],
+      "errors": []
+    },
+    {
+      "name": "not magnets and unusable hashes",
+      "sukebei": "https://sukebei.test/view/1",
+      "item": "MAGNET:?dn=ABC-123",
+      "javbus": [
+        {
+          "magnet": "",
+          "size": "",
+          "size_int": 1,
+          "tags": [],
+          "score": 1
+        },
+        {
+          "magnet": "magnet:?xt=urn:btih:XYZ",
+          "size": "",
+          "size_int": 2,
+          "tags": [],
+          "score": 2
+        },
+        {
+          "magnet": "Magnet:?xt=urn:btih:D23FE1C06BBA254A9DC9F519B335AA7C1367A88B",
+          "size": "",
+          "size_int": 3,
+          "tags": [],
+          "score": 3
+        }
+      ],
+      "candidates": [
+        {
+          "magnet": "Magnet:?xt=urn:btih:D23FE1C06BBA254A9DC9F519B335AA7C1367A88B",
+          "info_hash": "D23FE1C06BBA254A9DC9F519B335AA7C1367A88B",
+          "source": "javbus",
+          "size_hint": 3
+        }
+      ],
+      "log_tail": [
+        "WARNING: Skipping magnet without a usable info hash for ABC-123",
+        "WARNING: Skipping magnet without a usable info hash for ABC-123"
+      ],
+      "errors": []
+    },
+    {
+      "name": "five at most",
+      "javbus": [
+        {
+          "magnet": "magnet:?xt=urn:btih:0000000000000000000000000000000000000001&dn=ABC-123",
+          "size": "",
+          "size_int": 9,
+          "tags": [],
+          "score": 9
+        },
+        {
+          "magnet": "magnet:?xt=urn:btih:0000000000000000000000000000000000000002&dn=ABC-123",
+          "size": "",
+          "size_int": 8,
+          "tags": [],
+          "score": 8
+        },
+        {
+          "magnet": "magnet:?xt=urn:btih:0000000000000000000000000000000000000003&dn=ABC-123",
+          "size": "",
+          "size_int": 7,
+          "tags": [],
+          "score": 7
+        },
+        {
+          "magnet": "magnet:?xt=urn:btih:0000000000000000000000000000000000000004&dn=ABC-123",
+          "size": "",
+          "size_int": 6,
+          "tags": [],
+          "score": 6
+        },
+        {
+          "magnet": "magnet:?xt=urn:btih:0000000000000000000000000000000000000005&dn=ABC-123",
+          "size": "",
+          "size_int": 5,
+          "tags": [],
+          "score": 5
+        },
+        {
+          "magnet": "magnet:?xt=urn:btih:0000000000000000000000000000000000000006&dn=ABC-123",
+          "size": "",
+          "size_int": 4,
+          "tags": [],
+          "score": 4
+        },
+        {
+          "magnet": "magnet:?xt=urn:btih:0000000000000000000000000000000000000007&dn=ABC-123",
+          "size": "",
+          "size_int": 3,
+          "tags": [],
+          "score": 3
+        }
+      ],
+      "candidates": [
+        {
+          "magnet": "magnet:?xt=urn:btih:0000000000000000000000000000000000000001&dn=ABC-123",
+          "info_hash": "0000000000000000000000000000000000000001",
+          "source": "javbus",
+          "size_hint": 9
+        },
+        {
+          "magnet": "magnet:?xt=urn:btih:0000000000000000000000000000000000000002&dn=ABC-123",
+          "info_hash": "0000000000000000000000000000000000000002",
+          "source": "javbus",
+          "size_hint": 8
+        },
+        {
+          "magnet": "magnet:?xt=urn:btih:0000000000000000000000000000000000000003&dn=ABC-123",
+          "info_hash": "0000000000000000000000000000000000000003",
+          "source": "javbus",
+          "size_hint": 7
+        },
+        {
+          "magnet": "magnet:?xt=urn:btih:0000000000000000000000000000000000000004&dn=ABC-123",
+          "info_hash": "0000000000000000000000000000000000000004",
+          "source": "javbus",
+          "size_hint": 6
+        },
+        {
+          "magnet": "magnet:?xt=urn:btih:0000000000000000000000000000000000000005&dn=ABC-123",
+          "info_hash": "0000000000000000000000000000000000000005",
+          "source": "javbus",
+          "size_hint": 5
+        }
+      ],
+      "log_tail": [],
+      "errors": []
+    },
+    {
+      "name": "javbus does not list it yet",
+      "sukebei": "magnet:?xt=urn:btih:C12FE1C06BBA254A9DC9F519B335AA7C1367A88A&dn=ABC-123",
+      "javbus_status": 404,
+      "candidates": [
+        {
+          "magnet": "magnet:?xt=urn:btih:C12FE1C06BBA254A9DC9F519B335AA7C1367A88A&dn=ABC-123",
+          "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+          "source": "sukebei",
+          "size_hint": null
+        }
+      ],
+      "log_tail": [
+        "JavBus does not list ABC-123 yet"
+      ],
+      "errors": []
+    },
+    {
+      "name": "javbus fails",
+      "sukebei": "magnet:?xt=urn:btih:C12FE1C06BBA254A9DC9F519B335AA7C1367A88A&dn=ABC-123",
+      "javbus_status": 503,
+      "candidates": [
+        {
+          "magnet": "magnet:?xt=urn:btih:C12FE1C06BBA254A9DC9F519B335AA7C1367A88A&dn=ABC-123",
+          "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+          "source": "sukebei",
+          "size_hint": null
+        }
+      ],
+      "log_tail": [
+        "ERROR: Failed to get magnets from javbus for ABC-123: HTTPStatusError(\"Server error '503 Service Unavailable' for url 'https://www.javbus.com/ABC-123'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503\")"
+      ],
+      "errors": [
+        "ERROR: Failed to get magnets from javbus for ABC-123: HTTPStatusError(\"Server error '503 Service Unavailable' for url 'https://www.javbus.com/ABC-123'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503\")"
+      ]
+    },
+    {
+      "name": "javbus raises",
+      "item": "magnet:?xt=urn:btih:D23FE1C06BBA254A9DC9F519B335AA7C1367A88B&dn=ABC-123",
+      "javbus_raises": [
+        "RuntimeError",
+        "parser broke"
+      ],
+      "candidates": [
+        {
+          "magnet": "magnet:?xt=urn:btih:D23FE1C06BBA254A9DC9F519B335AA7C1367A88B&dn=ABC-123",
+          "info_hash": "D23FE1C06BBA254A9DC9F519B335AA7C1367A88B",
+          "source": "rss_item",
+          "size_hint": null
+        }
+      ],
+      "log_tail": [
+        "ERROR: Failed to get magnets from javbus for ABC-123: RuntimeError('parser broke')"
+      ],
+      "errors": [
+        "ERROR: Failed to get magnets from javbus for ABC-123: RuntimeError('parser broke')"
+      ]
+    },
+    {
+      "name": "sukebei raises",
+      "sukebei_raises": [
+        "RuntimeError",
+        "sukebei down"
+      ],
+      "raises": [
+        "RuntimeError",
+        "sukebei down"
+      ],
+      "log_tail": [],
+      "errors": []
+    },
+    {
+      "name": "an empty item magnet",
+      "item": "",
+      "sukebei": null,
+      "candidates": [],
+      "log_tail": [],
+      "errors": []
+    }
+  ]
+}

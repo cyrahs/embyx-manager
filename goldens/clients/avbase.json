@@ -1,0 +1,839 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "clients",
+  "cases": [
+    {
+      "kind": "date",
+      "value": "Fri Oct 02 2026 09:00:00 GMT+0900 (Japan Standard Time)",
+      "date": "2026-10-02"
+    },
+    {
+      "kind": "date",
+      "value": "Fri Oct 2 2026",
+      "date": "2026-10-02"
+    },
+    {
+      "kind": "date",
+      "value": "Fri Oct 2 2026 x",
+      "date": "2026-10-02"
+    },
+    {
+      "kind": "date",
+      "value": "Thu Feb 30 2026 09:00:00",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": "Fri Foo 02 2026",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": "fri oct 02 2026",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": "Fri OCT 02 2026",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": "Fri Oct 123 2026",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": "Fri Oct 02 202",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": "Fri Oct 02 0000",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": "Fri Oct ٠٢ ٢٠٢٦",
+      "date": "2026-10-02"
+    },
+    {
+      "kind": "date",
+      "value": "Fri Oct 02 2026",
+      "date": "2026-10-02"
+    },
+    {
+      "kind": "date",
+      "value": "2026-02-19T00:00:00.000Z",
+      "date": "2026-02-19"
+    },
+    {
+      "kind": "date",
+      "value": "2026-02-19",
+      "date": "2026-02-19"
+    },
+    {
+      "kind": "date",
+      "value": "20260219",
+      "date": "2026-02-19"
+    },
+    {
+      "kind": "date",
+      "value": "2026-W08",
+      "date": "2026-02-16"
+    },
+    {
+      "kind": "date",
+      "value": "2026-W08-4",
+      "date": "2026-02-19"
+    },
+    {
+      "kind": "date",
+      "value": "2026W084",
+      "date": "2026-02-19"
+    },
+    {
+      "kind": "date",
+      "value": "2026W08",
+      "date": "2026-02-16"
+    },
+    {
+      "kind": "date",
+      "value": "2026-W53",
+      "date": "2026-12-28"
+    },
+    {
+      "kind": "date",
+      "value": "2026-W08-8",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": "2026-02-30",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": "0000-01-01",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": "2026-2-19",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": "2026/02/19",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": "２０２６-02-19",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": "2026-02-19x",
+      "date": "2026-02-19"
+    },
+    {
+      "kind": "date",
+      "value": "20260219T00",
+      "date": "2026-02-19"
+    },
+    {
+      "kind": "date",
+      "value": "20260219xx",
+      "date": "2026-02-19"
+    },
+    {
+      "kind": "date",
+      "value": "2026021912",
+      "date": "2026-02-19"
+    },
+    {
+      "kind": "date",
+      "value": "2026-0219",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": "2026-02-1",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": "2026W0849",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": "2026W08-4",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": "2026-W084",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": "20260219é",
+      "date": "2026-02-19"
+    },
+    {
+      "kind": "date",
+      "value": "2026021é",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": "9999-W52-6",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": "9999-W52-5",
+      "date": "9999-12-31"
+    },
+    {
+      "kind": "date",
+      "value": "0000-W01",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": "2020-W53",
+      "date": "2020-12-28"
+    },
+    {
+      "kind": "date",
+      "value": "2020W537",
+      "date": "2021-01-03"
+    },
+    {
+      "kind": "date",
+      "value": "2026-02",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": "2026",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": "",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": " 2026-02-19",
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": null,
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": 20260219,
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": 2026.5,
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": true,
+      "date": null
+    },
+    {
+      "kind": "date",
+      "value": [
+        "2026-02-19"
+      ],
+      "date": null
+    },
+    {
+      "kind": "query",
+      "query": "河北彩伽",
+      "talent_id": null,
+      "name": "河北彩伽"
+    },
+    {
+      "kind": "query",
+      "query": " 5022 ",
+      "talent_id": 5022,
+      "name": ""
+    },
+    {
+      "kind": "query",
+      "query": "5022",
+      "talent_id": 5022,
+      "name": ""
+    },
+    {
+      "kind": "query",
+      "query": "٥٠٢٢",
+      "talent_id": 5022,
+      "name": ""
+    },
+    {
+      "kind": "query",
+      "query": "²",
+      "error": "ValueError",
+      "message": "invalid literal for int() with base 10: '²'"
+    },
+    {
+      "kind": "query",
+      "query": "https://www.avbase.net/talents/5022",
+      "talent_id": 5022,
+      "name": ""
+    },
+    {
+      "kind": "query",
+      "query": "https://www.avbase.net/talents/5022/feed",
+      "talent_id": 5022,
+      "name": ""
+    },
+    {
+      "kind": "query",
+      "query": "https://www.avbase.net/talents/5022/feed/",
+      "talent_id": 5022,
+      "name": ""
+    },
+    {
+      "kind": "query",
+      "query": "https://www.avbase.net/talents/%E6%B2%B3%E5%8C%97%E5%BD%A9%E8%8A%B1?tab=works",
+      "talent_id": null,
+      "name": "河北彩花"
+    },
+    {
+      "kind": "query",
+      "query": "/talents/abc",
+      "talent_id": null,
+      "name": "abc"
+    },
+    {
+      "kind": "query",
+      "query": "/talents/%20",
+      "error": "ValueError",
+      "message": "empty talent reference"
+    },
+    {
+      "kind": "query",
+      "query": "https://www.avbase.net/works/MIZD-555",
+      "error": "ValueError",
+      "message": "not an AVBase talent URL: 'https://www.avbase.net/works/MIZD-555'"
+    },
+    {
+      "kind": "query",
+      "query": "/actors/1",
+      "error": "ValueError",
+      "message": "not an AVBase talent URL: '/actors/1'"
+    },
+    {
+      "kind": "query",
+      "query": "",
+      "error": "ValueError",
+      "message": "empty talent reference"
+    },
+    {
+      "kind": "query",
+      "query": "   ",
+      "error": "ValueError",
+      "message": "empty talent reference"
+    },
+    {
+      "kind": "query",
+      "query": "http://[::1/talents/1",
+      "error": "ValueError",
+      "message": "Invalid IPv6 URL"
+    },
+    {
+      "kind": "query",
+      "query": "avbase.net/talents/5022",
+      "talent_id": null,
+      "name": "avbase.net/talents/5022"
+    },
+    {
+      "kind": "query",
+      "query": "https://www.avbase.net/talents/a/b",
+      "error": "ValueError",
+      "message": "not an AVBase talent URL: 'https://www.avbase.net/talents/a/b'"
+    },
+    {
+      "kind": "query",
+      "query": "https://www.avbase.net/talents/a#x",
+      "talent_id": null,
+      "name": "a"
+    },
+    {
+      "kind": "feed",
+      "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><rss version=\"2.0\"><channel><title><![CDATA[「河北彩花」のフィード]]></title><link>https://www.avbase.net/talents/%E6%B2%B3%E5%8C%97%E5%BD%A9%E8%8A%B1</link></channel></rss>",
+      "name": "河北彩花"
+    },
+    {
+      "kind": "feed",
+      "xml": "<rss><channel><title>「 名前 」の「x」</title><link>https://www.avbase.net/talents/5022</link></channel></rss>",
+      "name": "名前"
+    },
+    {
+      "kind": "feed",
+      "xml": "<rss><channel><title>no brackets</title><link> </link></channel></rss>",
+      "name": null
+    },
+    {
+      "kind": "feed",
+      "xml": "<rss><channel><link>https://www.avbase.net/talents/%E5%90%8D/</link></channel></rss>",
+      "name": "名"
+    },
+    {
+      "kind": "feed",
+      "xml": "<rss/>",
+      "name": null
+    },
+    {
+      "kind": "feed",
+      "xml": "not xml",
+      "name": null
+    },
+    {
+      "kind": "feed",
+      "xml": "<!DOCTYPE x><rss/>",
+      "name": null
+    },
+    {
+      "kind": "feed",
+      "xml": "<rss><channel><title>「a\nb」</title></channel></rss>",
+      "name": null
+    },
+    {
+      "kind": "feed",
+      "xml": "<rss><channel><link>http://[::1/talents/a</link></channel></rss>",
+      "error": "ValueError",
+      "message": "Invalid IPv6 URL"
+    },
+    {
+      "kind": "talent",
+      "props": {
+        "talent": {
+          "id": 5022,
+          "primary": {
+            "id": 5031,
+            "name": " 河北彩花 "
+          },
+          "actors": [
+            {
+              "name": "河北彩花"
+            },
+            {
+              "name": "河北彩伽"
+            },
+            null,
+            {
+              "name": 7
+            },
+            {
+              "name": "河北彩伽"
+            },
+            {}
+          ]
+        },
+        "total": 31
+      },
+      "talent": [
+        5022,
+        "河北彩花",
+        [
+          "河北彩伽",
+          "7"
+        ],
+        31
+      ]
+    },
+    {
+      "kind": "talent",
+      "props": {
+        "name": "fallback",
+        "talent": {
+          "id": "12",
+          "primary": null,
+          "actors": null
+        },
+        "total": "3"
+      },
+      "talent": [
+        12,
+        "fallback",
+        [],
+        3
+      ]
+    },
+    {
+      "kind": "talent",
+      "props": {
+        "talent": {
+          "id": 1.9
+        },
+        "total": 2.5
+      },
+      "talent": [
+        1,
+        "",
+        [],
+        2
+      ]
+    },
+    {
+      "kind": "talent",
+      "props": {
+        "talent": {
+          "id": 1,
+          "primary": 3
+        }
+      },
+      "error": "AttributeError",
+      "message": "'int' object has no attribute 'get'"
+    },
+    {
+      "kind": "talent",
+      "props": {
+        "talent": {
+          "actors": []
+        }
+      },
+      "error": "KeyError",
+      "message": "'id'"
+    },
+    {
+      "kind": "talent",
+      "props": {
+        "talent": {
+          "id": null
+        }
+      },
+      "error": "TypeError",
+      "message": "int() argument must be a string, a bytes-like object or a real number, not 'NoneType'"
+    },
+    {
+      "kind": "talent",
+      "props": {
+        "talent": {
+          "id": 1,
+          "actors": 5
+        }
+      },
+      "error": "TypeError",
+      "message": "'int' object is not iterable"
+    },
+    {
+      "kind": "talent",
+      "props": {
+        "talent": {
+          "id": 1
+        },
+        "total": "x"
+      },
+      "error": "ValueError",
+      "message": "invalid literal for int() with base 10: 'x'"
+    },
+    {
+      "kind": "listing",
+      "work": {
+        "work_id": "moodyz:MIZD-555",
+        "prefix": "moodyz",
+        "title": "best",
+        "min_date": "2026-02-19",
+        "actors": [
+          {
+            "id": 1,
+            "name": " A "
+          },
+          {
+            "id": "2",
+            "name": "B"
+          },
+          {
+            "id": 3,
+            "name": ""
+          },
+          "x",
+          {
+            "id": true,
+            "name": "C",
+            "talent": {
+              "id": 9
+            }
+          },
+          {
+            "id": 4,
+            "name": "D",
+            "talent": {
+              "id": "x"
+            }
+          }
+        ],
+        "casts": [
+          {
+            "actor": {
+              "id": 5,
+              "name": "E",
+              "talent": {
+                "id": 50
+              }
+            }
+          },
+          {
+            "actor": null
+          },
+          "x",
+          {
+            "actor": "y"
+          },
+          {
+            "actor": {
+              "id": 6,
+              "name": "F",
+              "talent": [
+                1
+              ]
+            }
+          }
+        ]
+      },
+      "built": [
+        "MIZD-555",
+        "moodyz",
+        "best",
+        "2026-02-19",
+        [
+          [
+            1,
+            "A",
+            null
+          ],
+          [
+            1,
+            "C",
+            9
+          ],
+          [
+            4,
+            "D",
+            null
+          ]
+        ]
+      ]
+    },
+    {
+      "kind": "listing",
+      "work": {
+        "work_id": null,
+        "prefix": null,
+        "title": 12,
+        "min_date": null
+      },
+      "built": [
+        "",
+        "",
+        "12",
+        null,
+        []
+      ]
+    },
+    {
+      "kind": "listing",
+      "work": {
+        "actors": 5
+      },
+      "error": "TypeError",
+      "message": "'int' object is not iterable"
+    },
+    {
+      "kind": "listing",
+      "work": {
+        "casts": [
+          1
+        ]
+      },
+      "built": [
+        "",
+        "",
+        "",
+        null,
+        []
+      ]
+    },
+    {
+      "kind": "listing",
+      "work": {
+        "work_id": [
+          "a"
+        ],
+        "casts": {
+          "k": 1
+        }
+      },
+      "built": [
+        "['a']",
+        "",
+        "",
+        null,
+        []
+      ]
+    },
+    {
+      "kind": "detail",
+      "work": {
+        "work_id": "moodyz:MIZD-555",
+        "prefix": "moodyz",
+        "title": "best",
+        "min_date": "2026-02-19",
+        "actors": [
+          {
+            "id": 1,
+            "name": " A "
+          },
+          {
+            "id": "2",
+            "name": "B"
+          },
+          {
+            "id": 3,
+            "name": ""
+          },
+          "x",
+          {
+            "id": true,
+            "name": "C",
+            "talent": {
+              "id": 9
+            }
+          },
+          {
+            "id": 4,
+            "name": "D",
+            "talent": {
+              "id": "x"
+            }
+          }
+        ],
+        "casts": [
+          {
+            "actor": {
+              "id": 5,
+              "name": "E",
+              "talent": {
+                "id": 50
+              }
+            }
+          },
+          {
+            "actor": null
+          },
+          "x",
+          {
+            "actor": "y"
+          },
+          {
+            "actor": {
+              "id": 6,
+              "name": "F",
+              "talent": [
+                1
+              ]
+            }
+          }
+        ]
+      },
+      "built": [
+        "MIZD-555",
+        "moodyz",
+        "best",
+        "2026-02-19",
+        [
+          [
+            5,
+            "E",
+            50
+          ],
+          [
+            6,
+            "F",
+            null
+          ]
+        ]
+      ]
+    },
+    {
+      "kind": "detail",
+      "work": {
+        "work_id": null,
+        "prefix": null,
+        "title": 12,
+        "min_date": null
+      },
+      "built": [
+        "",
+        "",
+        "12",
+        null,
+        []
+      ]
+    },
+    {
+      "kind": "detail",
+      "work": {
+        "actors": 5
+      },
+      "built": [
+        "",
+        "",
+        "",
+        null,
+        []
+      ]
+    },
+    {
+      "kind": "detail",
+      "work": {
+        "casts": [
+          1
+        ]
+      },
+      "built": [
+        "",
+        "",
+        "",
+        null,
+        []
+      ]
+    },
+    {
+      "kind": "detail",
+      "work": {
+        "work_id": [
+          "a"
+        ],
+        "casts": {
+          "k": 1
+        }
+      },
+      "built": [
+        "['a']",
+        "",
+        "",
+        null,
+        []
+      ]
+    }
+  ]
+}

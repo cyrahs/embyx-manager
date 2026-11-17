@@ -1,0 +1,145 @@
+# A move on the hard-link path (renameat2 flags refused with EINVAL, as on NFS) stopped in front
+# of each of its file-system steps (WP11): the link, the no-replace rename of the source to the
+# quarantine name, the plain rename it falls back to, the quarantine's unlink, and the journal's
+# linked after them. A new service reconciles from what the disk and the journal hold and
+# applies again.
+description = "fill_actor: a crash before each step of a hard-link move, then recovery"
+operation = "fill_actor.service"
+clock = "2026-09-12T03:00:00+00:00"
+
+[roots]
+names = ["actor", "additional", "movein"]
+
+[args]
+catalog = { actor = ["ABC-201", "ABC-202", "ABC-203", "ABC-204", "ABC-205"] }
+
+[[args.faults]]
+op = "rename_noreplace"
+path = "additional/ABC/ABC-201.mp4"
+errno = 22
+
+[[args.faults]]
+op = "rename_noreplace"
+path = "additional/ABC/ABC-202.mp4"
+errno = 22
+
+[[args.faults]]
+op = "rename_noreplace"
+path = "additional/ABC/ABC-203.mp4"
+errno = 22
+
+[[args.faults]]
+op = "rename_noreplace"
+path = "additional/ABC/ABC-204.mp4"
+errno = 22
+
+[[args.faults]]
+op = "rename_noreplace"
+path = "additional/ABC/ABC-205.mp4"
+errno = 22
+
+[[args.steps]]
+op = "scan"
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-201.mp4"], crash = { fs = "link" }, advance_seconds = 60 }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-201.mp4"] }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-202.mp4"], crash = { fs = "rename_noreplace", nth = 2 }, advance_seconds = 60 }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-202.mp4"] }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-203.mp4"], crash = { fs = "rename" }, advance_seconds = 60 }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-203.mp4"] }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-204.mp4"], crash = { fs = "unlink" }, advance_seconds = 60 }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-204.mp4"] }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-205.mp4"], crash = { repository = "save_move_journal", state = "linked" }, advance_seconds = 60 }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-205.mp4"] }
+
+[[tree]]
+path = "additional/ABC/ABC-201.mp4"
+size = 2
+
+[[tree]]
+path = "additional/ABC/ABC-202.mp4"
+size = 3
+
+[[tree]]
+path = "additional/ABC/ABC-203.mp4"
+size = 4
+
+[[tree]]
+path = "additional/ABC/ABC-204.mp4"
+size = 5
+
+[[tree]]
+path = "additional/ABC/ABC-205.mp4"
+size = 6
+
+[database]
+schema = "app"
+tables = [
+    "fill_actor_plans",
+    "fill_actor_move_results",
+    "fill_actor_move_journal",
+]

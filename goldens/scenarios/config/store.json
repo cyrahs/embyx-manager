@@ -1,0 +1,360 @@
+{
+  "calls": [],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "config.store",
+  "outcome": {
+    "result": {
+      "final": [
+        {
+          "dump_json": "{\"address\":\"cd2.internal:19798\",\"api_token\":\"secret-token\",\"secure\":false}",
+          "section": "clouddrive",
+          "version": 2
+        },
+        {
+          "dump_json": "{\"address\":\"http://Emby.internal:8096\",\"api_key\":\"k\"}",
+          "section": "emby",
+          "version": 1
+        },
+        {
+          "dump_json": "{\"id_exceptions\":[\"WEIRD-SPECIAL\"],\"ignored_id_patterns\":[\"1080P\"]}",
+          "section": "avid",
+          "version": 1
+        },
+        {
+          "dump_json": "{\"enabled\":false,\"interval_seconds\":900,\"categories\":[{\"label\":\"Rank\",\"task_dir_path\":\"/115/rank\"},{\"label\":\"演员\",\"task_dir_path\":\"/115/embyx_in\"}],\"failed_avid_cooldown_seconds\":86400}",
+          "section": "rss",
+          "version": 1
+        },
+        {
+          "dump_json": "{\"enabled\":false,\"scan_cron\":\"30 3 * * 1\",\"src_dir\":\"\",\"dst_dir\":\"\",\"mapping\":{\"intake\":\"sorted\"},\"priority_mapping\":{},\"min_size_mb\":12,\"brand_mapping\":{\"special\":[\"ABC\",\"DEF\"]},\"tracker_interval_seconds\":1800,\"stall_timeout_hours\":24,\"max_attempts\":5}",
+          "section": "archive",
+          "version": 1
+        },
+        {
+          "dump_json": "{\"enabled\":true,\"src_dir\":\"/mnt/strm/\",\"dst_dir\":\"/library\",\"debounce_seconds\":0.00001,\"full_sync_interval_seconds\":3600}",
+          "section": "mapping",
+          "version": 5
+        },
+        {
+          "dump_json": "{\"enabled\":false,\"interval_seconds\":86400,\"source_url\":\"https://jinjier.art/sql\",\"task_dir_path\":\"\"}",
+          "section": "playlists",
+          "version": 0
+        },
+        {
+          "dump_json": "{\"actor_root\":\"\",\"additional_roots\":[],\"move_in_root\":\"\",\"move_in_by_brand\":false,\"root_sentinel\":\".embyx-root\",\"apply_enabled\":false,\"cloud_strm_mount_prefix\":\"\",\"cloud_source_roots\":[],\"cloud_move_in_root\":\"\",\"task_dir_path\":\"\"}",
+          "section": "fill_actor",
+          "version": 0
+        },
+        {
+          "dump_json": "{\"work_dir\":\"/downloads/upload\",\"cloud_work_dir\":\"/downloads/upload\",\"cloud_staging_dir\":\"/115/upload\",\"cloud_mount_prefix\":\"/mnt/cd2\",\"free_space_reserve_gib\":20,\"auto_enabled\":true,\"auto_include_stackable\":false,\"auto_pause_on_failure\":false,\"home_transcode_enabled\":false}",
+          "section": "merge",
+          "version": 1
+        }
+      ],
+      "loaded": [
+        {
+          "dump_json": "{\"address\":\"\",\"api_token\":\"\",\"secure\":true}",
+          "section": "clouddrive",
+          "version": 0
+        },
+        {
+          "dump_json": "{\"address\":\"\",\"api_key\":\"\"}",
+          "section": "emby",
+          "version": 0
+        },
+        {
+          "dump_json": "{\"id_exceptions\":[],\"ignored_id_patterns\":[]}",
+          "section": "avid",
+          "version": 0
+        },
+        {
+          "dump_json": "{\"enabled\":false,\"interval_seconds\":1800,\"categories\":[],\"failed_avid_cooldown_seconds\":86400}",
+          "section": "rss",
+          "version": 0
+        },
+        {
+          "dump_json": "{\"enabled\":false,\"scan_cron\":\"0 4 * * *\",\"src_dir\":\"\",\"dst_dir\":\"\",\"mapping\":{},\"priority_mapping\":{},\"min_size_mb\":0,\"brand_mapping\":{},\"tracker_interval_seconds\":1800,\"stall_timeout_hours\":24,\"max_attempts\":5}",
+          "section": "archive",
+          "version": 0
+        },
+        {
+          "dump_json": "{\"enabled\":true,\"src_dir\":\"/strm\",\"dst_dir\":\"/library\",\"debounce_seconds\":2.0,\"full_sync_interval_seconds\":3600}",
+          "section": "mapping",
+          "version": 4
+        },
+        {
+          "dump_json": "{\"enabled\":false,\"interval_seconds\":86400,\"source_url\":\"https://jinjier.art/sql\",\"task_dir_path\":\"\"}",
+          "section": "playlists",
+          "version": 0
+        },
+        {
+          "dump_json": "{\"actor_root\":\"\",\"additional_roots\":[],\"move_in_root\":\"\",\"move_in_by_brand\":false,\"root_sentinel\":\".embyx-root\",\"apply_enabled\":false,\"cloud_strm_mount_prefix\":\"\",\"cloud_source_roots\":[],\"cloud_move_in_root\":\"\",\"task_dir_path\":\"\"}",
+          "section": "fill_actor",
+          "version": 0
+        },
+        {
+          "dump_json": "{\"work_dir\":\"/downloads/upload\",\"cloud_work_dir\":\"/downloads/upload\",\"cloud_staging_dir\":\"/115/upload\",\"cloud_mount_prefix\":\"/mnt/cd2\",\"free_space_reserve_gib\":20,\"auto_enabled\":false,\"auto_include_stackable\":false,\"auto_pause_on_failure\":false,\"home_transcode_enabled\":false}",
+          "section": "merge",
+          "version": 0
+        }
+      ],
+      "updates": [
+        {
+          "dump_json": "{\"address\":\"cd.internal:19798\",\"api_token\":\"secret-token\",\"secure\":false}",
+          "masked": {
+            "address": "cd.internal:19798",
+            "api_token": "",
+            "secure": false
+          },
+          "secret_flags": {
+            "api_token": true
+          },
+          "version": 1
+        },
+        {
+          "dump_json": "{\"address\":\"cd2.internal:19798\",\"api_token\":\"secret-token\",\"secure\":false}",
+          "masked": {
+            "address": "cd2.internal:19798",
+            "api_token": "",
+            "secure": false
+          },
+          "secret_flags": {
+            "api_token": true
+          },
+          "version": 2
+        },
+        {
+          "error": {
+            "message": "config section clouddrive version conflict: expected 1, stored 2",
+            "type": "ConfigVersionConflictError"
+          }
+        },
+        {
+          "dump_json": "{\"address\":\"http://Emby.internal:8096\",\"api_key\":\"k\"}",
+          "masked": {
+            "address": "http://Emby.internal:8096",
+            "api_key": ""
+          },
+          "secret_flags": {
+            "api_key": true
+          },
+          "version": 1
+        },
+        {
+          "dump_json": "{\"enabled\":false,\"interval_seconds\":900,\"categories\":[{\"label\":\"Rank\",\"task_dir_path\":\"/115/rank\"},{\"label\":\"演员\",\"task_dir_path\":\"/115/embyx_in\"}],\"failed_avid_cooldown_seconds\":86400}",
+          "masked": {
+            "categories": [
+              {
+                "label": "Rank",
+                "task_dir_path": "/115/rank"
+              },
+              {
+                "label": "演员",
+                "task_dir_path": "/115/embyx_in"
+              }
+            ],
+            "enabled": false,
+            "failed_avid_cooldown_seconds": 86400,
+            "interval_seconds": 900
+          },
+          "secret_flags": {},
+          "version": 1
+        },
+        {
+          "dump_json": "{\"enabled\":false,\"scan_cron\":\"30 3 * * 1\",\"src_dir\":\"\",\"dst_dir\":\"\",\"mapping\":{\"intake\":\"sorted\"},\"priority_mapping\":{},\"min_size_mb\":12,\"brand_mapping\":{\"special\":[\"ABC\",\"DEF\"]},\"tracker_interval_seconds\":1800,\"stall_timeout_hours\":24,\"max_attempts\":5}",
+          "masked": {
+            "brand_mapping": {
+              "special": [
+                "ABC",
+                "DEF"
+              ]
+            },
+            "dst_dir": "",
+            "enabled": false,
+            "mapping": {
+              "intake": "sorted"
+            },
+            "max_attempts": 5,
+            "min_size_mb": 12,
+            "priority_mapping": {},
+            "scan_cron": "30 3 * * 1",
+            "src_dir": "",
+            "stall_timeout_hours": 24,
+            "tracker_interval_seconds": 1800
+          },
+          "secret_flags": {},
+          "version": 1
+        },
+        {
+          "dump_json": "{\"enabled\":true,\"src_dir\":\"/mnt/strm/\",\"dst_dir\":\"/library\",\"debounce_seconds\":0.00001,\"full_sync_interval_seconds\":3600}",
+          "masked": {
+            "debounce_seconds": 1e-05,
+            "dst_dir": "/library",
+            "enabled": true,
+            "full_sync_interval_seconds": 3600,
+            "src_dir": "/mnt/strm/"
+          },
+          "secret_flags": {},
+          "version": 5
+        },
+        {
+          "error": {
+            "errors": [
+              {
+                "loc": [
+                  "actor_root"
+                ],
+                "msg": "Value error, fill_actor.actor_root must be an absolute path",
+                "type": "value_error"
+              }
+            ],
+            "type": "ValidationError"
+          }
+        },
+        {
+          "error": {
+            "errors": [
+              {
+                "loc": [
+                  "interval_seconds"
+                ],
+                "msg": "Input should be a valid integer, unable to parse string as an integer",
+                "type": "int_parsing"
+              }
+            ],
+            "type": "ValidationError"
+          }
+        },
+        {
+          "dump_json": "{\"work_dir\":\"/downloads/upload\",\"cloud_work_dir\":\"/downloads/upload\",\"cloud_staging_dir\":\"/115/upload\",\"cloud_mount_prefix\":\"/mnt/cd2\",\"free_space_reserve_gib\":20,\"auto_enabled\":true,\"auto_include_stackable\":false,\"auto_pause_on_failure\":false,\"home_transcode_enabled\":false}",
+          "masked": {
+            "auto_enabled": true,
+            "auto_include_stackable": false,
+            "auto_pause_on_failure": false,
+            "cloud_mount_prefix": "/mnt/cd2",
+            "cloud_staging_dir": "/115/upload",
+            "cloud_work_dir": "/downloads/upload",
+            "free_space_reserve_gib": 20,
+            "home_transcode_enabled": false,
+            "work_dir": "/downloads/upload"
+          },
+          "secret_flags": {},
+          "version": 1
+        },
+        {
+          "dump_json": "{\"id_exceptions\":[\"WEIRD-SPECIAL\"],\"ignored_id_patterns\":[\"1080P\"]}",
+          "masked": {
+            "id_exceptions": [
+              "WEIRD-SPECIAL"
+            ],
+            "ignored_id_patterns": [
+              "1080P"
+            ]
+          },
+          "secret_flags": {},
+          "version": 1
+        },
+        {
+          "error": {
+            "message": "'nope'",
+            "type": "UnknownConfigSectionError"
+          }
+        }
+      ]
+    }
+  },
+  "rows": {
+    "app_config": [
+      {
+        "section": "archive",
+        "updated_at": "<volatile:6>",
+        "value_json": "{\"enabled\":false,\"scan_cron\":\"30 3 * * 1\",\"src_dir\":\"\",\"dst_dir\":\"\",\"mapping\":{\"intake\":\"sorted\"},\"priority_mapping\":{},\"min_size_mb\":12,\"brand_mapping\":{\"special\":[\"ABC\",\"DEF\"]},\"tracker_interval_seconds\":1800,\"stall_timeout_hours\":24,\"max_attempts\":5}",
+        "version": 1
+      },
+      {
+        "section": "avid",
+        "updated_at": "<volatile:9>",
+        "value_json": "{\"id_exceptions\":[\"WEIRD-SPECIAL\"],\"ignored_id_patterns\":[\"1080P\"]}",
+        "version": 1
+      },
+      {
+        "section": "clouddrive",
+        "updated_at": "<volatile:3>",
+        "value_json": "{\"address\":\"cd2.internal:19798\",\"api_token\":\"secret-token\",\"secure\":false}",
+        "version": 2
+      },
+      {
+        "section": "emby",
+        "updated_at": "<volatile:4>",
+        "value_json": "{\"address\":\"http://Emby.internal:8096\",\"api_key\":\"k\"}",
+        "version": 1
+      },
+      {
+        "section": "legacy",
+        "updated_at": "<volatile:2>",
+        "value_json": "{\"x\": 1}",
+        "version": 1
+      },
+      {
+        "section": "mapping",
+        "updated_at": "<volatile:7>",
+        "value_json": "{\"enabled\":true,\"src_dir\":\"/mnt/strm/\",\"dst_dir\":\"/library\",\"debounce_seconds\":0.00001,\"full_sync_interval_seconds\":3600}",
+        "version": 5
+      },
+      {
+        "section": "merge",
+        "updated_at": "<volatile:8>",
+        "value_json": "{\"work_dir\":\"/downloads/upload\",\"cloud_work_dir\":\"/downloads/upload\",\"cloud_staging_dir\":\"/115/upload\",\"cloud_mount_prefix\":\"/mnt/cd2\",\"free_space_reserve_gib\":20,\"auto_enabled\":true,\"auto_include_stackable\":false,\"auto_pause_on_failure\":false,\"home_transcode_enabled\":false}",
+        "version": 1
+      },
+      {
+        "section": "playlists",
+        "updated_at": "<volatile:1>",
+        "value_json": "{\"enabled\": true, \"interval_seconds\": \"soon\"}",
+        "version": 2
+      },
+      {
+        "section": "rss",
+        "updated_at": "<volatile:5>",
+        "value_json": "{\"enabled\":false,\"interval_seconds\":900,\"categories\":[{\"label\":\"Rank\",\"task_dir_path\":\"/115/rank\"},{\"label\":\"演员\",\"task_dir_path\":\"/115/embyx_in\"}],\"failed_avid_cooldown_seconds\":86400}",
+        "version": 1
+      }
+    ],
+    "archive_acquisitions": [],
+    "archive_magnet_attempts": [],
+    "feed_subscriptions": [],
+    "fill_actor_apply_jobs": [],
+    "fill_actor_candidates": [],
+    "fill_actor_cloud_move_operations": [],
+    "fill_actor_jobs": [],
+    "fill_actor_move_journal": [],
+    "fill_actor_move_results": [],
+    "fill_actor_plans": [],
+    "health_probe": [],
+    "merge_tasks": [],
+    "merge_transcode_chunks": [],
+    "merge_transcode_parts": [],
+    "pipeline_runs": [],
+    "playlist_source": [],
+    "playlists": []
+  },
+  "scenario": "config/store",
+  "tree": {}
+}

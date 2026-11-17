@@ -1,0 +1,74 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "urls",
+  "cases": [
+    {
+      "text": "QUJD+/=",
+      "quote_no_safe": "QUJD%2B%2F%3D",
+      "quote": "QUJD%2B/%3D",
+      "unquote": "QUJD+/="
+    },
+    {
+      "text": "plain-text_with.safe~chars",
+      "quote_no_safe": "plain-text_with.safe~chars",
+      "quote": "plain-text_with.safe~chars",
+      "unquote": "plain-text_with.safe~chars"
+    },
+    {
+      "text": "slash/and space",
+      "quote_no_safe": "slash%2Fand%20space",
+      "quote": "slash/and%20space",
+      "unquote": "slash/and space"
+    },
+    {
+      "text": "中文",
+      "quote_no_safe": "%E4%B8%AD%E6%96%87",
+      "quote": "%E4%B8%AD%E6%96%87",
+      "unquote": "中文"
+    },
+    {
+      "text": "%41%42%zz%4",
+      "quote_no_safe": "%2541%2542%25zz%254",
+      "quote": "%2541%2542%25zz%254",
+      "unquote": "AB%zz%4"
+    },
+    {
+      "text": "%E4%B8%AD%E6%96%87",
+      "quote_no_safe": "%25E4%25B8%25AD%25E6%2596%2587",
+      "quote": "%25E4%25B8%25AD%25E6%2596%2587",
+      "unquote": "中文"
+    },
+    {
+      "text": "%E4%B8%ADx%",
+      "quote_no_safe": "%25E4%25B8%25ADx%25",
+      "quote": "%25E4%25B8%25ADx%25",
+      "unquote": "中x%"
+    },
+    {
+      "text": "%E4%B8",
+      "quote_no_safe": "%25E4%25B8",
+      "quote": "%25E4%25B8",
+      "unquote": "�"
+    },
+    {
+      "text": "%ff%fe",
+      "quote_no_safe": "%25ff%25fe",
+      "quote": "%25ff%25fe",
+      "unquote": "��"
+    },
+    {
+      "text": "mixed 中%E6%96%87%",
+      "quote_no_safe": "mixed%20%E4%B8%AD%25E6%2596%2587%25",
+      "quote": "mixed%20%E4%B8%AD%25E6%2596%2587%25",
+      "unquote": "mixed 中文%"
+    },
+    {
+      "text": "",
+      "quote_no_safe": "",
+      "quote": "",
+      "unquote": ""
+    }
+  ]
+}

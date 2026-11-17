@@ -1,0 +1,351 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "avid",
+  "cases": [
+    {
+      "id_exceptions": [
+        "WEIRD-SPECIAL"
+      ],
+      "ignored_id_patterns": [],
+      "results": [
+        {
+          "title": "prefix weird-special suffix 123",
+          "avid": "WEIRD-SPECIAL"
+        },
+        {
+          "title": "WEIRD-SPECIAL",
+          "avid": "WEIRD-SPECIAL"
+        },
+        {
+          "title": "ABC-123 1080P",
+          "avid": "ABC-123"
+        },
+        {
+          "title": "X1080X-ABC-123",
+          "avid": "ABC-123"
+        },
+        {
+          "title": "[www.site.com] ABP-123",
+          "avid": "ABP-123"
+        },
+        {
+          "title": "WWW.SITE.COM ABP-123",
+          "avid": "ABP-123"
+        },
+        {
+          "title": "abc-123",
+          "avid": "ABC-123"
+        },
+        {
+          "title": "ABC-123-CD1",
+          "avid": "ABC-123"
+        },
+        {
+          "title": "ABC-123 cd2",
+          "avid": "ABC-123"
+        },
+        {
+          "title": "xyz-123",
+          "avid": "XYZ-123"
+        },
+        {
+          "title": "XYZ123 ABC-456",
+          "avid": "ABC-456"
+        },
+        {
+          "title": "weird-lower",
+          "avid": ""
+        },
+        {
+          "title": "something AB in it",
+          "avid": ""
+        },
+        {
+          "title": "ab-123",
+          "avid": "AB-123"
+        }
+      ]
+    },
+    {
+      "id_exceptions": [],
+      "ignored_id_patterns": [
+        "1080P",
+        "X1080X"
+      ],
+      "results": [
+        {
+          "title": "prefix weird-special suffix 123",
+          "avid": ""
+        },
+        {
+          "title": "WEIRD-SPECIAL",
+          "avid": ""
+        },
+        {
+          "title": "ABC-123 1080P",
+          "avid": "ABC-123"
+        },
+        {
+          "title": "X1080X-ABC-123",
+          "avid": "ABC-123"
+        },
+        {
+          "title": "[www.site.com] ABP-123",
+          "avid": "ABP-123"
+        },
+        {
+          "title": "WWW.SITE.COM ABP-123",
+          "avid": "ABP-123"
+        },
+        {
+          "title": "abc-123",
+          "avid": "ABC-123"
+        },
+        {
+          "title": "ABC-123-CD1",
+          "avid": "ABC-123"
+        },
+        {
+          "title": "ABC-123 cd2",
+          "avid": "ABC-123"
+        },
+        {
+          "title": "xyz-123",
+          "avid": "XYZ-123"
+        },
+        {
+          "title": "XYZ123 ABC-456",
+          "avid": "ABC-456"
+        },
+        {
+          "title": "weird-lower",
+          "avid": ""
+        },
+        {
+          "title": "something AB in it",
+          "avid": ""
+        },
+        {
+          "title": "ab-123",
+          "avid": "AB-123"
+        }
+      ]
+    },
+    {
+      "id_exceptions": [
+        "ABC-123",
+        "AB"
+      ],
+      "ignored_id_patterns": [
+        ""
+      ],
+      "results": [
+        {
+          "title": "prefix weird-special suffix 123",
+          "avid": ""
+        },
+        {
+          "title": "WEIRD-SPECIAL",
+          "avid": ""
+        },
+        {
+          "title": "ABC-123 1080P",
+          "avid": "ABC-123"
+        },
+        {
+          "title": "X1080X-ABC-123",
+          "avid": "ABC-123"
+        },
+        {
+          "title": "[www.site.com] ABP-123",
+          "avid": "AB"
+        },
+        {
+          "title": "WWW.SITE.COM ABP-123",
+          "avid": "AB"
+        },
+        {
+          "title": "abc-123",
+          "avid": "ABC-123"
+        },
+        {
+          "title": "ABC-123-CD1",
+          "avid": "ABC-123"
+        },
+        {
+          "title": "ABC-123 cd2",
+          "avid": "ABC-123"
+        },
+        {
+          "title": "xyz-123",
+          "avid": "XYZ-123"
+        },
+        {
+          "title": "XYZ123 ABC-456",
+          "avid": "AB"
+        },
+        {
+          "title": "weird-lower",
+          "avid": ""
+        },
+        {
+          "title": "something AB in it",
+          "avid": "AB"
+        },
+        {
+          "title": "ab-123",
+          "avid": "AB"
+        }
+      ]
+    },
+    {
+      "id_exceptions": [],
+      "ignored_id_patterns": [
+        "\\[.*?\\]",
+        "(?i)www\\.\\w+\\.com"
+      ],
+      "error": "PatternError"
+    },
+    {
+      "id_exceptions": [],
+      "ignored_id_patterns": [
+        "^ABC-",
+        "-?CD\\d+$"
+      ],
+      "results": [
+        {
+          "title": "prefix weird-special suffix 123",
+          "avid": ""
+        },
+        {
+          "title": "WEIRD-SPECIAL",
+          "avid": ""
+        },
+        {
+          "title": "ABC-123 1080P",
+          "avid": ""
+        },
+        {
+          "title": "X1080X-ABC-123",
+          "avid": "ABC-123"
+        },
+        {
+          "title": "[www.site.com] ABP-123",
+          "avid": "ABP-123"
+        },
+        {
+          "title": "WWW.SITE.COM ABP-123",
+          "avid": "ABP-123"
+        },
+        {
+          "title": "abc-123",
+          "avid": "ABC-123"
+        },
+        {
+          "title": "ABC-123-CD1",
+          "avid": ""
+        },
+        {
+          "title": "ABC-123 cd2",
+          "avid": ""
+        },
+        {
+          "title": "xyz-123",
+          "avid": "XYZ-123"
+        },
+        {
+          "title": "XYZ123 ABC-456",
+          "avid": "ABC-456"
+        },
+        {
+          "title": "weird-lower",
+          "avid": ""
+        },
+        {
+          "title": "something AB in it",
+          "avid": ""
+        },
+        {
+          "title": "ab-123",
+          "avid": "AB-123"
+        }
+      ]
+    },
+    {
+      "id_exceptions": [
+        "weird-lower"
+      ],
+      "ignored_id_patterns": [
+        "(?P<x>XYZ)"
+      ],
+      "results": [
+        {
+          "title": "prefix weird-special suffix 123",
+          "avid": ""
+        },
+        {
+          "title": "WEIRD-SPECIAL",
+          "avid": ""
+        },
+        {
+          "title": "ABC-123 1080P",
+          "avid": "ABC-123"
+        },
+        {
+          "title": "X1080X-ABC-123",
+          "avid": "ABC-123"
+        },
+        {
+          "title": "[www.site.com] ABP-123",
+          "avid": "ABP-123"
+        },
+        {
+          "title": "WWW.SITE.COM ABP-123",
+          "avid": "ABP-123"
+        },
+        {
+          "title": "abc-123",
+          "avid": "ABC-123"
+        },
+        {
+          "title": "ABC-123-CD1",
+          "avid": "ABC-123"
+        },
+        {
+          "title": "ABC-123 cd2",
+          "avid": "ABC-123"
+        },
+        {
+          "title": "xyz-123",
+          "avid": "XYZ-123"
+        },
+        {
+          "title": "XYZ123 ABC-456",
+          "avid": "ABC-456"
+        },
+        {
+          "title": "weird-lower",
+          "avid": ""
+        },
+        {
+          "title": "something AB in it",
+          "avid": ""
+        },
+        {
+          "title": "ab-123",
+          "avid": "AB-123"
+        }
+      ]
+    },
+    {
+      "id_exceptions": [],
+      "ignored_id_patterns": [
+        "(",
+        "x"
+      ],
+      "error": "PatternError"
+    }
+  ]
+}

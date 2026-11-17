@@ -1,0 +1,44 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "json_dumps",
+  "cases": [
+    {
+      "kind": "datetime",
+      "value": "2026-11-09T22:56:54",
+      "str": "2026-11-09 22:56:54",
+      "hash_of_object": "{\"at\":\"2026-11-09 22:56:54\",\"n\":1}"
+    },
+    {
+      "kind": "datetime",
+      "value": "2026-11-09T22:56:54.000123",
+      "str": "2026-11-09 22:56:54.000123",
+      "hash_of_object": "{\"at\":\"2026-11-09 22:56:54.000123\",\"n\":1}"
+    },
+    {
+      "kind": "datetime",
+      "value": "2026-11-09T22:56:54+00:00",
+      "str": "2026-11-09 22:56:54+00:00",
+      "hash_of_object": "{\"at\":\"2026-11-09 22:56:54+00:00\",\"n\":1}"
+    },
+    {
+      "kind": "datetime",
+      "value": "2026-11-09T22:56:54.5+08:00",
+      "str": "2026-11-09 22:56:54.500000+08:00",
+      "hash_of_object": "{\"at\":\"2026-11-09 22:56:54.500000+08:00\",\"n\":1}"
+    },
+    {
+      "kind": "date",
+      "value": "2026-11-09",
+      "str": "2026-11-09",
+      "hash_of_object": "{\"at\":\"2026-11-09\",\"n\":1}"
+    },
+    {
+      "kind": "path",
+      "value": "collection/nikke/c010/skin.json",
+      "str": "collection/nikke/c010/skin.json",
+      "hash_of_object": "{\"at\":\"collection/nikke/c010/skin.json\",\"n\":1}"
+    }
+  ]
+}

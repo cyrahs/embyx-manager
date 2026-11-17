@@ -1,0 +1,237 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "config",
+  "cases": [
+    {
+      "section": "clouddrive",
+      "model": "CloudDriveConfig",
+      "fields": [
+        "address",
+        "api_token",
+        "secure"
+      ],
+      "secret_fields": [
+        "api_token"
+      ],
+      "dump_json": "{\"address\":\"\",\"api_token\":\"\",\"secure\":true}",
+      "masked": {
+        "address": "",
+        "api_token": "",
+        "secure": true
+      },
+      "secret_flags": {
+        "api_token": false
+      },
+      "properties": {
+        "configured": false
+      }
+    },
+    {
+      "section": "emby",
+      "model": "EmbyConfig",
+      "fields": [
+        "address",
+        "api_key"
+      ],
+      "secret_fields": [
+        "api_key"
+      ],
+      "dump_json": "{\"address\":\"\",\"api_key\":\"\"}",
+      "masked": {
+        "address": "",
+        "api_key": ""
+      },
+      "secret_flags": {
+        "api_key": false
+      },
+      "properties": {
+        "configured": false
+      }
+    },
+    {
+      "section": "avid",
+      "model": "AvidRulesConfig",
+      "fields": [
+        "id_exceptions",
+        "ignored_id_patterns"
+      ],
+      "secret_fields": [],
+      "dump_json": "{\"id_exceptions\":[],\"ignored_id_patterns\":[]}",
+      "masked": {
+        "id_exceptions": [],
+        "ignored_id_patterns": []
+      },
+      "secret_flags": {},
+      "properties": {}
+    },
+    {
+      "section": "rss",
+      "model": "RssConfig",
+      "fields": [
+        "enabled",
+        "interval_seconds",
+        "categories",
+        "failed_avid_cooldown_seconds"
+      ],
+      "secret_fields": [],
+      "dump_json": "{\"enabled\":false,\"interval_seconds\":1800,\"categories\":[],\"failed_avid_cooldown_seconds\":86400}",
+      "masked": {
+        "enabled": false,
+        "interval_seconds": 1800,
+        "categories": [],
+        "failed_avid_cooldown_seconds": 86400
+      },
+      "secret_flags": {},
+      "properties": {}
+    },
+    {
+      "section": "archive",
+      "model": "ArchiveConfig",
+      "fields": [
+        "enabled",
+        "scan_cron",
+        "src_dir",
+        "dst_dir",
+        "mapping",
+        "priority_mapping",
+        "min_size_mb",
+        "brand_mapping",
+        "tracker_interval_seconds",
+        "stall_timeout_hours",
+        "max_attempts"
+      ],
+      "secret_fields": [],
+      "dump_json": "{\"enabled\":false,\"scan_cron\":\"0 4 * * *\",\"src_dir\":\"\",\"dst_dir\":\"\",\"mapping\":{},\"priority_mapping\":{},\"min_size_mb\":0,\"brand_mapping\":{},\"tracker_interval_seconds\":1800,\"stall_timeout_hours\":24,\"max_attempts\":5}",
+      "masked": {
+        "enabled": false,
+        "scan_cron": "0 4 * * *",
+        "src_dir": "",
+        "dst_dir": "",
+        "mapping": {},
+        "priority_mapping": {},
+        "min_size_mb": 0,
+        "brand_mapping": {},
+        "tracker_interval_seconds": 1800,
+        "stall_timeout_hours": 24,
+        "max_attempts": 5
+      },
+      "secret_flags": {},
+      "properties": {
+        "configured": false
+      }
+    },
+    {
+      "section": "mapping",
+      "model": "MappingConfig",
+      "fields": [
+        "enabled",
+        "src_dir",
+        "dst_dir",
+        "debounce_seconds",
+        "full_sync_interval_seconds"
+      ],
+      "secret_fields": [],
+      "dump_json": "{\"enabled\":false,\"src_dir\":\"\",\"dst_dir\":\"\",\"debounce_seconds\":2.0,\"full_sync_interval_seconds\":86400}",
+      "masked": {
+        "enabled": false,
+        "src_dir": "",
+        "dst_dir": "",
+        "debounce_seconds": 2.0,
+        "full_sync_interval_seconds": 86400
+      },
+      "secret_flags": {},
+      "properties": {
+        "configured": false
+      }
+    },
+    {
+      "section": "playlists",
+      "model": "PlaylistsConfig",
+      "fields": [
+        "enabled",
+        "interval_seconds",
+        "source_url",
+        "task_dir_path"
+      ],
+      "secret_fields": [],
+      "dump_json": "{\"enabled\":false,\"interval_seconds\":86400,\"source_url\":\"https://jinjier.art/sql\",\"task_dir_path\":\"\"}",
+      "masked": {
+        "enabled": false,
+        "interval_seconds": 86400,
+        "source_url": "https://jinjier.art/sql",
+        "task_dir_path": ""
+      },
+      "secret_flags": {},
+      "properties": {}
+    },
+    {
+      "section": "fill_actor",
+      "model": "FillActorConfig",
+      "fields": [
+        "actor_root",
+        "additional_roots",
+        "move_in_root",
+        "move_in_by_brand",
+        "root_sentinel",
+        "apply_enabled",
+        "cloud_strm_mount_prefix",
+        "cloud_source_roots",
+        "cloud_move_in_root",
+        "task_dir_path"
+      ],
+      "secret_fields": [],
+      "dump_json": "{\"actor_root\":\"\",\"additional_roots\":[],\"move_in_root\":\"\",\"move_in_by_brand\":false,\"root_sentinel\":\".embyx-root\",\"apply_enabled\":false,\"cloud_strm_mount_prefix\":\"\",\"cloud_source_roots\":[],\"cloud_move_in_root\":\"\",\"task_dir_path\":\"\"}",
+      "masked": {
+        "actor_root": "",
+        "additional_roots": [],
+        "move_in_root": "",
+        "move_in_by_brand": false,
+        "root_sentinel": ".embyx-root",
+        "apply_enabled": false,
+        "cloud_strm_mount_prefix": "",
+        "cloud_source_roots": [],
+        "cloud_move_in_root": "",
+        "task_dir_path": ""
+      },
+      "secret_flags": {},
+      "properties": {
+        "configured": false,
+        "cloud_configured": false
+      }
+    },
+    {
+      "section": "merge",
+      "model": "MergeConfig",
+      "fields": [
+        "work_dir",
+        "cloud_work_dir",
+        "cloud_staging_dir",
+        "cloud_mount_prefix",
+        "free_space_reserve_gib",
+        "auto_enabled",
+        "auto_include_stackable",
+        "auto_pause_on_failure",
+        "home_transcode_enabled"
+      ],
+      "secret_fields": [],
+      "dump_json": "{\"work_dir\":\"/downloads/upload\",\"cloud_work_dir\":\"/downloads/upload\",\"cloud_staging_dir\":\"/115/upload\",\"cloud_mount_prefix\":\"/mnt/cd2\",\"free_space_reserve_gib\":20,\"auto_enabled\":false,\"auto_include_stackable\":false,\"auto_pause_on_failure\":false,\"home_transcode_enabled\":false}",
+      "masked": {
+        "work_dir": "/downloads/upload",
+        "cloud_work_dir": "/downloads/upload",
+        "cloud_staging_dir": "/115/upload",
+        "cloud_mount_prefix": "/mnt/cd2",
+        "free_space_reserve_gib": 20,
+        "auto_enabled": false,
+        "auto_include_stackable": false,
+        "auto_pause_on_failure": false,
+        "home_transcode_enabled": false
+      },
+      "secret_flags": {},
+      "properties": {
+        "configured": true
+      }
+    }
+  ]
+}

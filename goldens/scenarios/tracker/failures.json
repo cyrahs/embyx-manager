@@ -1,0 +1,1359 @@
+{
+  "calls": [
+    {
+      "error": {
+        "code": "UNAVAILABLE",
+        "details": "connection reset"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "ListOfflineFilesByPath",
+      "request": {
+        "path": "/115/task/inbox"
+      },
+      "seq": 1
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "ListOfflineFilesByPath",
+      "request": {
+        "path": "/115/task/inbox"
+      },
+      "response": {
+        "offlineFiles": [
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "1111111111111111111111111111111111111111",
+            "name": "RFR-102",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 100.0,
+            "size": "3",
+            "status": "OFFLINE_FINISHED",
+            "url": "magnet:?xt=urn:btih:1111111111111111111111111111111111111111&dn=RFR-102"
+          },
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "2222222222222222222222222222222222222222",
+            "name": "IGN-106",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 5.0,
+            "size": "0",
+            "status": "OFFLINE_ERROR",
+            "url": "magnet:?xt=urn:btih:2222222222222222222222222222222222222222&dn=IGN-106"
+          },
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "3333333333333333333333333333333333333333",
+            "name": "FIN-101",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 100.0,
+            "size": "4",
+            "status": "OFFLINE_FINISHED",
+            "url": "magnet:?xt=urn:btih:3333333333333333333333333333333333333333&dn=FIN-101"
+          },
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "4444444444444444444444444444444444444444",
+            "name": "REJ-104",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 1.0,
+            "size": "0",
+            "status": "OFFLINE_ERROR",
+            "url": "magnet:?xt=urn:btih:4444444444444444444444444444444444444444&dn=REJ-104"
+          },
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "5555555555555555555555555555555555555555",
+            "name": "NAT-103",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 100.0,
+            "size": "6",
+            "status": "OFFLINE_FINISHED",
+            "url": "magnet:?xt=urn:btih:5555555555555555555555555555555555555555&dn=NAT-103"
+          },
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "6666666666666666666666666666666666666666",
+            "name": "IGN-105",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 100.0,
+            "size": "2",
+            "status": "OFFLINE_FINISHED",
+            "url": "magnet:?xt=urn:btih:6666666666666666666666666666666666666666&dn=IGN-105"
+          }
+        ]
+      },
+      "seq": 2
+    },
+    {
+      "error": {
+        "code": "INTERNAL",
+        "details": "cache busy"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox"
+      },
+      "seq": 3
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{mount}/library/sorted/RFR"
+      },
+      "response": null,
+      "seq": 4
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{mount}/library/sorted/RFR/RFR-102.mp4",
+        "src": "{mount}/115/task/inbox/RFR-102/RFR-102.mp4"
+      },
+      "response": null,
+      "seq": 5
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{mount}/115/task/inbox/RFR-102"
+      },
+      "response": null,
+      "seq": 6
+    },
+    {
+      "error": {
+        "code": "INTERNAL",
+        "details": "busy"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "RemoveOfflineFiles",
+      "request": {
+        "cloudAccountId": "",
+        "cloudName": "",
+        "deleteFiles": true,
+        "infoHashes": [
+          "2222222222222222222222222222222222222222"
+        ],
+        "path": "/115/task/inbox"
+      },
+      "seq": 7
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/FIN-101",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/FIN-101",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "FIN-101",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/IGN-105",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/IGN-105",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "IGN-105",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/NAT-103",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/NAT-103",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "NAT-103",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/RFR-102",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/RFR-102",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "RFR-102",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 8
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox/FIN-101"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/FIN-101/FIN-101.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/FIN-101/FIN-101.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "FIN-101.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "4",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 9
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{mount}/library/sorted/FIN"
+      },
+      "response": null,
+      "seq": 10
+    },
+    {
+      "error": {
+        "message": "[Errno 5] Input/output error: '{mount}/115/task/inbox/FIN-101/FIN-101.mp4' -> '{mount}/library/sorted/FIN/FIN-101.mp4'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{mount}/library/sorted/FIN/FIN-101.mp4",
+        "src": "{mount}/115/task/inbox/FIN-101/FIN-101.mp4"
+      },
+      "seq": 11
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "RemoveOfflineFiles",
+      "request": {
+        "cloudAccountId": "",
+        "cloudName": "",
+        "deleteFiles": true,
+        "infoHashes": [
+          "4444444444444444444444444444444444444444"
+        ],
+        "path": "/115/task/inbox"
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 12
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/FIN-101",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/FIN-101",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "FIN-101",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/IGN-105",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/IGN-105",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "IGN-105",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/NAT-103",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/NAT-103",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "NAT-103",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/RFR-102",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/RFR-102",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "RFR-102",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 13
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox/NAT-103"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/NAT-103/XYZ-999.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/NAT-103/XYZ-999.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "XYZ-999.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "6",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 14
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "RemoveOfflineFiles",
+      "request": {
+        "cloudAccountId": "",
+        "cloudName": "",
+        "deleteFiles": false,
+        "infoHashes": [
+          "1111111111111111111111111111111111111111"
+        ],
+        "path": "/115/task/inbox"
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 15
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "ListOfflineFilesByPath",
+      "request": {
+        "path": "/115/task/inbox"
+      },
+      "response": {
+        "offlineFiles": [
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "2222222222222222222222222222222222222222",
+            "name": "IGN-106",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 5.0,
+            "size": "0",
+            "status": "OFFLINE_ERROR",
+            "url": "magnet:?xt=urn:btih:2222222222222222222222222222222222222222&dn=IGN-106"
+          },
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "3333333333333333333333333333333333333333",
+            "name": "FIN-101",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 100.0,
+            "size": "4",
+            "status": "OFFLINE_FINISHED",
+            "url": "magnet:?xt=urn:btih:3333333333333333333333333333333333333333&dn=FIN-101"
+          },
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "5555555555555555555555555555555555555555",
+            "name": "NAT-103",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 100.0,
+            "size": "6",
+            "status": "OFFLINE_FINISHED",
+            "url": "magnet:?xt=urn:btih:5555555555555555555555555555555555555555&dn=NAT-103"
+          },
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "6666666666666666666666666666666666666666",
+            "name": "IGN-105",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 100.0,
+            "size": "2",
+            "status": "OFFLINE_FINISHED",
+            "url": "magnet:?xt=urn:btih:6666666666666666666666666666666666666666&dn=IGN-105"
+          }
+        ]
+      },
+      "seq": 16
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/FIN-101",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/FIN-101",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "FIN-101",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/IGN-105",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/IGN-105",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "IGN-105",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/NAT-103",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/NAT-103",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "NAT-103",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/RFR-102",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/RFR-102",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "RFR-102",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 17
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox/FIN-101"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/FIN-101/FIN-101.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/FIN-101/FIN-101.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "FIN-101.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "4",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 18
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{mount}/library/sorted/FIN"
+      },
+      "response": null,
+      "seq": 19
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{mount}/library/sorted/FIN/FIN-101.mp4",
+        "src": "{mount}/115/task/inbox/FIN-101/FIN-101.mp4"
+      },
+      "response": null,
+      "seq": 20
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{mount}/115/task/inbox/FIN-101"
+      },
+      "response": null,
+      "seq": 21
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "RemoveOfflineFiles",
+      "request": {
+        "cloudAccountId": "",
+        "cloudName": "",
+        "deleteFiles": false,
+        "infoHashes": [
+          "3333333333333333333333333333333333333333"
+        ],
+        "path": "/115/task/inbox"
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 22
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/",
+        "/115/task/inbox",
+        "/115/task/inbox/FIN-101",
+        "/115/task/inbox/IGN-105",
+        "/115/task/inbox/NAT-103",
+        "/115/task/inbox/RFR-102"
+      ],
+      "files": [
+        {
+          "hashes": {},
+          "path": "/115/task/inbox/FIN-101/FIN-101.mp4",
+          "size": 4
+        },
+        {
+          "hashes": {},
+          "path": "/115/task/inbox/IGN-105/IGN-105.mp4",
+          "size": 2
+        },
+        {
+          "hashes": {},
+          "path": "/115/task/inbox/NAT-103/XYZ-999.mp4",
+          "size": 6
+        },
+        {
+          "hashes": {},
+          "path": "/115/task/inbox/RFR-102/RFR-102.mp4",
+          "size": 3
+        }
+      ],
+      "offline_tasks": [
+        {
+          "folder": "/115/task/inbox",
+          "info_hash": "2222222222222222222222222222222222222222",
+          "name": "IGN-106",
+          "progress": 5.0,
+          "size": 0,
+          "status": "OFFLINE_ERROR",
+          "url": "magnet:?xt=urn:btih:2222222222222222222222222222222222222222&dn=IGN-106"
+        },
+        {
+          "folder": "/115/task/inbox",
+          "info_hash": "5555555555555555555555555555555555555555",
+          "name": "NAT-103",
+          "progress": 100.0,
+          "size": 6,
+          "status": "OFFLINE_FINISHED",
+          "url": "magnet:?xt=urn:btih:5555555555555555555555555555555555555555&dn=NAT-103"
+        },
+        {
+          "folder": "/115/task/inbox",
+          "info_hash": "6666666666666666666666666666666666666666",
+          "name": "IGN-105",
+          "progress": 100.0,
+          "size": 2,
+          "status": "OFFLINE_FINISHED",
+          "url": "magnet:?xt=urn:btih:6666666666666666666666666666666666666666&dn=IGN-105"
+        }
+      ],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "tracker.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "error": {
+            "message": "<_InactiveRpcError of RPC that terminated with:\n\tstatus = StatusCode.UNAVAILABLE\n\tdetails = \"connection reset\"\n\tdebug_error_string = \"<scrubbed>\"\n>",
+            "type": "_InactiveRpcError"
+          },
+          "errors": [],
+          "log": [],
+          "op": "poll",
+          "stats": {}
+        },
+        {
+          "errors": [
+            "ERROR: failed to refresh /115/task/inbox/RFR-102: <_MultiThreadedRendezvous of RPC that terminated with:\n\tstatus = StatusCode.INTERNAL\n\tdetails = \"cache busy\"\n\tdebug_error_string = \"<scrubbed>\"\n>",
+            "ERROR: failed to remove the abandoned offline task 2222222222222222222222222222222222222222 under /115/task/inbox: <_InactiveRpcError of RPC that terminated with:\n\tstatus = StatusCode.INTERNAL\n\tdetails = \"busy\"\n\tdebug_error_string = \"<scrubbed>\"\n>",
+            "ERROR: failed to archive inbox/FIN-101: OSError(5, 'Input/output error')"
+          ],
+          "log": [
+            "ERROR: failed to refresh /115/task/inbox/RFR-102: <_MultiThreadedRendezvous of RPC that terminated with:\n\tstatus = StatusCode.INTERNAL\n\tdetails = \"cache busy\"\n\tdebug_error_string = \"<scrubbed>\"\n>",
+            "moving RFR-102.mp4 to sorted/RFR/RFR-102.mp4",
+            "WARNING: IGN-106: CloudDrive reported the download failed",
+            "ERROR: failed to remove the abandoned offline task 2222222222222222222222222222222222222222 under /115/task/inbox: <_InactiveRpcError of RPC that terminated with:\n\tstatus = StatusCode.INTERNAL\n\tdetails = \"busy\"\n\tdebug_error_string = \"<scrubbed>\"\n>",
+            "moving FIN-101.mp4 to sorted/FIN/FIN-101.mp4",
+            "ERROR: failed to archive inbox/FIN-101: OSError(5, 'Input/output error')",
+            "WARNING: REJ-104: CloudDrive reported the download failed",
+            "WARNING: REJ-104: every magnet was tried",
+            "WARNING: expected NAT-103 but found XYZ-999 in NAT-103, skipping"
+          ],
+          "op": "poll",
+          "result": null,
+          "stats": {
+            "archived": 1,
+            "archived_tasks_cleared": 1,
+            "error": 2,
+            "exhausted": 1,
+            "folders_discarded": 1,
+            "items_failed": 1,
+            "needs_attention": 1,
+            "offline_tasks": 6,
+            "tasks_removed": 1,
+            "videos_archived": 1
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "moving FIN-101.mp4 to sorted/FIN/FIN-101.mp4"
+          ],
+          "op": "poll",
+          "result": null,
+          "stats": {
+            "archived": 1,
+            "archived_tasks_cleared": 1,
+            "folders_discarded": 1,
+            "offline_tasks": 4,
+            "videos_archived": 1
+          }
+        }
+      ]
+    }
+  },
+  "rows": {
+    "app_config": [],
+    "archive_acquisitions": [
+      {
+        "archived_paths_json": "[\"sorted/FIN/FIN-101.mp4\"]",
+        "avid": "FIN-101",
+        "created_at": "2026-09-09T00:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss:Actor",
+        "state": "archived",
+        "task_dir_path": "/115/task/inbox",
+        "updated_at": "2026-09-10T03:02:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "IGN-105",
+        "created_at": "2026-09-09T00:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss:Actor",
+        "state": "ignored",
+        "task_dir_path": "/115/task/inbox",
+        "updated_at": "2026-09-09T00:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "IGN-106",
+        "created_at": "2026-09-09T00:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss:Actor",
+        "state": "ignored",
+        "task_dir_path": "/115/task/inbox",
+        "updated_at": "2026-09-09T00:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "NAT-103",
+        "created_at": "2026-09-09T00:00:00+00:00",
+        "next_action_at": null,
+        "note": "expected NAT-103 but found XYZ-999",
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss:Actor",
+        "state": "needs_attention",
+        "task_dir_path": "/115/task/inbox",
+        "updated_at": "2026-09-10T03:01:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "REJ-104",
+        "created_at": "2026-09-09T00:00:00+00:00",
+        "next_action_at": "2026-09-11T03:01:00+00:00",
+        "note": "every magnet was tried",
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss:Actor",
+        "state": "exhausted",
+        "task_dir_path": "/115/task/inbox",
+        "updated_at": "2026-09-10T03:01:00+00:00"
+      },
+      {
+        "archived_paths_json": "[\"sorted/RFR/RFR-102.mp4\"]",
+        "avid": "RFR-102",
+        "created_at": "2026-09-09T00:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss:Actor",
+        "state": "archived",
+        "task_dir_path": "/115/task/inbox",
+        "updated_at": "2026-09-10T03:01:00+00:00"
+      }
+    ],
+    "archive_magnet_attempts": [
+      {
+        "attempt_no": 1,
+        "avid": "FIN-101",
+        "error": null,
+        "info_hash": "3333333333333333333333333333333333333333",
+        "magnet": "magnet:?xt=urn:btih:3333333333333333333333333333333333333333&dn=FIN-101",
+        "magnet_source": "sukebei",
+        "progress": 99,
+        "size_hint": null,
+        "state": "archived",
+        "submitted_at": "2026-09-09T00:00:00+00:00",
+        "updated_at": "2026-09-10T03:02:00+00:00"
+      },
+      {
+        "attempt_no": 1,
+        "avid": "IGN-105",
+        "error": null,
+        "info_hash": "6666666666666666666666666666666666666666",
+        "magnet": "magnet:?xt=urn:btih:6666666666666666666666666666666666666666&dn=IGN-105",
+        "magnet_source": "sukebei",
+        "progress": null,
+        "size_hint": null,
+        "state": "submitted",
+        "submitted_at": "2026-09-09T00:00:00+00:00",
+        "updated_at": "2026-09-09T00:00:00+00:00"
+      },
+      {
+        "attempt_no": 1,
+        "avid": "IGN-106",
+        "error": "CloudDrive reported the download failed",
+        "info_hash": "2222222222222222222222222222222222222222",
+        "magnet": "magnet:?xt=urn:btih:2222222222222222222222222222222222222222&dn=IGN-106",
+        "magnet_source": "sukebei",
+        "progress": 5,
+        "size_hint": null,
+        "state": "error",
+        "submitted_at": "2026-09-09T00:00:00+00:00",
+        "updated_at": "2026-09-10T03:01:00+00:00"
+      },
+      {
+        "attempt_no": 2,
+        "avid": "IGN-106",
+        "error": null,
+        "info_hash": "2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A",
+        "magnet": "magnet:?xt=urn:btih:2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A2A&dn=IGN-106",
+        "magnet_source": "sukebei",
+        "progress": null,
+        "size_hint": null,
+        "state": "pending",
+        "submitted_at": null,
+        "updated_at": "2026-09-09T00:00:00+00:00"
+      },
+      {
+        "attempt_no": 1,
+        "avid": "NAT-103",
+        "error": null,
+        "info_hash": "5555555555555555555555555555555555555555",
+        "magnet": "magnet:?xt=urn:btih:5555555555555555555555555555555555555555&dn=NAT-103",
+        "magnet_source": "sukebei",
+        "progress": null,
+        "size_hint": null,
+        "state": "finished",
+        "submitted_at": "2026-09-09T00:00:00+00:00",
+        "updated_at": "2026-09-10T03:01:00+00:00"
+      },
+      {
+        "attempt_no": 1,
+        "avid": "REJ-104",
+        "error": "CloudDrive reported the download failed",
+        "info_hash": "4141414141414141414141414141414141414141",
+        "magnet": "magnet:?xt=urn:btih:4141414141414141414141414141414141414141&dn=REJ-104",
+        "magnet_source": "sukebei",
+        "progress": null,
+        "size_hint": null,
+        "state": "error",
+        "submitted_at": "2026-09-09T00:00:00+00:00",
+        "updated_at": "2026-09-09T00:00:00+00:00"
+      },
+      {
+        "attempt_no": 3,
+        "avid": "REJ-104",
+        "error": "CloudDrive reported the download failed",
+        "info_hash": "4444444444444444444444444444444444444444",
+        "magnet": "magnet:?xt=urn:btih:4444444444444444444444444444444444444444&dn=REJ-104",
+        "magnet_source": "sukebei",
+        "progress": 1,
+        "size_hint": null,
+        "state": "error",
+        "submitted_at": "2026-09-09T00:00:00+00:00",
+        "updated_at": "2026-09-10T03:01:00+00:00"
+      },
+      {
+        "attempt_no": 2,
+        "avid": "REJ-104",
+        "error": "no progress for 1d at 0%",
+        "info_hash": "4242424242424242424242424242424242424242",
+        "magnet": "magnet:?xt=urn:btih:4242424242424242424242424242424242424242&dn=REJ-104",
+        "magnet_source": "sukebei",
+        "progress": null,
+        "size_hint": null,
+        "state": "stalled",
+        "submitted_at": "2026-09-09T00:00:00+00:00",
+        "updated_at": "2026-09-09T00:00:00+00:00"
+      },
+      {
+        "attempt_no": 4,
+        "avid": "REJ-104",
+        "error": null,
+        "info_hash": "4545454545454545454545454545454545454545",
+        "magnet": "magnet:?xt=urn:btih:4545454545454545454545454545454545454545&dn=REJ-104",
+        "magnet_source": "sukebei",
+        "progress": null,
+        "size_hint": null,
+        "state": "pending",
+        "submitted_at": null,
+        "updated_at": "2026-09-09T00:00:00+00:00"
+      },
+      {
+        "attempt_no": 1,
+        "avid": "RFR-102",
+        "error": null,
+        "info_hash": "1111111111111111111111111111111111111111",
+        "magnet": "magnet:?xt=urn:btih:1111111111111111111111111111111111111111&dn=RFR-102",
+        "magnet_source": "sukebei",
+        "progress": null,
+        "size_hint": null,
+        "state": "archived",
+        "submitted_at": "2026-09-09T00:00:00+00:00",
+        "updated_at": "2026-09-10T03:01:00+00:00"
+      }
+    ],
+    "feed_subscriptions": [],
+    "fill_actor_apply_jobs": [],
+    "fill_actor_candidates": [],
+    "fill_actor_cloud_move_operations": [],
+    "fill_actor_jobs": [],
+    "fill_actor_move_journal": [],
+    "fill_actor_move_results": [],
+    "fill_actor_plans": [],
+    "health_probe": [],
+    "merge_tasks": [],
+    "merge_transcode_chunks": [],
+    "merge_transcode_parts": [],
+    "pipeline_runs": [],
+    "playlist_source": [],
+    "playlists": []
+  },
+  "scenario": "tracker/failures",
+  "tree": {
+    "mount": [
+      {
+        "kind": "dir",
+        "path": "115"
+      },
+      {
+        "kind": "dir",
+        "path": "115/task"
+      },
+      {
+        "kind": "dir",
+        "path": "115/task/inbox"
+      },
+      {
+        "kind": "dir",
+        "path": "115/task/inbox/IGN-105"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "115/task/inbox/IGN-105/IGN-105.mp4",
+        "sha256": "5dde896887f6754c",
+        "size": 2
+      },
+      {
+        "kind": "dir",
+        "path": "115/task/inbox/NAT-103"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "115/task/inbox/NAT-103/XYZ-999.mp4",
+        "sha256": "b7fb217694ae2d30",
+        "size": 6
+      },
+      {
+        "kind": "dir",
+        "path": "library"
+      },
+      {
+        "kind": "dir",
+        "path": "library/sorted"
+      },
+      {
+        "kind": "dir",
+        "path": "library/sorted/FIN"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "library/sorted/FIN/FIN-101.mp4",
+        "sha256": "2481a63c85a62cf8",
+        "size": 4
+      },
+      {
+        "kind": "dir",
+        "path": "library/sorted/RFR"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "library/sorted/RFR/RFR-102.mp4",
+        "sha256": "cd2eb0837c9b4c96",
+        "size": 3
+      }
+    ]
+  }
+}

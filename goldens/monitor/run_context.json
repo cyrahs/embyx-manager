@@ -1,0 +1,1685 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "monitor",
+  "cases": [
+    {
+      "name": "plain lines",
+      "calls": [
+        [
+          "info",
+          "Added magnet for ABC-123"
+        ],
+        [
+          "warning",
+          "Failed to get any magnet for ABC-123"
+        ],
+        [
+          "error",
+          "Failed to add magnet for ABC-123: errorMessage: \"full\"\n"
+        ]
+      ],
+      "log_tail": [
+        "Added magnet for ABC-123",
+        "WARNING: Failed to get any magnet for ABC-123",
+        "ERROR: Failed to add magnet for ABC-123: errorMessage: \"full\"\n"
+      ],
+      "errors": [
+        "ERROR: Failed to add magnet for ABC-123: errorMessage: \"full\"\n"
+      ],
+      "stats_json": "{}",
+      "log_json": "[\"Added magnet for ABC-123\", \"WARNING: Failed to get any magnet for ABC-123\", \"ERROR: Failed to add magnet for ABC-123: errorMessage: \\\"full\\\"\\n\"]",
+      "errors_json": "[\"ERROR: Failed to add magnet for ABC-123: errorMessage: \\\"full\\\"\\n\"]"
+    },
+    {
+      "name": "exceptions",
+      "calls": [
+        [
+          "exception",
+          "Failed to get magnets for ABC-123",
+          [
+            "RuntimeError",
+            "sukebei down"
+          ]
+        ],
+        [
+          "exception",
+          "mapping run failed",
+          [
+            "OSError",
+            "disk 'detached'"
+          ]
+        ],
+        [
+          "exception",
+          "outside a handler",
+          null
+        ],
+        [
+          "exception",
+          "演员 失败",
+          [
+            "ValueError",
+            "名字\n\"quoted\""
+          ]
+        ]
+      ],
+      "log_tail": [
+        "ERROR: Failed to get magnets for ABC-123: RuntimeError('sukebei down')",
+        "ERROR: mapping run failed: OSError(\"disk 'detached'\")",
+        "ERROR: outside a handler",
+        "ERROR: 演员 失败: ValueError('名字\\n\"quoted\"')"
+      ],
+      "errors": [
+        "ERROR: Failed to get magnets for ABC-123: RuntimeError('sukebei down')",
+        "ERROR: mapping run failed: OSError(\"disk 'detached'\")",
+        "ERROR: outside a handler",
+        "ERROR: 演员 失败: ValueError('名字\\n\"quoted\"')"
+      ],
+      "stats_json": "{}",
+      "log_json": "[\"ERROR: Failed to get magnets for ABC-123: RuntimeError('sukebei down')\", \"ERROR: mapping run failed: OSError(\\\"disk 'detached'\\\")\", \"ERROR: outside a handler\", \"ERROR: \\u6f14\\u5458 \\u5931\\u8d25: ValueError('\\u540d\\u5b57\\\\n\\\"quoted\\\"')\"]",
+      "errors_json": "[\"ERROR: Failed to get magnets for ABC-123: RuntimeError('sukebei down')\", \"ERROR: mapping run failed: OSError(\\\"disk 'detached'\\\")\", \"ERROR: outside a handler\", \"ERROR: \\u6f14\\u5458 \\u5931\\u8d25: ValueError('\\u540d\\u5b57\\\\n\\\"quoted\\\"')\"]"
+    },
+    {
+      "name": "percent signs are kept",
+      "calls": [
+        [
+          "info",
+          "100% done"
+        ],
+        [
+          "warning",
+          "%s literally"
+        ]
+      ],
+      "log_tail": [
+        "100% done",
+        "WARNING: %s literally"
+      ],
+      "errors": [],
+      "stats_json": "{}",
+      "log_json": "[\"100% done\", \"WARNING: %s literally\"]",
+      "errors_json": "[]"
+    },
+    {
+      "name": "counters keep insertion order",
+      "calls": [
+        [
+          "add",
+          "zeta",
+          1
+        ],
+        [
+          "add",
+          "alpha",
+          2
+        ],
+        [
+          "add",
+          "zeta",
+          3
+        ],
+        [
+          "set",
+          "retry_due",
+          4
+        ],
+        [
+          "add",
+          "candidates_recorded",
+          0
+        ],
+        [
+          "set",
+          "zeta",
+          -1
+        ]
+      ],
+      "log_tail": [],
+      "errors": [],
+      "stats_json": "{\"zeta\": -1, \"alpha\": 2, \"retry_due\": 4, \"candidates_recorded\": 0}",
+      "log_json": "[]",
+      "errors_json": "[]"
+    },
+    {
+      "name": "the tail keeps the last 200 lines",
+      "calls": [
+        [
+          "info",
+          "line 0"
+        ],
+        [
+          "info",
+          "line 1"
+        ],
+        [
+          "info",
+          "line 2"
+        ],
+        [
+          "info",
+          "line 3"
+        ],
+        [
+          "info",
+          "line 4"
+        ],
+        [
+          "info",
+          "line 5"
+        ],
+        [
+          "info",
+          "line 6"
+        ],
+        [
+          "info",
+          "line 7"
+        ],
+        [
+          "info",
+          "line 8"
+        ],
+        [
+          "info",
+          "line 9"
+        ],
+        [
+          "info",
+          "line 10"
+        ],
+        [
+          "info",
+          "line 11"
+        ],
+        [
+          "info",
+          "line 12"
+        ],
+        [
+          "info",
+          "line 13"
+        ],
+        [
+          "info",
+          "line 14"
+        ],
+        [
+          "info",
+          "line 15"
+        ],
+        [
+          "info",
+          "line 16"
+        ],
+        [
+          "info",
+          "line 17"
+        ],
+        [
+          "info",
+          "line 18"
+        ],
+        [
+          "info",
+          "line 19"
+        ],
+        [
+          "info",
+          "line 20"
+        ],
+        [
+          "info",
+          "line 21"
+        ],
+        [
+          "info",
+          "line 22"
+        ],
+        [
+          "info",
+          "line 23"
+        ],
+        [
+          "info",
+          "line 24"
+        ],
+        [
+          "info",
+          "line 25"
+        ],
+        [
+          "info",
+          "line 26"
+        ],
+        [
+          "info",
+          "line 27"
+        ],
+        [
+          "info",
+          "line 28"
+        ],
+        [
+          "info",
+          "line 29"
+        ],
+        [
+          "info",
+          "line 30"
+        ],
+        [
+          "info",
+          "line 31"
+        ],
+        [
+          "info",
+          "line 32"
+        ],
+        [
+          "info",
+          "line 33"
+        ],
+        [
+          "info",
+          "line 34"
+        ],
+        [
+          "info",
+          "line 35"
+        ],
+        [
+          "info",
+          "line 36"
+        ],
+        [
+          "info",
+          "line 37"
+        ],
+        [
+          "info",
+          "line 38"
+        ],
+        [
+          "info",
+          "line 39"
+        ],
+        [
+          "info",
+          "line 40"
+        ],
+        [
+          "info",
+          "line 41"
+        ],
+        [
+          "info",
+          "line 42"
+        ],
+        [
+          "info",
+          "line 43"
+        ],
+        [
+          "info",
+          "line 44"
+        ],
+        [
+          "info",
+          "line 45"
+        ],
+        [
+          "info",
+          "line 46"
+        ],
+        [
+          "info",
+          "line 47"
+        ],
+        [
+          "info",
+          "line 48"
+        ],
+        [
+          "info",
+          "line 49"
+        ],
+        [
+          "info",
+          "line 50"
+        ],
+        [
+          "info",
+          "line 51"
+        ],
+        [
+          "info",
+          "line 52"
+        ],
+        [
+          "info",
+          "line 53"
+        ],
+        [
+          "info",
+          "line 54"
+        ],
+        [
+          "info",
+          "line 55"
+        ],
+        [
+          "info",
+          "line 56"
+        ],
+        [
+          "info",
+          "line 57"
+        ],
+        [
+          "info",
+          "line 58"
+        ],
+        [
+          "info",
+          "line 59"
+        ],
+        [
+          "info",
+          "line 60"
+        ],
+        [
+          "info",
+          "line 61"
+        ],
+        [
+          "info",
+          "line 62"
+        ],
+        [
+          "info",
+          "line 63"
+        ],
+        [
+          "info",
+          "line 64"
+        ],
+        [
+          "info",
+          "line 65"
+        ],
+        [
+          "info",
+          "line 66"
+        ],
+        [
+          "info",
+          "line 67"
+        ],
+        [
+          "info",
+          "line 68"
+        ],
+        [
+          "info",
+          "line 69"
+        ],
+        [
+          "info",
+          "line 70"
+        ],
+        [
+          "info",
+          "line 71"
+        ],
+        [
+          "info",
+          "line 72"
+        ],
+        [
+          "info",
+          "line 73"
+        ],
+        [
+          "info",
+          "line 74"
+        ],
+        [
+          "info",
+          "line 75"
+        ],
+        [
+          "info",
+          "line 76"
+        ],
+        [
+          "info",
+          "line 77"
+        ],
+        [
+          "info",
+          "line 78"
+        ],
+        [
+          "info",
+          "line 79"
+        ],
+        [
+          "info",
+          "line 80"
+        ],
+        [
+          "info",
+          "line 81"
+        ],
+        [
+          "info",
+          "line 82"
+        ],
+        [
+          "info",
+          "line 83"
+        ],
+        [
+          "info",
+          "line 84"
+        ],
+        [
+          "info",
+          "line 85"
+        ],
+        [
+          "info",
+          "line 86"
+        ],
+        [
+          "info",
+          "line 87"
+        ],
+        [
+          "info",
+          "line 88"
+        ],
+        [
+          "info",
+          "line 89"
+        ],
+        [
+          "info",
+          "line 90"
+        ],
+        [
+          "info",
+          "line 91"
+        ],
+        [
+          "info",
+          "line 92"
+        ],
+        [
+          "info",
+          "line 93"
+        ],
+        [
+          "info",
+          "line 94"
+        ],
+        [
+          "info",
+          "line 95"
+        ],
+        [
+          "info",
+          "line 96"
+        ],
+        [
+          "info",
+          "line 97"
+        ],
+        [
+          "info",
+          "line 98"
+        ],
+        [
+          "info",
+          "line 99"
+        ],
+        [
+          "info",
+          "line 100"
+        ],
+        [
+          "info",
+          "line 101"
+        ],
+        [
+          "info",
+          "line 102"
+        ],
+        [
+          "info",
+          "line 103"
+        ],
+        [
+          "info",
+          "line 104"
+        ],
+        [
+          "info",
+          "line 105"
+        ],
+        [
+          "info",
+          "line 106"
+        ],
+        [
+          "info",
+          "line 107"
+        ],
+        [
+          "info",
+          "line 108"
+        ],
+        [
+          "info",
+          "line 109"
+        ],
+        [
+          "info",
+          "line 110"
+        ],
+        [
+          "info",
+          "line 111"
+        ],
+        [
+          "info",
+          "line 112"
+        ],
+        [
+          "info",
+          "line 113"
+        ],
+        [
+          "info",
+          "line 114"
+        ],
+        [
+          "info",
+          "line 115"
+        ],
+        [
+          "info",
+          "line 116"
+        ],
+        [
+          "info",
+          "line 117"
+        ],
+        [
+          "info",
+          "line 118"
+        ],
+        [
+          "info",
+          "line 119"
+        ],
+        [
+          "info",
+          "line 120"
+        ],
+        [
+          "info",
+          "line 121"
+        ],
+        [
+          "info",
+          "line 122"
+        ],
+        [
+          "info",
+          "line 123"
+        ],
+        [
+          "info",
+          "line 124"
+        ],
+        [
+          "info",
+          "line 125"
+        ],
+        [
+          "info",
+          "line 126"
+        ],
+        [
+          "info",
+          "line 127"
+        ],
+        [
+          "info",
+          "line 128"
+        ],
+        [
+          "info",
+          "line 129"
+        ],
+        [
+          "info",
+          "line 130"
+        ],
+        [
+          "info",
+          "line 131"
+        ],
+        [
+          "info",
+          "line 132"
+        ],
+        [
+          "info",
+          "line 133"
+        ],
+        [
+          "info",
+          "line 134"
+        ],
+        [
+          "info",
+          "line 135"
+        ],
+        [
+          "info",
+          "line 136"
+        ],
+        [
+          "info",
+          "line 137"
+        ],
+        [
+          "info",
+          "line 138"
+        ],
+        [
+          "info",
+          "line 139"
+        ],
+        [
+          "info",
+          "line 140"
+        ],
+        [
+          "info",
+          "line 141"
+        ],
+        [
+          "info",
+          "line 142"
+        ],
+        [
+          "info",
+          "line 143"
+        ],
+        [
+          "info",
+          "line 144"
+        ],
+        [
+          "info",
+          "line 145"
+        ],
+        [
+          "info",
+          "line 146"
+        ],
+        [
+          "info",
+          "line 147"
+        ],
+        [
+          "info",
+          "line 148"
+        ],
+        [
+          "info",
+          "line 149"
+        ],
+        [
+          "info",
+          "line 150"
+        ],
+        [
+          "info",
+          "line 151"
+        ],
+        [
+          "info",
+          "line 152"
+        ],
+        [
+          "info",
+          "line 153"
+        ],
+        [
+          "info",
+          "line 154"
+        ],
+        [
+          "info",
+          "line 155"
+        ],
+        [
+          "info",
+          "line 156"
+        ],
+        [
+          "info",
+          "line 157"
+        ],
+        [
+          "info",
+          "line 158"
+        ],
+        [
+          "info",
+          "line 159"
+        ],
+        [
+          "info",
+          "line 160"
+        ],
+        [
+          "info",
+          "line 161"
+        ],
+        [
+          "info",
+          "line 162"
+        ],
+        [
+          "info",
+          "line 163"
+        ],
+        [
+          "info",
+          "line 164"
+        ],
+        [
+          "info",
+          "line 165"
+        ],
+        [
+          "info",
+          "line 166"
+        ],
+        [
+          "info",
+          "line 167"
+        ],
+        [
+          "info",
+          "line 168"
+        ],
+        [
+          "info",
+          "line 169"
+        ],
+        [
+          "info",
+          "line 170"
+        ],
+        [
+          "info",
+          "line 171"
+        ],
+        [
+          "info",
+          "line 172"
+        ],
+        [
+          "info",
+          "line 173"
+        ],
+        [
+          "info",
+          "line 174"
+        ],
+        [
+          "info",
+          "line 175"
+        ],
+        [
+          "info",
+          "line 176"
+        ],
+        [
+          "info",
+          "line 177"
+        ],
+        [
+          "info",
+          "line 178"
+        ],
+        [
+          "info",
+          "line 179"
+        ],
+        [
+          "info",
+          "line 180"
+        ],
+        [
+          "info",
+          "line 181"
+        ],
+        [
+          "info",
+          "line 182"
+        ],
+        [
+          "info",
+          "line 183"
+        ],
+        [
+          "info",
+          "line 184"
+        ],
+        [
+          "info",
+          "line 185"
+        ],
+        [
+          "info",
+          "line 186"
+        ],
+        [
+          "info",
+          "line 187"
+        ],
+        [
+          "info",
+          "line 188"
+        ],
+        [
+          "info",
+          "line 189"
+        ],
+        [
+          "info",
+          "line 190"
+        ],
+        [
+          "info",
+          "line 191"
+        ],
+        [
+          "info",
+          "line 192"
+        ],
+        [
+          "info",
+          "line 193"
+        ],
+        [
+          "info",
+          "line 194"
+        ],
+        [
+          "info",
+          "line 195"
+        ],
+        [
+          "info",
+          "line 196"
+        ],
+        [
+          "info",
+          "line 197"
+        ],
+        [
+          "info",
+          "line 198"
+        ],
+        [
+          "info",
+          "line 199"
+        ],
+        [
+          "info",
+          "line 200"
+        ],
+        [
+          "info",
+          "line 201"
+        ],
+        [
+          "info",
+          "line 202"
+        ],
+        [
+          "info",
+          "line 203"
+        ],
+        [
+          "info",
+          "line 204"
+        ]
+      ],
+      "log_tail": [
+        "line 5",
+        "line 6",
+        "line 7",
+        "line 8",
+        "line 9",
+        "line 10",
+        "line 11",
+        "line 12",
+        "line 13",
+        "line 14",
+        "line 15",
+        "line 16",
+        "line 17",
+        "line 18",
+        "line 19",
+        "line 20",
+        "line 21",
+        "line 22",
+        "line 23",
+        "line 24",
+        "line 25",
+        "line 26",
+        "line 27",
+        "line 28",
+        "line 29",
+        "line 30",
+        "line 31",
+        "line 32",
+        "line 33",
+        "line 34",
+        "line 35",
+        "line 36",
+        "line 37",
+        "line 38",
+        "line 39",
+        "line 40",
+        "line 41",
+        "line 42",
+        "line 43",
+        "line 44",
+        "line 45",
+        "line 46",
+        "line 47",
+        "line 48",
+        "line 49",
+        "line 50",
+        "line 51",
+        "line 52",
+        "line 53",
+        "line 54",
+        "line 55",
+        "line 56",
+        "line 57",
+        "line 58",
+        "line 59",
+        "line 60",
+        "line 61",
+        "line 62",
+        "line 63",
+        "line 64",
+        "line 65",
+        "line 66",
+        "line 67",
+        "line 68",
+        "line 69",
+        "line 70",
+        "line 71",
+        "line 72",
+        "line 73",
+        "line 74",
+        "line 75",
+        "line 76",
+        "line 77",
+        "line 78",
+        "line 79",
+        "line 80",
+        "line 81",
+        "line 82",
+        "line 83",
+        "line 84",
+        "line 85",
+        "line 86",
+        "line 87",
+        "line 88",
+        "line 89",
+        "line 90",
+        "line 91",
+        "line 92",
+        "line 93",
+        "line 94",
+        "line 95",
+        "line 96",
+        "line 97",
+        "line 98",
+        "line 99",
+        "line 100",
+        "line 101",
+        "line 102",
+        "line 103",
+        "line 104",
+        "line 105",
+        "line 106",
+        "line 107",
+        "line 108",
+        "line 109",
+        "line 110",
+        "line 111",
+        "line 112",
+        "line 113",
+        "line 114",
+        "line 115",
+        "line 116",
+        "line 117",
+        "line 118",
+        "line 119",
+        "line 120",
+        "line 121",
+        "line 122",
+        "line 123",
+        "line 124",
+        "line 125",
+        "line 126",
+        "line 127",
+        "line 128",
+        "line 129",
+        "line 130",
+        "line 131",
+        "line 132",
+        "line 133",
+        "line 134",
+        "line 135",
+        "line 136",
+        "line 137",
+        "line 138",
+        "line 139",
+        "line 140",
+        "line 141",
+        "line 142",
+        "line 143",
+        "line 144",
+        "line 145",
+        "line 146",
+        "line 147",
+        "line 148",
+        "line 149",
+        "line 150",
+        "line 151",
+        "line 152",
+        "line 153",
+        "line 154",
+        "line 155",
+        "line 156",
+        "line 157",
+        "line 158",
+        "line 159",
+        "line 160",
+        "line 161",
+        "line 162",
+        "line 163",
+        "line 164",
+        "line 165",
+        "line 166",
+        "line 167",
+        "line 168",
+        "line 169",
+        "line 170",
+        "line 171",
+        "line 172",
+        "line 173",
+        "line 174",
+        "line 175",
+        "line 176",
+        "line 177",
+        "line 178",
+        "line 179",
+        "line 180",
+        "line 181",
+        "line 182",
+        "line 183",
+        "line 184",
+        "line 185",
+        "line 186",
+        "line 187",
+        "line 188",
+        "line 189",
+        "line 190",
+        "line 191",
+        "line 192",
+        "line 193",
+        "line 194",
+        "line 195",
+        "line 196",
+        "line 197",
+        "line 198",
+        "line 199",
+        "line 200",
+        "line 201",
+        "line 202",
+        "line 203",
+        "line 204"
+      ],
+      "errors": [],
+      "stats_json": "{}",
+      "log_json": "[\"line 5\", \"line 6\", \"line 7\", \"line 8\", \"line 9\", \"line 10\", \"line 11\", \"line 12\", \"line 13\", \"line 14\", \"line 15\", \"line 16\", \"line 17\", \"line 18\", \"line 19\", \"line 20\", \"line 21\", \"line 22\", \"line 23\", \"line 24\", \"line 25\", \"line 26\", \"line 27\", \"line 28\", \"line 29\", \"line 30\", \"line 31\", \"line 32\", \"line 33\", \"line 34\", \"line 35\", \"line 36\", \"line 37\", \"line 38\", \"line 39\", \"line 40\", \"line 41\", \"line 42\", \"line 43\", \"line 44\", \"line 45\", \"line 46\", \"line 47\", \"line 48\", \"line 49\", \"line 50\", \"line 51\", \"line 52\", \"line 53\", \"line 54\", \"line 55\", \"line 56\", \"line 57\", \"line 58\", \"line 59\", \"line 60\", \"line 61\", \"line 62\", \"line 63\", \"line 64\", \"line 65\", \"line 66\", \"line 67\", \"line 68\", \"line 69\", \"line 70\", \"line 71\", \"line 72\", \"line 73\", \"line 74\", \"line 75\", \"line 76\", \"line 77\", \"line 78\", \"line 79\", \"line 80\", \"line 81\", \"line 82\", \"line 83\", \"line 84\", \"line 85\", \"line 86\", \"line 87\", \"line 88\", \"line 89\", \"line 90\", \"line 91\", \"line 92\", \"line 93\", \"line 94\", \"line 95\", \"line 96\", \"line 97\", \"line 98\", \"line 99\", \"line 100\", \"line 101\", \"line 102\", \"line 103\", \"line 104\", \"line 105\", \"line 106\", \"line 107\", \"line 108\", \"line 109\", \"line 110\", \"line 111\", \"line 112\", \"line 113\", \"line 114\", \"line 115\", \"line 116\", \"line 117\", \"line 118\", \"line 119\", \"line 120\", \"line 121\", \"line 122\", \"line 123\", \"line 124\", \"line 125\", \"line 126\", \"line 127\", \"line 128\", \"line 129\", \"line 130\", \"line 131\", \"line 132\", \"line 133\", \"line 134\", \"line 135\", \"line 136\", \"line 137\", \"line 138\", \"line 139\", \"line 140\", \"line 141\", \"line 142\", \"line 143\", \"line 144\", \"line 145\", \"line 146\", \"line 147\", \"line 148\", \"line 149\", \"line 150\", \"line 151\", \"line 152\", \"line 153\", \"line 154\", \"line 155\", \"line 156\", \"line 157\", \"line 158\", \"line 159\", \"line 160\", \"line 161\", \"line 162\", \"line 163\", \"line 164\", \"line 165\", \"line 166\", \"line 167\", \"line 168\", \"line 169\", \"line 170\", \"line 171\", \"line 172\", \"line 173\", \"line 174\", \"line 175\", \"line 176\", \"line 177\", \"line 178\", \"line 179\", \"line 180\", \"line 181\", \"line 182\", \"line 183\", \"line 184\", \"line 185\", \"line 186\", \"line 187\", \"line 188\", \"line 189\", \"line 190\", \"line 191\", \"line 192\", \"line 193\", \"line 194\", \"line 195\", \"line 196\", \"line 197\", \"line 198\", \"line 199\", \"line 200\", \"line 201\", \"line 202\", \"line 203\", \"line 204\"]",
+      "errors_json": "[]"
+    },
+    {
+      "name": "errors stop at 50",
+      "calls": [
+        [
+          "error",
+          "failure 0"
+        ],
+        [
+          "error",
+          "failure 1"
+        ],
+        [
+          "error",
+          "failure 2"
+        ],
+        [
+          "error",
+          "failure 3"
+        ],
+        [
+          "error",
+          "failure 4"
+        ],
+        [
+          "error",
+          "failure 5"
+        ],
+        [
+          "error",
+          "failure 6"
+        ],
+        [
+          "error",
+          "failure 7"
+        ],
+        [
+          "error",
+          "failure 8"
+        ],
+        [
+          "error",
+          "failure 9"
+        ],
+        [
+          "error",
+          "failure 10"
+        ],
+        [
+          "error",
+          "failure 11"
+        ],
+        [
+          "error",
+          "failure 12"
+        ],
+        [
+          "error",
+          "failure 13"
+        ],
+        [
+          "error",
+          "failure 14"
+        ],
+        [
+          "error",
+          "failure 15"
+        ],
+        [
+          "error",
+          "failure 16"
+        ],
+        [
+          "error",
+          "failure 17"
+        ],
+        [
+          "error",
+          "failure 18"
+        ],
+        [
+          "error",
+          "failure 19"
+        ],
+        [
+          "error",
+          "failure 20"
+        ],
+        [
+          "error",
+          "failure 21"
+        ],
+        [
+          "error",
+          "failure 22"
+        ],
+        [
+          "error",
+          "failure 23"
+        ],
+        [
+          "error",
+          "failure 24"
+        ],
+        [
+          "error",
+          "failure 25"
+        ],
+        [
+          "error",
+          "failure 26"
+        ],
+        [
+          "error",
+          "failure 27"
+        ],
+        [
+          "error",
+          "failure 28"
+        ],
+        [
+          "error",
+          "failure 29"
+        ],
+        [
+          "exception",
+          "raised 0",
+          [
+            "RuntimeError",
+            "0"
+          ]
+        ],
+        [
+          "exception",
+          "raised 1",
+          [
+            "RuntimeError",
+            "1"
+          ]
+        ],
+        [
+          "exception",
+          "raised 2",
+          [
+            "RuntimeError",
+            "2"
+          ]
+        ],
+        [
+          "exception",
+          "raised 3",
+          [
+            "RuntimeError",
+            "3"
+          ]
+        ],
+        [
+          "exception",
+          "raised 4",
+          [
+            "RuntimeError",
+            "4"
+          ]
+        ],
+        [
+          "exception",
+          "raised 5",
+          [
+            "RuntimeError",
+            "5"
+          ]
+        ],
+        [
+          "exception",
+          "raised 6",
+          [
+            "RuntimeError",
+            "6"
+          ]
+        ],
+        [
+          "exception",
+          "raised 7",
+          [
+            "RuntimeError",
+            "7"
+          ]
+        ],
+        [
+          "exception",
+          "raised 8",
+          [
+            "RuntimeError",
+            "8"
+          ]
+        ],
+        [
+          "exception",
+          "raised 9",
+          [
+            "RuntimeError",
+            "9"
+          ]
+        ],
+        [
+          "exception",
+          "raised 10",
+          [
+            "RuntimeError",
+            "10"
+          ]
+        ],
+        [
+          "exception",
+          "raised 11",
+          [
+            "RuntimeError",
+            "11"
+          ]
+        ],
+        [
+          "exception",
+          "raised 12",
+          [
+            "RuntimeError",
+            "12"
+          ]
+        ],
+        [
+          "exception",
+          "raised 13",
+          [
+            "RuntimeError",
+            "13"
+          ]
+        ],
+        [
+          "exception",
+          "raised 14",
+          [
+            "RuntimeError",
+            "14"
+          ]
+        ],
+        [
+          "exception",
+          "raised 15",
+          [
+            "RuntimeError",
+            "15"
+          ]
+        ],
+        [
+          "exception",
+          "raised 16",
+          [
+            "RuntimeError",
+            "16"
+          ]
+        ],
+        [
+          "exception",
+          "raised 17",
+          [
+            "RuntimeError",
+            "17"
+          ]
+        ],
+        [
+          "exception",
+          "raised 18",
+          [
+            "RuntimeError",
+            "18"
+          ]
+        ],
+        [
+          "exception",
+          "raised 19",
+          [
+            "RuntimeError",
+            "19"
+          ]
+        ],
+        [
+          "exception",
+          "raised 20",
+          [
+            "RuntimeError",
+            "20"
+          ]
+        ],
+        [
+          "exception",
+          "raised 21",
+          [
+            "RuntimeError",
+            "21"
+          ]
+        ],
+        [
+          "exception",
+          "raised 22",
+          [
+            "RuntimeError",
+            "22"
+          ]
+        ],
+        [
+          "exception",
+          "raised 23",
+          [
+            "RuntimeError",
+            "23"
+          ]
+        ],
+        [
+          "exception",
+          "raised 24",
+          [
+            "RuntimeError",
+            "24"
+          ]
+        ],
+        [
+          "exception",
+          "raised 25",
+          [
+            "RuntimeError",
+            "25"
+          ]
+        ],
+        [
+          "exception",
+          "raised 26",
+          [
+            "RuntimeError",
+            "26"
+          ]
+        ],
+        [
+          "exception",
+          "raised 27",
+          [
+            "RuntimeError",
+            "27"
+          ]
+        ],
+        [
+          "exception",
+          "raised 28",
+          [
+            "RuntimeError",
+            "28"
+          ]
+        ],
+        [
+          "exception",
+          "raised 29",
+          [
+            "RuntimeError",
+            "29"
+          ]
+        ],
+        [
+          "info",
+          "after"
+        ]
+      ],
+      "log_tail": [
+        "ERROR: failure 0",
+        "ERROR: failure 1",
+        "ERROR: failure 2",
+        "ERROR: failure 3",
+        "ERROR: failure 4",
+        "ERROR: failure 5",
+        "ERROR: failure 6",
+        "ERROR: failure 7",
+        "ERROR: failure 8",
+        "ERROR: failure 9",
+        "ERROR: failure 10",
+        "ERROR: failure 11",
+        "ERROR: failure 12",
+        "ERROR: failure 13",
+        "ERROR: failure 14",
+        "ERROR: failure 15",
+        "ERROR: failure 16",
+        "ERROR: failure 17",
+        "ERROR: failure 18",
+        "ERROR: failure 19",
+        "ERROR: failure 20",
+        "ERROR: failure 21",
+        "ERROR: failure 22",
+        "ERROR: failure 23",
+        "ERROR: failure 24",
+        "ERROR: failure 25",
+        "ERROR: failure 26",
+        "ERROR: failure 27",
+        "ERROR: failure 28",
+        "ERROR: failure 29",
+        "ERROR: raised 0: RuntimeError('0')",
+        "ERROR: raised 1: RuntimeError('1')",
+        "ERROR: raised 2: RuntimeError('2')",
+        "ERROR: raised 3: RuntimeError('3')",
+        "ERROR: raised 4: RuntimeError('4')",
+        "ERROR: raised 5: RuntimeError('5')",
+        "ERROR: raised 6: RuntimeError('6')",
+        "ERROR: raised 7: RuntimeError('7')",
+        "ERROR: raised 8: RuntimeError('8')",
+        "ERROR: raised 9: RuntimeError('9')",
+        "ERROR: raised 10: RuntimeError('10')",
+        "ERROR: raised 11: RuntimeError('11')",
+        "ERROR: raised 12: RuntimeError('12')",
+        "ERROR: raised 13: RuntimeError('13')",
+        "ERROR: raised 14: RuntimeError('14')",
+        "ERROR: raised 15: RuntimeError('15')",
+        "ERROR: raised 16: RuntimeError('16')",
+        "ERROR: raised 17: RuntimeError('17')",
+        "ERROR: raised 18: RuntimeError('18')",
+        "ERROR: raised 19: RuntimeError('19')",
+        "ERROR: raised 20: RuntimeError('20')",
+        "ERROR: raised 21: RuntimeError('21')",
+        "ERROR: raised 22: RuntimeError('22')",
+        "ERROR: raised 23: RuntimeError('23')",
+        "ERROR: raised 24: RuntimeError('24')",
+        "ERROR: raised 25: RuntimeError('25')",
+        "ERROR: raised 26: RuntimeError('26')",
+        "ERROR: raised 27: RuntimeError('27')",
+        "ERROR: raised 28: RuntimeError('28')",
+        "ERROR: raised 29: RuntimeError('29')",
+        "after"
+      ],
+      "errors": [
+        "ERROR: failure 0",
+        "ERROR: failure 1",
+        "ERROR: failure 2",
+        "ERROR: failure 3",
+        "ERROR: failure 4",
+        "ERROR: failure 5",
+        "ERROR: failure 6",
+        "ERROR: failure 7",
+        "ERROR: failure 8",
+        "ERROR: failure 9",
+        "ERROR: failure 10",
+        "ERROR: failure 11",
+        "ERROR: failure 12",
+        "ERROR: failure 13",
+        "ERROR: failure 14",
+        "ERROR: failure 15",
+        "ERROR: failure 16",
+        "ERROR: failure 17",
+        "ERROR: failure 18",
+        "ERROR: failure 19",
+        "ERROR: failure 20",
+        "ERROR: failure 21",
+        "ERROR: failure 22",
+        "ERROR: failure 23",
+        "ERROR: failure 24",
+        "ERROR: failure 25",
+        "ERROR: failure 26",
+        "ERROR: failure 27",
+        "ERROR: failure 28",
+        "ERROR: failure 29",
+        "ERROR: raised 0: RuntimeError('0')",
+        "ERROR: raised 1: RuntimeError('1')",
+        "ERROR: raised 2: RuntimeError('2')",
+        "ERROR: raised 3: RuntimeError('3')",
+        "ERROR: raised 4: RuntimeError('4')",
+        "ERROR: raised 5: RuntimeError('5')",
+        "ERROR: raised 6: RuntimeError('6')",
+        "ERROR: raised 7: RuntimeError('7')",
+        "ERROR: raised 8: RuntimeError('8')",
+        "ERROR: raised 9: RuntimeError('9')",
+        "ERROR: raised 10: RuntimeError('10')",
+        "ERROR: raised 11: RuntimeError('11')",
+        "ERROR: raised 12: RuntimeError('12')",
+        "ERROR: raised 13: RuntimeError('13')",
+        "ERROR: raised 14: RuntimeError('14')",
+        "ERROR: raised 15: RuntimeError('15')",
+        "ERROR: raised 16: RuntimeError('16')",
+        "ERROR: raised 17: RuntimeError('17')",
+        "ERROR: raised 18: RuntimeError('18')",
+        "ERROR: raised 19: RuntimeError('19')"
+      ],
+      "stats_json": "{}",
+      "log_json": "[\"ERROR: failure 0\", \"ERROR: failure 1\", \"ERROR: failure 2\", \"ERROR: failure 3\", \"ERROR: failure 4\", \"ERROR: failure 5\", \"ERROR: failure 6\", \"ERROR: failure 7\", \"ERROR: failure 8\", \"ERROR: failure 9\", \"ERROR: failure 10\", \"ERROR: failure 11\", \"ERROR: failure 12\", \"ERROR: failure 13\", \"ERROR: failure 14\", \"ERROR: failure 15\", \"ERROR: failure 16\", \"ERROR: failure 17\", \"ERROR: failure 18\", \"ERROR: failure 19\", \"ERROR: failure 20\", \"ERROR: failure 21\", \"ERROR: failure 22\", \"ERROR: failure 23\", \"ERROR: failure 24\", \"ERROR: failure 25\", \"ERROR: failure 26\", \"ERROR: failure 27\", \"ERROR: failure 28\", \"ERROR: failure 29\", \"ERROR: raised 0: RuntimeError('0')\", \"ERROR: raised 1: RuntimeError('1')\", \"ERROR: raised 2: RuntimeError('2')\", \"ERROR: raised 3: RuntimeError('3')\", \"ERROR: raised 4: RuntimeError('4')\", \"ERROR: raised 5: RuntimeError('5')\", \"ERROR: raised 6: RuntimeError('6')\", \"ERROR: raised 7: RuntimeError('7')\", \"ERROR: raised 8: RuntimeError('8')\", \"ERROR: raised 9: RuntimeError('9')\", \"ERROR: raised 10: RuntimeError('10')\", \"ERROR: raised 11: RuntimeError('11')\", \"ERROR: raised 12: RuntimeError('12')\", \"ERROR: raised 13: RuntimeError('13')\", \"ERROR: raised 14: RuntimeError('14')\", \"ERROR: raised 15: RuntimeError('15')\", \"ERROR: raised 16: RuntimeError('16')\", \"ERROR: raised 17: RuntimeError('17')\", \"ERROR: raised 18: RuntimeError('18')\", \"ERROR: raised 19: RuntimeError('19')\", \"ERROR: raised 20: RuntimeError('20')\", \"ERROR: raised 21: RuntimeError('21')\", \"ERROR: raised 22: RuntimeError('22')\", \"ERROR: raised 23: RuntimeError('23')\", \"ERROR: raised 24: RuntimeError('24')\", \"ERROR: raised 25: RuntimeError('25')\", \"ERROR: raised 26: RuntimeError('26')\", \"ERROR: raised 27: RuntimeError('27')\", \"ERROR: raised 28: RuntimeError('28')\", \"ERROR: raised 29: RuntimeError('29')\", \"after\"]",
+      "errors_json": "[\"ERROR: failure 0\", \"ERROR: failure 1\", \"ERROR: failure 2\", \"ERROR: failure 3\", \"ERROR: failure 4\", \"ERROR: failure 5\", \"ERROR: failure 6\", \"ERROR: failure 7\", \"ERROR: failure 8\", \"ERROR: failure 9\", \"ERROR: failure 10\", \"ERROR: failure 11\", \"ERROR: failure 12\", \"ERROR: failure 13\", \"ERROR: failure 14\", \"ERROR: failure 15\", \"ERROR: failure 16\", \"ERROR: failure 17\", \"ERROR: failure 18\", \"ERROR: failure 19\", \"ERROR: failure 20\", \"ERROR: failure 21\", \"ERROR: failure 22\", \"ERROR: failure 23\", \"ERROR: failure 24\", \"ERROR: failure 25\", \"ERROR: failure 26\", \"ERROR: failure 27\", \"ERROR: failure 28\", \"ERROR: failure 29\", \"ERROR: raised 0: RuntimeError('0')\", \"ERROR: raised 1: RuntimeError('1')\", \"ERROR: raised 2: RuntimeError('2')\", \"ERROR: raised 3: RuntimeError('3')\", \"ERROR: raised 4: RuntimeError('4')\", \"ERROR: raised 5: RuntimeError('5')\", \"ERROR: raised 6: RuntimeError('6')\", \"ERROR: raised 7: RuntimeError('7')\", \"ERROR: raised 8: RuntimeError('8')\", \"ERROR: raised 9: RuntimeError('9')\", \"ERROR: raised 10: RuntimeError('10')\", \"ERROR: raised 11: RuntimeError('11')\", \"ERROR: raised 12: RuntimeError('12')\", \"ERROR: raised 13: RuntimeError('13')\", \"ERROR: raised 14: RuntimeError('14')\", \"ERROR: raised 15: RuntimeError('15')\", \"ERROR: raised 16: RuntimeError('16')\", \"ERROR: raised 17: RuntimeError('17')\", \"ERROR: raised 18: RuntimeError('18')\", \"ERROR: raised 19: RuntimeError('19')\"]"
+    },
+    {
+      "name": "unicode",
+      "calls": [
+        [
+          "info",
+          "ＡＢＣ　演员😀"
+        ],
+        [
+          "warning",
+          "\u0000 "
+        ]
+      ],
+      "log_tail": [
+        "ＡＢＣ　演员😀",
+        "WARNING: \u0000 "
+      ],
+      "errors": [],
+      "stats_json": "{}",
+      "log_json": "[\"\\uff21\\uff22\\uff23\\u3000\\u6f14\\u5458\\ud83d\\ude00\", \"WARNING: \\u0000\\u007f\\u2028\"]",
+      "errors_json": "[]"
+    }
+  ]
+}

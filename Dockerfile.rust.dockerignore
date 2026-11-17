@@ -1,0 +1,13 @@
+# Allowlist for Dockerfile.rust (BuildKit reads `<Dockerfile>.dockerignore` before `.dockerignore`):
+# only what the build copies, never `target/`, the Python tree or local state.
+*
+!Cargo.toml
+!Cargo.lock
+!rust-toolchain.toml
+!rustfmt.toml
+!clippy.toml
+!crates/
+!frontend/
+frontend/node_modules
+frontend/dist
+**/target

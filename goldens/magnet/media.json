@@ -1,0 +1,125 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "magnet",
+  "cases": [
+    {
+      "suffixes": [
+        ".avi",
+        ".flv",
+        ".m4v",
+        ".mkv",
+        ".mov",
+        ".mp4",
+        ".rmvb",
+        ".ts",
+        ".wmv"
+      ]
+    },
+    {
+      "name": "a.mp4",
+      "has_video_suffix": true
+    },
+    {
+      "name": "a.MKV",
+      "has_video_suffix": true
+    },
+    {
+      "name": "a.Avi",
+      "has_video_suffix": true
+    },
+    {
+      "name": "a.wmv",
+      "has_video_suffix": true
+    },
+    {
+      "name": "a.mov",
+      "has_video_suffix": true
+    },
+    {
+      "name": "a.flv",
+      "has_video_suffix": true
+    },
+    {
+      "name": "a.m4v",
+      "has_video_suffix": true
+    },
+    {
+      "name": "a.ts",
+      "has_video_suffix": true
+    },
+    {
+      "name": "a.rmvb",
+      "has_video_suffix": true
+    },
+    {
+      "name": "a.strm",
+      "has_video_suffix": false
+    },
+    {
+      "name": "a.mp4.part",
+      "has_video_suffix": false
+    },
+    {
+      "name": ".mp4",
+      "has_video_suffix": false
+    },
+    {
+      "name": "a.",
+      "has_video_suffix": false
+    },
+    {
+      "name": "a",
+      "has_video_suffix": false
+    },
+    {
+      "name": "dir.mp4/x",
+      "has_video_suffix": false
+    },
+    {
+      "name": "a.tar.ts",
+      "has_video_suffix": true
+    },
+    {
+      "name": "a.MP4 ",
+      "has_video_suffix": false
+    },
+    {
+      "name": "a.ＭＰ４",
+      "has_video_suffix": false
+    },
+    {
+      "name": "a.İ",
+      "has_video_suffix": false
+    },
+    {
+      "name": "a.ts\n",
+      "has_video_suffix": false
+    },
+    {
+      "name": "x/y/z.mkv",
+      "has_video_suffix": true
+    },
+    {
+      "name": "ABC-123.Rmvb",
+      "has_video_suffix": true
+    },
+    {
+      "name": "",
+      "has_video_suffix": false
+    },
+    {
+      "name": "a..mp4",
+      "has_video_suffix": true
+    },
+    {
+      "name": "a.mp4.",
+      "has_video_suffix": false
+    },
+    {
+      "name": "a.TS",
+      "has_video_suffix": true
+    }
+  ]
+}

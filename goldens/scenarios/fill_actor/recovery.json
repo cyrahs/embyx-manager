@@ -1,0 +1,1906 @@
+{
+  "calls": [
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-1",
+        "plan_id": "token-17",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 1
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-2",
+        "plan_id": "token-17",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 2
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-3",
+        "plan_id": "token-17",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 3
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-3",
+        "plan_id": "token-17",
+        "state": "linked"
+      },
+      "response": null,
+      "seq": 4
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-4",
+        "plan_id": "token-17",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 5
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-4",
+        "plan_id": "token-17",
+        "state": "linked"
+      },
+      "response": null,
+      "seq": 6
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-4",
+        "plan_id": "token-17",
+        "state": "source_removed"
+      },
+      "response": null,
+      "seq": 7
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-5",
+        "plan_id": "token-17",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 8
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-6",
+        "plan_id": "token-17",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 9
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-7",
+        "plan_id": "token-17",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 10
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-7",
+        "plan_id": "token-17",
+        "state": "linked"
+      },
+      "response": null,
+      "seq": 11
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-8",
+        "plan_id": "token-17",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 12
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-9",
+        "plan_id": "token-17",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 13
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-9",
+        "plan_id": "token-17",
+        "state": "linked"
+      },
+      "response": null,
+      "seq": 14
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-10",
+        "plan_id": "token-17",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 15
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-10",
+        "plan_id": "token-17",
+        "state": "linked"
+      },
+      "response": null,
+      "seq": 16
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-11",
+        "plan_id": "token-17",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 17
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-11",
+        "plan_id": "token-17",
+        "state": "linked"
+      },
+      "response": null,
+      "seq": 18
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-12",
+        "plan_id": "token-17",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 19
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-12",
+        "plan_id": "token-17",
+        "state": "linked"
+      },
+      "response": null,
+      "seq": 20
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-13",
+        "plan_id": "token-17",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 21
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-14",
+        "plan_id": "token-17",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 22
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-14",
+        "plan_id": "token-17",
+        "state": "linked"
+      },
+      "response": null,
+      "seq": 23
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-15",
+        "plan_id": "token-17",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 24
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-15",
+        "plan_id": "token-17",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 25
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-16",
+        "plan_id": "token-17",
+        "state": "prepared"
+      },
+      "response": null,
+      "seq": 26
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-16",
+        "plan_id": "token-17",
+        "state": "linked"
+      },
+      "response": null,
+      "seq": 27
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-16",
+        "plan_id": "token-17",
+        "state": "source_removed"
+      },
+      "response": null,
+      "seq": 28
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{movein}/ABC-401.mp4",
+        "src": "{additional}/ABC/ABC-401.mp4"
+      },
+      "response": null,
+      "seq": 29
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-1",
+        "plan_id": "token-17",
+        "state": "linked"
+      },
+      "response": null,
+      "seq": 30
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-1",
+        "plan_id": "token-17",
+        "state": "source_removed"
+      },
+      "response": null,
+      "seq": 31
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-1",
+        "error_code": null,
+        "plan_id": "token-17",
+        "state": "moved"
+      },
+      "response": null,
+      "seq": 32
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-1",
+        "plan_id": "token-17",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 33
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-10",
+        "error_code": "reconcile_destination_conflict",
+        "plan_id": "token-17",
+        "state": "conflict"
+      },
+      "response": null,
+      "seq": 34
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-10",
+        "plan_id": "token-17",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 35
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{movein}/.embyx-reconcile-aad2a8e98364da58c70b617575dd4457cd7fcb54164cca8f2faabfeec0300cbb"
+      },
+      "response": null,
+      "seq": 36
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-11",
+        "plan_id": "token-17",
+        "state": "source_removed"
+      },
+      "response": null,
+      "seq": 37
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-11",
+        "error_code": null,
+        "plan_id": "token-17",
+        "state": "moved"
+      },
+      "response": null,
+      "seq": 38
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-11",
+        "plan_id": "token-17",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 39
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{additional}/ABC/ABC-412.mp4",
+        "src": "{movein}/.embyx-reconcile-d6137e5567425e33c104c8b2b0870ed0f67fd271ab9385265fa53ae7627ab6f5"
+      },
+      "response": null,
+      "seq": 40
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-12",
+        "plan_id": "token-17",
+        "state": "source_removed"
+      },
+      "response": null,
+      "seq": 41
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-12",
+        "error_code": null,
+        "plan_id": "token-17",
+        "state": "moved"
+      },
+      "response": null,
+      "seq": 42
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-12",
+        "plan_id": "token-17",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 43
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{additional}/ABC/ABC-414.mp4",
+        "src": "{movein}/.embyx-reconcile-5fd2e112842e93d43743e4ab06839a7db12eea101016777e333970a70fd928a8"
+      },
+      "response": null,
+      "seq": 44
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-14",
+        "error_code": "source_changed_during_reconcile",
+        "plan_id": "token-17",
+        "state": "stale"
+      },
+      "response": null,
+      "seq": 45
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-14",
+        "plan_id": "token-17",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 46
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{movein}/.embyx-reconcile-0db30d3b5dece4ba741e952c9b920881f477d99ee1753a0e6c39bc1e13049b8f",
+        "src": "{additional}/ABC/ABC-416.mp4"
+      },
+      "response": null,
+      "seq": 47
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{movein}/.embyx-reconcile-0db30d3b5dece4ba741e952c9b920881f477d99ee1753a0e6c39bc1e13049b8f"
+      },
+      "response": null,
+      "seq": 48
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-16",
+        "error_code": null,
+        "plan_id": "token-17",
+        "state": "moved"
+      },
+      "response": null,
+      "seq": 49
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-16",
+        "plan_id": "token-17",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 50
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{movein}/.embyx-reconcile-0f6bffa9661cb5dd2f3f7b2929f33061f58a7ba7fdd689530b1a306f8ed8f3ec",
+        "src": "{additional}/ABC/ABC-402.mp4"
+      },
+      "response": null,
+      "seq": 51
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{movein}/.embyx-reconcile-0f6bffa9661cb5dd2f3f7b2929f33061f58a7ba7fdd689530b1a306f8ed8f3ec"
+      },
+      "response": null,
+      "seq": 52
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-2",
+        "plan_id": "token-17",
+        "state": "linked"
+      },
+      "response": null,
+      "seq": 53
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-2",
+        "plan_id": "token-17",
+        "state": "source_removed"
+      },
+      "response": null,
+      "seq": 54
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-2",
+        "error_code": null,
+        "plan_id": "token-17",
+        "state": "moved"
+      },
+      "response": null,
+      "seq": 55
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-2",
+        "plan_id": "token-17",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 56
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-3",
+        "plan_id": "token-17",
+        "state": "source_removed"
+      },
+      "response": null,
+      "seq": 57
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-3",
+        "error_code": null,
+        "plan_id": "token-17",
+        "state": "moved"
+      },
+      "response": null,
+      "seq": 58
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-3",
+        "plan_id": "token-17",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 59
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-4",
+        "error_code": null,
+        "plan_id": "token-17",
+        "state": "moved"
+      },
+      "response": null,
+      "seq": 60
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-4",
+        "plan_id": "token-17",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 61
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename_noreplace",
+      "request": {
+        "dst": "{additional}/ABC/ABC-405.mp4",
+        "src": "{movein}/ABC-405.mp4"
+      },
+      "response": null,
+      "seq": 62
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-5",
+        "error_code": "source_changed_during_move",
+        "plan_id": "token-17",
+        "state": "stale"
+      },
+      "response": null,
+      "seq": 63
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-5",
+        "plan_id": "token-17",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 64
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-7",
+        "error_code": "reconcile_destination_missing",
+        "plan_id": "token-17",
+        "state": "failed"
+      },
+      "response": null,
+      "seq": 65
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-7",
+        "plan_id": "token-17",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 66
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-8",
+        "error_code": "source_missing",
+        "plan_id": "token-17",
+        "state": "stale"
+      },
+      "response": null,
+      "seq": 67
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-8",
+        "plan_id": "token-17",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 68
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_result",
+      "request": {
+        "candidate_id": "token-9",
+        "error_code": "source_changed",
+        "plan_id": "token-17",
+        "state": "stale"
+      },
+      "response": null,
+      "seq": 69
+    },
+    {
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-9",
+        "plan_id": "token-17",
+        "state": "reconciled"
+      },
+      "response": null,
+      "seq": 70
+    },
+    {
+      "error": {
+        "message": "invalid move journal transition: reconciled -> prepared",
+        "type": "InvalidMoveJournalTransitionError"
+      },
+      "fake": "repository",
+      "lane": "main",
+      "method": "save_move_journal",
+      "request": {
+        "candidate_id": "token-15",
+        "plan_id": "token-17",
+        "state": "prepared"
+      },
+      "seq": 71
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "fill_actor.service",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "op": "scan",
+          "result": {
+            "actors": [
+              {
+                "actor_id": "actor",
+                "actor_name": null,
+                "aliases": [],
+                "error_code": null,
+                "error_message": null,
+                "scraped_count": 16,
+                "talent_id": null,
+                "video_ids": [
+                  "ABC-401",
+                  "ABC-402",
+                  "ABC-403",
+                  "ABC-404",
+                  "ABC-405",
+                  "ABC-406",
+                  "ABC-407",
+                  "ABC-408",
+                  "ABC-409",
+                  "ABC-410",
+                  "ABC-411",
+                  "ABC-412",
+                  "ABC-413",
+                  "ABC-414",
+                  "ABC-415",
+                  "ABC-416"
+                ]
+              }
+            ],
+            "created_at": "2026-09-14T03:00:00Z",
+            "expires_at": "2026-09-14T04:00:00Z",
+            "plan_id": "token-17",
+            "revision": "token-18",
+            "videos": [
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-1",
+                    "destination_conflict": false,
+                    "file_name": "ABC-401.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-401"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-401",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-2",
+                    "destination_conflict": false,
+                    "file_name": "ABC-402.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-402"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-402",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-3",
+                    "destination_conflict": false,
+                    "file_name": "ABC-403.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-403"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-403",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-4",
+                    "destination_conflict": false,
+                    "file_name": "ABC-404.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-404"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-404",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-5",
+                    "destination_conflict": false,
+                    "file_name": "ABC-405.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-405"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-405",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-6",
+                    "destination_conflict": false,
+                    "file_name": "ABC-406.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-406"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-406",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-7",
+                    "destination_conflict": false,
+                    "file_name": "ABC-407.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-407"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-407",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-8",
+                    "destination_conflict": false,
+                    "file_name": "ABC-408.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-408"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-408",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-9",
+                    "destination_conflict": false,
+                    "file_name": "ABC-409.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-409"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-409",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-10",
+                    "destination_conflict": false,
+                    "file_name": "ABC-410.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-410"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-410",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-11",
+                    "destination_conflict": false,
+                    "file_name": "ABC-411.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-411"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-411",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-12",
+                    "destination_conflict": false,
+                    "file_name": "ABC-412.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-412"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-412",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-13",
+                    "destination_conflict": false,
+                    "file_name": "ABC-413.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-413"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-413",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-14",
+                    "destination_conflict": false,
+                    "file_name": "ABC-414.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-414"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-414",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-15",
+                    "destination_conflict": false,
+                    "file_name": "ABC-415.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-415"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-415",
+                "warnings": []
+              },
+              {
+                "actor_ids": [
+                  "actor"
+                ],
+                "existing_files": [],
+                "move_candidates": [
+                  {
+                    "candidate_id": "token-16",
+                    "destination_conflict": false,
+                    "file_name": "ABC-416.mp4",
+                    "source_label": "{additional}",
+                    "video_id": "ABC-416"
+                  }
+                ],
+                "release_date": null,
+                "state": "additional_found",
+                "video_id": "ABC-416",
+                "warnings": []
+              }
+            ]
+          }
+        },
+        {
+          "op": "journal",
+          "result": null
+        },
+        {
+          "op": "journal",
+          "result": null
+        },
+        {
+          "op": "link"
+        },
+        {
+          "op": "journal",
+          "result": null
+        },
+        {
+          "op": "rename"
+        },
+        {
+          "op": "journal",
+          "result": null
+        },
+        {
+          "op": "rename"
+        },
+        {
+          "op": "journal",
+          "result": null
+        },
+        {
+          "op": "remove"
+        },
+        {
+          "op": "write"
+        },
+        {
+          "op": "journal",
+          "result": null
+        },
+        {
+          "op": "write"
+        },
+        {
+          "op": "journal",
+          "result": null
+        },
+        {
+          "op": "remove"
+        },
+        {
+          "op": "journal",
+          "result": null
+        },
+        {
+          "op": "remove"
+        },
+        {
+          "op": "journal",
+          "result": null
+        },
+        {
+          "op": "write"
+        },
+        {
+          "op": "journal",
+          "result": null
+        },
+        {
+          "op": "remove"
+        },
+        {
+          "op": "write"
+        },
+        {
+          "op": "journal",
+          "result": null
+        },
+        {
+          "op": "link"
+        },
+        {
+          "op": "rename"
+        },
+        {
+          "op": "journal",
+          "result": null
+        },
+        {
+          "op": "rename"
+        },
+        {
+          "op": "write"
+        },
+        {
+          "op": "journal",
+          "result": null
+        },
+        {
+          "op": "write"
+        },
+        {
+          "op": "journal",
+          "result": null
+        },
+        {
+          "op": "rename"
+        },
+        {
+          "op": "journal",
+          "result": null
+        },
+        {
+          "op": "journal",
+          "result": null
+        },
+        {
+          "op": "link"
+        },
+        {
+          "op": "reconcile",
+          "result": [
+            {
+              "candidate_id": "token-1",
+              "error_code": null,
+              "file_name": "ABC-401.mp4",
+              "state": "moved",
+              "video_id": "ABC-401"
+            },
+            {
+              "candidate_id": "token-10",
+              "error_code": "reconcile_destination_conflict",
+              "file_name": "ABC-410.mp4",
+              "state": "conflict",
+              "video_id": "ABC-410"
+            },
+            {
+              "candidate_id": "token-11",
+              "error_code": null,
+              "file_name": "ABC-411.mp4",
+              "state": "moved",
+              "video_id": "ABC-411"
+            },
+            {
+              "candidate_id": "token-12",
+              "error_code": null,
+              "file_name": "ABC-412.mp4",
+              "state": "moved",
+              "video_id": "ABC-412"
+            },
+            {
+              "candidate_id": "token-13",
+              "error_code": "reconcile_quarantine_conflict",
+              "file_name": "ABC-413.mp4",
+              "state": "failed",
+              "video_id": "ABC-413"
+            },
+            {
+              "candidate_id": "token-14",
+              "error_code": "source_changed_during_reconcile",
+              "file_name": "ABC-414.mp4",
+              "state": "stale",
+              "video_id": "ABC-414"
+            },
+            {
+              "candidate_id": "token-16",
+              "error_code": null,
+              "file_name": "ABC-416.mp4",
+              "state": "moved",
+              "video_id": "ABC-416"
+            },
+            {
+              "candidate_id": "token-2",
+              "error_code": null,
+              "file_name": "ABC-402.mp4",
+              "state": "moved",
+              "video_id": "ABC-402"
+            },
+            {
+              "candidate_id": "token-3",
+              "error_code": null,
+              "file_name": "ABC-403.mp4",
+              "state": "moved",
+              "video_id": "ABC-403"
+            },
+            {
+              "candidate_id": "token-4",
+              "error_code": null,
+              "file_name": "ABC-404.mp4",
+              "state": "moved",
+              "video_id": "ABC-404"
+            },
+            {
+              "candidate_id": "token-5",
+              "error_code": "source_changed_during_move",
+              "file_name": "ABC-405.mp4",
+              "state": "stale",
+              "video_id": "ABC-405"
+            },
+            {
+              "candidate_id": "token-6",
+              "error_code": "reconcile_rollback_conflict",
+              "file_name": "ABC-406.mp4",
+              "state": "failed",
+              "video_id": "ABC-406"
+            },
+            {
+              "candidate_id": "token-7",
+              "error_code": "reconcile_destination_missing",
+              "file_name": "ABC-407.mp4",
+              "state": "failed",
+              "video_id": "ABC-407"
+            },
+            {
+              "candidate_id": "token-8",
+              "error_code": "source_missing",
+              "file_name": "ABC-408.mp4",
+              "state": "stale",
+              "video_id": "ABC-408"
+            },
+            {
+              "candidate_id": "token-9",
+              "error_code": "source_changed",
+              "file_name": "ABC-409.mp4",
+              "state": "stale",
+              "video_id": "ABC-409"
+            }
+          ]
+        },
+        {
+          "op": "reconcile",
+          "result": [
+            {
+              "candidate_id": "token-13",
+              "error_code": "reconcile_quarantine_conflict",
+              "file_name": "ABC-413.mp4",
+              "state": "failed",
+              "video_id": "ABC-413"
+            },
+            {
+              "candidate_id": "token-6",
+              "error_code": "reconcile_rollback_conflict",
+              "file_name": "ABC-406.mp4",
+              "state": "failed",
+              "video_id": "ABC-406"
+            }
+          ]
+        },
+        {
+          "op": "apply",
+          "result": {
+            "plan_id": "token-17",
+            "results": [
+              {
+                "candidate_id": "token-1",
+                "error_code": null,
+                "file_name": "ABC-401.mp4",
+                "state": "moved",
+                "video_id": "ABC-401"
+              },
+              {
+                "candidate_id": "token-2",
+                "error_code": null,
+                "file_name": "ABC-402.mp4",
+                "state": "moved",
+                "video_id": "ABC-402"
+              },
+              {
+                "candidate_id": "token-3",
+                "error_code": null,
+                "file_name": "ABC-403.mp4",
+                "state": "moved",
+                "video_id": "ABC-403"
+              },
+              {
+                "candidate_id": "token-4",
+                "error_code": null,
+                "file_name": "ABC-404.mp4",
+                "state": "moved",
+                "video_id": "ABC-404"
+              },
+              {
+                "candidate_id": "token-5",
+                "error_code": "source_changed_during_move",
+                "file_name": "ABC-405.mp4",
+                "state": "stale",
+                "video_id": "ABC-405"
+              },
+              {
+                "candidate_id": "token-6",
+                "error_code": "reconcile_rollback_conflict",
+                "file_name": "ABC-406.mp4",
+                "state": "failed",
+                "video_id": "ABC-406"
+              },
+              {
+                "candidate_id": "token-7",
+                "error_code": "reconcile_destination_missing",
+                "file_name": "ABC-407.mp4",
+                "state": "failed",
+                "video_id": "ABC-407"
+              },
+              {
+                "candidate_id": "token-8",
+                "error_code": "source_missing",
+                "file_name": "ABC-408.mp4",
+                "state": "stale",
+                "video_id": "ABC-408"
+              },
+              {
+                "candidate_id": "token-9",
+                "error_code": "source_changed",
+                "file_name": "ABC-409.mp4",
+                "state": "stale",
+                "video_id": "ABC-409"
+              },
+              {
+                "candidate_id": "token-10",
+                "error_code": "reconcile_destination_conflict",
+                "file_name": "ABC-410.mp4",
+                "state": "conflict",
+                "video_id": "ABC-410"
+              },
+              {
+                "candidate_id": "token-11",
+                "error_code": null,
+                "file_name": "ABC-411.mp4",
+                "state": "moved",
+                "video_id": "ABC-411"
+              },
+              {
+                "candidate_id": "token-12",
+                "error_code": null,
+                "file_name": "ABC-412.mp4",
+                "state": "moved",
+                "video_id": "ABC-412"
+              },
+              {
+                "candidate_id": "token-13",
+                "error_code": "reconcile_quarantine_conflict",
+                "file_name": "ABC-413.mp4",
+                "state": "failed",
+                "video_id": "ABC-413"
+              },
+              {
+                "candidate_id": "token-14",
+                "error_code": "source_changed_during_reconcile",
+                "file_name": "ABC-414.mp4",
+                "state": "stale",
+                "video_id": "ABC-414"
+              },
+              {
+                "candidate_id": "token-15",
+                "error_code": "move_failed",
+                "file_name": "ABC-415.mp4",
+                "state": "failed",
+                "video_id": "ABC-415"
+              },
+              {
+                "candidate_id": "token-16",
+                "error_code": null,
+                "file_name": "ABC-416.mp4",
+                "state": "moved",
+                "video_id": "ABC-416"
+              }
+            ],
+            "revision": "token-18",
+            "state": "partial_failed"
+          }
+        }
+      ]
+    }
+  },
+  "rows": {
+    "fill_actor_move_journal": [
+      {
+        "candidate_id": "token-13",
+        "plan_id": "token-17",
+        "state": "prepared",
+        "updated_at": "2026-09-14T03:00:00+00:00"
+      },
+      {
+        "candidate_id": "token-6",
+        "plan_id": "token-17",
+        "state": "prepared",
+        "updated_at": "2026-09-14T03:00:00+00:00"
+      },
+      {
+        "candidate_id": "token-15",
+        "plan_id": "token-17",
+        "state": "reconciled",
+        "updated_at": "2026-09-14T03:00:00+00:00"
+      },
+      {
+        "candidate_id": "token-1",
+        "plan_id": "token-17",
+        "state": "reconciled",
+        "updated_at": "2026-09-14T03:01:00+00:00"
+      },
+      {
+        "candidate_id": "token-10",
+        "plan_id": "token-17",
+        "state": "reconciled",
+        "updated_at": "2026-09-14T03:01:00+00:00"
+      },
+      {
+        "candidate_id": "token-11",
+        "plan_id": "token-17",
+        "state": "reconciled",
+        "updated_at": "2026-09-14T03:01:00+00:00"
+      },
+      {
+        "candidate_id": "token-12",
+        "plan_id": "token-17",
+        "state": "reconciled",
+        "updated_at": "2026-09-14T03:01:00+00:00"
+      },
+      {
+        "candidate_id": "token-14",
+        "plan_id": "token-17",
+        "state": "reconciled",
+        "updated_at": "2026-09-14T03:01:00+00:00"
+      },
+      {
+        "candidate_id": "token-16",
+        "plan_id": "token-17",
+        "state": "reconciled",
+        "updated_at": "2026-09-14T03:01:00+00:00"
+      },
+      {
+        "candidate_id": "token-2",
+        "plan_id": "token-17",
+        "state": "reconciled",
+        "updated_at": "2026-09-14T03:01:00+00:00"
+      },
+      {
+        "candidate_id": "token-3",
+        "plan_id": "token-17",
+        "state": "reconciled",
+        "updated_at": "2026-09-14T03:01:00+00:00"
+      },
+      {
+        "candidate_id": "token-4",
+        "plan_id": "token-17",
+        "state": "reconciled",
+        "updated_at": "2026-09-14T03:01:00+00:00"
+      },
+      {
+        "candidate_id": "token-5",
+        "plan_id": "token-17",
+        "state": "reconciled",
+        "updated_at": "2026-09-14T03:01:00+00:00"
+      },
+      {
+        "candidate_id": "token-7",
+        "plan_id": "token-17",
+        "state": "reconciled",
+        "updated_at": "2026-09-14T03:01:00+00:00"
+      },
+      {
+        "candidate_id": "token-8",
+        "plan_id": "token-17",
+        "state": "reconciled",
+        "updated_at": "2026-09-14T03:01:00+00:00"
+      },
+      {
+        "candidate_id": "token-9",
+        "plan_id": "token-17",
+        "state": "reconciled",
+        "updated_at": "2026-09-14T03:01:00+00:00"
+      }
+    ],
+    "fill_actor_move_results": [
+      {
+        "candidate_id": "token-10",
+        "plan_id": "token-17",
+        "result_json": "{\"candidate_id\":\"token-10\",\"video_id\":\"ABC-410\",\"file_name\":\"ABC-410.mp4\",\"state\":\"conflict\",\"error_code\":\"reconcile_destination_conflict\"}"
+      },
+      {
+        "candidate_id": "token-11",
+        "plan_id": "token-17",
+        "result_json": "{\"candidate_id\":\"token-11\",\"video_id\":\"ABC-411\",\"file_name\":\"ABC-411.mp4\",\"state\":\"moved\",\"error_code\":null}"
+      },
+      {
+        "candidate_id": "token-12",
+        "plan_id": "token-17",
+        "result_json": "{\"candidate_id\":\"token-12\",\"video_id\":\"ABC-412\",\"file_name\":\"ABC-412.mp4\",\"state\":\"moved\",\"error_code\":null}"
+      },
+      {
+        "candidate_id": "token-14",
+        "plan_id": "token-17",
+        "result_json": "{\"candidate_id\":\"token-14\",\"video_id\":\"ABC-414\",\"file_name\":\"ABC-414.mp4\",\"state\":\"stale\",\"error_code\":\"source_changed_during_reconcile\"}"
+      },
+      {
+        "candidate_id": "token-16",
+        "plan_id": "token-17",
+        "result_json": "{\"candidate_id\":\"token-16\",\"video_id\":\"ABC-416\",\"file_name\":\"ABC-416.mp4\",\"state\":\"moved\",\"error_code\":null}"
+      },
+      {
+        "candidate_id": "token-1",
+        "plan_id": "token-17",
+        "result_json": "{\"candidate_id\":\"token-1\",\"video_id\":\"ABC-401\",\"file_name\":\"ABC-401.mp4\",\"state\":\"moved\",\"error_code\":null}"
+      },
+      {
+        "candidate_id": "token-2",
+        "plan_id": "token-17",
+        "result_json": "{\"candidate_id\":\"token-2\",\"video_id\":\"ABC-402\",\"file_name\":\"ABC-402.mp4\",\"state\":\"moved\",\"error_code\":null}"
+      },
+      {
+        "candidate_id": "token-3",
+        "plan_id": "token-17",
+        "result_json": "{\"candidate_id\":\"token-3\",\"video_id\":\"ABC-403\",\"file_name\":\"ABC-403.mp4\",\"state\":\"moved\",\"error_code\":null}"
+      },
+      {
+        "candidate_id": "token-4",
+        "plan_id": "token-17",
+        "result_json": "{\"candidate_id\":\"token-4\",\"video_id\":\"ABC-404\",\"file_name\":\"ABC-404.mp4\",\"state\":\"moved\",\"error_code\":null}"
+      },
+      {
+        "candidate_id": "token-5",
+        "plan_id": "token-17",
+        "result_json": "{\"candidate_id\":\"token-5\",\"video_id\":\"ABC-405\",\"file_name\":\"ABC-405.mp4\",\"state\":\"stale\",\"error_code\":\"source_changed_during_move\"}"
+      },
+      {
+        "candidate_id": "token-7",
+        "plan_id": "token-17",
+        "result_json": "{\"candidate_id\":\"token-7\",\"video_id\":\"ABC-407\",\"file_name\":\"ABC-407.mp4\",\"state\":\"failed\",\"error_code\":\"reconcile_destination_missing\"}"
+      },
+      {
+        "candidate_id": "token-8",
+        "plan_id": "token-17",
+        "result_json": "{\"candidate_id\":\"token-8\",\"video_id\":\"ABC-408\",\"file_name\":\"ABC-408.mp4\",\"state\":\"stale\",\"error_code\":\"source_missing\"}"
+      },
+      {
+        "candidate_id": "token-9",
+        "plan_id": "token-17",
+        "result_json": "{\"candidate_id\":\"token-9\",\"video_id\":\"ABC-409\",\"file_name\":\"ABC-409.mp4\",\"state\":\"stale\",\"error_code\":\"source_changed\"}"
+      }
+    ],
+    "fill_actor_plans": [
+      {
+        "config_version": 0,
+        "created_at": "2026-09-14T03:00:00+00:00",
+        "expires_at": "2026-09-14T04:00:00+00:00",
+        "plan_id": "token-17",
+        "public_json": "{\"plan_id\":\"token-17\",\"revision\":\"token-18\",\"created_at\":\"2026-09-14T03:00:00Z\",\"expires_at\":\"2026-09-14T04:00:00Z\",\"actors\":[{\"actor_id\":\"actor\",\"scraped_count\":16,\"video_ids\":[\"ABC-401\",\"ABC-402\",\"ABC-403\",\"ABC-404\",\"ABC-405\",\"ABC-406\",\"ABC-407\",\"ABC-408\",\"ABC-409\",\"ABC-410\",\"ABC-411\",\"ABC-412\",\"ABC-413\",\"ABC-414\",\"ABC-415\",\"ABC-416\"],\"error_code\":null,\"actor_name\":null,\"talent_id\":null,\"aliases\":[],\"error_message\":null}],\"videos\":[{\"video_id\":\"ABC-401\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-1\",\"video_id\":\"ABC-401\",\"file_name\":\"ABC-401.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-402\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-2\",\"video_id\":\"ABC-402\",\"file_name\":\"ABC-402.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-403\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-3\",\"video_id\":\"ABC-403\",\"file_name\":\"ABC-403.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-404\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-4\",\"video_id\":\"ABC-404\",\"file_name\":\"ABC-404.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-405\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-5\",\"video_id\":\"ABC-405\",\"file_name\":\"ABC-405.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-406\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-6\",\"video_id\":\"ABC-406\",\"file_name\":\"ABC-406.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-407\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-7\",\"video_id\":\"ABC-407\",\"file_name\":\"ABC-407.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-408\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-8\",\"video_id\":\"ABC-408\",\"file_name\":\"ABC-408.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-409\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-9\",\"video_id\":\"ABC-409\",\"file_name\":\"ABC-409.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-410\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-10\",\"video_id\":\"ABC-410\",\"file_name\":\"ABC-410.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-411\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-11\",\"video_id\":\"ABC-411\",\"file_name\":\"ABC-411.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-412\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-12\",\"video_id\":\"ABC-412\",\"file_name\":\"ABC-412.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-413\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-13\",\"video_id\":\"ABC-413\",\"file_name\":\"ABC-413.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-414\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-14\",\"video_id\":\"ABC-414\",\"file_name\":\"ABC-414.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-415\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-15\",\"video_id\":\"ABC-415\",\"file_name\":\"ABC-415.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]},{\"video_id\":\"ABC-416\",\"actor_ids\":[\"actor\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"token-16\",\"video_id\":\"ABC-416\",\"file_name\":\"ABC-416.mp4\",\"source_label\":\"{additional}\",\"destination_conflict\":false}],\"warnings\":[]}]}",
+        "revision": "token-18"
+      }
+    ]
+  },
+  "scenario": "fill_actor/recovery",
+  "tree": {
+    "actor": [],
+    "additional": [
+      {
+        "kind": "dir",
+        "path": "ABC"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC/ABC-405.mp4",
+        "sha256": "8e5966554908cc04",
+        "size": 12
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC/ABC-406.mp4",
+        "sha256": "7b70d3ab4c764154",
+        "size": 7
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC/ABC-409.mp4",
+        "sha256": "04d96d8a91ea74aa",
+        "size": 9
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC/ABC-412.mp4",
+        "sha256": "8e5966554908cc04",
+        "size": 12
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC/ABC-413.mp4",
+        "sha256": "8108ed602688b707",
+        "size": 14
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC/ABC-414.mp4",
+        "sha256": "b670825c8f110a2e",
+        "size": 15
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC/ABC-415.mp4",
+        "sha256": "9c5729595fb287cc",
+        "size": 16
+      }
+    ],
+    "movein": [
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": ".embyx-reconcile-084f58700d61d51c29b34e8728c9f7aa5f951cf210370b4ed19f899dfda18397",
+        "sha256": "8e5966554908cc04",
+        "size": 12
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC-401.mp4",
+        "sha256": "5dde896887f6754c",
+        "size": 2
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC-402.mp4",
+        "sha256": "cd2eb0837c9b4c96",
+        "size": 3
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC-403.mp4",
+        "sha256": "2481a63c85a62cf8",
+        "size": 4
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC-404.mp4",
+        "sha256": "eaf16bc07968e013",
+        "size": 5
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC-406.mp4",
+        "sha256": "8e5966554908cc04",
+        "size": 12
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC-410.mp4",
+        "sha256": "8e5966554908cc04",
+        "size": 12
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC-411.mp4",
+        "sha256": "59ffe12a70df1510",
+        "size": 12
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC-412.mp4",
+        "sha256": "ea156a2c16eb8f24",
+        "size": 13
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "ABC-416.mp4",
+        "sha256": "d04fd59f3d9a1fd4",
+        "size": 17
+      }
+    ]
+  }
+}

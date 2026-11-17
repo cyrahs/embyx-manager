@@ -1,0 +1,4105 @@
+{
+  "calls": [
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/embyx/type/vr/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-001-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-001-cd2.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-001-cd2.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-001-cd2.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-002-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-002-cd2.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-002-cd2.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-002-cd2.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-003-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-003-cd2.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-003-cd2.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-003-cd2.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-004-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-004-cd1.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-004-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-004-cd2.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-004-cd2.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-004-cd2.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 1
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/api/v1/namespaces/media/pods/embyx-manager-0",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "spec": {
+            "containers": [
+              {
+                "image": "ghcr.io/cyrahs/embyx-manager:latest"
+              }
+            ]
+          },
+          "status": {
+            "containerStatuses": [
+              {
+                "imageID": "ghcr.io/cyrahs/embyx-manager@sha256:abc123"
+              }
+            ]
+          }
+        },
+        "status": 200
+      },
+      "seq": 2
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "POST",
+      "request": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "2"
+            },
+            "name": "embyx-merge-2-abc-002"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "2"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/ABC-002.mp4",
+                      "--status",
+                      "{work}/.merge/2.json",
+                      "--reserve-gib",
+                      "20",
+                      "--",
+                      "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                      "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "2"
+            },
+            "name": "embyx-merge-2-abc-002"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "2"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/ABC-002.mp4",
+                      "--status",
+                      "{work}/.merge/2.json",
+                      "--reserve-gib",
+                      "20",
+                      "--",
+                      "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                      "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          },
+          "status": {}
+        },
+        "status": 201
+      },
+      "seq": 3
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "DELETE",
+      "request": {
+        "body": {
+          "propagationPolicy": "Background"
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs/embyx-merge-2-abc-002",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "status": "Success"
+        },
+        "status": 200
+      },
+      "seq": 4
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/embyx/type/vr/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-001-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-001-cd2.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-001-cd2.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-001-cd2.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-002-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-002-cd2.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-002-cd2.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-002-cd2.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-003-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-003-cd2.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-003-cd2.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-003-cd2.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-004-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-004-cd1.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-004-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-004-cd2.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-004-cd2.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-004-cd2.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 5
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "POST",
+      "request": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "3"
+            },
+            "name": "embyx-merge-3-abc-003"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "3"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/ABC-003.mp4",
+                      "--status",
+                      "{work}/.merge/3.json",
+                      "--reserve-gib",
+                      "20",
+                      "--",
+                      "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+                      "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd2.mp4"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "3"
+            },
+            "name": "embyx-merge-3-abc-003"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "3"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/ABC-003.mp4",
+                      "--status",
+                      "{work}/.merge/3.json",
+                      "--reserve-gib",
+                      "20",
+                      "--",
+                      "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+                      "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd2.mp4"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          },
+          "status": {}
+        },
+        "status": 201
+      },
+      "seq": 6
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "DELETE",
+      "request": {
+        "body": {
+          "propagationPolicy": "Background"
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs/embyx-merge-3-abc-003",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "status": "Success"
+        },
+        "status": 200
+      },
+      "seq": 7
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetCopyTasks",
+      "request": {},
+      "response": {
+        "copyTasks": []
+      },
+      "seq": 8
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/upload"
+      },
+      "response": [
+        {
+          "subFiles": []
+        }
+      ],
+      "seq": 9
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "CreateFolder",
+      "request": {
+        "folderName": "merge-3",
+        "parentPath": "/115/upload"
+      },
+      "response": {
+        "folderCreated": {
+          "CanCreateEncryptedFolder": false,
+          "CanLock": false,
+          "CanSyncFileChangesFromCloud": false,
+          "canAddShareLink": false,
+          "canDeletePermanently": false,
+          "canDirectAccessThumbnailURL": false,
+          "canMount": false,
+          "canOfflineDownload": false,
+          "canSearch": false,
+          "canUnmount": false,
+          "fileEncryptionType": "None",
+          "fileHashes": {},
+          "fileType": "Directory",
+          "fullPathName": "/115/upload/merge-3",
+          "hasDetailProperties": false,
+          "id": "/115/upload/merge-3",
+          "isCloudDirectory": false,
+          "isCloudFile": false,
+          "isCloudRoot": false,
+          "isDirectory": true,
+          "isForbidden": false,
+          "isLocal": false,
+          "isRoot": false,
+          "isSearchResult": false,
+          "name": "merge-3",
+          "originalPath": "",
+          "previewUrl": "",
+          "size": "0",
+          "supportOfflineDownloadManagement": false,
+          "thumbnailUrl": ""
+        },
+        "result": {
+          "errorMessage": "",
+          "resultFilePaths": [
+            "/115/upload/merge-3"
+          ],
+          "success": true
+        }
+      },
+      "seq": 10
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/upload"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/upload/merge-3",
+              "hasDetailProperties": false,
+              "id": "/115/upload/merge-3",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "merge-3",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 11
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "CopyFile",
+      "request": {
+        "conflictPolicy": "Overwrite",
+        "destPath": "/115/upload/merge-3",
+        "theFilePaths": [
+          "/downloads/upload/ABC-003.mp4"
+        ]
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 12
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetCopyTasks",
+      "request": {},
+      "response": {
+        "copyTasks": [
+          {
+            "cancelledFiles": "0",
+            "destPath": "/115/upload/merge-3",
+            "errors": [],
+            "failedFiles": "0",
+            "failedFolders": "0",
+            "paused": false,
+            "skippedFiles": "0",
+            "sourcePath": "/downloads/upload/ABC-003.mp4",
+            "status": "Pending",
+            "taskMode": "Copy",
+            "totalBytes": "0",
+            "totalFiles": "0",
+            "totalFolders": "0",
+            "uploadedBytes": "0",
+            "uploadedFiles": "0"
+          }
+        ]
+      },
+      "seq": 13
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetUploadFileList",
+      "request": {
+        "filter": "ABC-003.mp4",
+        "getAll": true,
+        "itemsPerPage": 0,
+        "pageNumber": 0
+      },
+      "response": {
+        "finishedBytes": "0",
+        "globalBytesPerSecond": 0.0,
+        "totalBytes": "0",
+        "totalCount": 0,
+        "totalCountFiltered": 0,
+        "uploadFiles": []
+      },
+      "seq": 14
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "DELETE",
+      "request": {
+        "body": {
+          "propagationPolicy": "Background"
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs/embyx-merge-3-abc-003",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "reason": "NotFound"
+        },
+        "status": 404
+      },
+      "seq": 15
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetCopyTasks",
+      "request": {},
+      "response": {
+        "copyTasks": [
+          {
+            "cancelledFiles": "0",
+            "destPath": "/115/upload/merge-3",
+            "errors": [],
+            "failedFiles": "0",
+            "failedFolders": "0",
+            "paused": false,
+            "skippedFiles": "0",
+            "sourcePath": "/downloads/upload/ABC-003.mp4",
+            "status": "Pending",
+            "taskMode": "Copy",
+            "totalBytes": "0",
+            "totalFiles": "0",
+            "totalFolders": "0",
+            "uploadedBytes": "0",
+            "uploadedFiles": "0"
+          }
+        ]
+      },
+      "seq": 16
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "CancelCopyTask",
+      "request": {
+        "destPath": "/115/upload/merge-3",
+        "sourcePath": "/downloads/upload/ABC-003.mp4"
+      },
+      "response": {},
+      "seq": 17
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "DELETE",
+      "request": {
+        "body": {
+          "propagationPolicy": "Background"
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs/embyx-merge-3-abc-003",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "reason": "NotFound"
+        },
+        "status": 404
+      },
+      "seq": 18
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetCopyTasks",
+      "request": {},
+      "response": {
+        "copyTasks": []
+      },
+      "seq": 19
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "DeleteFiles",
+      "request": {
+        "path": [
+          "/115/upload/merge-3"
+        ]
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 20
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/embyx/type/vr/ABC"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-001-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-001-cd2.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-001-cd2.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-001-cd2.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-002-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-002-cd2.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-002-cd2.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-002-cd2.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-003-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-003-cd2.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-003-cd2.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-003-cd2.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-004-cd1.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-004-cd1.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-004-cd1.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/embyx/type/vr/ABC/ABC-004-cd2.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/embyx/type/vr/ABC/ABC-004-cd2.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "ABC-004-cd2.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "10",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 21
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/api/v1/namespaces/media/pods/embyx-manager-0",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "spec": {
+            "containers": [
+              {
+                "image": "ghcr.io/cyrahs/embyx-manager:latest"
+              }
+            ]
+          },
+          "status": {
+            "containerStatuses": [
+              {
+                "imageID": "ghcr.io/cyrahs/embyx-manager@sha256:abc123"
+              }
+            ]
+          }
+        },
+        "status": 200
+      },
+      "seq": 22
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "POST",
+      "request": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "4"
+            },
+            "name": "embyx-merge-4-abc-004"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "4"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/ABC-004.mp4",
+                      "--status",
+                      "{work}/.merge/4.json",
+                      "--reserve-gib",
+                      "20",
+                      "--",
+                      "/mnt/cd2/115/embyx/type/vr/ABC/ABC-004-cd1.mp4",
+                      "/mnt/cd2/115/embyx/type/vr/ABC/ABC-004-cd2.mp4"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "4"
+            },
+            "name": "embyx-merge-4-abc-004"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "4"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "--output",
+                      "{work}/ABC-004.mp4",
+                      "--status",
+                      "{work}/.merge/4.json",
+                      "--reserve-gib",
+                      "20",
+                      "--",
+                      "/mnt/cd2/115/embyx/type/vr/ABC/ABC-004-cd1.mp4",
+                      "/mnt/cd2/115/embyx/type/vr/ABC/ABC-004-cd2.mp4"
+                    ],
+                    "command": [
+                      "embyx-manager",
+                      "merge-worker"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:abc123",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          },
+          "status": {}
+        },
+        "status": 201
+      },
+      "seq": 23
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "DELETE",
+      "request": {
+        "body": {
+          "propagationPolicy": "Background"
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs/embyx-merge-4-abc-004",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "status": "Success"
+        },
+        "status": 200
+      },
+      "seq": 24
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/",
+        "/115",
+        "/115/embyx",
+        "/115/embyx/type",
+        "/115/embyx/type/vr",
+        "/115/embyx/type/vr/ABC",
+        "/115/embyx_in",
+        "/115/upload"
+      ],
+      "files": [
+        {
+          "hashes": {},
+          "path": "/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+          "size": 10
+        },
+        {
+          "hashes": {},
+          "path": "/115/embyx/type/vr/ABC/ABC-001-cd2.mp4",
+          "size": 10
+        },
+        {
+          "hashes": {},
+          "path": "/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+          "size": 10
+        },
+        {
+          "hashes": {},
+          "path": "/115/embyx/type/vr/ABC/ABC-002-cd2.mp4",
+          "size": 10
+        },
+        {
+          "hashes": {},
+          "path": "/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+          "size": 10
+        },
+        {
+          "hashes": {},
+          "path": "/115/embyx/type/vr/ABC/ABC-003-cd2.mp4",
+          "size": 10
+        },
+        {
+          "hashes": {},
+          "path": "/115/embyx/type/vr/ABC/ABC-004-cd1.mp4",
+          "size": 10
+        },
+        {
+          "hashes": {},
+          "path": "/115/embyx/type/vr/ABC/ABC-004-cd2.mp4",
+          "size": 10
+        }
+      ],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "jobs": {},
+      "routes_left": [
+        {
+          "body": {
+            "spec": {
+              "containers": [
+                {
+                  "image": "ghcr.io/cyrahs/embyx-manager:latest"
+                }
+              ]
+            },
+            "status": {
+              "containerStatuses": [
+                {
+                  "imageID": "ghcr.io/cyrahs/embyx-manager@sha256:abc123"
+                }
+              ]
+            }
+          },
+          "method": "GET",
+          "path": "/api/v1/namespaces/media/pods/embyx-manager-0"
+        }
+      ]
+    }
+  },
+  "format": 1,
+  "operation": "merge.service",
+  "outcome": {
+    "result": {
+      "clock": "2026-11-14T08:00:00+00:00",
+      "steps": [
+        {
+          "op": "create",
+          "result": {
+            "avid": "ABC-001",
+            "brand": "ABC",
+            "error": null,
+            "failed_state": null,
+            "finished_at": null,
+            "id": 1,
+            "job_name": null,
+            "library_dir": "type/vr",
+            "merged_bytes": null,
+            "merged_name": "ABC-001.mp4",
+            "merged_sha1": null,
+            "notice": null,
+            "parts": [
+              "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+              "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+            ],
+            "phase": null,
+            "progress": null,
+            "source": "vr",
+            "state": "queued",
+            "state_changed_at_is_updated_at": true,
+            "transcode_paused": false,
+            "transcoder": null,
+            "updated_at_is_created_at": true,
+            "upload_attempts": 0,
+            "uploaded_bytes": null
+          },
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "cancel",
+          "result": {
+            "avid": "ABC-001",
+            "brand": "ABC",
+            "error": null,
+            "failed_state": null,
+            "finished_at": "2026-11-14T08:00:00+00:00",
+            "id": 1,
+            "job_name": null,
+            "library_dir": "type/vr",
+            "merged_bytes": null,
+            "merged_name": "ABC-001.mp4",
+            "merged_sha1": null,
+            "notice": null,
+            "parts": [
+              "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+              "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+            ],
+            "phase": null,
+            "progress": null,
+            "source": "vr",
+            "state": "cancelled",
+            "state_changed_at_is_updated_at": true,
+            "transcode_paused": false,
+            "transcoder": null,
+            "updated_at_is_created_at": true,
+            "upload_attempts": 0,
+            "uploaded_bytes": null
+          },
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "error": {
+            "code": "merge_task_not_cancellable",
+            "type": "MergeActionError"
+          },
+          "op": "cancel",
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "error": {
+            "code": "merge_task_not_found",
+            "type": "MergeActionError"
+          },
+          "op": "cancel",
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "create",
+          "result": {
+            "avid": "ABC-002",
+            "brand": "ABC",
+            "error": null,
+            "failed_state": null,
+            "finished_at": null,
+            "id": 2,
+            "job_name": null,
+            "library_dir": "type/vr",
+            "merged_bytes": null,
+            "merged_name": "ABC-002.mp4",
+            "merged_sha1": null,
+            "notice": null,
+            "parts": [
+              "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+              "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+            ],
+            "phase": null,
+            "progress": null,
+            "source": "vr",
+            "state": "queued",
+            "state_changed_at_is_updated_at": true,
+            "transcode_paused": false,
+            "transcoder": null,
+            "updated_at_is_created_at": true,
+            "upload_attempts": 0,
+            "uploaded_bytes": null
+          },
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-002",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 2,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-002.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "tick",
+          "result": {
+            "triggered": []
+          },
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-002",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 2,
+              "job_name": "embyx-merge-2-abc-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-002.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "write",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-002",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 2,
+              "job_name": "embyx-merge-2-abc-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-002.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "write",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-002",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 2,
+              "job_name": "embyx-merge-2-abc-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-002.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "write",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-002",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 2,
+              "job_name": "embyx-merge-2-abc-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-002.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "cancel",
+          "result": {
+            "avid": "ABC-002",
+            "brand": "ABC",
+            "error": null,
+            "failed_state": null,
+            "finished_at": "2026-11-14T08:00:00+00:00",
+            "id": 2,
+            "job_name": "embyx-merge-2-abc-002",
+            "library_dir": "type/vr",
+            "merged_bytes": null,
+            "merged_name": "ABC-002.mp4",
+            "merged_sha1": null,
+            "notice": null,
+            "parts": [
+              "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+              "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+            ],
+            "phase": "starting",
+            "progress": 0.0,
+            "source": "vr",
+            "state": "cancelled",
+            "state_changed_at_is_updated_at": true,
+            "transcode_paused": false,
+            "transcoder": null,
+            "updated_at_is_created_at": true,
+            "upload_attempts": 0,
+            "uploaded_bytes": null
+          },
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-002",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 2,
+              "job_name": "embyx-merge-2-abc-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-002.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "create",
+          "result": {
+            "avid": "ABC-003",
+            "brand": "ABC",
+            "error": null,
+            "failed_state": null,
+            "finished_at": null,
+            "id": 3,
+            "job_name": null,
+            "library_dir": "type/vr",
+            "merged_bytes": null,
+            "merged_name": "ABC-003.mp4",
+            "merged_sha1": null,
+            "notice": null,
+            "parts": [
+              "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+              "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd2.mp4"
+            ],
+            "phase": null,
+            "progress": null,
+            "source": "vr",
+            "state": "queued",
+            "state_changed_at_is_updated_at": true,
+            "transcode_paused": false,
+            "transcoder": null,
+            "updated_at_is_created_at": true,
+            "upload_attempts": 0,
+            "uploaded_bytes": null
+          },
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-002",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 2,
+              "job_name": "embyx-merge-2-abc-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-002.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-003",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 3,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-003.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "tick",
+          "result": {
+            "triggered": []
+          },
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-002",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 2,
+              "job_name": "embyx-merge-2-abc-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-002.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-003",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 3,
+              "job_name": "embyx-merge-3-abc-003",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-003.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "write",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-002",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 2,
+              "job_name": "embyx-merge-2-abc-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-002.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-003",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 3,
+              "job_name": "embyx-merge-3-abc-003",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-003.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "write",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-002",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 2,
+              "job_name": "embyx-merge-2-abc-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-002.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-003",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 3,
+              "job_name": "embyx-merge-3-abc-003",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-003.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "tick",
+          "result": {
+            "triggered": []
+          },
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-002",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 2,
+              "job_name": "embyx-merge-2-abc-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-002.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-003",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 3,
+              "job_name": "embyx-merge-3-abc-003",
+              "library_dir": "type/vr",
+              "merged_bytes": 14,
+              "merged_name": "ABC-003.mp4",
+              "merged_sha1": "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709",
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "uploading",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": 0
+            }
+          ]
+        },
+        {
+          "error": {
+            "message": "",
+            "type": "CancelledError"
+          },
+          "op": "tick",
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-002",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 2,
+              "job_name": "embyx-merge-2-abc-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-002.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-003",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 3,
+              "job_name": "embyx-merge-3-abc-003",
+              "library_dir": "type/vr",
+              "merged_bytes": 14,
+              "merged_name": "ABC-003.mp4",
+              "merged_sha1": "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709",
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "uploading",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": 0
+            }
+          ]
+        },
+        {
+          "op": "restart",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-002",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 2,
+              "job_name": "embyx-merge-2-abc-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-002.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-003",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 3,
+              "job_name": "embyx-merge-3-abc-003",
+              "library_dir": "type/vr",
+              "merged_bytes": 14,
+              "merged_name": "ABC-003.mp4",
+              "merged_sha1": "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709",
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "uploading",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": 0
+            }
+          ]
+        },
+        {
+          "op": "tick",
+          "result": {
+            "triggered": []
+          },
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-002",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 2,
+              "job_name": "embyx-merge-2-abc-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-002.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-003",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 3,
+              "job_name": "embyx-merge-3-abc-003",
+              "library_dir": "type/vr",
+              "merged_bytes": 14,
+              "merged_name": "ABC-003.mp4",
+              "merged_sha1": "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709",
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "uploading",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": 0
+            }
+          ]
+        },
+        {
+          "error": {
+            "message": "",
+            "type": "CancelledError"
+          },
+          "op": "cancel",
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-002",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 2,
+              "job_name": "embyx-merge-2-abc-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-002.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-003",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 3,
+              "job_name": "embyx-merge-3-abc-003",
+              "library_dir": "type/vr",
+              "merged_bytes": 14,
+              "merged_name": "ABC-003.mp4",
+              "merged_sha1": "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709",
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "uploading",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": 0
+            }
+          ]
+        },
+        {
+          "op": "restart",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-002",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 2,
+              "job_name": "embyx-merge-2-abc-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-002.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-003",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 3,
+              "job_name": "embyx-merge-3-abc-003",
+              "library_dir": "type/vr",
+              "merged_bytes": 14,
+              "merged_name": "ABC-003.mp4",
+              "merged_sha1": "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709",
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "uploading",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": 0
+            }
+          ]
+        },
+        {
+          "op": "cancel",
+          "result": {
+            "avid": "ABC-003",
+            "brand": "ABC",
+            "error": null,
+            "failed_state": null,
+            "finished_at": "2026-11-14T08:00:00+00:00",
+            "id": 3,
+            "job_name": "embyx-merge-3-abc-003",
+            "library_dir": "type/vr",
+            "merged_bytes": 14,
+            "merged_name": "ABC-003.mp4",
+            "merged_sha1": "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709",
+            "notice": null,
+            "parts": [
+              "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+              "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd2.mp4"
+            ],
+            "phase": null,
+            "progress": null,
+            "source": "vr",
+            "state": "cancelled",
+            "state_changed_at_is_updated_at": true,
+            "transcode_paused": false,
+            "transcoder": null,
+            "updated_at_is_created_at": true,
+            "upload_attempts": 0,
+            "uploaded_bytes": 0
+          },
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-002",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 2,
+              "job_name": "embyx-merge-2-abc-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-002.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-003",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 3,
+              "job_name": "embyx-merge-3-abc-003",
+              "library_dir": "type/vr",
+              "merged_bytes": 14,
+              "merged_name": "ABC-003.mp4",
+              "merged_sha1": "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709",
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": 0
+            }
+          ]
+        },
+        {
+          "op": "create",
+          "result": {
+            "avid": "ABC-004",
+            "brand": "ABC",
+            "error": null,
+            "failed_state": null,
+            "finished_at": null,
+            "id": 4,
+            "job_name": null,
+            "library_dir": "type/vr",
+            "merged_bytes": null,
+            "merged_name": "ABC-004.mp4",
+            "merged_sha1": null,
+            "notice": null,
+            "parts": [
+              "/mnt/cd2/115/embyx/type/vr/ABC/ABC-004-cd1.mp4",
+              "/mnt/cd2/115/embyx/type/vr/ABC/ABC-004-cd2.mp4"
+            ],
+            "phase": null,
+            "progress": null,
+            "source": "vr",
+            "state": "queued",
+            "state_changed_at_is_updated_at": true,
+            "transcode_paused": false,
+            "transcoder": null,
+            "updated_at_is_created_at": true,
+            "upload_attempts": 0,
+            "uploaded_bytes": null
+          },
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-002",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 2,
+              "job_name": "embyx-merge-2-abc-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-002.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-003",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 3,
+              "job_name": "embyx-merge-3-abc-003",
+              "library_dir": "type/vr",
+              "merged_bytes": 14,
+              "merged_name": "ABC-003.mp4",
+              "merged_sha1": "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709",
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": 0
+            },
+            {
+              "avid": "ABC-004",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 4,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-004.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-004-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-004-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "queued",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "tick",
+          "result": {
+            "triggered": []
+          },
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-002",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 2,
+              "job_name": "embyx-merge-2-abc-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-002.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-003",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 3,
+              "job_name": "embyx-merge-3-abc-003",
+              "library_dir": "type/vr",
+              "merged_bytes": 14,
+              "merged_name": "ABC-003.mp4",
+              "merged_sha1": "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709",
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": 0
+            },
+            {
+              "avid": "ABC-004",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 4,
+              "job_name": "embyx-merge-4-abc-004",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-004.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-004-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-004-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "write",
+          "result": null,
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-002",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 2,
+              "job_name": "embyx-merge-2-abc-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-002.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-003",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 3,
+              "job_name": "embyx-merge-3-abc-003",
+              "library_dir": "type/vr",
+              "merged_bytes": 14,
+              "merged_name": "ABC-003.mp4",
+              "merged_sha1": "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709",
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": 0
+            },
+            {
+              "avid": "ABC-004",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": null,
+              "id": 4,
+              "job_name": "embyx-merge-4-abc-004",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-004.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-004-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-004-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "merging",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "tick",
+          "result": {
+            "triggered": []
+          },
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-002",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 2,
+              "job_name": "embyx-merge-2-abc-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-002.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-003",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 3,
+              "job_name": "embyx-merge-3-abc-003",
+              "library_dir": "type/vr",
+              "merged_bytes": 14,
+              "merged_name": "ABC-003.mp4",
+              "merged_sha1": "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709",
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": 0
+            },
+            {
+              "avid": "ABC-004",
+              "brand": "ABC",
+              "error": "not enough space on the work volume",
+              "failed_state": "merging",
+              "finished_at": null,
+              "id": 4,
+              "job_name": "embyx-merge-4-abc-004",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-004.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-004-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-004-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "failed",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        },
+        {
+          "op": "cancel",
+          "result": {
+            "avid": "ABC-004",
+            "brand": "ABC",
+            "error": "not enough space on the work volume",
+            "failed_state": "merging",
+            "finished_at": "2026-11-14T08:00:00+00:00",
+            "id": 4,
+            "job_name": "embyx-merge-4-abc-004",
+            "library_dir": "type/vr",
+            "merged_bytes": null,
+            "merged_name": "ABC-004.mp4",
+            "merged_sha1": null,
+            "notice": null,
+            "parts": [
+              "/mnt/cd2/115/embyx/type/vr/ABC/ABC-004-cd1.mp4",
+              "/mnt/cd2/115/embyx/type/vr/ABC/ABC-004-cd2.mp4"
+            ],
+            "phase": "starting",
+            "progress": 0.0,
+            "source": "vr",
+            "state": "cancelled",
+            "state_changed_at_is_updated_at": true,
+            "transcode_paused": false,
+            "transcoder": null,
+            "updated_at_is_created_at": true,
+            "upload_attempts": 0,
+            "uploaded_bytes": null
+          },
+          "tasks": [
+            {
+              "avid": "ABC-001",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 1,
+              "job_name": null,
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-001.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-002",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 2,
+              "job_name": "embyx-merge-2-abc-002",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-002.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            },
+            {
+              "avid": "ABC-003",
+              "brand": "ABC",
+              "error": null,
+              "failed_state": null,
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 3,
+              "job_name": "embyx-merge-3-abc-003",
+              "library_dir": "type/vr",
+              "merged_bytes": 14,
+              "merged_name": "ABC-003.mp4",
+              "merged_sha1": "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709",
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd2.mp4"
+              ],
+              "phase": null,
+              "progress": null,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": 0
+            },
+            {
+              "avid": "ABC-004",
+              "brand": "ABC",
+              "error": "not enough space on the work volume",
+              "failed_state": "merging",
+              "finished_at": "2026-11-14T08:00:00+00:00",
+              "id": 4,
+              "job_name": "embyx-merge-4-abc-004",
+              "library_dir": "type/vr",
+              "merged_bytes": null,
+              "merged_name": "ABC-004.mp4",
+              "merged_sha1": null,
+              "notice": null,
+              "parts": [
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-004-cd1.mp4",
+                "/mnt/cd2/115/embyx/type/vr/ABC/ABC-004-cd2.mp4"
+              ],
+              "phase": "starting",
+              "progress": 0.0,
+              "source": "vr",
+              "state": "cancelled",
+              "state_changed_at_is_updated_at": true,
+              "transcode_paused": false,
+              "transcoder": null,
+              "updated_at_is_created_at": true,
+              "upload_attempts": 0,
+              "uploaded_bytes": null
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "rows": {
+    "app_config": [],
+    "archive_acquisitions": [],
+    "archive_magnet_attempts": [],
+    "feed_subscriptions": [],
+    "fill_actor_apply_jobs": [],
+    "fill_actor_candidates": [],
+    "fill_actor_cloud_move_operations": [],
+    "fill_actor_jobs": [],
+    "fill_actor_move_journal": [],
+    "fill_actor_move_results": [],
+    "fill_actor_plans": [],
+    "health_probe": [],
+    "merge_tasks": [
+      {
+        "avid": "ABC-001",
+        "brand": "ABC",
+        "created_at": "2026-11-14T08:00:00+00:00",
+        "error": null,
+        "failed_state": null,
+        "finished_at": "2026-11-14T08:00:00+00:00",
+        "id": 1,
+        "job_name": null,
+        "library_dir": "type/vr",
+        "merged_bytes": null,
+        "merged_name": "ABC-001.mp4",
+        "merged_sha1": null,
+        "notice": null,
+        "parts_json": "[\"/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd1.mp4\", \"/mnt/cd2/115/embyx/type/vr/ABC/ABC-001-cd2.mp4\"]",
+        "phase": null,
+        "progress": null,
+        "source": "vr",
+        "state": "cancelled",
+        "state_changed_at": "2026-11-14T08:00:00+00:00",
+        "transcode_paused": false,
+        "transcoder": null,
+        "updated_at": "2026-11-14T08:00:00+00:00",
+        "upload_attempts": 0,
+        "uploaded_bytes": null
+      },
+      {
+        "avid": "ABC-002",
+        "brand": "ABC",
+        "created_at": "2026-11-14T08:00:00+00:00",
+        "error": null,
+        "failed_state": null,
+        "finished_at": "2026-11-14T08:00:00+00:00",
+        "id": 2,
+        "job_name": "embyx-merge-2-abc-002",
+        "library_dir": "type/vr",
+        "merged_bytes": null,
+        "merged_name": "ABC-002.mp4",
+        "merged_sha1": null,
+        "notice": null,
+        "parts_json": "[\"/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd1.mp4\", \"/mnt/cd2/115/embyx/type/vr/ABC/ABC-002-cd2.mp4\"]",
+        "phase": "starting",
+        "progress": 0,
+        "source": "vr",
+        "state": "cancelled",
+        "state_changed_at": "2026-11-14T08:00:00+00:00",
+        "transcode_paused": false,
+        "transcoder": null,
+        "updated_at": "2026-11-14T08:00:00+00:00",
+        "upload_attempts": 0,
+        "uploaded_bytes": null
+      },
+      {
+        "avid": "ABC-003",
+        "brand": "ABC",
+        "created_at": "2026-11-14T08:00:00+00:00",
+        "error": null,
+        "failed_state": null,
+        "finished_at": "2026-11-14T08:00:00+00:00",
+        "id": 3,
+        "job_name": "embyx-merge-3-abc-003",
+        "library_dir": "type/vr",
+        "merged_bytes": 14,
+        "merged_name": "ABC-003.mp4",
+        "merged_sha1": "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709",
+        "notice": null,
+        "parts_json": "[\"/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd1.mp4\", \"/mnt/cd2/115/embyx/type/vr/ABC/ABC-003-cd2.mp4\"]",
+        "phase": null,
+        "progress": null,
+        "source": "vr",
+        "state": "cancelled",
+        "state_changed_at": "2026-11-14T08:00:00+00:00",
+        "transcode_paused": false,
+        "transcoder": null,
+        "updated_at": "2026-11-14T08:00:00+00:00",
+        "upload_attempts": 0,
+        "uploaded_bytes": 0
+      },
+      {
+        "avid": "ABC-004",
+        "brand": "ABC",
+        "created_at": "2026-11-14T08:00:00+00:00",
+        "error": "not enough space on the work volume",
+        "failed_state": "merging",
+        "finished_at": "2026-11-14T08:00:00+00:00",
+        "id": 4,
+        "job_name": "embyx-merge-4-abc-004",
+        "library_dir": "type/vr",
+        "merged_bytes": null,
+        "merged_name": "ABC-004.mp4",
+        "merged_sha1": null,
+        "notice": null,
+        "parts_json": "[\"/mnt/cd2/115/embyx/type/vr/ABC/ABC-004-cd1.mp4\", \"/mnt/cd2/115/embyx/type/vr/ABC/ABC-004-cd2.mp4\"]",
+        "phase": "starting",
+        "progress": 0,
+        "source": "vr",
+        "state": "cancelled",
+        "state_changed_at": "2026-11-14T08:00:00+00:00",
+        "transcode_paused": false,
+        "transcoder": null,
+        "updated_at": "2026-11-14T08:00:00+00:00",
+        "upload_attempts": 0,
+        "uploaded_bytes": null
+      }
+    ],
+    "merge_transcode_chunks": [],
+    "merge_transcode_parts": [],
+    "pipeline_runs": [],
+    "playlist_source": [],
+    "playlists": []
+  },
+  "scenario": "merge/cancel",
+  "tree": {
+    "mapping": [],
+    "secrets": [
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "job.json",
+        "sha256": "8c299e50567ce0e6",
+        "size": 204
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "token",
+        "sha256": "52713805db90269f",
+        "size": 15
+      }
+    ],
+    "work": [
+      {
+        "kind": "dir",
+        "path": ".merge"
+      }
+    ]
+  }
+}

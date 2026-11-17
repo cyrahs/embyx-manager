@@ -1,0 +1,299 @@
+{
+  "calls": [
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/ABC"
+      },
+      "response": null,
+      "seq": 1
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-301.mp4",
+        "src": "{task}/intake/ABC-301 links/ABC-301.mp4"
+      },
+      "response": null,
+      "seq": 2
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/ABC-301 links"
+      },
+      "response": null,
+      "seq": 3
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/starred/ABC"
+      },
+      "response": null,
+      "seq": 4
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/starred/ABC/ABC-302-cd1.mp4",
+        "src": "{library}/sorted/ABC/ABC-302-cd1.mp4"
+      },
+      "response": null,
+      "seq": 5
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/starred/ABC"
+      },
+      "response": null,
+      "seq": 6
+    },
+    {
+      "error": {
+        "message": "[Errno 5] Input/output error: '{library}/sorted/ABC/ABC-302-cd2.mp4' -> '{library}/starred/ABC/ABC-302-cd2.mp4'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/starred/ABC/ABC-302-cd2.mp4",
+        "src": "{library}/sorted/ABC/ABC-302-cd2.mp4"
+      },
+      "seq": 7
+    },
+    {
+      "error": {
+        "message": "[Errno 28] No space left on device: '{library}/starred/DEF'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/starred/DEF"
+      },
+      "seq": 8
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/starred/DEF"
+      },
+      "response": null,
+      "seq": 9
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/starred/DEF/DEF-303.mp4",
+        "src": "{library}/sorted/DEF/DEF-303.mp4"
+      },
+      "response": null,
+      "seq": 10
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "archive.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "errors": [],
+          "log": [
+            "moving ABC-301.mp4 to sorted/ABC/ABC-301.mp4"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [
+              "sorted/ABC/ABC-301.mp4"
+            ],
+            "avid": "ABC-301",
+            "outcome": "archived",
+            "reason": ""
+          },
+          "stats": {
+            "folders_discarded": 1,
+            "videos_archived": 1
+          }
+        },
+        {
+          "errors": [
+            "ERROR: failed to archive vip/ABC-302: OSError(5, 'Input/output error')"
+          ],
+          "log": [
+            "promoting sorted/ABC/ABC-302-cd1.mp4 to starred/ABC/ABC-302-cd1.mp4",
+            "promoting sorted/ABC/ABC-302-cd2.mp4 to starred/ABC/ABC-302-cd2.mp4",
+            "ERROR: failed to archive vip/ABC-302: OSError(5, 'Input/output error')"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [],
+            "avid": "ABC-302",
+            "outcome": "failed",
+            "reason": "[Errno 5] Input/output error: '{library}/sorted/ABC/ABC-302-cd2.mp4' -> '{library}/starred/ABC/ABC-302-cd2.mp4'"
+          },
+          "stats": {
+            "duplicates_promoted": 1,
+            "items_failed": 1
+          }
+        },
+        {
+          "error": {
+            "message": "[Errno 28] No space left on device: '{library}/starred/DEF'",
+            "type": "OSError"
+          },
+          "errors": [],
+          "log": [],
+          "op": "library_holdings",
+          "stats": {}
+        },
+        {
+          "errors": [],
+          "log": [
+            "promoting sorted/DEF/DEF-303.mp4 to starred/DEF/DEF-303.mp4"
+          ],
+          "op": "library_holdings",
+          "result": [
+            "starred/DEF/DEF-303.mp4"
+          ],
+          "stats": {
+            "duplicates_promoted": 1
+          }
+        }
+      ]
+    }
+  },
+  "rows": {},
+  "scenario": "archive/links_and_promotion",
+  "tree": {
+    "library": [
+      {
+        "kind": "dir",
+        "path": "sorted"
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/ABC"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-301.mp4",
+        "sha256": "0f46e4b0802fee6f",
+        "size": 31
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-302-cd2.mp4",
+        "sha256": "11ba55a3a7c1ee0f",
+        "size": 33
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/DEF"
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/KEEP"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/KEEP/KEEP-001.mp4",
+        "sha256": "3164596df4fdd018",
+        "size": 41
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/KEEP/KEEP-002.mp4",
+        "sha256": "2b2573d5ea0b352e",
+        "size": 42
+      },
+      {
+        "kind": "dir",
+        "path": "starred"
+      },
+      {
+        "kind": "dir",
+        "path": "starred/ABC"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "starred/ABC/ABC-302-cd1.mp4",
+        "sha256": "c62e4615bd39e222",
+        "size": 32
+      },
+      {
+        "kind": "dir",
+        "path": "starred/DEF"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "starred/DEF/DEF-303.mp4",
+        "sha256": "efa79bd8bf70266b",
+        "size": 35
+      }
+    ],
+    "task": [
+      {
+        "kind": "dir",
+        "path": "intake"
+      },
+      {
+        "kind": "dir",
+        "path": "vip"
+      },
+      {
+        "kind": "dir",
+        "path": "vip/ABC-302"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "vip/ABC-302/ABC-302-4k.mp4",
+        "sha256": "b0b43789f1857820",
+        "size": 34
+      }
+    ]
+  }
+}

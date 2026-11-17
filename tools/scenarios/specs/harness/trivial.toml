@@ -1,0 +1,44 @@
+# Proves the runner end to end (WP0): one file renamed in the tree, one MoveFile call to the
+# fake CloudDrive through each build's own client, one row updated with the scenario clock.
+description = "harness: rename a file, move it on the fake CloudDrive, mark its row"
+operation = "harness.trivial"
+clock = "2026-11-13T18:22:00+00:00"
+volatile = ["rows.items.created_at"]
+
+[ordering]
+mode = "total"
+
+[roots]
+names = ["upload", "library"]
+
+[[tree]]
+path = "upload/in/a.txt"
+text = "part one"
+
+[[tree]]
+path = "upload/in/b.txt"
+size = 3
+
+[[tree]]
+path = "upload/in/b-link.txt"
+kind = "hardlink"
+target = "upload/in/b.txt"
+
+[[tree]]
+path = "library/sorted"
+kind = "dir"
+
+[database]
+schema = "none"
+sql = [
+    "CREATE TABLE items (id BIGSERIAL PRIMARY KEY, name TEXT NOT NULL, state TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT now(), moved_at TIMESTAMPTZ, meta_json TEXT NOT NULL DEFAULT '{}')",
+    "INSERT INTO items (name, state, meta_json) VALUES ('a.txt', 'new', '{\"size\": 8, \"ratio\": 1.0}'), ('b.txt', 'new', '{}')",
+]
+tables = ["items"]
+
+[clouddrive]
+directories = ["/115/in", "/115/out"]
+files = [
+    { path = "/115/in/a.txt", size = 8, hashes = { "2" = "0123456789abcdef0123456789abcdef01234567" } },
+    { path = "/115/in/b.txt", size = 3 },
+]

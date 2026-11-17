@@ -1,0 +1,1140 @@
+{
+  "calls": [
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "ListOfflineFilesByPath",
+      "request": {
+        "path": "/115/task/inbox"
+      },
+      "response": {
+        "offlineFiles": [
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "1111111111111111111111111111111111111111",
+            "name": "RPA-301",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 100.0,
+            "size": "9",
+            "status": "OFFLINE_FINISHED",
+            "url": "magnet:?xt=urn:btih:1111111111111111111111111111111111111111&dn=RPA-301"
+          },
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "2222222222222222222222222222222222222222",
+            "name": "RPB-302",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 100.0,
+            "size": "1",
+            "status": "OFFLINE_FINISHED",
+            "url": "magnet:?xt=urn:btih:2222222222222222222222222222222222222222&dn=RPB-302"
+          },
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "3333333333333333333333333333333333333333",
+            "name": "RPC-303",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 100.0,
+            "size": "8",
+            "status": "OFFLINE_FINISHED",
+            "url": "magnet:?xt=urn:btih:3333333333333333333333333333333333333333&dn=RPC-303"
+          }
+        ]
+      },
+      "seq": 1
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/RPA-301",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/RPA-301",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "RPA-301",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/RPB-302",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/RPB-302",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "RPB-302",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/RPC-303",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/RPC-303",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "RPC-303",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 2
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox/RPA-301"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/RPA-301/RPA-301.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/RPA-301/RPA-301.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "RPA-301.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "9",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 3
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/library/sorted/RPA"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/library/sorted/RPA/RPA-301.mp4",
+              "hasDetailProperties": false,
+              "id": "/library/sorted/RPA/RPA-301.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "RPA-301.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "4",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 4
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "DeleteFiles",
+      "request": {
+        "path": [
+          "/library/sorted/RPA/RPA-301.mp4"
+        ]
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 5
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/library/sorted/RPA"
+      },
+      "response": [
+        {
+          "subFiles": []
+        }
+      ],
+      "seq": 6
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/RPA-301",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/RPA-301",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "RPA-301",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/RPB-302",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/RPB-302",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "RPB-302",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/RPC-303",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/RPC-303",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "RPC-303",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 7
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox/RPB-302"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/RPB-302/info.nfo",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/RPB-302/info.nfo",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "info.nfo",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 8
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "RemoveOfflineFiles",
+      "request": {
+        "cloudAccountId": "",
+        "cloudName": "",
+        "deleteFiles": true,
+        "infoHashes": [
+          "2222222222222222222222222222222222222222"
+        ],
+        "path": "/115/task/inbox"
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 9
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/RPA-301",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/RPA-301",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "RPA-301",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/RPC-303",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/RPC-303",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "RPC-303",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 10
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox/RPC-303"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/RPC-303/XYZ-888.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/RPC-303/XYZ-888.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "XYZ-888.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "8",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 11
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "ListOfflineFilesByPath",
+      "request": {
+        "path": "/115/task/inbox"
+      },
+      "response": {
+        "offlineFiles": [
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "1111111111111111111111111111111111111111",
+            "name": "RPA-301",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 100.0,
+            "size": "9",
+            "status": "OFFLINE_FINISHED",
+            "url": "magnet:?xt=urn:btih:1111111111111111111111111111111111111111&dn=RPA-301"
+          },
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "3333333333333333333333333333333333333333",
+            "name": "RPC-303",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 100.0,
+            "size": "8",
+            "status": "OFFLINE_FINISHED",
+            "url": "magnet:?xt=urn:btih:3333333333333333333333333333333333333333&dn=RPC-303"
+          }
+        ]
+      },
+      "seq": 12
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/RPA-301",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/RPA-301",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "RPA-301",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/RPC-303",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/RPC-303",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "RPC-303",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 13
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox/RPA-301"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/RPA-301/RPA-301.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/RPA-301/RPA-301.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "RPA-301.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "9",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 14
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{mount}/library/sorted/RPA"
+      },
+      "response": null,
+      "seq": 15
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{mount}/library/sorted/RPA/RPA-301.mp4",
+        "src": "{mount}/115/task/inbox/RPA-301/RPA-301.mp4"
+      },
+      "response": null,
+      "seq": 16
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{mount}/115/task/inbox/RPA-301"
+      },
+      "response": null,
+      "seq": 17
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "RemoveOfflineFiles",
+      "request": {
+        "cloudAccountId": "",
+        "cloudName": "",
+        "deleteFiles": false,
+        "infoHashes": [
+          "1111111111111111111111111111111111111111"
+        ],
+        "path": "/115/task/inbox"
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 18
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/",
+        "/115/task/inbox",
+        "/115/task/inbox/RPA-301",
+        "/115/task/inbox/RPC-303",
+        "/library",
+        "/library/sorted",
+        "/library/sorted/RPA",
+        "/library/sorted/RPB",
+        "/library/sorted/RPC"
+      ],
+      "files": [
+        {
+          "hashes": {},
+          "path": "/115/task/inbox/RPA-301/RPA-301.mp4",
+          "size": 9
+        },
+        {
+          "hashes": {},
+          "path": "/115/task/inbox/RPC-303/XYZ-888.mp4",
+          "size": 8
+        },
+        {
+          "hashes": {},
+          "path": "/library/sorted/RPB/RPB-302.mp4",
+          "size": 4
+        },
+        {
+          "hashes": {},
+          "path": "/library/sorted/RPC/RPC-303.mp4",
+          "size": 4
+        }
+      ],
+      "offline_tasks": [
+        {
+          "folder": "/115/task/inbox",
+          "info_hash": "3333333333333333333333333333333333333333",
+          "name": "RPC-303",
+          "progress": 100.0,
+          "size": 8,
+          "status": "OFFLINE_FINISHED",
+          "url": "magnet:?xt=urn:btih:3333333333333333333333333333333333333333&dn=RPC-303"
+        }
+      ],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "tracker.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "errors": [],
+          "log": [
+            "RPA-301: deleting the replaced copy /library/sorted/RPA/RPA-301.mp4",
+            "RPB-302 holds no video above 0MB",
+            "WARNING: RPB-302 finished with no usable video, trying the next magnet",
+            "WARNING: RPB-302: every magnet was tried",
+            "WARNING: expected RPC-303 but found XYZ-888 in RPC-303, skipping"
+          ],
+          "op": "poll",
+          "result": null,
+          "stats": {
+            "exhausted": 1,
+            "junk": 1,
+            "needs_attention": 1,
+            "offline_tasks": 3,
+            "replaced_copies_deleted": 1,
+            "tasks_removed": 1
+          }
+        },
+        {
+          "op": "remove"
+        },
+        {
+          "errors": [],
+          "log": [
+            "moving RPA-301.mp4 to sorted/RPA/RPA-301.mp4"
+          ],
+          "op": "poll",
+          "result": null,
+          "stats": {
+            "archived": 1,
+            "archived_tasks_cleared": 1,
+            "folders_discarded": 1,
+            "offline_tasks": 2,
+            "videos_archived": 1
+          }
+        }
+      ]
+    }
+  },
+  "rows": {
+    "app_config": [],
+    "archive_acquisitions": [
+      {
+        "archived_paths_json": "[\"sorted/RPA/RPA-301.mp4\"]",
+        "avid": "RPA-301",
+        "created_at": "2026-09-09T00:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "manual",
+        "state": "archived",
+        "task_dir_path": "/115/task/inbox",
+        "updated_at": "2026-09-10T03:01:00+00:00"
+      },
+      {
+        "archived_paths_json": "[\"sorted/RPB/RPB-302.mp4\"]",
+        "avid": "RPB-302",
+        "created_at": "2026-09-09T00:00:00+00:00",
+        "next_action_at": "2026-09-11T03:00:00+00:00",
+        "note": "every magnet was tried",
+        "release_date": null,
+        "replace_after_attempt": 1,
+        "replace_paths_json": "[\"sorted/RPB/RPB-302.mp4\"]",
+        "source": "manual",
+        "state": "exhausted",
+        "task_dir_path": "/115/task/inbox",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[\"sorted/RPC/RPC-303.mp4\"]",
+        "avid": "RPC-303",
+        "created_at": "2026-09-09T00:00:00+00:00",
+        "next_action_at": null,
+        "note": "expected RPC-303 but found XYZ-888",
+        "release_date": null,
+        "replace_after_attempt": 1,
+        "replace_paths_json": "[\"sorted/RPC/RPC-303.mp4\"]",
+        "source": "manual",
+        "state": "needs_attention",
+        "task_dir_path": "/115/task/inbox",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      }
+    ],
+    "archive_magnet_attempts": [
+      {
+        "attempt_no": 1,
+        "avid": "RPA-301",
+        "error": null,
+        "info_hash": "0101010101010101010101010101010101010101",
+        "magnet": "magnet:?xt=urn:btih:0101010101010101010101010101010101010101&dn=RPA-301",
+        "magnet_source": "sukebei",
+        "progress": 100,
+        "size_hint": null,
+        "state": "archived",
+        "submitted_at": "2026-08-01T00:00:00+00:00",
+        "updated_at": "2026-08-01T00:00:00+00:00"
+      },
+      {
+        "attempt_no": 2,
+        "avid": "RPA-301",
+        "error": null,
+        "info_hash": "1111111111111111111111111111111111111111",
+        "magnet": "magnet:?xt=urn:btih:1111111111111111111111111111111111111111&dn=RPA-301",
+        "magnet_source": "sukebei",
+        "progress": 80,
+        "size_hint": null,
+        "state": "archived",
+        "submitted_at": "2026-09-09T00:00:00+00:00",
+        "updated_at": "2026-09-10T03:01:00+00:00"
+      },
+      {
+        "attempt_no": 1,
+        "avid": "RPB-302",
+        "error": null,
+        "info_hash": "0202020202020202020202020202020202020202",
+        "magnet": "magnet:?xt=urn:btih:0202020202020202020202020202020202020202&dn=RPB-302",
+        "magnet_source": "sukebei",
+        "progress": 100,
+        "size_hint": null,
+        "state": "archived",
+        "submitted_at": "2026-08-01T00:00:00+00:00",
+        "updated_at": "2026-08-01T00:00:00+00:00"
+      },
+      {
+        "attempt_no": 2,
+        "avid": "RPB-302",
+        "error": null,
+        "info_hash": "2222222222222222222222222222222222222222",
+        "magnet": "magnet:?xt=urn:btih:2222222222222222222222222222222222222222&dn=RPB-302",
+        "magnet_source": "sukebei",
+        "progress": 80,
+        "size_hint": null,
+        "state": "junk",
+        "submitted_at": "2026-09-09T00:00:00+00:00",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      },
+      {
+        "attempt_no": 1,
+        "avid": "RPC-303",
+        "error": null,
+        "info_hash": "0303030303030303030303030303030303030303",
+        "magnet": "magnet:?xt=urn:btih:0303030303030303030303030303030303030303&dn=RPC-303",
+        "magnet_source": "sukebei",
+        "progress": 100,
+        "size_hint": null,
+        "state": "archived",
+        "submitted_at": "2026-08-01T00:00:00+00:00",
+        "updated_at": "2026-08-01T00:00:00+00:00"
+      },
+      {
+        "attempt_no": 2,
+        "avid": "RPC-303",
+        "error": null,
+        "info_hash": "3333333333333333333333333333333333333333",
+        "magnet": "magnet:?xt=urn:btih:3333333333333333333333333333333333333333&dn=RPC-303",
+        "magnet_source": "sukebei",
+        "progress": 80,
+        "size_hint": null,
+        "state": "finished",
+        "submitted_at": "2026-09-09T00:00:00+00:00",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      }
+    ],
+    "feed_subscriptions": [],
+    "fill_actor_apply_jobs": [],
+    "fill_actor_candidates": [],
+    "fill_actor_cloud_move_operations": [],
+    "fill_actor_jobs": [],
+    "fill_actor_move_journal": [],
+    "fill_actor_move_results": [],
+    "fill_actor_plans": [],
+    "health_probe": [],
+    "merge_tasks": [],
+    "merge_transcode_chunks": [],
+    "merge_transcode_parts": [],
+    "pipeline_runs": [],
+    "playlist_source": [],
+    "playlists": []
+  },
+  "scenario": "replace/filing",
+  "tree": {
+    "mount": [
+      {
+        "kind": "dir",
+        "path": "115"
+      },
+      {
+        "kind": "dir",
+        "path": "115/task"
+      },
+      {
+        "kind": "dir",
+        "path": "115/task/inbox"
+      },
+      {
+        "kind": "dir",
+        "path": "115/task/inbox/RPB-302"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "115/task/inbox/RPB-302/info.nfo",
+        "sha256": "2d711642b726b044",
+        "size": 1
+      },
+      {
+        "kind": "dir",
+        "path": "115/task/inbox/RPC-303"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "115/task/inbox/RPC-303/XYZ-888.mp4",
+        "sha256": "4cf0c1012276f46a",
+        "size": 8
+      },
+      {
+        "kind": "dir",
+        "path": "library"
+      },
+      {
+        "kind": "dir",
+        "path": "library/sorted"
+      },
+      {
+        "kind": "dir",
+        "path": "library/sorted/RPA"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "library/sorted/RPA/RPA-301.mp4",
+        "sha256": "a73add1aecea03a8",
+        "size": 9
+      },
+      {
+        "kind": "dir",
+        "path": "library/sorted/RPB"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "library/sorted/RPB/RPB-302.mp4",
+        "sha256": "2481a63c85a62cf8",
+        "size": 4
+      },
+      {
+        "kind": "dir",
+        "path": "library/sorted/RPC"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "library/sorted/RPC/RPC-303.mp4",
+        "sha256": "2481a63c85a62cf8",
+        "size": 4
+      }
+    ]
+  }
+}

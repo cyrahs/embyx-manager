@@ -1,0 +1,361 @@
+{
+  "calls": [
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/AAA"
+      },
+      "response": null,
+      "seq": 1
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/AAA/AAA-701.mp4",
+        "src": "{task}/intake/AAA-701/AAA-701.mp4"
+      },
+      "response": null,
+      "seq": 2
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/AAA-701"
+      },
+      "response": null,
+      "seq": 3
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/BBB"
+      },
+      "response": null,
+      "seq": 4
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/BBB/BBB-702.mp4",
+        "src": "{task}/intake/BBB-702/BBB-702.mp4"
+      },
+      "response": null,
+      "seq": 5
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/BBB-702"
+      },
+      "response": null,
+      "seq": 6
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/CCC"
+      },
+      "response": null,
+      "seq": 7
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/CCC/CCC-703.mp4",
+        "src": "{task}/intake/CCC-703/CCC-703.mp4"
+      },
+      "response": null,
+      "seq": 8
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/CCC-703"
+      },
+      "response": null,
+      "seq": 9
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/DDD"
+      },
+      "response": null,
+      "seq": 10
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/DDD/DDD-704.mp4",
+        "src": "{task}/intake/DDD-704/DDD-704.mp4"
+      },
+      "response": null,
+      "seq": 11
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/DDD-704"
+      },
+      "response": null,
+      "seq": 12
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "reconcile.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "error": {
+            "message": "[Errno 5] Input/output error: '{task}/intake/CCC-703/CCC-703.mp4'",
+            "type": "OSError"
+          },
+          "errors": [],
+          "log": [
+            "AAA-701 is still changing, leaving it for the next pass",
+            "BBB-702 is still changing, leaving it for the next pass"
+          ],
+          "op": "run",
+          "stats": {}
+        },
+        {
+          "error": {
+            "message": "",
+            "type": "RunCancelledError"
+          },
+          "errors": [],
+          "log": [
+            "moving AAA-701.mp4 to sorted/AAA/AAA-701.mp4"
+          ],
+          "op": "run",
+          "stats": {
+            "folders_discarded": 1,
+            "reconciled": 1,
+            "videos_archived": 1
+          }
+        },
+        {
+          "error": {
+            "message": "[Errno 5] Input/output error: '{task}/intake/CCC-703/CCC-703.mp4'",
+            "type": "OSError"
+          },
+          "errors": [],
+          "log": [
+            "moving BBB-702.mp4 to sorted/BBB/BBB-702.mp4"
+          ],
+          "op": "run",
+          "stats": {
+            "folders_discarded": 1,
+            "reconciled": 1,
+            "videos_archived": 1
+          }
+        },
+        {
+          "errors": [],
+          "log": [
+            "CCC-703 is still changing, leaving it for the next pass",
+            "DDD-704 is still changing, leaving it for the next pass"
+          ],
+          "op": "run",
+          "result": null,
+          "stats": {}
+        },
+        {
+          "error": {
+            "message": "acquisition: ignored -> archived is not a legal transition",
+            "type": "IllegalTransitionError"
+          },
+          "errors": [],
+          "log": [
+            "moving CCC-703.mp4 to sorted/CCC/CCC-703.mp4",
+            "moving DDD-704.mp4 to sorted/DDD/DDD-704.mp4"
+          ],
+          "op": "run",
+          "stats": {
+            "folders_discarded": 2,
+            "reconciled": 1,
+            "videos_archived": 2
+          }
+        }
+      ]
+    }
+  },
+  "rows": {
+    "app_config": [],
+    "archive_acquisitions": [
+      {
+        "archived_paths_json": "[\"sorted/AAA/AAA-701.mp4\"]",
+        "avid": "AAA-701",
+        "created_at": "2026-09-05T03:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "reconcile",
+        "state": "archived",
+        "task_dir_path": null,
+        "updated_at": "2026-09-05T03:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[\"sorted/BBB/BBB-702.mp4\"]",
+        "avid": "BBB-702",
+        "created_at": "2026-09-05T03:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "reconcile",
+        "state": "archived",
+        "task_dir_path": null,
+        "updated_at": "2026-09-05T03:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[\"sorted/CCC/CCC-703.mp4\"]",
+        "avid": "CCC-703",
+        "created_at": "2026-09-05T03:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "reconcile",
+        "state": "archived",
+        "task_dir_path": null,
+        "updated_at": "2026-09-05T03:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "DDD-704",
+        "created_at": "2026-09-01T00:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "manual",
+        "state": "ignored",
+        "task_dir_path": null,
+        "updated_at": "2026-09-01T00:00:00+00:00"
+      }
+    ],
+    "archive_magnet_attempts": [],
+    "feed_subscriptions": [],
+    "fill_actor_apply_jobs": [],
+    "fill_actor_candidates": [],
+    "fill_actor_cloud_move_operations": [],
+    "fill_actor_jobs": [],
+    "fill_actor_move_journal": [],
+    "fill_actor_move_results": [],
+    "fill_actor_plans": [],
+    "health_probe": [],
+    "merge_tasks": [],
+    "merge_transcode_chunks": [],
+    "merge_transcode_parts": [],
+    "pipeline_runs": [],
+    "playlist_source": [],
+    "playlists": []
+  },
+  "scenario": "reconcile/failures",
+  "tree": {
+    "library": [
+      {
+        "kind": "dir",
+        "path": "sorted"
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/AAA"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/AAA/AAA-701.mp4",
+        "sha256": "2d711642b726b044",
+        "size": 1
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/BBB"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/BBB/BBB-702.mp4",
+        "sha256": "5dde896887f6754c",
+        "size": 2
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/CCC"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/CCC/CCC-703.mp4",
+        "sha256": "cd2eb0837c9b4c96",
+        "size": 3
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/DDD"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/DDD/DDD-704.mp4",
+        "sha256": "2481a63c85a62cf8",
+        "size": 4
+      }
+    ],
+    "task": [
+      {
+        "kind": "dir",
+        "path": "intake"
+      }
+    ]
+  }
+}

@@ -1,0 +1,330 @@
+# The upload and its check going wrong (cross-version contract 4: the back-off of 5 min,
+# 15 min, 1 h and 3 h). The merged file is lost mid-upload and merged again; the copy fails
+# five times and the task fails; retried, 115 refuses the file for good; retried again, a
+# passing fatal error is restarted, a paused copy says so, a copy CloudDrive forgot is issued
+# again after the grace; the check then finds no file, the wrong size, no SHA-1 and the wrong
+# SHA-1, each retried, and the task is cancelled from verifying.
+# Its `restart` steps split it for the resume matrix (`crates/embyx-merge/tests/service_scenarios.rs`):
+# a new process each, and in the matrix the other build.
+description = "merge service: upload back-off, fatal uploads and failed checks, each retried"
+operation = "merge.service"
+clock = "2026-11-14T08:00:00+00:00"
+
+[roots]
+names = ["work", "mapping", "secrets"]
+
+[database]
+schema = "app"
+
+[args]
+
+[args.archive]
+src_dir = "/mnt/cd2/115/embyx_in"
+dst_dir = "/mnt/cd2/115/embyx"
+priority_mapping = { vr = "type/vr" }
+
+[[args.steps]]
+op = "create"
+args = { avid = "SQTEVR-009", source = "vr", library_dir = "type/vr", brand = "SQTEVR", merged_name = "SQTEVR-009.mp4", parts = ["/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4", "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4", "/mnt/cd2/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd3.mp4"] }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "write"
+args = { path = "work/SQTEVR-009.mp4", text = "merged-file-of-sqtevr-009" }
+
+[[args.steps]]
+op = "write"
+args = { path = "work/.merge/1.json", json = { state = "done", size = 25, sha1 = "4a5e2bb31de0d4c9c3c1a5a4b8a5a6c7d8e9f0a1" } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "tick"
+
+# The merged file is lost while it uploads: merged again.
+[[args.steps]]
+op = "remove"
+args = { path = "work/SQTEVR-009.mp4" }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "write"
+args = { path = "work/SQTEVR-009.mp4", text = "merged-file-of-sqtevr-009" }
+
+[[args.steps]]
+op = "write"
+args = { path = "work/.merge/1.json", json = { state = "done", size = 25, sha1 = "4a5e2bb31de0d4c9c3c1a5a4b8a5a6c7d8e9f0a1" } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "tick"
+
+# The copy fails, again and again: restarted at once, then after 5 min, 15 min, 1 h and 3 h.
+[[args.steps]]
+op = "cloud"
+args = { edit = "update_copy_tasks", args = { dest_path = "/115/upload/merge-1", fields = { status = "Failed", errors = ["net::ERR_CONNECTION_RESET"] } } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "cloud"
+args = { edit = "update_copy_tasks", args = { dest_path = "/115/upload/merge-1", fields = { status = "Failed", errors = ["net::ERR_CONNECTION_RESET"] } } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "advance"
+args = { seconds = 120 }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "advance"
+args = { seconds = 300 }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "cloud"
+args = { edit = "update_copy_tasks", args = { dest_path = "/115/upload/merge-1", fields = { status = "Failed", errors = ["net::ERR_CONNECTION_RESET"] } } }
+
+[[args.steps]]
+op = "advance"
+args = { seconds = 120 }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "advance"
+args = { seconds = 900 }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "cloud"
+args = { edit = "update_copy_tasks", args = { dest_path = "/115/upload/merge-1", fields = { status = "Failed", errors = ["net::ERR_CONNECTION_RESET"] } } }
+
+[[args.steps]]
+op = "advance"
+args = { seconds = 120 }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "advance"
+args = { seconds = 3600 }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "cloud"
+args = { edit = "update_copy_tasks", args = { dest_path = "/115/upload/merge-1", fields = { status = "Failed", errors = ["net::ERR_CONNECTION_RESET"] } } }
+
+[[args.steps]]
+op = "advance"
+args = { seconds = 120 }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "advance"
+args = { seconds = 10800 }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "cloud"
+args = { edit = "update_copy_tasks", args = { dest_path = "/115/upload/merge-1", fields = { status = "Failed", errors = ["net::ERR_CONNECTION_RESET"] } } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "retry"
+args = { id = 1 }
+
+# CloudDrive gives up on the file for good: 115 refuses its size.
+[[args.steps]]
+op = "cloud"
+args = { edit = "update_copy_tasks", args = { dest_path = "/115/upload/merge-1", fields = { status = "Scanned", errors = [] } } }
+
+[[args.steps]]
+op = "cloud"
+args = { edit = "set_uploads", args = { uploads = [{ dest_path = "/115/upload/merge-1/SQTEVR-009.mp4", size = 25, transferred = 3, status = "FatalError", error = "code: 10025 单文件不能大于115GB" }] } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "retry"
+args = { id = 1 }
+
+# A fatal upload that is not for good is restarted.
+[[args.steps]]
+op = "cloud"
+args = { edit = "set_uploads", args = { uploads = [{ dest_path = "/115/upload/merge-1/SQTEVR-009.mp4", size = 25, transferred = 7, status = "FatalError", error = "connection timed out" }] } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "cloud"
+args = { edit = "set_uploads", args = { uploads = [{ dest_path = "/115/upload/merge-1/SQTEVR-009.mp4", size = 25, transferred = 9, status = "Transfer" }] } }
+
+[[args.steps]]
+op = "advance"
+args = { seconds = 120 }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "cloud"
+args = { edit = "update_copy_tasks", args = { dest_path = "/115/upload/merge-1", fields = { paused = true } } }
+
+[[args.steps]]
+op = "tick"
+
+# CloudDrive drops the copy from its list: copied again after the grace.
+[[args.steps]]
+op = "cloud"
+args = { edit = "drop_copy_tasks", args = { dest_path = "/115/upload/merge-1" } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "advance"
+args = { seconds = 120 }
+
+[[args.steps]]
+op = "tick"
+
+# Verified: the file is missing, then the wrong size, then without a SHA-1, then the wrong one.
+[[args.steps]]
+op = "cloud"
+args = { edit = "update_copy_tasks", args = { dest_path = "/115/upload/merge-1", fields = { status = "Completed", uploaded_bytes = 25, total_bytes = 25, paused = false } } }
+
+[[args.steps]]
+op = "cloud"
+args = { edit = "set_uploads", args = { uploads = [] } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "advance"
+args = { seconds = 600 }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "retry"
+args = { id = 1 }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "cloud"
+args = { edit = "add_file", args = { path = "/115/upload/merge-1/SQTEVR-009.mp4", size = 24 } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "retry"
+args = { id = 1 }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "cloud"
+args = { edit = "add_file", args = { path = "/115/upload/merge-1/SQTEVR-009.mp4", size = 25 } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "advance"
+args = { seconds = 1800 }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "retry"
+args = { id = 1 }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "cloud"
+args = { edit = "add_file", args = { path = "/115/upload/merge-1/SQTEVR-009.mp4", size = 25, hashes = { "2" = "0000000000000000000000000000000000000000" } } }
+
+[[args.steps]]
+op = "tick"
+
+[[args.steps]]
+op = "cancel"
+args = { id = 1 }
+
+[kubernetes]
+jobs = {}
+
+[[kubernetes.routes]]
+method = "GET"
+path = "/api/v1/namespaces/media/pods/embyx-manager-0"
+body = { spec = { containers = [{ image = "ghcr.io/cyrahs/embyx-manager:latest" }] }, status = { containerStatuses = [{ imageID = "ghcr.io/cyrahs/embyx-manager@sha256:abc123" }] } }
+
+[clouddrive]
+directories = ["/115/upload", "/115/embyx_in"]
+files = [
+    { path = "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd1.mp4", size = 10 },
+    { path = "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd2.mp4", size = 10 },
+    { path = "/115/embyx/type/vr/SQTEVR/SQTEVR-009-cd3.mp4", size = 5 },
+]

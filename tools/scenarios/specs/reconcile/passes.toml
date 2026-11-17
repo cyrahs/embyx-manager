@@ -1,0 +1,111 @@
+# The reconcile scan over four passes (WP6): a folder is filed only once it looked the same
+# twice, a growing one waits a pass longer; an AVID the tracker owns is left alone; a leftover
+# of an archived AVID is filed without touching its row; a folder with two AVIDs and one with
+# none are reported once each, by folder; a folder whose AVID the library already holds is
+# parked as needs_attention once (and not again for a row already parked); a junk folder stays;
+# a nested route and a priority route are scanned as routes of their own; a missing route
+# source is skipped. The rows pin what the ledger records.
+description = "reconcile: settle, file, park and report across passes"
+operation = "reconcile.steps"
+clock = "2026-09-04T03:00:00+00:00"
+
+[roots]
+names = ["task", "library"]
+
+[args.config]
+src_dir = "task"
+dst_dir = "library"
+mapping = { intake = "sorted", "intake/rank" = "sorted/rank", gone = "elsewhere" }
+priority_mapping = { vip = "starred" }
+min_size_mb = 0
+
+[[args.steps]]
+op = "run"
+
+[[args.steps]]
+op = "write"
+args = { path = "task/intake/ABC-603 growing/ABC-603.mp4", size = 99 }
+
+[[args.steps]]
+op = "run"
+args = { advance_seconds = 3600 }
+
+[[args.steps]]
+op = "run"
+args = { advance_seconds = 3600 }
+
+[[args.steps]]
+op = "run"
+args = { advance_seconds = 3600 }
+
+[[tree]]
+path = "task/intake/ABC-600 release/ABC-600.mp4"
+size = 10
+
+[[tree]]
+path = "task/intake/ABC-600 release/ABC-600.nfo"
+size = 1
+
+[[tree]]
+path = "task/intake/ABC-601 dl/ABC-601.mp4"
+size = 11
+
+[[tree]]
+path = "task/intake/ABC-602 leftover/ABC-602.mp4"
+size = 12
+
+[[tree]]
+path = "task/intake/ABC-603 growing/ABC-603.mp4"
+size = 13
+
+[[tree]]
+path = "task/intake/mixed/ABC-604.mp4"
+size = 14
+
+[[tree]]
+path = "task/intake/mixed/DEF-605.mp4"
+size = 15
+
+[[tree]]
+path = "library/sorted/ABC/ABC-606.mp4"
+size = 16
+
+[[tree]]
+path = "task/intake/ABC-606 again/ABC-606.mp4"
+size = 17
+
+[[tree]]
+path = "library/sorted/ABC/ABC-607.mp4"
+size = 18
+
+[[tree]]
+path = "task/intake/ABC-607 again/ABC-607.mp4"
+size = 19
+
+[[tree]]
+path = "task/intake/junk/readme.txt"
+text = "no video here"
+
+[[tree]]
+path = "task/intake/whatever/movie.mp4"
+size = 20
+
+[[tree]]
+path = "task/intake/rank/DEF-608 release/DEF-608.mp4"
+size = 21
+
+[[tree]]
+path = "task/vip/ABC-609/ABC-609.mp4"
+size = 22
+
+[[tree]]
+path = "task/intake/loose-ABC-610.mp4"
+size = 23
+
+[database]
+schema = "app"
+sql = [
+    "INSERT INTO archive_acquisitions (avid, state, source, created_at, updated_at) VALUES ('ABC-601', 'downloading', 'rss:Actor', '2026-09-01T00:00:00Z', '2026-09-01T00:00:00Z')",
+    "INSERT INTO archive_acquisitions (avid, state, source, archived_paths_json, created_at, updated_at) VALUES ('ABC-602', 'archived', 'rss:Actor', '[\"sorted/ABC/ABC-602.mp4\"]', '2026-09-01T00:00:00Z', '2026-09-02T00:00:00Z')",
+    "INSERT INTO archive_acquisitions (avid, state, source, note, created_at, updated_at) VALUES ('ABC-607', 'needs_attention', 'manual', 'parked earlier', '2026-09-01T00:00:00Z', '2026-09-02T00:00:00Z')",
+]

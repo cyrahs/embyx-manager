@@ -1,0 +1,84 @@
+# Cancelled while a move runs (WP11): an apply cancelled right after the rename, a reconcile
+# cancelled right after it unlinked the quarantine name a crash left, an apply on the hard-link
+# path cancelled right after the link. The move a cancelled call started still ends, journal and
+# result included; the next call returns what it stored.
+description = "fill_actor: apply and reconcile cancelled between two steps"
+operation = "fill_actor.service"
+clock = "2026-09-13T03:00:00+00:00"
+
+[roots]
+names = ["actor", "additional", "movein"]
+
+[args]
+catalog = { actor = ["ABC-301", "ABC-302", "ABC-303"] }
+
+[[args.faults]]
+op = "rename_noreplace"
+path = "additional/ABC/ABC-302.mp4"
+errno = 22
+
+[[args.faults]]
+op = "rename_noreplace"
+path = "additional/ABC/ABC-303.mp4"
+errno = 22
+
+[[args.steps]]
+op = "scan"
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-301.mp4"], cancel_after = { fs = "rename_noreplace" }, advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-301.mp4"] }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-302.mp4"], crash = { fs = "unlink" }, advance_seconds = 60 }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { cancel_after = { fs = "unlink" }, advance_seconds = 60 }
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-302.mp4"] }
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-303.mp4"], cancel_after = { fs = "link" }, advance_seconds = 60 }
+
+[[args.steps]]
+op = "reconcile"
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-303.mp4"] }
+
+[[tree]]
+path = "additional/ABC/ABC-301.mp4"
+size = 2
+
+[[tree]]
+path = "additional/ABC/ABC-302.mp4"
+size = 3
+
+[[tree]]
+path = "additional/ABC/ABC-303.mp4"
+size = 4
+
+[database]
+schema = "app"
+tables = [
+    "fill_actor_plans",
+    "fill_actor_move_results",
+    "fill_actor_move_journal",
+]

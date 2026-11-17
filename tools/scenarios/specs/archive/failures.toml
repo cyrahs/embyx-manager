@@ -1,0 +1,147 @@
+# Partial failures (WP6): the second of three parts cannot be renamed (the first is already
+# in the library, the folder stays, the outcome is failed with the error's text); the folder
+# cannot be removed after filing; a duplicate copy cannot be deleted; the brand directory
+# cannot be created; a video's stat fails with EIO (inspection fails); one folder's walk fails
+# during run() and the next folder still gets its turn; a loose group's rename fails inside
+# run() and is contained; a route root that cannot be listed ends run() with the error.
+description = "archive: failures contained per folder, and the ones that end a run"
+operation = "archive.steps"
+
+[roots]
+names = ["task", "library"]
+
+[args.config]
+src_dir = "task"
+dst_dir = "library"
+mapping = { intake = "sorted", broken = "other" }
+min_size_mb = 0
+
+[[args.faults]]
+op = "rename"
+path = "task/intake/three/ABC-402-2.mp4"
+errno = 13
+
+[[args.faults]]
+op = "rmtree"
+path = "task/intake/stuck"
+errno = 16
+
+[[args.faults]]
+op = "unlink"
+path = "task/intake/copies/ABC-404 (1).mp4"
+errno = 30
+
+[[args.faults]]
+op = "mkdir"
+path = "library/sorted/NEW"
+errno = 28
+
+[[args.faults]]
+op = "stat"
+path = "task/intake/eio/ABC-406.mp4"
+errno = 5
+
+[[args.faults]]
+op = "rglob"
+path = "task/broken/aaa-bad"
+message = "mount went away"
+
+[[args.faults]]
+op = "rename"
+path = "task/broken/GHI-409.mp4"
+errno = 107
+
+[[args.faults]]
+op = "iterdir"
+path = "task/listless"
+errno = 107
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/three", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/stuck", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/copies", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/new-brand", dst = "sorted" }
+
+[[args.steps]]
+op = "archive_folder"
+args = { folder = "task/intake/eio", dst = "sorted" }
+
+[[args.steps]]
+op = "configure"
+args = { config = { src_dir = "task", dst_dir = "library", mapping = { broken = "other" }, min_size_mb = 0 } }
+
+[[args.steps]]
+op = "run"
+
+[[args.steps]]
+op = "configure"
+args = { config = { src_dir = "task", dst_dir = "library", mapping = { listless = "other", broken = "other" }, min_size_mb = 0 } }
+
+[[args.steps]]
+op = "run"
+
+[[tree]]
+path = "task/listless"
+kind = "dir"
+
+[[tree]]
+path = "task/intake/three/ABC-402-1.mp4"
+size = 1
+
+[[tree]]
+path = "task/intake/three/ABC-402-2.mp4"
+size = 2
+
+[[tree]]
+path = "task/intake/three/ABC-402-3.mp4"
+size = 3
+
+[[tree]]
+path = "task/intake/stuck/ABC-403.mp4"
+size = 4
+
+[[tree]]
+path = "task/intake/stuck/ABC-403.nfo"
+size = 1
+
+[[tree]]
+path = "task/intake/copies/ABC-404.mp4"
+size = 5
+
+[[tree]]
+path = "task/intake/copies/ABC-404 (1).mp4"
+size = 5
+
+[[tree]]
+path = "task/intake/new-brand/NEW-405.mp4"
+size = 6
+
+[[tree]]
+path = "task/intake/eio/ABC-406.mp4"
+size = 7
+
+[[tree]]
+path = "task/broken/aaa-bad/DEF-407.mp4"
+size = 8
+
+[[tree]]
+path = "task/broken/zzz-good/DEF-408.mp4"
+size = 9
+
+[[tree]]
+path = "task/broken/GHI-409.mp4"
+size = 10
+
+[[tree]]
+path = "task/broken/GHI-410.mp4"
+size = 11

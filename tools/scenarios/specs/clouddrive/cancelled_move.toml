@@ -1,0 +1,10 @@
+# Contract 6: a move whose caller is cancelled while the RPC is on its way still reaches
+# CloudDrive and runs to its answer; the transcript shows the MoveFile with its response and
+# the file in its new folder.
+description = "clouddrive: a cancelled caller does not abandon a move already sent"
+operation = "clouddrive.cancelled_move"
+args = { source = "/115/in/ABC-001.mp4", destination = "/115/out" }
+
+[clouddrive]
+directories = ["/115/in", "/115/out"]
+files = [{ path = "/115/in/ABC-001.mp4", size = 1 }]

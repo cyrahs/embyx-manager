@@ -1,0 +1,234 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "merge_detect",
+  "cases": [
+    {
+      "archive": {
+        "src_dir": "/mnt/cd2/115/embyx_in",
+        "dst_dir": "/mnt/cd2/115/embyx",
+        "mapping": {
+          "hh": "type/hh",
+          "rank": "rank",
+          "rest": "rest",
+          "special": "type/special",
+          "hh2": "type/hh2"
+        },
+        "priority_mapping": {
+          "vr": "type/vr",
+          "clt": "actor/clt",
+          "deep/er": "deep"
+        }
+      },
+      "route_sources": [
+        "vr",
+        "clt",
+        "deep/er",
+        "hh",
+        "rank",
+        "rest",
+        "special",
+        "hh2"
+      ],
+      "library_dirs": [
+        [
+          null,
+          null
+        ],
+        [
+          "",
+          null
+        ],
+        [
+          "type/vr",
+          "vr"
+        ],
+        [
+          "actor/clt",
+          "clt"
+        ],
+        [
+          "rank",
+          "rank"
+        ],
+        [
+          "type/hh",
+          "hh"
+        ],
+        [
+          "type/hh2",
+          "hh2"
+        ],
+        [
+          "abs",
+          null
+        ],
+        [
+          "type/unknown",
+          null
+        ],
+        [
+          "deep",
+          "deep/er"
+        ]
+      ],
+      "task_dirs": [
+        [
+          null,
+          null,
+          null
+        ],
+        [
+          "",
+          null,
+          null
+        ],
+        [
+          "/",
+          null,
+          null
+        ],
+        [
+          "/115/embyx_in/clt",
+          "clt",
+          null
+        ],
+        [
+          "/115/embyx_in/vr/",
+          "vr",
+          null
+        ],
+        [
+          "embyx_in/hh",
+          "hh",
+          null
+        ],
+        [
+          "/hh",
+          "hh",
+          null
+        ],
+        [
+          "hh",
+          null,
+          null
+        ],
+        [
+          "/115/other",
+          null,
+          null
+        ],
+        [
+          "/abs",
+          null,
+          null
+        ],
+        [
+          "/x/abs",
+          null,
+          null
+        ],
+        [
+          "/mnt/cd2/115/embyx_in/deep/er",
+          "deep/er",
+          null
+        ],
+        [
+          "/deep/er",
+          "deep/er",
+          null
+        ],
+        [
+          "//115/embyx_in/rank",
+          "rank",
+          null
+        ],
+        [
+          "/a/b/c/d/e/f/embyx_in/rest",
+          null,
+          null
+        ]
+      ],
+      "is_whole_copy": [
+        [
+          "VRKM-1429",
+          "VRKM-01429",
+          true
+        ],
+        [
+          "VRKM-1429-cd1",
+          "VRKM-01429",
+          false
+        ],
+        [
+          " vrkm-1429 ",
+          "VRKM-01429",
+          true
+        ],
+        [
+          "VRKM-1429-CD12",
+          "VRKM-1429",
+          false
+        ],
+        [
+          "VRKM-14290",
+          "VRKM-1429",
+          false
+        ],
+        [
+          "FC2-PPV-123",
+          "FC2-PPV-0123",
+          false
+        ],
+        [
+          "ABC-001",
+          "abc-1",
+          true
+        ],
+        [
+          "",
+          "",
+          true
+        ],
+        [
+          "ABC-001-cd",
+          "ABC-001",
+          false
+        ]
+      ],
+      "whole_copies": [
+        [
+          "AVOPVR-117",
+          [
+            "AVOPVR-117-cd1.mp4",
+            "AVOPVR-117.mp4",
+            "AVOPVR-117.nfo",
+            "AVOPVR-1170.mp4",
+            "avopvr-0117.mkv"
+          ],
+          [
+            "AVOPVR-117.mp4",
+            "avopvr-0117.mkv"
+          ]
+        ],
+        [
+          "SAVR-01135",
+          [
+            "SAVR-1135.mp4",
+            "SAVR-1135-cd2.mp4",
+            "SAVR-1135.MP4",
+            "SAVR-1135.strm",
+            ".mp4",
+            "a/SAVR-1135.ts"
+          ],
+          [
+            "SAVR-1135.mp4",
+            "SAVR-1135.MP4",
+            "a/SAVR-1135.ts"
+          ]
+        ]
+      ]
+    }
+  ]
+}

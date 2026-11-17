@@ -1,0 +1,517 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "home_worker",
+  "cases": [
+    {
+      "kind": "defaults",
+      "environment": {
+        "APPDATA": "<appdata>",
+        "LOCALAPPDATA": "<localappdata>"
+      },
+      "config_path": "<root>/appdata/embyx-transcode/config.toml",
+      "cache_dir": "<root>/local/embyx-transcode"
+    },
+    {
+      "kind": "defaults",
+      "environment": {},
+      "config_path": "<root>/home/.config/embyx-transcode/config.toml",
+      "cache_dir": "<root>/home/.cache/embyx-transcode"
+    },
+    {
+      "kind": "defaults",
+      "environment": {
+        "APPDATA": "",
+        "LOCALAPPDATA": ""
+      },
+      "config_path": "<root>/home/.config/embyx-transcode/config.toml",
+      "cache_dir": "<root>/home/.cache/embyx-transcode"
+    },
+    {
+      "kind": "load",
+      "title": "file and flags",
+      "toml": "server = \"http://10.117.200.1:8080\"\nupload_mbps = 25\n[encoder]\ntune = \"hq\"\n",
+      "argv": [
+        "--jobs",
+        "3"
+      ],
+      "value": {
+        "server": "http://10.117.200.1:8080",
+        "token": "",
+        "cache_dir": "<root>/config0/local/embyx-transcode",
+        "upload_mbps": 25.0,
+        "jobs": 3,
+        "max_queue_gb": 8.0,
+        "ffmpeg": "ffmpeg",
+        "ffprobe": "ffprobe",
+        "name": "<host>",
+        "encoder": {
+          "tune": "hq"
+        }
+      }
+    },
+    {
+      "kind": "load",
+      "title": "flags only",
+      "toml": null,
+      "argv": [
+        "--server",
+        "http://10.117.200.1:8080/",
+        "--token",
+        "t0k"
+      ],
+      "value": {
+        "server": "http://10.117.200.1:8080",
+        "token": "t0k",
+        "cache_dir": "<root>/config1/local/embyx-transcode",
+        "upload_mbps": 30.0,
+        "jobs": 3,
+        "max_queue_gb": 8.0,
+        "ffmpeg": "ffmpeg",
+        "ffprobe": "ffprobe",
+        "name": "<host>",
+        "encoder": {}
+      }
+    },
+    {
+      "kind": "load",
+      "title": "no server anywhere",
+      "toml": null,
+      "argv": [],
+      "exit": "no server given: pass --server or set server in <root>/config2/appdata/embyx-transcode/config.toml"
+    },
+    {
+      "kind": "load",
+      "title": "an empty server",
+      "toml": "server = \"\"\n",
+      "argv": [],
+      "exit": "no server given: pass --server or set server in <root>/config3/appdata/embyx-transcode/config.toml"
+    },
+    {
+      "kind": "load",
+      "title": "a server that is not a string",
+      "toml": "server = 8080\njobs = 0\n",
+      "argv": [],
+      "value": {
+        "server": "8080",
+        "token": "",
+        "cache_dir": "<root>/config4/local/embyx-transcode",
+        "upload_mbps": 30.0,
+        "jobs": 1,
+        "max_queue_gb": 8.0,
+        "ffmpeg": "ffmpeg",
+        "ffprobe": "ffprobe",
+        "name": "<host>",
+        "encoder": {}
+      }
+    },
+    {
+      "kind": "load",
+      "title": "a missing file named on the command line",
+      "toml": null,
+      "argv": [
+        "--config",
+        "missing.toml"
+      ],
+      "exit": "config file not found: <root>/config5/missing.toml"
+    },
+    {
+      "kind": "load",
+      "title": "every key",
+      "toml": "server = \"http://h:1///\"\ntoken = \"abc\"\ncache_dir = \"D:/cache\"\nupload_mbps = \"12.5\"\njobs = 2.9\nmax_queue_gb = 4\nffmpeg = \"C:/ff/ffmpeg.exe\"\nffprobe = \"C:/ff/ffprobe.exe\"\nname = \"s7desk\"\n[encoder]\ncodec = \"libx264\"\nextra = [\"-preset\", \"fast\"]\nbit_depth = 8\n",
+      "argv": [],
+      "value": {
+        "server": "http://h:1",
+        "token": "abc",
+        "cache_dir": "D:/cache",
+        "upload_mbps": 12.5,
+        "jobs": 2,
+        "max_queue_gb": 4.0,
+        "ffmpeg": "C:/ff/ffmpeg.exe",
+        "ffprobe": "C:/ff/ffprobe.exe",
+        "name": "s7desk",
+        "encoder": {
+          "codec": "libx264",
+          "extra": [
+            "-preset",
+            "fast"
+          ],
+          "bit_depth": 8
+        }
+      }
+    },
+    {
+      "kind": "load",
+      "title": "flags win over the file",
+      "toml": "server = \"http://a\"\njobs = 5\nupload_mbps = 1\n",
+      "argv": [
+        "--server",
+        "http://b",
+        "--jobs",
+        "-2",
+        "--upload-mbps",
+        "0",
+        "--max-queue-gb",
+        "1.5",
+        "--ffmpeg",
+        "ff",
+        "--ffprobe",
+        "fp",
+        "--cache-dir",
+        "cache"
+      ],
+      "value": {
+        "server": "http://b",
+        "token": "",
+        "cache_dir": "cache",
+        "upload_mbps": 0.0,
+        "jobs": 1,
+        "max_queue_gb": 1.5,
+        "ffmpeg": "ff",
+        "ffprobe": "fp",
+        "name": "<host>",
+        "encoder": {}
+      }
+    },
+    {
+      "kind": "load",
+      "title": "a bad float",
+      "toml": "server = \"http://a\"\nupload_mbps = \"fast\"\n",
+      "argv": [],
+      "error": {
+        "type": "ValueError",
+        "message": "could not convert string to float: 'fast'"
+      }
+    },
+    {
+      "kind": "load",
+      "title": "a bad int",
+      "toml": "server = \"http://a\"\njobs = \"many\"\n",
+      "argv": [],
+      "error": {
+        "type": "ValueError",
+        "message": "invalid literal for int() with base 10: 'many'"
+      }
+    },
+    {
+      "kind": "load",
+      "title": "an empty cache_dir keeps the default",
+      "toml": "server = \"http://a\"\ncache_dir = \"\"\n",
+      "argv": [],
+      "value": {
+        "server": "http://a",
+        "token": "",
+        "cache_dir": "<root>/config10/local/embyx-transcode",
+        "upload_mbps": 30.0,
+        "jobs": 3,
+        "max_queue_gb": 8.0,
+        "ffmpeg": "ffmpeg",
+        "ffprobe": "ffprobe",
+        "name": "<host>",
+        "encoder": {}
+      }
+    },
+    {
+      "kind": "load",
+      "title": "a cache_dir that is not a path",
+      "toml": "server = \"http://a\"\ncache_dir = 5\n",
+      "argv": [],
+      "error": {
+        "type": "TypeError",
+        "message": "argument should be a str or an os.PathLike object where __fspath__ returns a str, not 'int'"
+      }
+    },
+    {
+      "kind": "load",
+      "title": "an encoder that is not a table",
+      "toml": "server = \"http://a\"\nencoder = 5\n",
+      "argv": [],
+      "error": {
+        "type": "TypeError",
+        "message": "'int' object is not iterable"
+      }
+    },
+    {
+      "kind": "load",
+      "title": "an encoder of pairs",
+      "toml": "server = \"http://a\"\nencoder = [[\"codec\", \"libx264\"]]\n",
+      "argv": [],
+      "value": {
+        "server": "http://a",
+        "token": "",
+        "cache_dir": "<root>/config13/local/embyx-transcode",
+        "upload_mbps": 30.0,
+        "jobs": 3,
+        "max_queue_gb": 8.0,
+        "ffmpeg": "ffmpeg",
+        "ffprobe": "ffprobe",
+        "name": "<host>",
+        "encoder": {
+          "codec": "libx264"
+        }
+      }
+    },
+    {
+      "kind": "load",
+      "title": "a boolean token and name",
+      "toml": "server = \"http://a\"\ntoken = true\nname = 1.5\n",
+      "argv": [],
+      "value": {
+        "server": "http://a",
+        "token": "True",
+        "cache_dir": "<root>/config14/local/embyx-transcode",
+        "upload_mbps": 30.0,
+        "jobs": 3,
+        "max_queue_gb": 8.0,
+        "ffmpeg": "ffmpeg",
+        "ffprobe": "ffprobe",
+        "name": "1.5",
+        "encoder": {}
+      }
+    },
+    {
+      "kind": "load",
+      "title": "a list server",
+      "toml": "server = [\"http://a\", 2]\n",
+      "argv": [],
+      "value": {
+        "server": "['http://a', 2]",
+        "token": "",
+        "cache_dir": "<root>/config15/local/embyx-transcode",
+        "upload_mbps": 30.0,
+        "jobs": 3,
+        "max_queue_gb": 8.0,
+        "ffmpeg": "ffmpeg",
+        "ffprobe": "ffprobe",
+        "name": "<host>",
+        "encoder": {}
+      }
+    },
+    {
+      "kind": "load",
+      "title": "unknown keys are ignored",
+      "toml": "server = \"http://a\"\ncolour = \"red\"\n[other]\nx = 1\n",
+      "argv": [],
+      "value": {
+        "server": "http://a",
+        "token": "",
+        "cache_dir": "<root>/config16/local/embyx-transcode",
+        "upload_mbps": 30.0,
+        "jobs": 3,
+        "max_queue_gb": 8.0,
+        "ffmpeg": "ffmpeg",
+        "ffprobe": "ffprobe",
+        "name": "<host>",
+        "encoder": {}
+      }
+    },
+    {
+      "kind": "load",
+      "title": "an infinite queue",
+      "toml": "server = \"http://a\"\nmax_queue_gb = inf\n",
+      "argv": [],
+      "value": {
+        "server": "http://a",
+        "token": "",
+        "cache_dir": "<root>/config17/local/embyx-transcode",
+        "upload_mbps": 30.0,
+        "jobs": 3,
+        "max_queue_gb": Infinity,
+        "ffmpeg": "ffmpeg",
+        "ffprobe": "ffprobe",
+        "name": "<host>",
+        "encoder": {}
+      }
+    },
+    {
+      "kind": "argv",
+      "argv": [
+        "--server",
+        "http://a",
+        "--jobs",
+        "3"
+      ],
+      "value": {
+        "config": null,
+        "server": "http://a",
+        "token": null,
+        "cache_dir": null,
+        "upload_mbps": null,
+        "jobs": 3,
+        "max_queue_gb": null,
+        "ffmpeg": null,
+        "ffprobe": null
+      }
+    },
+    {
+      "kind": "argv",
+      "argv": [
+        "--serv",
+        "http://a",
+        "--job",
+        "2"
+      ],
+      "value": {
+        "config": null,
+        "server": "http://a",
+        "token": null,
+        "cache_dir": null,
+        "upload_mbps": null,
+        "jobs": 2,
+        "max_queue_gb": null,
+        "ffmpeg": null,
+        "ffprobe": null
+      }
+    },
+    {
+      "kind": "argv",
+      "argv": [
+        "--server",
+        "http://a",
+        "--server",
+        "http://b"
+      ],
+      "value": {
+        "config": null,
+        "server": "http://b",
+        "token": null,
+        "cache_dir": null,
+        "upload_mbps": null,
+        "jobs": null,
+        "max_queue_gb": null,
+        "ffmpeg": null,
+        "ffprobe": null
+      }
+    },
+    {
+      "kind": "argv",
+      "argv": [
+        "--upload-mbps",
+        "-5",
+        "--jobs",
+        "-1",
+        "--max-queue-gb",
+        "-0.5"
+      ],
+      "value": {
+        "config": null,
+        "server": null,
+        "token": null,
+        "cache_dir": null,
+        "upload_mbps": -5.0,
+        "jobs": -1,
+        "max_queue_gb": -0.5,
+        "ffmpeg": null,
+        "ffprobe": null
+      }
+    },
+    {
+      "kind": "argv",
+      "argv": [
+        "--upload-mbps",
+        "1_000",
+        "--jobs",
+        " 4 ",
+        "--max-queue-gb",
+        "inf"
+      ],
+      "value": {
+        "config": null,
+        "server": null,
+        "token": null,
+        "cache_dir": null,
+        "upload_mbps": 1000.0,
+        "jobs": 4,
+        "max_queue_gb": Infinity,
+        "ffmpeg": null,
+        "ffprobe": null
+      }
+    },
+    {
+      "kind": "argv",
+      "argv": [
+        "--jobs",
+        "٣"
+      ],
+      "value": {
+        "config": null,
+        "server": null,
+        "token": null,
+        "cache_dir": null,
+        "upload_mbps": null,
+        "jobs": 3,
+        "max_queue_gb": null,
+        "ffmpeg": null,
+        "ffprobe": null
+      }
+    },
+    {
+      "kind": "argv",
+      "argv": [
+        "--jobs",
+        "2.5"
+      ],
+      "refused": "ArgumentError"
+    },
+    {
+      "kind": "argv",
+      "argv": [
+        "--upload-mbps",
+        "fast"
+      ],
+      "refused": "ArgumentError"
+    },
+    {
+      "kind": "argv",
+      "argv": [
+        "--cache",
+        "c"
+      ],
+      "value": {
+        "config": null,
+        "server": null,
+        "token": null,
+        "cache_dir": "c",
+        "upload_mbps": null,
+        "jobs": null,
+        "max_queue_gb": null,
+        "ffmpeg": null,
+        "ffprobe": null
+      }
+    },
+    {
+      "kind": "argv",
+      "argv": [
+        "--server=http://a",
+        "--token=t"
+      ],
+      "value": {
+        "config": null,
+        "server": "http://a",
+        "token": "t",
+        "cache_dir": null,
+        "upload_mbps": null,
+        "jobs": null,
+        "max_queue_gb": null,
+        "ffmpeg": null,
+        "ffprobe": null
+      }
+    },
+    {
+      "kind": "argv",
+      "argv": [
+        "--ff",
+        "x"
+      ],
+      "refused": "ArgumentError"
+    },
+    {
+      "kind": "argv",
+      "argv": [
+        "positional"
+      ],
+      "refused": "ArgumentError"
+    }
+  ]
+}

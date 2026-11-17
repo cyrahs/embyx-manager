@@ -1,0 +1,472 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "home_worker",
+  "cases": [
+    {
+      "kind": "loop",
+      "title": "waits, failures and a title that is already done",
+      "answers": [
+        {
+          "error": "transport"
+        },
+        {
+          "error": "server",
+          "status": 401,
+          "code": "unauthorized"
+        },
+        {
+          "error": "transport"
+        },
+        {
+          "value": {
+            "task": null,
+            "wait": "idle"
+          }
+        },
+        {
+          "value": {
+            "task": null,
+            "wait": "idle"
+          }
+        },
+        {
+          "value": {
+            "task": null,
+            "wait": "probing",
+            "task_id": 7
+          }
+        },
+        {
+          "value": {
+            "task": null,
+            "wait": "mystery"
+          }
+        },
+        {
+          "value": {
+            "task": null
+          }
+        },
+        {
+          "value": {
+            "task": {
+              "id": 7,
+              "avid": "SQTEVR-009",
+              "video_bitrate": 6140000,
+              "chunk_seconds": 60,
+              "encoder": {
+                "codec": "av1_nvenc",
+                "preset": "p7",
+                "tune": "uhq",
+                "multipass": "fullres",
+                "lookahead": 32,
+                "spatial_aq": true,
+                "bit_depth": 10,
+                "gop_seconds": 5
+              },
+              "paused": false,
+              "parts": [
+                {
+                  "index": 0,
+                  "name": "SQTEVR-009-cd1.mp4",
+                  "size": 1000000000,
+                  "duration": 30.0,
+                  "done": true,
+                  "next_chunk": 0,
+                  "resume_at": 0.0
+                },
+                {
+                  "index": 1,
+                  "name": "SQTEVR-009-cd2.mp4",
+                  "size": 1000000000,
+                  "duration": 20.0,
+                  "done": true,
+                  "next_chunk": 0,
+                  "resume_at": 0.0
+                }
+              ]
+            }
+          }
+        },
+        {
+          "value": {
+            "task": null,
+            "wait": "idle"
+          }
+        }
+      ],
+      "code": 0,
+      "log": [
+        {
+          "status": false,
+          "line": "transcode-worker 1 连接 http://cluster，缓存 <root>/loop0，上传上限 25.5 Mbps"
+        },
+        {
+          "status": false,
+          "line": "连不上集群（connection refused），5 秒后重试"
+        },
+        {
+          "status": false,
+          "line": "连不上集群（401 unauthorized），10 秒后重试"
+        },
+        {
+          "status": false,
+          "line": "连不上集群（connection refused），20 秒后重试"
+        },
+        {
+          "status": false,
+          "line": "等待：没有等转码的作品"
+        },
+        {
+          "status": false,
+          "line": "等待：集群正在读取分盘信息"
+        },
+        {
+          "status": false,
+          "line": "等待：mystery"
+        },
+        {
+          "status": false,
+          "line": "等待：None"
+        },
+        {
+          "status": false,
+          "line": "开始 SQTEVR-009：2 盘，还剩 0 盘，视频码率 6.14 Mbps"
+        },
+        {
+          "status": false,
+          "line": "SQTEVR-009 全部分盘已传到集群，接下来由集群拼接、上传 115"
+        },
+        {
+          "status": false,
+          "line": "等待：没有等转码的作品"
+        },
+        {
+          "status": false,
+          "line": "已退出"
+        }
+      ],
+      "sleeps": [
+        5.0,
+        10.0,
+        20.0,
+        30.0,
+        30.0,
+        10.0,
+        30.0,
+        30.0,
+        30.0
+      ],
+      "claims": [
+        {
+          "name": "<host>",
+          "version": "1",
+          "task_id": null,
+          "state": "waiting",
+          "parts": []
+        },
+        {
+          "name": "<host>",
+          "version": "1",
+          "task_id": null,
+          "state": "waiting",
+          "parts": []
+        },
+        {
+          "name": "<host>",
+          "version": "1",
+          "task_id": null,
+          "state": "waiting",
+          "parts": []
+        },
+        {
+          "name": "<host>",
+          "version": "1",
+          "task_id": null,
+          "state": "waiting",
+          "parts": []
+        },
+        {
+          "name": "<host>",
+          "version": "1",
+          "task_id": null,
+          "state": "waiting",
+          "parts": []
+        },
+        {
+          "name": "<host>",
+          "version": "1",
+          "task_id": null,
+          "state": "waiting",
+          "parts": []
+        },
+        {
+          "name": "<host>",
+          "version": "1",
+          "task_id": null,
+          "state": "waiting",
+          "parts": []
+        },
+        {
+          "name": "<host>",
+          "version": "1",
+          "task_id": null,
+          "state": "waiting",
+          "parts": []
+        },
+        {
+          "name": "<host>",
+          "version": "1",
+          "task_id": null,
+          "state": "waiting",
+          "parts": []
+        },
+        {
+          "name": "<host>",
+          "version": "1",
+          "task_id": null,
+          "state": "waiting",
+          "parts": []
+        }
+      ],
+      "left": []
+    },
+    {
+      "kind": "loop",
+      "title": "eight failures in a row",
+      "answers": [
+        {
+          "error": "transport"
+        },
+        {
+          "error": "transport"
+        },
+        {
+          "error": "transport"
+        },
+        {
+          "error": "transport"
+        },
+        {
+          "error": "transport"
+        },
+        {
+          "error": "transport"
+        },
+        {
+          "error": "transport"
+        },
+        {
+          "error": "transport"
+        },
+        {
+          "value": {
+            "task": null,
+            "wait": "busy"
+          }
+        }
+      ],
+      "code": 0,
+      "log": [
+        {
+          "status": false,
+          "line": "transcode-worker 1 连接 http://cluster，缓存 <root>/loop1，上传上限 25.5 Mbps"
+        },
+        {
+          "status": false,
+          "line": "连不上集群（connection refused），5 秒后重试"
+        },
+        {
+          "status": false,
+          "line": "连不上集群（connection refused），10 秒后重试"
+        },
+        {
+          "status": false,
+          "line": "连不上集群（connection refused），20 秒后重试"
+        },
+        {
+          "status": false,
+          "line": "连不上集群（connection refused），40 秒后重试"
+        },
+        {
+          "status": false,
+          "line": "连不上集群（connection refused），80 秒后重试"
+        },
+        {
+          "status": false,
+          "line": "连不上集群（connection refused），160 秒后重试"
+        },
+        {
+          "status": false,
+          "line": "连不上集群（connection refused），300 秒后重试"
+        },
+        {
+          "status": false,
+          "line": "连不上集群（connection refused），300 秒后重试"
+        },
+        {
+          "status": false,
+          "line": "等待：集群在合并别的作品，等它完成"
+        },
+        {
+          "status": false,
+          "line": "已退出"
+        }
+      ],
+      "sleeps": [
+        5.0,
+        10.0,
+        20.0,
+        40.0,
+        80.0,
+        160.0,
+        300.0,
+        300.0,
+        30.0
+      ],
+      "claims": [
+        {
+          "name": "<host>",
+          "version": "1",
+          "task_id": null,
+          "state": "waiting",
+          "parts": []
+        },
+        {
+          "name": "<host>",
+          "version": "1",
+          "task_id": null,
+          "state": "waiting",
+          "parts": []
+        },
+        {
+          "name": "<host>",
+          "version": "1",
+          "task_id": null,
+          "state": "waiting",
+          "parts": []
+        },
+        {
+          "name": "<host>",
+          "version": "1",
+          "task_id": null,
+          "state": "waiting",
+          "parts": []
+        },
+        {
+          "name": "<host>",
+          "version": "1",
+          "task_id": null,
+          "state": "waiting",
+          "parts": []
+        },
+        {
+          "name": "<host>",
+          "version": "1",
+          "task_id": null,
+          "state": "waiting",
+          "parts": []
+        },
+        {
+          "name": "<host>",
+          "version": "1",
+          "task_id": null,
+          "state": "waiting",
+          "parts": []
+        },
+        {
+          "name": "<host>",
+          "version": "1",
+          "task_id": null,
+          "state": "waiting",
+          "parts": []
+        },
+        {
+          "name": "<host>",
+          "version": "1",
+          "task_id": null,
+          "state": "waiting",
+          "parts": []
+        }
+      ],
+      "left": []
+    },
+    {
+      "kind": "loop",
+      "title": "a float bit rate and a stale cache",
+      "stale": [
+        "3",
+        "12",
+        "loose.txt"
+      ],
+      "answers": [
+        {
+          "value": {
+            "task": {
+              "id": 12,
+              "avid": "ABC-001",
+              "video_bitrate": 12345678.9,
+              "chunk_seconds": 60,
+              "encoder": {
+                "codec": "av1_nvenc",
+                "preset": "p7",
+                "tune": "uhq",
+                "multipass": "fullres",
+                "lookahead": 32,
+                "spatial_aq": true,
+                "bit_depth": 10,
+                "gop_seconds": 5
+              },
+              "paused": false,
+              "parts": [
+                {
+                  "index": 0,
+                  "name": "SQTEVR-009-cd1.mp4",
+                  "size": 1000000000,
+                  "duration": 1.0,
+                  "done": true,
+                  "next_chunk": 0,
+                  "resume_at": 0.0
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "code": 0,
+      "log": [
+        {
+          "status": false,
+          "line": "transcode-worker 1 连接 http://cluster，缓存 <root>/loop2，上传上限 25.5 Mbps"
+        },
+        {
+          "status": false,
+          "line": "开始 ABC-001：1 盘，还剩 0 盘，视频码率 12.35 Mbps"
+        },
+        {
+          "status": false,
+          "line": "ABC-001 全部分盘已传到集群，接下来由集群拼接、上传 115"
+        },
+        {
+          "status": false,
+          "line": "已退出"
+        }
+      ],
+      "sleeps": [],
+      "claims": [
+        {
+          "name": "<host>",
+          "version": "1",
+          "task_id": null,
+          "state": "waiting",
+          "parts": []
+        }
+      ],
+      "left": [
+        "loose.txt"
+      ]
+    }
+  ]
+}

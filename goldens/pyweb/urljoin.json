@@ -1,0 +1,148 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "pyweb",
+  "cases": [
+    {
+      "base": "https://stellasora.miraheze.org",
+      "url": "/wiki/Freesia",
+      "result": "https://stellasora.miraheze.org/wiki/Freesia"
+    },
+    {
+      "base": "https://stellasora.miraheze.org",
+      "url": "//static.wikitide.net/stellasorawiki/2/2f/Freesia.png",
+      "result": "https://static.wikitide.net/stellasorawiki/2/2f/Freesia.png"
+    },
+    {
+      "base": "https://stellasora.miraheze.org",
+      "url": "https://other.example/x",
+      "result": "https://other.example/x"
+    },
+    {
+      "base": "https://stellasora.miraheze.org",
+      "url": "relative/path",
+      "result": "https://stellasora.miraheze.org/relative/path"
+    },
+    {
+      "base": "https://stellasora.miraheze.org/wiki/Page",
+      "url": "File:X.png",
+      "result": "File:X.png"
+    },
+    {
+      "base": "https://stellasora.miraheze.org/wiki/Page",
+      "url": "../up",
+      "result": "https://stellasora.miraheze.org/up"
+    },
+    {
+      "base": "https://stellasora.miraheze.org/wiki/Page",
+      "url": "./here/./x/..",
+      "result": "https://stellasora.miraheze.org/wiki/here/"
+    },
+    {
+      "base": "https://stellasora.miraheze.org/wiki/Page",
+      "url": "?q=1",
+      "result": "https://stellasora.miraheze.org/wiki/Page?q=1"
+    },
+    {
+      "base": "https://stellasora.miraheze.org/wiki/Page?a=b",
+      "url": "#frag",
+      "result": "https://stellasora.miraheze.org/wiki/Page?a=b#frag"
+    },
+    {
+      "base": "https://stellasora.miraheze.org/wiki/Page;p",
+      "url": "",
+      "result": "https://stellasora.miraheze.org/wiki/Page;p"
+    },
+    {
+      "base": "https://stellasora.miraheze.org/a/b/c",
+      "url": "g;x?y#s",
+      "result": "https://stellasora.miraheze.org/a/b/g;x?y#s"
+    },
+    {
+      "base": "https://stellasora.miraheze.org/a/b/c",
+      "url": "../../../../g",
+      "result": "https://stellasora.miraheze.org/g"
+    },
+    {
+      "base": "https://stellasora.miraheze.org/a//b/c",
+      "url": "d//e",
+      "result": "https://stellasora.miraheze.org/a/b/d/e"
+    },
+    {
+      "base": "https://stellasora.miraheze.org",
+      "url": "mailto:x@y",
+      "result": "mailto:x@y"
+    },
+    {
+      "base": "https://stellasora.miraheze.org",
+      "url": "javascript:void(0)",
+      "result": "javascript:void(0)"
+    },
+    {
+      "base": "https://stellasora.miraheze.org",
+      "url": " /wiki/Leading_space",
+      "result": "https://stellasora.miraheze.org/wiki/Leading_space"
+    },
+    {
+      "base": "https://stellasora.miraheze.org",
+      "url": "/wiki/Tab\there",
+      "result": "https://stellasora.miraheze.org/wiki/Tabhere"
+    },
+    {
+      "base": "https://stellasora.miraheze.org",
+      "url": "HTTPS://UPPER.example/X",
+      "result": "https://UPPER.example/X"
+    },
+    {
+      "base": "https://stellasora.miraheze.org",
+      "url": "http:/wiki/x",
+      "result": "http:/wiki/x"
+    },
+    {
+      "base": "https://stellasora.miraheze.org",
+      "url": "//[::1]:8080/x",
+      "result": "https://[::1]:8080/x"
+    },
+    {
+      "base": "https://stellasora.miraheze.org",
+      "url": "//[::1/x",
+      "error": "Invalid IPv6 URL"
+    },
+    {
+      "base": "https://stellasora.miraheze.org",
+      "url": "//[1.2.3.4]/x",
+      "error": "An IPv4 address cannot be in brackets"
+    },
+    {
+      "base": "https://stellasora.miraheze.org",
+      "url": "//[v1.fe]/x",
+      "result": "https://[v1.fe]/x"
+    },
+    {
+      "base": "https://stellasora.miraheze.org",
+      "url": "//a[::1]/x",
+      "error": "Invalid IPv6 URL"
+    },
+    {
+      "base": "https://stellasora.miraheze.org",
+      "url": "//host℀x/p",
+      "error": "netloc 'host℀x' contains invalid characters under NFKC normalization"
+    },
+    {
+      "base": "https://stellasora.miraheze.org",
+      "url": "//ｈｏｓｔ/full-width",
+      "result": "https://ｈｏｓｔ/full-width"
+    },
+    {
+      "base": "",
+      "url": "/x",
+      "result": "/x"
+    },
+    {
+      "base": "http://a/b",
+      "url": "c:d",
+      "result": "c:d"
+    }
+  ]
+}

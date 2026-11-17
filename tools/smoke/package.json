@@ -1,0 +1,9 @@
+{
+  "name": "embyx-manager-page-smoke",
+  "private": true,
+  "description": "Page smoke of the unmodified front end against the Rust server (WP4)",
+  "type": "module",
+  "dependencies": {
+    "playwright": "1.63.0"
+  }
+}

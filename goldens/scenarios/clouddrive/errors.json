@@ -1,0 +1,534 @@
+{
+  "calls": [
+    {
+      "error": {
+        "code": "UNAVAILABLE",
+        "details": "connection refused"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSystemInfo",
+      "request": {},
+      "seq": 1
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSystemInfo",
+      "request": {},
+      "response": {
+        "IsLogin": true,
+        "SystemReady": true,
+        "UserName": "fake"
+      },
+      "seq": 2
+    },
+    {
+      "error": {
+        "code": "PERMISSION_DENIED",
+        "details": "token expired"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/"
+      },
+      "seq": 3
+    },
+    {
+      "error": {
+        "code": "PERMISSION_DENIED",
+        "details": "token expired"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/in"
+      },
+      "seq": 4
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/in"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/in/a.mp4",
+              "hasDetailProperties": false,
+              "id": "/115/in/a.mp4",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "a.mp4",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "2",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 5
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/in",
+              "hasDetailProperties": false,
+              "id": "/115/in",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "in",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/out",
+              "hasDetailProperties": false,
+              "id": "/115/out",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "out",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 6
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/in",
+              "hasDetailProperties": false,
+              "id": "/115/in",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "in",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/out",
+              "hasDetailProperties": false,
+              "id": "/115/out",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "out",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 7
+    },
+    {
+      "error": {
+        "code": "DEADLINE_EXCEEDED",
+        "details": "Deadline Exceeded"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "CreateFolder",
+      "request": {
+        "folderName": "new",
+        "parentPath": "/115"
+      },
+      "seq": 8
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/in",
+              "hasDetailProperties": false,
+              "id": "/115/in",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "in",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/out",
+              "hasDetailProperties": false,
+              "id": "/115/out",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "out",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 9
+    },
+    {
+      "error": {
+        "code": "INTERNAL",
+        "details": "中文 错误"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "MoveFile",
+      "request": {
+        "conflictPolicy": "Skip",
+        "destPath": "/115/out",
+        "theFilePaths": [
+          "/115/in/a.mp4"
+        ]
+      },
+      "seq": 10
+    },
+    {
+      "error": {
+        "code": "NOT_FOUND",
+        "details": ""
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "DeleteFiles",
+      "request": {
+        "path": [
+          "/115/in/a.mp4"
+        ]
+      },
+      "seq": 11
+    },
+    {
+      "error": {
+        "code": "UNAUTHENTICATED",
+        "details": "bad token"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetCopyTasks",
+      "request": {},
+      "seq": 12
+    },
+    {
+      "error": {
+        "code": "RESOURCE_EXHAUSTED",
+        "details": "slow down"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "ListOfflineFilesByPath",
+      "request": {
+        "path": "/115/in"
+      },
+      "seq": 13
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/",
+        "/115",
+        "/115/in",
+        "/115/out"
+      ],
+      "files": [
+        {
+          "hashes": {},
+          "path": "/115/in/a.mp4",
+          "size": 2
+        }
+      ],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "clouddrive.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "error": {
+            "code": "UNAVAILABLE",
+            "details": "connection refused",
+            "type": "_InactiveRpcError"
+          },
+          "op": "check"
+        },
+        {
+          "error": {
+            "code": "PERMISSION_DENIED",
+            "details": "token expired",
+            "type": "_MultiThreadedRendezvous"
+          },
+          "op": "check"
+        },
+        {
+          "error": {
+            "code": "PERMISSION_DENIED",
+            "details": "token expired",
+            "type": "_MultiThreadedRendezvous"
+          },
+          "op": "list_directory"
+        },
+        {
+          "op": "stat_file",
+          "result": {
+            "full_path": "/115/in/a.mp4",
+            "hashes": {},
+            "id": "/115/in/a.mp4",
+            "is_directory": false,
+            "name": "a.mp4",
+            "size": 2,
+            "write_time": null
+          }
+        },
+        {
+          "op": "ensure_directory",
+          "result": {
+            "created": false,
+            "path": "/115/in",
+            "success": true
+          }
+        },
+        {
+          "error": {
+            "code": "DEADLINE_EXCEEDED",
+            "details": "Deadline Exceeded",
+            "type": "_InactiveRpcError"
+          },
+          "op": "ensure_directory"
+        },
+        {
+          "error": {
+            "code": "INTERNAL",
+            "details": "中文 错误",
+            "type": "_InactiveRpcError"
+          },
+          "op": "move_file"
+        },
+        {
+          "error": {
+            "code": "NOT_FOUND",
+            "details": "",
+            "type": "_InactiveRpcError"
+          },
+          "op": "delete_files"
+        },
+        {
+          "error": {
+            "code": "UNAUTHENTICATED",
+            "details": "bad token",
+            "type": "_InactiveRpcError"
+          },
+          "op": "copy_tasks"
+        },
+        {
+          "error": {
+            "code": "RESOURCE_EXHAUSTED",
+            "details": "slow down",
+            "type": "_InactiveRpcError"
+          },
+          "op": "list_offline_files"
+        }
+      ]
+    }
+  },
+  "rows": {},
+  "scenario": "clouddrive/errors",
+  "tree": {}
+}

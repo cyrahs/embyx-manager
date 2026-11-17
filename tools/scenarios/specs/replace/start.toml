@@ -1,0 +1,120 @@
+# Starting a replacement (换版, WP7): the plan names the copy to delete and the directory the
+# new download goes to; a fresh magnet from the resolvers, or the operator's pasted one, is
+# submitted while the old copy stays; refusals (unreadable text, not held, already in progress,
+# a magnet already tried, not a magnet) write nothing; a title with no magnet is parked; a
+# pasted magnet CloudDrive already holds is a failed submit, parked too; a start cancelled the
+# moment CloudDrive took the magnet leaves the row mid-way, and the tracker's next poll picks
+# up every new download.
+description = "replace: plan and start, refusals, parking and a cancelled start"
+operation = "tracker.steps"
+clock = "2026-09-10T03:00:00+00:00"
+
+[roots]
+names = ["mount"]
+
+[args]
+mount = "mount"
+task_dirs = ["/115/task/inbox"]
+
+[args.sukebei]
+"IPZ-661" = "magnet:?xt=urn:btih:B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1&dn=IPZ-661"
+
+[args.config]
+src_dir = "mount/115/task"
+dst_dir = "mount/library"
+mapping = { inbox = "sorted" }
+min_size_mb = 0
+
+[[args.steps]]
+op = "plan"
+args = { text = "  ipz-661 [1080p] " }
+
+[[args.steps]]
+op = "plan"
+args = { text = "XYZ-001" }
+
+[[args.steps]]
+op = "plan"
+args = { text = "hello world" }
+
+[[args.steps]]
+op = "start"
+args = { text = "IPZ-661" }
+
+[[args.steps]]
+op = "start"
+args = { text = "IPZ-661" }
+
+[[args.steps]]
+op = "start"
+args = { text = "ABC-123", magnet = "magnet:?xt=urn:btih:A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1" }
+
+[[args.steps]]
+op = "start"
+args = { text = "ABC-123", magnet = "not a magnet" }
+
+[[args.steps]]
+op = "start"
+args = { text = "ABC-123", magnet = " magnet:?xt=urn:btih:C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1&dn=ABC-123 " }
+
+[[args.steps]]
+op = "start"
+args = { text = "NOM-401" }
+
+[[args.steps]]
+op = "start"
+args = { text = "DUP-402", magnet = "magnet:?xt=urn:btih:D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1" }
+
+[[args.steps]]
+op = "start"
+args = { text = "CXL-403", magnet = "magnet:?xt=urn:btih:E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1", cancel_after = "AddOfflineFiles" }
+
+[[args.steps]]
+op = "plan"
+args = { text = "CXL-403" }
+
+[[args.steps]]
+op = "poll"
+args = { advance_seconds = 60 }
+
+[[tree]]
+path = "mount/library/sorted/IPZ/IPZ-661.mp4"
+size = 4
+
+[[tree]]
+path = "mount/library/sorted/ABC/ABC-123.mp4"
+size = 4
+
+[[tree]]
+path = "mount/library/sorted/NOM/NOM-401.mp4"
+size = 4
+
+[[tree]]
+path = "mount/library/sorted/DUP/DUP-402.mp4"
+size = 4
+
+[[tree]]
+path = "mount/library/sorted/CXL/CXL-403.mp4"
+size = 4
+
+[database]
+schema = "app"
+sql = [
+    "INSERT INTO archive_acquisitions (avid, state, source, task_dir_path, release_date, created_at, updated_at, archived_paths_json) VALUES ('ABC-123', 'archived', 'rss:Actor', '/115/task/inbox', NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z', '[\"sorted/ABC/ABC-123.mp4\"]')",
+    "INSERT INTO archive_acquisitions (avid, state, source, task_dir_path, release_date, created_at, updated_at, archived_paths_json) VALUES ('DUP-402', 'archived', 'rss:Actor', NULL, NULL, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z', '[\"sorted/DUP/DUP-402.mp4\"]')",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at, error) VALUES ('ABC-123', 1, 'magnet:?xt=urn:btih:A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1&dn=ABC-123', 'A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1A1', 'sukebei', 'archived', 100.0, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z', NULL)",
+    "INSERT INTO archive_magnet_attempts (avid, attempt_no, magnet, info_hash, magnet_source, state, progress, submitted_at, updated_at, error) VALUES ('DUP-402', 1, 'magnet:?xt=urn:btih:D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0&dn=DUP-402', 'D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0D0', 'sukebei', 'archived', 100.0, '2026-09-09T00:00:00Z', '2026-09-09T00:00:00Z', NULL)",
+]
+
+[clouddrive]
+directories = ["/115/task/inbox", "/115/other"]
+files = [
+    { path = "/library/sorted/IPZ/IPZ-661.mp4", size = 4 },
+    { path = "/library/sorted/ABC/ABC-123.mp4", size = 4 },
+    { path = "/library/sorted/NOM/NOM-401.mp4", size = 4 },
+    { path = "/library/sorted/DUP/DUP-402.mp4", size = 4 },
+    { path = "/library/sorted/CXL/CXL-403.mp4", size = 4 },
+]
+offline_tasks = [
+    { name = "someone else's", url = "magnet:?xt=urn:btih:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1", folder = "/115/other", info_hash = "d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1", status = "OFFLINE_DOWNLOADING", size = 0, progress = 10.0 },
+]

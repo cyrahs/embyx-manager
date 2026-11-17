@@ -1,0 +1,307 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "monitor",
+  "cases": [
+    {
+      "acquisition": [
+        {
+          "from": "discovered",
+          "to": [
+            "archived",
+            "downloading",
+            "ignored",
+            "needs_attention",
+            "resolve_failed"
+          ],
+          "refused": {
+            "discovered": "acquisition: discovered -> discovered is not a legal transition",
+            "exhausted": "acquisition: discovered -> exhausted is not a legal transition"
+          }
+        },
+        {
+          "from": "downloading",
+          "to": [
+            "archived",
+            "downloading",
+            "exhausted",
+            "ignored",
+            "needs_attention"
+          ],
+          "refused": {
+            "discovered": "acquisition: downloading -> discovered is not a legal transition",
+            "resolve_failed": "acquisition: downloading -> resolve_failed is not a legal transition"
+          }
+        },
+        {
+          "from": "archived",
+          "to": [],
+          "refused": {
+            "discovered": "acquisition: archived -> discovered is not a legal transition",
+            "downloading": "acquisition: archived -> downloading is not a legal transition",
+            "archived": "acquisition: archived -> archived is not a legal transition",
+            "resolve_failed": "acquisition: archived -> resolve_failed is not a legal transition",
+            "exhausted": "acquisition: archived -> exhausted is not a legal transition",
+            "needs_attention": "acquisition: archived -> needs_attention is not a legal transition",
+            "ignored": "acquisition: archived -> ignored is not a legal transition"
+          }
+        },
+        {
+          "from": "resolve_failed",
+          "to": [
+            "archived",
+            "downloading",
+            "exhausted",
+            "ignored",
+            "needs_attention",
+            "resolve_failed"
+          ],
+          "refused": {
+            "discovered": "acquisition: resolve_failed -> discovered is not a legal transition"
+          }
+        },
+        {
+          "from": "exhausted",
+          "to": [
+            "archived",
+            "downloading",
+            "ignored",
+            "needs_attention",
+            "resolve_failed"
+          ],
+          "refused": {
+            "discovered": "acquisition: exhausted -> discovered is not a legal transition",
+            "exhausted": "acquisition: exhausted -> exhausted is not a legal transition"
+          }
+        },
+        {
+          "from": "needs_attention",
+          "to": [
+            "archived",
+            "downloading",
+            "exhausted",
+            "ignored"
+          ],
+          "refused": {
+            "discovered": "acquisition: needs_attention -> discovered is not a legal transition",
+            "resolve_failed": "acquisition: needs_attention -> resolve_failed is not a legal transition",
+            "needs_attention": "acquisition: needs_attention -> needs_attention is not a legal transition"
+          }
+        },
+        {
+          "from": "ignored",
+          "to": [
+            "discovered"
+          ],
+          "refused": {
+            "downloading": "acquisition: ignored -> downloading is not a legal transition",
+            "archived": "acquisition: ignored -> archived is not a legal transition",
+            "resolve_failed": "acquisition: ignored -> resolve_failed is not a legal transition",
+            "exhausted": "acquisition: ignored -> exhausted is not a legal transition",
+            "needs_attention": "acquisition: ignored -> needs_attention is not a legal transition",
+            "ignored": "acquisition: ignored -> ignored is not a legal transition"
+          }
+        }
+      ],
+      "attempt": [
+        {
+          "from": "pending",
+          "to": [
+            "error",
+            "submitted"
+          ],
+          "refused": {
+            "pending": "attempt: pending -> pending is not a legal transition",
+            "downloading": "attempt: pending -> downloading is not a legal transition",
+            "finished": "attempt: pending -> finished is not a legal transition",
+            "archiving": "attempt: pending -> archiving is not a legal transition",
+            "archived": "attempt: pending -> archived is not a legal transition",
+            "junk": "attempt: pending -> junk is not a legal transition",
+            "stalled": "attempt: pending -> stalled is not a legal transition",
+            "lost": "attempt: pending -> lost is not a legal transition"
+          }
+        },
+        {
+          "from": "submitted",
+          "to": [
+            "downloading",
+            "error",
+            "finished",
+            "lost",
+            "stalled"
+          ],
+          "refused": {
+            "pending": "attempt: submitted -> pending is not a legal transition",
+            "submitted": "attempt: submitted -> submitted is not a legal transition",
+            "archiving": "attempt: submitted -> archiving is not a legal transition",
+            "archived": "attempt: submitted -> archived is not a legal transition",
+            "junk": "attempt: submitted -> junk is not a legal transition"
+          }
+        },
+        {
+          "from": "downloading",
+          "to": [
+            "downloading",
+            "error",
+            "finished",
+            "lost",
+            "stalled"
+          ],
+          "refused": {
+            "pending": "attempt: downloading -> pending is not a legal transition",
+            "submitted": "attempt: downloading -> submitted is not a legal transition",
+            "archiving": "attempt: downloading -> archiving is not a legal transition",
+            "archived": "attempt: downloading -> archived is not a legal transition",
+            "junk": "attempt: downloading -> junk is not a legal transition"
+          }
+        },
+        {
+          "from": "finished",
+          "to": [
+            "archiving",
+            "lost"
+          ],
+          "refused": {
+            "pending": "attempt: finished -> pending is not a legal transition",
+            "submitted": "attempt: finished -> submitted is not a legal transition",
+            "downloading": "attempt: finished -> downloading is not a legal transition",
+            "finished": "attempt: finished -> finished is not a legal transition",
+            "archived": "attempt: finished -> archived is not a legal transition",
+            "junk": "attempt: finished -> junk is not a legal transition",
+            "error": "attempt: finished -> error is not a legal transition",
+            "stalled": "attempt: finished -> stalled is not a legal transition"
+          }
+        },
+        {
+          "from": "archiving",
+          "to": [
+            "archived",
+            "finished",
+            "junk"
+          ],
+          "refused": {
+            "pending": "attempt: archiving -> pending is not a legal transition",
+            "submitted": "attempt: archiving -> submitted is not a legal transition",
+            "downloading": "attempt: archiving -> downloading is not a legal transition",
+            "archiving": "attempt: archiving -> archiving is not a legal transition",
+            "error": "attempt: archiving -> error is not a legal transition",
+            "stalled": "attempt: archiving -> stalled is not a legal transition",
+            "lost": "attempt: archiving -> lost is not a legal transition"
+          }
+        },
+        {
+          "from": "archived",
+          "to": [],
+          "refused": {
+            "pending": "attempt: archived -> pending is not a legal transition",
+            "submitted": "attempt: archived -> submitted is not a legal transition",
+            "downloading": "attempt: archived -> downloading is not a legal transition",
+            "finished": "attempt: archived -> finished is not a legal transition",
+            "archiving": "attempt: archived -> archiving is not a legal transition",
+            "archived": "attempt: archived -> archived is not a legal transition",
+            "junk": "attempt: archived -> junk is not a legal transition",
+            "error": "attempt: archived -> error is not a legal transition",
+            "stalled": "attempt: archived -> stalled is not a legal transition",
+            "lost": "attempt: archived -> lost is not a legal transition"
+          }
+        },
+        {
+          "from": "junk",
+          "to": [],
+          "refused": {
+            "pending": "attempt: junk -> pending is not a legal transition",
+            "submitted": "attempt: junk -> submitted is not a legal transition",
+            "downloading": "attempt: junk -> downloading is not a legal transition",
+            "finished": "attempt: junk -> finished is not a legal transition",
+            "archiving": "attempt: junk -> archiving is not a legal transition",
+            "archived": "attempt: junk -> archived is not a legal transition",
+            "junk": "attempt: junk -> junk is not a legal transition",
+            "error": "attempt: junk -> error is not a legal transition",
+            "stalled": "attempt: junk -> stalled is not a legal transition",
+            "lost": "attempt: junk -> lost is not a legal transition"
+          }
+        },
+        {
+          "from": "error",
+          "to": [],
+          "refused": {
+            "pending": "attempt: error -> pending is not a legal transition",
+            "submitted": "attempt: error -> submitted is not a legal transition",
+            "downloading": "attempt: error -> downloading is not a legal transition",
+            "finished": "attempt: error -> finished is not a legal transition",
+            "archiving": "attempt: error -> archiving is not a legal transition",
+            "archived": "attempt: error -> archived is not a legal transition",
+            "junk": "attempt: error -> junk is not a legal transition",
+            "error": "attempt: error -> error is not a legal transition",
+            "stalled": "attempt: error -> stalled is not a legal transition",
+            "lost": "attempt: error -> lost is not a legal transition"
+          }
+        },
+        {
+          "from": "stalled",
+          "to": [],
+          "refused": {
+            "pending": "attempt: stalled -> pending is not a legal transition",
+            "submitted": "attempt: stalled -> submitted is not a legal transition",
+            "downloading": "attempt: stalled -> downloading is not a legal transition",
+            "finished": "attempt: stalled -> finished is not a legal transition",
+            "archiving": "attempt: stalled -> archiving is not a legal transition",
+            "archived": "attempt: stalled -> archived is not a legal transition",
+            "junk": "attempt: stalled -> junk is not a legal transition",
+            "error": "attempt: stalled -> error is not a legal transition",
+            "stalled": "attempt: stalled -> stalled is not a legal transition",
+            "lost": "attempt: stalled -> lost is not a legal transition"
+          }
+        },
+        {
+          "from": "lost",
+          "to": [],
+          "refused": {
+            "pending": "attempt: lost -> pending is not a legal transition",
+            "submitted": "attempt: lost -> submitted is not a legal transition",
+            "downloading": "attempt: lost -> downloading is not a legal transition",
+            "finished": "attempt: lost -> finished is not a legal transition",
+            "archiving": "attempt: lost -> archiving is not a legal transition",
+            "archived": "attempt: lost -> archived is not a legal transition",
+            "junk": "attempt: lost -> junk is not a legal transition",
+            "error": "attempt: lost -> error is not a legal transition",
+            "stalled": "attempt: lost -> stalled is not a legal transition",
+            "lost": "attempt: lost -> lost is not a legal transition"
+          }
+        }
+      ],
+      "sets": {
+        "ACTIVE_STATES": [
+          "discovered",
+          "downloading"
+        ],
+        "REPLACEABLE_STATES": [
+          "archived",
+          "exhausted",
+          "ignored",
+          "resolve_failed"
+        ],
+        "RETRYABLE_STATES": [
+          "exhausted",
+          "resolve_failed"
+        ],
+        "DUE_STATES": [
+          "discovered",
+          "exhausted",
+          "resolve_failed"
+        ],
+        "IN_FLIGHT_ATTEMPT_STATES": [
+          "downloading",
+          "submitted"
+        ],
+        "LIVE_ATTEMPT_STATES": [
+          "archiving",
+          "downloading",
+          "finished",
+          "submitted"
+        ]
+      }
+    }
+  ]
+}

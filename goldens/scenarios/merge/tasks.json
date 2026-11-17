@@ -1,0 +1,722 @@
+{
+  "calls": [],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "merge.tasks",
+  "outcome": {
+    "result": [
+      {
+        "op": "last_done_at",
+        "result": null
+      },
+      {
+        "op": "create",
+        "result": {
+          "avid": "ABC-123",
+          "brand": "ABC",
+          "error": null,
+          "failed_state": null,
+          "finished_at": null,
+          "id": 1,
+          "job_name": null,
+          "library_dir": "/mnt/cd2/115/embyx/rank/ABC",
+          "merged_bytes": null,
+          "merged_name": "ABC-123.mp4",
+          "merged_sha1": null,
+          "notice": null,
+          "parts": [
+            "/mnt/cd2/115/embyx/rank/ABC/ABC-123-cd1.mp4",
+            "/mnt/cd2/115/embyx/rank/ABC/ABC-123 \"演员\"-cd2.mp4"
+          ],
+          "phase": null,
+          "progress": null,
+          "source": "rank",
+          "state": "queued",
+          "state_changed_at_is_updated_at": true,
+          "transcode_paused": false,
+          "transcoder": null,
+          "updated_at_is_created_at": true,
+          "upload_attempts": 0,
+          "uploaded_bytes": null
+        }
+      },
+      {
+        "error": {
+          "message": "ABC-123",
+          "type": "MergeTaskConflictError"
+        },
+        "op": "create"
+      },
+      {
+        "op": "create",
+        "result": {
+          "avid": "DEF-456",
+          "brand": "DEF",
+          "error": null,
+          "failed_state": null,
+          "finished_at": null,
+          "id": 3,
+          "job_name": null,
+          "library_dir": "/mnt/cd2/115/embyx/vr/DEF",
+          "merged_bytes": null,
+          "merged_name": "DEF-456.mp4",
+          "merged_sha1": null,
+          "notice": null,
+          "parts": [
+            "a\\b.mp4",
+            "c\u0001d.mp4"
+          ],
+          "phase": null,
+          "progress": null,
+          "source": "vr",
+          "state": "queued",
+          "state_changed_at_is_updated_at": true,
+          "transcode_paused": false,
+          "transcoder": null,
+          "updated_at_is_created_at": true,
+          "upload_attempts": 0,
+          "uploaded_bytes": null
+        }
+      },
+      {
+        "op": "create",
+        "result": {
+          "avid": "GHI-789",
+          "brand": "GHI",
+          "error": null,
+          "failed_state": null,
+          "finished_at": null,
+          "id": 4,
+          "job_name": null,
+          "library_dir": "/mnt/cd2/115/embyx/rank/GHI",
+          "merged_bytes": null,
+          "merged_name": "GHI-789.mp4",
+          "merged_sha1": null,
+          "notice": null,
+          "parts": [
+            "g1.mp4",
+            "g2.mp4"
+          ],
+          "phase": null,
+          "progress": null,
+          "source": "rank",
+          "state": "queued",
+          "state_changed_at_is_updated_at": true,
+          "transcode_paused": false,
+          "transcoder": null,
+          "updated_at_is_created_at": true,
+          "upload_attempts": 0,
+          "uploaded_bytes": null
+        }
+      },
+      {
+        "op": "get",
+        "result": {
+          "avid": "ABC-123",
+          "brand": "ABC",
+          "error": null,
+          "failed_state": null,
+          "finished_at": null,
+          "id": 1,
+          "job_name": null,
+          "library_dir": "/mnt/cd2/115/embyx/rank/ABC",
+          "merged_bytes": null,
+          "merged_name": "ABC-123.mp4",
+          "merged_sha1": null,
+          "notice": null,
+          "parts": [
+            "/mnt/cd2/115/embyx/rank/ABC/ABC-123-cd1.mp4",
+            "/mnt/cd2/115/embyx/rank/ABC/ABC-123 \"演员\"-cd2.mp4"
+          ],
+          "phase": null,
+          "progress": null,
+          "source": "rank",
+          "state": "queued",
+          "state_changed_at_is_updated_at": true,
+          "transcode_paused": false,
+          "transcoder": null,
+          "updated_at_is_created_at": true,
+          "upload_attempts": 0,
+          "uploaded_bytes": null
+        }
+      },
+      {
+        "op": "get",
+        "result": null
+      },
+      {
+        "op": "transition",
+        "result": {
+          "avid": "ABC-123",
+          "brand": "ABC",
+          "error": null,
+          "failed_state": null,
+          "finished_at": null,
+          "id": 1,
+          "job_name": "embyx-merge-1-abc",
+          "library_dir": "/mnt/cd2/115/embyx/rank/ABC",
+          "merged_bytes": null,
+          "merged_name": "ABC-123.mp4",
+          "merged_sha1": null,
+          "notice": null,
+          "parts": [
+            "/mnt/cd2/115/embyx/rank/ABC/ABC-123-cd1.mp4",
+            "/mnt/cd2/115/embyx/rank/ABC/ABC-123 \"演员\"-cd2.mp4"
+          ],
+          "phase": "merging",
+          "progress": 0.25,
+          "source": "rank",
+          "state": "merging",
+          "state_changed_at_is_updated_at": true,
+          "transcode_paused": false,
+          "transcoder": null,
+          "updated_at_is_created_at": false,
+          "upload_attempts": 0,
+          "uploaded_bytes": null
+        }
+      },
+      {
+        "op": "transition",
+        "result": null
+      },
+      {
+        "op": "update",
+        "result": {
+          "avid": "ABC-123",
+          "brand": "ABC",
+          "error": null,
+          "failed_state": null,
+          "finished_at": null,
+          "id": 1,
+          "job_name": "embyx-merge-1-abc",
+          "library_dir": "/mnt/cd2/115/embyx/rank/ABC",
+          "merged_bytes": 123456789012,
+          "merged_name": "ABC-123.mp4",
+          "merged_sha1": "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709",
+          "notice": "CloudDrive 不可达",
+          "parts": [
+            "/mnt/cd2/115/embyx/rank/ABC/ABC-123-cd1.mp4",
+            "/mnt/cd2/115/embyx/rank/ABC/ABC-123 \"演员\"-cd2.mp4"
+          ],
+          "phase": "merging",
+          "progress": 1.0,
+          "source": "rank",
+          "state": "merging",
+          "state_changed_at_is_updated_at": false,
+          "transcode_paused": true,
+          "transcoder": "home",
+          "updated_at_is_created_at": false,
+          "upload_attempts": 2,
+          "uploaded_bytes": 0
+        }
+      },
+      {
+        "op": "update",
+        "result": null
+      },
+      {
+        "op": "transition",
+        "result": {
+          "avid": "ABC-123",
+          "brand": "ABC",
+          "error": "ffmpeg failed: exit 1",
+          "failed_state": "merging",
+          "finished_at": null,
+          "id": 1,
+          "job_name": "embyx-merge-1-abc",
+          "library_dir": "/mnt/cd2/115/embyx/rank/ABC",
+          "merged_bytes": 123456789012,
+          "merged_name": "ABC-123.mp4",
+          "merged_sha1": "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709",
+          "notice": "CloudDrive 不可达",
+          "parts": [
+            "/mnt/cd2/115/embyx/rank/ABC/ABC-123-cd1.mp4",
+            "/mnt/cd2/115/embyx/rank/ABC/ABC-123 \"演员\"-cd2.mp4"
+          ],
+          "phase": "",
+          "progress": 1.0,
+          "source": "rank",
+          "state": "failed",
+          "state_changed_at_is_updated_at": true,
+          "transcode_paused": true,
+          "transcoder": "home",
+          "updated_at_is_created_at": false,
+          "upload_attempts": 2,
+          "uploaded_bytes": 0
+        }
+      },
+      {
+        "op": "transition",
+        "result": {
+          "avid": "GHI-789",
+          "brand": "GHI",
+          "error": null,
+          "failed_state": null,
+          "finished_at": "2026-11-13T22:30:00+00:00",
+          "id": 4,
+          "job_name": null,
+          "library_dir": "/mnt/cd2/115/embyx/rank/GHI",
+          "merged_bytes": null,
+          "merged_name": "GHI-789.mp4",
+          "merged_sha1": null,
+          "notice": null,
+          "parts": [
+            "g1.mp4",
+            "g2.mp4"
+          ],
+          "phase": null,
+          "progress": 1.0,
+          "source": "rank",
+          "state": "done",
+          "state_changed_at_is_updated_at": true,
+          "transcode_paused": false,
+          "transcoder": null,
+          "updated_at_is_created_at": false,
+          "upload_attempts": 0,
+          "uploaded_bytes": null
+        }
+      },
+      {
+        "op": "transition",
+        "result": {
+          "avid": "DEF-456",
+          "brand": "DEF",
+          "error": null,
+          "failed_state": null,
+          "finished_at": null,
+          "id": 3,
+          "job_name": null,
+          "library_dir": "/mnt/cd2/115/embyx/vr/DEF",
+          "merged_bytes": null,
+          "merged_name": "DEF-456.mp4",
+          "merged_sha1": null,
+          "notice": "",
+          "parts": [
+            "a\\b.mp4",
+            "c\u0001d.mp4"
+          ],
+          "phase": null,
+          "progress": null,
+          "source": "vr",
+          "state": "transcoding",
+          "state_changed_at_is_updated_at": true,
+          "transcode_paused": false,
+          "transcoder": "cpu",
+          "updated_at_is_created_at": false,
+          "upload_attempts": 0,
+          "uploaded_bytes": null
+        }
+      },
+      {
+        "op": "update",
+        "result": {
+          "avid": "DEF-456",
+          "brand": "DEF",
+          "error": "",
+          "failed_state": null,
+          "finished_at": null,
+          "id": 3,
+          "job_name": "",
+          "library_dir": "/mnt/cd2/115/embyx/vr/DEF",
+          "merged_bytes": null,
+          "merged_name": "DEF-456.mp4",
+          "merged_sha1": "",
+          "notice": "",
+          "parts": [
+            "a\\b.mp4",
+            "c\u0001d.mp4"
+          ],
+          "phase": null,
+          "progress": 0.0,
+          "source": "vr",
+          "state": "transcoding",
+          "state_changed_at_is_updated_at": false,
+          "transcode_paused": false,
+          "transcoder": "cpu",
+          "updated_at_is_created_at": false,
+          "upload_attempts": 0,
+          "uploaded_bytes": null
+        }
+      },
+      {
+        "op": "transition",
+        "result": {
+          "avid": "ABC-123",
+          "brand": "ABC",
+          "error": "ffmpeg failed: exit 1",
+          "failed_state": "merging",
+          "finished_at": "2026-11-13T15:00:00.123456+00:00",
+          "id": 1,
+          "job_name": "embyx-merge-1-abc",
+          "library_dir": "/mnt/cd2/115/embyx/rank/ABC",
+          "merged_bytes": 123456789012,
+          "merged_name": "ABC-123.mp4",
+          "merged_sha1": "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709",
+          "notice": "CloudDrive 不可达",
+          "parts": [
+            "/mnt/cd2/115/embyx/rank/ABC/ABC-123-cd1.mp4",
+            "/mnt/cd2/115/embyx/rank/ABC/ABC-123 \"演员\"-cd2.mp4"
+          ],
+          "phase": "",
+          "progress": 1.0,
+          "source": "rank",
+          "state": "cancelled",
+          "state_changed_at_is_updated_at": true,
+          "transcode_paused": true,
+          "transcoder": "home",
+          "updated_at_is_created_at": false,
+          "upload_attempts": 2,
+          "uploaded_bytes": 0
+        }
+      },
+      {
+        "op": "create",
+        "result": {
+          "avid": "ABC-123",
+          "brand": "ABC",
+          "error": null,
+          "failed_state": null,
+          "finished_at": null,
+          "id": 5,
+          "job_name": null,
+          "library_dir": "/mnt/cd2/115/embyx/rank/ABC",
+          "merged_bytes": null,
+          "merged_name": "ABC-123.mp4",
+          "merged_sha1": null,
+          "notice": null,
+          "parts": [
+            "p1.mp4"
+          ],
+          "phase": null,
+          "progress": null,
+          "source": "rank",
+          "state": "queued",
+          "state_changed_at_is_updated_at": true,
+          "transcode_paused": false,
+          "transcoder": null,
+          "updated_at_is_created_at": true,
+          "upload_attempts": 0,
+          "uploaded_bytes": null
+        }
+      },
+      {
+        "op": "open_tasks",
+        "result": [
+          {
+            "avid": "DEF-456",
+            "brand": "DEF",
+            "error": "",
+            "failed_state": null,
+            "finished_at": null,
+            "id": 3,
+            "job_name": "",
+            "library_dir": "/mnt/cd2/115/embyx/vr/DEF",
+            "merged_bytes": null,
+            "merged_name": "DEF-456.mp4",
+            "merged_sha1": "",
+            "notice": "",
+            "parts": [
+              "a\\b.mp4",
+              "c\u0001d.mp4"
+            ],
+            "phase": null,
+            "progress": 0.0,
+            "source": "vr",
+            "state": "transcoding",
+            "state_changed_at_is_updated_at": false,
+            "transcode_paused": false,
+            "transcoder": "cpu",
+            "updated_at_is_created_at": false,
+            "upload_attempts": 0,
+            "uploaded_bytes": null
+          },
+          {
+            "avid": "ABC-123",
+            "brand": "ABC",
+            "error": null,
+            "failed_state": null,
+            "finished_at": null,
+            "id": 5,
+            "job_name": null,
+            "library_dir": "/mnt/cd2/115/embyx/rank/ABC",
+            "merged_bytes": null,
+            "merged_name": "ABC-123.mp4",
+            "merged_sha1": null,
+            "notice": null,
+            "parts": [
+              "p1.mp4"
+            ],
+            "phase": null,
+            "progress": null,
+            "source": "rank",
+            "state": "queued",
+            "state_changed_at_is_updated_at": true,
+            "transcode_paused": false,
+            "transcoder": null,
+            "updated_at_is_created_at": true,
+            "upload_attempts": 0,
+            "uploaded_bytes": null
+          }
+        ]
+      },
+      {
+        "op": "listing",
+        "result": [
+          {
+            "avid": "ABC-123",
+            "brand": "ABC",
+            "error": null,
+            "failed_state": null,
+            "finished_at": null,
+            "id": 5,
+            "job_name": null,
+            "library_dir": "/mnt/cd2/115/embyx/rank/ABC",
+            "merged_bytes": null,
+            "merged_name": "ABC-123.mp4",
+            "merged_sha1": null,
+            "notice": null,
+            "parts": [
+              "p1.mp4"
+            ],
+            "phase": null,
+            "progress": null,
+            "source": "rank",
+            "state": "queued",
+            "state_changed_at_is_updated_at": true,
+            "transcode_paused": false,
+            "transcoder": null,
+            "updated_at_is_created_at": true,
+            "upload_attempts": 0,
+            "uploaded_bytes": null
+          },
+          {
+            "avid": "GHI-789",
+            "brand": "GHI",
+            "error": null,
+            "failed_state": null,
+            "finished_at": "2026-11-13T22:30:00+00:00",
+            "id": 4,
+            "job_name": null,
+            "library_dir": "/mnt/cd2/115/embyx/rank/GHI",
+            "merged_bytes": null,
+            "merged_name": "GHI-789.mp4",
+            "merged_sha1": null,
+            "notice": null,
+            "parts": [
+              "g1.mp4",
+              "g2.mp4"
+            ],
+            "phase": null,
+            "progress": 1.0,
+            "source": "rank",
+            "state": "done",
+            "state_changed_at_is_updated_at": true,
+            "transcode_paused": false,
+            "transcoder": null,
+            "updated_at_is_created_at": false,
+            "upload_attempts": 0,
+            "uploaded_bytes": null
+          },
+          {
+            "avid": "DEF-456",
+            "brand": "DEF",
+            "error": "",
+            "failed_state": null,
+            "finished_at": null,
+            "id": 3,
+            "job_name": "",
+            "library_dir": "/mnt/cd2/115/embyx/vr/DEF",
+            "merged_bytes": null,
+            "merged_name": "DEF-456.mp4",
+            "merged_sha1": "",
+            "notice": "",
+            "parts": [
+              "a\\b.mp4",
+              "c\u0001d.mp4"
+            ],
+            "phase": null,
+            "progress": 0.0,
+            "source": "vr",
+            "state": "transcoding",
+            "state_changed_at_is_updated_at": false,
+            "transcode_paused": false,
+            "transcoder": "cpu",
+            "updated_at_is_created_at": false,
+            "upload_attempts": 0,
+            "uploaded_bytes": null
+          },
+          {
+            "avid": "ABC-123",
+            "brand": "ABC",
+            "error": "ffmpeg failed: exit 1",
+            "failed_state": "merging",
+            "finished_at": "2026-11-13T15:00:00.123456+00:00",
+            "id": 1,
+            "job_name": "embyx-merge-1-abc",
+            "library_dir": "/mnt/cd2/115/embyx/rank/ABC",
+            "merged_bytes": 123456789012,
+            "merged_name": "ABC-123.mp4",
+            "merged_sha1": "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709",
+            "notice": "CloudDrive 不可达",
+            "parts": [
+              "/mnt/cd2/115/embyx/rank/ABC/ABC-123-cd1.mp4",
+              "/mnt/cd2/115/embyx/rank/ABC/ABC-123 \"演员\"-cd2.mp4"
+            ],
+            "phase": "",
+            "progress": 1.0,
+            "source": "rank",
+            "state": "cancelled",
+            "state_changed_at_is_updated_at": true,
+            "transcode_paused": true,
+            "transcoder": "home",
+            "updated_at_is_created_at": false,
+            "upload_attempts": 2,
+            "uploaded_bytes": 0
+          }
+        ]
+      },
+      {
+        "op": "cancelled_avids",
+        "result": [
+          "ABC-123"
+        ]
+      },
+      {
+        "op": "merged_avids",
+        "result": [
+          "GHI-789"
+        ]
+      },
+      {
+        "op": "last_done_at",
+        "result": "2026-11-13T22:30:00+00:00"
+      }
+    ]
+  },
+  "rows": {
+    "merge_tasks": [
+      {
+        "avid": "ABC-123",
+        "brand": "ABC",
+        "created_at": "<volatile:1>",
+        "error": "ffmpeg failed: exit 1",
+        "failed_state": "merging",
+        "finished_at": "2026-11-13T15:00:00.123456+00:00",
+        "id": 1,
+        "job_name": "embyx-merge-1-abc",
+        "library_dir": "/mnt/cd2/115/embyx/rank/ABC",
+        "merged_bytes": 123456789012,
+        "merged_name": "ABC-123.mp4",
+        "merged_sha1": "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709",
+        "notice": "CloudDrive 不可达",
+        "parts_json": "[\"/mnt/cd2/115/embyx/rank/ABC/ABC-123-cd1.mp4\", \"/mnt/cd2/115/embyx/rank/ABC/ABC-123 \\\"演员\\\"-cd2.mp4\"]",
+        "phase": "",
+        "progress": 1,
+        "source": "rank",
+        "state": "cancelled",
+        "state_changed_at": "<volatile:3>",
+        "transcode_paused": true,
+        "transcoder": "home",
+        "updated_at": "<volatile:3>",
+        "upload_attempts": 2,
+        "uploaded_bytes": 0
+      },
+      {
+        "avid": "DEF-456",
+        "brand": "DEF",
+        "created_at": "<volatile:2>",
+        "error": "",
+        "failed_state": null,
+        "finished_at": null,
+        "id": 3,
+        "job_name": "",
+        "library_dir": "/mnt/cd2/115/embyx/vr/DEF",
+        "merged_bytes": null,
+        "merged_name": "DEF-456.mp4",
+        "merged_sha1": "",
+        "notice": "",
+        "parts_json": "[\"a\\\\b.mp4\", \"c\\u0001d.mp4\"]",
+        "phase": null,
+        "progress": 0,
+        "source": "vr",
+        "state": "transcoding",
+        "state_changed_at": "<volatile:2>",
+        "transcode_paused": false,
+        "transcoder": "cpu",
+        "updated_at": "<volatile:2>",
+        "upload_attempts": 0,
+        "uploaded_bytes": null
+      },
+      {
+        "avid": "GHI-789",
+        "brand": "GHI",
+        "created_at": "<volatile:3>",
+        "error": null,
+        "failed_state": null,
+        "finished_at": "2026-11-13T22:30:00+00:00",
+        "id": 4,
+        "job_name": null,
+        "library_dir": "/mnt/cd2/115/embyx/rank/GHI",
+        "merged_bytes": null,
+        "merged_name": "GHI-789.mp4",
+        "merged_sha1": null,
+        "notice": null,
+        "parts_json": "[\"g1.mp4\", \"g2.mp4\"]",
+        "phase": null,
+        "progress": 1,
+        "source": "rank",
+        "state": "done",
+        "state_changed_at": "<volatile:1>",
+        "transcode_paused": false,
+        "transcoder": null,
+        "updated_at": "<volatile:1>",
+        "upload_attempts": 0,
+        "uploaded_bytes": null
+      },
+      {
+        "avid": "ABC-123",
+        "brand": "ABC",
+        "created_at": "<volatile:4>",
+        "error": null,
+        "failed_state": null,
+        "finished_at": null,
+        "id": 5,
+        "job_name": null,
+        "library_dir": "/mnt/cd2/115/embyx/rank/ABC",
+        "merged_bytes": null,
+        "merged_name": "ABC-123.mp4",
+        "merged_sha1": null,
+        "notice": null,
+        "parts_json": "[\"p1.mp4\"]",
+        "phase": null,
+        "progress": null,
+        "source": "rank",
+        "state": "queued",
+        "state_changed_at": "<volatile:4>",
+        "transcode_paused": false,
+        "transcoder": null,
+        "updated_at": "<volatile:4>",
+        "upload_attempts": 0,
+        "uploaded_bytes": null
+      }
+    ]
+  },
+  "scenario": "merge/tasks",
+  "tree": {}
+}

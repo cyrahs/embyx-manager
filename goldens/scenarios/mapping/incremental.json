@@ -1,0 +1,331 @@
+{
+  "calls": [
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-101"
+      },
+      "response": null,
+      "seq": 1
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "copy2",
+      "request": {
+        "dst": "{emby}/a/ABC-101/ABC-101.strm",
+        "src": "{flat}/a/ABC-101.strm"
+      },
+      "response": null,
+      "seq": 2
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-101"
+      },
+      "response": null,
+      "seq": 3
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{emby}/a/ABC-102"
+      },
+      "response": null,
+      "seq": 4
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{emby}/a/ABC-102/ABC-102-cd2.strm"
+      },
+      "response": null,
+      "seq": 5
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{emby}/a/ABC-102/ABC-102-cd2-poster.jpg"
+      },
+      "response": null,
+      "seq": 6
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{emby}/a/ABC-102/ABC-102-cd1.strm"
+      },
+      "response": null,
+      "seq": 7
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{emby}/a/ABC-102/ABC-102-cd1.nfo"
+      },
+      "response": null,
+      "seq": 8
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{emby}/b/c/DEF-201/DEF-201.strm"
+      },
+      "response": null,
+      "seq": 9
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmdir",
+      "request": {
+        "path": "{emby}/b/c/DEF-201"
+      },
+      "response": null,
+      "seq": 10
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmdir",
+      "request": {
+        "path": "{emby}/b/c"
+      },
+      "response": null,
+      "seq": 11
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmdir",
+      "request": {
+        "path": "{emby}/b"
+      },
+      "response": null,
+      "seq": 12
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "mapping.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "errors": [],
+          "log": [
+            "WARNING: failed to get avid for {elsewhere}/JKL-1.strm, skipping",
+            "updated a/ABC-101.strm -> a/ABC-101/ABC-101.strm",
+            "WARNING: source file missing, skipping {flat}/a/PQR-777.strm",
+            "WARNING: failed to get avid for {flat}/a/no title.strm, skipping"
+          ],
+          "op": "incremental",
+          "result": {
+            "failed_changed": [],
+            "failed_deleted": []
+          },
+          "stats": {
+            "files_updated": 1
+          }
+        },
+        {
+          "errors": [],
+          "log": [],
+          "op": "incremental",
+          "result": {
+            "failed_changed": [],
+            "failed_deleted": []
+          },
+          "stats": {
+            "files_skipped": 2
+          }
+        },
+        {
+          "op": "remove"
+        },
+        {
+          "errors": [],
+          "log": [
+            "deleted a/ABC-102/ABC-102-cd2.strm",
+            "deleted a/ABC-102/ABC-102-cd2-poster.jpg"
+          ],
+          "op": "incremental",
+          "result": {
+            "failed_changed": [],
+            "failed_deleted": []
+          },
+          "stats": {
+            "files_deleted": 1,
+            "sidecars_deleted": 1
+          }
+        },
+        {
+          "op": "remove"
+        },
+        {
+          "errors": [],
+          "log": [
+            "deleted a/ABC-102/ABC-102-cd1.strm",
+            "deleted a/ABC-102/ABC-102-cd1.nfo"
+          ],
+          "op": "incremental",
+          "result": {
+            "failed_changed": [],
+            "failed_deleted": []
+          },
+          "stats": {
+            "files_deleted": 1,
+            "sidecars_deleted": 1
+          }
+        },
+        {
+          "op": "remove"
+        },
+        {
+          "errors": [],
+          "log": [
+            "deleted b/c/DEF-201/DEF-201.strm",
+            "deleted empty directory: b/c/DEF-201",
+            "deleted empty directory: b/c",
+            "deleted empty directory: b"
+          ],
+          "op": "incremental",
+          "result": {
+            "failed_changed": [],
+            "failed_deleted": []
+          },
+          "stats": {
+            "dirs_deleted": 3,
+            "files_deleted": 1
+          }
+        },
+        {
+          "error": {
+            "message": "",
+            "type": "RunCancelledError"
+          },
+          "errors": [],
+          "log": [],
+          "op": "incremental",
+          "stats": {}
+        }
+      ]
+    }
+  },
+  "rows": {},
+  "scenario": "mapping/incremental",
+  "tree": {
+    "elsewhere": [
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "JKL-1.strm",
+        "sha256": "e41a2ca6a9b1e079",
+        "size": 16
+      }
+    ],
+    "emby": [
+      {
+        "kind": "dir",
+        "path": "a"
+      },
+      {
+        "kind": "dir",
+        "path": "a/ABC-101"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "a/ABC-101/ABC-101.strm",
+        "sha256": "d8adc39bf60a0497",
+        "size": 20
+      },
+      {
+        "kind": "dir",
+        "path": "a/ABC-102"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "a/ABC-102/ABC-102.nfo",
+        "sha256": "87d3be25624a99ae",
+        "size": 8
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "a/ABC-102/poster.jpg",
+        "sha256": "2481a63c85a62cf8",
+        "size": 4
+      }
+    ],
+    "flat": [
+      {
+        "kind": "dir",
+        "path": "a"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "a/ABC-101.strm",
+        "sha256": "d8adc39bf60a0497",
+        "size": 20
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "a/no title.strm",
+        "sha256": "cf2002a416fa972a",
+        "size": 21
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "a/notes.txt",
+        "sha256": "da947091b711faa0",
+        "size": 10
+      },
+      {
+        "kind": "dir",
+        "path": "b"
+      },
+      {
+        "kind": "dir",
+        "path": "b/c"
+      }
+    ]
+  }
+}

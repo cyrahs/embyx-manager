@@ -1,0 +1,1160 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "clouddrive_wrapper",
+  "cases": [
+    {
+      "path": "",
+      "normpath": ".",
+      "split": [
+        "",
+        ""
+      ],
+      "dirname": "",
+      "basename": "",
+      "joins": [
+        {
+          "tail": "",
+          "joined": ""
+        },
+        {
+          "tail": "x",
+          "joined": "x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "x/"
+        },
+        {
+          "tail": "..",
+          "joined": ".."
+        }
+      ]
+    },
+    {
+      "path": "/",
+      "normpath": "/",
+      "split": [
+        "/",
+        ""
+      ],
+      "dirname": "/",
+      "basename": "",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "/"
+        },
+        {
+          "tail": "x",
+          "joined": "/x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "/x/"
+        },
+        {
+          "tail": "..",
+          "joined": "/.."
+        }
+      ]
+    },
+    {
+      "path": "//",
+      "normpath": "//",
+      "split": [
+        "//",
+        ""
+      ],
+      "dirname": "//",
+      "basename": "",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "//"
+        },
+        {
+          "tail": "x",
+          "joined": "//x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "//x/"
+        },
+        {
+          "tail": "..",
+          "joined": "//.."
+        }
+      ]
+    },
+    {
+      "path": "///",
+      "normpath": "/",
+      "split": [
+        "///",
+        ""
+      ],
+      "dirname": "///",
+      "basename": "",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "///"
+        },
+        {
+          "tail": "x",
+          "joined": "///x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "///x/"
+        },
+        {
+          "tail": "..",
+          "joined": "///.."
+        }
+      ]
+    },
+    {
+      "path": "/a",
+      "normpath": "/a",
+      "split": [
+        "/",
+        "a"
+      ],
+      "dirname": "/",
+      "basename": "a",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "/a/"
+        },
+        {
+          "tail": "x",
+          "joined": "/a/x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "/a/x/"
+        },
+        {
+          "tail": "..",
+          "joined": "/a/.."
+        }
+      ]
+    },
+    {
+      "path": "/a/",
+      "normpath": "/a",
+      "split": [
+        "/a",
+        ""
+      ],
+      "dirname": "/a",
+      "basename": "",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "/a/"
+        },
+        {
+          "tail": "x",
+          "joined": "/a/x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "/a/x/"
+        },
+        {
+          "tail": "..",
+          "joined": "/a/.."
+        }
+      ]
+    },
+    {
+      "path": "/a//b",
+      "normpath": "/a/b",
+      "split": [
+        "/a",
+        "b"
+      ],
+      "dirname": "/a",
+      "basename": "b",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "/a//b/"
+        },
+        {
+          "tail": "x",
+          "joined": "/a//b/x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "/a//b/x/"
+        },
+        {
+          "tail": "..",
+          "joined": "/a//b/.."
+        }
+      ]
+    },
+    {
+      "path": "/a/./b",
+      "normpath": "/a/b",
+      "split": [
+        "/a/.",
+        "b"
+      ],
+      "dirname": "/a/.",
+      "basename": "b",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "/a/./b/"
+        },
+        {
+          "tail": "x",
+          "joined": "/a/./b/x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "/a/./b/x/"
+        },
+        {
+          "tail": "..",
+          "joined": "/a/./b/.."
+        }
+      ]
+    },
+    {
+      "path": "/a/../b",
+      "normpath": "/b",
+      "split": [
+        "/a/..",
+        "b"
+      ],
+      "dirname": "/a/..",
+      "basename": "b",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "/a/../b/"
+        },
+        {
+          "tail": "x",
+          "joined": "/a/../b/x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "/a/../b/x/"
+        },
+        {
+          "tail": "..",
+          "joined": "/a/../b/.."
+        }
+      ]
+    },
+    {
+      "path": "/../a",
+      "normpath": "/a",
+      "split": [
+        "/..",
+        "a"
+      ],
+      "dirname": "/..",
+      "basename": "a",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "/../a/"
+        },
+        {
+          "tail": "x",
+          "joined": "/../a/x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "/../a/x/"
+        },
+        {
+          "tail": "..",
+          "joined": "/../a/.."
+        }
+      ]
+    },
+    {
+      "path": "/..",
+      "normpath": "/",
+      "split": [
+        "/",
+        ".."
+      ],
+      "dirname": "/",
+      "basename": "..",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "/../"
+        },
+        {
+          "tail": "x",
+          "joined": "/../x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "/../x/"
+        },
+        {
+          "tail": "..",
+          "joined": "/../.."
+        }
+      ]
+    },
+    {
+      "path": "/.",
+      "normpath": "/",
+      "split": [
+        "/",
+        "."
+      ],
+      "dirname": "/",
+      "basename": ".",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "/./"
+        },
+        {
+          "tail": "x",
+          "joined": "/./x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "/./x/"
+        },
+        {
+          "tail": "..",
+          "joined": "/./.."
+        }
+      ]
+    },
+    {
+      "path": "a",
+      "normpath": "a",
+      "split": [
+        "",
+        "a"
+      ],
+      "dirname": "",
+      "basename": "a",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "a/"
+        },
+        {
+          "tail": "x",
+          "joined": "a/x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "a/x/"
+        },
+        {
+          "tail": "..",
+          "joined": "a/.."
+        }
+      ]
+    },
+    {
+      "path": "a/b",
+      "normpath": "a/b",
+      "split": [
+        "a",
+        "b"
+      ],
+      "dirname": "a",
+      "basename": "b",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "a/b/"
+        },
+        {
+          "tail": "x",
+          "joined": "a/b/x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "a/b/x/"
+        },
+        {
+          "tail": "..",
+          "joined": "a/b/.."
+        }
+      ]
+    },
+    {
+      "path": "a/../..",
+      "normpath": "..",
+      "split": [
+        "a/..",
+        ".."
+      ],
+      "dirname": "a/..",
+      "basename": "..",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "a/../../"
+        },
+        {
+          "tail": "x",
+          "joined": "a/../../x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "a/../../x/"
+        },
+        {
+          "tail": "..",
+          "joined": "a/../../.."
+        }
+      ]
+    },
+    {
+      "path": "../a",
+      "normpath": "../a",
+      "split": [
+        "..",
+        "a"
+      ],
+      "dirname": "..",
+      "basename": "a",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "../a/"
+        },
+        {
+          "tail": "x",
+          "joined": "../a/x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "../a/x/"
+        },
+        {
+          "tail": "..",
+          "joined": "../a/.."
+        }
+      ]
+    },
+    {
+      "path": "./a",
+      "normpath": "a",
+      "split": [
+        ".",
+        "a"
+      ],
+      "dirname": ".",
+      "basename": "a",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "./a/"
+        },
+        {
+          "tail": "x",
+          "joined": "./a/x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "./a/x/"
+        },
+        {
+          "tail": "..",
+          "joined": "./a/.."
+        }
+      ]
+    },
+    {
+      "path": ".",
+      "normpath": ".",
+      "split": [
+        "",
+        "."
+      ],
+      "dirname": "",
+      "basename": ".",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "./"
+        },
+        {
+          "tail": "x",
+          "joined": "./x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "./x/"
+        },
+        {
+          "tail": "..",
+          "joined": "./.."
+        }
+      ]
+    },
+    {
+      "path": "..",
+      "normpath": "..",
+      "split": [
+        "",
+        ".."
+      ],
+      "dirname": "",
+      "basename": "..",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "../"
+        },
+        {
+          "tail": "x",
+          "joined": "../x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "../x/"
+        },
+        {
+          "tail": "..",
+          "joined": "../.."
+        }
+      ]
+    },
+    {
+      "path": "//a/b",
+      "normpath": "//a/b",
+      "split": [
+        "//a",
+        "b"
+      ],
+      "dirname": "//a",
+      "basename": "b",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "//a/b/"
+        },
+        {
+          "tail": "x",
+          "joined": "//a/b/x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "//a/b/x/"
+        },
+        {
+          "tail": "..",
+          "joined": "//a/b/.."
+        }
+      ]
+    },
+    {
+      "path": "///a/b",
+      "normpath": "/a/b",
+      "split": [
+        "///a",
+        "b"
+      ],
+      "dirname": "///a",
+      "basename": "b",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "///a/b/"
+        },
+        {
+          "tail": "x",
+          "joined": "///a/b/x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "///a/b/x/"
+        },
+        {
+          "tail": "..",
+          "joined": "///a/b/.."
+        }
+      ]
+    },
+    {
+      "path": "/a/b/",
+      "normpath": "/a/b",
+      "split": [
+        "/a/b",
+        ""
+      ],
+      "dirname": "/a/b",
+      "basename": "",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "/a/b/"
+        },
+        {
+          "tail": "x",
+          "joined": "/a/b/x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "/a/b/x/"
+        },
+        {
+          "tail": "..",
+          "joined": "/a/b/.."
+        }
+      ]
+    },
+    {
+      "path": "/a/b//",
+      "normpath": "/a/b",
+      "split": [
+        "/a/b",
+        ""
+      ],
+      "dirname": "/a/b",
+      "basename": "",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "/a/b//"
+        },
+        {
+          "tail": "x",
+          "joined": "/a/b//x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "/a/b//x/"
+        },
+        {
+          "tail": "..",
+          "joined": "/a/b//.."
+        }
+      ]
+    },
+    {
+      "path": "/115/embyx_in/ABC-001.mp4",
+      "normpath": "/115/embyx_in/ABC-001.mp4",
+      "split": [
+        "/115/embyx_in",
+        "ABC-001.mp4"
+      ],
+      "dirname": "/115/embyx_in",
+      "basename": "ABC-001.mp4",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "/115/embyx_in/ABC-001.mp4/"
+        },
+        {
+          "tail": "x",
+          "joined": "/115/embyx_in/ABC-001.mp4/x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "/115/embyx_in/ABC-001.mp4/x/"
+        },
+        {
+          "tail": "..",
+          "joined": "/115/embyx_in/ABC-001.mp4/.."
+        }
+      ]
+    },
+    {
+      "path": "/115/embyx_in/",
+      "normpath": "/115/embyx_in",
+      "split": [
+        "/115/embyx_in",
+        ""
+      ],
+      "dirname": "/115/embyx_in",
+      "basename": "",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "/115/embyx_in/"
+        },
+        {
+          "tail": "x",
+          "joined": "/115/embyx_in/x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "/115/embyx_in/x/"
+        },
+        {
+          "tail": "..",
+          "joined": "/115/embyx_in/.."
+        }
+      ]
+    },
+    {
+      "path": "/115/a b/c.mp4",
+      "normpath": "/115/a b/c.mp4",
+      "split": [
+        "/115/a b",
+        "c.mp4"
+      ],
+      "dirname": "/115/a b",
+      "basename": "c.mp4",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "/115/a b/c.mp4/"
+        },
+        {
+          "tail": "x",
+          "joined": "/115/a b/c.mp4/x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "/115/a b/c.mp4/x/"
+        },
+        {
+          "tail": "..",
+          "joined": "/115/a b/c.mp4/.."
+        }
+      ]
+    },
+    {
+      "path": "/中文/文件.mp4",
+      "normpath": "/中文/文件.mp4",
+      "split": [
+        "/中文",
+        "文件.mp4"
+      ],
+      "dirname": "/中文",
+      "basename": "文件.mp4",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "/中文/文件.mp4/"
+        },
+        {
+          "tail": "x",
+          "joined": "/中文/文件.mp4/x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "/中文/文件.mp4/x/"
+        },
+        {
+          "tail": "..",
+          "joined": "/中文/文件.mp4/.."
+        }
+      ]
+    },
+    {
+      "path": "a//",
+      "normpath": "a",
+      "split": [
+        "a",
+        ""
+      ],
+      "dirname": "a",
+      "basename": "",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "a//"
+        },
+        {
+          "tail": "x",
+          "joined": "a//x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "a//x/"
+        },
+        {
+          "tail": "..",
+          "joined": "a//.."
+        }
+      ]
+    },
+    {
+      "path": "/a/b/..",
+      "normpath": "/a",
+      "split": [
+        "/a/b",
+        ".."
+      ],
+      "dirname": "/a/b",
+      "basename": "..",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "/a/b/../"
+        },
+        {
+          "tail": "x",
+          "joined": "/a/b/../x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "/a/b/../x/"
+        },
+        {
+          "tail": "..",
+          "joined": "/a/b/../.."
+        }
+      ]
+    },
+    {
+      "path": "/a/b/../..",
+      "normpath": "/",
+      "split": [
+        "/a/b/..",
+        ".."
+      ],
+      "dirname": "/a/b/..",
+      "basename": "..",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "/a/b/../../"
+        },
+        {
+          "tail": "x",
+          "joined": "/a/b/../../x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "/a/b/../../x/"
+        },
+        {
+          "tail": "..",
+          "joined": "/a/b/../../.."
+        }
+      ]
+    },
+    {
+      "path": "/a/b/../../..",
+      "normpath": "/",
+      "split": [
+        "/a/b/../..",
+        ".."
+      ],
+      "dirname": "/a/b/../..",
+      "basename": "..",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "/a/b/../../../"
+        },
+        {
+          "tail": "x",
+          "joined": "/a/b/../../../x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "/a/b/../../../x/"
+        },
+        {
+          "tail": "..",
+          "joined": "/a/b/../../../.."
+        }
+      ]
+    },
+    {
+      "path": "/...",
+      "normpath": "/...",
+      "split": [
+        "/",
+        "..."
+      ],
+      "dirname": "/",
+      "basename": "...",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "/.../"
+        },
+        {
+          "tail": "x",
+          "joined": "/.../x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "/.../x/"
+        },
+        {
+          "tail": "..",
+          "joined": "/.../.."
+        }
+      ]
+    },
+    {
+      "path": "/a/.../b",
+      "normpath": "/a/.../b",
+      "split": [
+        "/a/...",
+        "b"
+      ],
+      "dirname": "/a/...",
+      "basename": "b",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "/a/.../b/"
+        },
+        {
+          "tail": "x",
+          "joined": "/a/.../b/x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "/a/.../b/x/"
+        },
+        {
+          "tail": "..",
+          "joined": "/a/.../b/.."
+        }
+      ]
+    },
+    {
+      "path": "/a\\b",
+      "normpath": "/a\\b",
+      "split": [
+        "/",
+        "a\\b"
+      ],
+      "dirname": "/",
+      "basename": "a\\b",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "/a\\b/"
+        },
+        {
+          "tail": "x",
+          "joined": "/a\\b/x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "/a\\b/x/"
+        },
+        {
+          "tail": "..",
+          "joined": "/a\\b/.."
+        }
+      ]
+    },
+    {
+      "path": "a/b/../c/./d",
+      "normpath": "a/c/d",
+      "split": [
+        "a/b/../c/.",
+        "d"
+      ],
+      "dirname": "a/b/../c/.",
+      "basename": "d",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "a/b/../c/./d/"
+        },
+        {
+          "tail": "x",
+          "joined": "a/b/../c/./d/x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "a/b/../c/./d/x/"
+        },
+        {
+          "tail": "..",
+          "joined": "a/b/../c/./d/.."
+        }
+      ]
+    },
+    {
+      "path": "//..",
+      "normpath": "//",
+      "split": [
+        "//",
+        ".."
+      ],
+      "dirname": "//",
+      "basename": "..",
+      "joins": [
+        {
+          "tail": "",
+          "joined": "//../"
+        },
+        {
+          "tail": "x",
+          "joined": "//../x"
+        },
+        {
+          "tail": "/abs",
+          "joined": "/abs"
+        },
+        {
+          "tail": "x/",
+          "joined": "//../x/"
+        },
+        {
+          "tail": "..",
+          "joined": "//../.."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,240 @@
+# Recovery from every journal state (WP11): the journal rows a build left behind (written here
+# through the repository, as either build writes them) and the disk as a crash left it. One title
+# per case: prepared with the source alone, with source and destination one inode, with a
+# foreign destination (source gone: rolled back; source there: a conflict left for a person), with
+# nothing; linked or source_removed with the destination alone, with nothing, with the source
+# rewritten, with a foreign destination, with both still linked; the quarantine name holding the
+# file (destination linked or missing) or a foreign file (destination there or not); reconciled
+# (left alone). Reconcile runs twice, then apply over the whole plan.
+description = "fill_actor: reconcile from each journal state the disk can be in"
+operation = "fill_actor.service"
+clock = "2026-09-14T03:00:00+00:00"
+
+[roots]
+names = ["actor", "additional", "movein"]
+
+[args]
+catalog = { actor = ["ABC-401", "ABC-402", "ABC-403", "ABC-404", "ABC-405", "ABC-406", "ABC-407", "ABC-408", "ABC-409", "ABC-410", "ABC-411", "ABC-412", "ABC-413", "ABC-414", "ABC-415", "ABC-416"] }
+
+[[args.steps]]
+op = "scan"
+
+[[args.steps]]
+op = "journal"
+args = { file = "ABC-401.mp4", states = ["prepared"] }
+
+[[args.steps]]
+op = "journal"
+args = { file = "ABC-402.mp4", states = ["prepared"] }
+
+[[args.steps]]
+op = "link"
+args = { target = "additional/ABC/ABC-402.mp4", path = "movein/ABC-402.mp4" }
+
+[[args.steps]]
+op = "journal"
+args = { file = "ABC-403.mp4", states = ["prepared", "linked"] }
+
+[[args.steps]]
+op = "rename"
+args = { src = "additional/ABC/ABC-403.mp4", dst = "movein/ABC-403.mp4" }
+
+[[args.steps]]
+op = "journal"
+args = { file = "ABC-404.mp4", states = ["prepared", "linked", "source_removed"] }
+
+[[args.steps]]
+op = "rename"
+args = { src = "additional/ABC/ABC-404.mp4", dst = "movein/ABC-404.mp4" }
+
+[[args.steps]]
+op = "journal"
+args = { file = "ABC-405.mp4", states = ["prepared"] }
+
+[[args.steps]]
+op = "remove"
+args = { path = "additional/ABC/ABC-405.mp4" }
+
+[[args.steps]]
+op = "write"
+args = { path = "movein/ABC-405.mp4", text = "someone else" }
+
+[[args.steps]]
+op = "journal"
+args = { file = "ABC-406.mp4", states = ["prepared"] }
+
+[[args.steps]]
+op = "write"
+args = { path = "movein/ABC-406.mp4", text = "someone else" }
+
+[[args.steps]]
+op = "journal"
+args = { file = "ABC-407.mp4", states = ["prepared", "linked"] }
+
+[[args.steps]]
+op = "remove"
+args = { path = "additional/ABC/ABC-407.mp4" }
+
+[[args.steps]]
+op = "journal"
+args = { file = "ABC-408.mp4", states = ["prepared"] }
+
+[[args.steps]]
+op = "remove"
+args = { path = "additional/ABC/ABC-408.mp4" }
+
+[[args.steps]]
+op = "journal"
+args = { file = "ABC-409.mp4", states = ["prepared", "linked"] }
+
+[[args.steps]]
+op = "write"
+args = { path = "additional/ABC/ABC-409.mp4", text = "rewritten" }
+
+[[args.steps]]
+op = "journal"
+args = { file = "ABC-410.mp4", states = ["prepared", "linked"] }
+
+[[args.steps]]
+op = "remove"
+args = { path = "additional/ABC/ABC-410.mp4" }
+
+[[args.steps]]
+op = "write"
+args = { path = "movein/ABC-410.mp4", text = "someone else" }
+
+[[args.steps]]
+op = "journal"
+args = { file = "ABC-411.mp4", states = ["prepared", "linked"] }
+
+[[args.steps]]
+op = "link"
+args = { target = "additional/ABC/ABC-411.mp4", path = "movein/.embyx-reconcile-aad2a8e98364da58c70b617575dd4457cd7fcb54164cca8f2faabfeec0300cbb" }
+
+[[args.steps]]
+op = "rename"
+args = { src = "additional/ABC/ABC-411.mp4", dst = "movein/ABC-411.mp4" }
+
+[[args.steps]]
+op = "journal"
+args = { file = "ABC-412.mp4", states = ["prepared", "linked"] }
+
+[[args.steps]]
+op = "rename"
+args = { src = "additional/ABC/ABC-412.mp4", dst = "movein/ABC-412.mp4" }
+
+[[args.steps]]
+op = "write"
+args = { path = "movein/.embyx-reconcile-d6137e5567425e33c104c8b2b0870ed0f67fd271ab9385265fa53ae7627ab6f5", text = "someone else" }
+
+[[args.steps]]
+op = "journal"
+args = { file = "ABC-413.mp4", states = ["prepared"] }
+
+[[args.steps]]
+op = "write"
+args = { path = "movein/.embyx-reconcile-084f58700d61d51c29b34e8728c9f7aa5f951cf210370b4ed19f899dfda18397", text = "someone else" }
+
+[[args.steps]]
+op = "journal"
+args = { file = "ABC-414.mp4", states = ["prepared", "linked"] }
+
+[[args.steps]]
+op = "rename"
+args = { src = "additional/ABC/ABC-414.mp4", dst = "movein/.embyx-reconcile-5fd2e112842e93d43743e4ab06839a7db12eea101016777e333970a70fd928a8" }
+
+[[args.steps]]
+op = "journal"
+args = { file = "ABC-415.mp4", states = ["prepared", "reconciled"] }
+
+[[args.steps]]
+op = "journal"
+args = { file = "ABC-416.mp4", states = ["prepared", "linked", "source_removed"] }
+
+[[args.steps]]
+op = "link"
+args = { target = "additional/ABC/ABC-416.mp4", path = "movein/ABC-416.mp4" }
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { advance_seconds = 60 }
+
+[[tree]]
+path = "additional/ABC/ABC-401.mp4"
+size = 2
+
+[[tree]]
+path = "additional/ABC/ABC-402.mp4"
+size = 3
+
+[[tree]]
+path = "additional/ABC/ABC-403.mp4"
+size = 4
+
+[[tree]]
+path = "additional/ABC/ABC-404.mp4"
+size = 5
+
+[[tree]]
+path = "additional/ABC/ABC-405.mp4"
+size = 6
+
+[[tree]]
+path = "additional/ABC/ABC-406.mp4"
+size = 7
+
+[[tree]]
+path = "additional/ABC/ABC-407.mp4"
+size = 8
+
+[[tree]]
+path = "additional/ABC/ABC-408.mp4"
+size = 9
+
+[[tree]]
+path = "additional/ABC/ABC-409.mp4"
+size = 10
+
+[[tree]]
+path = "additional/ABC/ABC-410.mp4"
+size = 11
+
+[[tree]]
+path = "additional/ABC/ABC-411.mp4"
+size = 12
+
+[[tree]]
+path = "additional/ABC/ABC-412.mp4"
+size = 13
+
+[[tree]]
+path = "additional/ABC/ABC-413.mp4"
+size = 14
+
+[[tree]]
+path = "additional/ABC/ABC-414.mp4"
+size = 15
+
+[[tree]]
+path = "additional/ABC/ABC-415.mp4"
+size = 16
+
+[[tree]]
+path = "additional/ABC/ABC-416.mp4"
+size = 17
+
+[database]
+schema = "app"
+tables = [
+    "fill_actor_plans",
+    "fill_actor_move_results",
+    "fill_actor_move_journal",
+]

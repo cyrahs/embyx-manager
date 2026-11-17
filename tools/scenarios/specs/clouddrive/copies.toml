@@ -1,0 +1,59 @@
+# Copy tasks and the upload queue through the wrapper (WP3): queueing a copy, reading the
+# tasks, restarting and cancelling one, and the upload state of a file (a fatal error
+# included, with and without a message).
+description = "clouddrive: copy tasks and upload states"
+operation = "clouddrive.steps"
+
+[[args.steps]]
+op = "copy_file"
+args = { source = "/local/upload/ABC-001.mp4", destination = "/115/upload" }
+
+[[args.steps]]
+op = "copy_file"
+args = { source = "/local/upload/ABC-002.mp4", destination = "/115/nowhere" }
+
+[[args.steps]]
+op = "copy_tasks"
+
+[[args.steps]]
+op = "restart_copy_task"
+args = { source = "/local/upload/OLD-001.mp4", destination = "/115/upload" }
+
+[[args.steps]]
+op = "cancel_copy_task"
+args = { source = "/local/upload/ABC-001.mp4", destination = "/115/upload" }
+
+[[args.steps]]
+op = "copy_tasks"
+
+[[args.steps]]
+op = "upload_state"
+args = { path = "/115/upload/OLD-001.mp4" }
+
+[[args.steps]]
+op = "upload_state"
+args = { path = "/115/upload/BAD-001.mp4" }
+
+[[args.steps]]
+op = "upload_state"
+args = { path = "/115/upload/BAD-002.mp4" }
+
+[[args.steps]]
+op = "upload_state"
+args = { path = "/115/upload/NONE-001.mp4" }
+
+[[args.steps]]
+op = "upload_state"
+args = { path = "/115/upload/OLD" }
+
+[clouddrive]
+directories = ["/115/upload"]
+copy_tasks = [
+    { source_path = "/local/upload/OLD-001.mp4", dest_path = "/115/upload", status = "Failed", total_bytes = 100, uploaded_bytes = 40, failed_files = 1, paused = false, errors = ["quota", "timeout"] },
+    { source_path = "/local/upload/DONE-001.mp4", dest_path = "/115/upload", status = "Completed", total_bytes = 7, uploaded_bytes = 7, failed_files = 0, paused = true, errors = [] },
+]
+uploads = [
+    { dest_path = "/115/upload/OLD-001.mp4", size = 100, transferred = 40, status = "Transfer" },
+    { dest_path = "/115/upload/BAD-001.mp4", size = 5, transferred = 0, status = "FatalError", error = "file too large" },
+    { dest_path = "/115/upload/BAD-002.mp4", size = 5, status = "FatalError" },
+]

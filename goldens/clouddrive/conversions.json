@@ -1,0 +1,571 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "clouddrive_wrapper",
+  "cases": [
+    {
+      "kind": "cloud_file",
+      "message": "clouddrive.CloudDriveFile",
+      "bytes": "0a0766696c652d6964120b4142432d3030312e6d70341a102f3131352f4142432d3030312e6d7034207b",
+      "value": {
+        "id": "file-id",
+        "name": "ABC-001.mp4",
+        "full_path": "/115/ABC-001.mp4",
+        "size": 123,
+        "is_directory": false,
+        "write_time": null,
+        "hashes": {}
+      }
+    },
+    {
+      "kind": "cloud_file",
+      "message": "clouddrive.CloudDriveFile",
+      "bytes": "0a016412034142431a082f3131352f4142433a0608c803109506f00101",
+      "value": {
+        "id": "d",
+        "name": "ABC",
+        "full_path": "/115/ABC",
+        "size": 0,
+        "is_directory": true,
+        "write_time": {
+          "seconds": 456,
+          "nanos": 789
+        },
+        "hashes": {}
+      }
+    },
+    {
+      "kind": "cloud_file",
+      "message": "clouddrive.CloudDriveFile",
+      "bytes": "0a017a12017a3a00",
+      "value": {
+        "id": "z",
+        "name": "z",
+        "full_path": "",
+        "size": 0,
+        "is_directory": false,
+        "write_time": {
+          "seconds": 0,
+          "nanos": 0
+        },
+        "hashes": {}
+      }
+    },
+    {
+      "kind": "cloud_file",
+      "message": "clouddrive.CloudDriveFile",
+      "bytes": "0a01681205682e6d70341a0a2f3131352f682e6d70342080fca2b4ac03b20407080a120374656eb2040408031200b2040e0802120a736861312d76616c7565b20407080112036d6435",
+      "value": {
+        "id": "h",
+        "name": "h.mp4",
+        "full_path": "/115/h.mp4",
+        "size": 115000000000,
+        "is_directory": false,
+        "write_time": null,
+        "hashes": {
+          "1": "md5",
+          "10": "ten",
+          "2": "sha1-value",
+          "3": ""
+        }
+      }
+    },
+    {
+      "kind": "cloud_file",
+      "message": "clouddrive.CloudDriveFile",
+      "bytes": "20ffffffffffffffffff01",
+      "value": {
+        "id": "",
+        "name": "",
+        "full_path": "",
+        "size": -1,
+        "is_directory": false,
+        "write_time": null,
+        "hashes": {}
+      }
+    },
+    {
+      "kind": "cloud_file",
+      "message": "clouddrive.CloudDriveFile",
+      "bytes": "",
+      "value": {
+        "id": "",
+        "name": "",
+        "full_path": "",
+        "size": 0,
+        "is_directory": false,
+        "write_time": null,
+        "hashes": {}
+      }
+    },
+    {
+      "kind": "offline_file",
+      "message": "clouddrive.OfflineFile",
+      "bytes": "0a074142432d3132331080081a3c6d61676e65743a3f78743d75726e3a627469683a6331326665316330366262613235346139646339663531396233333561613763313336376138386120012a28633132666531633036626261323534613964633966353139623333356161376331333637613838613202343238c0d9ecc406490ad7a3703daa40405007",
+      "value": {
+        "name": "ABC-123",
+        "size": 1024,
+        "url": "magnet:?xt=urn:btih:c12fe1c06bba254a9dc9f519b335aa7c1367a88a",
+        "status": "OFFLINE_DOWNLOADING",
+        "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+        "file_id": "42",
+        "add_time": 1755000000,
+        "progress": 33.33,
+        "peers": 7
+      }
+    },
+    {
+      "kind": "offline_file",
+      "message": "clouddrive.OfflineFile",
+      "bytes": "0a074142432d3132331080081a3c6d61676e65743a3f78743d75726e3a627469683a633132666531633036626261323534613964633966353139623333356161376331333637613838612a28633132666531633036626261323534613964633966353139623333356161376331333637613838613202343238c0d9ecc406490ad7a3703daa40405007",
+      "value": {
+        "name": "ABC-123",
+        "size": 1024,
+        "url": "magnet:?xt=urn:btih:c12fe1c06bba254a9dc9f519b335aa7c1367a88a",
+        "status": "OFFLINE_INIT",
+        "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+        "file_id": "42",
+        "add_time": 1755000000,
+        "progress": 33.33,
+        "peers": 7
+      }
+    },
+    {
+      "kind": "offline_file",
+      "message": "clouddrive.OfflineFile",
+      "bytes": "0a074142432d3132331080081a3c6d61676e65743a3f78743d75726e3a627469683a6331326665316330366262613235346139646339663531396233333561613763313336376138386120022a28633132666531633036626261323534613964633966353139623333356161376331333637613838613202343238c0d9ecc406490ad7a3703daa40405007",
+      "value": {
+        "name": "ABC-123",
+        "size": 1024,
+        "url": "magnet:?xt=urn:btih:c12fe1c06bba254a9dc9f519b335aa7c1367a88a",
+        "status": "OFFLINE_FINISHED",
+        "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+        "file_id": "42",
+        "add_time": 1755000000,
+        "progress": 33.33,
+        "peers": 7
+      }
+    },
+    {
+      "kind": "offline_file",
+      "message": "clouddrive.OfflineFile",
+      "bytes": "0a074142432d3132331080081a3c6d61676e65743a3f78743d75726e3a627469683a6331326665316330366262613235346139646339663531396233333561613763313336376138386120032a28633132666531633036626261323534613964633966353139623333356161376331333637613838613202343238c0d9ecc406490ad7a3703daa40405007",
+      "value": {
+        "name": "ABC-123",
+        "size": 1024,
+        "url": "magnet:?xt=urn:btih:c12fe1c06bba254a9dc9f519b335aa7c1367a88a",
+        "status": "OFFLINE_ERROR",
+        "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+        "file_id": "42",
+        "add_time": 1755000000,
+        "progress": 33.33,
+        "peers": 7
+      }
+    },
+    {
+      "kind": "offline_file",
+      "message": "clouddrive.OfflineFile",
+      "bytes": "0a074142432d3132331080081a3c6d61676e65743a3f78743d75726e3a627469683a6331326665316330366262613235346139646339663531396233333561613763313336376138386120042a28633132666531633036626261323534613964633966353139623333356161376331333637613838613202343238c0d9ecc406490ad7a3703daa40405007",
+      "value": {
+        "name": "ABC-123",
+        "size": 1024,
+        "url": "magnet:?xt=urn:btih:c12fe1c06bba254a9dc9f519b335aa7c1367a88a",
+        "status": "OFFLINE_UNKNOWN",
+        "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+        "file_id": "42",
+        "add_time": 1755000000,
+        "progress": 33.33,
+        "peers": 7
+      }
+    },
+    {
+      "kind": "offline_file",
+      "message": "clouddrive.OfflineFile",
+      "bytes": "0a074142432d3132331080081a3c6d61676e65743a3f78743d75726e3a627469683a6331326665316330366262613235346139646339663531396233333561613763313336376138386120052a28633132666531633036626261323534613964633966353139623333356161376331333637613838613202343238c0d9ecc406490ad7a3703daa40405007",
+      "value": {
+        "name": "ABC-123",
+        "size": 1024,
+        "url": "magnet:?xt=urn:btih:c12fe1c06bba254a9dc9f519b335aa7c1367a88a",
+        "status": "OFFLINE_UNKNOWN",
+        "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+        "file_id": "42",
+        "add_time": 1755000000,
+        "progress": 33.33,
+        "peers": 7
+      }
+    },
+    {
+      "kind": "offline_file",
+      "message": "clouddrive.OfflineFile",
+      "bytes": "0a074142432d3132331080081a3c6d61676e65743a3f78743d75726e3a627469683a6331326665316330366262613235346139646339663531396233333561613763313336376138386120632a28633132666531633036626261323534613964633966353139623333356161376331333637613838613202343238c0d9ecc406490ad7a3703daa40405007",
+      "value": {
+        "name": "ABC-123",
+        "size": 1024,
+        "url": "magnet:?xt=urn:btih:c12fe1c06bba254a9dc9f519b335aa7c1367a88a",
+        "status": "OFFLINE_UNKNOWN",
+        "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+        "file_id": "42",
+        "add_time": 1755000000,
+        "progress": 33.33,
+        "peers": 7
+      }
+    },
+    {
+      "kind": "offline_file",
+      "message": "clouddrive.OfflineFile",
+      "bytes": "0a074142432d3132331080081a3c6d61676e65743a3f78743d75726e3a627469683a6331326665316330366262613235346139646339663531396233333561613763313336376138386120ffffffffffffffffff012a28633132666531633036626261323534613964633966353139623333356161376331333637613838613202343238c0d9ecc406490ad7a3703daa40405007",
+      "value": {
+        "name": "ABC-123",
+        "size": 1024,
+        "url": "magnet:?xt=urn:btih:c12fe1c06bba254a9dc9f519b335aa7c1367a88a",
+        "status": "OFFLINE_UNKNOWN",
+        "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+        "file_id": "42",
+        "add_time": 1755000000,
+        "progress": 33.33,
+        "peers": 7
+      }
+    },
+    {
+      "kind": "offline_file",
+      "message": "clouddrive.OfflineFile",
+      "bytes": "0a074142432d3132331080081a3c6d61676e65743a3f78743d75726e3a627469683a6331326665316330366262613235346139646339663531396233333561613763313336376138386120012a28633132666531633036626261323534613964633966353139623333356161376331333637613838613202343238c0d9ecc4065007",
+      "value": {
+        "name": "ABC-123",
+        "size": 1024,
+        "url": "magnet:?xt=urn:btih:c12fe1c06bba254a9dc9f519b335aa7c1367a88a",
+        "status": "OFFLINE_DOWNLOADING",
+        "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+        "file_id": "42",
+        "add_time": 1755000000,
+        "progress": 0.0,
+        "peers": 7
+      }
+    },
+    {
+      "kind": "offline_file",
+      "message": "clouddrive.OfflineFile",
+      "bytes": "0a074142432d3132331080081a3c6d61676e65743a3f78743d75726e3a627469683a6331326665316330366262613235346139646339663531396233333561613763313336376138386120012a28633132666531633036626261323534613964633966353139623333356161376331333637613838613202343238c0d9ecc4064900000000000059405007",
+      "value": {
+        "name": "ABC-123",
+        "size": 1024,
+        "url": "magnet:?xt=urn:btih:c12fe1c06bba254a9dc9f519b335aa7c1367a88a",
+        "status": "OFFLINE_DOWNLOADING",
+        "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+        "file_id": "42",
+        "add_time": 1755000000,
+        "progress": 100.0,
+        "peers": 7
+      }
+    },
+    {
+      "kind": "offline_file",
+      "message": "clouddrive.OfflineFile",
+      "bytes": "0a074142432d3132331080081a3c6d61676e65743a3f78743d75726e3a627469683a6331326665316330366262613235346139646339663531396233333561613763313336376138386120012a28633132666531633036626261323534613964633966353139623333356161376331333637613838613202343238c0d9ecc406499a9999999999b93f5007",
+      "value": {
+        "name": "ABC-123",
+        "size": 1024,
+        "url": "magnet:?xt=urn:btih:c12fe1c06bba254a9dc9f519b335aa7c1367a88a",
+        "status": "OFFLINE_DOWNLOADING",
+        "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+        "file_id": "42",
+        "add_time": 1755000000,
+        "progress": 0.1,
+        "peers": 7
+      }
+    },
+    {
+      "kind": "offline_file",
+      "message": "clouddrive.OfflineFile",
+      "bytes": "0a074142432d3132331080081a3c6d61676e65743a3f78743d75726e3a627469683a6331326665316330366262613235346139646339663531396233333561613763313336376138386120012a28633132666531633036626261323534613964633966353139623333356161376331333637613838613202343238c0d9ecc4064948afbc9af2d77a3e5007",
+      "value": {
+        "name": "ABC-123",
+        "size": 1024,
+        "url": "magnet:?xt=urn:btih:c12fe1c06bba254a9dc9f519b335aa7c1367a88a",
+        "status": "OFFLINE_DOWNLOADING",
+        "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+        "file_id": "42",
+        "add_time": 1755000000,
+        "progress": 1e-07,
+        "peers": 7
+      }
+    },
+    {
+      "kind": "offline_file",
+      "message": "clouddrive.OfflineFile",
+      "bytes": "0a074142432d3132331080081a3c6d61676e65743a3f78743d75726e3a627469683a6331326665316330366262613235346139646339663531396233333561613763313336376138386120012a28633132666531633036626261323534613964633966353139623333356161376331333637613838613202343238c0d9ecc406493943f5ffffff58405007",
+      "value": {
+        "name": "ABC-123",
+        "size": 1024,
+        "url": "magnet:?xt=urn:btih:c12fe1c06bba254a9dc9f519b335aa7c1367a88a",
+        "status": "OFFLINE_DOWNLOADING",
+        "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+        "file_id": "42",
+        "add_time": 1755000000,
+        "progress": 99.99999999,
+        "peers": 7
+      }
+    },
+    {
+      "kind": "offline_file",
+      "message": "clouddrive.OfflineFile",
+      "bytes": "0a074142432d3132331080081a3c6d61676e65743a3f78743d75726e3a627469683a6331326665316330366262613235346139646339663531396233333561613763313336376138386120012a28633132666531633036626261323534613964633966353139623333356161376331333637613838613202343238c0d9ecc40649cdccccdc298c67415007",
+      "value": {
+        "name": "ABC-123",
+        "size": 1024,
+        "url": "magnet:?xt=urn:btih:c12fe1c06bba254a9dc9f519b335aa7c1367a88a",
+        "status": "OFFLINE_DOWNLOADING",
+        "info_hash": "C12FE1C06BBA254A9DC9F519B335AA7C1367A88A",
+        "file_id": "42",
+        "add_time": 1755000000,
+        "progress": 12345678.9,
+        "peers": 7
+      }
+    },
+    {
+      "kind": "offline_file",
+      "message": "clouddrive.OfflineFile",
+      "bytes": "0a074142432d3132331080081a3c6d61676e65743a3f78743d75726e3a627469683a6331326665316330366262613235346139646339663531396233333561613763313336376138386120012a0fc3846263e1ba9ec39f444546c4b1693202343238c0d9ecc406490ad7a3703daa40405007",
+      "value": {
+        "name": "ABC-123",
+        "size": 1024,
+        "url": "magnet:?xt=urn:btih:c12fe1c06bba254a9dc9f519b335aa7c1367a88a",
+        "status": "OFFLINE_DOWNLOADING",
+        "info_hash": "ÄBCẞSSDEFII",
+        "file_id": "42",
+        "add_time": 1755000000,
+        "progress": 33.33,
+        "peers": 7
+      }
+    },
+    {
+      "kind": "offline_file",
+      "message": "clouddrive.OfflineFile",
+      "bytes": "10ffffffffffffffffff01388080808080808080800150808080808020",
+      "value": {
+        "name": "",
+        "size": 18446744073709551615,
+        "url": "",
+        "status": "OFFLINE_INIT",
+        "info_hash": "",
+        "file_id": "",
+        "add_time": 9223372036854775808,
+        "progress": 0.0,
+        "peers": 1099511627776
+      }
+    },
+    {
+      "kind": "offline_file",
+      "message": "clouddrive.OfflineFile",
+      "bytes": "",
+      "value": {
+        "name": "",
+        "size": 0,
+        "url": "",
+        "status": "OFFLINE_INIT",
+        "info_hash": "",
+        "file_id": "",
+        "add_time": 0,
+        "progress": 0.0,
+        "peers": 0
+      }
+    },
+    {
+      "kind": "copy_task",
+      "message": "clouddrive.CopyTask",
+      "bytes": "1a152f75706c6f61642f6d657267652f4142432e6d703422132f3131352f75706c6f61642f6d657267652d31480260808080983b68017a07120566697273747a1c121ae58d95e69687e4bbb6e4b88de883bde5a4a7e4ba8e3131354742",
+      "value": {
+        "source_path": "/upload/merge/ABC.mp4",
+        "dest_path": "/115/upload/merge-1",
+        "status": "Pending",
+        "total_bytes": 15888023552,
+        "uploaded_bytes": 1,
+        "failed_files": 2,
+        "paused": false,
+        "errors": [
+          "first",
+          "单文件不能大于115GB"
+        ]
+      }
+    },
+    {
+      "kind": "copy_task",
+      "message": "clouddrive.CopyTask",
+      "bytes": "1a152f75706c6f61642f6d657267652f4142432e6d703422132f3131352f75706c6f61642f6d657267652d312801480260808080983b680170017a07120566697273747a1c121ae58d95e69687e4bbb6e4b88de883bde5a4a7e4ba8e3131354742",
+      "value": {
+        "source_path": "/upload/merge/ABC.mp4",
+        "dest_path": "/115/upload/merge-1",
+        "status": "Scanning",
+        "total_bytes": 15888023552,
+        "uploaded_bytes": 1,
+        "failed_files": 2,
+        "paused": true,
+        "errors": [
+          "first",
+          "单文件不能大于115GB"
+        ]
+      }
+    },
+    {
+      "kind": "copy_task",
+      "message": "clouddrive.CopyTask",
+      "bytes": "1a152f75706c6f61642f6d657267652f4142432e6d703422132f3131352f75706c6f61642f6d657267652d312802480260808080983b68017a07120566697273747a1c121ae58d95e69687e4bbb6e4b88de883bde5a4a7e4ba8e3131354742",
+      "value": {
+        "source_path": "/upload/merge/ABC.mp4",
+        "dest_path": "/115/upload/merge-1",
+        "status": "Scanned",
+        "total_bytes": 15888023552,
+        "uploaded_bytes": 1,
+        "failed_files": 2,
+        "paused": false,
+        "errors": [
+          "first",
+          "单文件不能大于115GB"
+        ]
+      }
+    },
+    {
+      "kind": "copy_task",
+      "message": "clouddrive.CopyTask",
+      "bytes": "1a152f75706c6f61642f6d657267652f4142432e6d703422132f3131352f75706c6f61642f6d657267652d312803480260808080983b68017a07120566697273747a1c121ae58d95e69687e4bbb6e4b88de883bde5a4a7e4ba8e3131354742",
+      "value": {
+        "source_path": "/upload/merge/ABC.mp4",
+        "dest_path": "/115/upload/merge-1",
+        "status": "Completed",
+        "total_bytes": 15888023552,
+        "uploaded_bytes": 1,
+        "failed_files": 2,
+        "paused": false,
+        "errors": [
+          "first",
+          "单文件不能大于115GB"
+        ]
+      }
+    },
+    {
+      "kind": "copy_task",
+      "message": "clouddrive.CopyTask",
+      "bytes": "1a152f75706c6f61642f6d657267652f4142432e6d703422132f3131352f75706c6f61642f6d657267652d312804480260808080983b68017a07120566697273747a1c121ae58d95e69687e4bbb6e4b88de883bde5a4a7e4ba8e3131354742",
+      "value": {
+        "source_path": "/upload/merge/ABC.mp4",
+        "dest_path": "/115/upload/merge-1",
+        "status": "Failed",
+        "total_bytes": 15888023552,
+        "uploaded_bytes": 1,
+        "failed_files": 2,
+        "paused": false,
+        "errors": [
+          "first",
+          "单文件不能大于115GB"
+        ]
+      }
+    },
+    {
+      "kind": "copy_task",
+      "message": "clouddrive.CopyTask",
+      "bytes": "1a152f75706c6f61642f6d657267652f4142432e6d703422132f3131352f75706c6f61642f6d657267652d312807480260808080983b68017a07120566697273747a1c121ae58d95e69687e4bbb6e4b88de883bde5a4a7e4ba8e3131354742",
+      "value": {
+        "source_path": "/upload/merge/ABC.mp4",
+        "dest_path": "/115/upload/merge-1",
+        "status": "Unknown",
+        "total_bytes": 15888023552,
+        "uploaded_bytes": 1,
+        "failed_files": 2,
+        "paused": false,
+        "errors": [
+          "first",
+          "单文件不能大于115GB"
+        ]
+      }
+    },
+    {
+      "kind": "copy_task",
+      "message": "clouddrive.CopyTask",
+      "bytes": "1a152f75706c6f61642f6d657267652f4142432e6d703422132f3131352f75706c6f61642f6d657267652d3128fdffffffffffffffff01480260808080983b680170017a07120566697273747a1c121ae58d95e69687e4bbb6e4b88de883bde5a4a7e4ba8e3131354742",
+      "value": {
+        "source_path": "/upload/merge/ABC.mp4",
+        "dest_path": "/115/upload/merge-1",
+        "status": "Unknown",
+        "total_bytes": 15888023552,
+        "uploaded_bytes": 1,
+        "failed_files": 2,
+        "paused": true,
+        "errors": [
+          "first",
+          "单文件不能大于115GB"
+        ]
+      }
+    },
+    {
+      "kind": "copy_task",
+      "message": "clouddrive.CopyTask",
+      "bytes": "",
+      "value": {
+        "source_path": "",
+        "dest_path": "",
+        "status": "Pending",
+        "total_bytes": 0,
+        "uploaded_bytes": 0,
+        "failed_files": 0,
+        "paused": false,
+        "errors": []
+      }
+    },
+    {
+      "kind": "upload_state",
+      "message": "clouddrive.UploadFileInfo",
+      "bytes": "12112f3131352f75706c6f61642f612e6d70342a0a466174616c4572726f72320b636f64653a203130303235",
+      "value": {
+        "status": "FatalError",
+        "transferred": 0,
+        "error": "code: 10025",
+        "fatal": "code: 10025"
+      }
+    },
+    {
+      "kind": "upload_state",
+      "message": "clouddrive.UploadFileInfo",
+      "bytes": "12112f3131352f75706c6f61642f612e6d70342a0a466174616c4572726f72",
+      "value": {
+        "status": "FatalError",
+        "transferred": 0,
+        "error": "",
+        "fatal": "fatal upload error"
+      }
+    },
+    {
+      "kind": "upload_state",
+      "message": "clouddrive.UploadFileInfo",
+      "bytes": "12112f3131352f75706c6f61642f612e6d703420808080983b2a085472616e73666572",
+      "value": {
+        "status": "Transfer",
+        "transferred": 15888023552,
+        "error": "",
+        "fatal": null
+      }
+    },
+    {
+      "kind": "upload_state",
+      "message": "clouddrive.UploadFileInfo",
+      "bytes": "12112f3131352f75706c6f61642f612e6d70342a0a666174616c6572726f72320a6c6f7765722063617365",
+      "value": {
+        "status": "fatalerror",
+        "transferred": 0,
+        "error": "lower case",
+        "fatal": null
+      }
+    },
+    {
+      "kind": "upload_state",
+      "message": "clouddrive.UploadFileInfo",
+      "bytes": "",
+      "value": {
+        "status": "",
+        "transferred": 0,
+        "error": "",
+        "fatal": null
+      }
+    }
+  ]
+}

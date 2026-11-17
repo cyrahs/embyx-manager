@@ -1,0 +1,539 @@
+{
+  "calls": [
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/apis/batch/v1/namespaces/media/jobs/embyx-merge-1-abc-001",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "kind": "Status",
+          "reason": "NotFound"
+        },
+        "status": 404
+      },
+      "seq": 1
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/api/v1/namespaces/media/pods/embyx-manager-7d9f-abcde",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "spec": {
+            "containers": [
+              {
+                "image": "ghcr.io/cyrahs/embyx-manager:latest",
+                "name": "embyx-manager"
+              }
+            ]
+          },
+          "status": {
+            "containerStatuses": [
+              {
+                "imageID": "docker-pullable://ghcr.io/cyrahs/embyx-manager@sha256:0123abcd",
+                "name": "embyx-manager"
+              }
+            ]
+          }
+        },
+        "status": 200
+      },
+      "seq": 2
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "POST",
+      "request": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "1"
+            },
+            "name": "embyx-merge-1-abc-001"
+          },
+          "spec": {
+            "backoffLimit": 0,
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "1"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "merge-worker",
+                      "--task",
+                      "1",
+                      "中文"
+                    ],
+                    "command": [
+                      "embyx-manager"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:0123abcd",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "kind": "Job"
+        },
+        "status": 201
+      },
+      "seq": 3
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "POST",
+      "request": {
+        "body": {
+          "apiVersion": "batch/v1",
+          "kind": "Job",
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "1"
+            },
+            "name": "embyx-merge-1-abc-001"
+          },
+          "spec": {
+            "backoffLimit": 0,
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "1"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "merge-worker",
+                      "--task",
+                      "1"
+                    ],
+                    "command": [
+                      "embyx-manager"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:0123abcd",
+                    "name": "merge"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "kind": "Status",
+          "reason": "AlreadyExists"
+        },
+        "status": 409
+      },
+      "seq": 4
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "POST",
+      "request": {
+        "body": {
+          "metadata": {
+            "labels": {
+              "app": "embyx-merge",
+              "embyx-manager/merge-task": "2",
+              "tier": "batch"
+            },
+            "name": "embyx-merge-2-def-002"
+          },
+          "spec": {
+            "backoffLimit": 0,
+            "template": {
+              "metadata": {
+                "labels": {
+                  "embyx-manager/merge-task": "2"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "args": [
+                      "merge-worker",
+                      "--task",
+                      "2"
+                    ],
+                    "image": "ghcr.io/cyrahs/embyx-manager@sha256:0123abcd",
+                    "name": "merge"
+                  }
+                ],
+                "restartPolicy": "Never"
+              }
+            }
+          }
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "kind": "Job"
+        },
+        "status": 201
+      },
+      "seq": 5
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/apis/batch/v1/namespaces/media/jobs/embyx-merge-1-abc-001",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "metadata": {
+            "name": "embyx-merge-1-abc-001"
+          },
+          "status": {
+            "conditions": [
+              {
+                "message": "Job has reached the specified backoff limit",
+                "reason": "BackoffLimitExceeded",
+                "status": "True",
+                "type": "Failed"
+              }
+            ],
+            "failed": 1
+          }
+        },
+        "status": 200
+      },
+      "seq": 6
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/api/v1/namespaces/media/pods",
+        "query": {
+          "labelSelector": [
+            "job-name=embyx-merge-1-abc-001"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "items": [
+            {
+              "metadata": {
+                "name": "embyx-merge-1-abc-001-old"
+              }
+            },
+            {
+              "metadata": {
+                "name": "embyx-merge-1-abc-001-x7k2p"
+              }
+            }
+          ]
+        },
+        "status": 200
+      },
+      "seq": 7
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/api/v1/namespaces/media/pods/embyx-merge-1-abc-001-x7k2p/log",
+        "query": {
+          "tailLines": [
+            "5"
+          ]
+        }
+      },
+      "response": {
+        "body": "ffmpeg: concat failed\n",
+        "status": 200
+      },
+      "seq": 8
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/api/v1/namespaces/media/pods",
+        "query": {
+          "labelSelector": [
+            "job-name=embyx-merge-2-def-002"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "items": []
+        },
+        "status": 200
+      },
+      "seq": 9
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "DELETE",
+      "request": {
+        "body": {
+          "propagationPolicy": "Background"
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs/embyx-merge-1-abc-001",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "kind": "Status",
+          "status": "Success"
+        },
+        "status": 200
+      },
+      "seq": 10
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "DELETE",
+      "request": {
+        "body": {
+          "propagationPolicy": "Background"
+        },
+        "path": "/apis/batch/v1/namespaces/media/jobs/embyx-merge-1-abc-001",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "error": "no route"
+        },
+        "status": 404
+      },
+      "seq": 11
+    },
+    {
+      "fake": "kubernetes",
+      "lane": "main",
+      "method": "GET",
+      "request": {
+        "body": null,
+        "path": "/apis/batch/v1/namespaces/media/jobs/embyx-merge-1-abc-001",
+        "query": {}
+      },
+      "response": {
+        "body": {
+          "message": "etcdserver: request timed out"
+        },
+        "status": 500
+      },
+      "seq": 12
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": [
+        {
+          "body": {
+            "spec": {
+              "containers": [
+                {
+                  "image": "ghcr.io/cyrahs/embyx-manager:latest",
+                  "name": "embyx-manager"
+                }
+              ]
+            },
+            "status": {
+              "containerStatuses": [
+                {
+                  "imageID": "docker-pullable://ghcr.io/cyrahs/embyx-manager@sha256:0123abcd",
+                  "name": "embyx-manager"
+                }
+              ]
+            }
+          },
+          "method": "GET",
+          "path": "/api/v1/namespaces/media/pods/embyx-manager-7d9f-abcde"
+        },
+        {
+          "body": "ffmpeg: concat failed\n",
+          "method": "GET",
+          "path": "/api/v1/namespaces/media/pods/embyx-merge-1-abc-001-x7k2p/log"
+        },
+        {
+          "body": {
+            "items": []
+          },
+          "method": "GET",
+          "path": "/api/v1/namespaces/media/pods"
+        },
+        {
+          "body": {
+            "message": "etcdserver: request timed out"
+          },
+          "method": "GET",
+          "path": "/apis/batch/v1/namespaces/media/jobs/embyx-merge-1-abc-001",
+          "status": 500
+        }
+      ]
+    }
+  },
+  "format": 1,
+  "operation": "kube.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "op": "get_job",
+          "result": null
+        },
+        {
+          "op": "create_job",
+          "result": null
+        },
+        {
+          "op": "create_job",
+          "result": null
+        },
+        {
+          "op": "own_image",
+          "result": "ghcr.io/cyrahs/embyx-manager@sha256:0123abcd"
+        },
+        {
+          "op": "write_template",
+          "result": null
+        },
+        {
+          "op": "create_job",
+          "result": null
+        },
+        {
+          "op": "get_job",
+          "result": {
+            "failure": "Job has reached the specified backoff limit",
+            "job": {
+              "metadata": {
+                "name": "embyx-merge-1-abc-001"
+              },
+              "status": {
+                "conditions": [
+                  {
+                    "message": "Job has reached the specified backoff limit",
+                    "reason": "BackoffLimitExceeded",
+                    "status": "True",
+                    "type": "Failed"
+                  }
+                ],
+                "failed": 1
+              }
+            },
+            "outcome": "failed"
+          }
+        },
+        {
+          "op": "log_tail",
+          "result": "\"ffmpeg: concat failed\\n\""
+        },
+        {
+          "op": "log_tail",
+          "result": ""
+        },
+        {
+          "op": "delete_job",
+          "result": null
+        },
+        {
+          "op": "delete_job",
+          "result": null
+        },
+        {
+          "error": {
+            "message": "Kubernetes API GET /apis/batch/v1/namespaces/media/jobs/embyx-merge-1-abc-001 answered 500: {\"message\": \"etcdserver: request timed out\"}",
+            "type": "KubeError"
+          },
+          "op": "get_job"
+        },
+        {
+          "op": "write_template",
+          "result": null
+        },
+        {
+          "error": {
+            "message": "'spec'",
+            "type": "KeyError"
+          },
+          "op": "create_job"
+        }
+      ]
+    }
+  },
+  "rows": {},
+  "scenario": "kube/jobs",
+  "tree": {
+    "mount": [
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "job.json",
+        "sha256": "d02566bce32faf91",
+        "size": 26
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "token",
+        "sha256": "2625bb043465a793",
+        "size": 31
+      }
+    ]
+  }
+}

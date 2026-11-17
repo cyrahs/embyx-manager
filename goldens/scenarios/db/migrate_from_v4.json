@@ -1,0 +1,216 @@
+{
+  "calls": [],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "db.migrate_from",
+  "outcome": {
+    "result": {
+      "versions": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ]
+    }
+  },
+  "rows": {
+    "app_config": [
+      {
+        "section": "archive",
+        "updated_at": "2026-05-03T00:00:00+00:00",
+        "value_json": "{\"dst_dir\": \"/library\", \"enabled\": true, \"src_dir\": \"/downloads\", \"tracker_interval_seconds\": 1800}",
+        "version": 4
+      },
+      {
+        "section": "clouddrive",
+        "updated_at": "2026-05-01T00:00:00+00:00",
+        "value_json": "{\"secure\": false, \"address\": \"clouddrive:19798\", \"api_token\": \"x\"}",
+        "version": 3
+      },
+      {
+        "section": "mapping",
+        "updated_at": "2026-05-04T00:00:00+00:00",
+        "value_json": "{\"enabled\": false, \"debounce_seconds\": 2.5}",
+        "version": 1
+      },
+      {
+        "section": "rss",
+        "updated_at": "2026-05-02T00:00:00+00:00",
+        "value_json": "{\"enabled\": true, \"categories\": [{\"label\": \"演员\", \"task_dir_path\": \"/115/embyx_in\"}, {\"label\": \"Rank\", \"task_dir_path\": \"/115/embyx_in\"}], \"interval_seconds\": 900, \"failed_avid_cooldown_seconds\": 3600}",
+        "version": 2
+      }
+    ],
+    "archive_acquisitions": [
+      {
+        "archived_paths_json": "[]",
+        "avid": "123456-789",
+        "created_at": "2026-07-07T10:00:00+00:00",
+        "next_action_at": "2026-07-08T10:00:00+00:00",
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss_actor",
+        "state": "resolve_failed",
+        "task_dir_path": "/115/embyx_in",
+        "updated_at": "2026-07-07T10:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "ABC-123",
+        "created_at": "2026-07-01T10:00:00+00:00",
+        "next_action_at": "2026-07-02T10:00:00+00:00",
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss_actor",
+        "state": "resolve_failed",
+        "task_dir_path": "/115/embyx_in",
+        "updated_at": "2026-07-01T10:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "ABP-0012",
+        "created_at": "2026-07-03T10:00:00+00:00",
+        "next_action_at": "2026-07-04T10:00:00+00:00",
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss_actor",
+        "state": "resolve_failed",
+        "task_dir_path": "/115/embyx_in",
+        "updated_at": "2026-07-03T10:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "ABP-012",
+        "created_at": "2026-07-02T10:00:00+00:00",
+        "next_action_at": "2026-07-03T10:00:00+00:00",
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss_actor",
+        "state": "resolve_failed",
+        "task_dir_path": "/115/embyx_in",
+        "updated_at": "2026-07-02T10:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "FC2-00123",
+        "created_at": "2026-07-04T10:00:00+00:00",
+        "next_action_at": "2026-07-05T10:00:00+00:00",
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss_actor",
+        "state": "resolve_failed",
+        "task_dir_path": "/115/embyx_in",
+        "updated_at": "2026-07-04T10:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "TBW-019",
+        "created_at": "2026-07-05T10:00:00+00:00",
+        "next_action_at": "2026-07-06T10:00:00+00:00",
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss_actor",
+        "state": "resolve_failed",
+        "task_dir_path": "/115/embyx_in",
+        "updated_at": "2026-07-05T10:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "XYZ-0045",
+        "created_at": "2026-07-06T10:00:00+00:00",
+        "next_action_at": "2026-07-07T10:00:00+00:00",
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss_actor",
+        "state": "resolve_failed",
+        "task_dir_path": "/115/embyx_in",
+        "updated_at": "2026-07-06T10:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "XYZ-045",
+        "created_at": "2026-07-06T11:00:00+00:00",
+        "next_action_at": "2026-07-07T11:00:00+00:00",
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss_actor",
+        "state": "resolve_failed",
+        "task_dir_path": "/115/embyx_in",
+        "updated_at": "2026-07-06T11:00:00+00:00"
+      }
+    ],
+    "archive_magnet_attempts": [],
+    "feed_subscriptions": [],
+    "fill_actor_apply_jobs": [],
+    "fill_actor_candidates": [],
+    "fill_actor_cloud_move_operations": [],
+    "fill_actor_jobs": [],
+    "fill_actor_move_journal": [],
+    "fill_actor_move_results": [],
+    "fill_actor_plans": [
+      {
+        "config_version": 3,
+        "created_at": "2026-07-01T00:00:00+00:00",
+        "expires_at": "2026-07-02T00:00:00+00:00",
+        "plan_id": "plan-1",
+        "public_json": "{}",
+        "revision": "r1"
+      }
+    ],
+    "health_probe": [],
+    "merge_tasks": [],
+    "merge_transcode_chunks": [],
+    "merge_transcode_parts": [],
+    "pipeline_runs": [],
+    "playlist_source": [],
+    "playlists": []
+  },
+  "scenario": "db/migrate_from_v4",
+  "tree": {}
+}

@@ -1,0 +1,1122 @@
+{
+  "calls": [],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "fill_actor.repository",
+  "outcome": {
+    "result": [
+      {
+        "op": "get_plan",
+        "result": {
+          "candidates": [
+            {
+              "candidate_id": "legacy-c",
+              "cloud_destination_dir": "/cloud/library/destination/OLD",
+              "cloud_file": {
+                "file_id": "old-file",
+                "hashes": [
+                  [
+                    "2",
+                    "SHA1"
+                  ],
+                  [
+                    "中",
+                    "é"
+                  ]
+                ],
+                "name": "OLD-001.mp4",
+                "path": "/cloud/library/source-b/OLD/OLD-001.mp4",
+                "size": 1073741824000,
+                "write_time": 1783936800123456789
+              },
+              "cloud_source_path": "/cloud/library/source-b/OLD/OLD-001.mp4",
+              "destination": "/move-in/OLD/OLD-001.strm",
+              "fingerprint": {
+                "ctime_ns": 1783936800123456789,
+                "device": 66306,
+                "inode": 1234567,
+                "mtime_ns": 1783936800123456789,
+                "size": 52
+              },
+              "kind": "cloud_strm",
+              "mapping_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "source": "/mapping/OLD/OLD-001.strm",
+              "source_root": "/mapping",
+              "video_id": "OLD-001"
+            }
+          ],
+          "config_version": 0,
+          "public": "{\"plan_id\":\"legacy\",\"revision\":\"legacy-r\",\"created_at\":\"2026-07-13T19:00:00+09:00\",\"expires_at\":\"2026-07-13T20:00:00+09:00\",\"actors\":[{\"actor_id\":\"old\",\"scraped_count\":1,\"video_ids\":[\"OLD-001\"],\"error_code\":null,\"actor_name\":null,\"talent_id\":null,\"aliases\":[],\"error_message\":null}],\"videos\":[{\"video_id\":\"OLD-001\",\"actor_ids\":[\"old\"],\"state\":\"magnet_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"legacy-c\",\"video_id\":\"OLD-001\",\"file_name\":\"OLD-001.strm\",\"source_label\":\"additional-1\",\"destination_conflict\":false}],\"warnings\":[]}]}"
+        }
+      },
+      {
+        "op": "list_unresolved_cloud_moves",
+        "result": [
+          {
+            "attempt_id": "legacy-attempt",
+            "candidate_id": "legacy-c",
+            "destination_dir": "/cloud/library/destination/OLD",
+            "error_code": "cloud_move_interrupted",
+            "plan_id": "legacy",
+            "source_path": "/cloud/library/source-b/OLD/OLD-001.mp4",
+            "state": "unknown",
+            "updated_at": "2026-07-13T10:30:00.500000+00:00"
+          }
+        ]
+      },
+      {
+        "op": "get_job",
+        "result": {
+          "actor_ids": [],
+          "created_at": "2026-07-13T09:00:00+00:00",
+          "error_code": null,
+          "job_id": "legacy-job",
+          "lease_expires_at": null,
+          "operation": "create_plan",
+          "owner_id": null,
+          "plan_id": "legacy",
+          "progress": {
+            "completed": 0,
+            "current": null,
+            "stage": "queued",
+            "stage_started_at": "1970-01-01T00:00:00+00:00",
+            "total": null,
+            "unit": "items",
+            "updated_at": "1970-01-01T00:00:00+00:00"
+          },
+          "state": "running",
+          "updated_at": "2026-07-13T09:00:00+00:00"
+        }
+      },
+      {
+        "op": "fail_expired_jobs",
+        "result": 1
+      },
+      {
+        "op": "delete_plan",
+        "result": false
+      },
+      {
+        "op": "finalize_cloud_move",
+        "result": null
+      },
+      {
+        "op": "list_move_results",
+        "result": [
+          "{\"candidate_id\":\"legacy-c\",\"video_id\":\"OLD-001\",\"file_name\":\"OLD-001.strm\",\"state\":\"moved\",\"error_code\":null}"
+        ]
+      },
+      {
+        "op": "save_plan",
+        "result": null
+      },
+      {
+        "op": "get_plan",
+        "result": {
+          "candidates": [
+            {
+              "candidate_id": "c-cloud",
+              "cloud_destination_dir": "/cloud/library/destination/ABC",
+              "cloud_file": {
+                "file_id": "file-2",
+                "hashes": [
+                  [
+                    "2",
+                    "Z"
+                  ],
+                  [
+                    "sha1",
+                    "abcd"
+                  ],
+                  [
+                    "中",
+                    "é"
+                  ]
+                ],
+                "name": "ABC-002.mp4",
+                "path": "/cloud/library/source-b/ABC/ABC-002.mp4",
+                "size": 123,
+                "write_time": 456
+              },
+              "cloud_source_path": "/cloud/library/source-b/ABC/ABC-002.mp4",
+              "destination": "/move-in/ABC/ABC-002.strm",
+              "fingerprint": {
+                "ctime_ns": 5,
+                "device": 1,
+                "inode": 2,
+                "mtime_ns": 4,
+                "size": 3
+              },
+              "kind": "cloud_strm",
+              "mapping_sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+              "source": "/mapping/ABC/ABC-002.strm",
+              "source_root": "/mapping",
+              "video_id": "ABC-002"
+            },
+            {
+              "candidate_id": "c-local",
+              "cloud_destination_dir": null,
+              "cloud_file": null,
+              "cloud_source_path": null,
+              "destination": "/move-in/ABC/ABC-001 [演员] \"x\".mp4",
+              "fingerprint": {
+                "ctime_ns": 1783936800000000000,
+                "device": 64769,
+                "inode": 9007199254740993,
+                "mtime_ns": -1,
+                "size": 0
+              },
+              "kind": "local_file",
+              "mapping_sha256": null,
+              "source": "/additional/ABC/ABC-001 [演员] \"x\".mp4",
+              "source_root": "/additional",
+              "video_id": "ABC-001"
+            }
+          ],
+          "config_version": 7,
+          "public": "{\"plan_id\":\"plan-1\",\"revision\":\"rev-1\",\"created_at\":\"2026-07-13T10:00:00.123456Z\",\"expires_at\":\"2026-07-13T12:00:00+02:00\",\"actors\":[{\"actor_id\":\"actor-1\",\"scraped_count\":2,\"video_ids\":[\"ABC-001\",\"ABC-002\"],\"error_code\":null,\"actor_name\":\"河北彩花\",\"talent_id\":5022,\"aliases\":[\"河北彩伽\"],\"error_message\":null}],\"videos\":[{\"video_id\":\"ABC-001\",\"actor_ids\":[\"actor-1\"],\"state\":\"additional_found\",\"release_date\":\"2026-01-01\",\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"c-local\",\"video_id\":\"ABC-001\",\"file_name\":\"ABC-001 [演员] \\\"x\\\".mp4\",\"source_label\":\"additional-1\",\"destination_conflict\":false}],\"warnings\":[\"不同 行\"]},{\"video_id\":\"ABC-002\",\"actor_ids\":[\"actor-1\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"c-cloud\",\"video_id\":\"ABC-002\",\"file_name\":\"ABC-002.strm\",\"source_label\":\"additional-2\",\"destination_conflict\":true}],\"warnings\":[]}]}"
+        }
+      },
+      {
+        "op": "get_candidate",
+        "result": {
+          "candidate_id": "c-cloud",
+          "cloud_destination_dir": "/cloud/library/destination/ABC",
+          "cloud_file": {
+            "file_id": "file-2",
+            "hashes": [
+              [
+                "2",
+                "Z"
+              ],
+              [
+                "sha1",
+                "abcd"
+              ],
+              [
+                "中",
+                "é"
+              ]
+            ],
+            "name": "ABC-002.mp4",
+            "path": "/cloud/library/source-b/ABC/ABC-002.mp4",
+            "size": 123,
+            "write_time": 456
+          },
+          "cloud_source_path": "/cloud/library/source-b/ABC/ABC-002.mp4",
+          "destination": "/move-in/ABC/ABC-002.strm",
+          "fingerprint": {
+            "ctime_ns": 5,
+            "device": 1,
+            "inode": 2,
+            "mtime_ns": 4,
+            "size": 3
+          },
+          "kind": "cloud_strm",
+          "mapping_sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          "source": "/mapping/ABC/ABC-002.strm",
+          "source_root": "/mapping",
+          "video_id": "ABC-002"
+        }
+      },
+      {
+        "op": "get_candidate",
+        "result": null
+      },
+      {
+        "error": {
+          "message": "private candidate records must match public plan candidates",
+          "type": "ValueError"
+        },
+        "op": "save_plan"
+      },
+      {
+        "op": "save_move_result",
+        "result": null
+      },
+      {
+        "op": "save_move_result",
+        "result": null
+      },
+      {
+        "error": {
+          "message": "('plan-1', 'missing')",
+          "type": "KeyError"
+        },
+        "op": "save_move_result"
+      },
+      {
+        "op": "get_move_result",
+        "result": "{\"candidate_id\":\"c-local\",\"video_id\":\"ABC-001\",\"file_name\":\"ABC-001.mp4\",\"state\":\"moved\",\"error_code\":null}"
+      },
+      {
+        "error": {
+          "message": "invalid move journal transition: none -> linked",
+          "type": "InvalidMoveJournalTransitionError"
+        },
+        "op": "save_move_journal"
+      },
+      {
+        "op": "save_move_journal",
+        "result": null
+      },
+      {
+        "op": "save_move_journal",
+        "result": null
+      },
+      {
+        "error": {
+          "message": "invalid move journal transition: linked -> prepared",
+          "type": "InvalidMoveJournalTransitionError"
+        },
+        "op": "save_move_journal"
+      },
+      {
+        "op": "list_unreconciled_moves",
+        "result": [
+          {
+            "candidate_id": "c-local",
+            "plan_id": "plan-1",
+            "state": "linked",
+            "updated_at": "2026-07-13T10:02:00+00:00"
+          }
+        ]
+      },
+      {
+        "op": "delete_plan",
+        "result": false
+      },
+      {
+        "error": {
+          "message": "invalid CloudDrive move transition: none -> submitting",
+          "type": "InvalidCloudMoveTransitionError"
+        },
+        "op": "save_cloud_move_operation"
+      },
+      {
+        "op": "save_cloud_move_operation",
+        "result": null
+      },
+      {
+        "error": {
+          "message": "invalid CloudDrive move transition: prepared -> verifying",
+          "type": "InvalidCloudMoveTransitionError"
+        },
+        "op": "save_cloud_move_operation"
+      },
+      {
+        "error": {
+          "message": "terminal CloudDrive operations must be finalized with their result",
+          "type": "ValueError"
+        },
+        "op": "save_cloud_move_operation"
+      },
+      {
+        "error": {
+          "message": "successful or in-progress CloudDrive operations must not carry an error code",
+          "type": "ValueError"
+        },
+        "op": "save_cloud_move_operation"
+      },
+      {
+        "error": {
+          "message": "successful or in-progress CloudDrive operations must not carry an error code",
+          "type": "ValueError"
+        },
+        "op": "finalize_cloud_move"
+      },
+      {
+        "op": "get_cloud_move_operation",
+        "result": {
+          "attempt_id": "attempt-1",
+          "candidate_id": "c-cloud",
+          "destination_dir": "/cloud/library/destination/ABC",
+          "error_code": null,
+          "plan_id": "plan-1",
+          "source_path": "/cloud/library/source-b/ABC/ABC-002.mp4",
+          "state": "prepared",
+          "updated_at": "2026-07-13T10:04:00+00:00"
+        }
+      },
+      {
+        "op": "finalize_cloud_move",
+        "result": null
+      },
+      {
+        "op": "list_unresolved_cloud_moves",
+        "result": []
+      },
+      {
+        "op": "enqueue_job",
+        "result": true
+      },
+      {
+        "op": "enqueue_job",
+        "result": true
+      },
+      {
+        "op": "enqueue_job",
+        "result": false
+      },
+      {
+        "op": "claim_next_job",
+        "result": {
+          "actor_ids": [
+            "actor-1",
+            "演员"
+          ],
+          "created_at": "2026-07-13T10:10:00+00:00",
+          "error_code": null,
+          "job_id": "scan-1",
+          "lease_expires_at": "2026-07-13T10:11:30+00:00",
+          "operation": "create_plan",
+          "owner_id": "worker-a",
+          "plan_id": "scan-1",
+          "progress": {
+            "completed": 0,
+            "current": null,
+            "stage": "queued",
+            "stage_started_at": "2026-07-13T10:10:00+00:00",
+            "total": 2,
+            "unit": "actors",
+            "updated_at": "2026-07-13T10:10:00+00:00"
+          },
+          "state": "running",
+          "updated_at": "2026-07-13T10:11:00+00:00"
+        }
+      },
+      {
+        "op": "renew_owned_job_lease",
+        "result": true
+      },
+      {
+        "op": "renew_owned_job_lease",
+        "result": false
+      },
+      {
+        "op": "update_owned_job_progress",
+        "result": true
+      },
+      {
+        "error": {
+          "message": "invalid input for query argument $2: 3000000000 (value out of int32 range)",
+          "type": "DataError"
+        },
+        "op": "update_owned_job_progress"
+      },
+      {
+        "op": "get_job",
+        "result": {
+          "actor_ids": [
+            "actor-1",
+            "演员"
+          ],
+          "created_at": "2026-07-13T10:10:00+00:00",
+          "error_code": null,
+          "job_id": "scan-1",
+          "lease_expires_at": "2026-07-13T10:11:50.000001+00:00",
+          "operation": "create_plan",
+          "owner_id": "worker-a",
+          "plan_id": "scan-1",
+          "progress": {
+            "completed": 4,
+            "current": "ABC-004 \"演员\"",
+            "stage": "library_scan",
+            "stage_started_at": "2026-07-13T10:11:21+00:00",
+            "total": 10,
+            "unit": "videos",
+            "updated_at": "2026-07-13T10:11:25.500000+00:00"
+          },
+          "state": "running",
+          "updated_at": "2026-07-13T10:11:20+00:00"
+        }
+      },
+      {
+        "op": "cancel_job",
+        "result": {
+          "job": {
+            "actor_ids": [],
+            "created_at": "2026-07-13T10:10:01+00:00",
+            "error_code": "job_cancelled",
+            "job_id": "scan-2",
+            "lease_expires_at": null,
+            "operation": "create_plan",
+            "owner_id": null,
+            "plan_id": null,
+            "progress": {
+              "completed": 0,
+              "current": null,
+              "stage": "done",
+              "stage_started_at": "2026-07-13T10:12:00+00:00",
+              "total": null,
+              "unit": "items",
+              "updated_at": "2026-07-13T10:12:00+00:00"
+            },
+            "state": "failed",
+            "updated_at": "2026-07-13T10:12:00+00:00"
+          },
+          "outcome": "cancelled",
+          "previous_owner_id": null,
+          "previous_state": "queued"
+        }
+      },
+      {
+        "op": "cancel_job",
+        "result": {
+          "job": {
+            "actor_ids": [],
+            "created_at": "2026-07-13T10:10:01+00:00",
+            "error_code": "job_cancelled",
+            "job_id": "scan-2",
+            "lease_expires_at": null,
+            "operation": "create_plan",
+            "owner_id": null,
+            "plan_id": null,
+            "progress": {
+              "completed": 0,
+              "current": null,
+              "stage": "done",
+              "stage_started_at": "2026-07-13T10:12:00+00:00",
+              "total": null,
+              "unit": "items",
+              "updated_at": "2026-07-13T10:12:00+00:00"
+            },
+            "state": "failed",
+            "updated_at": "2026-07-13T10:12:00+00:00"
+          },
+          "outcome": "already_cancelled",
+          "previous_owner_id": null,
+          "previous_state": "failed"
+        }
+      },
+      {
+        "op": "cancel_job",
+        "result": {
+          "job": {
+            "actor_ids": [
+              "actor-1",
+              "演员"
+            ],
+            "created_at": "2026-07-13T10:10:00+00:00",
+            "error_code": "job_cancelled",
+            "job_id": "scan-1",
+            "lease_expires_at": null,
+            "operation": "create_plan",
+            "owner_id": null,
+            "plan_id": "scan-1",
+            "progress": {
+              "completed": 4,
+              "current": "ABC-004 \"演员\"",
+              "stage": "done",
+              "stage_started_at": "2026-07-13T10:11:40+00:00",
+              "total": 10,
+              "unit": "videos",
+              "updated_at": "2026-07-13T10:11:40+00:00"
+            },
+            "state": "failed",
+            "updated_at": "2026-07-13T10:11:40+00:00"
+          },
+          "outcome": "cancelled",
+          "previous_owner_id": "worker-a",
+          "previous_state": "running"
+        }
+      },
+      {
+        "op": "finish_owned_job",
+        "result": false
+      },
+      {
+        "op": "fail_expired_jobs",
+        "result": 0
+      },
+      {
+        "op": "list_jobs",
+        "result": [
+          {
+            "actor_ids": [],
+            "created_at": "2026-07-13T09:00:00+00:00",
+            "error_code": "lease_expired",
+            "job_id": "legacy-job",
+            "lease_expires_at": null,
+            "operation": "create_plan",
+            "owner_id": null,
+            "plan_id": "legacy",
+            "progress": {
+              "completed": 0,
+              "current": null,
+              "stage": "done",
+              "stage_started_at": "2026-07-13T10:00:00+00:00",
+              "total": null,
+              "unit": "items",
+              "updated_at": "2026-07-13T10:00:00+00:00"
+            },
+            "state": "failed",
+            "updated_at": "2026-07-13T10:00:00+00:00"
+          },
+          {
+            "actor_ids": [
+              "actor-1",
+              "演员"
+            ],
+            "created_at": "2026-07-13T10:10:00+00:00",
+            "error_code": "job_cancelled",
+            "job_id": "scan-1",
+            "lease_expires_at": null,
+            "operation": "create_plan",
+            "owner_id": null,
+            "plan_id": "scan-1",
+            "progress": {
+              "completed": 4,
+              "current": "ABC-004 \"演员\"",
+              "stage": "done",
+              "stage_started_at": "2026-07-13T10:11:40+00:00",
+              "total": 10,
+              "unit": "videos",
+              "updated_at": "2026-07-13T10:11:40+00:00"
+            },
+            "state": "failed",
+            "updated_at": "2026-07-13T10:11:40+00:00"
+          },
+          {
+            "actor_ids": [],
+            "created_at": "2026-07-13T10:10:01+00:00",
+            "error_code": "job_cancelled",
+            "job_id": "scan-2",
+            "lease_expires_at": null,
+            "operation": "create_plan",
+            "owner_id": null,
+            "plan_id": null,
+            "progress": {
+              "completed": 0,
+              "current": null,
+              "stage": "done",
+              "stage_started_at": "2026-07-13T10:12:00+00:00",
+              "total": null,
+              "unit": "items",
+              "updated_at": "2026-07-13T10:12:00+00:00"
+            },
+            "state": "failed",
+            "updated_at": "2026-07-13T10:12:00+00:00"
+          }
+        ]
+      },
+      {
+        "op": "save_plan",
+        "result": null
+      },
+      {
+        "op": "enqueue_apply_job",
+        "result": {
+          "outcome": "enqueued",
+          "record": {
+            "candidate_ids": [
+              "c-1",
+              "演员"
+            ],
+            "job": {
+              "actor_ids": [],
+              "created_at": "2026-07-13T10:21:00+00:00",
+              "error_code": null,
+              "job_id": "apply-1",
+              "lease_expires_at": null,
+              "operation": "apply",
+              "owner_id": null,
+              "plan_id": "plan-2",
+              "progress": {
+                "completed": 0,
+                "current": "",
+                "stage": "queued",
+                "stage_started_at": "2026-07-13T10:21:00+00:00",
+                "total": 2,
+                "unit": "items",
+                "updated_at": "2026-07-13T10:21:00+00:00"
+              },
+              "state": "queued",
+              "updated_at": "2026-07-13T10:21:00+00:00"
+            },
+            "result": null,
+            "revision": "rev-2"
+          }
+        }
+      },
+      {
+        "op": "enqueue_apply_job",
+        "result": {
+          "outcome": "existing",
+          "record": {
+            "candidate_ids": [
+              "c-1",
+              "演员"
+            ],
+            "job": {
+              "actor_ids": [],
+              "created_at": "2026-07-13T10:21:00+00:00",
+              "error_code": null,
+              "job_id": "apply-1",
+              "lease_expires_at": null,
+              "operation": "apply",
+              "owner_id": null,
+              "plan_id": "plan-2",
+              "progress": {
+                "completed": 0,
+                "current": "",
+                "stage": "queued",
+                "stage_started_at": "2026-07-13T10:21:00+00:00",
+                "total": 2,
+                "unit": "items",
+                "updated_at": "2026-07-13T10:21:00+00:00"
+              },
+              "state": "queued",
+              "updated_at": "2026-07-13T10:21:00+00:00"
+            },
+            "result": null,
+            "revision": "rev-2"
+          }
+        }
+      },
+      {
+        "op": "enqueue_apply_job",
+        "result": {
+          "outcome": "conflict",
+          "record": null
+        }
+      },
+      {
+        "op": "enqueue_apply_job",
+        "result": {
+          "outcome": "full",
+          "record": null
+        }
+      },
+      {
+        "error": {
+          "message": "job progress completed must not exceed total",
+          "type": "ValueError"
+        },
+        "op": "enqueue_apply_job"
+      },
+      {
+        "op": "claim_next_job",
+        "result": {
+          "actor_ids": [],
+          "created_at": "2026-07-13T10:21:00+00:00",
+          "error_code": null,
+          "job_id": "apply-1",
+          "lease_expires_at": "2026-07-13T10:23:30+00:00",
+          "operation": "apply",
+          "owner_id": "worker-a",
+          "plan_id": "plan-2",
+          "progress": {
+            "completed": 0,
+            "current": "",
+            "stage": "queued",
+            "stage_started_at": "2026-07-13T10:21:00+00:00",
+            "total": 2,
+            "unit": "items",
+            "updated_at": "2026-07-13T10:21:00+00:00"
+          },
+          "state": "running",
+          "updated_at": "2026-07-13T10:23:00+00:00"
+        }
+      },
+      {
+        "error": {
+          "message": "apply results require a completed job",
+          "type": "ValueError"
+        },
+        "op": "finish_owned_job"
+      },
+      {
+        "op": "finish_owned_job",
+        "result": true
+      },
+      {
+        "op": "get_apply_job",
+        "result": {
+          "candidate_ids": [
+            "c-1",
+            "演员"
+          ],
+          "job": {
+            "actor_ids": [],
+            "created_at": "2026-07-13T10:21:00+00:00",
+            "error_code": null,
+            "job_id": "apply-1",
+            "lease_expires_at": null,
+            "operation": "apply",
+            "owner_id": null,
+            "plan_id": "plan-2",
+            "progress": {
+              "completed": 2,
+              "current": "c-1",
+              "stage": "done",
+              "stage_started_at": "2026-07-13T10:23:10+00:00",
+              "total": 2,
+              "unit": "items",
+              "updated_at": "2026-07-13T10:23:11+00:00"
+            },
+            "state": "completed",
+            "updated_at": "2026-07-13T10:23:11+00:00"
+          },
+          "result": "{\"plan_id\":\"plan-2\",\"revision\":\"rev-2\",\"state\":\"partial_failed\",\"results\":[{\"candidate_id\":\"c-1\",\"video_id\":\"XYZ-001\",\"file_name\":\"XYZ-001.mp4\",\"state\":\"failed\",\"error_code\":\"source_changed\"}]}",
+          "revision": "rev-2"
+        }
+      },
+      {
+        "op": "purge_expired_plans",
+        "result": 1
+      },
+      {
+        "op": "get_apply_job",
+        "result": {
+          "candidate_ids": [
+            "c-1",
+            "演员"
+          ],
+          "job": {
+            "actor_ids": [],
+            "created_at": "2026-07-13T10:21:00+00:00",
+            "error_code": null,
+            "job_id": "apply-1",
+            "lease_expires_at": null,
+            "operation": "apply",
+            "owner_id": null,
+            "plan_id": null,
+            "progress": {
+              "completed": 2,
+              "current": "c-1",
+              "stage": "done",
+              "stage_started_at": "2026-07-13T10:23:10+00:00",
+              "total": 2,
+              "unit": "items",
+              "updated_at": "2026-07-13T10:23:11+00:00"
+            },
+            "state": "completed",
+            "updated_at": "2026-07-13T10:23:11+00:00"
+          },
+          "result": "{\"plan_id\":\"plan-2\",\"revision\":\"rev-2\",\"state\":\"partial_failed\",\"results\":[{\"candidate_id\":\"c-1\",\"video_id\":\"XYZ-001\",\"file_name\":\"XYZ-001.mp4\",\"state\":\"failed\",\"error_code\":\"source_changed\"}]}",
+          "revision": "rev-2"
+        }
+      },
+      {
+        "op": "list_jobs",
+        "result": [
+          {
+            "actor_ids": [],
+            "created_at": "2026-07-13T09:00:00+00:00",
+            "error_code": "lease_expired",
+            "job_id": "legacy-job",
+            "lease_expires_at": null,
+            "operation": "create_plan",
+            "owner_id": null,
+            "plan_id": "legacy",
+            "progress": {
+              "completed": 0,
+              "current": null,
+              "stage": "done",
+              "stage_started_at": "2026-07-13T10:00:00+00:00",
+              "total": null,
+              "unit": "items",
+              "updated_at": "2026-07-13T10:00:00+00:00"
+            },
+            "state": "failed",
+            "updated_at": "2026-07-13T10:00:00+00:00"
+          },
+          {
+            "actor_ids": [
+              "actor-1",
+              "演员"
+            ],
+            "created_at": "2026-07-13T10:10:00+00:00",
+            "error_code": "job_cancelled",
+            "job_id": "scan-1",
+            "lease_expires_at": null,
+            "operation": "create_plan",
+            "owner_id": null,
+            "plan_id": "scan-1",
+            "progress": {
+              "completed": 4,
+              "current": "ABC-004 \"演员\"",
+              "stage": "done",
+              "stage_started_at": "2026-07-13T10:11:40+00:00",
+              "total": 10,
+              "unit": "videos",
+              "updated_at": "2026-07-13T10:11:40+00:00"
+            },
+            "state": "failed",
+            "updated_at": "2026-07-13T10:11:40+00:00"
+          },
+          {
+            "actor_ids": [],
+            "created_at": "2026-07-13T10:10:01+00:00",
+            "error_code": "job_cancelled",
+            "job_id": "scan-2",
+            "lease_expires_at": null,
+            "operation": "create_plan",
+            "owner_id": null,
+            "plan_id": null,
+            "progress": {
+              "completed": 0,
+              "current": null,
+              "stage": "done",
+              "stage_started_at": "2026-07-13T10:12:00+00:00",
+              "total": null,
+              "unit": "items",
+              "updated_at": "2026-07-13T10:12:00+00:00"
+            },
+            "state": "failed",
+            "updated_at": "2026-07-13T10:12:00+00:00"
+          },
+          {
+            "actor_ids": [],
+            "created_at": "2026-07-13T10:21:00+00:00",
+            "error_code": null,
+            "job_id": "apply-1",
+            "lease_expires_at": null,
+            "operation": "apply",
+            "owner_id": null,
+            "plan_id": null,
+            "progress": {
+              "completed": 2,
+              "current": "c-1",
+              "stage": "done",
+              "stage_started_at": "2026-07-13T10:23:10+00:00",
+              "total": 2,
+              "unit": "items",
+              "updated_at": "2026-07-13T10:23:11+00:00"
+            },
+            "state": "completed",
+            "updated_at": "2026-07-13T10:23:11+00:00"
+          }
+        ]
+      }
+    ]
+  },
+  "rows": {
+    "fill_actor_apply_jobs": [
+      {
+        "candidate_ids_json": "[\"c-1\", \"\\u6f14\\u5458\"]",
+        "job_id": "apply-1",
+        "result_json": "{\"plan_id\":\"plan-2\",\"revision\":\"rev-2\",\"state\":\"partial_failed\",\"results\":[{\"candidate_id\":\"c-1\",\"video_id\":\"XYZ-001\",\"file_name\":\"XYZ-001.mp4\",\"state\":\"failed\",\"error_code\":\"source_changed\"}]}",
+        "revision": "rev-2"
+      }
+    ],
+    "fill_actor_candidates": [
+      {
+        "candidate_id": "legacy-c",
+        "candidate_kind": "cloud_strm",
+        "cloud_destination_dir": "/cloud/library/destination/OLD",
+        "cloud_file_json": "{\"hashes\":{\"2\":\"SHA1\",\"中\":\"é\"},\"id\":\"old-file\",\"name\":\"OLD-001.mp4\",\"path\":\"/cloud/library/source-b/OLD/OLD-001.mp4\",\"size\":1073741824000,\"write_time\":1783936800123456789}",
+        "cloud_source_path": "/cloud/library/source-b/OLD/OLD-001.mp4",
+        "destination_path": "/move-in/OLD/OLD-001.strm",
+        "fingerprint_ctime_ns": 1783936800123456789,
+        "fingerprint_device": 66306,
+        "fingerprint_inode": 1234567,
+        "fingerprint_mtime_ns": 1783936800123456789,
+        "fingerprint_size": 52,
+        "mapping_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "plan_id": "legacy",
+        "source_path": "/mapping/OLD/OLD-001.strm",
+        "source_root": "/mapping",
+        "video_id": "OLD-001"
+      },
+      {
+        "candidate_id": "c-local",
+        "candidate_kind": "local_file",
+        "cloud_destination_dir": null,
+        "cloud_file_json": null,
+        "cloud_source_path": null,
+        "destination_path": "/move-in/ABC/ABC-001 [演员] \"x\".mp4",
+        "fingerprint_ctime_ns": 1783936800000000000,
+        "fingerprint_device": 64769,
+        "fingerprint_inode": 9007199254740993,
+        "fingerprint_mtime_ns": -1,
+        "fingerprint_size": 0,
+        "mapping_sha256": null,
+        "plan_id": "plan-1",
+        "source_path": "/additional/ABC/ABC-001 [演员] \"x\".mp4",
+        "source_root": "/additional",
+        "video_id": "ABC-001"
+      },
+      {
+        "candidate_id": "c-cloud",
+        "candidate_kind": "cloud_strm",
+        "cloud_destination_dir": "/cloud/library/destination/ABC",
+        "cloud_file_json": "{\"hashes\":{\"2\":\"Z\",\"sha1\":\"abcd\",\"\\u4e2d\":\"\\u00e9\"},\"id\":\"file-2\",\"name\":\"ABC-002.mp4\",\"path\":\"/cloud/library/source-b/ABC/ABC-002.mp4\",\"size\":123,\"write_time\":456}",
+        "cloud_source_path": "/cloud/library/source-b/ABC/ABC-002.mp4",
+        "destination_path": "/move-in/ABC/ABC-002.strm",
+        "fingerprint_ctime_ns": 5,
+        "fingerprint_device": 1,
+        "fingerprint_inode": 2,
+        "fingerprint_mtime_ns": 4,
+        "fingerprint_size": 3,
+        "mapping_sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "plan_id": "plan-1",
+        "source_path": "/mapping/ABC/ABC-002.strm",
+        "source_root": "/mapping",
+        "video_id": "ABC-002"
+      }
+    ],
+    "fill_actor_cloud_move_operations": [
+      {
+        "attempt_id": "attempt-1",
+        "candidate_id": "c-cloud",
+        "destination_dir": "/cloud/library/destination/ABC",
+        "error_code": "destination_exists",
+        "plan_id": "plan-1",
+        "source_path": "/cloud/library/source-b/ABC/ABC-002.mp4",
+        "state": "conflict",
+        "updated_at": "2026-07-13T10:06:00+00:00"
+      },
+      {
+        "attempt_id": "legacy-attempt",
+        "candidate_id": "legacy-c",
+        "destination_dir": "/cloud/library/destination/OLD",
+        "error_code": null,
+        "plan_id": "legacy",
+        "source_path": "/cloud/library/source-b/OLD/OLD-001.mp4",
+        "state": "succeeded",
+        "updated_at": "2026-07-13T10:45:00.000001+00:00"
+      }
+    ],
+    "fill_actor_jobs": [
+      {
+        "actor_ids_json": "[]",
+        "created_at": "2026-07-13T10:21:00+00:00",
+        "error_code": null,
+        "job_id": "apply-1",
+        "lease_expires_at": null,
+        "operation": "apply",
+        "owner_id": null,
+        "plan_id": null,
+        "progress_completed": 2,
+        "progress_current": "c-1",
+        "progress_stage": "done",
+        "progress_stage_started_at": "2026-07-13T10:23:10+00:00",
+        "progress_total": 2,
+        "progress_unit": "items",
+        "progress_updated_at": "2026-07-13T10:23:11+00:00",
+        "state": "completed",
+        "updated_at": "2026-07-13T10:23:11+00:00"
+      },
+      {
+        "actor_ids_json": "[]",
+        "created_at": "2026-07-13T09:00:00+00:00",
+        "error_code": "lease_expired",
+        "job_id": "legacy-job",
+        "lease_expires_at": null,
+        "operation": "create_plan",
+        "owner_id": null,
+        "plan_id": "legacy",
+        "progress_completed": 0,
+        "progress_current": null,
+        "progress_stage": "done",
+        "progress_stage_started_at": "2026-07-13T10:00:00+00:00",
+        "progress_total": null,
+        "progress_unit": "items",
+        "progress_updated_at": "2026-07-13T10:00:00+00:00",
+        "state": "failed",
+        "updated_at": "2026-07-13T10:00:00+00:00"
+      },
+      {
+        "actor_ids_json": "[\"actor-1\", \"\\u6f14\\u5458\"]",
+        "created_at": "2026-07-13T10:10:00+00:00",
+        "error_code": "job_cancelled",
+        "job_id": "scan-1",
+        "lease_expires_at": null,
+        "operation": "create_plan",
+        "owner_id": null,
+        "plan_id": "scan-1",
+        "progress_completed": 4,
+        "progress_current": "ABC-004 \"演员\"",
+        "progress_stage": "done",
+        "progress_stage_started_at": "2026-07-13T10:11:40+00:00",
+        "progress_total": 10,
+        "progress_unit": "videos",
+        "progress_updated_at": "2026-07-13T10:11:40+00:00",
+        "state": "failed",
+        "updated_at": "2026-07-13T10:11:40+00:00"
+      },
+      {
+        "actor_ids_json": "[]",
+        "created_at": "2026-07-13T10:10:01+00:00",
+        "error_code": "job_cancelled",
+        "job_id": "scan-2",
+        "lease_expires_at": null,
+        "operation": "create_plan",
+        "owner_id": null,
+        "plan_id": null,
+        "progress_completed": 0,
+        "progress_current": null,
+        "progress_stage": "done",
+        "progress_stage_started_at": "2026-07-13T10:12:00+00:00",
+        "progress_total": null,
+        "progress_unit": "items",
+        "progress_updated_at": "2026-07-13T10:12:00+00:00",
+        "state": "failed",
+        "updated_at": "2026-07-13T10:12:00+00:00"
+      }
+    ],
+    "fill_actor_move_journal": [
+      {
+        "candidate_id": "c-local",
+        "plan_id": "plan-1",
+        "state": "linked",
+        "updated_at": "2026-07-13T10:02:00+00:00"
+      }
+    ],
+    "fill_actor_move_results": [
+      {
+        "candidate_id": "legacy-c",
+        "plan_id": "legacy",
+        "result_json": "{\"candidate_id\":\"legacy-c\",\"video_id\":\"OLD-001\",\"file_name\":\"OLD-001.strm\",\"state\":\"moved\",\"error_code\":null}"
+      },
+      {
+        "candidate_id": "c-cloud",
+        "plan_id": "plan-1",
+        "result_json": "{\"candidate_id\":\"c-cloud\",\"video_id\":\"ABC-002\",\"file_name\":\"ABC-002.strm\",\"state\":\"conflict\",\"error_code\":\"destination_exists\"}"
+      },
+      {
+        "candidate_id": "c-local",
+        "plan_id": "plan-1",
+        "result_json": "{\"candidate_id\":\"c-local\",\"video_id\":\"ABC-001\",\"file_name\":\"ABC-001.mp4\",\"state\":\"moved\",\"error_code\":null}"
+      }
+    ],
+    "fill_actor_plans": [
+      {
+        "config_version": 0,
+        "created_at": "2026-07-13T10:00:00+00:00",
+        "expires_at": "2026-07-13T11:00:00+00:00",
+        "plan_id": "legacy",
+        "public_json": "{\"plan_id\":\"legacy\",\"revision\":\"legacy-r\",\"created_at\":\"2026-07-13T19:00:00+09:00\",\"expires_at\":\"2026-07-13T20:00:00+09:00\",\"actors\":[{\"actor_id\":\"old\",\"scraped_count\":1,\"video_ids\":[\"OLD-001\"],\"error_code\":null}],\"videos\":[{\"video_id\":\"OLD-001\",\"actor_ids\":[\"old\"],\"state\":\"magnet_found\",\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"legacy-c\",\"video_id\":\"OLD-001\",\"file_name\":\"OLD-001.strm\",\"source_label\":\"additional-1\",\"destination_conflict\":false}],\"warnings\":[]}]}",
+        "revision": "legacy-r"
+      },
+      {
+        "config_version": 7,
+        "created_at": "2026-07-13T10:00:00.123456+00:00",
+        "expires_at": "2026-07-13T10:00:00+00:00",
+        "plan_id": "plan-1",
+        "public_json": "{\"plan_id\":\"plan-1\",\"revision\":\"rev-1\",\"created_at\":\"2026-07-13T10:00:00.123456Z\",\"expires_at\":\"2026-07-13T12:00:00+02:00\",\"actors\":[{\"actor_id\":\"actor-1\",\"scraped_count\":2,\"video_ids\":[\"ABC-001\",\"ABC-002\"],\"error_code\":null,\"actor_name\":\"河北彩花\",\"talent_id\":5022,\"aliases\":[\"河北彩伽\"],\"error_message\":null}],\"videos\":[{\"video_id\":\"ABC-001\",\"actor_ids\":[\"actor-1\"],\"state\":\"additional_found\",\"release_date\":\"2026-01-01\",\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"c-local\",\"video_id\":\"ABC-001\",\"file_name\":\"ABC-001 [演员] \\\"x\\\".mp4\",\"source_label\":\"additional-1\",\"destination_conflict\":false}],\"warnings\":[\"不同 行\"]},{\"video_id\":\"ABC-002\",\"actor_ids\":[\"actor-1\"],\"state\":\"additional_found\",\"release_date\":null,\"existing_files\":[],\"move_candidates\":[{\"candidate_id\":\"c-cloud\",\"video_id\":\"ABC-002\",\"file_name\":\"ABC-002.strm\",\"source_label\":\"additional-2\",\"destination_conflict\":true}],\"warnings\":[]}]}",
+        "revision": "rev-1"
+      }
+    ]
+  },
+  "scenario": "fill_actor/repository",
+  "tree": {}
+}

@@ -1,0 +1,70 @@
+# A root that went offline (WP11): with the sentinel file gone from the move-in root, reconcile
+# does nothing and apply reports each candidate as root_unavailable without touching the journal;
+# with the sentinel back, the prepared journal is reconciled and the rest applied.
+description = "fill_actor: reconcile and apply while a root is offline"
+operation = "fill_actor.service"
+clock = "2026-09-15T03:00:00+00:00"
+
+[roots]
+names = ["actor", "additional", "movein"]
+
+[args]
+catalog = { actor = ["ABC-501", "ABC-502"] }
+root_sentinel = ".online"
+
+[[args.steps]]
+op = "scan"
+
+[[args.steps]]
+op = "journal"
+args = { file = "ABC-501.mp4", states = ["prepared"] }
+
+[[args.steps]]
+op = "remove"
+args = { path = "movein/.online" }
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+
+[[args.steps]]
+op = "write"
+args = { path = "movein/.online", text = "" }
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+
+[[tree]]
+path = "actor/.online"
+text = ""
+
+[[tree]]
+path = "additional/.online"
+text = ""
+
+[[tree]]
+path = "movein/.online"
+text = ""
+
+[[tree]]
+path = "additional/ABC/ABC-501.mp4"
+size = 2
+
+[[tree]]
+path = "additional/ABC/ABC-502.mp4"
+size = 3
+
+[database]
+schema = "app"
+tables = [
+    "fill_actor_plans",
+    "fill_actor_move_results",
+    "fill_actor_move_journal",
+]

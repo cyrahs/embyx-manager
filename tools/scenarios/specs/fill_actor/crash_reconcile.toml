@@ -1,0 +1,111 @@
+# Crashes while a journal is reconciled (WP11): a hard-link move stopped in front of the
+# quarantine unlink, then its reconcile stopped in front of the same unlink; a foreign file at
+# the destination of a prepared move, its rollback to the source stopped in front of the rename;
+# the quarantine name holding the file with the destination missing, its restore stopped in
+# front of the rename. Each crash is followed by a restart and a reconcile that finishes the
+# work, and the plan is applied at the end.
+description = "fill_actor: a crash in the middle of reconciling each kind of journal"
+operation = "fill_actor.service"
+clock = "2026-09-19T03:00:00+00:00"
+
+[roots]
+names = ["actor", "additional", "movein"]
+
+[args]
+catalog = { actor = ["ABC-801", "ABC-802", "ABC-803"] }
+
+[[args.faults]]
+op = "rename_noreplace"
+path = "additional/ABC/ABC-801.mp4"
+errno = 22
+
+[[args.steps]]
+op = "scan"
+
+[[args.steps]]
+op = "apply"
+args = { files = ["ABC-801.mp4"], crash = { fs = "unlink" }, advance_seconds = 60 }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { crash = { fs = "unlink" }, advance_seconds = 60 }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "journal"
+args = { file = "ABC-802.mp4", states = ["prepared"] }
+
+[[args.steps]]
+op = "rename"
+args = { src = "additional/ABC/ABC-802.mp4", dst = "movein/ABC-802.mp4" }
+
+[[args.steps]]
+op = "remove"
+args = { path = "movein/ABC-802.mp4" }
+
+[[args.steps]]
+op = "write"
+args = { path = "movein/ABC-802.mp4", text = "someone else" }
+
+[[args.steps]]
+op = "reconcile"
+args = { crash = { fs = "rename_noreplace", path = "movein/ABC-802.mp4" }, advance_seconds = 60 }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "journal"
+args = { file = "ABC-803.mp4", states = ["prepared", "linked"] }
+
+[[args.steps]]
+op = "rename"
+args = { src = "additional/ABC/ABC-803.mp4", dst = "movein/.embyx-reconcile-a2f2b0b588bcc84fbf4d2ac8cc086b6f84de3e00fa3c1ba11e38ac078eb03192" }
+
+[[args.steps]]
+op = "reconcile"
+args = { crash = { fs = "rename_noreplace", path = "movein/.embyx-reconcile-a2f2b0b588bcc84fbf4d2ac8cc086b6f84de3e00fa3c1ba11e38ac078eb03192" }, advance_seconds = 60 }
+
+[[args.steps]]
+op = "restart"
+
+[[args.steps]]
+op = "reconcile"
+args = { advance_seconds = 60 }
+
+[[args.steps]]
+op = "apply"
+args = { advance_seconds = 60 }
+
+[[tree]]
+path = "additional/ABC/ABC-801.mp4"
+size = 2
+
+[[tree]]
+path = "additional/ABC/ABC-802.mp4"
+size = 3
+
+[[tree]]
+path = "additional/ABC/ABC-803.mp4"
+size = 4
+
+[database]
+schema = "app"
+tables = [
+    "fill_actor_plans",
+    "fill_actor_move_results",
+    "fill_actor_move_journal",
+]

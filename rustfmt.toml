@@ -1,0 +1,3 @@
+# Mirrors the Python tree's 120-column limit (pyproject.toml, [tool.ruff]).
+max_width = 120
+use_field_init_shorthand = true

@@ -1,0 +1,330 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "merge_worker",
+  "cases": [
+    {
+      "transcode_bitrate": [
+        {
+          "args": [
+            129600000000,
+            172800.0,
+            256000,
+            0.4,
+            0.9
+          ],
+          "value": 2297600
+        },
+        {
+          "args": [
+            129600000000,
+            172800.0,
+            256000,
+            0.5,
+            0.8
+          ],
+          "value": 2872000
+        },
+        {
+          "args": [
+            400000000000,
+            172800.0,
+            256000,
+            0.4,
+            0.9
+          ],
+          "value": 4535666
+        },
+        {
+          "args": [
+            400000000000,
+            172800.0,
+            256000,
+            0.5,
+            0.8
+          ],
+          "value": 4003259
+        },
+        {
+          "args": [
+            400000000000,
+            172800.0,
+            1000000000,
+            0.4,
+            0.9
+          ],
+          "error": {
+            "type": "MergeRefusedError",
+            "message": "the audio alone leaves no room for video under 115 GB"
+          }
+        },
+        {
+          "args": [
+            400000000000,
+            172800.0,
+            1000000000,
+            0.5,
+            0.8
+          ],
+          "error": {
+            "type": "MergeRefusedError",
+            "message": "the audio alone leaves no room for video under 115 GB"
+          }
+        },
+        {
+          "args": [
+            120000000000,
+            43200.0,
+            0,
+            0.4,
+            0.9
+          ],
+          "value": 8888888
+        },
+        {
+          "args": [
+            120000000000,
+            43200.0,
+            0,
+            0.5,
+            0.8
+          ],
+          "value": 11111111
+        },
+        {
+          "args": [
+            120000000000,
+            1e-09,
+            0,
+            0.4,
+            0.9
+          ],
+          "value": 384000000000000000000
+        },
+        {
+          "args": [
+            120000000000,
+            1e-09,
+            0,
+            0.5,
+            0.8
+          ],
+          "value": 480000000000000000000
+        },
+        {
+          "args": [
+            120000000000,
+            43200.123456789,
+            320000,
+            0.4,
+            0.9
+          ],
+          "value": 8760863
+        },
+        {
+          "args": [
+            120000000000,
+            43200.123456789,
+            320000,
+            0.5,
+            0.8
+          ],
+          "value": 10951079
+        },
+        {
+          "args": [
+            1,
+            1.0,
+            0,
+            0.4,
+            0.9
+          ],
+          "value": 3
+        },
+        {
+          "args": [
+            1,
+            1.0,
+            0,
+            0.5,
+            0.8
+          ],
+          "value": 4
+        },
+        {
+          "args": [
+            0,
+            3.0,
+            0,
+            0.4,
+            0.9
+          ],
+          "error": {
+            "type": "MergeRefusedError",
+            "message": "the audio alone leaves no room for video under 115 GB"
+          }
+        },
+        {
+          "args": [
+            0,
+            3.0,
+            0,
+            0.5,
+            0.8
+          ],
+          "error": {
+            "type": "MergeRefusedError",
+            "message": "the audio alone leaves no room for video under 115 GB"
+          }
+        }
+      ],
+      "transcode_memory": [
+        {
+          "width": 4096,
+          "height": 2048,
+          "value": 2147483648
+        },
+        {
+          "width": 1920,
+          "height": 1080,
+          "value": 536870912
+        },
+        {
+          "width": 8192,
+          "height": 4096,
+          "value": 8589934592
+        },
+        {
+          "width": null,
+          "height": null,
+          "value": 2147483648
+        },
+        {
+          "width": 3840,
+          "height": 1920,
+          "value": 1887436800
+        },
+        {
+          "width": 7,
+          "height": 3,
+          "value": 536870912
+        }
+      ],
+      "paths": [
+        {
+          "part": 0,
+          "chunk": 0,
+          "chunk_path": "/w/cd01/chunk-00000.mkv",
+          "audio_path": "/w/audio/cd01.mka"
+        },
+        {
+          "part": 8,
+          "chunk": 12,
+          "chunk_path": "/w/cd09/chunk-00012.mkv",
+          "audio_path": "/w/audio/cd09.mka"
+        },
+        {
+          "part": 99,
+          "chunk": 99999,
+          "chunk_path": "/w/cd100/chunk-99999.mkv",
+          "audio_path": "/w/audio/cd100.mka"
+        },
+        {
+          "part": -1,
+          "chunk": 3,
+          "chunk_path": "/w/cd00/chunk-00003.mkv",
+          "audio_path": "/w/audio/cd00.mka"
+        },
+        {
+          "part": -3,
+          "chunk": -5,
+          "chunk_path": "/w/cd-2/chunk--0005.mkv",
+          "audio_path": "/w/audio/cd-2.mka"
+        }
+      ],
+      "scripts": [
+        {
+          "entries": [
+            [
+              "/a/b.mkv",
+              60.0
+            ],
+            [
+              "/a/it's.mkv",
+              0.3333333333333333
+            ],
+            [
+              "/a/中文 x.mka",
+              1e-07
+            ],
+            [
+              "/a/c",
+              12345.6789995
+            ]
+          ],
+          "concat_script": "file '/a/b.mkv'\nduration 60.000000\nfile '/a/it'\\''s.mkv'\nduration 0.333333\nfile '/a/中文 x.mka'\nduration 0.000000\nfile '/a/c'\nduration 12345.678999\n",
+          "concat_list": "file '/a/b.mkv'\nfile '/a/it'\\''s.mkv'\nfile '/a/中文 x.mka'\nfile '/a/c'\n"
+        },
+        {
+          "entries": [
+            [
+              "/x",
+              0.0
+            ]
+          ],
+          "concat_script": "file '/x'\nduration 0.000000\n",
+          "concat_list": "file '/x'\n"
+        },
+        {
+          "entries": [
+            [
+              "/y",
+              -2.5
+            ],
+            [
+              "/z",
+              1e+21
+            ]
+          ],
+          "concat_script": "file '/y'\nduration -2.500000\nfile '/z'\nduration 1000000000000000000000.000000\n",
+          "concat_list": "file '/y'\nfile '/z'\n"
+        }
+      ],
+      "memory_limit": [
+        {
+          "content": "3221225472\n",
+          "value": 3221225472
+        },
+        {
+          "content": "max\n",
+          "value": null
+        },
+        {
+          "content": " 42 ",
+          "value": 42
+        },
+        {
+          "content": "",
+          "value": null
+        },
+        {
+          "content": "-5",
+          "value": null
+        },
+        {
+          "content": "1e9",
+          "value": null
+        },
+        {
+          "content": "٣٢",
+          "value": 32
+        },
+        {
+          "content": null,
+          "value": null
+        }
+      ]
+    }
+  ]
+}

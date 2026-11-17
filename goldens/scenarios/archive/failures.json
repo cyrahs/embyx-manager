@@ -1,0 +1,522 @@
+{
+  "calls": [
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/ABC"
+      },
+      "response": null,
+      "seq": 1
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-402-cd1.mp4",
+        "src": "{task}/intake/three/ABC-402-1.mp4"
+      },
+      "response": null,
+      "seq": 2
+    },
+    {
+      "error": {
+        "message": "[Errno 13] Permission denied: '{task}/intake/three/ABC-402-2.mp4' -> '{library}/sorted/ABC/ABC-402-cd2.mp4'",
+        "type": "PermissionError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-402-cd2.mp4",
+        "src": "{task}/intake/three/ABC-402-2.mp4"
+      },
+      "seq": 3
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/ABC"
+      },
+      "response": null,
+      "seq": 4
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-403.mp4",
+        "src": "{task}/intake/stuck/ABC-403.mp4"
+      },
+      "response": null,
+      "seq": 5
+    },
+    {
+      "error": {
+        "message": "[Errno 16] Device or resource busy: '{task}/intake/stuck'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/stuck"
+      },
+      "seq": 6
+    },
+    {
+      "error": {
+        "message": "[Errno 30] Read-only file system: '{task}/intake/copies/ABC-404 (1).mp4'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "unlink",
+      "request": {
+        "path": "{task}/intake/copies/ABC-404 (1).mp4"
+      },
+      "seq": 7
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/ABC"
+      },
+      "response": null,
+      "seq": 8
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/sorted/ABC/ABC-404.mp4",
+        "src": "{task}/intake/copies/ABC-404.mp4"
+      },
+      "response": null,
+      "seq": 9
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/intake/copies"
+      },
+      "response": null,
+      "seq": 10
+    },
+    {
+      "error": {
+        "message": "[Errno 28] No space left on device: '{library}/sorted/NEW'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/sorted/NEW"
+      },
+      "seq": 11
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/other/DEF"
+      },
+      "response": null,
+      "seq": 12
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/other/DEF/DEF-408.mp4",
+        "src": "{task}/broken/zzz-good/DEF-408.mp4"
+      },
+      "response": null,
+      "seq": 13
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rmtree",
+      "request": {
+        "path": "{task}/broken/zzz-good"
+      },
+      "response": null,
+      "seq": 14
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/other/GHI"
+      },
+      "response": null,
+      "seq": 15
+    },
+    {
+      "error": {
+        "message": "[Errno 107] Transport endpoint is not connected: '{task}/broken/GHI-409.mp4' -> '{library}/other/GHI/GHI-409.mp4'",
+        "type": "OSError"
+      },
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/other/GHI/GHI-409.mp4",
+        "src": "{task}/broken/GHI-409.mp4"
+      },
+      "seq": 16
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "mkdir",
+      "request": {
+        "path": "{library}/other/GHI"
+      },
+      "response": null,
+      "seq": 17
+    },
+    {
+      "fake": "fs",
+      "lane": "main",
+      "method": "rename",
+      "request": {
+        "dst": "{library}/other/GHI/GHI-410.mp4",
+        "src": "{task}/broken/GHI-410.mp4"
+      },
+      "response": null,
+      "seq": 18
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/"
+      ],
+      "files": [],
+      "offline_tasks": [],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "archive.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "errors": [
+            "ERROR: failed to archive intake/three: PermissionError(13, 'Permission denied')"
+          ],
+          "log": [
+            "moving ABC-402-1.mp4 to sorted/ABC/ABC-402-cd1.mp4",
+            "moving ABC-402-2.mp4 to sorted/ABC/ABC-402-cd2.mp4",
+            "ERROR: failed to archive intake/three: PermissionError(13, 'Permission denied')"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [],
+            "avid": "ABC-402",
+            "outcome": "failed",
+            "reason": "[Errno 13] Permission denied: '{task}/intake/three/ABC-402-2.mp4' -> '{library}/sorted/ABC/ABC-402-cd2.mp4'"
+          },
+          "stats": {
+            "items_failed": 1
+          }
+        },
+        {
+          "errors": [
+            "ERROR: archived stuck but failed to remove it: OSError(16, 'Device or resource busy')"
+          ],
+          "log": [
+            "moving ABC-403.mp4 to sorted/ABC/ABC-403.mp4",
+            "ERROR: archived stuck but failed to remove it: OSError(16, 'Device or resource busy')"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [
+              "sorted/ABC/ABC-403.mp4"
+            ],
+            "avid": "ABC-403",
+            "outcome": "archived",
+            "reason": ""
+          },
+          "stats": {
+            "videos_archived": 1
+          }
+        },
+        {
+          "errors": [
+            "ERROR: failed to remove the duplicate ABC-404 (1).mp4 in copies: OSError(30, 'Read-only file system')"
+          ],
+          "log": [
+            "duplicate videos in copies, keeping ABC-404.mp4 and dropping ABC-404 (1).mp4",
+            "ERROR: failed to remove the duplicate ABC-404 (1).mp4 in copies: OSError(30, 'Read-only file system')",
+            "moving ABC-404.mp4 to sorted/ABC/ABC-404.mp4"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [
+              "sorted/ABC/ABC-404.mp4"
+            ],
+            "avid": "ABC-404",
+            "outcome": "archived",
+            "reason": ""
+          },
+          "stats": {
+            "folders_discarded": 1,
+            "videos_archived": 1
+          }
+        },
+        {
+          "errors": [
+            "ERROR: failed to archive intake/new-brand: OSError(28, 'No space left on device')"
+          ],
+          "log": [
+            "ERROR: failed to archive intake/new-brand: OSError(28, 'No space left on device')"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [],
+            "avid": "NEW-405",
+            "outcome": "failed",
+            "reason": "[Errno 28] No space left on device: '{library}/sorted/NEW'"
+          },
+          "stats": {
+            "items_failed": 1
+          }
+        },
+        {
+          "errors": [
+            "ERROR: failed to inspect intake/eio: OSError(5, 'Input/output error')"
+          ],
+          "log": [
+            "ERROR: failed to inspect intake/eio: OSError(5, 'Input/output error')"
+          ],
+          "op": "archive_folder",
+          "result": {
+            "archived_paths": [],
+            "avid": "",
+            "outcome": "failed",
+            "reason": "[Errno 5] Input/output error: '{task}/intake/eio/ABC-406.mp4'"
+          },
+          "stats": {
+            "items_failed": 1
+          }
+        },
+        {
+          "errors": [],
+          "log": [],
+          "op": "configure",
+          "result": null,
+          "stats": {}
+        },
+        {
+          "errors": [
+            "ERROR: failed to inspect broken/aaa-bad: OSError('mount went away')",
+            "ERROR: failed to archive the loose file broken/GHI-409: OSError(107, 'Transport endpoint is not connected')"
+          ],
+          "log": [
+            "processing {task}/broken -> {library}/other",
+            "ERROR: failed to inspect broken/aaa-bad: OSError('mount went away')",
+            "moving DEF-408.mp4 to other/DEF/DEF-408.mp4",
+            "moving GHI-409.mp4 to other/GHI/GHI-409.mp4",
+            "ERROR: failed to archive the loose file broken/GHI-409: OSError(107, 'Transport endpoint is not connected')",
+            "moving GHI-410.mp4 to other/GHI/GHI-410.mp4"
+          ],
+          "op": "run",
+          "result": null,
+          "stats": {
+            "folders_discarded": 1,
+            "items_failed": 2,
+            "videos_archived": 2
+          }
+        },
+        {
+          "errors": [],
+          "log": [],
+          "op": "configure",
+          "result": null,
+          "stats": {}
+        },
+        {
+          "error": {
+            "message": "[Errno 107] Transport endpoint is not connected: '{task}/listless'",
+            "type": "OSError"
+          },
+          "errors": [],
+          "log": [
+            "processing {task}/listless -> {library}/other"
+          ],
+          "op": "run",
+          "stats": {}
+        }
+      ]
+    }
+  },
+  "rows": {},
+  "scenario": "archive/failures",
+  "tree": {
+    "library": [
+      {
+        "kind": "dir",
+        "path": "other"
+      },
+      {
+        "kind": "dir",
+        "path": "other/DEF"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "other/DEF/DEF-408.mp4",
+        "sha256": "a73add1aecea03a8",
+        "size": 9
+      },
+      {
+        "kind": "dir",
+        "path": "other/GHI"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "other/GHI/GHI-410.mp4",
+        "sha256": "7668d2cd32a37eb4",
+        "size": 11
+      },
+      {
+        "kind": "dir",
+        "path": "sorted"
+      },
+      {
+        "kind": "dir",
+        "path": "sorted/ABC"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-402-cd1.mp4",
+        "sha256": "2d711642b726b044",
+        "size": 1
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-403.mp4",
+        "sha256": "2481a63c85a62cf8",
+        "size": 4
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "sorted/ABC/ABC-404.mp4",
+        "sha256": "eaf16bc07968e013",
+        "size": 5
+      }
+    ],
+    "task": [
+      {
+        "kind": "dir",
+        "path": "broken"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "broken/GHI-409.mp4",
+        "sha256": "fc11d6f28e59d3cc",
+        "size": 10
+      },
+      {
+        "kind": "dir",
+        "path": "broken/aaa-bad"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "broken/aaa-bad/DEF-407.mp4",
+        "sha256": "4cf0c1012276f46a",
+        "size": 8
+      },
+      {
+        "kind": "dir",
+        "path": "intake"
+      },
+      {
+        "kind": "dir",
+        "path": "intake/eio"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/eio/ABC-406.mp4",
+        "sha256": "7b70d3ab4c764154",
+        "size": 7
+      },
+      {
+        "kind": "dir",
+        "path": "intake/new-brand"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/new-brand/NEW-405.mp4",
+        "sha256": "b7fb217694ae2d30",
+        "size": 6
+      },
+      {
+        "kind": "dir",
+        "path": "intake/stuck"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/stuck/ABC-403.nfo",
+        "sha256": "2d711642b726b044",
+        "size": 1
+      },
+      {
+        "kind": "dir",
+        "path": "intake/three"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/three/ABC-402-2.mp4",
+        "sha256": "5dde896887f6754c",
+        "size": 2
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "intake/three/ABC-402-3.mp4",
+        "sha256": "cd2eb0837c9b4c96",
+        "size": 3
+      },
+      {
+        "kind": "dir",
+        "path": "listless"
+      }
+    ]
+  }
+}

@@ -1,0 +1,913 @@
+{
+  "calls": [
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "inbox",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/other",
+              "hasDetailProperties": false,
+              "id": "/115/task/other",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "other",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            },
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/picks",
+              "hasDetailProperties": false,
+              "id": "/115/task/picks",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": true,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "picks",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "0",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 1
+    },
+    {
+      "error": {
+        "code": "NOT_FOUND",
+        "details": "path not found: /nowhere"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/nowhere"
+      },
+      "seq": 2
+    },
+    {
+      "error": {
+        "code": "NOT_FOUND",
+        "details": "path not found: /115/task/absent"
+      },
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/absent"
+      },
+      "seq": 3
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/picks"
+      },
+      "response": [
+        {
+          "subFiles": []
+        }
+      ],
+      "seq": 4
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/picks"
+      },
+      "response": [
+        {
+          "subFiles": []
+        }
+      ],
+      "seq": 5
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "AddOfflineFiles",
+      "request": {
+        "checkFolderAfterSecs": "10",
+        "toFolder": "/115/task/picks",
+        "urls": "magnet:?xt=urn:btih:C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1&dn=NEW-503"
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 6
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "AddOfflineFiles",
+      "request": {
+        "checkFolderAfterSecs": "10",
+        "toFolder": "/115/task/picks",
+        "urls": "magnet:?xt=urn:btih:D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1&dn=DUPE-504"
+      },
+      "response": {
+        "errorMessage": "任务已存在",
+        "resultFilePaths": [],
+        "success": false
+      },
+      "seq": 7
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/notes.txt",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/notes.txt",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "notes.txt",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 8
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/notes.txt",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/notes.txt",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "notes.txt",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 9
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "AddOfflineFiles",
+      "request": {
+        "checkFolderAfterSecs": "10",
+        "toFolder": "/115/task/inbox",
+        "urls": "magnet:?xt=urn:btih:E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1&dn=CXL-508"
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 10
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "GetSubFiles",
+      "request": {
+        "forceRefresh": true,
+        "path": "/115/task/inbox"
+      },
+      "response": [
+        {
+          "subFiles": [
+            {
+              "CanCreateEncryptedFolder": false,
+              "CanLock": false,
+              "CanSyncFileChangesFromCloud": false,
+              "canAddShareLink": false,
+              "canDeletePermanently": false,
+              "canDirectAccessThumbnailURL": false,
+              "canMount": false,
+              "canOfflineDownload": false,
+              "canSearch": false,
+              "canUnmount": false,
+              "fileEncryptionType": "None",
+              "fileHashes": {},
+              "fileType": "Directory",
+              "fullPathName": "/115/task/inbox/notes.txt",
+              "hasDetailProperties": false,
+              "id": "/115/task/inbox/notes.txt",
+              "isCloudDirectory": false,
+              "isCloudFile": false,
+              "isCloudRoot": false,
+              "isDirectory": false,
+              "isForbidden": false,
+              "isLocal": false,
+              "isRoot": false,
+              "isSearchResult": false,
+              "name": "notes.txt",
+              "originalPath": "",
+              "previewUrl": "",
+              "size": "1",
+              "supportOfflineDownloadManagement": false,
+              "thumbnailUrl": ""
+            }
+          ]
+        }
+      ],
+      "seq": 11
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "AddOfflineFiles",
+      "request": {
+        "checkFolderAfterSecs": "10",
+        "toFolder": "/115/task/inbox",
+        "urls": "magnet:?xt=urn:btih:E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2&dn=CXL-509"
+      },
+      "response": {
+        "errorMessage": "",
+        "resultFilePaths": [],
+        "success": true
+      },
+      "seq": 12
+    },
+    {
+      "fake": "clouddrive",
+      "lane": "main",
+      "method": "ListOfflineFilesByPath",
+      "request": {
+        "path": "/115/task/inbox"
+      },
+      "response": {
+        "offlineFiles": [
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+            "name": "TRK-502",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 35.0,
+            "size": "0",
+            "status": "OFFLINE_DOWNLOADING",
+            "url": "magnet:?xt=urn:btih:b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1"
+          },
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1",
+            "name": "CXL-508",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 0.0,
+            "size": "0",
+            "status": "OFFLINE_INIT",
+            "url": "magnet:?xt=urn:btih:E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1&dn=CXL-508"
+          },
+          {
+            "add_time": "0",
+            "fileId": "",
+            "infoHash": "e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2",
+            "name": "CXL-509",
+            "parentId": "",
+            "peers": "0",
+            "percendDone": 0.0,
+            "size": "0",
+            "status": "OFFLINE_INIT",
+            "url": "magnet:?xt=urn:btih:E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2&dn=CXL-509"
+          }
+        ]
+      },
+      "seq": 13
+    }
+  ],
+  "fakes": {
+    "clouddrive": {
+      "copy_tasks": [],
+      "directories": [
+        "/",
+        "/115",
+        "/115/misc",
+        "/115/task",
+        "/115/task/inbox",
+        "/115/task/other",
+        "/115/task/picks"
+      ],
+      "files": [
+        {
+          "hashes": {},
+          "path": "/115/task/inbox/notes.txt",
+          "size": 1
+        }
+      ],
+      "offline_tasks": [
+        {
+          "folder": "/115/task/inbox",
+          "info_hash": "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+          "name": "TRK-502",
+          "progress": 35.0,
+          "size": 0,
+          "status": "OFFLINE_DOWNLOADING",
+          "url": "magnet:?xt=urn:btih:b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1"
+        },
+        {
+          "folder": "/115/misc",
+          "info_hash": "d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+          "name": "someone else's",
+          "progress": 10.0,
+          "size": 0,
+          "status": "OFFLINE_DOWNLOADING",
+          "url": "magnet:?xt=urn:btih:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1"
+        },
+        {
+          "folder": "/115/task/picks",
+          "info_hash": "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1",
+          "name": "NEW-503",
+          "progress": 0.0,
+          "size": 0,
+          "status": "OFFLINE_INIT",
+          "url": "magnet:?xt=urn:btih:C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1&dn=NEW-503"
+        },
+        {
+          "folder": "/115/task/inbox",
+          "info_hash": "e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1",
+          "name": "CXL-508",
+          "progress": 0.0,
+          "size": 0,
+          "status": "OFFLINE_INIT",
+          "url": "magnet:?xt=urn:btih:E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1&dn=CXL-508"
+        },
+        {
+          "folder": "/115/task/inbox",
+          "info_hash": "e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2",
+          "name": "CXL-509",
+          "progress": 0.0,
+          "size": 0,
+          "status": "OFFLINE_INIT",
+          "url": "magnet:?xt=urn:btih:E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2&dn=CXL-509"
+        }
+      ],
+      "uploads": []
+    },
+    "emby": {
+      "routes_left": []
+    },
+    "kubernetes": {
+      "routes_left": []
+    }
+  },
+  "format": 1,
+  "operation": "tracker.steps",
+  "outcome": {
+    "result": {
+      "steps": [
+        {
+          "op": "default_directory",
+          "result": "/115/task/inbox"
+        },
+        {
+          "op": "browse",
+          "result": {
+            "entries": [
+              {
+                "configured": true,
+                "name": "inbox",
+                "path": "/115/task/inbox",
+                "routed": true
+              },
+              {
+                "configured": false,
+                "name": "other",
+                "path": "/115/task/other",
+                "routed": false
+              },
+              {
+                "configured": false,
+                "name": "picks",
+                "path": "/115/task/picks",
+                "routed": true
+              }
+            ],
+            "parent": "/115",
+            "path": "/115/task"
+          }
+        },
+        {
+          "error": {
+            "message": "directory_not_found",
+            "type": "DirectoryNotFoundError"
+          },
+          "op": "browse"
+        },
+        {
+          "error": {
+            "message": "directory_not_routed",
+            "type": "DirectoryNotRoutedError"
+          },
+          "op": "check_target"
+        },
+        {
+          "error": {
+            "message": "directory_not_found",
+            "type": "DirectoryNotFoundError"
+          },
+          "op": "check_target"
+        },
+        {
+          "op": "check_target",
+          "result": "/115/task/picks"
+        },
+        {
+          "op": "submit",
+          "result": {
+            "entries": [
+              {
+                "archived_paths": [],
+                "avid": "NEW-503",
+                "outcome": "submitted",
+                "text": "[FHD] new-503.mp4"
+              },
+              {
+                "archived_paths": [],
+                "avid": null,
+                "outcome": "unreadable",
+                "text": "hello"
+              },
+              {
+                "archived_paths": [
+                  "sorted/HLD/HLD-501.mp4"
+                ],
+                "avid": "HLD-501",
+                "outcome": "already_in_library",
+                "text": "HLD-501"
+              },
+              {
+                "archived_paths": [],
+                "avid": "TRK-502",
+                "outcome": "already_tracked",
+                "text": "TRK-502"
+              },
+              {
+                "archived_paths": [],
+                "avid": "NOM-505",
+                "outcome": "no_magnet",
+                "text": "NOM-505"
+              },
+              {
+                "archived_paths": [],
+                "avid": "DUPE-504",
+                "outcome": "submit_failed",
+                "text": "DUPE-504"
+              }
+            ],
+            "task_dir_path": "/115/task/picks"
+          }
+        },
+        {
+          "op": "default_directory",
+          "result": "/115/task/picks"
+        },
+        {
+          "op": "submit",
+          "result": {
+            "entries": [
+              {
+                "archived_paths": [],
+                "avid": "QUE-506",
+                "outcome": "queued",
+                "text": "QUE-506"
+              },
+              {
+                "archived_paths": [],
+                "avid": "QUE-507",
+                "outcome": "queued",
+                "text": "que-507"
+              }
+            ],
+            "task_dir_path": "/115/task/inbox"
+          }
+        },
+        {
+          "error": {
+            "message": "",
+            "type": "CancelledError"
+          },
+          "op": "submit"
+        },
+        {
+          "op": "submit",
+          "result": {
+            "entries": [
+              {
+                "archived_paths": [],
+                "avid": "CXL-508",
+                "outcome": "submit_failed",
+                "text": "CXL-508"
+              },
+              {
+                "archived_paths": [],
+                "avid": "CXL-509",
+                "outcome": "submitted",
+                "text": "CXL-509"
+              }
+            ],
+            "task_dir_path": "/115/task/inbox"
+          }
+        },
+        {
+          "error": {
+            "message": "too_many_inputs",
+            "type": "TooManyInputsError"
+          },
+          "op": "submit"
+        },
+        {
+          "error": {
+            "message": "directory_not_routed",
+            "type": "DirectoryNotRoutedError"
+          },
+          "op": "submit"
+        },
+        {
+          "errors": [],
+          "log": [],
+          "op": "poll",
+          "result": null,
+          "stats": {
+            "offline_tasks": 3
+          }
+        }
+      ]
+    }
+  },
+  "rows": {
+    "app_config": [],
+    "archive_acquisitions": [
+      {
+        "archived_paths_json": "[]",
+        "avid": "CXL-508",
+        "created_at": "2026-09-10T03:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "manual",
+        "state": "discovered",
+        "task_dir_path": "/115/task/inbox",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "CXL-509",
+        "created_at": "2026-09-10T03:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "manual",
+        "state": "downloading",
+        "task_dir_path": "/115/task/inbox",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "DUPE-504",
+        "created_at": "2026-09-10T03:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "manual",
+        "state": "discovered",
+        "task_dir_path": "/115/task/picks",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "NEW-503",
+        "created_at": "2026-09-10T03:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "manual",
+        "state": "downloading",
+        "task_dir_path": "/115/task/picks",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "NOM-505",
+        "created_at": "2026-09-10T03:00:00+00:00",
+        "next_action_at": "2026-09-10T04:00:00+00:00",
+        "note": "no magnet found",
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "manual",
+        "state": "resolve_failed",
+        "task_dir_path": "/115/task/picks",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "QUE-506",
+        "created_at": "2026-09-10T03:00:00+00:00",
+        "next_action_at": "2026-09-10T03:00:00+00:00",
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "manual",
+        "state": "discovered",
+        "task_dir_path": "/115/task/inbox",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "QUE-507",
+        "created_at": "2026-09-10T03:00:00+00:00",
+        "next_action_at": "2026-09-10T03:00:00+00:00",
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "manual",
+        "state": "discovered",
+        "task_dir_path": "/115/task/inbox",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      },
+      {
+        "archived_paths_json": "[]",
+        "avid": "TRK-502",
+        "created_at": "2026-09-09T00:00:00+00:00",
+        "next_action_at": null,
+        "note": null,
+        "release_date": null,
+        "replace_after_attempt": null,
+        "replace_paths_json": null,
+        "source": "rss:Actor",
+        "state": "downloading",
+        "task_dir_path": "/115/task/inbox",
+        "updated_at": "2026-09-09T00:00:00+00:00"
+      }
+    ],
+    "archive_magnet_attempts": [
+      {
+        "attempt_no": 1,
+        "avid": "CXL-508",
+        "error": null,
+        "info_hash": "E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1",
+        "magnet": "magnet:?xt=urn:btih:E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1E1&dn=CXL-508",
+        "magnet_source": "sukebei",
+        "progress": 0,
+        "size_hint": null,
+        "state": "downloading",
+        "submitted_at": "2026-09-10T03:00:00+00:00",
+        "updated_at": "2026-09-10T03:01:00+00:00"
+      },
+      {
+        "attempt_no": 1,
+        "avid": "CXL-509",
+        "error": null,
+        "info_hash": "E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2",
+        "magnet": "magnet:?xt=urn:btih:E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2&dn=CXL-509",
+        "magnet_source": "sukebei",
+        "progress": 0,
+        "size_hint": null,
+        "state": "downloading",
+        "submitted_at": "2026-09-10T03:00:00+00:00",
+        "updated_at": "2026-09-10T03:01:00+00:00"
+      },
+      {
+        "attempt_no": 1,
+        "avid": "DUPE-504",
+        "error": "failed to add the offline task",
+        "info_hash": "D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1",
+        "magnet": "magnet:?xt=urn:btih:D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1D1&dn=DUPE-504",
+        "magnet_source": "sukebei",
+        "progress": null,
+        "size_hint": null,
+        "state": "error",
+        "submitted_at": "2026-09-10T03:00:00+00:00",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      },
+      {
+        "attempt_no": 1,
+        "avid": "NEW-503",
+        "error": null,
+        "info_hash": "C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1",
+        "magnet": "magnet:?xt=urn:btih:C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1&dn=NEW-503",
+        "magnet_source": "sukebei",
+        "progress": null,
+        "size_hint": null,
+        "state": "submitted",
+        "submitted_at": "2026-09-10T03:00:00+00:00",
+        "updated_at": "2026-09-10T03:00:00+00:00"
+      },
+      {
+        "attempt_no": 1,
+        "avid": "TRK-502",
+        "error": null,
+        "info_hash": "B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1",
+        "magnet": "magnet:?xt=urn:btih:B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1&dn=TRK-502",
+        "magnet_source": "sukebei",
+        "progress": 35,
+        "size_hint": null,
+        "state": "downloading",
+        "submitted_at": "2026-09-09T00:00:00+00:00",
+        "updated_at": "2026-09-10T03:01:00+00:00"
+      }
+    ],
+    "feed_subscriptions": [],
+    "fill_actor_apply_jobs": [],
+    "fill_actor_candidates": [],
+    "fill_actor_cloud_move_operations": [],
+    "fill_actor_jobs": [],
+    "fill_actor_move_journal": [],
+    "fill_actor_move_results": [],
+    "fill_actor_plans": [],
+    "health_probe": [],
+    "merge_tasks": [],
+    "merge_transcode_chunks": [],
+    "merge_transcode_parts": [],
+    "pipeline_runs": [],
+    "playlist_source": [],
+    "playlists": []
+  },
+  "scenario": "manual/submit",
+  "tree": {
+    "mount": [
+      {
+        "kind": "dir",
+        "path": "library"
+      },
+      {
+        "kind": "dir",
+        "path": "library/sorted"
+      },
+      {
+        "kind": "dir",
+        "path": "library/sorted/HLD"
+      },
+      {
+        "kind": "file",
+        "nlink": 1,
+        "path": "library/sorted/HLD/HLD-501.mp4",
+        "sha256": "2481a63c85a62cf8",
+        "size": 4
+      }
+    ]
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "_generated": "by tools/goldens/generate.py from the Python baseline; do not edit",
+  "baseline": "5a3c083468e9626e9b79d59ed3afb24ba7e6b4ff",
+  "python": "3.13.18",
+  "area": "avid",
+  "cases": [
+    {
+      "avid": "ABC-123",
+      "brand": "ABC"
+    },
+    {
+      "avid": "259LUXU-1234",
+      "brand": "259LUXU"
+    },
+    {
+      "avid": "NOBRAND",
+      "brand": null
+    },
+    {
+      "avid": "123456-789",
+      "brand": "12"
+    },
+    {
+      "avid": "1-2",
+      "brand": "1"
+    },
+    {
+      "avid": "12-3",
+      "brand": "12"
+    },
+    {
+      "avid": "123\n-4",
+      "brand": "12"
+    },
+    {
+      "avid": "12\n-3",
+      "brand": "12"
+    },
+    {
+      "avid": "١٢٣-4",
+      "brand": "١٢"
+    },
+    {
+      "avid": "A-B-C",
+      "brand": "A"
+    },
+    {
+      "avid": "-1",
+      "brand": ""
+    },
+    {
+      "avid": "",
+      "brand": null
+    },
+    {
+      "title": "ABC-123 CD2.mp4",
+      "cd": "2"
+    },
+    {
+      "title": "ABC-123.mp4",
+      "cd": null
+    },
+    {
+      "title": "CD12x",
+      "cd": "12"
+    },
+    {
+      "title": "CD1",
+      "cd": null
+    },
+    {
+      "title": "CD1\n",
+      "cd": null
+    },
+    {
+      "title": "cd2.mp4",
+      "cd": null
+    },
+    {
+      "title": "ABC CD١x",
+      "cd": "١"
+    },
+    {
+      "title": "xCD03.mkv",
+      "cd": "03"
+    }
+  ]
+}

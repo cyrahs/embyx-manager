@@ -1,0 +1,45 @@
+[package]
+name = "embyx-monitor"
+description = "Acquisition ledger, intake, tracker, archive, mapping, RSS, playlists and the scheduler of embyx-manager"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[features]
+# The in-memory ledger the Python tests call `FakeLedger` (`testing`), for other crates' tests.
+test-support = ["embyx-db/test-support"]
+
+[dependencies]
+chrono.workspace = true
+embyx-clients = { workspace = true, features = ["clouddrive"] }
+embyx-core.workspace = true
+embyx-db.workspace = true
+futures-util = { workspace = true, features = ["std"] }
+getrandom.workspace = true
+indexmap.workspace = true
+notify.workspace = true
+caseless.workspace = true
+croner.workspace = true
+rustix.workspace = true
+sqlx.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["macros", "rt", "sync", "time"] }
+tokio-util = { workspace = true, features = ["rt"] }
+tracing.workspace = true
+
+[dev-dependencies]
+# base64 and serde_json: the level 3 live-run example (examples/level3.rs) only.
+base64.workspace = true
+chrono-tz.workspace = true
+embyx-clients = { workspace = true, features = ["clouddrive", "test-support"] }
+embyx-core = { workspace = true, features = ["test-support"] }
+embyx-db = { workspace = true, features = ["test-support"] }
+hex.workspace = true
+serde_json.workspace = true
+tempfile.workspace = true
+tokio = { workspace = true, features = ["macros", "rt", "rt-multi-thread", "sync", "time"] }

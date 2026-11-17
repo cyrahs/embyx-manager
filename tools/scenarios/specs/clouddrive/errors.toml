@@ -1,0 +1,56 @@
+# Errors the fake CloudDrive answers on purpose (WP3): a status on a unary call and on the
+# streamed listing (`check` lists the root after GetSystemInfo), and the wrapper's own
+# follow-up when CreateFolder fails (it lists the parent to tell "already there" from a real
+# failure).
+description = "clouddrive: scripted RPC errors and the wrapper's follow-ups"
+operation = "clouddrive.steps"
+
+[[args.steps]]
+op = "check"
+
+[[args.steps]]
+op = "check"
+
+[[args.steps]]
+op = "list_directory"
+args = { path = "/115/in" }
+
+[[args.steps]]
+op = "stat_file"
+args = { path = "/115/in/a.mp4" }
+
+[[args.steps]]
+op = "ensure_directory"
+args = { parent = "/115", name = "in" }
+
+[[args.steps]]
+op = "ensure_directory"
+args = { parent = "/115", name = "new" }
+
+[[args.steps]]
+op = "move_file"
+args = { source = "/115/in/a.mp4", destination = "/115/out" }
+
+[[args.steps]]
+op = "delete_files"
+args = { paths = ["/115/in/a.mp4"] }
+
+[[args.steps]]
+op = "copy_tasks"
+
+[[args.steps]]
+op = "list_offline_files"
+args = { path = "/115/in" }
+
+[clouddrive]
+directories = ["/115", "/115/in", "/115/out"]
+files = [{ path = "/115/in/a.mp4", size = 2 }]
+errors = [
+    { method = "GetSystemInfo", code = "UNAVAILABLE", details = "connection refused" },
+    { method = "GetSubFiles", code = "PERMISSION_DENIED", details = "token expired", times = 2 },
+    { method = "CreateFolder", code = "DEADLINE_EXCEEDED", details = "Deadline Exceeded", times = 2 },
+    { method = "MoveFile", code = "INTERNAL", details = "中文 错误" },
+    { method = "DeleteFiles", code = "NOT_FOUND", details = "" },
+    { method = "GetCopyTasks", code = "UNAUTHENTICATED", details = "bad token" },
+    { method = "ListOfflineFilesByPath", code = "RESOURCE_EXHAUSTED", details = "slow down" },
+]

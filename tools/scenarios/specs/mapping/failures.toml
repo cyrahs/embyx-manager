@@ -1,0 +1,165 @@
+# Failures midway (WP8). Incremental: a delete that fails (EROFS), a directory listing that
+# fails (EIO) and an rmdir that fails (EACCES) are each reported as a failed path while the
+# batch goes on; ENOTEMPTY on rmdir is a warning. Full sync: a stop asked for right after a
+# copy ends the run at the next title; a copy that fails (EIO, once) ends the run with the
+# error after the titles before it were mirrored, and the next run finishes the job; an empty
+# directory that cannot be removed (ENOTEMPTY: warned; EACCES: logged with its traceback)
+# keeps its ancestors while the rest are still removed; a mirror path that is a directory is a
+# FileExistsError (ends a full run, fails one path of an incremental batch). A source or
+# mirror root that is not a directory is a ValueError; a mirror root that does not exist yet
+# is created by an incremental batch's first copy.
+description = "mapping: failures and a stop in the middle of full and incremental runs"
+operation = "mapping.steps"
+
+[roots]
+names = ["flat", "emby", "other"]
+
+[args.config]
+src_dir = "flat"
+dst_dir = "emby"
+
+[[args.faults]]
+op = "unlink"
+path = "emby/d/MNO-501/MNO-501.strm"
+errno = 30
+times = 1
+
+[[args.faults]]
+op = "iterdir"
+path = "emby/d/MNO-502"
+errno = 5
+times = 1
+
+[[args.faults]]
+op = "rmdir"
+path = "emby/d/MNO-503"
+errno = 13
+times = 1
+
+[[args.faults]]
+op = "rmdir"
+path = "emby/d/MNO-504"
+errno = 39
+times = 1
+
+[[args.faults]]
+op = "copy2"
+path = "flat/b/DEF-201.strm"
+errno = 5
+times = 1
+
+[[args.faults]]
+op = "rmtree"
+path = "emby/stale/one"
+errno = 39
+
+[[args.faults]]
+op = "rmtree"
+path = "emby/locked"
+errno = 13
+
+[[args.stops]]
+op = "copy2"
+path = "flat/a/ABC-102.strm"
+
+[[args.steps]]
+op = "incremental"
+args = { deleted = ["flat/d/MNO-501.strm", "flat/d/MNO-502.strm", "flat/d/MNO-503.strm", "flat/d/MNO-504.strm"] }
+
+[[args.steps]]
+op = "full"
+
+[[args.steps]]
+op = "full"
+
+[[args.steps]]
+op = "full"
+
+[[args.steps]]
+op = "mkdir"
+args = { path = "emby/c/JKL-401/JKL-401.strm" }
+
+[[args.steps]]
+op = "write"
+args = { path = "flat/c/JKL-401.strm", text = "/cloud/c/JKL-401.mp4", mtime = 1767225600 }
+
+[[args.steps]]
+op = "full"
+
+[[args.steps]]
+op = "incremental"
+args = { changed = ["flat/c/JKL-401.strm", "flat/a/ABC-101.strm"] }
+
+[[args.steps]]
+op = "configure"
+args = { config = { src_dir = "flat", dst_dir = "other/file" } }
+
+[[args.steps]]
+op = "full"
+
+[[args.steps]]
+op = "configure"
+args = { config = { src_dir = "other/missing", dst_dir = "emby" } }
+
+[[args.steps]]
+op = "full"
+
+[[args.steps]]
+op = "configure"
+args = { config = { src_dir = "flat", dst_dir = "other/new/mirror" } }
+
+[[args.steps]]
+op = "incremental"
+args = { changed = ["flat/a/ABC-101.strm"] }
+
+[[tree]]
+path = "flat/a/ABC-101.strm"
+text = "/cloud/a/ABC-101.mp4"
+
+[[tree]]
+path = "flat/a/ABC-102.strm"
+text = "/cloud/a/ABC-102.mp4"
+
+[[tree]]
+path = "flat/a/ABC-103.strm"
+text = "/cloud/a/ABC-103.mp4"
+
+[[tree]]
+path = "flat/b/DEF-201.strm"
+text = "/cloud/b/DEF-201.mp4"
+
+[[tree]]
+path = "emby/d/MNO-501/MNO-501.strm"
+text = "/cloud/d/MNO-501.mp4"
+
+[[tree]]
+path = "emby/d/MNO-502/MNO-502.strm"
+text = "/cloud/d/MNO-502.mp4"
+
+[[tree]]
+path = "emby/d/MNO-503/MNO-503.strm"
+text = "/cloud/d/MNO-503.mp4"
+
+[[tree]]
+path = "emby/d/MNO-504/MNO-504.strm"
+text = "/cloud/d/MNO-504.mp4"
+
+[[tree]]
+path = "emby/stale/one/two"
+kind = "dir"
+
+[[tree]]
+path = "emby/stale/three"
+kind = "dir"
+
+[[tree]]
+path = "emby/locked/poster.jpg"
+size = 1
+
+[[tree]]
+path = "emby/gone/away"
+kind = "dir"
+
+[[tree]]
+path = "other/file"
+text = "a file"

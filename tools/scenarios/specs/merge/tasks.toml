@@ -1,0 +1,94 @@
+# The merge task rows (merge/tasks.py): what a create, an update and each kind of transition
+# store, the one-open-task-per-title index, and the queries the merge tab and auto-merge
+# read. The rows show the `parts_json` bytes each build stores; the timestamps written from
+# the wall clock are volatile (their order is kept), `finished_at` comes from the clock.
+description = "merge: create, update and move merge tasks, then list them"
+operation = "merge.tasks"
+clock = "2026-11-13T22:30:00+00:00"
+volatile = ["rows.merge_tasks.created_at", "rows.merge_tasks.updated_at", "rows.merge_tasks.state_changed_at"]
+
+[database]
+schema = "app"
+tables = ["merge_tasks"]
+
+[[args.steps]]
+op = "last_done_at"
+
+[[args.steps]]
+op = "create"
+args = { avid = "ABC-123", source = "rank", library_dir = "/mnt/cd2/115/embyx/rank/ABC", brand = "ABC", parts = ["/mnt/cd2/115/embyx/rank/ABC/ABC-123-cd1.mp4", "/mnt/cd2/115/embyx/rank/ABC/ABC-123 \"演员\"-cd2.mp4"], merged_name = "ABC-123.mp4" }
+
+[[args.steps]]
+op = "create"
+args = { avid = "ABC-123", source = "rank", library_dir = "/x", brand = "ABC", parts = [], merged_name = "ABC-123.mkv" }
+
+[[args.steps]]
+op = "create"
+args = { avid = "DEF-456", source = "vr", library_dir = "/mnt/cd2/115/embyx/vr/DEF", brand = "DEF", parts = ["a\\b.mp4", "c\u0001d.mp4"], merged_name = "DEF-456.mp4" }
+
+[[args.steps]]
+op = "create"
+args = { avid = "GHI-789", source = "rank", library_dir = "/mnt/cd2/115/embyx/rank/GHI", brand = "GHI", parts = ["g1.mp4", "g2.mp4"], merged_name = "GHI-789.mp4" }
+
+[[args.steps]]
+op = "get"
+args = { id = 1 }
+
+[[args.steps]]
+op = "get"
+args = { id = 99 }
+
+[[args.steps]]
+op = "transition"
+args = { id = 1, expected = "queued", state = "merging", fields = { job_name = "embyx-merge-1-abc", phase = "merging", progress = 0.25 } }
+
+[[args.steps]]
+op = "transition"
+args = { id = 1, expected = "queued", state = "uploading" }
+
+[[args.steps]]
+op = "update"
+args = { id = 1, fields = { merged_bytes = 123456789012, merged_sha1 = "DA39A3EE5E6B4B0D3255BFEF95601890AFD80709", uploaded_bytes = 0, upload_attempts = 2, notice = "CloudDrive 不可达", transcoder = "home", transcode_paused = true, progress = 1.0 } }
+
+[[args.steps]]
+op = "update"
+args = { id = 99, fields = { notice = "x" } }
+
+[[args.steps]]
+op = "transition"
+args = { id = 1, expected = "merging", state = "failed", fields = { failed_state = "merging", error = "ffmpeg failed: exit 1", phase = "" } }
+
+[[args.steps]]
+op = "transition"
+args = { id = 4, expected = "queued", state = "done", fields = { finished_at = "now", progress = 1.0 } }
+
+[[args.steps]]
+op = "transition"
+args = { id = 3, expected = "queued", state = "transcoding", fields = { transcoder = "cpu", notice = "" } }
+
+[[args.steps]]
+op = "update"
+args = { id = 3, fields = { notice = "", error = "", job_name = "", merged_sha1 = "", progress = 0.0 } }
+
+[[args.steps]]
+op = "transition"
+args = { id = 1, expected = "failed", state = "cancelled", fields = { finished_at = "2026-11-13T23:00:00.123456+08:00", failed_state = "merging" } }
+
+[[args.steps]]
+op = "create"
+args = { avid = "ABC-123", source = "rank", library_dir = "/mnt/cd2/115/embyx/rank/ABC", brand = "ABC", parts = ["p1.mp4"], merged_name = "ABC-123.mp4" }
+
+[[args.steps]]
+op = "open_tasks"
+
+[[args.steps]]
+op = "listing"
+
+[[args.steps]]
+op = "cancelled_avids"
+
+[[args.steps]]
+op = "merged_avids"
+
+[[args.steps]]
+op = "last_done_at"
