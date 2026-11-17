@@ -440,7 +440,8 @@ The full rows are in PLAN.md "Experiment log".
    CloudDrive, which spends calls to the 115 API. The paused deployment's manual round checks the same paths on
    the real tree, one pipeline at a time, so this is not recommended.
 2. **Pod memory.** Keep 256Mi / 768Mi, or lower the request (for example to 128Mi) after a week of
-   watching the pod's working set (DEPLOY.md).
+   watching the pod's working set (DEPLOY.md). The trial's first hours of auto-merge speak against lowering
+   it yet: the process alone reached 210 Mi (see "What the trial showed").
 3. **Job Object for the home worker** (HOME-WORKER.md). It would make ffmpeg shims harmless for stops.
    It is not built; winget's ffmpeg needs nothing.
 4. **Deployment itself.** Described in DEPLOY.md and PLAN.md "Deployment and rollback". When this report was
@@ -486,21 +487,29 @@ parts failed under Python however often it was retried.
 What the trial showed on the live system between 2026-11-16 00:09Z and 2026-11-17 00:08Z (PLAN.md has each
 round with its figures): a mapping full sync that changed nothing, one RSS run by hand and the scheduled ones
 after it, archive runs and tracker polls whose log lines and stats match the Python build's last ones, the
-playlist sync (after #104), eight downloads filed in the right place with nothing else touched (three
-listings of intake and library, each against the one before), one manual AVID filed 26 s after it was
-entered, one lossless merge by hand and then the auto-merge: eight more titles from the Job
-through the 115 upload, the replacement of the parts and the filing, and one title refused for mixed streams
-with Python's words. One fill-actor scan ran and found nothing new. All seven switches are back on. The
-working set stayed between 147 and 164 Mi for the first 16 hours and between 91 and 233 Mi with the
-auto-merge running; the Python pod's moved between 190 and 513 Mi in the six hours before the swap.
+playlist sync (after #104), nine downloads filed in the right place with nothing else touched (four
+listings of intake and library, each against the one before, the last at 00:16Z on 2026-11-17), one manual
+AVID filed 26 s after its magnet was submitted, one lossless merge by hand and then the auto-merge: eight
+more titles from the Job through the 115 upload, the replacement of the parts and the filing, and one title
+refused for mixed streams with Python's words. Task 286, the title D177 was found on, was retried from
+another thread and merged. One fill-actor scan ran and found nothing new. All seven switches are back on.
+
+Memory on the live system is higher than the benchmark's figures, and not settled. The working set stayed
+between 147 and 164 Mi for the first 16 hours (one merge). With the auto-merge running it moved between 91
+and 482 Mi: the process's own memory rose in steps from 85 to 210 Mi over the first four hours (seven
+merges) and stayed there for the hour and a half after that, and the rest is file cache during a merge and
+reclaimable kernel slab from the CloudDrive mount. The pod's peak touched its 768 Mi limit without an OOM
+event. The Python pod's working set moved between 190 and 513 Mi in the six hours before the swap. Whether
+the Rust process stops at about 210 Mi has to be read again after a day of auto-merge.
 
 ## What was not tested
 
 This list is as it stood before the deployment trial. The trial has since run the first two items on the
-live system, bar the re-encode; PLAN.md's "Deployment trial log" has the rounds. What the trial itself did
-not reach: a title over 115 GB (the AV1 re-encode and the home worker, with either worker build), the Rust
-worker exe on Windows, a fill-actor scan that queues a new title or proposes moves and the apply of such a
-plan, a playlist fill, a replacement (换版), and the merge page's pause, cancel and retry.
+live system, bar the re-encode, and the fourth (the RSS runs read the RSSHub feeds); PLAN.md's "Deployment
+trial log" has the rounds. What the trial itself did not reach: a title over 115 GB (the AV1 re-encode and
+the home worker, with either worker build), the Rust worker exe on Windows, a fill-actor scan that queues a
+new title or proposes moves and the apply of such a plan, a playlist fill, a replacement (换版), and the
+merge page's pause and cancel (retry was used once, on task 286, from another thread).
 
 - A deployment of the Rust image, or the image in the pod's conditions (read-only root, uid 0 with
   `DAC_OVERRIDE`, the CloudDrive FUSE mount).
