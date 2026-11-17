@@ -210,10 +210,11 @@ fn read_request(reader: &mut BufReader<TcpStream>) -> Option<Recorded> {
 }
 
 /// A runner whose `run` answers from a function of the argument list and records the
-/// calls; `spawn` is refused.
+/// calls; `spawn` is refused, and what `keep_awake` was asked is kept in order.
 pub(crate) struct ScriptedRunner {
     pub answer: Box<Answer>,
     pub calls: Mutex<Vec<(Vec<String>, Option<Duration>)>>,
+    pub awake: Mutex<Vec<bool>>,
 }
 
 impl ScriptedRunner {
@@ -221,7 +222,12 @@ impl ScriptedRunner {
         Self {
             answer: Box::new(answer),
             calls: Mutex::new(Vec::new()),
+            awake: Mutex::new(Vec::new()),
         }
+    }
+
+    pub(crate) fn awake(&self) -> Vec<bool> {
+        self.awake.lock().unwrap_or_else(PoisonError::into_inner).clone()
     }
 
     pub(crate) fn calls(&self) -> Vec<(Vec<String>, Option<Duration>)> {
@@ -241,6 +247,10 @@ impl Runner for ScriptedRunner {
 
     fn spawn(&self, _argv: &[OsString]) -> io::Result<Arc<dyn Running>> {
         Err(io::Error::other("the scripted runner starts no process"))
+    }
+
+    fn keep_awake(&self, on: bool) {
+        self.awake.lock().unwrap_or_else(PoisonError::into_inner).push(on);
     }
 }
 

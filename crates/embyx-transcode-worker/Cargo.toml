@@ -30,7 +30,7 @@ ureq = { version = "3.5", default-features = false, features = ["rustls"] }
 nix = { workspace = true, features = ["hostname"] }
 
 [target.'cfg(windows)'.dependencies]
-windows-sys = { workspace = true, features = ["Win32_System_SystemInformation"] }
+windows-sys = { workspace = true, features = ["Win32_System_Power", "Win32_System_SystemInformation"] }
 windows-link = "0.2"
 
 [dev-dependencies]
