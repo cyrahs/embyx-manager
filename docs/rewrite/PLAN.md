@@ -42,6 +42,7 @@ rollback"), and only as far as those steps need: the image is published from `ru
 `rust-<sha>` (`rust-image.yml`), the running app is paused and read through its own API, backups are taken, and
 one nas-gitops PR pins the Rust image. Still in force: no workflow dispatch, no git tags, no release, nothing
 under the `latest` tag, no direct write to the database, no `rust` into `main`; those wait for Max (steps 8, 9).
+Max asked for steps 8 and 9 on 2026-11-17 ("Wrap-up log"); the direct write to the database stays ruled out.
 
 - Never deploy. No image publish from `rust`, no change to charys117/nas-gitops, no workflow dispatch, no tags.
   (`ci.yml` publishes `latest` from `main` only; Flux follows `latest` by digest and restarts the pod.)
@@ -802,6 +803,50 @@ Kept, with the reason:
 - 00:08Z on 2026-11-17 `fill_actor.apply_enabled` restored. All seven switches are back at their values from before the
   pause, and steps 1 to 7 are done except the home worker: the Python worker polled the Rust server without
   errors in the trial's first hours, no title over 115 GB came up, and the Rust exe waits for a release.
+
+## Wrap-up log (2026-11-17, steps 8 and 9 of "Deployment and rollback")
+
+Max, 2026-11-17 00:45Z: wrap up; the worker on his PC changes to the exe when he is home, not now; the
+backups from before the deployment may be deleted.
+
+- 00:52Z, step 8: `rust` into `main` (#108, squash b2ffd31; the tree equals `rust` at 728a7ee). `ci.yml` was
+  still the Python one and rebuilt the Python image as `latest`; the cluster was pinned and did not follow.
+- 01:02Z, keep-safes: #109 added a workflow, run once by hand, that put the git tag `python-final` on 5a3c083
+  and the image tag `python-final` on `sha256:06fd3f09…6208`, the Python image that ran in production (read
+  back from the registry). A tag push from the working session is refused, so the tag had to come from a
+  workflow.
+- 01:27Z, cleanup merged (#110, its own thread, squash dcc7b9c): the Python tree, `BASELINE`, the Python tooling
+  and the two Rust workflows are gone; `Dockerfile.rust` is `Dockerfile`; one `ci.yml` builds, tests and
+  publishes the Rust image as `latest` (`sha256:ebbc2dd6…5f2d`), with `sha-<commit>` beside it; `release.yml`
+  builds the Windows worker exe on a `v*` tag. Against the image of the trial the Rust sources differ in
+  comments and one removed example dependency.
+- 01:41Z, the cluster follows `latest` again (nas-gitops #186: `newTag: latest` and the image-automation
+  marker back, on that digest). The new pod answered health as before, `GET /api/config` was byte-equal
+  before and after, the schema version is 19, the front end is served. From here on every merge into `main`
+  deploys by itself. Going back to Python: pin tag `python-final` and its digest in nas-gitops without the
+  marker; the database is the same.
+- Memory, the open point of the trial, read again at 01:38Z on the pod of the third image (6.5 hours; ten
+  merges filed, tasks 286, 292 to 297 and 299 to 301, and task 302 uploading): the process's own memory had
+  gone on to 242 Mi (85, 105, 139, 163, 186, 210, 220, 242). `/proc/1/smaps` shows where it sits: eight
+  glibc thread arenas, six at 27 to 28 Mi, one at 58 and one at 13, about 236 Mi together, and a main heap
+  of 2 Mi. That points to arenas keeping their high-water mark and away from a leak per merge: six arenas
+  of the same size look like one transient allocation of about 27 Mi that different worker threads ran in
+  turn (which one was not traced), and an arena does not give that back. It is a reading, not a proof:
+  leaked memory would sit in the same arenas, and the arenas at 58 and 13 Mi do not follow the pattern. Where
+  it would have levelled off was not measured. nas-gitops #186 therefore also sets `MALLOC_ARENA_MAX=2` in
+  the Deployment; nothing in the app changed. Its effect is not measured yet either: the new pod stood at
+  96 Mi after 50 minutes, but no merge finished in that time (next entry). If the process keeps climbing
+  with two arenas (past some 150 Mi and still rising merge after merge), that would point to a leak and has
+  to be traced.
+- Task 302 (GAH-110, 23.2 GB) was `uploading` when the pod was replaced at 01:41Z and stayed `uploading`
+  on the new pod, first attempt, nothing restarted. Its upload had stalled at about 1.1 GB before that: CloudDrive
+  sent about 2 MB/s at 00:50Z, 0.5 MB/s at 01:00Z and about 0.1 MB/s from 01:10Z on (15 to 21 MB/s during
+  the uploads before it). That is the crawl seen on task 291 and on Python's tasks 276 and 288. The auto-merge
+  is serial, so the queue waits behind it.
+- Not done yet when this was written: the first release of the worker exe (`release.yml` gets a manual run
+  that creates the tag, for the same reason as above), deleting the backups (after task 302 has been filed
+  by the new pod), and reading the memory again after a day of merges with two arenas. Left for Max: the
+  worker switch at home, branch `rust` and the `rust-*` image tags, the memory request.
 
 ## Experiment log
 

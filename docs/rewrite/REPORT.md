@@ -19,6 +19,9 @@ A copy of this file is at `/mnt/project-files/embyx-rust/report-data.md`.
   command (no D row; named in the introduction of `docs/DIVERGENCES.md` and in PLAN.md).
 - **`main` catch-up.** `main` is still at the baseline (rechecked 2026-11-14 10:17Z, before the last PR), so there is nothing to
   port.
+- **After this report.** The deployment trial ran on 2026-11-16 ("Found by the deployment trial" below) and
+  the wrap-up on 2026-11-17: `rust` is in `main` (#108), the Python tree is gone (#110, tag `python-final`
+  keeps it), `latest` is the Rust image and the cluster follows it. PLAN.md has both logs.
 - **Level 1.** Complete and green: locally on cd657f6, the last commit that changed crate code, and in CI
   on 6c5120b (#100's review fixes: tools, `Dockerfile.rust`, `rust.yml` and docs, no crate code), merged as
   cf10954. #101 adds only this report and PLAN.md. #102 (level 2) changes the tools, the docs and one
@@ -445,13 +448,14 @@ The full rows are in PLAN.md "Experiment log".
    CloudDrive, which spends calls to the 115 API. The paused deployment's manual round checks the same paths on
    the real tree, one pipeline at a time, so this is not recommended.
 2. **Pod memory.** Keep 256Mi / 768Mi, or lower the request (for example to 128Mi) after a week of
-   watching the pod's working set (DEPLOY.md). The trial's first hours of auto-merge speak against lowering
-   it yet: the process alone reached 210 Mi (the memory paragraph before "What was not tested").
+   watching the pod's working set (DEPLOY.md). The trial's hours of auto-merge speak against lowering
+   it yet: the process alone reached 242 Mi before the arena cap of 2026-11-17 (the memory paragraphs
+   before "What was not tested").
 3. **Job Object for the home worker** (HOME-WORKER.md). It would make ffmpeg shims harmless for stops.
    It is not built; winget's ffmpeg needs nothing.
 4. **Deployment itself.** Described in DEPLOY.md and PLAN.md "Deployment and rollback". When this report was
    written none of it was done. Max gave the go-ahead for the trial on 2026-11-16: the image workflow
-   (`rust-image.yml`) was added then; the release workflow for the home worker is still only described.
+   (`rust-image.yml`) was added then; the release workflow for the home worker was still only described (it came with #110, see "After this report").
 
 ## Open risks
 
@@ -504,8 +508,15 @@ between 147 and 164 Mi for the first 16 hours and reached 227 Mi while the one m
 and 482 Mi: the process's own memory rose in steps from 85 to 210 Mi over the first three hours and forty minutes
 (seven merges) and stayed there for the hour and a half after that, and the rest is file cache during a merge and
 reclaimable kernel slab from the CloudDrive mount. The pod's peak touched its 768 Mi limit without an OOM
-event. The Python pod's working set moved between 190 and 513 Mi in the six hours before the swap. Whether
-the Rust process stops at about 210 Mi has to be read again after a day of auto-merge.
+event. The Python pod's working set moved between 190 and 513 Mi in the six hours before the swap.
+
+The steps went on after that (242 Mi after 6.5 hours and ten filed merges). Where the memory sat points to
+glibc's thread arenas and away from a leak: eight arenas of 13 to 58 Mi, six of them at 27 to 28 Mi, held
+about 236 Mi, which looks like one large transient allocation run by different worker threads in turn, each
+arena keeping its high-water mark. That is a reading, not a proof. The deployment now runs with
+`MALLOC_ARENA_MAX=2` (nas-gitops #186, set with the switch to `latest` on 2026-11-17; no change in the
+app). What that brings has to be read after a day of merges, and a climb that goes on with two arenas would
+point to a leak and has to be traced; PLAN.md's "Wrap-up log" has the figures.
 
 ## What was not tested
 
