@@ -337,7 +337,7 @@ pub fn assert_transcript(parts: Parts<'_>) {
     let path = repo_root().join("goldens/scenarios").join(format!("{name}.json"));
     let golden = std::fs::read_to_string(&path).unwrap_or_else(|error| {
         panic!(
-            "cannot read {} (run tools/scenarios/runner.py): {error}",
+            "cannot read {} (transcripts are frozen; their generator is at commit b2ffd31): {error}",
             path.display()
         )
     });

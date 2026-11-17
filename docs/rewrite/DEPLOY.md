@@ -1,5 +1,9 @@
 # Deploying the Rust build
 
+> History of the Rust rewrite, kept as written. Paths and commands in it are from before the Python tree left
+> the repository (the cleanup after the switch, November 2026): the Python app is at tag `python-final`, the
+> rewrite's Python tooling at the commit that merged branch `rust` into `main` (b2ffd31).
+
 What it takes to run the Rust build in the cluster and on the home worker, and how to go back. Max
 gave the go-ahead for the deployment trial on 2026-11-16 (PLAN.md "Deployment and rollback"): the image
 workflow below was added then. The release workflow for the home worker is still only a sketch.

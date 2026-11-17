@@ -1,5 +1,9 @@
 # Effect transcripts (scenarios)
 
+> History of the Rust rewrite, kept as written. Paths and commands in it are from before the Python tree left
+> the repository (the cleanup after the switch, November 2026): the Python app is at tag `python-final`, the
+> rewrite's Python tooling at the commit that merged branch `rust` into `main` (b2ffd31).
+
 A unit golden pins a pure function. An effect transcript pins what an operation *does*: the
 calls it makes to CloudDrive, Kubernetes and Emby, what it leaves on disk and in the database.
 Both builds run the same scenario; their transcripts must be byte-identical.

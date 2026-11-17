@@ -4,7 +4,7 @@
 //! derived, so that RSS, the archiver and the acquisition ledger never disagree about what
 //! to call a video; the spelling keys the ledger and names library files (cross-version
 //! contract 7), so every branch below follows the Python one in order and the corpora in
-//! `tests/data/` plus `goldens/avid/` hold it to the baseline's output.
+//! `crates/embyx-core/data/` plus `goldens/avid/` hold it to the baseline's output.
 //!
 //! The pattern branches are derived from `JavSP`'s `javsp/avid.py`
 //! (<https://github.com/Yuukiy/JavSP>), Copyright (C) `JavSP` contributors, licensed under

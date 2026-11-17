@@ -1,5 +1,9 @@
 # embyx-manager Rust rewrite: plan and status
 
+> History of the Rust rewrite, kept as written. Paths and commands in it are from before the Python tree left
+> the repository (the cleanup after the switch, November 2026): the Python app is at tag `python-final`, the
+> rewrite's Python tooling at the commit that merged branch `rust` into `main` (b2ffd31).
+
 Approved by Max on 2026-11-13 18:22Z ("按默认项开始": WP0 starts, the home transcode worker is ported to Rust and
 shipped as an exe from GitHub Releases, everything else follows the defaults below). Written by the planning
 thread (规划 embyx-manager 的 Rust 改写方案); this file is its repository copy and, from WP0 on, the source of truth

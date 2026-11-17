@@ -1,7 +1,7 @@
 //! The merge Job's worker, run against real ffmpeg on tiny generated parts.
 //!
 //! Ported from `tests/test_merge_worker.py`. Python skips the ffmpeg tests when ffmpeg is
-//! missing; here they need it (`rust.yml` installs it), as a test that cannot run fails.
+//! missing; here they need it (CI installs it), as a test that cannot run fails.
 
 use std::path::{Path, PathBuf};
 use std::process::Command as Process;

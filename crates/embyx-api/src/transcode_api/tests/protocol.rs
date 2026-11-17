@@ -1,14 +1,14 @@
-//! Cross-version contract 5: a home worker of protocol v1 written in Python works against the
-//! Rust listener. The listener is served on a local port over a scratch database, a fake Job
-//! API and a fake CloudDrive; the baseline's own `home_worker` (`tools/home_worker/python_worker.py`)
-//! claims the task, reads the parts with ffmpeg over HTTP (range requests), uploads chunks
-//! with their headers, sends heartbeats, is stopped midway and resumes, and reads a refusal
-//! as `ServerError`. The Rust merge worker then prepares the audio and assembles what the
-//! Python worker sent, with the arguments of the Jobs the service asked for.
+//! Cross-version contract 5: a home worker of protocol v1 works against the listener. The
+//! listener is served on a local port over a scratch database, a fake Job API and a fake
+//! CloudDrive; the Rust worker (`embyx-transcode-worker`) claims the task, reads the parts with
+//! ffmpeg over HTTP (range requests), uploads chunks with their headers, sends heartbeats, is
+//! stopped midway and resumes, and reads a refusal as `ServerError`. The Rust merge worker then
+//! prepares the audio and assembles what the worker sent, with the arguments of the Jobs the
+//! service asked for.
 //!
-//! The same story with the Rust worker (`embyx-transcode-worker`) in the Python worker's
-//! place: the pairing both sides will have once the Python tree is gone. Its other direction,
-//! the Rust worker against the Python listener, is that crate's `tests/python_listener.rs`.
+//! Until the Python tree left the repository, the same story also ran the Python worker against
+//! this listener and the Rust worker against the Python listener; those cross-build tests are in
+//! the history at the commit that merged branch `rust` (docs/rewrite/PARITY.md).
 
 use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
@@ -18,7 +18,7 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use embyx_core::config::models::{ArchiveConfig, CloudDriveConfig, MergeConfig};
-use embyx_core::pyjson::{self, Dict, DumpOptions, Value};
+use embyx_core::pyjson::{self, Dict, Value};
 use embyx_db::testdb::TestDatabase;
 use embyx_merge::fakes::{FakeCloud, FakeKube};
 use embyx_merge::ports::{MergeCloud, MergeKube, Trigger};
@@ -40,10 +40,6 @@ use crate::app::create_transcode_app;
 
 const BIG: i64 = 200 * 1_000_000_000;
 const TOKEN: &str = "protocol-secret";
-
-fn repository() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../..")
-}
 
 fn ffmpeg(arguments: &[&str]) {
     let status = Process::new("ffmpeg")
@@ -95,30 +91,6 @@ fn frames(path: &Path) -> i64 {
         .expect("a count")
 }
 
-/// One run of the Python worker; its printed JSON.
-async fn python_worker(run: &Value) -> Value {
-    let argument = pyjson::dumps(run, &DumpOptions::plain()).expect("JSON");
-    let output = tokio::task::spawn_blocking(move || {
-        let repository = repository();
-        Process::new("uv")
-            .args(["run", "--locked", "python"])
-            .arg(repository.join("tools/home_worker/python_worker.py"))
-            .arg(argument)
-            .current_dir(&repository)
-            .output()
-            .expect("uv runs (it must be installed)")
-    })
-    .await
-    .expect("the worker thread");
-    let stdout = String::from_utf8(output.stdout).expect("utf-8");
-    assert!(
-        output.status.success(),
-        "the Python worker failed: {}{stdout}",
-        String::from_utf8_lossy(&output.stderr)
-    );
-    pyjson::loads(stdout.trim_end()).expect("the worker prints JSON")
-}
-
 /// The value after `flag` in a Job's arguments.
 fn after(args: &[String], flag: &str) -> String {
     let at = args
@@ -158,18 +130,6 @@ fn run_job(args: &[String], parts: Vec<String>, tmp: &Path) {
         &mut stderr,
     );
     assert_eq!(code, 0, "the merge worker: {}", String::from_utf8_lossy(&stderr));
-}
-
-fn field<'a>(value: &'a Value, key: &str) -> &'a Value {
-    value.get(key).unwrap_or_else(|| panic!("no {key} in {value:?}"))
-}
-
-fn dict(entries: Vec<(&str, Value)>) -> Value {
-    let mut dict = Dict::new();
-    for (key, value) in entries {
-        dict.insert(key, value);
-    }
-    Value::Dict(dict)
 }
 
 /// The Rust listener over a scratch database, a fake Job API and a fake CloudDrive, with one
@@ -254,126 +214,6 @@ impl Rig {
         self.repository.database().close().await;
         self.test.drop_database().await;
     }
-}
-
-#[tokio::test]
-#[allow(clippy::too_many_lines, reason = "one worker's whole task, step for step")]
-async fn a_python_worker_transcodes_a_title_through_the_rust_listener() {
-    let tmp = tempfile::tempdir().expect("tempdir");
-    let mount = tmp.path().join("cd2");
-    let library = format!("{}/115/embyx", mount.display());
-    let parts: Vec<String> = (1..=2)
-        .map(|index| format!("{library}/type/vr/SQTEVR/SQTEVR-009-cd{index}.mp4"))
-        .collect();
-    make_part(Path::new(&parts[0]), 14.0, 0.2);
-    make_part(Path::new(&parts[1]), 5.0, 0.0);
-    let work = tmp.path().join("upload");
-    std::fs::create_dir_all(&work).expect("mkdir");
-    let scratch = tmp.path().join("tmp");
-    std::fs::create_dir_all(&scratch).expect("mkdir");
-
-    let Rig {
-        test,
-        repository,
-        kube,
-        service,
-        task,
-        address,
-        server,
-    } = rig(&mount, &library, &work, &parts).await;
-
-    let encoder = pyjson::loads(
-        r#"{"codec": "libx264", "extra": ["-preset", "veryfast", "-bf", "3", "-vf", "realtime=speed=4"]}"#,
-    )
-    .expect("JSON");
-    let run = |stop_after: Value, refuse: bool| {
-        dict(vec![
-            ("server", Value::Str(format!("http://{address}"))),
-            ("token", Value::from(TOKEN)),
-            (
-                "cache_dir",
-                Value::Str(tmp.path().join("cache").to_string_lossy().into_owned()),
-            ),
-            ("encoder", encoder.clone()),
-            ("chunk_seconds", Value::Int(2)),
-            ("stop_after", stop_after),
-            ("refuse", Value::Bool(refuse)),
-            // The worker's 15 s, shortened so these short runs send heartbeats.
-            ("heartbeat_seconds", Value::Float(0.5)),
-        ])
-    };
-
-    // The first claim starts the audio Job; the worker is told to wait while it probes.
-    let first = python_worker(&run(Value::Null, false)).await;
-    assert_eq!(
-        field(&first, "claim"),
-        &pyjson::loads(&format!(
-            r#"{{"task": null, "wait": "probing", "task_id": {}}}"#,
-            task.id
-        ))
-        .expect("JSON")
-    );
-    let (name, args) = kube.state().created[0].clone();
-    assert_eq!(name, audio_job_name(task.id, &task.avid));
-    run_job(&args, parts.clone(), &scratch);
-
-    // Stopped once the cluster took the first chunk, then a chunk out of order is refused.
-    let stopped = python_worker(&run(Value::Int(1), true)).await;
-    assert_eq!(field(&stopped, "outcome"), &Value::from("stopped"));
-    let assigned = field(field(&stopped, "claim"), "task");
-    assert_eq!(field(assigned, "id"), &Value::Int(i128::from(task.id)));
-    assert_eq!(field(assigned, "paused"), &Value::Bool(false));
-    let refusal = field(&stopped, "refusal");
-    assert_eq!(field(refusal, "status"), &Value::Int(409));
-    assert_eq!(field(refusal, "code"), &Value::from("transcode_chunk_out_of_order"));
-    let details = field(refusal, "details");
-    let Value::Int(next) = field(details, "next_chunk") else {
-        panic!("next_chunk in {details:?}");
-    };
-    assert!(*next >= 1, "the first chunk was taken: {details:?}");
-    assert!(matches!(field(details, "resume_at"), Value::Float(at) if *at > 0.0));
-    let held = TranscodeRepository::new(test.database())
-        .chunks(task.id)
-        .await
-        .expect("chunks");
-    assert!(
-        !held.is_empty() && held.iter().all(|chunk| chunk.part_index == 0),
-        "{held:?}"
-    );
-
-    // The second run resumes where the cluster's chunks end and sends the rest.
-    let done = python_worker(&run(Value::Null, false)).await;
-    assert_eq!(field(&done, "outcome"), &Value::from("done"));
-    let resumed = field(field(&done, "claim"), "task");
-    let Some(Value::List(views)) = resumed.get("parts") else {
-        panic!("parts in {resumed:?}");
-    };
-    assert_eq!(views[0].get("next_chunk"), Some(&Value::Int(*next)));
-    // Heartbeats went through while it encoded, each answered active and not paused.
-    assert_eq!(field(&done, "heartbeat_failures"), &Value::List(Vec::new()));
-    let Value::List(heartbeats) = field(&done, "heartbeats") else {
-        panic!("heartbeats in {done:?}");
-    };
-    assert!(!heartbeats.is_empty(), "no heartbeat was sent: {done:?}");
-    for answer in heartbeats {
-        assert_eq!(answer.get("active"), Some(&Value::Bool(true)), "{answer:?}");
-        assert_eq!(answer.get("paused"), Some(&Value::Bool(false)), "{answer:?}");
-    }
-
-    // The service assembles once every part is in, with the Rust merge worker.
-    service.tick().await.expect("tick");
-    let task = repository.get(task.id).await.expect("get").expect("the task");
-    assert_eq!(task.state, MergeState::Merging);
-    let (_, args) = kube.state().created.last().cloned().expect("the merge Job");
-    assert!(args.iter().any(|arg| arg == "--home-assemble"), "{args:?}");
-    run_job(&args, Vec::new(), &scratch);
-    let output = PathBuf::from(after(&args, "--output"));
-    let sources: i64 = parts.iter().map(|part| frames(Path::new(part))).sum();
-    assert_eq!(frames(&output), sources);
-
-    server.abort();
-    repository.database().close().await;
-    test.drop_database().await;
 }
 
 /// The Rust worker's HTTP client, counting the chunks the listener took and keeping its
