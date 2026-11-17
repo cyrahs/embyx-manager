@@ -69,8 +69,9 @@ jobs:
           echo "error: ${IMAGE}@${DIGEST} reads back as '${source_digest}'"
           exit 1
         fi
-        # Only "not found" counts as an absent tag; any other failure stops here, so a
-        # registry hiccup can never lead to writing over a tag that exists.
+        # Only "not found" for the tag itself counts as an absent tag; any other failure
+        # stops here, so a registry hiccup or a tag with a missing part can never lead to
+        # writing over a tag that exists.
         if out="$(inspect "${IMAGE}:python-final" 2>&1)"; then
           existing="$(jq -r .digest <<< "${out}")"
           if [[ "${existing}" != "${DIGEST}" ]]; then
@@ -78,7 +79,7 @@ jobs:
             exit 1
           fi
           echo "image tag python-final is already on ${DIGEST}"
-        elif grep -qiE 'not found|manifest unknown' <<< "${out}"; then
+        elif grep -qF "${IMAGE}:python-final: not found" <<< "${out}"; then
           # Without --prefer-index=false a single-platform manifest would be wrapped in a
           # new index with another digest; with it the source is tagged as it is.
           docker buildx imagetools create --prefer-index=false --tag "${IMAGE}:python-final" "${IMAGE}@${DIGEST}"
