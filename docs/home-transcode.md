@@ -99,13 +99,16 @@ The status line shows each part's progress and fps, the upload rate and the queu
 **Ctrl+C** twice exits at once. The next start picks up after the last chunk the cluster
 holds, or after the last chunk still in the local cache.
 
-While it works a title, the worker asks Windows not to go to sleep on its idle timer (the
-display may still turn off). It lets go when the title is done, when you stop the worker, and
-while a paused title has nothing left to encode or upload. A worker that only waits for work
-asks for nothing: the PC sleeps as its power plan says, the merge page shows the worker as
-offline, and a title queued meanwhile starts once the PC is awake again. Sleep you ask for
-yourself (the power button, the Start menu) always happens. The cluster keeps every chunk it
-took, and the worker goes on from there once the PC is awake; restart it if it does not.
+While it has a title to work, the worker asks Windows not to go to sleep on its idle timer (the
+display may still turn off). That covers encoding and uploading, and also the waits when the
+cluster cannot be reached for a while. It lets go when the title is done, when a stopped worker
+has sent its queued chunks and exits, and while a paused title has nothing left to encode or
+upload. A worker that only waits for work asks for nothing: the PC sleeps as its power plan
+says, the merge page shows the worker as offline, and a title queued meanwhile starts once the
+PC is awake again. Sleep you ask for yourself (the power button, the Start menu) always
+happens. The cluster keeps every chunk it took, and the worker goes on from there once the PC
+is awake; restart it if it does not. `powercfg /requests` in an administrator terminal lists
+`embyx-manager.exe` under SYSTEM while the request is held.
 
 Every setting can also be given on the command line (`--server`, `--token`, `--upload-mbps`,
 `--jobs`, `--max-queue-gb`, `--cache-dir`, `--ffmpeg`, `--ffprobe`, `--config`).

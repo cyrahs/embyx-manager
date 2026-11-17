@@ -324,6 +324,16 @@ fn awake_run(cluster: FakeCluster, cache: &Path, task: Assignment) -> (TaskRun, 
     (run, cluster, runner)
 }
 
+/// What a test hands `run` as its Ctrl+C count: `presses` on every turn of the loop, and a
+/// failure in place of a hang when the turns go on for ten seconds.
+fn stop_when(presses: impl Fn() -> usize + Sync) -> impl Fn() -> usize + Sync {
+    let deadline = Instant::now() + Duration::from_secs(10);
+    move || {
+        assert!(Instant::now() < deadline, "the run did not get to its end");
+        presses()
+    }
+}
+
 fn paused_cluster() -> FakeCluster {
     FakeCluster {
         on_heartbeat: Box::new(|_| Ok(answer(&[("active", Value::Bool(true)), ("paused", Value::Bool(true))]))),
@@ -365,10 +375,10 @@ fn a_task_at_work_keeps_the_machine_awake_until_the_run_ends() {
     let sent = Arc::clone(&cluster);
     let watched = Arc::clone(&runner);
     let outcome = run
-        .run(&move || {
+        .run(&stop_when(move || {
             assert_ne!(watched.awake(), [true, false], "let go while the task was worked");
             usize::from(!sent.uploaded().is_empty())
-        })
+        }))
         .expect("run");
     assert_eq!(outcome, Outcome::Stopped);
     assert_eq!(cluster.uploaded().len(), 1);
@@ -394,13 +404,13 @@ fn a_paused_task_keeps_the_machine_awake_only_while_chunks_go_out() {
     // Ctrl+C once the loop has let go, which it does while it is still running.
     let watched = Arc::clone(&runner);
     let outcome = run
-        .run(&move || {
+        .run(&stop_when(move || {
             let asked = watched.awake();
             if asked == [true] {
                 seen.store(true, Ordering::SeqCst);
             }
             usize::from(asked == [true, false])
-        })
+        }))
         .expect("run");
     assert_eq!(outcome, Outcome::Stopped);
     assert_eq!(cluster.uploaded().len(), 1);
@@ -418,4 +428,33 @@ fn a_paused_task_with_nothing_to_send_lets_the_machine_sleep() {
         .expect("run");
     assert_eq!(outcome, Outcome::Stopped);
     assert_eq!(runner.awake(), Vec::<bool>::new());
+}
+
+#[test]
+fn a_pause_lets_go_and_a_resume_asks_again() {
+    let cache = tempfile::tempdir().expect("cache");
+    // The cluster's pause switch, as the heartbeat hears it.
+    let pause = Arc::new(std::sync::atomic::AtomicBool::new(false));
+    let heard = Arc::clone(&pause);
+    let cluster = FakeCluster {
+        on_heartbeat: Box::new(move |_| {
+            Ok(answer(&[
+                ("active", Value::Bool(true)),
+                ("paused", Value::Bool(heard.load(Ordering::SeqCst))),
+            ]))
+        }),
+        ..FakeCluster::default()
+    };
+    let (run, _, runner) = awake_run(cluster, cache.path(), assignment());
+    // Pause once the run has asked, resume once it has let go, Ctrl+C once it has asked again.
+    let watched = Arc::clone(&runner);
+    let outcome = run
+        .run(&stop_when(move || {
+            let asked = watched.awake();
+            pause.store(asked == [true], Ordering::SeqCst);
+            usize::from(asked == [true, false, true])
+        }))
+        .expect("run");
+    assert_eq!(outcome, Outcome::Stopped);
+    assert_eq!(runner.awake(), [true, false, true, false]);
 }
