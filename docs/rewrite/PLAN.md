@@ -831,12 +831,12 @@ backups from before the deployment may be deleted.
   (about 27 Mi; which listing it is was not traced) keeps that much, because an arena does not give its
   high-water mark back. Left alone it would level off near the number of arenas times that peak, some 250
   to 500 Mi. nas-gitops #186 therefore also sets `MALLOC_ARENA_MAX=2` in the Deployment; nothing in the app
-  changed. Its effect is not measured yet: the new pod stood at 96 Mi after its first hour, but no merge
-  finished in that hour (next entry).
+  changed. Its effect is not measured yet: the new pod stood at 96 Mi after 50 minutes, but no merge
+  finished in that time (next entry).
 - Task 302 (GAH-110, 23.2 GB) was `uploading` when the pod was replaced at 01:41Z and stayed `uploading`
-  on the new pod, first attempt, nothing restarted. Its upload had stalled at 1.2 GB before that: CloudDrive
-  sent about 2 MB/s at 00:50Z and about 0.1 MB/s from 01:00Z on, the crawl task 291 and Python's tasks 276
-  and 288 showed. The auto-merge is serial, so the queue waits behind it.
+  on the new pod, first attempt, nothing restarted. Its upload had stalled at about 1.1 GB before that: CloudDrive
+  sent about 2 MB/s at 00:50Z, 0.5 MB/s at 01:00Z and about 0.1 MB/s from 01:10Z on (15 to 21 MB/s during
+  the uploads before it), the crawl task 291 and Python's tasks 276 and 288 showed. The auto-merge is serial, so the queue waits behind it.
 - Not done yet when this was written: the first release of the worker exe (`release.yml` gets a manual run
   that creates the tag, for the same reason as above), deleting the backups (after task 302 has been filed
   by the new pod), and reading the memory again after a day of merges with two arenas. Left for Max: the
