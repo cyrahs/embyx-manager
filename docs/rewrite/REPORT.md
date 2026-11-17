@@ -86,7 +86,8 @@ A copy of this file is at `/mnt/project-files/embyx-rust/report-data.md`.
   uncompressed (215 MB compressed) against Python's 947 MB (249 MB).
 - **Memory.** Idle RSS is 25.5 MiB against Python's 105.8 MiB on the same run, which meets the plan's goal
   of under 50 MiB. The highest RSS over a full workload was 43.0 MiB against 123.1 MiB. The merge worker
-  peaked at 18.0 MiB against 40.6 MiB, about 3 MiB over the plan's 15 MiB goal.
+  peaked at 18.0 MiB against 40.6 MiB, about 3 MiB over the plan's 15 MiB goal. These are the benchmark's
+  figures; the live pod's are higher (the memory paragraph before "What was not tested").
 
 ## Code size
 
@@ -441,7 +442,7 @@ The full rows are in PLAN.md "Experiment log".
    the real tree, one pipeline at a time, so this is not recommended.
 2. **Pod memory.** Keep 256Mi / 768Mi, or lower the request (for example to 128Mi) after a week of
    watching the pod's working set (DEPLOY.md). The trial's first hours of auto-merge speak against lowering
-   it yet: the process alone reached 210 Mi (see "What the trial showed").
+   it yet: the process alone reached 210 Mi (the memory paragraph before "What was not tested").
 3. **Job Object for the home worker** (HOME-WORKER.md). It would make ffmpeg shims harmless for stops.
    It is not built; winget's ffmpeg needs nothing.
 4. **Deployment itself.** Described in DEPLOY.md and PLAN.md "Deployment and rollback". When this report was
@@ -484,7 +485,7 @@ than the others', and the concat passes its timestamps on unscaled; the Rust wor
 remuxes such parts into the first part's units first (#105, D177, a Python bug fixed). Every title with such
 parts failed under Python however often it was retried.
 
-What the trial showed on the live system between 2026-11-16 00:09Z and 2026-11-17 00:08Z (PLAN.md has each
+What the trial showed on the live system between 2026-11-16 00:09Z and 2026-11-17 00:16Z (PLAN.md has each
 round with its figures): a mapping full sync that changed nothing, one RSS run by hand and the scheduled ones
 after it, archive runs and tracker polls whose log lines and stats match the Python build's last ones, the
 playlist sync (after #104), nine downloads filed in the right place with nothing else touched (four
@@ -495,9 +496,9 @@ refused for mixed streams with Python's words. Task 286, the title D177 was foun
 another thread and merged. One fill-actor scan ran and found nothing new. All seven switches are back on.
 
 Memory on the live system is higher than the benchmark's figures, and not settled. The working set stayed
-between 147 and 164 Mi for the first 16 hours (one merge). With the auto-merge running it moved between 91
-and 482 Mi: the process's own memory rose in steps from 85 to 210 Mi over the first four hours (seven
-merges) and stayed there for the hour and a half after that, and the rest is file cache during a merge and
+between 147 and 164 Mi for the first 16 hours and reached 227 Mi while the one merge of that time was filed. With the auto-merge running it moved between 91
+and 482 Mi: the process's own memory rose in steps from 85 to 210 Mi over the first three hours and forty minutes
+(seven merges) and stayed there for the hour and a half after that, and the rest is file cache during a merge and
 reclaimable kernel slab from the CloudDrive mount. The pod's peak touched its 768 Mi limit without an OOM
 event. The Python pod's working set moved between 190 and 513 Mi in the six hours before the swap. Whether
 the Rust process stops at about 210 Mi has to be read again after a day of auto-merge.

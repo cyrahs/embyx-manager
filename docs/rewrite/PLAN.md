@@ -778,9 +778,11 @@ Kept, with the reason:
   while a merge runs (up to about 210 Mi) and about 140 Mi of reclaimable kernel slab (directory entries of
   the CloudDrive mount; the `find` run inside the pod for the listings adds to it). The cgroup's peak touched
   the 768 Mi limit, with no OOM event (`oom_kill 0`). The second image's pod had stayed at 133 to 145 Mi RSS
-  for 17 hours with one merge, so the steps come with the merges; the build uses glibc's allocator, whose
-  arenas keep freed memory. Open: whether 210 Mi is a ceiling or the steps go on with more merges. It has
-  to be read again after a day of auto-merge before the memory request is lowered (REPORT.md, decision 2).
+  for 17 hours with one merge, so the steps probably come with the merges (five steps over seven merges,
+  none tied to a cause yet). The build uses glibc's allocator, whose arenas keep freed memory; that would
+  give a ceiling, but it is not shown. Open: whether 210 Mi is a ceiling or the steps go on with more
+  merges. It has to be read again after a day of auto-merge before the memory request is lowered
+  (REPORT.md, decision 2).
 - Manual AVID (Max, 23:48Z: a common title from a playlist that was never filled): `POST /api/monitor/manual`
   with SOE-539, missing from "JavDB 2011 TOP250", into `/115/embyx_in/rank`. Submitted at 23:49:58Z with a
   Sukebei magnet; the tracker's first fast check, 15 s after a submission, had filed it by 23:50:24Z (26 s
