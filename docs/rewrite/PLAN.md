@@ -754,6 +754,33 @@ Kept, with the reason:
   `merge.home_transcode_enabled` and `merge.auto_enabled` restored together at 19:08Z (with the home switch
   off a title over 115 GB would go to the Job's CPU encoder); the auto-merge queued its next title within
   seconds. Still off: `fill_actor.apply_enabled`, until a fill-actor scan and a manual AVID have been run.
+- Auto-merge on the third image, 19:08Z to 00:10Z: ten titles queued one after another. Eight are `done`
+  (tasks 292-297, 299, 300; 12 to 33 GB each, 15 to 50 minutes from queueing to `done`, every upload on its
+  first attempt), one was refused by the Job at the probe (task 298, FC2-1520624: "carries different streams
+  than ...; a stream copy would break", the refusal Python's tasks 255, 222 and 196 ended with; the Job exits
+  0 and the auto-merge went on to the next title, as configured), one was running. A listing at 22:25Z differs
+  from the 19:00Z one by the merges finished until then (parts gone, merged files there) and three more
+  tracker-filed downloads. DSVR-646's parts were under `rest/DSVR` and the merged file is under
+  `type/vr/DSVR`: the archive files a merged title by today's routes, as Python did (task 229, WAVR-075).
+- Task 286 (DSVR-0386), the merge that had failed on Python and led to #105, was retried from outside this
+  trial once the third image was live and was `done` at 19:57Z: 5.47 GB, filed as
+  `type/vr/DSVR/DSVR-386.mp4`. The name is Python's (`normalize_number('DSVR-0386')` is `DSVR-386`).
+- Memory with the auto-merge running (19:10Z-22:20Z, 10-minute samples): working set between 91 and 233 Mi.
+  A `find` over the library run inside the pod for the listings adds about 140 Mi of kernel slab for a while.
+- Manual AVID (Max, 23:48Z: a common title from a playlist that was never filled): `POST /api/monitor/manual`
+  with SOE-539, missing from "JavDB 2011 TOP250", into `/115/embyx_in/rank`. Submitted at 23:49:58Z with a
+  Sukebei magnet; a tracker fast check filed it 26 s later as `rank/SOE/SOE-539.mp4` (5.23 GB) and the mapping
+  watchdog wrote the `.strm` 4 s after that. The four JavBus candidates stay `pending` and the intake
+  directory is unchanged: the rows have the shape of Python's last manual entry (IPZ-661, 2026-10-28, filed
+  in 31 s). This is the first fast check seen on the Rust build.
+- Fill-actor scan (Max's choice on a decision card, 00:05Z on 2026-11-17: one scan of an actor picked for few
+  missing titles): the actor Python last scanned on 2026-11-06. Done in 9 s (Python then: 26 s): 332 titles,
+  190 `exists`, 142 `already_tracked`, none queued, no move candidate, the ledger unchanged. So the scan,
+  the catalog read and the library match were seen live; queueing a title the ledger does not know and
+  applying moves were not, as this actor had nothing new.
+- 00:08Z `fill_actor.apply_enabled` restored. All seven switches are back at their values from before the
+  pause, and steps 1 to 7 are done except the home worker: the Python worker polled the Rust server without
+  errors in the trial's first hours, no title over 115 GB came up, and the Rust exe waits for a release.
 
 ## Experiment log
 

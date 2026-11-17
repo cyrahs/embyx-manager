@@ -483,19 +483,24 @@ than the others', and the concat passes its timestamps on unscaled; the Rust wor
 remuxes such parts into the first part's units first (#105, D177, a Python bug fixed). Every title with such
 parts failed under Python however often it was retried.
 
-What the trial has shown so far on the live system (PLAN.md has each round with its figures): a mapping
-full sync that changed nothing, one RSS run by hand and the scheduled ones after it, archive runs and tracker
-polls whose log lines and stats match the Python build's last ones, the playlist sync (after #104), five
-downloads submitted and filed in the right place with nothing else touched (two listings of intake and
-library against the one taken before the swap), and one lossless merge from the Job through the 115 upload,
-the replacement of the parts and the filing of the merged file. Over 16 hours of that load the working set
-stayed between 147 and 164 Mi (227 Mi at its highest, while a merge was filed); the Python pod's moved between
-190 and 513 Mi in the six hours before the swap.
+What the trial showed on the live system between 2026-11-16 00:09Z and 2026-11-17 00:08Z (PLAN.md has each
+round with its figures): a mapping full sync that changed nothing, one RSS run by hand and the scheduled ones
+after it, archive runs and tracker polls whose log lines and stats match the Python build's last ones, the
+playlist sync (after #104), eight downloads filed in the right place with nothing else touched (three
+listings of intake and library, each against the one before), one manual AVID filed 26 s after it was
+entered, one lossless merge by hand and then the auto-merge: eight more titles from the Job
+through the 115 upload, the replacement of the parts and the filing, and one title refused for mixed streams
+with Python's words. One fill-actor scan ran and found nothing new. All seven switches are back on. The
+working set stayed between 147 and 164 Mi for the first 16 hours and between 91 and 233 Mi with the
+auto-merge running; the Python pod's moved between 190 and 513 Mi in the six hours before the swap.
 
 ## What was not tested
 
-This list is as it stood before the deployment trial. The trial is running the first items on the live
-system one at a time; PLAN.md's "Deployment trial log" says which are done.
+This list is as it stood before the deployment trial. The trial has since run the first two items on the
+live system, bar the re-encode; PLAN.md's "Deployment trial log" has the rounds. What the trial itself did
+not reach: a title over 115 GB (the AV1 re-encode and the home worker, with either worker build), the Rust
+worker exe on Windows, a fill-actor scan that queues a new title or proposes moves and the apply of such a
+plan, a playlist fill, a replacement (换版), and the merge page's pause, cancel and retry.
 
 - A deployment of the Rust image, or the image in the pod's conditions (read-only root, uid 0 with
   `DAC_OVERRIDE`, the CloudDrive FUSE mount).
