@@ -4,16 +4,26 @@ name: Release
 # `embyx-manager.exe` with the MSVC runtime linked in (no Visual C++ redistributable needed),
 # writes its SHA-256 and attaches both to a GitHub Release named after the tag. CI's `windows`
 # job builds the same exe on every pull request. Nothing here touches the image or the cluster.
+#
+# Two ways in: push a tag `v*`, or run the workflow by hand on `main` with the tag as input.
+# The manual run builds the commit it runs on and creates the tag there together with the
+# release; it refuses a tag that already exists.
 
 on:
   push:
     tags: [ 'v*' ]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Version tag to create on this commit and release, for example v0.1.0
+        required: true
+        type: string
 
 permissions:
   contents: write
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ inputs.tag || github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -25,6 +35,27 @@ jobs:
       RUSTFLAGS: -C target-feature=+crt-static
     steps:
     - uses: actions/checkout@v5
+
+    # A manual run names the tag itself: only from `main`, only `vX.Y.Z`, and never a tag
+    # that exists (a pushed tag is its own guard, the release step verifies it).
+    - name: Check the tag of a manual run
+      if: github.event_name == 'workflow_dispatch'
+      shell: bash
+      env:
+        TAG: ${{ inputs.tag }}
+      run: |
+        if [[ "${GITHUB_REF}" != refs/heads/main ]]; then
+          echo "error: a manual release runs on main, not on ${GITHUB_REF}"
+          exit 1
+        fi
+        if [[ ! "${TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "error: the tag must look like v1.2.3, got '${TAG}'"
+          exit 1
+        fi
+        if [[ -n "$(git ls-remote origin "refs/tags/${TAG}")" ]]; then
+          echo "error: tag ${TAG} already exists"
+          exit 1
+        fi
 
     - name: Install the pinned toolchain (rust-toolchain.toml)
       run: |
@@ -51,9 +82,16 @@ jobs:
       shell: bash
       env:
         GH_TOKEN: ${{ github.token }}
+        TAG: ${{ inputs.tag || github.ref_name }}
       run: |
         notes="Home transcode worker for Windows (x86-64), built from ${GITHUB_SHA}.
 
-        Install and update: https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/docs/home-transcode.md"
-        gh release create "${GITHUB_REF_NAME}" --verify-tag --title "embyx-manager ${GITHUB_REF_NAME}" --notes "${notes}" \
+        Install and update: https://github.com/${GITHUB_REPOSITORY}/blob/${TAG}/docs/home-transcode.md"
+        # A pushed tag must exist and is used as it is; a manual run creates it on this commit.
+        if [[ "${GITHUB_EVENT_NAME}" == workflow_dispatch ]]; then
+          where=(--target "${GITHUB_SHA}")
+        else
+          where=(--verify-tag)
+        fi
+        gh release create "${TAG}" "${where[@]}" --title "embyx-manager ${TAG}" --notes "${notes}" \
           target/release/embyx-manager.exe target/release/embyx-manager.exe.sha256
