@@ -455,7 +455,7 @@ The full rows are in PLAN.md "Experiment log".
    It is not built; winget's ffmpeg needs nothing.
 4. **Deployment itself.** Described in DEPLOY.md and PLAN.md "Deployment and rollback". When this report was
    written none of it was done. Max gave the go-ahead for the trial on 2026-11-16: the image workflow
-   (`rust-image.yml`) was added then; the release workflow for the home worker is still only described.
+   (`rust-image.yml`) was added then; the release workflow for the home worker was still only described (it came with #110, see "After this report").
 
 ## Open risks
 
@@ -510,11 +510,13 @@ and 482 Mi: the process's own memory rose in steps from 85 to 210 Mi over the fi
 reclaimable kernel slab from the CloudDrive mount. The pod's peak touched its 768 Mi limit without an OOM
 event. The Python pod's working set moved between 190 and 513 Mi in the six hours before the swap.
 
-The steps went on after that (242 Mi after 6.5 hours and eleven merges) and turned out not to be a leak: the
-memory sat in eight glibc thread arenas of 27 to 58 Mi each, every one keeping the high-water mark of one
-large transient allocation. The deployment now runs with `MALLOC_ARENA_MAX=2` (nas-gitops #186, set with the
-switch to `latest` on 2026-11-17; no change in the app). What that brings has to be read after a day of
-merges; PLAN.md's "Wrap-up log" has the figures.
+The steps went on after that (242 Mi after 6.5 hours and ten filed merges). Where the memory sat points to
+glibc's thread arenas and away from a leak: eight arenas of 13 to 58 Mi, six of them at 27 to 28 Mi, held
+about 236 Mi, which looks like one large transient allocation run by different worker threads in turn, each
+arena keeping its high-water mark. That is a reading, not a proof. The deployment now runs with
+`MALLOC_ARENA_MAX=2` (nas-gitops #186, set with the switch to `latest` on 2026-11-17; no change in the
+app). What that brings has to be read after a day of merges, and a climb past 150 Mi with two arenas would
+mean a leak after all; PLAN.md's "Wrap-up log" has the figures.
 
 ## What was not tested
 

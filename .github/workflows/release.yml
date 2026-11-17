@@ -23,7 +23,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: release-${{ inputs.tag || github.ref }}
+  group: release-${{ inputs.tag || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
@@ -48,11 +48,13 @@ jobs:
           echo "error: a manual release runs on main, not on ${GITHUB_REF}"
           exit 1
         fi
-        if [[ ! "${TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        if [[ ! "${TAG}" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
           echo "error: the tag must look like v1.2.3, got '${TAG}'"
           exit 1
         fi
-        if [[ -n "$(git ls-remote origin "refs/tags/${TAG}")" ]]; then
+        # On its own line: a failed lookup stops the step instead of reading as "no such tag".
+        existing="$(git ls-remote origin "refs/tags/${TAG}")"
+        if [[ -n "${existing}" ]]; then
           echo "error: tag ${TAG} already exists"
           exit 1
         fi
@@ -89,6 +91,12 @@ jobs:
         Install and update: https://github.com/${GITHUB_REPOSITORY}/blob/${TAG}/docs/home-transcode.md"
         # A pushed tag must exist and is used as it is; a manual run creates it on this commit.
         if [[ "${GITHUB_EVENT_NAME}" == workflow_dispatch ]]; then
+          # Looked up again: a tag pushed during the build would otherwise take this exe.
+          existing="$(git ls-remote origin "refs/tags/${TAG}")"
+          if [[ -n "${existing}" ]]; then
+            echo "error: tag ${TAG} appeared during the build"
+            exit 1
+          fi
           where=(--target "${GITHUB_SHA}")
         else
           where=(--verify-tag)
