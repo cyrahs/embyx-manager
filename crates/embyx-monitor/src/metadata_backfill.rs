@@ -215,11 +215,14 @@ impl MetadataBackfill {
                 continue;
             };
             match self.pass(server.as_ref(), &stop).await {
-                Ok(report) => {
-                    if !report.refreshed.is_empty() {
-                        tracing::info!(logger = LOGGER, "refreshed: {}", report.refreshed.join(", "));
-                    }
+                // The app's own loggers print WARNING and above only (as Python's root logger
+                // does), so a pass that did something says so at that level; a pass that found
+                // nothing to do stays quiet.
+                Ok(report) if report.refreshed.is_empty() && report.failed == 0 => {
                     tracing::info!(logger = LOGGER, "{}", report.summary());
+                }
+                Ok(report) => {
+                    tracing::warn!(logger = LOGGER, "{}: {}", report.summary(), report.refreshed.join(", "));
                 }
                 Err(error) => tracing::warn!(logger = LOGGER, error = %error, "metadata backfill pass failed"),
             }
