@@ -127,6 +127,9 @@ impl FakeServer {
                 _ => {}
             }
         }
+        if path.starts_with("/emby/Items/") && path.ends_with("/Refresh") && method == "POST" {
+            return Reply::status(204);
+        }
         if path == "/emby/Items/Delete" && method == "POST" {
             for id in first("Ids").expect("ids").split(',') {
                 self.playlists.retain(|(known, _)| known != id);
@@ -323,6 +326,89 @@ async fn movie_index_keys_on_the_parent_directory_and_pages_through() {
         pages
             .iter()
             .all(|page| page["Fields"] == ["Path"] && page["Recursive"] == ["true"])
+    );
+}
+
+#[tokio::test]
+async fn movies_carry_their_provider_ids_and_page_through() {
+    let (web, server) = serve(FakeServer {
+        movies: vec![
+            json!({"Id": "1", "Name": "SNOS-475 title", "DateCreated": "2026-11-19T21:02:59.0000000Z",
+                   "ProviderIds": {"MetaTube": "FANZA:snos00475", "Tmdb": ""}}),
+            json!({"Id": "2", "Name": "JQJ-011", "DateCreated": "2026-11-19T21:02:59.0000000Z", "ProviderIds": {}}),
+            json!({"Id": "3", "Name": "DOCP-078 title", "ProviderIds": {"metatube": "FANZA:118docp00078"}}),
+            json!({"Name": "no id"}),
+            json!({"Id": "5", "Name": "ABS-086"}),
+        ],
+        ..FakeServer::default()
+    })
+    .await;
+    let movies = make_client(&web, KEY)
+        .with_index_page_size(2)
+        .movies()
+        .await
+        .expect("movies");
+    let ids: Vec<(&str, &[String], bool)> = movies
+        .iter()
+        .map(|movie| {
+            (
+                movie.item_id.as_str(),
+                movie.provider_ids.as_slice(),
+                movie.has_provider("MetaTube"),
+            )
+        })
+        .collect();
+    assert_eq!(
+        ids,
+        [
+            ("1", &["MetaTube".to_owned()][..], true),
+            ("2", &[][..], false),
+            ("3", &["metatube".to_owned()][..], true),
+            ("5", &[][..], false),
+        ]
+    );
+    assert_eq!(movies[1].name, "JQJ-011");
+    assert_eq!(movies[1].date_created, "2026-11-19T21:02:59.0000000Z");
+    assert_eq!(movies[2].date_created, "");
+    let calls = &server.lock().expect("lock").calls;
+    let pages: Vec<&Params> = calls
+        .iter()
+        .filter(|call| call.1 == "/emby/Items")
+        .map(|call| &call.2)
+        .collect();
+    let starts: Vec<&[String]> = pages.iter().map(|page| page["StartIndex"].as_slice()).collect();
+    assert_eq!(starts, [["0"], ["2"], ["4"]]);
+    assert!(pages.iter().all(|page| page["Fields"] == ["ProviderIds,DateCreated"]
+        && page["IncludeItemTypes"] == ["Movie"]
+        && page["Recursive"] == ["true"]));
+}
+
+#[tokio::test]
+async fn refresh_metadata_asks_for_a_full_replace() {
+    let (web, server) = serve(FakeServer::default()).await;
+    make_client(&web, KEY).refresh_metadata("42").await.expect("refresh");
+    let (method, path, params) = server.lock().expect("lock").calls[0].clone();
+    assert_eq!((method.as_str(), path.as_str()), ("POST", "/emby/Items/42/Refresh"));
+    for (name, value) in [
+        ("Recursive", "false"),
+        ("MetadataRefreshMode", "FullRefresh"),
+        ("ImageRefreshMode", "FullRefresh"),
+        ("ReplaceAllMetadata", "true"),
+        ("ReplaceAllImages", "true"),
+    ] {
+        assert_eq!(params[name], [value.to_owned()], "{name}");
+    }
+
+    let web = FakeWeb::start(|_: &Seen| Reply::status(500)).await;
+    let error = make_client(&web, KEY).refresh_metadata("42").await.unwrap_err();
+    assert_eq!(error, EmbyError::Server("POST /Items/42/Refresh: HTTP 500".to_owned()));
+    let web = FakeWeb::start(|_: &Seen| Reply::Close).await;
+    let error = make_client(&web, KEY).refresh_metadata("42").await.unwrap_err();
+    assert!(
+        error
+            .to_string()
+            .starts_with("POST /Items/42/Refresh: RemoteProtocolError: "),
+        "{error}"
     );
 }
 
