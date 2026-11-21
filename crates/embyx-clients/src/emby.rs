@@ -9,7 +9,7 @@ use std::fmt;
 use std::time::Duration;
 
 use embyx_core::posixpath;
-use embyx_core::pyjson::{self, JsonEncoding, Value};
+use embyx_core::pyjson::{self, JsonEncoding, Key, Value};
 use embyx_core::pyurl::unquote;
 use reqwest::Method;
 
@@ -70,6 +70,25 @@ pub struct EmbyServerInfo {
     pub name: String,
     pub version: String,
     pub server_id: String,
+}
+
+/// A movie as the metadata backfill sees it.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct EmbyMovie {
+    pub item_id: String,
+    pub name: String,
+    /// The names of the provider ids the item carries with a value (`MetaTube`, `Tmdb`, ...).
+    pub provider_ids: Vec<String>,
+    /// `DateCreated` as the server sends it (ISO 8601, UTC); empty when missing.
+    pub date_created: String,
+}
+
+impl EmbyMovie {
+    /// Whether the item carries an id from `provider`, its name compared without case
+    /// (Emby has stored the plugin's key both as `MetaTube` and as `metatube`).
+    pub fn has_provider(&self, provider: &str) -> bool {
+        self.provider_ids.iter().any(|name| name.eq_ignore_ascii_case(provider))
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -185,6 +204,69 @@ impl EmbyClient {
                 return Ok(index);
             }
         }
+    }
+
+    /// Every movie with its provider ids and creation time, in the order the server lists
+    /// them.
+    pub async fn movies(&self) -> Result<Vec<EmbyMovie>, EmbyError> {
+        let mut movies = Vec::new();
+        let mut start: i128 = 0;
+        loop {
+            let params = [
+                ("Recursive", "true".to_owned()),
+                ("IncludeItemTypes", "Movie".to_owned()),
+                ("Fields", "ProviderIds,DateCreated".to_owned()),
+                ("StartIndex", start.to_string()),
+                ("Limit", self.index_page_size.to_string()),
+            ];
+            let body = self.get_json("/Items", &params).await?;
+            let items = pyvalue::iterate(pyvalue::get(&body, "Items")?)?;
+            for item in &items {
+                let item_id = text_or_empty(pyvalue::get(item, "Id")?);
+                if item_id.is_empty() {
+                    continue;
+                }
+                let provider_ids = match pyvalue::get(item, "ProviderIds")? {
+                    Value::Dict(ids) => ids
+                        .iter()
+                        .filter(|(_, value)| pyvalue::truthy(value))
+                        .filter_map(|(key, _)| match key {
+                            Key::Str(name) => Some(name.clone()),
+                            _ => None,
+                        })
+                        .collect(),
+                    _ => Vec::new(),
+                };
+                movies.push(EmbyMovie {
+                    item_id,
+                    name: text_or_empty(pyvalue::get(item, "Name")?),
+                    provider_ids,
+                    date_created: text_or_empty(pyvalue::get(item, "DateCreated")?),
+                });
+            }
+            start += i128::try_from(items.len()).unwrap_or(i128::MAX);
+            let total = pyvalue::py_int(pyvalue::or(pyvalue::get(&body, "TotalRecordCount")?, &Value::Int(0)))?;
+            if items.is_empty() || start >= total {
+                return Ok(movies);
+            }
+        }
+    }
+
+    /// Queue a full metadata refresh of one item: every field and image is fetched again from
+    /// the library's metadata providers, as "Refresh metadata" with "Replace all metadata" and
+    /// "Replace existing images" does in the web client. The server answers at once and works
+    /// through its queue afterwards.
+    pub async fn refresh_metadata(&self, item_id: &str) -> Result<(), EmbyError> {
+        let params = [
+            ("Recursive", "false".to_owned()),
+            ("MetadataRefreshMode", "FullRefresh".to_owned()),
+            ("ImageRefreshMode", "FullRefresh".to_owned()),
+            ("ReplaceAllMetadata", "true".to_owned()),
+            ("ReplaceAllImages", "true".to_owned()),
+        ];
+        self.request(Method::POST, &format!("/Items/{item_id}/Refresh"), &params)
+            .await
+            .map(drop)
     }
 
     pub async fn list_playlists(&self) -> Result<Vec<EmbyPlaylist>, EmbyError> {

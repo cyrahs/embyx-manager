@@ -15,11 +15,17 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use embyx_clients::clouddrive::{AsyncCloudDrive, ClientOptions};
+use embyx_clients::emby::EmbyClient;
+use embyx_clients::net::retry::tokio_sleeper;
 use embyx_core::config::AnySection;
+use embyx_core::config::models::EmbyConfig;
 use embyx_core::settings::{Settings, SettingsError};
 use embyx_db::config_store::ConfigStore;
 use embyx_db::database::{Database, DatabaseError};
+use embyx_monitor::metadata_backfill::{BackfillServer, BackfillSettings, MetadataBackfill, ServerFor};
+use embyx_monitor::support::system_clock;
 use futures_util::future::BoxFuture;
+use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 
 use crate::app::{AppParts, Lifespan, ReadyProbe, create_app, create_transcode_app};
@@ -154,7 +160,7 @@ impl std::fmt::Debug for Assembled {
 /// `runtime_lifespan`: the config store loaded first, then the scheduler, the merge service,
 /// the title scan warming up in the background and auto-merge started; at the end the warm-up
 /// cancelled, auto-merge, the merge service and the scheduler closed, then the clients and the
-/// database last.
+/// database last. The metadata backfill (D179) starts after auto-merge and stops first.
 struct RuntimeLifespan {
     store: Arc<ConfigStore>,
     database: Database,
@@ -162,6 +168,29 @@ struct RuntimeLifespan {
     scheduler: embyx_monitor::scheduler::MonitorScheduler,
     merge: merge::MergeParts,
     warming: Mutex<Option<tokio::task::JoinHandle<()>>>,
+    backfill: Mutex<Option<(CancellationToken, tokio::task::JoinHandle<()>)>>,
+}
+
+/// The Emby server of the `emby` section as it is when a backfill pass starts.
+fn backfill_server_for(store: &Arc<ConfigStore>) -> ServerFor {
+    let store = Arc::clone(store);
+    Arc::new(move || {
+        let config = store.get::<EmbyConfig>();
+        if !config.configured() {
+            return None;
+        }
+        match EmbyClient::new(&config.address, &config.api_key) {
+            Ok(client) => Some(Arc::new(client) as Arc<dyn BackfillServer>),
+            Err(error) => {
+                tracing::warn!(
+                    logger = embyx_monitor::metadata_backfill::LOGGER,
+                    error = %error,
+                    "metadata backfill: the Emby client could not be built"
+                );
+                None
+            }
+        }
+    })
 }
 
 impl Lifespan for RuntimeLifespan {
@@ -174,12 +203,30 @@ impl Lifespan for RuntimeLifespan {
             let warming = tokio::spawn(async move { embyx_merge::catalog::warm_title_cache(&catalog, &cache).await });
             *self.warming.lock().unwrap_or_else(std::sync::PoisonError::into_inner) = Some(warming);
             self.merge.auto.start();
+            let backfill = Arc::new(MetadataBackfill::new(
+                BackfillSettings::default(),
+                system_clock(),
+                tokio_sleeper(),
+            ));
+            let stop = CancellationToken::new();
+            let task = tokio::spawn(backfill.run(backfill_server_for(&self.store), stop.clone()));
+            *self.backfill.lock().unwrap_or_else(std::sync::PoisonError::into_inner) = Some((stop, task));
             Ok(())
         })
     }
 
     fn stop(&self) -> BoxFuture<'_, Result<(), Internal>> {
         Box::pin(async move {
+            // Nothing of the backfill's is stored: a refresh already queued stays with Emby.
+            let backfill = self
+                .backfill
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .take();
+            if let Some((stop, task)) = backfill {
+                stop.cancel();
+                task.abort();
+            }
             let warming = self
                 .warming
                 .lock()
@@ -257,6 +304,7 @@ pub fn build_app(settings: &Settings, frontend_dist: Option<PathBuf>) -> Result<
         scheduler: monitor.scheduler.clone(),
         merge,
         warming: Mutex::new(None),
+        backfill: Mutex::new(None),
     });
     Ok(Assembled {
         app,

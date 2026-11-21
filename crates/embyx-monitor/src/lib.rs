@@ -21,6 +21,7 @@ pub mod fs;
 pub mod intake;
 pub mod manual;
 pub mod mapping;
+pub mod metadata_backfill;
 pub mod move_in;
 pub mod playlist_sync;
 pub mod playlists;
